@@ -349,6 +349,25 @@ func TestFileUpload(t *testing.T) {
 	}
 }
 
+type DummyComp struct {
+}
+
+func (dc *DummyComp) MarshalHTML(phb *ui.PageHeadBuilder) (r []byte, err error) {
+	r = []byte("<div>hello</div>")
+	phb.PutScript(`
+	function hello() {
+		console.log("hello")
+	}
+	`)
+
+	phb.PutStyle(`
+	div {
+		background-color: red;
+	}
+	`)
+	return
+}
+
 var eventCases = []struct {
 	name              string
 	eventFunc         ui.EventFunc
@@ -368,6 +387,54 @@ var eventCases = []struct {
 	"reload": true
 }
 		`,
+	},
+	{
+		name: "case 2",
+		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
+			pr.Schema = &DummyComp{}
+		},
+		expectedEventResp: `
+{
+	"schema": "\u003cdiv\u003ehello\u003c/div\u003e",
+	"reload": true,
+	"scripts": "\n\tfunction hello() {\n\t\tconsole.log(\"hello\")\n\t}\n\t",
+	"styles": "\n\tdiv {\n\t\tbackground-color: red;\n\t}\n\t"
+}
+		`,
+		expectedIndexResp: `
+
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta charset="utf8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+
+	</head>
+	<body class="front">
+	<style type="text/css">
+
+	div {
+		background-color: red;
+	}
+	</style>
+<script>
+
+	function hello() {
+		console.log("hello")
+	}
+	</script>
+<div>hello</div>
+
+
+<script type="text/javascript">
+
+window.__serverSideData__={}
+
+</script>
+	<script type="text/javascript" src="/main.js"></script>
+	</body>
+</html>
+`,
 	},
 }
 

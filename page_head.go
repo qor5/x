@@ -10,7 +10,9 @@ import (
 )
 
 type PageHeadBuilder struct {
-	Nodes []*html.Node
+	Nodes   []*html.Node
+	Scripts []string
+	Styles  []string
 }
 
 func (b *PageHeadBuilder) Title(title string) (r *PageHeadBuilder) {
@@ -36,6 +38,36 @@ func (b *PageHeadBuilder) MetaNameContent(name, content string) (r *PageHeadBuil
 
 func (b *PageHeadBuilder) Meta(attrs ...string) (r *PageHeadBuilder) {
 	b.addNode(atom.Meta, "", attrs...)
+	r = b
+	return
+}
+
+func (b *PageHeadBuilder) PutScript(script string) (r *PageHeadBuilder) {
+	var exists bool
+	for _, s := range b.Scripts {
+		if s == script {
+			exists = true
+			break
+		}
+	}
+	if !exists {
+		b.Scripts = append(b.Scripts, script)
+	}
+	r = b
+	return
+}
+
+func (b *PageHeadBuilder) PutStyle(style string) (r *PageHeadBuilder) {
+	var exists bool
+	for _, s := range b.Styles {
+		if s == style {
+			exists = true
+			break
+		}
+	}
+	if !exists {
+		b.Styles = append(b.Styles, style)
+	}
 	r = b
 	return
 }

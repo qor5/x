@@ -17,12 +17,12 @@ import (
 )
 
 type PageBuilder struct {
-	b			  *Builder
+	b              *Builder
 	eventFuncRefs  map[string]EventFunc
 	pageRenderFunc PageRenderFunc
-	h			  http.Handler
+	h              http.Handler
 	pageStateType  reflect.Type
-	maxFormSize	int64
+	maxFormSize    int64
 }
 
 func (b *Builder) NewPage() (pb *PageBuilder) {
@@ -84,8 +84,8 @@ func (s StringComponentJSON) MarshalJSON() (r []byte, err error) {
 }
 
 type EventContext struct {
-	R	 *http.Request
-	W	 http.ResponseWriter
+	R     *http.Request
+	W     http.ResponseWriter
 	Hub   EventFuncHub
 	State PageState
 	Event *Event
@@ -117,23 +117,25 @@ type PageState interface{}
 
 type PageResponse struct {
 	Schema   Component
-	State	PageState
-	Head	 PageHeadBuilder
+	State    PageState
+	Head     PageHeadBuilder
 	JSONOnly bool
 }
 
 type PageRenderFunc func(ctx *EventContext) (r PageResponse, err error)
 
 type EventResponse struct {
-	Alert	   Component   `json:"alert,omitempty"`
-	Confirm	 Component   `json:"confirm,omitempty"`
-	Dialog	  Component   `json:"dialog,omitempty"`
-	CloseDialog bool		`json:"closeDialog,omitempty"`
-	Schema	  Component   `json:"schema,omitempty"`
-	State	   PageState   `json:"states,omitempty"`
-	Reload	  bool		`json:"reload,omitempty"`
-	RedirectURL string	  `json:"redirectURL,omitempty"`
-	Data		interface{} `json:"data,omitempty"` // used for return collection data like TagsInput data source
+	Alert       Component   `json:"alert,omitempty"`
+	Confirm     Component   `json:"confirm,omitempty"`
+	Dialog      Component   `json:"dialog,omitempty"`
+	CloseDialog bool        `json:"closeDialog,omitempty"`
+	Schema      Component   `json:"schema,omitempty"`
+	State       PageState   `json:"states,omitempty"`
+	Reload      bool        `json:"reload,omitempty"`
+	RedirectURL string      `json:"redirectURL,omitempty"`
+	Data        interface{} `json:"data,omitempty"` // used for return collection data like TagsInput data source
+	Scripts     string      `json:"scripts,omitempty"`
+	Styles      string      `json:"styles,omitempty"`
 }
 
 type EventFunc func(ctx *EventContext) (r EventResponse, err error)
@@ -150,8 +152,8 @@ type EventFuncHub interface {
 	It is used in Pager (Pagination) component.
 */
 type EventFuncID struct {
-	ID		string	 `json:"id,omitempty"`
-	Params	[]string   `json:"params,omitempty"`
+	ID        string     `json:"id,omitempty"`
+	Params    []string   `json:"params,omitempty"`
 	PushState url.Values `json:"pushState"` // This we don't omitempty, So that {} can be keeped when use url.Values{}
 }
 
@@ -160,25 +162,33 @@ type EventFuncID struct {
 	will pass the Event to server side. use ctx.Event.Checked etc to get the value.
 */
 type Event struct {
-	Checked bool	 `json:"checked,omitempty"` // For Checkbox
-	From	string   `json:"from,omitempty"`	// For DatePicker
-	To	  string   `json:"to,omitempty"`	  // For DatePicker
+	Checked bool     `json:"checked,omitempty"` // For Checkbox
+	From    string   `json:"from,omitempty"`    // For DatePicker
+	To      string   `json:"to,omitempty"`      // For DatePicker
 	Value   string   `json:"value,omitempty"`   // For Input, DatePicker
 	Params  []string `json:"-"`
 }
 
 type eventBody struct {
 	EventFuncID EventFuncID `json:"eventFuncId,omitempty"`
-	Event	   Event	   `json:"event,omitempty"`
+	Event       Event       `json:"event,omitempty"`
 	PageState   PageState   `json:"pageState,omitempty"`
 }
 
 type ServerSideData struct {
-	Schema Component  `json:"schema,omitempty"`
-	States url.Values `json:"states,omitempty"`
+	Schema  Component  `json:"schema,omitempty"`
+	States  url.Values `json:"states,omitempty"`
+	Scripts string     `json:"scripts,omitempty"`
+	Styles  string     `json:"styles,omitempty"`
 }
 
-func (p *PageBuilder) render(serverSideData *ServerSideData, w http.ResponseWriter, r *http.Request, ctx *EventContext) (pager *PageResponse) {
+func (p *PageBuilder) render(
+	serverSideData *ServerSideData,
+	w http.ResponseWriter,
+	r *http.Request,
+	ctx *EventContext,
+	renderJSON bool,
+) (pager *PageResponse, body *bytes.Buffer) {
 
 	if p.pageRenderFunc == nil {
 		return
@@ -198,6 +208,51 @@ func (p *PageBuilder) render(serverSideData *ServerSideData, w http.ResponseWrit
 	// fmt.Println("eventFuncRefs count: ", len(p.eventFuncRefs))
 	serverSideData.Schema = pr.Schema
 
+	if serverSideData.Schema == nil {
+		panic("page's RenderFunc returns nil schema, use pr.Schema = root to set it")
+	}
+
+	head := &pr.Head
+
+	body = bytes.NewBuffer(nil)
+
+	if hcomp, ok := serverSideData.Schema.(ComponentHTML); ok {
+		var schema []byte
+		schema, err = hcomp.MarshalHTML(head)
+		if err != nil {
+			panic(err)
+		}
+
+		scripts := strings.Join(head.Scripts, "\n\n")
+		styles := strings.Join(head.Styles, "\n\n")
+
+		if pr.JSONOnly || renderJSON {
+			serverSideData.Schema = string(schema)
+			serverSideData.Scripts = scripts
+			serverSideData.Styles = styles
+		} else {
+			serverSideData.Schema = nil
+			serverSideData.Scripts = ""
+			serverSideData.Styles = ""
+		}
+
+		if len(head.Styles) > 0 {
+			body.WriteString(`<style type="text/css">`)
+			body.WriteString("\n")
+			body.WriteString(styles)
+			body.WriteString("</style>\n")
+		}
+
+		if len(head.Scripts) > 0 {
+			body.WriteString("<script>\n")
+			body.WriteString(scripts)
+			body.WriteString("</script>\n")
+		}
+
+		body.Write(schema)
+		body.WriteString("\n")
+	}
+
 	// default page response state to ctx state if not set
 	if ctx.State != nil && pr.State == nil {
 		pr.State = ctx.State
@@ -206,6 +261,7 @@ func (p *PageBuilder) render(serverSideData *ServerSideData, w http.ResponseWrit
 	if pr.State == nil {
 		return
 	}
+
 	p.pageStateType, serverSideData.States = encodePageState(pr.State)
 	return
 }
@@ -230,30 +286,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	var serverSideData = &ServerSideData{}
-	pr := p.render(serverSideData, w, r, nil)
-	if serverSideData.Schema == nil {
-		panic("page's RenderFunc returns nil schema, use pr.Schema = root to set it")
-	}
-	head := pr.Head
-
-	var body = bytes.NewBuffer(nil)
-
-	if hcomp, ok := serverSideData.Schema.(ComponentHTML); ok {
-		var schema []byte
-		schema, err = hcomp.MarshalHTML(&head)
-		if err != nil {
-			panic(err)
-		}
-
-		if pr.JSONOnly {
-			serverSideData.Schema = string(schema)
-		} else {
-			serverSideData.Schema = nil
-		}
-
-		body.Write(schema)
-		body.WriteString("\n")
-	}
+	pr, body := p.render(serverSideData, w, r, nil, false)
 
 	var serverSideDataJSON []byte
 	serverSideDataJSON, err = json.MarshalIndent(serverSideData, "", "\t")
@@ -269,7 +302,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	body.WriteString(templates.PageInitialization(string(serverSideDataJSON)))
 
 	var resp string
-	resp, err = p.b.GetLayoutMiddleFunc()(nil, &head)(r, body.String())
+	resp, err = p.b.GetLayoutMiddleFunc()(nil, &pr.Head)(r, body.String())
 	if err != nil {
 		panic(err)
 	}
@@ -355,7 +388,7 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	if len(p.eventFuncRefs) == 0 {
 		log.Println("Rerender because eventFuncs gone, might server restarted")
 		ssd := &ServerSideData{}
-		p.render(ssd, w, r, ctx)
+		p.render(ssd, w, r, ctx, true)
 		json.Marshal(ssd) // to fill in event funcs that setup inside a component
 	}
 
@@ -391,8 +424,10 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 
 	if er.Reload {
 		ssd := &ServerSideData{}
-		p.render(ssd, w, r, ctx)
+		p.render(ssd, w, r, ctx, true)
 		er.Schema = ssd.Schema
+		er.Scripts = ssd.Scripts
+		er.Styles = ssd.Styles
 	}
 
 	err = json.NewEncoder(w).Encode(er)
