@@ -411,13 +411,13 @@ var eventCases = []struct {
 
 	</head>
 	<body class="front">
-	<style type="text/css">
+	<style id="main_styles" type="text/css">
 
 	div {
 		background-color: red;
 	}
 	</style>
-<script>
+<script id="main_scripts">
 
 	function hello() {
 		console.log("hello")

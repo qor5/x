@@ -237,20 +237,21 @@ func (p *PageBuilder) render(
 		}
 
 		if len(head.Styles) > 0 {
-			body.WriteString(`<style type="text/css">`)
+			body.WriteString(`<style id="main_styles" type="text/css">`)
 			body.WriteString("\n")
 			body.WriteString(styles)
 			body.WriteString("</style>\n")
 		}
 
 		if len(head.Scripts) > 0 {
-			body.WriteString("<script>\n")
+			body.WriteString("<script id=\"main_scripts\">\n")
 			body.WriteString(scripts)
 			body.WriteString("</script>\n")
 		}
 
+		body.WriteString("<div id=\"app\">\n")
 		body.Write(schema)
-		body.WriteString("\n")
+		body.WriteString("</div>\n")
 	}
 
 	// default page response state to ctx state if not set

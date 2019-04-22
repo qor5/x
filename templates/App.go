@@ -20,6 +20,8 @@ func App(dev bool, prefix string, heads string, body string) string {
 
 		_buffer.WriteString("<script type=\"text/javascript\" src=\"http://localhost:3000/main.js\"></script>")
 
+		_buffer.WriteString("<script type=\"text/javascript\" src=\"http://localhost:3100/app.js\"></script>")
+
 	} else {
 
 		_buffer.WriteString("<script type=\"text/javascript\" src=\"")
