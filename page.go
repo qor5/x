@@ -61,17 +61,17 @@ func (p *PageBuilder) RefEventFunc(eventFuncId string, ef EventFunc) (key string
 type Component interface {
 }
 
-type ComponentJSON interface {
+type JSONComponent interface {
 	MarshalJSON() ([]byte, error)
 }
 
-type ComponentHTML interface {
+type HTMLComponent interface {
 	MarshalHTML(phb *PageHeadBuilder) ([]byte, error)
 }
 
-type StringComponentHTML string
+type StringHTMLComponent string
 
-func (s StringComponentHTML) MarshalHTML(phb *PageHeadBuilder) (r []byte, err error) {
+func (s StringHTMLComponent) MarshalHTML(phb *PageHeadBuilder) (r []byte, err error) {
 	r = []byte(s)
 	return
 }
@@ -216,9 +216,9 @@ func (p *PageBuilder) render(
 
 	body = bytes.NewBuffer(nil)
 
-	if hcomp, ok := serverSideData.Schema.(ComponentHTML); ok {
+	if HTMLComponent, ok := serverSideData.Schema.(HTMLComponent); ok {
 		var schema []byte
-		schema, err = hcomp.MarshalHTML(head)
+		schema, err = HTMLComponent.MarshalHTML(head)
 		if err != nil {
 			panic(err)
 		}

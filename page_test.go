@@ -114,7 +114,7 @@ var pageStateCases = []struct {
 	{
 		name:       "html component",
 		state:      &userData,
-		schema:     ui.StringComponentHTML("<h1>Hello</h1>"),
+		schema:     ui.StringHTMLComponent("<h1>Hello</h1>"),
 		renderHTML: true,
 		body: `
 
@@ -126,7 +126,8 @@ var pageStateCases = []struct {
 
 	</head>
 	<body class="front">
-	<h1>Hello</h1>
+	<div id="app">
+<h1>Hello</h1></div>
 
 
 <script type="text/javascript">
@@ -379,7 +380,7 @@ var eventCases = []struct {
 	{
 		name: "case 1",
 		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
-			pr.Schema = ui.StringComponentHTML("<h1>Hello</h1>")
+			pr.Schema = ui.StringHTMLComponent("<h1>Hello</h1>")
 		},
 		expectedEventResp: `
 {
@@ -423,7 +424,8 @@ var eventCases = []struct {
 		console.log("hello")
 	}
 	</script>
-<div>hello</div>
+<div id="app">
+<div>hello</div></div>
 
 
 <script type="text/javascript">
