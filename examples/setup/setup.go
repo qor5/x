@@ -54,7 +54,7 @@ func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) 
 func home(prefix string, pages []pageItem) ui.PageRenderFunc {
 	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
-		pr.Schema = Button()
+		pr.Schema = Button("Home")
 
 		return
 	}

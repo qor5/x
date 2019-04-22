@@ -76,22 +76,41 @@ export function fetchEvent(eventFuncId, eventJSON, form, alert) {
 			}
 
 			if (r.schema) {
-				var body = document.querySelector("#app");
-				body.innerHTML = r.schema;
-
-				if (r.styles) {
-					var styles = document.querySelector("#main_styles");
-					styles.text = r.styles;
-				}
-				if (r.scripts) {
-					var scripts = document.querySelector("#main_scripts");
-					scripts.text = r.text
-				}
-
-				newVue();
+				reload(r)
 			}
 			return r;
 		});
+}
+
+function reload(r) {
+	var app = document.querySelector("#app");
+	app.innerHTML = r.schema;
+
+	if (r.styles) {
+		var s = document.querySelector("#main_styles");
+		if (s) {
+			s.parentNode.removeChild(s);
+		}
+		s = document.createElement("style")
+		s.type = 'text/css'
+		s.id = "main_styles"
+		s.appendChild(document.createTextNode(r.styles))
+		document.body.insertBefore(s, app)
+	}
+
+
+	if (r.scripts) {
+		var s = document.querySelector("#main_scripts");
+		if (s) {
+			s.parentNode.removeChild(s);
+		}
+		s = document.createElement("script")
+		s.id = "main_scripts"
+		s.appendChild(document.createTextNode(r.scripts))
+		document.body.insertBefore(s, app)
+	}
+
+	newVue();
 }
 
 export function jsonEvent(evt) {
