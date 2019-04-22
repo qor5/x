@@ -1,0 +1,76 @@
+//go:generate gorazor templates templates
+package page
+
+import (
+	"bytes"
+	"net/http"
+	"time"
+
+	"github.com/sunfmin/page/templates"
+)
+
+type Builder struct {
+	layoutMiddleFunc LayoutMiddleFn
+	frontDev		 bool
+	assetsPrefix	 string
+	packsBuffer	  *bytes.Reader
+}
+
+type LayoutFn func(r *http.Request, body string) (output string, err error)
+
+type LayoutMiddleFn func(in LayoutFn, head *PageHeadBuilder) (out LayoutFn)
+
+func New() (b *Builder) {
+	b = new(Builder)
+	return
+}
+
+func (b *Builder) LayoutMiddleFn(mf LayoutMiddleFn) (r *Builder) {
+	b.layoutMiddleFunc = mf
+	r = b
+	return
+}
+
+func (b *Builder) FrontDev(v bool) (r *Builder) {
+	b.frontDev = v
+	r = b
+	return
+}
+
+type ComponentsPack string
+
+func (b *Builder) Assets(prefix string, packs ...ComponentsPack) (r *Builder) {
+	b.assetsPrefix = prefix
+	var buf []byte
+	for _, pk := range packs {
+		// buf = append(buf, []byte(fmt.Sprintf("\n// pack %d\n", i+1))...)
+		// buf = append(buf, []byte(fmt.Sprintf("\nconsole.log('pack %d, length %d');\n", i+1, len(pk)))...)
+		buf = append(buf, []byte(pk)...)
+		buf = append(buf, []byte(";")...)
+	}
+
+	b.packsBuffer = bytes.NewReader(buf)
+	r = b
+	return
+}
+
+var startTime = time.Now()
+
+func (b *Builder) AssetsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/javascript")
+	http.ServeContent(w, r, "", startTime, b.packsBuffer)
+}
+
+func (b *Builder) defaultLayoutMiddleFunc(in LayoutFn, head *PageHeadBuilder) (out LayoutFn) {
+	return func(r *http.Request, body string) (output string, err error) {
+		output = templates.App(b.frontDev, b.assetsPrefix, head.String(), body)
+		return
+	}
+}
+
+func (b *Builder) GetLayoutMiddleFunc() (lm LayoutMiddleFn) {
+	if b.layoutMiddleFunc != nil {
+		return b.layoutMiddleFunc
+	}
+	return b.defaultLayoutMiddleFunc
+}
