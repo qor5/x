@@ -6,6 +6,11 @@ import (
 )
 
 func HelloButton(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
-	pr.Schema = Button()
+	pr.Schema = Button().OnMouseDown(ctx.Hub, "reload", reload)
+	return
+}
+
+func reload(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	r.Reload = true
 	return
 }

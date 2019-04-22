@@ -78,10 +78,15 @@ export function fetchEvent(eventFuncId, eventJSON, form, alert) {
 			if (r.schema) {
 				var body = document.querySelector("#app");
 				body.innerHTML = r.schema;
-				var styles = document.querySelector("#main_styles");
-				styles.text = r.styles;
-				var scripts = document.querySelector("#main_scripts");
-				scripts.text = r.text
+
+				if (r.styles) {
+					var styles = document.querySelector("#main_styles");
+					styles.text = r.styles;
+				}
+				if (r.scripts) {
+					var scripts = document.querySelector("#main_scripts");
+					scripts.text = r.text
+				}
 
 				newVue();
 			}
