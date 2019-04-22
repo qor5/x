@@ -177,8 +177,66 @@ func TestPageState(t *testing.T) {
 	}
 }
 
-func TestPageStateInitAndSet(t *testing.T) {
+func runEvent(
+	eventFunc ui.EventFunc,
+	renderChanger func(ctx *ui.EventContext, pr *ui.PageResponse),
+	eventFormChanger func(mw *multipart.Writer),
+) (indexResp string, eventResp string) {
 	pb := ui.New().NewPage()
+
+	var f = func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+		r.Reload = true
+		return
+	}
+
+	if eventFunc != nil {
+		f = eventFunc
+	}
+
+	var rf = func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+		ctx.Hub.RefEventFunc("call", f)
+
+		if renderChanger != nil {
+			renderChanger(ctx, &pr)
+		} else {
+			ctx.StateOrInit(&User{})
+			pr.Schema = ui.StringComponentJSON("{}")
+			pr.JSONOnly = true
+		}
+		return
+	}
+
+	pb.RenderFunc(rf)
+
+	r := httptest.NewRequest("GET", "/", nil)
+	w := httptest.NewRecorder()
+	pb.Handler().ServeHTTP(w, r)
+
+	indexResp = w.Body.String()
+
+	body := bytes.NewBuffer(nil)
+
+	mw := multipart.NewWriter(body)
+	mw.WriteField("__event_data__", `{"eventFuncId":{"id":"call","pushState":null},"event":{"value":""}}
+	`)
+
+	if eventFormChanger != nil {
+		eventFormChanger(mw)
+	}
+
+	mw.Close()
+
+	r = httptest.NewRequest("POST", "/__execute_event__/call", body)
+	r.Header.Add("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", mw.Boundary()))
+
+	w = httptest.NewRecorder()
+	pb.Handler().ServeHTTP(w, r)
+
+	eventResp = w.Body.String()
+	return
+}
+
+func TestPageStateInitAndSet(t *testing.T) {
 
 	var login = func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 		add := ctx.SubStateOrInit("Address", &Address{}).(*Address)
@@ -188,19 +246,7 @@ func TestPageStateInitAndSet(t *testing.T) {
 		return
 	}
 
-	pb.RenderFunc(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
-		ctx.StateOrInit(&User{})
-
-		ctx.Hub.RefEventFunc("login", login)
-
-		pr.Schema = ui.StringComponentJSON("{}")
-		pr.JSONOnly = true
-		return
-	})
-
-	r := httptest.NewRequest("GET", "/", nil)
-	w := httptest.NewRecorder()
-	pb.Handler().ServeHTTP(w, r)
+	indexResp, eventResp := runEvent(login, nil, nil)
 
 	diff := testingutils.PrettyJsonDiff(`
 {
@@ -211,23 +257,10 @@ func TestPageStateInitAndSet(t *testing.T) {
 		]
 	}
 }
-	`, w.Body.String())
+	`, indexResp)
 	if len(diff) > 0 {
 		t.Error(diff)
 	}
-
-	body := bytes.NewBuffer(nil)
-
-	mw := multipart.NewWriter(body)
-	mw.WriteField("__event_data__", `{"eventFuncId":{"id":"login","pushState":null},"event":{"value":""}}
-	`)
-	mw.Close()
-
-	r = httptest.NewRequest("POST", "/__execute_event__/login", body)
-	r.Header.Add("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", mw.Boundary()))
-
-	w = httptest.NewRecorder()
-	pb.Handler().ServeHTTP(w, r)
 
 	diff = testingutils.PrettyJsonDiff(`
 {
@@ -245,7 +278,7 @@ func TestPageStateInitAndSet(t *testing.T) {
 	},
 	"reload": true
 }
-	`, w.Body.String())
+	`, eventResp)
 	if len(diff) > 0 {
 		t.Error(diff)
 	}
@@ -313,5 +346,47 @@ func TestFileUpload(t *testing.T) {
 	`, w.Body.String())
 	if len(diff) > 0 {
 		t.Error(diff)
+	}
+}
+
+var eventCases = []struct {
+	name              string
+	eventFunc         ui.EventFunc
+	renderChanger     func(ctx *ui.EventContext, pr *ui.PageResponse)
+	eventFormChanger  func(mw *multipart.Writer)
+	expectedIndexResp string
+	expectedEventResp string
+}{
+	{
+		name: "case 1",
+		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
+			pr.Schema = ui.StringComponentHTML("<h1>Hello</h1>")
+		},
+		expectedEventResp: `
+{
+	"schema": "\u003ch1\u003eHello\u003c/h1\u003e",
+	"reload": true
+}
+		`,
+	},
+}
+
+func TestEvents(t *testing.T) {
+	for _, c := range eventCases {
+		indexResp, eventResp := runEvent(c.eventFunc, c.renderChanger, c.eventFormChanger)
+		var diff string
+		if len(c.expectedIndexResp) > 0 {
+			diff = testingutils.PrettyJsonDiff(c.expectedIndexResp, indexResp)
+			if len(diff) > 0 {
+				t.Error(c.name, diff)
+			}
+		}
+
+		if len(c.expectedEventResp) > 0 {
+			diff = testingutils.PrettyJsonDiff(c.expectedEventResp, eventResp)
+			if len(diff) > 0 {
+				t.Error(c.name, diff)
+			}
+		}
 	}
 }
