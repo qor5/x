@@ -25,7 +25,10 @@
   },
   "vue": {
     "runtimeCompiler": true,
-    "filenameHashing": false
+    "filenameHashing": false,
+    "devServer": {
+      "port": 3100
+    }
   },
   "eslintConfig": {
     "root": true,
