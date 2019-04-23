@@ -7,10 +7,16 @@ import (
 
 var corejsassetsbox = packr.NewBox("./corejs/dist/")
 
-func ComponentsPack() ui.ComponentsPack {
+func ComponentsPacks() []ui.ComponentsPack {
+	v, err := corejsassetsbox.FindString("js/chunk-vendors.js")
+	if err != nil {
+		panic(err)
+	}
+
 	r, err := corejsassetsbox.FindString("js/app.js")
 	if err != nil {
 		panic(err)
 	}
-	return ui.ComponentsPack(r)
+
+	return []ui.ComponentsPack{ui.ComponentsPack(v), ui.ComponentsPack(r)}
 }

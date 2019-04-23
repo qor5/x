@@ -63,7 +63,7 @@ func home(prefix string, pages []pageItem) ui.PageRenderFunc {
 func Setup(prefix string) http.Handler {
 	ub := ui.New().Assets(
 		prefix+"/assets",
-		vuibuilder.ComponentsPack(),
+		vuibuilder.ComponentsPacks()...,
 	)
 
 	if len(os.Getenv("DEV")) > 0 {
