@@ -93,7 +93,7 @@ func (b *HTMLTagBuilder) PrependChild(c ui.HTMLComponent) (r *HTMLTagBuilder) {
 	return
 }
 
-func (b *HTMLTagBuilder) MarshalHTML(phb *ui.PageHeadBuilder) (r []byte, err error) {
+func (b *HTMLTagBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	// remove empty
 	cs := []ui.HTMLComponent{}
 	for _, c := range b.children {
@@ -117,7 +117,7 @@ func (b *HTMLTagBuilder) MarshalHTML(phb *ui.PageHeadBuilder) (r []byte, err err
 	if len(cs) > 0 {
 		for _, c := range cs {
 			var child []byte
-			child, err = c.MarshalHTML(phb)
+			child, err = c.MarshalHTML(ctx)
 			if err != nil {
 				return
 			}

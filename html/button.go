@@ -21,16 +21,16 @@ func (b *ButtonBuilder) OnClick(hub ui.EventFuncHub, eventFuncId string, ef ui.E
 	return
 }
 
-func (b *ButtonBuilder) MarshalHTML(phb *ui.PageHeadBuilder) (r []byte, err error) {
-	phb.PutStyle(`
+func (b *ButtonBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
+	ctx.Head.PutStyle(`
 	button {
 		color: red;
 	}
 	`)
 
-	phb.PutScript(`
+	ctx.Head.PutScript(`
 		console.log("run")
 	`)
 
-	return b.tag.MarshalHTML(phb)
+	return b.tag.MarshalHTML(ctx)
 }

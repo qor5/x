@@ -1,4 +1,4 @@
-package vuibuilder
+package bran
 
 import (
 	"github.com/gobuffalo/packr"

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	"github.com/sunfmin/vuibuilder/examples/setup"
+	"github.com/sunfmin/bran/examples/setup"
 )
 
 func main() {

@@ -8,10 +8,10 @@ import (
 	"strings"
 
 	"github.com/gobuffalo/packr"
+	"github.com/sunfmin/bran"
+	"github.com/sunfmin/bran/examples/e01_hello_button"
+	. "github.com/sunfmin/bran/html"
 	ui "github.com/sunfmin/page"
-	"github.com/sunfmin/vuibuilder"
-	"github.com/sunfmin/vuibuilder/examples/e01_hello_button"
-	. "github.com/sunfmin/vuibuilder/html"
 	"github.com/theplant/appkit/contexts"
 	"github.com/theplant/appkit/server"
 )
@@ -34,6 +34,8 @@ var exampleBox = packr.NewBox("../")
 func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) (out ui.PageRenderFunc) {
 	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
+		ctx.Head.Title(cp.Title())
+
 		var innerPr ui.PageResponse
 		innerPr, err = in(ctx)
 		if err != nil {
@@ -45,7 +47,6 @@ func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) 
 		pr.Schema = root
 
 		pr.State = innerPr.State
-		pr.Head.Title(cp.Title())
 
 		return
 	}
@@ -63,7 +64,7 @@ func home(prefix string, pages []pageItem) ui.PageRenderFunc {
 func Setup(prefix string) http.Handler {
 	ub := ui.New().Assets(
 		prefix+"/assets",
-		vuibuilder.ComponentsPacks()...,
+		bran.ComponentsPacks()...,
 	)
 
 	if len(os.Getenv("DEV")) > 0 {
