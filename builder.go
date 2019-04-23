@@ -11,9 +11,9 @@ import (
 
 type Builder struct {
 	layoutMiddleFunc LayoutMiddleFn
-	frontDev		 bool
-	assetsPrefix	 string
-	packsBuffer	  *bytes.Reader
+	frontDev         bool
+	assetsPrefix     string
+	packsBuffer      *bytes.Reader
 }
 
 type LayoutFn func(r *http.Request, body string) (output string, err error)
@@ -41,15 +41,15 @@ type ComponentsPack string
 
 func (b *Builder) Assets(prefix string, packs ...ComponentsPack) (r *Builder) {
 	b.assetsPrefix = prefix
-	var buf []byte
+	var buf = bytes.NewBuffer(nil)
 	for _, pk := range packs {
 		// buf = append(buf, []byte(fmt.Sprintf("\n// pack %d\n", i+1))...)
 		// buf = append(buf, []byte(fmt.Sprintf("\nconsole.log('pack %d, length %d');\n", i+1, len(pk)))...)
-		buf = append(buf, []byte(pk)...)
-		buf = append(buf, []byte(";")...)
+		buf.WriteString(string(pk))
+		buf.WriteString(";\n\n")
 	}
 
-	b.packsBuffer = bytes.NewReader(buf)
+	b.packsBuffer = bytes.NewReader(buf.Bytes())
 	r = b
 	return
 }
