@@ -12,8 +12,7 @@ import (
 type Builder struct {
 	layoutMiddleFunc LayoutMiddleFn
 	frontDev         bool
-	assetsPrefix     string
-	packsBuffer      *bytes.Reader
+	prefix           string
 }
 
 type LayoutFn func(r *http.Request, body string) (output string, err error)
@@ -39,31 +38,34 @@ func (b *Builder) FrontDev(v bool) (r *Builder) {
 
 type ComponentsPack string
 
-func (b *Builder) Assets(prefix string, packs ...ComponentsPack) (r *Builder) {
-	b.assetsPrefix = prefix
-	var buf = bytes.NewBuffer(nil)
-	for _, pk := range packs {
-		// buf = append(buf, []byte(fmt.Sprintf("\n// pack %d\n", i+1))...)
-		// buf = append(buf, []byte(fmt.Sprintf("\nconsole.log('pack %d, length %d');\n", i+1, len(pk)))...)
-		buf.WriteString(string(pk))
-		buf.WriteString(";\n\n")
-	}
-
-	b.packsBuffer = bytes.NewReader(buf.Bytes())
+func (b *Builder) Prefix(prefix string) (r *Builder) {
+	b.prefix = prefix
 	r = b
 	return
 }
 
 var startTime = time.Now()
 
-func (b *Builder) AssetsHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/javascript")
-	http.ServeContent(w, r, "", startTime, b.packsBuffer)
+func (b *Builder) PacksHandler(contentType string, packs ...ComponentsPack) http.HandlerFunc {
+	var buf = bytes.NewBuffer(nil)
+	for _, pk := range packs {
+		// buf = append(buf, []byte(fmt.Sprintf("\n// pack %d\n", i+1))...)
+		// buf = append(buf, []byte(fmt.Sprintf("\nconsole.log('pack %d, length %d');\n", i+1, len(pk)))...)
+		buf.WriteString(string(pk))
+		buf.WriteString("\n\n")
+	}
+
+	body := bytes.NewReader(buf.Bytes())
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", contentType)
+		http.ServeContent(w, r, "", startTime, body)
+	}
 }
 
 func (b *Builder) defaultLayoutMiddleFunc(in LayoutFn, head *PageHeadBuilder) (out LayoutFn) {
 	return func(r *http.Request, body string) (output string, err error) {
-		output = templates.App(b.frontDev, b.assetsPrefix, head.String(), body)
+		output = templates.App(b.frontDev, b.prefix, head.String(), body)
 		return
 	}
 }
