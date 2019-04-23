@@ -10,10 +10,12 @@ import (
 )
 
 type HTMLTagBuilder struct {
-	tag      string
-	attrs    map[string]string
-	text     string
-	children []ui.HTMLComponent
+	tag           string
+	attrs         map[string]string
+	text          string
+	children      []ui.HTMLComponent
+	fieldName     *string
+	onInputFuncID *ui.EventFuncID
 }
 
 func Tag(tag string) (r *HTMLTagBuilder) {
@@ -36,6 +38,15 @@ func (b *HTMLTagBuilder) Tag(v string) (r *HTMLTagBuilder) {
 
 func (b *HTMLTagBuilder) Text(v string) (r *HTMLTagBuilder) {
 	b.text = v
+	r = b
+	return
+}
+
+func (b *HTMLTagBuilder) FieldName(v string) (r *HTMLTagBuilder) {
+	if len(v) > 0 {
+		b.fieldName = &v
+	}
+
 	r = b
 	return
 }
@@ -64,6 +75,17 @@ func (b *HTMLTagBuilder) Style(v string) (r *HTMLTagBuilder) {
 	return
 }
 
+func (b *HTMLTagBuilder) OnInput(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params ...string) (r *HTMLTagBuilder) {
+
+	b.onInputFuncID = &ui.EventFuncID{
+		ID:     hub.RefEventFunc(eventFuncId, ef),
+		Params: params,
+	}
+
+	r = b
+	return
+}
+
 func (b *HTMLTagBuilder) OnClick(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params ...string) (r *HTMLTagBuilder) {
 
 	fid := &ui.EventFuncID{
@@ -76,7 +98,7 @@ func (b *HTMLTagBuilder) OnClick(hub ui.EventFuncHub, eventFuncId string, ef ui.
 		panic(err)
 	}
 
-	b.Attr("v-on:click", fmt.Sprintf("click(%s, $event)", string(jb)))
+	b.Attr("v-on:click", fmt.Sprintf("onclick(%s, $event)", string(jb)))
 	r = b
 	return
 }
@@ -93,7 +115,27 @@ func (b *HTMLTagBuilder) PrependChild(c ui.HTMLComponent) (r *HTMLTagBuilder) {
 	return
 }
 
+func (b *HTMLTagBuilder) setupChange() {
+	if b.fieldName == nil && b.onInputFuncID == nil {
+		return
+	}
+
+	jb, err := json.Marshal(b.onInputFuncID)
+	if err != nil {
+		panic(err)
+	}
+
+	fieldName, err := json.Marshal(b.fieldName)
+	if err != nil {
+		panic(err)
+	}
+
+	b.Attr("v-on:input", fmt.Sprintf(`oninput(%s, %s, $event)`, string(jb), string(fieldName)))
+}
+
 func (b *HTMLTagBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
+	b.setupChange()
+
 	// remove empty
 	cs := []ui.HTMLComponent{}
 	for _, c := range b.children {

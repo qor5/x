@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { newFormWithStates, mergeStatesIntoForm } from './form';
-// import debounce from 'lodash/debounce';
+import debounce from 'lodash/debounce';
 // import wrap from "lodash/wrap";
 import 'whatwg-fetch';
 import querystring from 'query-string';
@@ -166,9 +166,15 @@ function jsonEvent(evt: any) {
 	return v;
 }
 
-function controlsOnChange(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
+const debounceFetchEvent = debounce(fetchEvent, 800);
+
+function controlsOnInput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
+	// console.log("evt", evt)
 	if (fieldName) {
 		form.set(fieldName, evt.target.value);
+	}
+	if (eventFuncId) {
+		debounceFetchEvent(eventFuncId, jsonEvent(evt));
 	}
 }
 
@@ -178,10 +184,10 @@ function newVue() {
 		el: '#app',
 		data: {},
 		methods: {
-			click(eventFuncId: EventFuncID, evt: any) {
-				fetchEvent(eventFuncId, evt);
+			onclick(eventFuncId: EventFuncID, evt: any) {
+				fetchEvent(eventFuncId, jsonEvent(evt));
 			},
-			change: controlsOnChange,
+			oninput: controlsOnInput,
 		},
 	});
 }

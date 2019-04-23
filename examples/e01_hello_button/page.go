@@ -1,12 +1,29 @@
 package e01_hello_button
 
 import (
-	ui "github.com/sunfmin/page"
 	. "github.com/sunfmin/bran/html"
+	ui "github.com/sunfmin/page"
 )
 
+type mystate struct {
+	Message string
+}
+
 func HelloButton(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
-	pr.Schema = Button("Hello").OnClick(ctx.Hub, "reload", reload)
+	s := ctx.StateOrInit(&mystate{}).(*mystate)
+
+	pr.Schema = Tag("div").Children(
+		Button("Hello").
+			OnClick(ctx.Hub, "reload", reload),
+		Tag("input").
+			OnInput(ctx.Hub, "reload2", reload).
+			Attr("type", "text").
+			FieldName("Message").
+			Attr("value", s.Message),
+		Tag("div").
+			Style("font-family: monospace;").
+			Text(s.Message),
+	)
 	return
 }
 

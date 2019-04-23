@@ -22,15 +22,5 @@ func (b *ButtonBuilder) OnClick(hub ui.EventFuncHub, eventFuncId string, ef ui.E
 }
 
 func (b *ButtonBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
-	ctx.Head.PutStyle(`
-	button {
-		color: red;
-	}
-	`)
-
-	ctx.Head.PutScript(`
-		console.log("run")
-	`)
-
 	return b.tag.MarshalHTML(ctx)
 }
