@@ -64,7 +64,7 @@ func (b *HTMLTagBuilder) Attr(k string, v string) (r *HTMLTagBuilder) {
 }
 
 func (b *HTMLTagBuilder) ClassNames(names ...string) (r *HTMLTagBuilder) {
-	b.Attr("className", strings.TrimSpace(strings.Join(names, " ")))
+	b.Attr("class", strings.TrimSpace(strings.Join(names, " ")))
 	r = b
 	return
 }
