@@ -353,15 +353,15 @@ func TestFileUpload(t *testing.T) {
 type DummyComp struct {
 }
 
-func (dc *DummyComp) MarshalHTML(phb *ui.PageHeadBuilder) (r []byte, err error) {
+func (dc *DummyComp) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	r = []byte("<div>hello</div>")
-	phb.PutScript(`
+	ctx.Head.PutScript(`
 	function hello() {
 		console.log("hello")
 	}
 	`)
 
-	phb.PutStyle(`
+	ctx.Head.PutStyle(`
 	div {
 		background-color: red;
 	}

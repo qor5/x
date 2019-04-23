@@ -66,12 +66,12 @@ type JSONComponent interface {
 }
 
 type HTMLComponent interface {
-	MarshalHTML(phb *PageHeadBuilder) ([]byte, error)
+	MarshalHTML(ctx *EventContext) ([]byte, error)
 }
 
 type StringHTMLComponent string
 
-func (s StringHTMLComponent) MarshalHTML(phb *PageHeadBuilder) (r []byte, err error) {
+func (s StringHTMLComponent) MarshalHTML(ctx *EventContext) (r []byte, err error) {
 	r = []byte(s)
 	return
 }
@@ -87,6 +87,7 @@ type EventContext struct {
 	R     *http.Request
 	W     http.ResponseWriter
 	Hub   EventFuncHub
+	Head  *PageHeadBuilder
 	State PageState
 	Event *Event
 }
@@ -118,7 +119,6 @@ type PageState interface{}
 type PageResponse struct {
 	Schema   Component
 	State    PageState
-	Head     PageHeadBuilder
 	JSONOnly bool
 }
 
@@ -193,12 +193,11 @@ func (p *PageBuilder) render(
 	if p.pageRenderFunc == nil {
 		return
 	}
-	if ctx == nil {
-		ctx = new(EventContext)
-		ctx.Hub = p
-	}
+
+	ctx.Hub = p
 	ctx.R = r
 	ctx.W = w
+	ctx.Head = &PageHeadBuilder{}
 	pr, err := p.pageRenderFunc(ctx)
 	if err != nil {
 		panic(err)
@@ -212,19 +211,17 @@ func (p *PageBuilder) render(
 		panic("page's RenderFunc returns nil schema, use pr.Schema = root to set it")
 	}
 
-	head := &pr.Head
-
 	body = bytes.NewBuffer(nil)
 
 	if HTMLComponent, ok := serverSideData.Schema.(HTMLComponent); ok {
 		var schema []byte
-		schema, err = HTMLComponent.MarshalHTML(head)
+		schema, err = HTMLComponent.MarshalHTML(ctx)
 		if err != nil {
 			panic(err)
 		}
 
-		scripts := strings.Join(head.Scripts, "\n\n")
-		styles := strings.Join(head.Styles, "\n\n")
+		scripts := strings.Join(ctx.Head.Scripts, "\n\n")
+		styles := strings.Join(ctx.Head.Styles, "\n\n")
 
 		if pr.JSONOnly || renderJSON {
 			serverSideData.Schema = string(schema)
@@ -236,14 +233,14 @@ func (p *PageBuilder) render(
 			serverSideData.Styles = ""
 		}
 
-		if len(head.Styles) > 0 {
+		if len(styles) > 0 {
 			body.WriteString(`<style id="main_styles" type="text/css">`)
 			body.WriteString("\n")
 			body.WriteString(styles)
 			body.WriteString("</style>\n")
 		}
 
-		if len(head.Scripts) > 0 {
+		if len(scripts) > 0 {
 			body.WriteString("<script id=\"main_scripts\">\n")
 			body.WriteString(scripts)
 			body.WriteString("</script>\n")
@@ -287,7 +284,8 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	var serverSideData = &ServerSideData{}
-	pr, body := p.render(serverSideData, w, r, nil, false)
+	ctx := new(EventContext)
+	pr, body := p.render(serverSideData, w, r, ctx, false)
 
 	var serverSideDataJSON []byte
 	serverSideDataJSON, err = json.MarshalIndent(serverSideData, "", "\t")
@@ -303,7 +301,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	body.WriteString(templates.PageInitialization(string(serverSideDataJSON)))
 
 	var resp string
-	resp, err = p.b.GetLayoutMiddleFunc()(nil, &pr.Head)(r, body.String())
+	resp, err = p.b.GetLayoutMiddleFunc()(nil, ctx.Head)(r, body.String())
 	if err != nil {
 		panic(err)
 	}
@@ -385,6 +383,7 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	ctx.R = r
 	ctx.W = w
 	ctx.Hub = p
+	ctx.Head = &PageHeadBuilder{}
 
 	if len(p.eventFuncRefs) == 0 {
 		log.Println("Rerender because eventFuncs gone, might server restarted")
