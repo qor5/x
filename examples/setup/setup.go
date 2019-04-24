@@ -54,8 +54,12 @@ func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) 
 	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
 		ctx.Head.Title(cp.Title())
-		ctx.Head.HTML(`<link rel="stylesheet" href="/assets/material.css">`)
-		ctx.Head.HTML(`<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">`)
+		ctx.Head.HTML(`
+			<link rel="stylesheet" href="/assets/material.css">
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+		`)
 
 		var innerPr ui.PageResponse
 		innerPr, err = in(ctx)

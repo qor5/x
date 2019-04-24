@@ -12,6 +12,7 @@ type ButtonBuilder struct {
 	classNames []string
 	variant    ButtonVariant
 	inCard     bool
+	disabled   bool
 }
 
 func Button(text string) (r *ButtonBuilder) {
@@ -24,6 +25,11 @@ func Button(text string) (r *ButtonBuilder) {
 
 func (b *ButtonBuilder) ClassNames(names ...string) (r *ButtonBuilder) {
 	b.classNames = names
+	return b
+}
+
+func (b *ButtonBuilder) Disabled(v bool) (r *ButtonBuilder) {
+	b.disabled = v
 	return b
 }
 
@@ -65,6 +71,8 @@ func (b *ButtonBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) 
 		b.classNames = append(b.classNames, fmt.Sprintf("mdc-button--%s", b.variant))
 	}
 	b.tag.ClassNames(b.classNames...)
-
+	if b.disabled {
+		b.tag.Attr("disabled", "true")
+	}
 	return b.tag.MarshalHTML(ctx)
 }
