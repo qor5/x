@@ -11,17 +11,24 @@ type ButtonBuilder struct {
 	tag        *h.HTMLTagBuilder
 	classNames []string
 	variant    ButtonVariant
+	inCard     bool
 }
 
 func Button(text string) (r *ButtonBuilder) {
 	r = &ButtonBuilder{
-		tag: h.Tag("button").Text(text),
+		tag:     h.Tag("button").Text(text),
+		variant: ButtonVariantText,
 	}
 	return
 }
 
 func (b *ButtonBuilder) ClassNames(names ...string) (r *ButtonBuilder) {
-	b.tag.ClassNames(names...)
+	b.classNames = names
+	return b
+}
+
+func (b *ButtonBuilder) InCard() (r *ButtonBuilder) {
+	b.inCard = true
 	return b
 }
 
@@ -51,6 +58,9 @@ func (b *ButtonBuilder) Variant(v ButtonVariant) (r *ButtonBuilder) {
 
 func (b *ButtonBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	b.classNames = append(b.classNames, "mdc-button")
+	if b.inCard {
+		b.classNames = append(b.classNames, "mdc-card__action", "mdc-card__action--button")
+	}
 	if len(b.variant) > 0 {
 		b.classNames = append(b.classNames, fmt.Sprintf("mdc-button--%s", b.variant))
 	}

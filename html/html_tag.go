@@ -157,6 +157,10 @@ func (b *HTMLTagBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error)
 		attrStr = " " + strings.Join(attrSegs, " ")
 	}
 
+	if len(b.text) > 0 {
+		cs = append(cs, Text(b.text))
+	}
+
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString(fmt.Sprintf("<%s%s>\n", b.tag, attrStr))
 	if len(cs) > 0 {
@@ -168,8 +172,6 @@ func (b *HTMLTagBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error)
 			}
 			buf.Write(child)
 		}
-	} else if len(b.text) > 0 {
-		buf.WriteString(b.text)
 	}
 
 	buf.WriteString(fmt.Sprintf("</%s>\n", b.tag))

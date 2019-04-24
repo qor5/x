@@ -13,7 +13,8 @@ import (
 	"github.com/sunfmin/bran/examples/e02_hello_material_button"
 	"github.com/sunfmin/bran/examples/e03_hello_card"
 	"github.com/sunfmin/bran/examples/e04_hello_material_grid"
-	"github.com/sunfmin/bran/material"
+	h "github.com/sunfmin/bran/html"
+	m "github.com/sunfmin/bran/material"
 	ui "github.com/sunfmin/page"
 	"github.com/theplant/appkit/contexts"
 	"github.com/theplant/appkit/server"
@@ -32,6 +33,21 @@ func (p pageItem) Title() string {
 	return fmt.Sprintf("%s: %s", strings.ToUpper(segs[0]), strings.Join(segs[1:], " "))
 }
 
+func exampleLinks(prefix string, pages []pageItem) (comp ui.HTMLComponent) {
+	var links []ui.HTMLComponent
+	for _, p := range pages {
+		links = append(links,
+			h.Tag("li").Children(
+				h.Tag("a").
+					Attr("href", fmt.Sprintf("%s/%s/", prefix, p.url)).
+					Text(p.Title()),
+			),
+		)
+	}
+	comp = h.Tag("ul").Children(links...)
+	return
+}
+
 var exampleBox = packr.NewBox("../")
 
 func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) (out ui.PageRenderFunc) {
@@ -47,9 +63,33 @@ func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) 
 			panic(err)
 		}
 
-		root := innerPr.Schema
+		demo := innerPr.Schema
 
-		pr.Schema = root
+		var dacComps = []ui.HTMLComponent{demo.(ui.HTMLComponent)}
+
+		var code string
+		code, err = exampleBox.FindString(cp.url + "/page.go")
+		if err != nil {
+			return
+		}
+		if len(code) > 0 {
+			dacComps = append(dacComps,
+				h.Tag("pre").Style("font-family: monospace").Text(
+					code,
+				),
+			)
+		}
+		ctx.Head.PutStyle(`
+			pre {
+				padding: 24px;
+				background-color: #eee;
+			}
+		`)
+
+		pr.Schema = m.Grid(
+			m.Cell(exampleLinks(prefix, pages)).Span(3, m.ScreenAll),
+			m.Cell(dacComps...).Span(9, m.ScreenAll),
+		)
 
 		pr.State = innerPr.State
 
@@ -79,7 +119,7 @@ func Setup(prefix string) http.Handler {
 	mux.Handle("/assets/main.js",
 		ub.PacksHandler("text/javascript", bran.ComponentsPacks()...))
 	mux.Handle("/assets/material.css",
-		ub.PacksHandler("text/css", material.ComponentsPacks()...))
+		ub.PacksHandler("text/css", m.ComponentsPacks()...))
 
 	var pages = []pageItem{
 		{

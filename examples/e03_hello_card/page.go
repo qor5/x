@@ -12,9 +12,8 @@ type mystate struct {
 func HelloCard(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	pr.Schema = Card(
 		ui.StringHTMLComponent(`Text`),
-	).ActionButtons(ui.StringHTMLComponent(`
-			<button class="mdc-button mdc-card__action mdc-card__action--button">Read</button>
-			<button class="mdc-button mdc-card__action mdc-card__action--button">Bookmark</button>
-		`))
+	).ActionButtons(
+		Button("Read").InCard(),
+		Button("Bookmark").InCard())
 	return
 }
