@@ -22,20 +22,17 @@ func Button(text string) (r *ButtonBuilder) {
 
 func (b *ButtonBuilder) ClassNames(names ...string) (r *ButtonBuilder) {
 	b.tag.ClassNames(names...)
-	r = b
-	return
+	return b
 }
 
 func (b *ButtonBuilder) Children(comps ...ui.HTMLComponent) (r *ButtonBuilder) {
 	b.tag.Children(comps...)
-	r = b
-	return
+	return b
 }
 
 func (b *ButtonBuilder) OnClick(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params ...string) (r *ButtonBuilder) {
 	b.tag.OnClick(hub, eventFuncId, ef, params...)
-	r = b
-	return
+	return b
 }
 
 type ButtonVariant string
@@ -49,8 +46,7 @@ const (
 
 func (b *ButtonBuilder) Variant(v ButtonVariant) (r *ButtonBuilder) {
 	b.variant = v
-	r = b
-	return
+	return b
 }
 
 func (b *ButtonBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {

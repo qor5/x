@@ -10,6 +10,7 @@
   "vue": {
     "runtimeCompiler": true,
     "filenameHashing": false,
+    "productionSourceMap": false,
     "devServer": {
       "port": 3100
     }

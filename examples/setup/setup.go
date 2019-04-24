@@ -10,8 +10,8 @@ import (
 	"github.com/gobuffalo/packr"
 	"github.com/sunfmin/bran"
 	"github.com/sunfmin/bran/examples/e01_hello_button"
-	"github.com/sunfmin/bran/examples/e02_hello_card"
-	. "github.com/sunfmin/bran/html"
+	"github.com/sunfmin/bran/examples/e02_hello_material_button"
+	"github.com/sunfmin/bran/examples/e03_hello_card"
 	"github.com/sunfmin/bran/material"
 	ui "github.com/sunfmin/page"
 	"github.com/theplant/appkit/contexts"
@@ -56,11 +56,9 @@ func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) 
 	}
 }
 
-func home(prefix string, pages []pageItem) ui.PageRenderFunc {
-	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
-
-		pr.Schema = Button("Home")
-
+func home(prefix string, pages []pageItem) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "e01_hello_button/", 302)
 		return
 	}
 }
@@ -88,8 +86,12 @@ func Setup(prefix string) http.Handler {
 			renderFunc: e01_hello_button.HelloButton,
 		},
 		{
-			url:        "e02_hello_card",
-			renderFunc: e02_hello_card.HelloCard,
+			url:        "e02_hello_material_button",
+			renderFunc: e02_hello_material_button.HelloButton,
+		},
+		{
+			url:        "e03_hello_card",
+			renderFunc: e03_hello_card.HelloCard,
 		},
 	}
 
@@ -110,6 +112,6 @@ func Setup(prefix string) http.Handler {
 		)
 	}
 
-	mux.Handle("/", ub.NewPage().RenderFunc(home(prefix, pages)).Handler())
+	mux.Handle("/", home(prefix, pages))
 	return mux
 }
