@@ -2,6 +2,7 @@ package e01_hello_button
 
 import (
 	. "github.com/sunfmin/bran/html"
+	m "github.com/sunfmin/bran/material"
 	ui "github.com/sunfmin/page"
 )
 
@@ -23,6 +24,14 @@ func HelloButton(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		Tag("div").
 			Style("font-family: monospace;").
 			Text(s.Message),
+		m.Button("Reload").Variant(m.ButtonVariantRaised).
+			OnClick(ctx.Hub, "reload3", reload),
+		m.Button("Reload").Variant(m.ButtonVariantUnelevated).
+			OnClick(ctx.Hub, "reload4", reload),
+		m.Button("Reload").Variant(m.ButtonVariantOutlined).
+			OnClick(ctx.Hub, "reload5", reload),
+		m.Button("Reload").Variant(m.ButtonVariantText).
+			OnClick(ctx.Hub, "reload6", reload),
 	)
 	return
 }

@@ -12,6 +12,7 @@ import (
 type HTMLTagBuilder struct {
 	tag           string
 	attrs         map[string]string
+	classNames    []string
 	text          string
 	children      []ui.HTMLComponent
 	fieldName     *string
@@ -64,7 +65,7 @@ func (b *HTMLTagBuilder) Attr(k string, v string) (r *HTMLTagBuilder) {
 }
 
 func (b *HTMLTagBuilder) ClassNames(names ...string) (r *HTMLTagBuilder) {
-	b.Attr("class", strings.TrimSpace(strings.Join(names, " ")))
+	b.classNames = names
 	r = b
 	return
 }
@@ -135,6 +136,7 @@ func (b *HTMLTagBuilder) setupChange() {
 
 func (b *HTMLTagBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	b.setupChange()
+	b.Attr("class", strings.TrimSpace(strings.Join(b.classNames, " ")))
 
 	// remove empty
 	cs := []ui.HTMLComponent{}

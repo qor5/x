@@ -1,7 +1,7 @@
 package material
 
 import (
-	. "github.com/sunfmin/bran/html"
+	h "github.com/sunfmin/bran/html"
 	ui "github.com/sunfmin/page"
 )
 
@@ -38,29 +38,29 @@ func (b *CardBuilder) ActionIcons(icons ...ui.HTMLComponent) (r *CardBuilder) {
 }
 
 func (b *CardBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
-	root := Tag("div").
+	root := h.Tag("div").
 		ClassNames(append([]string{"mdc-card"}, b.classNames...)...).
 		Children(
-			Tag("div").ClassNames("mdc-card__primary-action").Attr("tabindex", "0").
+			h.Tag("div").ClassNames("mdc-card__primary-action").Attr("tabindex", "0").
 				Children(
 					b.children...,
 				),
 		)
 
 	if len(b.actionButtons) > 0 || len(b.actionIcons) > 0 {
-		actions := Tag("div").ClassNames("mdc-card__actions")
+		actions := h.Tag("div").ClassNames("mdc-card__actions")
 		root.AddChildren(actions)
 
 		if len(b.actionButtons) > 0 {
 			actions.AddChildren(
-				Tag("div").ClassNames("mdc-card__action-buttons").
+				h.Tag("div").ClassNames("mdc-card__action-buttons").
 					Children(b.actionButtons...),
 			)
 		}
 
 		if len(b.actionIcons) > 0 {
 			actions.AddChildren(
-				Tag("div").ClassNames("mdc-card__action-icons").
+				h.Tag("div").ClassNames("mdc-card__action-icons").
 					Children(b.actionIcons...),
 			)
 		}
