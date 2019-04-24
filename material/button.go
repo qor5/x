@@ -26,6 +26,12 @@ func (b *ButtonBuilder) ClassNames(names ...string) (r *ButtonBuilder) {
 	return
 }
 
+func (b *ButtonBuilder) Children(comps ...ui.HTMLComponent) (r *ButtonBuilder) {
+	b.tag.Children(comps...)
+	r = b
+	return
+}
+
 func (b *ButtonBuilder) OnClick(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params ...string) (r *ButtonBuilder) {
 	b.tag.OnClick(hub, eventFuncId, ef, params...)
 	r = b
