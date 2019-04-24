@@ -12,6 +12,7 @@ import (
 	"github.com/sunfmin/bran/examples/e01_hello_button"
 	"github.com/sunfmin/bran/examples/e02_hello_material_button"
 	"github.com/sunfmin/bran/examples/e03_hello_card"
+	"github.com/sunfmin/bran/examples/e04_hello_material_grid"
 	"github.com/sunfmin/bran/material"
 	ui "github.com/sunfmin/page"
 	"github.com/theplant/appkit/contexts"
@@ -92,6 +93,10 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e03_hello_card",
 			renderFunc: e03_hello_card.HelloCard,
+		},
+		{
+			url:        "e04_hello_material_grid",
+			renderFunc: e04_hello_material_grid.HelloGrid,
 		},
 	}
 

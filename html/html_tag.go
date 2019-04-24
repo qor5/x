@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"html"
 	"strings"
 
 	ui "github.com/sunfmin/page"
@@ -173,5 +174,29 @@ func (b *HTMLTagBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error)
 
 	buf.WriteString(fmt.Sprintf("</%s>\n", b.tag))
 	r = buf.Bytes()
+	return
+}
+
+func Div(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {
+	return Tag("div").Children(children...)
+}
+
+func Text(text string) (r ui.HTMLComponent) {
+	r = ui.StringHTMLComponent(html.EscapeString(text))
+	return
+}
+
+type Styles map[string]string
+
+func (s Styles) String() string {
+	segs := []string{}
+	for k, v := range s {
+		segs = append(segs, fmt.Sprintf("%s:%s", k, v))
+	}
+	return strings.Join(segs, "; ")
+}
+
+func (s Styles) Put(name, value string) (r Styles) {
+	s[name] = value
 	return
 }
