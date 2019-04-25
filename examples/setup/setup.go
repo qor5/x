@@ -55,7 +55,6 @@ func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) 
 
 		ctx.Head.Title(cp.Title())
 		ctx.Head.HTML(`
-			<link rel="stylesheet" href="/assets/material.css">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -122,8 +121,6 @@ func Setup(prefix string) http.Handler {
 
 	mux.Handle("/assets/main.js",
 		ub.PacksHandler("text/javascript", bran.ComponentsPacks()...))
-	mux.Handle("/assets/material.css",
-		ub.PacksHandler("text/css", m.ComponentsPacks()...))
 
 	var pages = []pageItem{
 		{

@@ -102,7 +102,7 @@ func HelloGrid(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 			Cell(h.Text("2")).ClassNames("demo-cell").Span(1, ScreenAll),
 			Cell(h.Text("3")).ClassNames("demo-cell").Span(1, ScreenAll),
 		).ClassNames("demo-grid", "max-width").FixColumnWidth().AlignRight(),
-	).ClassNames("mdc-typography")
+	)
 
 	styles(ctx)
 	return

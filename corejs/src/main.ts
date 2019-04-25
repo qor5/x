@@ -107,10 +107,11 @@ function fetchEvent(
 
 function reload(r: EventResponse) {
 	const app = document.querySelector('#app');
-	if (app) {
-		app.innerHTML = r.schema;
+	if (!app) {
+		return;
 	}
 
+	app.innerHTML = r.schema;
 	if (r.styles) {
 		let style = document.querySelector('#main_styles');
 		if (style && style.parentNode) {
@@ -131,7 +132,7 @@ function reload(r: EventResponse) {
 		script = document.createElement('script');
 		script.setAttribute('id', 'main_scripts');
 		script.appendChild(document.createTextNode(r.scripts));
-		document.body.insertBefore(script, app);
+		document.body.insertBefore(script, app.nextSibling);
 	}
 
 	newVue();
