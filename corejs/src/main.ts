@@ -31,7 +31,8 @@ interface EventResponse {
 // function closeDialog() { }
 
 declare var window: any;
-const form = newFormWithStates(window.__serverSideData__.states);
+
+const form = window.form = newFormWithStates(window.__serverSideData__.states);
 
 function fetchEvent(
 	eventFuncId: EventFuncID,
@@ -179,8 +180,11 @@ function controlsOnInput(eventFuncId?: EventFuncID, fieldName?: string, evt?: an
 	}
 }
 
-
 function newVue() {
+	for (const registerComp of window.vueComps) {
+		registerComp(Vue);
+	}
+	// console.log("window.vueComps", window.vueComps)
 	const vm = new Vue({
 		el: '#app',
 		data: {},
@@ -191,6 +195,8 @@ function newVue() {
 			oninput: controlsOnInput,
 		},
 	});
+	window.vueComps = [];
+
 }
 
 newVue();

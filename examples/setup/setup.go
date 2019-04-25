@@ -13,6 +13,7 @@ import (
 	"github.com/sunfmin/bran/examples/e02_hello_material_button"
 	"github.com/sunfmin/bran/examples/e03_hello_card"
 	"github.com/sunfmin/bran/examples/e04_hello_material_grid"
+	"github.com/sunfmin/bran/examples/e05_hello_customized_component"
 	h "github.com/sunfmin/bran/html"
 	m "github.com/sunfmin/bran/material"
 	ui "github.com/sunfmin/page"
@@ -138,6 +139,10 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e04_hello_material_grid",
 			renderFunc: e04_hello_material_grid.HelloGrid,
+		},
+		{
+			url:        "e05_hello_customized_component",
+			renderFunc: e05_hello_customized_component.HelloCustomziedComponent,
 		},
 	}
 
