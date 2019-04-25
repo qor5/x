@@ -12,7 +12,7 @@ import (
 
 type HTMLTagBuilder struct {
 	tag           string
-	attrs         map[string]string
+	attrs         [][]string
 	classNames    []string
 	text          string
 	children      []ui.HTMLComponent
@@ -24,7 +24,7 @@ func Tag(tag string) (r *HTMLTagBuilder) {
 	r = &HTMLTagBuilder{}
 
 	if r.attrs == nil {
-		r.attrs = make(map[string]string)
+		r.attrs = [][]string{}
 	}
 
 	r.Tag(tag)
@@ -60,9 +60,13 @@ func (b *HTMLTagBuilder) Children(comps ...ui.HTMLComponent) (r *HTMLTagBuilder)
 }
 
 func (b *HTMLTagBuilder) Attr(k string, v string) (r *HTMLTagBuilder) {
-	b.attrs[k] = v
-	r = b
-	return
+	for _, at := range b.attrs {
+		if at[0] == k {
+			return b
+		}
+	}
+	b.attrs = append(b.attrs, []string{k, v})
+	return b
 }
 
 func (b *HTMLTagBuilder) ClassNames(names ...string) (r *HTMLTagBuilder) {
@@ -137,7 +141,10 @@ func (b *HTMLTagBuilder) setupChange() {
 
 func (b *HTMLTagBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	b.setupChange()
-	b.Attr("class", strings.TrimSpace(strings.Join(b.classNames, " ")))
+	class := strings.TrimSpace(strings.Join(b.classNames, " "))
+	if len(class) > 0 {
+		b.Attr("class", class)
+	}
 
 	// remove empty
 	cs := []ui.HTMLComponent{}
@@ -149,20 +156,28 @@ func (b *HTMLTagBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error)
 	}
 
 	attrSegs := []string{}
-	for k, v := range b.attrs {
-		attrSegs = append(attrSegs, fmt.Sprintf("%s='%s'", k, v))
+	for _, at := range b.attrs {
+		attrSegs = append(attrSegs, fmt.Sprintf("%s='%s'", at[0], at[1]))
 	}
+
 	attrStr := ""
 	if len(attrSegs) > 0 {
 		attrStr = " " + strings.Join(attrSegs, " ")
 	}
 
+	onlyText := false
 	if len(b.text) > 0 {
 		cs = append(cs, Text(b.text))
+		if len(cs) == 1 {
+			onlyText = true
+		}
 	}
 
 	buf := bytes.NewBuffer(nil)
-	buf.WriteString(fmt.Sprintf("<%s%s>\n", b.tag, attrStr))
+	buf.WriteString(fmt.Sprintf("<%s%s>", b.tag, attrStr))
+	if !onlyText {
+		buf.WriteString("\n")
+	}
 	if len(cs) > 0 {
 		for _, c := range cs {
 			var child []byte
@@ -173,7 +188,6 @@ func (b *HTMLTagBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error)
 			buf.Write(child)
 		}
 	}
-
 	buf.WriteString(fmt.Sprintf("</%s>\n", b.tag))
 	r = buf.Bytes()
 	return
