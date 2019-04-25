@@ -217,6 +217,7 @@ func (s *Styles) String() string {
 func (s *Styles) Put(name, value string) (r *Styles) {
 	for _, el := range s.pairs {
 		if el[0] == name {
+			el[1] = value
 			return s
 		}
 	}
