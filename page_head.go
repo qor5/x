@@ -10,9 +10,10 @@ import (
 )
 
 type PageHeadBuilder struct {
-	Nodes   []*html.Node
-	Scripts []string
-	Styles  []string
+	headNodes []*html.Node
+	scripts   []string
+	styles    []string
+	rearHtmls []string
 }
 
 func (b *PageHeadBuilder) Title(title string) (r *PageHeadBuilder) {
@@ -22,7 +23,7 @@ func (b *PageHeadBuilder) Title(title string) (r *PageHeadBuilder) {
 }
 
 func (b *PageHeadBuilder) HasTitle() (r bool) {
-	for _, n := range b.Nodes {
+	for _, n := range b.headNodes {
 		if n.Type == html.ElementNode && n.Data == "title" {
 			return true
 		}
@@ -44,14 +45,14 @@ func (b *PageHeadBuilder) Meta(attrs ...string) (r *PageHeadBuilder) {
 
 func (b *PageHeadBuilder) PutScript(script string) (r *PageHeadBuilder) {
 	var exists bool
-	for _, s := range b.Scripts {
+	for _, s := range b.scripts {
 		if s == script {
 			exists = true
 			break
 		}
 	}
 	if !exists {
-		b.Scripts = append(b.Scripts, script)
+		b.scripts = append(b.scripts, script)
 	}
 	r = b
 	return
@@ -59,21 +60,75 @@ func (b *PageHeadBuilder) PutScript(script string) (r *PageHeadBuilder) {
 
 func (b *PageHeadBuilder) PutStyle(style string) (r *PageHeadBuilder) {
 	var exists bool
-	for _, s := range b.Styles {
+	for _, s := range b.styles {
 		if s == style {
 			exists = true
 			break
 		}
 	}
 	if !exists {
-		b.Styles = append(b.Styles, style)
+		b.styles = append(b.styles, style)
 	}
 	r = b
 	return
 }
 
+func (b *PageHeadBuilder) PutRealHTML(v string) (r *PageHeadBuilder) {
+	var exists bool
+	for _, s := range b.rearHtmls {
+		if s == v {
+			exists = true
+			break
+		}
+	}
+	if !exists {
+		b.rearHtmls = append(b.rearHtmls, v)
+	}
+	r = b
+	return
+}
+
+func (b *PageHeadBuilder) MainStyles(htmlTag bool) (r string) {
+
+	if len(b.styles) == 0 {
+		return
+	}
+
+	body := bytes.NewBuffer(nil)
+	if htmlTag {
+		body.WriteString(`<style id="main_styles" type="text/css">`)
+		body.WriteString("\n")
+	}
+	body.WriteString(strings.Join(b.styles, "\n\n"))
+	if htmlTag {
+		body.WriteString("</style>\n")
+	}
+
+	return body.String()
+}
+
+func (b *PageHeadBuilder) MainScripts(htmlTag bool) (r string) {
+	if len(b.scripts) == 0 {
+		return
+	}
+
+	body := bytes.NewBuffer(nil)
+	if htmlTag {
+		body.WriteString("<script id=\"main_scripts\">\n")
+	}
+	body.WriteString(strings.Join(b.scripts, "\n\n"))
+	if htmlTag {
+		body.WriteString("</script>\n")
+	}
+	return body.String()
+}
+
+func (b *PageHeadBuilder) RealHTML() (r string) {
+	return strings.Join(b.rearHtmls, "\n")
+}
+
 func (b *PageHeadBuilder) Clear() (r *PageHeadBuilder) {
-	b.Nodes = []*html.Node{}
+	b.headNodes = []*html.Node{}
 	r = b
 	return
 }
@@ -86,7 +141,7 @@ func (b *PageHeadBuilder) HTML(v string) (r *PageHeadBuilder) {
 	// _ = n
 	n = n.FirstChild.FirstChild.FirstChild
 	for n != nil {
-		b.Nodes = append(b.Nodes, n)
+		b.headNodes = append(b.headNodes, n)
 		n = n.NextSibling
 	}
 	r = b
@@ -107,7 +162,7 @@ func haveAttr(key, val string, attrs []html.Attribute) (keyExists bool, keyValBo
 
 func (b *PageHeadBuilder) addCharsetViewPortIfMissing() {
 	var foundCharset, foundViewPort bool
-	for _, n := range b.Nodes {
+	for _, n := range b.headNodes {
 		if ok, _ := haveAttr("charset", "", n.Attr); ok {
 			foundCharset = true
 		}
@@ -126,7 +181,7 @@ func (b *PageHeadBuilder) addCharsetViewPortIfMissing() {
 func (b *PageHeadBuilder) String() string {
 	b.addCharsetViewPortIfMissing()
 	buf := bytes.NewBuffer(nil)
-	for _, n := range b.Nodes {
+	for _, n := range b.headNodes {
 		html.Render(buf, n)
 		buf.WriteString("\n")
 	}
@@ -160,5 +215,5 @@ func (b *PageHeadBuilder) addNode(atom atom.Atom, body string, attrs ...string) 
 		})
 	}
 
-	b.Nodes = append(b.Nodes, n)
+	b.headNodes = append(b.headNodes, n)
 }

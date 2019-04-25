@@ -220,35 +220,24 @@ func (p *PageBuilder) render(
 			panic(err)
 		}
 
-		scripts := strings.Join(ctx.Head.Scripts, "\n\n")
-		styles := strings.Join(ctx.Head.Styles, "\n\n")
-
 		if pr.JSONOnly || renderJSON {
 			serverSideData.Schema = string(schema)
-			serverSideData.Scripts = scripts
-			serverSideData.Styles = styles
+			serverSideData.Scripts = ctx.Head.MainScripts(false)
+			serverSideData.Styles = ctx.Head.MainStyles(false)
 		} else {
 			serverSideData.Schema = nil
 			serverSideData.Scripts = ""
 			serverSideData.Styles = ""
 		}
 
-		if len(styles) > 0 {
-			body.WriteString(`<style id="main_styles" type="text/css">`)
-			body.WriteString("\n")
-			body.WriteString(styles)
-			body.WriteString("</style>\n")
-		}
-
-		if len(scripts) > 0 {
-			body.WriteString("<script id=\"main_scripts\">\n")
-			body.WriteString(scripts)
-			body.WriteString("</script>\n")
-		}
+		body.WriteString(ctx.Head.MainStyles(true))
 
 		body.WriteString("<div id=\"app\">\n")
 		body.Write(schema)
 		body.WriteString("</div>\n")
+
+		body.WriteString(ctx.Head.RealHTML())
+		body.WriteString(ctx.Head.MainScripts(true))
 	}
 
 	// default page response state to ctx state if not set

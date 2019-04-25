@@ -418,14 +418,14 @@ var eventCases = []struct {
 		background-color: red;
 	}
 	</style>
+<div id="app">
+<div>hello</div></div>
 <script id="main_scripts">
 
 	function hello() {
 		console.log("hello")
 	}
 	</script>
-<div id="app">
-<div>hello</div></div>
 
 
 <script type="text/javascript">
