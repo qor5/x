@@ -10,7 +10,7 @@ import (
 type GridBuilder struct {
 	classNames     []string
 	children       []ui.HTMLComponent
-	styles         h.Styles
+	styles         *h.Styles
 	align          string
 	fixColumnWidth string
 	inner          bool
@@ -19,7 +19,7 @@ type GridBuilder struct {
 func Grid(cells ...ui.HTMLComponent) (r *GridBuilder) {
 	r = &GridBuilder{}
 	r.Children(cells...)
-	r.styles = h.Styles(map[string]string{})
+	r.styles = &h.Styles{}
 	return
 }
 

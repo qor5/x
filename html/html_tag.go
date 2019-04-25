@@ -202,17 +202,25 @@ func Text(text string) (r ui.HTMLComponent) {
 	return
 }
 
-type Styles map[string]string
-
-func (s Styles) String() string {
-	segs := []string{}
-	for k, v := range s {
-		segs = append(segs, fmt.Sprintf("%s:%s", k, v))
-	}
-	return strings.Join(segs, "; ")
+type Styles struct {
+	pairs [][]string
 }
 
-func (s Styles) Put(name, value string) (r Styles) {
-	s[name] = value
-	return
+func (s *Styles) String() string {
+	segs := []string{}
+	for _, v := range s.pairs {
+		segs = append(segs, fmt.Sprintf("%s:%s;", v[0], v[1]))
+	}
+	return strings.Join(segs, " ")
+}
+
+func (s *Styles) Put(name, value string) (r *Styles) {
+	for _, el := range s.pairs {
+		if el[0] == name {
+			return s
+		}
+	}
+
+	s.pairs = append(s.pairs, []string{name, value})
+	return s
 }
