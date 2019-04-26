@@ -181,7 +181,7 @@ function controlsOnInput(eventFuncId?: EventFuncID, fieldName?: string, evt?: an
 }
 
 function newVue() {
-	for (const registerComp of window.vueComps) {
+	for (const registerComp of (window.vueComps || [])) {
 		registerComp(Vue);
 	}
 	// console.log("window.vueComps", window.vueComps)
