@@ -61,8 +61,8 @@ func (p *PageBuilder) RefEventFunc(eventFuncId string, ef EventFunc) (key string
 type Component interface {
 }
 
-type JSONComponent interface {
-	MarshalJSON() ([]byte, error)
+type SchemaComponent interface {
+	MarshalSchema(ctx *EventContext) ([]byte, error)
 }
 
 type HTMLComponent interface {
@@ -76,9 +76,9 @@ func (s StringHTMLComponent) MarshalHTML(ctx *EventContext) (r []byte, err error
 	return
 }
 
-type StringComponentJSON string
+type StringSchemaComponent string
 
-func (s StringComponentJSON) MarshalJSON() (r []byte, err error) {
+func (s StringSchemaComponent) MarshalSchema(ctx *EventContext) (r []byte, err error) {
 	r = []byte(s)
 	return
 }
@@ -182,6 +182,19 @@ type ServerSideData struct {
 	Styles  string     `json:"styles,omitempty"`
 }
 
+func WithContext(ctx *EventContext, comp SchemaComponent) json.Marshaler {
+	return &withCtx{ctx, comp}
+}
+
+type withCtx struct {
+	ctx  *EventContext
+	body SchemaComponent
+}
+
+func (wc *withCtx) MarshalJSON() ([]byte, error) {
+	return wc.body.MarshalSchema(wc.ctx)
+}
+
 func (p *PageBuilder) render(
 	serverSideData *ServerSideData,
 	w http.ResponseWriter,
@@ -204,18 +217,20 @@ func (p *PageBuilder) render(
 	}
 	pager = &pr
 
-	// fmt.Println("eventFuncRefs count: ", len(p.eventFuncRefs))
-	serverSideData.Schema = pr.Schema
-
-	if serverSideData.Schema == nil {
+	if pager.Schema == nil {
 		panic("page's RenderFunc returns nil schema, use pr.Schema = root to set it")
+	}
+
+	// fmt.Println("eventFuncRefs count: ", len(p.eventFuncRefs))
+	if comp, ok := pr.Schema.(SchemaComponent); ok {
+		serverSideData.Schema = WithContext(ctx, comp)
 	}
 
 	body = bytes.NewBuffer(nil)
 
-	if HTMLComponent, ok := serverSideData.Schema.(HTMLComponent); ok {
+	if comp, ok := pr.Schema.(HTMLComponent); ok {
 		var schema []byte
-		schema, err = HTMLComponent.MarshalHTML(ctx)
+		schema, err = comp.MarshalHTML(ctx)
 		if err != nil {
 			panic(err)
 		}
@@ -419,11 +434,28 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 		er.Styles = ssd.Styles
 	}
 
+	eventResponseWithContext(ctx, &er)
+
 	err = json.NewEncoder(w).Encode(er)
 	if err != nil {
 		panic(err)
 	}
 	return
+}
+
+func eventResponseWithContext(ctx *EventContext, er *EventResponse) {
+	if comp, ok := er.Alert.(SchemaComponent); ok {
+		er.Alert = WithContext(ctx, comp)
+	}
+	if comp, ok := er.Confirm.(SchemaComponent); ok {
+		er.Confirm = WithContext(ctx, comp)
+	}
+	if comp, ok := er.Schema.(SchemaComponent); ok {
+		er.Schema = WithContext(ctx, comp)
+	}
+	if comp, ok := er.Dialog.(SchemaComponent); ok {
+		er.Dialog = WithContext(ctx, comp)
+	}
 }
 
 func (p *PageBuilder) NewPageState() interface{} {

@@ -93,7 +93,7 @@ var pageStateCases = []struct {
 	{
 		name:   "html",
 		state:  &userData,
-		schema: ui.StringComponentJSON("{}"),
+		schema: ui.StringSchemaComponent("{}"),
 		body: `
 {
 	"schema": {},
@@ -160,7 +160,7 @@ func TestPageState(t *testing.T) {
 	for _, c := range pageStateCases {
 		pb.RenderFunc(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 			ctx.State = c.state
-			pr.Schema = ui.StringComponentJSON("{}")
+			pr.Schema = ui.StringSchemaComponent("{}")
 			if c.schema != nil {
 				pr.Schema = c.schema
 			}
@@ -201,7 +201,7 @@ func runEvent(
 			renderChanger(ctx, &pr)
 		} else {
 			ctx.StateOrInit(&User{})
-			pr.Schema = ui.StringComponentJSON("{}")
+			pr.Schema = ui.StringSchemaComponent("{}")
 			pr.JSONOnly = true
 		}
 		return
@@ -315,7 +315,7 @@ func TestFileUpload(t *testing.T) {
 
 		ctx.Hub.RefEventFunc("uploadFile", uploadFile)
 
-		pr.Schema = ui.StringComponentJSON(fmt.Sprintf(`{"__text__": "%s"}`, string(data)))
+		pr.Schema = ui.StringSchemaComponent(fmt.Sprintf(`{"__text__": "%s"}`, string(data)))
 		pr.JSONOnly = true
 		return
 	})
