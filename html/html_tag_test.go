@@ -15,8 +15,8 @@ var htmltagCases = []struct {
 }{
 	{
 		name: "case 1",
-		tag: Tag("div").Children(
-			Tag("div").Text("Hello"),
+		tag: Div(
+			Div().Text("Hello"),
 		),
 		expected: `<div>
 <div>Hello</div>

@@ -39,29 +39,29 @@ func (b *CardBuilder) ActionIcons(icons ...ui.HTMLComponent) (r *CardBuilder) {
 
 func (b *CardBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	ctx.Head.PutStyle(cardstyles)
-	root := h.Tag("div").
+	root := h.Div().
 		ClassNames(append([]string{"mdc-card"}, b.classNames...)...).
 		Children(
-			h.Tag("div").ClassNames("mdc-card__primary-action").Attr("tabindex", "0").
+			h.Div().ClassNames("mdc-card__primary-action").Attr("tabindex", "0").
 				Children(
 					b.children...,
 				),
 		)
 
 	if len(b.actionButtons) > 0 || len(b.actionIcons) > 0 {
-		actions := h.Tag("div").ClassNames("mdc-card__actions")
+		actions := h.Div().ClassNames("mdc-card__actions")
 		root.AddChildren(actions)
 
 		if len(b.actionButtons) > 0 {
 			actions.AddChildren(
-				h.Tag("div").ClassNames("mdc-card__action-buttons").
+				h.Div().ClassNames("mdc-card__action-buttons").
 					Children(b.actionButtons...),
 			)
 		}
 
 		if len(b.actionIcons) > 0 {
 			actions.AddChildren(
-				h.Tag("div").ClassNames("mdc-card__action-icons").
+				h.Div().ClassNames("mdc-card__action-icons").
 					Children(b.actionIcons...),
 			)
 		}

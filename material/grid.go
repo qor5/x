@@ -96,7 +96,7 @@ func (b *GridBuilder) Children(comps ...ui.HTMLComponent) (r *GridBuilder) {
 func (b *GridBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	ctx.Head.PutStyle(gridcss)
 
-	inner := h.Tag("div").
+	inner := h.Div().
 		ClassNames("mdc-layout-grid__inner").
 		Children(b.children...)
 
@@ -104,7 +104,7 @@ func (b *GridBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 		return inner.MarshalHTML(ctx)
 	}
 
-	root := h.Tag("div").
+	root := h.Div().
 		ClassNames(append(b.classNames, "mdc-layout-grid", b.align, b.fixColumnWidth)...).
 		Style(b.styles.String()).
 		Children(inner)
@@ -151,7 +151,7 @@ func (b *CellBuilder) Children(comps ...ui.HTMLComponent) (r *CellBuilder) {
 }
 
 func (b *CellBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
-	root := h.Tag("div").
+	root := h.Div().
 		ClassNames(append(append(
 			b.classNames,
 			"mdc-layout-grid__cell",

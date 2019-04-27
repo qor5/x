@@ -198,7 +198,7 @@ func Div(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {
 }
 
 func Text(text string) (r ui.HTMLComponent) {
-	r = ui.StringHTMLComponent(html.EscapeString(text))
+	r = ui.RawHTML(html.EscapeString(text))
 	return
 }
 

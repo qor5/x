@@ -12,7 +12,7 @@ type mystate struct {
 func HelloButton(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	s := ctx.StateOrInit(&mystate{}).(*mystate)
 
-	pr.Schema = Tag("div").Children(
+	pr.Schema = Div(
 		Button("Hello").
 			OnClick(ctx.Hub, "reload", reload),
 		Tag("input").
@@ -20,7 +20,7 @@ func HelloButton(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 			Attr("type", "text").
 			FieldName("Message").
 			Attr("value", s.Message),
-		Tag("div").
+		Div().
 			Style("font-family: monospace;").
 			Text(s.Message),
 	)

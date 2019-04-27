@@ -64,13 +64,13 @@ func (b *TagsInputBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err erro
 		ClassNames("tagsInput").
 		Attr("v-slot", "{ parent }").
 		Children(
-			Tag("div").Children(
-				Tag("div").ClassNames("tagsInputSelected").Children(
+			Div(
+				Div().ClassNames("tagsInputSelected").Children(
 					selectedComps...,
 				),
 				Tag("button").Text("Toggle").Attr("v-on:click", "parent.toggle()"),
 			),
-			Tag("div").
+			Div().
 				ClassNames("tagsInputOptions").
 				Attr("v-bind:class", "{tagsInputOptionsOpen: parent.isOpen}").Children(
 				optionComps...,
@@ -120,11 +120,11 @@ func HelloCustomziedComponent(ctx *ui.EventContext) (pr ui.PageResponse, err err
 	for i := 1; i < 11; i++ {
 		opts = append(opts, &TagsInputOption{
 			Key:   fmt.Sprint(i),
-			Label: Tag("div").Text(fmt.Sprintf("label %d", i)),
+			Label: Div().Text(fmt.Sprintf("label %d", i)),
 		})
 	}
 
-	pr.Schema = Tag("div").Children(
+	pr.Schema = Div(
 		TagsInput().Selected([]string{"1", "2", "3"}).Options(opts...),
 		Button("Refresh").OnClick(ctx.Hub, "refresh", reload),
 	)
