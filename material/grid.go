@@ -13,7 +13,7 @@ type GridBuilder struct {
 	styles         *h.Styles
 	align          string
 	fixColumnWidth string
-	inner          bool
+	innerOnly      bool
 }
 
 func Grid(cells ...ui.HTMLComponent) (r *GridBuilder) {
@@ -48,7 +48,7 @@ func (b *GridBuilder) FixColumnWidth() (r *GridBuilder) {
 }
 
 func (b *GridBuilder) Inner() (r *GridBuilder) {
-	b.inner = true
+	b.innerOnly = true
 	return b
 }
 
@@ -96,18 +96,15 @@ func (b *GridBuilder) Children(comps ...ui.HTMLComponent) (r *GridBuilder) {
 func (b *GridBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	ctx.Head.PutStyle(gridcss)
 
-	inner := h.Div().
-		ClassNames("mdc-layout-grid__inner").
-		Children(b.children...)
+	inner := h.Div(b.children...).ClassNames("mdc-layout-grid__inner")
 
-	if b.inner {
+	if b.innerOnly {
 		return inner.MarshalHTML(ctx)
 	}
 
-	root := h.Div().
+	root := h.Div(inner).
 		ClassNames(append(b.classNames, "mdc-layout-grid", b.align, b.fixColumnWidth)...).
-		Style(b.styles.String()).
-		Children(inner)
+		Style(b.styles.String())
 
 	return root.MarshalHTML(ctx)
 }
@@ -151,13 +148,11 @@ func (b *CellBuilder) Children(comps ...ui.HTMLComponent) (r *CellBuilder) {
 }
 
 func (b *CellBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
-	root := h.Div().
+	root := h.Div(b.children...).
 		ClassNames(append(append(
 			b.classNames,
 			"mdc-layout-grid__cell",
-		), b.spans...)...).
-		Children(b.children...)
-
+		), b.spans...)...)
 	return root.MarshalHTML(ctx)
 }
 
