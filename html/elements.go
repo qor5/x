@@ -110,8 +110,8 @@ func Section(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {
 	return Tag("section").Children(children...)
 }
 
-func Pre(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {
-	return Tag("pre").Children(children...)
+func Pre(text string) (r *HTMLTagBuilder) {
+	return Tag("pre").Text(text)
 }
 
 func UL(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {

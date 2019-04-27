@@ -14,7 +14,7 @@ import (
 	"github.com/sunfmin/bran/examples/e03_hello_card"
 	"github.com/sunfmin/bran/examples/e04_hello_material_grid"
 	"github.com/sunfmin/bran/examples/e05_hello_customized_component"
-	h "github.com/sunfmin/bran/html"
+	. "github.com/sunfmin/bran/html"
 	m "github.com/sunfmin/bran/material"
 	ui "github.com/sunfmin/page"
 	"github.com/theplant/appkit/contexts"
@@ -38,12 +38,12 @@ func exampleLinks(prefix string, pages []pageItem) (comp ui.HTMLComponent) {
 	var links []ui.HTMLComponent
 	for _, p := range pages {
 		links = append(links,
-			h.Li(
-				h.A(p.Title()).Href(fmt.Sprintf("%s/%s/", prefix, p.url)),
+			Li(
+				A(p.Title()).Href(fmt.Sprintf("%s/%s/", prefix, p.url)),
 			),
 		)
 	}
-	comp = h.UL(links...)
+	comp = UL(links...)
 	return
 }
 
@@ -76,9 +76,7 @@ func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) 
 		}
 		if len(code) > 0 {
 			dacComps = append(dacComps,
-				h.Tag("pre").Style("font-family: monospace").Text(
-					code,
-				),
+				Pre(code).Style("font-family: monospace"),
 			)
 		}
 		ctx.Head.PutStyle(`
