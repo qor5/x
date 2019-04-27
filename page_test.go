@@ -93,7 +93,7 @@ var pageStateCases = []struct {
 	{
 		name:   "html",
 		state:  &userData,
-		schema: ui.StringSchemaComponent("{}"),
+		schema: ui.RawSchema("{}"),
 		body: `
 {
 	"schema": {},
@@ -114,7 +114,7 @@ var pageStateCases = []struct {
 	{
 		name:       "html component",
 		state:      &userData,
-		schema:     ui.StringHTMLComponent("<h1>Hello</h1>"),
+		schema:     ui.RawHTML("<h1>Hello</h1>"),
 		renderHTML: true,
 		body: `
 
@@ -160,7 +160,7 @@ func TestPageState(t *testing.T) {
 	for _, c := range pageStateCases {
 		pb.RenderFunc(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 			ctx.State = c.state
-			pr.Schema = ui.StringSchemaComponent("{}")
+			pr.Schema = ui.RawSchema("{}")
 			if c.schema != nil {
 				pr.Schema = c.schema
 			}
@@ -201,7 +201,7 @@ func runEvent(
 			renderChanger(ctx, &pr)
 		} else {
 			ctx.StateOrInit(&User{})
-			pr.Schema = ui.StringSchemaComponent("{}")
+			pr.Schema = ui.RawSchema("{}")
 			pr.JSONOnly = true
 		}
 		return
@@ -315,7 +315,7 @@ func TestFileUpload(t *testing.T) {
 
 		ctx.Hub.RefEventFunc("uploadFile", uploadFile)
 
-		pr.Schema = ui.StringSchemaComponent(fmt.Sprintf(`{"__text__": "%s"}`, string(data)))
+		pr.Schema = ui.RawSchema(fmt.Sprintf(`{"__text__": "%s"}`, string(data)))
 		pr.JSONOnly = true
 		return
 	})
@@ -380,7 +380,7 @@ var eventCases = []struct {
 	{
 		name: "case 1",
 		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
-			pr.Schema = ui.StringHTMLComponent("<h1>Hello</h1>")
+			pr.Schema = ui.RawHTML("<h1>Hello</h1>")
 		},
 		expectedEventResp: `
 {

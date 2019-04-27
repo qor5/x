@@ -69,16 +69,16 @@ type HTMLComponent interface {
 	MarshalHTML(ctx *EventContext) ([]byte, error)
 }
 
-type StringHTMLComponent string
+type RawHTML string
 
-func (s StringHTMLComponent) MarshalHTML(ctx *EventContext) (r []byte, err error) {
+func (s RawHTML) MarshalHTML(ctx *EventContext) (r []byte, err error) {
 	r = []byte(s)
 	return
 }
 
-type StringSchemaComponent string
+type RawSchema string
 
-func (s StringSchemaComponent) MarshalSchema(ctx *EventContext) (r []byte, err error) {
+func (s RawSchema) MarshalSchema(ctx *EventContext) (r []byte, err error) {
 	r = []byte(s)
 	return
 }
