@@ -38,14 +38,12 @@ func exampleLinks(prefix string, pages []pageItem) (comp ui.HTMLComponent) {
 	var links []ui.HTMLComponent
 	for _, p := range pages {
 		links = append(links,
-			h.Tag("li").Children(
-				h.Tag("a").
-					Attr("href", fmt.Sprintf("%s/%s/", prefix, p.url)).
-					Text(p.Title()),
+			h.Li(
+				h.A(p.Title()).Href(fmt.Sprintf("%s/%s/", prefix, p.url)),
 			),
 		)
 	}
-	comp = h.Tag("ul").Children(links...)
+	comp = h.UL(links...)
 	return
 }
 
