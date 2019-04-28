@@ -15,8 +15,7 @@ type CardBuilder struct {
 
 func (b *CardBuilder) ClassNames(names ...string) (r *CardBuilder) {
 	b.classNames = names
-	r = b
-	return
+	return b
 }
 
 func Card(children ...ui.HTMLComponent) (r *CardBuilder) {
@@ -27,14 +26,12 @@ func Card(children ...ui.HTMLComponent) (r *CardBuilder) {
 
 func (b *CardBuilder) ActionButtons(buttons ...ui.HTMLComponent) (r *CardBuilder) {
 	b.actionButtons = buttons
-	r = b
-	return
+	return b
 }
 
 func (b *CardBuilder) ActionIcons(icons ...ui.HTMLComponent) (r *CardBuilder) {
 	b.actionIcons = icons
-	r = b
-	return
+	return b
 }
 
 func (b *CardBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {

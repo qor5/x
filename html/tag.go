@@ -33,14 +33,17 @@ func Tag(tag string) (r *HTMLTagBuilder) {
 
 func (b *HTMLTagBuilder) Tag(v string) (r *HTMLTagBuilder) {
 	b.tag = v
-	r = b
-	return
+	return b
 }
 
 func (b *HTMLTagBuilder) Text(v string) (r *HTMLTagBuilder) {
 	b.text = v
-	r = b
-	return
+	return b
+}
+
+func (b *HTMLTagBuilder) Id(v string) (r *HTMLTagBuilder) {
+	b.Attr("id", v)
+	return b
 }
 
 func (b *HTMLTagBuilder) FieldName(v string) (r *HTMLTagBuilder) {
@@ -48,14 +51,12 @@ func (b *HTMLTagBuilder) FieldName(v string) (r *HTMLTagBuilder) {
 		b.fieldName = &v
 	}
 
-	r = b
-	return
+	return b
 }
 
 func (b *HTMLTagBuilder) Children(comps ...ui.HTMLComponent) (r *HTMLTagBuilder) {
 	b.children = comps
-	r = b
-	return
+	return b
 }
 
 func (b *HTMLTagBuilder) Attr(k string, v string) (r *HTMLTagBuilder) {
@@ -69,15 +70,16 @@ func (b *HTMLTagBuilder) Attr(k string, v string) (r *HTMLTagBuilder) {
 }
 
 func (b *HTMLTagBuilder) ClassNames(names ...string) (r *HTMLTagBuilder) {
-	b.classNames = names
-	r = b
-	return
+	b.classNames = []string{}
+	for _, n := range names {
+		b.classNames = append(b.classNames, strings.Split(n, " ")...)
+	}
+	return b
 }
 
 func (b *HTMLTagBuilder) Style(v string) (r *HTMLTagBuilder) {
 	b.Attr("style", v)
-	r = b
-	return
+	return b
 }
 
 func (b *HTMLTagBuilder) OnInput(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params ...string) (r *HTMLTagBuilder) {
@@ -87,8 +89,7 @@ func (b *HTMLTagBuilder) OnInput(hub ui.EventFuncHub, eventFuncId string, ef ui.
 		Params: params,
 	}
 
-	r = b
-	return
+	return b
 }
 
 func (b *HTMLTagBuilder) OnClick(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params ...string) (r *HTMLTagBuilder) {
@@ -104,20 +105,17 @@ func (b *HTMLTagBuilder) OnClick(hub ui.EventFuncHub, eventFuncId string, ef ui.
 	}
 
 	b.Attr("v-on:click", fmt.Sprintf("onclick(%s, $event)", string(jb)))
-	r = b
-	return
+	return b
 }
 
 func (b *HTMLTagBuilder) AddChildren(c ...ui.HTMLComponent) (r *HTMLTagBuilder) {
 	b.children = append(b.children, c...)
-	r = b
-	return
+	return b
 }
 
 func (b *HTMLTagBuilder) PrependChild(c ui.HTMLComponent) (r *HTMLTagBuilder) {
 	b.children = append([]ui.HTMLComponent{c}, b.children...)
-	r = b
-	return
+	return b
 }
 
 func (b *HTMLTagBuilder) setupChange() {

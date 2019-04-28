@@ -17,8 +17,7 @@ func Button(label string) (r *ButtonBuilder) {
 
 func (b *ButtonBuilder) OnClick(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params ...string) (r *ButtonBuilder) {
 	b.tag.OnClick(hub, eventFuncId, ef, params...)
-	r = b
-	return
+	return b
 }
 
 func (b *ButtonBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {

@@ -106,6 +106,10 @@ func P(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {
 	return Tag("p").Children(children...)
 }
 
+func I(text string) (r *HTMLTagBuilder) {
+	return Tag("i").Text(text)
+}
+
 func Section(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {
 	return Tag("section").Children(children...)
 }
@@ -143,6 +147,53 @@ func A(text string) (r *HTMLLinkBuilder) {
 
 func (b *HTMLLinkBuilder) Href(href string) (r *HTMLLinkBuilder) {
 	b.Attr("href", href)
+	return b
+}
+
+type HTMLFormBuilder struct {
+	HTMLTagBuilder
+}
+
+func Form(children ...ui.HTMLComponent) (r *HTMLFormBuilder) {
+	tag := Tag("form").Children(children...)
+	return &HTMLFormBuilder{
+		HTMLTagBuilder: *tag,
+	}
+}
+
+func (b *HTMLFormBuilder) Action(v string) (r *HTMLFormBuilder) {
+	b.Attr("action", v)
+	return b
+}
+
+func (b *HTMLFormBuilder) Method(v string) (r *HTMLFormBuilder) {
+	b.Attr("method", v)
+	return b
+}
+
+type HTMLInputBuilder struct {
+	HTMLTagBuilder
+}
+
+func Input(name string) (r *HTMLInputBuilder) {
+	tag := Tag("input").Attr("name", name)
+	return &HTMLInputBuilder{
+		HTMLTagBuilder: *tag,
+	}
+}
+
+func (b *HTMLInputBuilder) Type(v string) (r *HTMLInputBuilder) {
+	b.Attr("type", v)
+	return b
+}
+
+func (b *HTMLInputBuilder) Value(v string) (r *HTMLInputBuilder) {
+	b.Attr("value", v)
+	return b
+}
+
+func (b *HTMLInputBuilder) Placeholder(v string) (r *HTMLInputBuilder) {
+	b.Attr("placeholder", v)
 	return b
 }
 
