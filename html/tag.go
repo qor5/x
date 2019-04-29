@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"html"
 	"strings"
 
 	ui "github.com/sunfmin/page"
@@ -71,11 +72,11 @@ func (b *HTMLTagBuilder) Attr(k string, v string) (r *HTMLTagBuilder) {
 
 func (b *HTMLTagBuilder) ClassNames(names ...string) (r *HTMLTagBuilder) {
 	b.classNames = []string{}
-	b.addClassNames(names...)
+	b.AddClassNames(names...)
 	return b
 }
 
-func (b *HTMLTagBuilder) addClassNames(names ...string) {
+func (b *HTMLTagBuilder) AddClassNames(names ...string) (r *HTMLTagBuilder) {
 	for _, n := range names {
 		ins := strings.Split(n, " ")
 		for _, in := range ins {
@@ -85,13 +86,19 @@ func (b *HTMLTagBuilder) addClassNames(names ...string) {
 			}
 		}
 	}
+	return b
 }
 
 func (b *HTMLTagBuilder) AddClassNameIf(name string, add bool) (r *HTMLTagBuilder) {
 	if !add {
 		return b
 	}
-	b.addClassNames(name)
+	b.AddClassNames(name)
+	return b
+}
+
+func (b *HTMLTagBuilder) Title(v string) (r *HTMLTagBuilder) {
+	b.Attr("title", html.EscapeString(v))
 	return b
 }
 
