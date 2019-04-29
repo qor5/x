@@ -71,9 +71,27 @@ func (b *HTMLTagBuilder) Attr(k string, v string) (r *HTMLTagBuilder) {
 
 func (b *HTMLTagBuilder) ClassNames(names ...string) (r *HTMLTagBuilder) {
 	b.classNames = []string{}
+	b.addClassNames(names...)
+	return b
+}
+
+func (b *HTMLTagBuilder) addClassNames(names ...string) {
 	for _, n := range names {
-		b.classNames = append(b.classNames, strings.Split(n, " ")...)
+		ins := strings.Split(n, " ")
+		for _, in := range ins {
+			tin := strings.TrimSpace(in)
+			if len(tin) > 0 {
+				b.classNames = append(b.classNames, tin)
+			}
+		}
 	}
+}
+
+func (b *HTMLTagBuilder) AddClassNameIf(name string, add bool) (r *HTMLTagBuilder) {
+	if !add {
+		return b
+	}
+	b.addClassNames(name)
 	return b
 }
 
