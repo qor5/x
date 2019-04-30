@@ -1,7 +1,7 @@
 package html
 
 import (
-	ui "github.com/sunfmin/page"
+	ui "github.com/sunfmin/pagui"
 )
 
 type ButtonBuilder struct {

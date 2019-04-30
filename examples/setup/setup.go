@@ -16,7 +16,7 @@ import (
 	"github.com/sunfmin/bran/examples/e05_hello_customized_component"
 	. "github.com/sunfmin/bran/html"
 	m "github.com/sunfmin/bran/material"
-	ui "github.com/sunfmin/page"
+	ui "github.com/sunfmin/pagui"
 	"github.com/theplant/appkit/contexts"
 	"github.com/theplant/appkit/server"
 )

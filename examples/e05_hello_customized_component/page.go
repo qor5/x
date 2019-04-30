@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	. "github.com/sunfmin/bran/html"
-	ui "github.com/sunfmin/page"
+	ui "github.com/sunfmin/pagui"
 )
 
 type TagsInputBuilder struct {

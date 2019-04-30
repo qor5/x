@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	. "github.com/sunfmin/bran/html"
-	ui "github.com/sunfmin/page"
+	ui "github.com/sunfmin/pagui"
 	"github.com/theplant/testingutils"
 )
 

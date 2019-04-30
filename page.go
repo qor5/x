@@ -2,7 +2,7 @@ package bran
 
 import (
 	"github.com/gobuffalo/packr"
-	ui "github.com/sunfmin/page"
+	ui "github.com/sunfmin/pagui"
 )
 
 var corejsassetsbox = packr.NewBox("./corejs/dist/")

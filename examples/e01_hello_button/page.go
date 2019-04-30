@@ -2,7 +2,7 @@ package e01_hello_button
 
 import (
 	. "github.com/sunfmin/bran/html"
-	ui "github.com/sunfmin/page"
+	ui "github.com/sunfmin/pagui"
 )
 
 type mystate struct {

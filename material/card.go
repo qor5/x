@@ -2,7 +2,7 @@ package material
 
 import (
 	h "github.com/sunfmin/bran/html"
-	ui "github.com/sunfmin/page"
+	ui "github.com/sunfmin/pagui"
 )
 
 type CardBuilder struct {

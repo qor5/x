@@ -3,7 +3,7 @@ package html
 import (
 	"html"
 
-	ui "github.com/sunfmin/page"
+	ui "github.com/sunfmin/pagui"
 )
 
 func HTML(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {
