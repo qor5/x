@@ -58,31 +58,6 @@ func (p *PageBuilder) RefEventFunc(eventFuncId string, ef EventFunc) (key string
 	return
 }
 
-type Component interface {
-}
-
-type SchemaComponent interface {
-	MarshalSchema(ctx *EventContext) ([]byte, error)
-}
-
-type HTMLComponent interface {
-	MarshalHTML(ctx *EventContext) ([]byte, error)
-}
-
-type RawHTML string
-
-func (s RawHTML) MarshalHTML(ctx *EventContext) (r []byte, err error) {
-	r = []byte(s)
-	return
-}
-
-type RawSchema string
-
-func (s RawSchema) MarshalSchema(ctx *EventContext) (r []byte, err error) {
-	r = []byte(s)
-	return
-}
-
 type EventContext struct {
 	R     *http.Request
 	W     http.ResponseWriter
