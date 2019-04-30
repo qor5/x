@@ -14,6 +14,7 @@ import (
 
 	"github.com/go-playground/form"
 	"github.com/sunfmin/pagui/templates"
+	"github.com/sunfmin/pagui/ui"
 )
 
 type PageBuilder struct {
@@ -27,7 +28,7 @@ type PageBuilder struct {
 
 func (b *Builder) NewPage() (pb *PageBuilder) {
 	pb = &PageBuilder{}
-	pb.eventFuncRefs = make(map[string]EventFunc)
+	pb.eventFuncRefs = make(map[string]ui.EventFunc)
 	pb.b = b
 	return
 }
@@ -59,25 +60,25 @@ func (p *PageBuilder) RefEventFunc(eventFuncId string, ef ui.EventFunc) (key str
 }
 
 type eventBody struct {
-	EventFuncID EventFuncID `json:"eventFuncId,omitempty"`
-	Event       Event       `json:"event,omitempty"`
-	PageState   PageState   `json:"pageState,omitempty"`
+	EventFuncID ui.EventFuncID `json:"eventFuncId,omitempty"`
+	Event       ui.Event       `json:"event,omitempty"`
+	PageState   ui.PageState   `json:"pageState,omitempty"`
 }
 
 type ServerSideData struct {
-	Schema  Component  `json:"schema,omitempty"`
-	States  url.Values `json:"states,omitempty"`
-	Scripts string     `json:"scripts,omitempty"`
-	Styles  string     `json:"styles,omitempty"`
+	Schema  ui.Component `json:"schema,omitempty"`
+	States  url.Values   `json:"states,omitempty"`
+	Scripts string       `json:"scripts,omitempty"`
+	Styles  string       `json:"styles,omitempty"`
 }
 
-func WithContext(ctx *EventContext, comp SchemaComponent) json.Marshaler {
+func WithContext(ctx *ui.EventContext, comp ui.SchemaComponent) json.Marshaler {
 	return &withCtx{ctx, comp}
 }
 
 type withCtx struct {
-	ctx  *EventContext
-	body SchemaComponent
+	ctx  *ui.EventContext
+	body ui.SchemaComponent
 }
 
 func (wc *withCtx) MarshalJSON() ([]byte, error) {
@@ -88,18 +89,20 @@ func (p *PageBuilder) render(
 	serverSideData *ServerSideData,
 	w http.ResponseWriter,
 	r *http.Request,
-	ctx *EventContext,
+	ctx *ui.EventContext,
 	renderJSON bool,
-) (pager *PageResponse, body *bytes.Buffer) {
+) (pager *ui.PageResponse, body *bytes.Buffer, head *PageHeadBuilder) {
 
 	if p.pageRenderFunc == nil {
 		return
 	}
 
+	head = &PageHeadBuilder{}
+
 	ctx.Hub = p
 	ctx.R = r
 	ctx.W = w
-	ctx.Head = &PageHeadBuilder{}
+	ctx.Injector = head
 	pr, err := p.pageRenderFunc(ctx)
 	if err != nil {
 		panic(err)
@@ -111,13 +114,13 @@ func (p *PageBuilder) render(
 	}
 
 	// fmt.Println("eventFuncRefs count: ", len(p.eventFuncRefs))
-	if comp, ok := pr.Schema.(SchemaComponent); ok {
+	if comp, ok := pr.Schema.(ui.SchemaComponent); ok {
 		serverSideData.Schema = WithContext(ctx, comp)
 	}
 
 	body = bytes.NewBuffer(nil)
 
-	if comp, ok := pr.Schema.(HTMLComponent); ok {
+	if comp, ok := pr.Schema.(ui.HTMLComponent); ok {
 		var schema []byte
 		schema, err = comp.MarshalHTML(ctx)
 		if err != nil {
@@ -126,22 +129,22 @@ func (p *PageBuilder) render(
 
 		if pr.JSONOnly || renderJSON {
 			serverSideData.Schema = string(schema)
-			serverSideData.Scripts = ctx.Head.MainScripts(false)
-			serverSideData.Styles = ctx.Head.MainStyles(false)
+			serverSideData.Scripts = head.MainScripts(false)
+			serverSideData.Styles = head.MainStyles(false)
 		} else {
 			serverSideData.Schema = nil
 			serverSideData.Scripts = ""
 			serverSideData.Styles = ""
 		}
 
-		body.WriteString(ctx.Head.MainStyles(true))
+		body.WriteString(head.MainStyles(true))
 
 		body.WriteString("<div id=\"app\">\n")
 		body.Write(schema)
 		body.WriteString("</div>\n")
 
-		body.WriteString(ctx.Head.RealHTML())
-		body.WriteString(ctx.Head.MainScripts(true))
+		body.WriteString(head.RealHTML())
+		body.WriteString(head.MainScripts(true))
 	}
 
 	// default page response state to ctx state if not set
@@ -157,7 +160,7 @@ func (p *PageBuilder) render(
 	return
 }
 
-func encodePageState(pageState PageState) (pageStateType reflect.Type, values url.Values) {
+func encodePageState(pageState ui.PageState) (pageStateType reflect.Type, values url.Values) {
 	var cantEncode bool
 	pageStateType, cantEncode = getPageStateType(pageState)
 	if cantEncode {
@@ -177,8 +180,8 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	var serverSideData = &ServerSideData{}
-	ctx := new(EventContext)
-	pr, body := p.render(serverSideData, w, r, ctx, false)
+	ctx := new(ui.EventContext)
+	pr, body, head := p.render(serverSideData, w, r, ctx, false)
 
 	var serverSideDataJSON []byte
 	serverSideDataJSON, err = json.MarshalIndent(serverSideData, "", "\t")
@@ -194,7 +197,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	body.WriteString(templates.PageInitialization(string(serverSideDataJSON)))
 
 	var resp string
-	resp, err = p.b.GetLayoutMiddleFunc()(nil, ctx.Head)(r, body.String())
+	resp, err = p.b.GetLayoutMiddleFunc()(nil, head)(r, body.String())
 	if err != nil {
 		panic(err)
 	}
@@ -202,7 +205,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func getPageStateType(pageState PageState) (t reflect.Type, cantEncode bool) {
+func getPageStateType(pageState ui.PageState) (t reflect.Type, cantEncode bool) {
 	v := reflect.ValueOf(pageState)
 
 	if v.Kind() != reflect.Ptr {
@@ -272,11 +275,11 @@ func (p *PageBuilder) eventBodyFromRequest(r *http.Request) *eventBody {
 func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	// for server side restart and lost all the eventFuncs, but user keep clicking page without refresh page to call p.render to fill up eventFuncs
 
-	ctx := new(EventContext)
+	ctx := new(ui.EventContext)
 	ctx.R = r
 	ctx.W = w
 	ctx.Hub = p
-	ctx.Head = &PageHeadBuilder{}
+	ctx.Injector = &PageHeadBuilder{}
 
 	if len(p.eventFuncRefs) == 0 {
 		log.Println("Rerender because eventFuncs gone, might server restarted")
@@ -332,17 +335,17 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func eventResponseWithContext(ctx *EventContext, er *EventResponse) {
-	if comp, ok := er.Alert.(SchemaComponent); ok {
+func eventResponseWithContext(ctx *ui.EventContext, er *ui.EventResponse) {
+	if comp, ok := er.Alert.(ui.SchemaComponent); ok {
 		er.Alert = WithContext(ctx, comp)
 	}
-	if comp, ok := er.Confirm.(SchemaComponent); ok {
+	if comp, ok := er.Confirm.(ui.SchemaComponent); ok {
 		er.Confirm = WithContext(ctx, comp)
 	}
-	if comp, ok := er.Schema.(SchemaComponent); ok {
+	if comp, ok := er.Schema.(ui.SchemaComponent); ok {
 		er.Schema = WithContext(ctx, comp)
 	}
-	if comp, ok := er.Dialog.(SchemaComponent); ok {
+	if comp, ok := er.Dialog.(ui.SchemaComponent); ok {
 		er.Dialog = WithContext(ctx, comp)
 	}
 }

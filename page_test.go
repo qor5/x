@@ -10,7 +10,8 @@ import (
 
 	"github.com/theplant/testingutils"
 
-	ui "github.com/sunfmin/pagui"
+	"github.com/sunfmin/pagui"
+	"github.com/sunfmin/pagui/ui"
 )
 
 type User struct {
@@ -155,7 +156,7 @@ window.__serverSideData__={
 }
 
 func TestPageState(t *testing.T) {
-	pb := ui.New().NewPage()
+	pb := pagui.New().NewPage()
 
 	for _, c := range pageStateCases {
 		pb.RenderFunc(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
@@ -183,7 +184,7 @@ func runEvent(
 	renderChanger func(ctx *ui.EventContext, pr *ui.PageResponse),
 	eventFormChanger func(mw *multipart.Writer),
 ) (indexResp string, eventResp string) {
-	pb := ui.New().NewPage()
+	pb := pagui.New().NewPage()
 
 	var f = func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 		r.Reload = true
@@ -295,7 +296,7 @@ func TestFileUpload(t *testing.T) {
 		return
 	}
 
-	pb := ui.New().NewPage()
+	pb := pagui.New().NewPage()
 	pb.RenderFunc(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
 		s := ctx.StateOrInit(&mystate{}).(*mystate)
@@ -355,13 +356,13 @@ type DummyComp struct {
 
 func (dc *DummyComp) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	r = []byte("<div>hello</div>")
-	ctx.Head.PutScript(`
+	ctx.Injector.PutScript(`
 	function hello() {
 		console.log("hello")
 	}
 	`)
 
-	ctx.Head.PutStyle(`
+	ctx.Injector.PutStyle(`
 	div {
 		background-color: red;
 	}

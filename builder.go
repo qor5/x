@@ -26,22 +26,19 @@ func New() (b *Builder) {
 
 func (b *Builder) LayoutMiddleFn(mf LayoutMiddleFn) (r *Builder) {
 	b.layoutMiddleFunc = mf
-	r = b
-	return
+	return b
 }
 
 func (b *Builder) FrontDev(v bool) (r *Builder) {
 	b.frontDev = v
-	r = b
-	return
+	return b
 }
 
 type ComponentsPack string
 
 func (b *Builder) Prefix(prefix string) (r *Builder) {
 	b.prefix = prefix
-	r = b
-	return
+	return b
 }
 
 var startTime = time.Now()

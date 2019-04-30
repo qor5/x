@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/sunfmin/pagui/ui"
+
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -16,10 +18,9 @@ type PageHeadBuilder struct {
 	rearHtmls []string
 }
 
-func (b *PageHeadBuilder) Title(title string) (r *PageHeadBuilder) {
+func (b *PageHeadBuilder) Title(title string) (r ui.PageInjector) {
 	b.addNode(atom.Title, title)
-	r = b
-	return
+	return b
 }
 
 func (b *PageHeadBuilder) HasTitle() (r bool) {
@@ -31,19 +32,17 @@ func (b *PageHeadBuilder) HasTitle() (r bool) {
 	return
 }
 
-func (b *PageHeadBuilder) MetaNameContent(name, content string) (r *PageHeadBuilder) {
+func (b *PageHeadBuilder) MetaNameContent(name, content string) (r ui.PageInjector) {
 	b.Meta("name", name, "content", content)
-	r = b
-	return
+	return b
 }
 
-func (b *PageHeadBuilder) Meta(attrs ...string) (r *PageHeadBuilder) {
+func (b *PageHeadBuilder) Meta(attrs ...string) (r ui.PageInjector) {
 	b.addNode(atom.Meta, "", attrs...)
-	r = b
-	return
+	return b
 }
 
-func (b *PageHeadBuilder) PutScript(script string) (r *PageHeadBuilder) {
+func (b *PageHeadBuilder) PutScript(script string) (r ui.PageInjector) {
 	var exists bool
 	for _, s := range b.scripts {
 		if s == script {
@@ -54,11 +53,10 @@ func (b *PageHeadBuilder) PutScript(script string) (r *PageHeadBuilder) {
 	if !exists {
 		b.scripts = append(b.scripts, script)
 	}
-	r = b
-	return
+	return b
 }
 
-func (b *PageHeadBuilder) PutStyle(style string) (r *PageHeadBuilder) {
+func (b *PageHeadBuilder) PutStyle(style string) (r ui.PageInjector) {
 	var exists bool
 	for _, s := range b.styles {
 		if s == style {
@@ -69,11 +67,10 @@ func (b *PageHeadBuilder) PutStyle(style string) (r *PageHeadBuilder) {
 	if !exists {
 		b.styles = append(b.styles, style)
 	}
-	r = b
-	return
+	return b
 }
 
-func (b *PageHeadBuilder) PutRealHTML(v string) (r *PageHeadBuilder) {
+func (b *PageHeadBuilder) PutTailHTML(v string) (r ui.PageInjector) {
 	var exists bool
 	for _, s := range b.rearHtmls {
 		if s == v {
@@ -84,8 +81,7 @@ func (b *PageHeadBuilder) PutRealHTML(v string) (r *PageHeadBuilder) {
 	if !exists {
 		b.rearHtmls = append(b.rearHtmls, v)
 	}
-	r = b
-	return
+	return b
 }
 
 func (b *PageHeadBuilder) MainStyles(htmlTag bool) (r string) {
@@ -129,11 +125,10 @@ func (b *PageHeadBuilder) RealHTML() (r string) {
 
 func (b *PageHeadBuilder) Clear() (r *PageHeadBuilder) {
 	b.headNodes = []*html.Node{}
-	r = b
-	return
+	return b
 }
 
-func (b *PageHeadBuilder) HTML(v string) (r *PageHeadBuilder) {
+func (b *PageHeadBuilder) PutHeadHTML(v string) (r ui.PageInjector) {
 	n, err := html.Parse(strings.NewReader(v))
 	if err != nil {
 		panic(err)
@@ -144,8 +139,7 @@ func (b *PageHeadBuilder) HTML(v string) (r *PageHeadBuilder) {
 		b.headNodes = append(b.headNodes, n)
 		n = n.NextSibling
 	}
-	r = b
-	return
+	return b
 }
 
 func haveAttr(key, val string, attrs []html.Attribute) (keyExists bool, keyValBothExists bool) {
