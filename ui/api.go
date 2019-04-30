@@ -73,6 +73,10 @@ type EventFuncHub interface {
 	RefEventFunc(eventFuncId string, ef EventFunc) (key string)
 }
 
+type LayoutFn func(r *http.Request, body string) (output string, err error)
+
+type LayoutMiddleFn func(in LayoutFn, injector PageInjector) (out LayoutFn)
+
 /*
 	PushState: Whatever put into this, will do window.history.pushState to the current page url with
 	it as query string, for example: /my-page-url/?key=name&value=felix. and It also pass the query string along
@@ -115,6 +119,8 @@ type PageInjector interface {
 	PutStyle(style string)
 	PutHeadHTML(v string)
 	PutTailHTML(v string)
+
+	HeadString() string
 }
 
 func (ctx *EventContext) StateOrInit(v PageState) (r PageState) {

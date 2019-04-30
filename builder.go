@@ -11,19 +11,15 @@ import (
 )
 
 type Builder struct {
-	layoutMiddleFunc LayoutMiddleFn
+	layoutMiddleFunc ui.LayoutMiddleFn
 }
-
-type LayoutFn func(r *http.Request, body string) (output string, err error)
-
-type LayoutMiddleFn func(in LayoutFn, head *DefaultPageInjector) (out LayoutFn)
 
 func New() (b *Builder) {
 	b = new(Builder)
 	return
 }
 
-func (b *Builder) LayoutMiddleFn(mf LayoutMiddleFn) (r *Builder) {
+func (b *Builder) LayoutMiddleFn(mf ui.LayoutMiddleFn) (r *Builder) {
 	b.layoutMiddleFunc = mf
 	return b
 }
@@ -49,7 +45,7 @@ func (b *Builder) PacksHandler(contentType string, packs ...ComponentsPack) http
 	}
 }
 
-func (b *Builder) defaultLayoutMiddleFunc(in LayoutFn, head *DefaultPageInjector) (out LayoutFn) {
+func (b *Builder) defaultLayoutMiddleFunc(in ui.LayoutFn, head ui.PageInjector) (out ui.LayoutFn) {
 	return func(r *http.Request, body string) (output string, err error) {
 
 		root := h.HTML(
@@ -78,7 +74,7 @@ func (b *Builder) defaultLayoutMiddleFunc(in LayoutFn, head *DefaultPageInjector
 	}
 }
 
-func (b *Builder) GetLayoutMiddleFunc() (lm LayoutMiddleFn) {
+func (b *Builder) GetLayoutMiddleFunc() (lm ui.LayoutMiddleFn) {
 	if b.layoutMiddleFunc != nil {
 		return b.layoutMiddleFunc
 	}
