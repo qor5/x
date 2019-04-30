@@ -3,7 +3,7 @@ package e04_hello_material_grid
 import (
 	h "github.com/sunfmin/bran/html"
 	. "github.com/sunfmin/bran/material"
-	"github.com/sunfmin/pagui/ui"
+	"github.com/sunfmin/bran/ui"
 )
 
 func HelloGrid(ctx *ui.EventContext) (pr ui.PageResponse, err error) {

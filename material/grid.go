@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	h "github.com/sunfmin/bran/html"
-	"github.com/sunfmin/pagui/ui"
+	"github.com/sunfmin/bran/ui"
 )
 
 type GridBuilder struct {

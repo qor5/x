@@ -2,7 +2,7 @@ package e03_hello_card
 
 import (
 	. "github.com/sunfmin/bran/material"
-	"github.com/sunfmin/pagui/ui"
+	"github.com/sunfmin/bran/ui"
 )
 
 type mystate struct {

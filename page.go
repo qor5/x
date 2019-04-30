@@ -1,4 +1,4 @@
-package pagui
+package bran
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 
 	"github.com/go-playground/form"
 	h "github.com/sunfmin/bran/html"
-	"github.com/sunfmin/pagui/ui"
+	"github.com/sunfmin/bran/ui"
 )
 
 type PageBuilder struct {

@@ -1,4 +1,4 @@
-package pagui_test
+package bran_test
 
 import (
 	"strings"
@@ -6,15 +6,15 @@ import (
 
 	"github.com/theplant/testingutils"
 
-	ui "github.com/sunfmin/pagui"
+	"github.com/sunfmin/bran"
 )
 
 var cases = []struct {
-	operation func(b *ui.DefaultPageInjector)
+	operation func(b *bran.DefaultPageInjector)
 	expected  string
 }{
 	{
-		operation: func(b *ui.DefaultPageInjector) {
+		operation: func(b *bran.DefaultPageInjector) {
 			b.Title("Hello")
 		},
 		expected: `<title>Hello</title>
@@ -23,7 +23,7 @@ var cases = []struct {
 		`,
 	},
 	{
-		operation: func(b *ui.DefaultPageInjector) {
+		operation: func(b *bran.DefaultPageInjector) {
 			b.Title("Hello")
 			b.Meta("charset", "shiftjis")
 		},
@@ -33,7 +33,7 @@ var cases = []struct {
 `,
 	},
 	{
-		operation: func(b *ui.DefaultPageInjector) {
+		operation: func(b *bran.DefaultPageInjector) {
 			b.Title("Hello")
 			b.Meta("charset", "shiftjis")
 		},
@@ -43,7 +43,7 @@ var cases = []struct {
 `,
 	},
 	{
-		operation: func(b *ui.DefaultPageInjector) {
+		operation: func(b *bran.DefaultPageInjector) {
 			b.Title("Hello")
 			b.Meta("charset", "shiftjis")
 			b.Meta("charset", "utf8")
@@ -60,7 +60,7 @@ var cases = []struct {
 
 func TestDefaultPageInjector(t *testing.T) {
 	for _, c := range cases {
-		var b ui.DefaultPageInjector
+		var b bran.DefaultPageInjector
 		c.operation(&b)
 		diff := testingutils.PrettyJsonDiff(strings.TrimSpace(c.expected), strings.TrimSpace(b.HeadString()))
 		if len(diff) > 0 {

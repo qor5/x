@@ -7,7 +7,7 @@ import (
 	"html"
 	"strings"
 
-	"github.com/sunfmin/pagui/ui"
+	"github.com/sunfmin/bran/ui"
 )
 
 type HTMLTagBuilder struct {

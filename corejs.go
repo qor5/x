@@ -2,12 +2,11 @@ package bran
 
 import (
 	"github.com/gobuffalo/packr"
-	"github.com/sunfmin/pagui"
 )
 
 var corejsassetsbox = packr.NewBox("./corejs/dist/")
 
-func ComponentsPacks() []pagui.ComponentsPack {
+func ComponentsPacks() []ComponentsPack {
 	v, err := corejsassetsbox.FindString("js/chunk-vendors.js")
 	if err != nil {
 		panic(err)
@@ -18,5 +17,5 @@ func ComponentsPacks() []pagui.ComponentsPack {
 		panic(err)
 	}
 
-	return []pagui.ComponentsPack{pagui.ComponentsPack(v), pagui.ComponentsPack(r)}
+	return []ComponentsPack{ComponentsPack(v), ComponentsPack(r)}
 }

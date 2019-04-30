@@ -1,11 +1,11 @@
-package pagui
+package bran
 
 import (
 	"bytes"
 	"net/http"
 	"time"
 
-	"github.com/sunfmin/pagui/ui"
+	"github.com/sunfmin/bran/ui"
 
 	h "github.com/sunfmin/bran/html"
 )

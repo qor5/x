@@ -1,4 +1,4 @@
-package pagui_test
+package bran_test
 
 import (
 	"bytes"
@@ -10,8 +10,8 @@ import (
 
 	"github.com/theplant/testingutils"
 
-	"github.com/sunfmin/pagui"
-	"github.com/sunfmin/pagui/ui"
+	"github.com/sunfmin/bran"
+	"github.com/sunfmin/bran/ui"
 )
 
 type User struct {
@@ -150,7 +150,7 @@ window.__serverSideData__={
 }
 
 func TestPageState(t *testing.T) {
-	pb := pagui.New().NewPage()
+	pb := bran.New().NewPage()
 
 	for _, c := range pageStateCases {
 		pb.RenderFunc(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
@@ -178,7 +178,7 @@ func runEvent(
 	renderChanger func(ctx *ui.EventContext, pr *ui.PageResponse),
 	eventFormChanger func(mw *multipart.Writer),
 ) (indexResp string, eventResp string) {
-	pb := pagui.New().NewPage()
+	pb := bran.New().NewPage()
 
 	var f = func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 		r.Reload = true
@@ -290,7 +290,7 @@ func TestFileUpload(t *testing.T) {
 		return
 	}
 
-	pb := pagui.New().NewPage()
+	pb := bran.New().NewPage()
 	pb.RenderFunc(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
 		s := ctx.StateOrInit(&mystate{}).(*mystate)

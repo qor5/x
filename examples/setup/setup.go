@@ -16,8 +16,7 @@ import (
 	"github.com/sunfmin/bran/examples/e05_hello_customized_component"
 	. "github.com/sunfmin/bran/html"
 	m "github.com/sunfmin/bran/material"
-	"github.com/sunfmin/pagui"
-	"github.com/sunfmin/pagui/ui"
+	"github.com/sunfmin/bran/ui"
 	"github.com/theplant/appkit/contexts"
 	"github.com/theplant/appkit/server"
 )
@@ -114,7 +113,7 @@ func home(prefix string, pages []pageItem) http.HandlerFunc {
 }
 
 func Setup(prefix string) http.Handler {
-	ub := pagui.New()
+	ub := bran.New()
 
 	mux := http.NewServeMux()
 
@@ -154,7 +153,7 @@ func Setup(prefix string) http.Handler {
 	for _, p := range pages {
 		mux.Handle(
 			fmt.Sprintf("/%s/", p.url),
-			pagui.StripPrefix(
+			bran.StripPrefix(
 				fmt.Sprintf("/%s", p.url), mw(ub.NewPage().RenderFunc(layout(p.renderFunc, pages, prefix, p)).Handler()),
 			),
 			// mw(ub.NewPage().RenderFunc(layout(p.renderFunc, pages, prefix, p)).Handler()),
