@@ -102,8 +102,23 @@ func (b *HTMLTagBuilder) Title(v string) (r *HTMLTagBuilder) {
 	return b
 }
 
+func (b *HTMLTagBuilder) TabIndex(v int) (r *HTMLTagBuilder) {
+	b.Attr("tabindex", fmt.Sprint(v))
+	return b
+}
+
+func (b *HTMLTagBuilder) Role(v string) (r *HTMLTagBuilder) {
+	b.Attr("role", v)
+	return b
+}
+
 func (b *HTMLTagBuilder) Style(v string) (r *HTMLTagBuilder) {
 	b.Attr("style", v)
+	return b
+}
+
+func (b *HTMLTagBuilder) Disabled(v bool) (r *HTMLTagBuilder) {
+	b.Attr("disabled", fmt.Sprint(v))
 	return b
 }
 
