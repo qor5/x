@@ -13,7 +13,7 @@ import (
 	"github.com/sunfmin/reflectutils"
 
 	"github.com/go-playground/form"
-	"github.com/sunfmin/pagui/templates"
+	h "github.com/sunfmin/bran/html"
 	"github.com/sunfmin/pagui/ui"
 )
 
@@ -194,7 +194,16 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body.WriteString(templates.PageInitialization(string(serverSideDataJSON)))
+	serverSideDataScript := h.Script(fmt.Sprintf(`
+window.__serverSideData__=%s
+`, string(serverSideDataJSON)))
+
+	var b []byte
+	b, err = serverSideDataScript.MarshalHTML(ctx)
+	if err != nil {
+		panic(err)
+	}
+	body.Write(b)
 
 	var resp string
 	resp, err = p.b.GetLayoutMiddleFunc()(nil, head)(r, body.String())

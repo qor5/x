@@ -1,4 +1,3 @@
-//go:generate gorazor templates templates
 package pagui
 
 import (
@@ -6,13 +5,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sunfmin/pagui/templates"
+	"github.com/sunfmin/pagui/ui"
+
+	h "github.com/sunfmin/bran/html"
 )
 
 type Builder struct {
 	layoutMiddleFunc LayoutMiddleFn
-	frontDev         bool
-	prefix           string
 }
 
 type LayoutFn func(r *http.Request, body string) (output string, err error)
@@ -29,17 +28,7 @@ func (b *Builder) LayoutMiddleFn(mf LayoutMiddleFn) (r *Builder) {
 	return b
 }
 
-func (b *Builder) FrontDev(v bool) (r *Builder) {
-	b.frontDev = v
-	return b
-}
-
 type ComponentsPack string
-
-func (b *Builder) Prefix(prefix string) (r *Builder) {
-	b.prefix = prefix
-	return b
-}
 
 var startTime = time.Now()
 
@@ -62,7 +51,29 @@ func (b *Builder) PacksHandler(contentType string, packs ...ComponentsPack) http
 
 func (b *Builder) defaultLayoutMiddleFunc(in LayoutFn, head *PageHeadBuilder) (out LayoutFn) {
 	return func(r *http.Request, body string) (output string, err error) {
-		output = templates.App(b.frontDev, b.prefix, head.String(), body)
+
+		root := h.HTML(
+			h.Head(
+				ui.RawHTML(head.String()),
+			),
+			h.Body(
+				ui.RawHTML(body),
+			).Class("front"),
+		)
+
+		buf := bytes.NewBuffer(nil)
+		buf.WriteString("<!DOCTYPE html>\n")
+
+		var b []byte
+		ctx := new(ui.EventContext)
+		ctx.R = r
+		b, err = root.MarshalHTML(ctx)
+		if err != nil {
+			return
+		}
+		buf.Write(b)
+
+		output = buf.String()
 		return
 	}
 }

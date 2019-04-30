@@ -117,21 +117,16 @@ var pageStateCases = []struct {
 		state:      &userData,
 		schema:     ui.RawHTML("<h1>Hello</h1>"),
 		renderHTML: true,
-		body: `
-
-<!DOCTYPE html>
+		body: `<!DOCTYPE html>
 <html>
-	<head>
-	<meta charset="utf8"/>
+<head>
+<meta charset="utf8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-
-	</head>
-	<body class="front">
-	<div id="app">
+</head>
+<body class='front'>
+<div id="app">
 <h1>Hello</h1></div>
-
-
-<script type="text/javascript">
+<script type='text/javascript'>
 
 window.__serverSideData__={
 	"states": {
@@ -146,11 +141,10 @@ window.__serverSideData__={
 		]
 	}
 }
-
 </script>
-	<script type="text/javascript" src="/main.js"></script>
-	</body>
+</body>
 </html>
+
 `,
 	},
 }
@@ -403,17 +397,14 @@ var eventCases = []struct {
 	"styles": "\n\tdiv {\n\t\tbackground-color: red;\n\t}\n\t"
 }
 		`,
-		expectedIndexResp: `
-
-<!DOCTYPE html>
+		expectedIndexResp: `<!DOCTYPE html>
 <html>
-	<head>
-	<meta charset="utf8"/>
+<head>
+<meta charset="utf8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-
-	</head>
-	<body class="front">
-	<style id="main_styles" type="text/css">
+</head>
+<body class='front'>
+<style id="main_styles" type="text/css">
 
 	div {
 		background-color: red;
@@ -427,16 +418,13 @@ var eventCases = []struct {
 		console.log("hello")
 	}
 	</script>
-
-
-<script type="text/javascript">
+<script type='text/javascript'>
 
 window.__serverSideData__={}
-
 </script>
-	<script type="text/javascript" src="/main.js"></script>
-	</body>
+</body>
 </html>
+
 `,
 	},
 }
