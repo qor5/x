@@ -3,7 +3,7 @@ package e04_hello_material_grid
 import (
 	h "github.com/sunfmin/bran/html"
 	. "github.com/sunfmin/bran/material"
-	ui "github.com/sunfmin/pagui"
+	"github.com/sunfmin/pagui/ui"
 )
 
 func HelloGrid(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
@@ -114,7 +114,7 @@ func reload(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 }
 
 func styles(ctx *ui.EventContext) {
-	ctx.Head.PutStyle(`
+	ctx.Injector.PutStyle(`
       .demo-grid {
         background-color: #DDDDDD;
         margin-bottom: 32px;

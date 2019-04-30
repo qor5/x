@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	h "github.com/sunfmin/bran/html"
-	ui "github.com/sunfmin/pagui"
+	"github.com/sunfmin/pagui/ui"
 )
 
 type ButtonBuilder struct {
@@ -63,7 +63,7 @@ func (b *ButtonBuilder) Variant(v ButtonVariant) (r *ButtonBuilder) {
 }
 
 func (b *ButtonBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
-	ctx.Head.PutStyle(buttonstyle)
+	ctx.Injector.PutStyle(buttonstyle)
 	b.classNames = append(b.classNames, "mdc-button")
 	if b.inCard {
 		b.classNames = append(b.classNames, "mdc-card__action", "mdc-card__action--button")

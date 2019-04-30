@@ -6,7 +6,7 @@ import (
 
 	h "github.com/sunfmin/bran/html"
 	. "github.com/sunfmin/bran/material"
-	ui "github.com/sunfmin/pagui"
+	"github.com/sunfmin/pagui/ui"
 )
 
 func randText() string {

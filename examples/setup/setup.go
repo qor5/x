@@ -16,7 +16,8 @@ import (
 	"github.com/sunfmin/bran/examples/e05_hello_customized_component"
 	. "github.com/sunfmin/bran/html"
 	m "github.com/sunfmin/bran/material"
-	ui "github.com/sunfmin/pagui"
+	"github.com/sunfmin/pagui"
+	"github.com/sunfmin/pagui/ui"
 	"github.com/theplant/appkit/contexts"
 	"github.com/theplant/appkit/server"
 )
@@ -52,8 +53,8 @@ var exampleBox = packr.NewBox("../")
 func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) (out ui.PageRenderFunc) {
 	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
-		ctx.Head.Title(cp.Title())
-		ctx.Head.HTML(`
+		ctx.Injector.Title(cp.Title())
+		ctx.Injector.PutHeadHTML(`
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -79,7 +80,7 @@ func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) 
 				Pre(code).Style("font-family: monospace"),
 			)
 		}
-		ctx.Head.PutStyle(`
+		ctx.Injector.PutStyle(`
 			pre {
 				padding: 24px;
 				background-color: #eee;
@@ -105,7 +106,7 @@ func home(prefix string, pages []pageItem) http.HandlerFunc {
 }
 
 func Setup(prefix string) http.Handler {
-	ub := ui.New().Prefix(
+	ub := pagui.New().Prefix(
 		prefix + "/assets",
 	)
 
@@ -152,7 +153,7 @@ func Setup(prefix string) http.Handler {
 	for _, p := range pages {
 		mux.Handle(
 			fmt.Sprintf("/%s/", p.url),
-			ui.StripPrefix(
+			pagui.StripPrefix(
 				fmt.Sprintf("/%s", p.url), mw(ub.NewPage().RenderFunc(layout(p.renderFunc, pages, prefix, p)).Handler()),
 			),
 			// mw(ub.NewPage().RenderFunc(layout(p.renderFunc, pages, prefix, p)).Handler()),

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	. "github.com/sunfmin/bran/html"
-	ui "github.com/sunfmin/pagui"
+	"github.com/sunfmin/pagui/ui"
 )
 
 type TagsInputBuilder struct {
@@ -48,8 +48,8 @@ func contains(k string, in []string) bool {
 }
 
 func (b *TagsInputBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
-	ctx.Head.PutScript(tagsInputScript)
-	ctx.Head.PutStyle(tagsInputStyles)
+	ctx.Injector.PutScript(tagsInputScript)
+	ctx.Injector.PutStyle(tagsInputStyles)
 
 	selectedComps := []ui.HTMLComponent{}
 	optionComps := []ui.HTMLComponent{}

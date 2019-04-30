@@ -2,7 +2,7 @@ package material
 
 import (
 	h "github.com/sunfmin/bran/html"
-	ui "github.com/sunfmin/pagui"
+	"github.com/sunfmin/pagui/ui"
 )
 
 type CardBuilder struct {
@@ -35,7 +35,7 @@ func (b *CardBuilder) ActionIcons(icons ...ui.HTMLComponent) (r *CardBuilder) {
 }
 
 func (b *CardBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
-	ctx.Head.PutStyle(cardstyles)
+	ctx.Injector.PutStyle(cardstyles)
 	root := h.Div(
 		h.Div(b.children...).
 			Class("mdc-card__primary-action").

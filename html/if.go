@@ -1,7 +1,7 @@
 package html
 
 import (
-	ui "github.com/sunfmin/pagui"
+	"github.com/sunfmin/pagui/ui"
 )
 
 func If(v bool, yes ui.HTMLComponent, no ui.HTMLComponent) (r ui.HTMLComponent) {

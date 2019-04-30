@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	h "github.com/sunfmin/bran/html"
-	ui "github.com/sunfmin/pagui"
+	"github.com/sunfmin/pagui/ui"
 )
 
 type GridBuilder struct {
@@ -94,7 +94,7 @@ func (b *GridBuilder) Children(comps ...ui.HTMLComponent) (r *GridBuilder) {
 }
 
 func (b *GridBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
-	ctx.Head.PutStyle(gridcss)
+	ctx.Injector.PutStyle(gridcss)
 
 	inner := h.Div(b.children...).Class("mdc-layout-grid__inner")
 
