@@ -72,19 +72,6 @@ type ServerSideData struct {
 	Styles  string      `json:"styles,omitempty"`
 }
 
-func WithContext(ctx *ui.EventContext, comp ui.SchemaComponent) json.Marshaler {
-	return &withCtx{ctx, comp}
-}
-
-type withCtx struct {
-	ctx  *ui.EventContext
-	body ui.SchemaComponent
-}
-
-func (wc *withCtx) MarshalJSON() ([]byte, error) {
-	return wc.body.MarshalSchema(wc.ctx)
-}
-
 func (p *PageBuilder) render(
 	serverSideData *ServerSideData,
 	w http.ResponseWriter,
@@ -354,16 +341,16 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 
 func eventResponseWithContext(ctx *ui.EventContext, er *ui.EventResponse) {
 	if comp, ok := er.Alert.(ui.SchemaComponent); ok {
-		er.Alert = WithContext(ctx, comp)
+		er.Alert = ui.WithContext(ctx, comp)
 	}
 	if comp, ok := er.Confirm.(ui.SchemaComponent); ok {
-		er.Confirm = WithContext(ctx, comp)
+		er.Confirm = ui.WithContext(ctx, comp)
 	}
 	if comp, ok := er.Schema.(ui.SchemaComponent); ok {
-		er.Schema = WithContext(ctx, comp)
+		er.Schema = ui.WithContext(ctx, comp)
 	}
 	if comp, ok := er.Dialog.(ui.SchemaComponent); ok {
-		er.Dialog = WithContext(ctx, comp)
+		er.Dialog = ui.WithContext(ctx, comp)
 	}
 }
 

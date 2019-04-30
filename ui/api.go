@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 
@@ -136,4 +137,17 @@ func (ctx *EventContext) SubStateOrInit(reflectPath string, v interface{}) (r in
 	}
 
 	return
+}
+
+func WithContext(ctx *EventContext, comp SchemaComponent) json.Marshaler {
+	return &withCtx{ctx, comp}
+}
+
+type withCtx struct {
+	ctx  *EventContext
+	body SchemaComponent
+}
+
+func (wc *withCtx) MarshalJSON() ([]byte, error) {
+	return wc.body.MarshalSchema(wc.ctx)
 }
