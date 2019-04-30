@@ -216,3 +216,20 @@ func (b *HTMLMetaBuilder) Content(content string) (r *HTMLMetaBuilder) {
 func Text(text string) (r ui.HTMLComponent) {
 	return ui.RawHTML(html.EscapeString(text))
 }
+
+type ButtonBuilder struct {
+	HTMLTagBuilder
+}
+
+func Button(label string) (r *ButtonBuilder) {
+	tag := Tag("button").Text(label)
+	r = &ButtonBuilder{
+		HTMLTagBuilder: *tag,
+	}
+	return
+}
+
+func (b *ButtonBuilder) Type(v string) (r *ButtonBuilder) {
+	b.Attr("type", v)
+	return b
+}
