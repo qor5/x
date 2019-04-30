@@ -11,19 +11,19 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-type PageHeadBuilder struct {
+type DefaultPageInjector struct {
 	headNodes []*html.Node
 	scripts   []string
 	styles    []string
 	rearHtmls []string
 }
 
-func (b *PageHeadBuilder) Title(title string) (r ui.PageInjector) {
+func (b *DefaultPageInjector) Title(title string) (r ui.PageInjector) {
 	b.addNode(atom.Title, title)
 	return b
 }
 
-func (b *PageHeadBuilder) HasTitle() (r bool) {
+func (b *DefaultPageInjector) HasTitle() (r bool) {
 	for _, n := range b.headNodes {
 		if n.Type == html.ElementNode && n.Data == "title" {
 			return true
@@ -32,17 +32,17 @@ func (b *PageHeadBuilder) HasTitle() (r bool) {
 	return
 }
 
-func (b *PageHeadBuilder) MetaNameContent(name, content string) (r ui.PageInjector) {
+func (b *DefaultPageInjector) MetaNameContent(name, content string) (r ui.PageInjector) {
 	b.Meta("name", name, "content", content)
 	return b
 }
 
-func (b *PageHeadBuilder) Meta(attrs ...string) (r ui.PageInjector) {
+func (b *DefaultPageInjector) Meta(attrs ...string) (r ui.PageInjector) {
 	b.addNode(atom.Meta, "", attrs...)
 	return b
 }
 
-func (b *PageHeadBuilder) PutScript(script string) (r ui.PageInjector) {
+func (b *DefaultPageInjector) PutScript(script string) (r ui.PageInjector) {
 	var exists bool
 	for _, s := range b.scripts {
 		if s == script {
@@ -56,7 +56,7 @@ func (b *PageHeadBuilder) PutScript(script string) (r ui.PageInjector) {
 	return b
 }
 
-func (b *PageHeadBuilder) PutStyle(style string) (r ui.PageInjector) {
+func (b *DefaultPageInjector) PutStyle(style string) (r ui.PageInjector) {
 	var exists bool
 	for _, s := range b.styles {
 		if s == style {
@@ -70,7 +70,7 @@ func (b *PageHeadBuilder) PutStyle(style string) (r ui.PageInjector) {
 	return b
 }
 
-func (b *PageHeadBuilder) PutTailHTML(v string) (r ui.PageInjector) {
+func (b *DefaultPageInjector) PutTailHTML(v string) (r ui.PageInjector) {
 	var exists bool
 	for _, s := range b.rearHtmls {
 		if s == v {
@@ -84,7 +84,7 @@ func (b *PageHeadBuilder) PutTailHTML(v string) (r ui.PageInjector) {
 	return b
 }
 
-func (b *PageHeadBuilder) MainStyles(htmlTag bool) (r string) {
+func (b *DefaultPageInjector) MainStyles(htmlTag bool) (r string) {
 
 	if len(b.styles) == 0 {
 		return
@@ -103,7 +103,7 @@ func (b *PageHeadBuilder) MainStyles(htmlTag bool) (r string) {
 	return body.String()
 }
 
-func (b *PageHeadBuilder) MainScripts(htmlTag bool) (r string) {
+func (b *DefaultPageInjector) MainScripts(htmlTag bool) (r string) {
 	if len(b.scripts) == 0 {
 		return
 	}
@@ -119,16 +119,16 @@ func (b *PageHeadBuilder) MainScripts(htmlTag bool) (r string) {
 	return body.String()
 }
 
-func (b *PageHeadBuilder) RealHTML() (r string) {
+func (b *DefaultPageInjector) RealHTML() (r string) {
 	return strings.Join(b.rearHtmls, "\n")
 }
 
-func (b *PageHeadBuilder) Clear() (r *PageHeadBuilder) {
+func (b *DefaultPageInjector) Clear() (r *DefaultPageInjector) {
 	b.headNodes = []*html.Node{}
 	return b
 }
 
-func (b *PageHeadBuilder) PutHeadHTML(v string) (r ui.PageInjector) {
+func (b *DefaultPageInjector) PutHeadHTML(v string) (r ui.PageInjector) {
 	n, err := html.Parse(strings.NewReader(v))
 	if err != nil {
 		panic(err)
@@ -154,7 +154,7 @@ func haveAttr(key, val string, attrs []html.Attribute) (keyExists bool, keyValBo
 	return
 }
 
-func (b *PageHeadBuilder) addCharsetViewPortIfMissing() {
+func (b *DefaultPageInjector) addCharsetViewPortIfMissing() {
 	var foundCharset, foundViewPort bool
 	for _, n := range b.headNodes {
 		if ok, _ := haveAttr("charset", "", n.Attr); ok {
@@ -172,7 +172,7 @@ func (b *PageHeadBuilder) addCharsetViewPortIfMissing() {
 	}
 }
 
-func (b *PageHeadBuilder) String() string {
+func (b *DefaultPageInjector) String() string {
 	b.addCharsetViewPortIfMissing()
 	buf := bytes.NewBuffer(nil)
 	for _, n := range b.headNodes {
@@ -182,7 +182,7 @@ func (b *PageHeadBuilder) String() string {
 	return buf.String()
 }
 
-func (b *PageHeadBuilder) addNode(atom atom.Atom, body string, attrs ...string) {
+func (b *DefaultPageInjector) addNode(atom atom.Atom, body string, attrs ...string) {
 	l := len(attrs)
 	if l%2 != 0 {
 		panic(fmt.Sprintf("attrs should be pairs: %+v, length: %d", attrs, l))

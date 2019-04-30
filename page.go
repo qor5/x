@@ -91,13 +91,13 @@ func (p *PageBuilder) render(
 	r *http.Request,
 	ctx *ui.EventContext,
 	renderJSON bool,
-) (pager *ui.PageResponse, body *bytes.Buffer, head *PageHeadBuilder) {
+) (pager *ui.PageResponse, body *bytes.Buffer, head *DefaultPageInjector) {
 
 	if p.pageRenderFunc == nil {
 		return
 	}
 
-	head = &PageHeadBuilder{}
+	head = &DefaultPageInjector{}
 
 	ctx.Hub = p
 	ctx.R = r
@@ -288,7 +288,7 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	ctx.R = r
 	ctx.W = w
 	ctx.Hub = p
-	ctx.Injector = &PageHeadBuilder{}
+	ctx.Injector = &DefaultPageInjector{}
 
 	if len(p.eventFuncRefs) == 0 {
 		log.Println("Rerender because eventFuncs gone, might server restarted")

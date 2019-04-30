@@ -10,11 +10,11 @@ import (
 )
 
 var cases = []struct {
-	operation func(b *ui.PageHeadBuilder)
+	operation func(b *ui.DefaultPageInjector)
 	expected  string
 }{
 	{
-		operation: func(b *ui.PageHeadBuilder) {
+		operation: func(b *ui.DefaultPageInjector) {
 			b.Title("Hello")
 		},
 		expected: `<title>Hello</title>
@@ -23,7 +23,7 @@ var cases = []struct {
 		`,
 	},
 	{
-		operation: func(b *ui.PageHeadBuilder) {
+		operation: func(b *ui.DefaultPageInjector) {
 			b.Title("Hello").Meta("charset", "shiftjis")
 		},
 		expected: `<title>Hello</title>
@@ -32,7 +32,7 @@ var cases = []struct {
 `,
 	},
 	{
-		operation: func(b *ui.PageHeadBuilder) {
+		operation: func(b *ui.DefaultPageInjector) {
 			b.Title("Hello").Meta("charset", "shiftjis")
 		},
 		expected: `<title>Hello</title>
@@ -41,7 +41,7 @@ var cases = []struct {
 `,
 	},
 	{
-		operation: func(b *ui.PageHeadBuilder) {
+		operation: func(b *ui.DefaultPageInjector) {
 			b.Title("Hello").Meta("charset", "shiftjis").Meta("charset", "utf8").MetaNameContent("keywords", "Hello")
 		},
 		expected: `<title>Hello</title>
@@ -53,9 +53,9 @@ var cases = []struct {
 	},
 }
 
-func TestPageHeadBuilder(t *testing.T) {
+func TestDefaultPageInjector(t *testing.T) {
 	for _, c := range cases {
-		var b ui.PageHeadBuilder
+		var b ui.DefaultPageInjector
 		c.operation(&b)
 		diff := testingutils.PrettyJsonDiff(strings.TrimSpace(c.expected), strings.TrimSpace(b.String()))
 		if len(diff) > 0 {
