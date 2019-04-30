@@ -10,98 +10,98 @@ func HelloGrid(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
 	pr.Schema = h.Div(
 		h.Div().Text("Grid of default wide (4 columns) items").
-			ClassNames("demo-grid-legend"),
+			Class("demo-grid-legend"),
 		Grid(
-			Cell(h.Text("1")).ClassNames("demo-cell"),
-			Cell(h.Text("2")).ClassNames("demo-cell"),
-			Cell(h.Text("3")).ClassNames("demo-cell"),
-		).ClassNames("demo-grid"),
+			Cell(h.Text("1")).Class("demo-cell"),
+			Cell(h.Text("2")).Class("demo-cell"),
+			Cell(h.Text("3")).Class("demo-cell"),
+		).Class("demo-grid"),
 
 		h.Div().Text("Grid of 1 column wide items").
-			ClassNames("demo-grid-legend"),
+			Class("demo-grid-legend"),
 		Grid(
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-		).ClassNames("demo-grid"),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+		).Class("demo-grid"),
 
 		h.Div().Text("Grid of differently sized items").
-			ClassNames("demo-grid-legend"),
+			Class("demo-grid-legend"),
 		Grid(
-			Cell(h.Text("6")).ClassNames("demo-cell").Span(6, ScreenAll),
-			Cell(h.Text("4")).ClassNames("demo-cell").Span(4, ScreenAll),
-			Cell(h.Text("2")).ClassNames("demo-cell").Span(2, ScreenAll),
-		).ClassNames("demo-grid").Margin(12, ScreenAll),
+			Cell(h.Text("6")).Class("demo-cell").Span(6, ScreenAll),
+			Cell(h.Text("4")).Class("demo-cell").Span(4, ScreenAll),
+			Cell(h.Text("2")).Class("demo-cell").Span(2, ScreenAll),
+		).Class("demo-grid").Margin(12, ScreenAll),
 
 		h.Div().Text("Grid of items with tweaks at different screen sizes").
-			ClassNames("demo-grid-legend"),
+			Class("demo-grid-legend"),
 		Grid(
-			Cell(h.Text("6 (8 tablet)")).ClassNames("demo-cell").
+			Cell(h.Text("6 (8 tablet)")).Class("demo-cell").
 				Span(6, ScreenAll).Span(8, ScreenTablet),
-			Cell(h.Text("4 (6 tablet)")).ClassNames("demo-cell").
+			Cell(h.Text("4 (6 tablet)")).Class("demo-cell").
 				Span(4, ScreenAll).Span(4, ScreenTablet),
-			Cell(h.Text("2 (4 phone)")).ClassNames("demo-cell").
+			Cell(h.Text("2 (4 phone)")).Class("demo-cell").
 				Span(2, ScreenAll).Span(4, ScreenPhone),
-		).ClassNames("demo-grid"),
+		).Class("demo-grid"),
 
 		h.Div().Text("Grid nested within parent grid cell").
-			ClassNames("demo-grid-legend"),
+			Class("demo-grid-legend"),
 		Grid(
 			Cell(
 				Grid(
-					Cell(h.Tag("span").Text("Child 4")).ClassNames("demo-child-cell", "demo-cell"),
-					Cell(h.Tag("span").Text("Child 4")).ClassNames("demo-child-cell", "demo-cell"),
-					Cell(h.Tag("span").Text("Child 4")).ClassNames("demo-child-cell", "demo-cell"),
+					Cell(h.Tag("span").Text("Child 4")).Class("demo-child-cell", "demo-cell"),
+					Cell(h.Tag("span").Text("Child 4")).Class("demo-child-cell", "demo-cell"),
+					Cell(h.Tag("span").Text("Child 4")).Class("demo-child-cell", "demo-cell"),
 				).Inner(),
 				h.Tag("span").Text("Parent 4"),
-			).ClassNames("demo-parent-cell").
+			).Class("demo-parent-cell").
 				Span(4, ScreenAll),
-			Cell(h.Text("4")).ClassNames("demo-cell").
+			Cell(h.Text("4")).Class("demo-cell").
 				Span(4, ScreenAll),
-			Cell(h.Text("4")).ClassNames("demo-cell").
+			Cell(h.Text("4")).Class("demo-cell").
 				Span(4, ScreenAll),
-		).ClassNames("demo-grid"),
+		).Class("demo-grid"),
 
 		h.Div().Text("Grid with max width (1280px) and center alignment by default").
-			ClassNames("demo-grid-legend"),
+			Class("demo-grid-legend"),
 		Grid(
-			Cell(h.Text("1")).ClassNames("demo-cell"),
-			Cell(h.Text("2")).ClassNames("demo-cell"),
-			Cell(h.Text("3")).ClassNames("demo-cell"),
-		).ClassNames("demo-grid", "max-width"),
+			Cell(h.Text("1")).Class("demo-cell"),
+			Cell(h.Text("2")).Class("demo-cell"),
+			Cell(h.Text("3")).Class("demo-cell"),
+		).Class("demo-grid", "max-width"),
 
 		h.Div().Text("Grid with max width (1280px) and left alignment").
-			ClassNames("demo-grid-legend"),
+			Class("demo-grid-legend"),
 		Grid(
-			Cell(h.Text("1")).ClassNames("demo-cell"),
-			Cell(h.Text("2")).ClassNames("demo-cell"),
-			Cell(h.Text("3")).ClassNames("demo-cell"),
-		).ClassNames("demo-grid", "max-width").AlignLeft(),
+			Cell(h.Text("1")).Class("demo-cell"),
+			Cell(h.Text("2")).Class("demo-cell"),
+			Cell(h.Text("3")).Class("demo-cell"),
+		).Class("demo-grid", "max-width").AlignLeft(),
 
 		h.Div().Text("Fixed column width layout grid and center alignment by default").
-			ClassNames("demo-grid-legend"),
+			Class("demo-grid-legend"),
 		Grid(
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("2")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("3")).ClassNames("demo-cell").Span(1, ScreenAll),
-		).ClassNames("demo-grid", "max-width").FixColumnWidth(),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("2")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("3")).Class("demo-cell").Span(1, ScreenAll),
+		).Class("demo-grid", "max-width").FixColumnWidth(),
 
 		h.Div().Text("Fixed column width layout grid and right alignment").
-			ClassNames("demo-grid-legend"),
+			Class("demo-grid-legend"),
 		Grid(
-			Cell(h.Text("1")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("2")).ClassNames("demo-cell").Span(1, ScreenAll),
-			Cell(h.Text("3")).ClassNames("demo-cell").Span(1, ScreenAll),
-		).ClassNames("demo-grid", "max-width").FixColumnWidth().AlignRight(),
+			Cell(h.Text("1")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("2")).Class("demo-cell").Span(1, ScreenAll),
+			Cell(h.Text("3")).Class("demo-cell").Span(1, ScreenAll),
+		).Class("demo-grid", "max-width").FixColumnWidth().AlignRight(),
 	)
 
 	styles(ctx)

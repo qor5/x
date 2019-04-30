@@ -32,7 +32,7 @@ const (
 	ScreenPhone   Screen = "phone"
 )
 
-func (b *GridBuilder) ClassNames(names ...string) (r *GridBuilder) {
+func (b *GridBuilder) Class(names ...string) (r *GridBuilder) {
 	b.classNames = names
 	return b
 }
@@ -96,14 +96,14 @@ func (b *GridBuilder) Children(comps ...ui.HTMLComponent) (r *GridBuilder) {
 func (b *GridBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	ctx.Head.PutStyle(gridcss)
 
-	inner := h.Div(b.children...).ClassNames("mdc-layout-grid__inner")
+	inner := h.Div(b.children...).Class("mdc-layout-grid__inner")
 
 	if b.innerOnly {
 		return inner.MarshalHTML(ctx)
 	}
 
 	root := h.Div(inner).
-		ClassNames(append(b.classNames, "mdc-layout-grid", b.align, b.fixColumnWidth)...).
+		Class(append(b.classNames, "mdc-layout-grid", b.align, b.fixColumnWidth)...).
 		Style(b.styles.String())
 
 	return root.MarshalHTML(ctx)
@@ -121,7 +121,7 @@ func Cell(children ...ui.HTMLComponent) (r *CellBuilder) {
 	return
 }
 
-func (b *CellBuilder) ClassNames(names ...string) (r *CellBuilder) {
+func (b *CellBuilder) Class(names ...string) (r *CellBuilder) {
 	b.classNames = names
 	return b
 }
@@ -149,7 +149,7 @@ func (b *CellBuilder) Children(comps ...ui.HTMLComponent) (r *CellBuilder) {
 
 func (b *CellBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	root := h.Div(b.children...).
-		ClassNames(append(append(
+		Class(append(append(
 			b.classNames,
 			"mdc-layout-grid__cell",
 		), b.spans...)...)

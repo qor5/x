@@ -13,7 +13,7 @@ type CardBuilder struct {
 	actionIcons   []ui.HTMLComponent
 }
 
-func (b *CardBuilder) ClassNames(names ...string) (r *CardBuilder) {
+func (b *CardBuilder) Class(names ...string) (r *CardBuilder) {
 	b.classNames = names
 	return b
 }
@@ -38,24 +38,24 @@ func (b *CardBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	ctx.Head.PutStyle(cardstyles)
 	root := h.Div(
 		h.Div(b.children...).
-			ClassNames("mdc-card__primary-action").
+			Class("mdc-card__primary-action").
 			Attr("tabindex", "0"),
-	).ClassNames(append([]string{"mdc-card"}, b.classNames...)...)
+	).Class(append([]string{"mdc-card"}, b.classNames...)...)
 
 	if len(b.actionButtons) > 0 || len(b.actionIcons) > 0 {
-		actions := h.Div().ClassNames("mdc-card__actions")
+		actions := h.Div().Class("mdc-card__actions")
 		root.AddChildren(actions)
 
 		if len(b.actionButtons) > 0 {
 			actions.AddChildren(
-				h.Div().ClassNames("mdc-card__action-buttons").
+				h.Div().Class("mdc-card__action-buttons").
 					Children(b.actionButtons...),
 			)
 		}
 
 		if len(b.actionIcons) > 0 {
 			actions.AddChildren(
-				h.Div().ClassNames("mdc-card__action-icons").
+				h.Div().Class("mdc-card__action-icons").
 					Children(b.actionIcons...),
 			)
 		}

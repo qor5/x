@@ -23,7 +23,7 @@ func Button(text string) (r *ButtonBuilder) {
 	return
 }
 
-func (b *ButtonBuilder) ClassNames(names ...string) (r *ButtonBuilder) {
+func (b *ButtonBuilder) Class(names ...string) (r *ButtonBuilder) {
 	b.classNames = names
 	return b
 }
@@ -71,7 +71,7 @@ func (b *ButtonBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) 
 	if len(b.variant) > 0 {
 		b.classNames = append(b.classNames, fmt.Sprintf("mdc-button--%s", b.variant))
 	}
-	b.tag.ClassNames(b.classNames...)
+	b.tag.Class(b.classNames...)
 	if b.disabled {
 		b.tag.Attr("disabled", "true")
 	}

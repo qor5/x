@@ -70,13 +70,13 @@ func (b *HTMLTagBuilder) Attr(k string, v string) (r *HTMLTagBuilder) {
 	return b
 }
 
-func (b *HTMLTagBuilder) ClassNames(names ...string) (r *HTMLTagBuilder) {
+func (b *HTMLTagBuilder) Class(names ...string) (r *HTMLTagBuilder) {
 	b.classNames = []string{}
-	b.AddClassNames(names...)
+	b.AddClass(names...)
 	return b
 }
 
-func (b *HTMLTagBuilder) AddClassNames(names ...string) (r *HTMLTagBuilder) {
+func (b *HTMLTagBuilder) AddClass(names ...string) (r *HTMLTagBuilder) {
 	for _, n := range names {
 		ins := strings.Split(n, " ")
 		for _, in := range ins {
@@ -89,11 +89,11 @@ func (b *HTMLTagBuilder) AddClassNames(names ...string) (r *HTMLTagBuilder) {
 	return b
 }
 
-func (b *HTMLTagBuilder) AddClassNameIf(name string, add bool) (r *HTMLTagBuilder) {
+func (b *HTMLTagBuilder) AddClassIf(name string, add bool) (r *HTMLTagBuilder) {
 	if !add {
 		return b
 	}
-	b.AddClassNames(name)
+	b.AddClass(name)
 	return b
 }
 

@@ -23,7 +23,7 @@ func TagsInput() (r *TagsInputBuilder) {
 	return
 }
 
-func (b *TagsInputBuilder) ClassNames(names ...string) (r *TagsInputBuilder) {
+func (b *TagsInputBuilder) Class(names ...string) (r *TagsInputBuilder) {
 	b.classNames = names
 	return b
 }
@@ -61,17 +61,17 @@ func (b *TagsInputBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err erro
 	}
 
 	root := Tag("tags-input").
-		ClassNames("tagsInput").
+		Class("tagsInput").
 		Attr("v-slot", "{ parent }").
 		Children(
 			Div(
-				Div().ClassNames("tagsInputSelected").Children(
+				Div().Class("tagsInputSelected").Children(
 					selectedComps...,
 				),
 				Tag("button").Text("Toggle").Attr("v-on:click", "parent.toggle()"),
 			),
 			Div().
-				ClassNames("tagsInputOptions").
+				Class("tagsInputOptions").
 				Attr("v-bind:class", "{tagsInputOptionsOpen: parent.isOpen}").Children(
 				optionComps...,
 			),
