@@ -217,6 +217,12 @@ func Text(text string) (r ui.HTMLComponent) {
 	return ui.RawHTML(html.EscapeString(text))
 }
 
+func Script(script string) (r ui.HTMLComponent) {
+	return Tag("script").
+		Attr("type", "text/javascript").
+		Children(ui.RawHTML(script))
+}
+
 type ButtonBuilder struct {
 	HTMLTagBuilder
 }
