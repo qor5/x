@@ -66,10 +66,10 @@ type eventBody struct {
 }
 
 type ServerSideData struct {
-	Schema  ui.Component `json:"schema,omitempty"`
-	States  url.Values   `json:"states,omitempty"`
-	Scripts string       `json:"scripts,omitempty"`
-	Styles  string       `json:"styles,omitempty"`
+	Schema  interface{} `json:"schema,omitempty"`
+	States  url.Values  `json:"states,omitempty"`
+	Scripts string      `json:"scripts,omitempty"`
+	Styles  string      `json:"styles,omitempty"`
 }
 
 func WithContext(ctx *ui.EventContext, comp ui.SchemaComponent) json.Marshaler {
@@ -90,19 +90,18 @@ func (p *PageBuilder) render(
 	w http.ResponseWriter,
 	r *http.Request,
 	ctx *ui.EventContext,
-	renderJSON bool,
-) (pager *ui.PageResponse, body *bytes.Buffer, head *DefaultPageInjector) {
+	head *DefaultPageInjector,
+) (pager *ui.PageResponse, isRenderHTML bool) {
 
 	if p.pageRenderFunc == nil {
 		return
 	}
 
-	head = &DefaultPageInjector{}
-
 	ctx.Hub = p
 	ctx.R = r
 	ctx.W = w
 	ctx.Injector = head
+
 	pr, err := p.pageRenderFunc(ctx)
 	if err != nil {
 		panic(err)
@@ -114,38 +113,23 @@ func (p *PageBuilder) render(
 	}
 
 	// fmt.Println("eventFuncRefs count: ", len(p.eventFuncRefs))
-	if comp, ok := pr.Schema.(ui.SchemaComponent); ok {
-		serverSideData.Schema = WithContext(ctx, comp)
-	}
-
-	body = bytes.NewBuffer(nil)
-
-	if comp, ok := pr.Schema.(ui.HTMLComponent); ok {
-		var schema []byte
-		schema, err = comp.MarshalHTML(ctx)
+	if comp, ok := pager.Schema.(ui.SchemaComponent); ok {
+		b, err := comp.MarshalSchema(ctx)
 		if err != nil {
 			panic(err)
 		}
-
-		if pr.JSONOnly || renderJSON {
-			serverSideData.Schema = string(schema)
-			serverSideData.Scripts = head.MainScripts(false)
-			serverSideData.Styles = head.MainStyles(false)
-		} else {
-			serverSideData.Schema = nil
-			serverSideData.Scripts = ""
-			serverSideData.Styles = ""
+		serverSideData.Schema = json.RawMessage(b)
+	} else if comp, ok := pager.Schema.(ui.HTMLComponent); ok {
+		b, err := comp.MarshalHTML(ctx)
+		if err != nil {
+			panic(err)
 		}
-
-		body.WriteString(head.MainStyles(true))
-
-		body.WriteString("<div id=\"app\">\n")
-		body.Write(schema)
-		body.WriteString("</div>\n")
-
-		body.WriteString(head.RealHTML())
-		body.WriteString(head.MainScripts(true))
+		isRenderHTML = true
+		serverSideData.Schema = string(b)
 	}
+
+	serverSideData.Scripts = head.MainScripts(false)
+	serverSideData.Styles = head.MainStyles(false)
 
 	// default page response state to ctx state if not set
 	if ctx.State != nil && pr.State == nil {
@@ -180,8 +164,18 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	var serverSideData = &ServerSideData{}
+	var head = &DefaultPageInjector{}
+
 	ctx := new(ui.EventContext)
-	pr, body, head := p.render(serverSideData, w, r, ctx, false)
+	pr, isRenderHTML := p.render(serverSideData, w, r, ctx, head)
+
+	var schema = serverSideData.Schema
+
+	if isRenderHTML && !pr.JSONOnly {
+		serverSideData.Schema = nil
+		serverSideData.Scripts = ""
+		serverSideData.Styles = ""
+	}
 
 	var serverSideDataJSON []byte
 	serverSideDataJSON, err = json.MarshalIndent(serverSideData, "", "\t")
@@ -194,9 +188,17 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serverSideDataScript := h.Script(fmt.Sprintf(`
-window.__serverSideData__=%s
-`, string(serverSideDataJSON)))
+	body := bytes.NewBuffer(nil)
+
+	body.WriteString(head.MainStyles(true))
+
+	if isRenderHTML {
+		body.WriteString("<div id=\"app\">\n")
+		body.WriteString(schema.(string))
+		body.WriteString("</div>\n")
+	}
+
+	serverSideDataScript := h.Script(fmt.Sprintf("window.__serverSideData__=%s\n", string(serverSideDataJSON)))
 
 	var b []byte
 	b, err = serverSideDataScript.MarshalHTML(ctx)
@@ -204,6 +206,10 @@ window.__serverSideData__=%s
 		panic(err)
 	}
 	body.Write(b)
+
+	body.WriteString(head.MainScripts(true))
+	body.WriteString(head.TailHTML())
+	body.WriteString("\n")
 
 	var resp string
 	resp, err = p.b.GetLayoutMiddleFunc()(nil, head)(r, body.String())
@@ -293,7 +299,8 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	if len(p.eventFuncRefs) == 0 {
 		log.Println("Rerender because eventFuncs gone, might server restarted")
 		ssd := &ServerSideData{}
-		p.render(ssd, w, r, ctx, true)
+		head := &DefaultPageInjector{}
+		p.render(ssd, w, r, ctx, head)
 		json.Marshal(ssd) // to fill in event funcs that setup inside a component
 	}
 
@@ -329,7 +336,8 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 
 	if er.Reload {
 		ssd := &ServerSideData{}
-		p.render(ssd, w, r, ctx, true)
+		head := &DefaultPageInjector{}
+		p.render(ssd, w, r, ctx, head)
 		er.Schema = ssd.Schema
 		er.Scripts = ssd.Scripts
 		er.Styles = ssd.Styles

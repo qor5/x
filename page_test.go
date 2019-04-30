@@ -127,7 +127,6 @@ var pageStateCases = []struct {
 <div id="app">
 <h1>Hello</h1></div>
 <script type='text/javascript'>
-
 window.__serverSideData__={
 	"states": {
 		"Address.City": [
@@ -142,6 +141,7 @@ window.__serverSideData__={
 	}
 }
 </script>
+
 </body>
 </html>
 
@@ -354,13 +354,13 @@ func (dc *DummyComp) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 	function hello() {
 		console.log("hello")
 	}
-	`)
+`)
 
 	ctx.Injector.PutStyle(`
 	div {
 		background-color: red;
 	}
-	`)
+`)
 	return
 }
 
@@ -372,31 +372,33 @@ var eventCases = []struct {
 	expectedIndexResp string
 	expectedEventResp string
 }{
-	{
-		name: "case 1",
-		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
-			pr.Schema = ui.RawHTML("<h1>Hello</h1>")
-		},
-		expectedEventResp: `
-{
-	"schema": "\u003ch1\u003eHello\u003c/h1\u003e",
-	"reload": true
-}
-		`,
-	},
+
+	// 	{
+	// 		name: "case 1",
+	// 		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
+	// 			pr.Schema = ui.RawHTML("<h1>Hello</h1>")
+	// 		},
+	// 		expectedEventResp: `
+	// {
+	// 	"schema": "\u003ch1\u003eHello\u003c/h1\u003e",
+	// 	"reload": true
+	// }
+	// 		`,
+	// 	},
 	{
 		name: "case 2",
 		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
+			ctx.Injector.PutTailHTML("<script src='/assets/main.js'></script>")
 			pr.Schema = &DummyComp{}
 		},
 		expectedEventResp: `
 {
 	"schema": "\u003cdiv\u003ehello\u003c/div\u003e",
 	"reload": true,
-	"scripts": "\n\tfunction hello() {\n\t\tconsole.log(\"hello\")\n\t}\n\t",
-	"styles": "\n\tdiv {\n\t\tbackground-color: red;\n\t}\n\t"
+	"scripts": "\n\tfunction hello() {\n\t\tconsole.log(\"hello\")\n\t}\n",
+	"styles": "\n\tdiv {\n\t\tbackground-color: red;\n\t}\n"
 }
-		`,
+`,
 		expectedIndexResp: `<!DOCTYPE html>
 <html>
 <head>
@@ -409,19 +411,21 @@ var eventCases = []struct {
 	div {
 		background-color: red;
 	}
-	</style>
+
+</style>
 <div id="app">
 <div>hello</div></div>
+<script type='text/javascript'>
+window.__serverSideData__={}
+</script>
 <script id="main_scripts">
 
 	function hello() {
 		console.log("hello")
 	}
-	</script>
-<script type='text/javascript'>
 
-window.__serverSideData__={}
 </script>
+<script src='/assets/main.js'></script>
 </body>
 </html>
 

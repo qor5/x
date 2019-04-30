@@ -107,13 +107,13 @@ type EventContext struct {
 }
 
 type PageInjector interface {
-	Title(title string) PageInjector
-	MetaNameContent(name, content string) PageInjector
-	Meta(attrs ...string) PageInjector
-	PutScript(script string) PageInjector
-	PutStyle(style string) PageInjector
-	PutHeadHTML(v string) PageInjector
-	PutTailHTML(v string) PageInjector
+	Title(title string)
+	Meta(attrs ...string)
+	MetaNameContent(name, content string)
+	PutScript(script string)
+	PutStyle(style string)
+	PutHeadHTML(v string)
+	PutTailHTML(v string)
 }
 
 func (ctx *EventContext) StateOrInit(v PageState) (r PageState) {

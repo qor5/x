@@ -54,7 +54,7 @@ func (b *Builder) defaultLayoutMiddleFunc(in LayoutFn, head *DefaultPageInjector
 
 		root := h.HTML(
 			h.Head(
-				ui.RawHTML(head.String()),
+				ui.RawHTML(head.HeadString()),
 			),
 			h.Body(
 				ui.RawHTML(body),

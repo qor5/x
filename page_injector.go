@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sunfmin/pagui/ui"
-
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -15,12 +13,12 @@ type DefaultPageInjector struct {
 	headNodes []*html.Node
 	scripts   []string
 	styles    []string
-	rearHtmls []string
+	tailHtmls []string
 }
 
-func (b *DefaultPageInjector) Title(title string) (r ui.PageInjector) {
+func (b *DefaultPageInjector) Title(title string) {
 	b.addNode(atom.Title, title)
-	return b
+	return
 }
 
 func (b *DefaultPageInjector) HasTitle() (r bool) {
@@ -32,17 +30,17 @@ func (b *DefaultPageInjector) HasTitle() (r bool) {
 	return
 }
 
-func (b *DefaultPageInjector) MetaNameContent(name, content string) (r ui.PageInjector) {
+func (b *DefaultPageInjector) MetaNameContent(name, content string) {
 	b.Meta("name", name, "content", content)
-	return b
+	return
 }
 
-func (b *DefaultPageInjector) Meta(attrs ...string) (r ui.PageInjector) {
+func (b *DefaultPageInjector) Meta(attrs ...string) {
 	b.addNode(atom.Meta, "", attrs...)
-	return b
+	return
 }
 
-func (b *DefaultPageInjector) PutScript(script string) (r ui.PageInjector) {
+func (b *DefaultPageInjector) PutScript(script string) {
 	var exists bool
 	for _, s := range b.scripts {
 		if s == script {
@@ -53,35 +51,29 @@ func (b *DefaultPageInjector) PutScript(script string) (r ui.PageInjector) {
 	if !exists {
 		b.scripts = append(b.scripts, script)
 	}
-	return b
+	return
 }
 
-func (b *DefaultPageInjector) PutStyle(style string) (r ui.PageInjector) {
-	var exists bool
+func (b *DefaultPageInjector) PutStyle(style string) {
 	for _, s := range b.styles {
 		if s == style {
-			exists = true
-			break
+			return
 		}
 	}
-	if !exists {
-		b.styles = append(b.styles, style)
-	}
-	return b
+
+	b.styles = append(b.styles, style)
+	return
 }
 
-func (b *DefaultPageInjector) PutTailHTML(v string) (r ui.PageInjector) {
-	var exists bool
-	for _, s := range b.rearHtmls {
+func (b *DefaultPageInjector) PutTailHTML(v string) {
+	for _, s := range b.tailHtmls {
 		if s == v {
-			exists = true
-			break
+			return
 		}
 	}
-	if !exists {
-		b.rearHtmls = append(b.rearHtmls, v)
-	}
-	return b
+
+	b.tailHtmls = append(b.tailHtmls, v)
+	return
 }
 
 func (b *DefaultPageInjector) MainStyles(htmlTag bool) (r string) {
@@ -97,7 +89,7 @@ func (b *DefaultPageInjector) MainStyles(htmlTag bool) (r string) {
 	}
 	body.WriteString(strings.Join(b.styles, "\n\n"))
 	if htmlTag {
-		body.WriteString("</style>\n")
+		body.WriteString("\n</style>\n")
 	}
 
 	return body.String()
@@ -114,13 +106,13 @@ func (b *DefaultPageInjector) MainScripts(htmlTag bool) (r string) {
 	}
 	body.WriteString(strings.Join(b.scripts, "\n\n"))
 	if htmlTag {
-		body.WriteString("</script>\n")
+		body.WriteString("\n</script>\n")
 	}
 	return body.String()
 }
 
-func (b *DefaultPageInjector) RealHTML() (r string) {
-	return strings.Join(b.rearHtmls, "\n")
+func (b *DefaultPageInjector) TailHTML() (r string) {
+	return strings.Join(b.tailHtmls, "\n")
 }
 
 func (b *DefaultPageInjector) Clear() (r *DefaultPageInjector) {
@@ -128,7 +120,7 @@ func (b *DefaultPageInjector) Clear() (r *DefaultPageInjector) {
 	return b
 }
 
-func (b *DefaultPageInjector) PutHeadHTML(v string) (r ui.PageInjector) {
+func (b *DefaultPageInjector) PutHeadHTML(v string) {
 	n, err := html.Parse(strings.NewReader(v))
 	if err != nil {
 		panic(err)
@@ -139,7 +131,7 @@ func (b *DefaultPageInjector) PutHeadHTML(v string) (r ui.PageInjector) {
 		b.headNodes = append(b.headNodes, n)
 		n = n.NextSibling
 	}
-	return b
+	return
 }
 
 func haveAttr(key, val string, attrs []html.Attribute) (keyExists bool, keyValBothExists bool) {
@@ -172,7 +164,7 @@ func (b *DefaultPageInjector) addCharsetViewPortIfMissing() {
 	}
 }
 
-func (b *DefaultPageInjector) String() string {
+func (b *DefaultPageInjector) HeadString() string {
 	b.addCharsetViewPortIfMissing()
 	buf := bytes.NewBuffer(nil)
 	for _, n := range b.headNodes {
