@@ -1,5 +1,5 @@
 //go:generate gorazor templates templates
-package page
+package pagui
 
 import (
 	"bytes"

@@ -1,4 +1,4 @@
-package page_test
+package pagui_test
 
 import (
 	"bytes"

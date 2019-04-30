@@ -1,4 +1,4 @@
-package page
+package pagui
 
 import (
 	"net/http"
