@@ -13,7 +13,7 @@ import (
 	"github.com/sunfmin/reflectutils"
 
 	"github.com/go-playground/form"
-	"github.com/sunfmin/page/templates"
+	"github.com/sunfmin/pagui/templates"
 )
 
 type PageBuilder struct {

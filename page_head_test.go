@@ -6,7 +6,7 @@ import (
 
 	"github.com/theplant/testingutils"
 
-	ui "github.com/sunfmin/page"
+	ui "github.com/sunfmin/pagui"
 )
 
 var cases = []struct {

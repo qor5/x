@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sunfmin/page/templates"
+	"github.com/sunfmin/pagui/templates"
 )
 
 type Builder struct {
