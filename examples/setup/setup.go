@@ -53,12 +53,20 @@ var exampleBox = packr.NewBox("../")
 func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) (out ui.PageRenderFunc) {
 	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
+		tailScript := `<script src='/assets/main.js'></script>`
+		if len(os.Getenv("DEV")) > 0 {
+			fmt.Println("Using Dev environment, make sure you did: yarn start")
+			tailScript = `<script src='http://localhost:3100/app.js'></script>`
+
+		}
+
 		ctx.Injector.Title(cp.Title())
 		ctx.Injector.PutHeadHTML(`
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 		`)
+		ctx.Injector.PutTailHTML(tailScript)
 
 		var innerPr ui.PageResponse
 		innerPr, err = in(ctx)
@@ -106,14 +114,7 @@ func home(prefix string, pages []pageItem) http.HandlerFunc {
 }
 
 func Setup(prefix string) http.Handler {
-	ub := pagui.New().Prefix(
-		prefix + "/assets",
-	)
-
-	if len(os.Getenv("DEV")) > 0 {
-		fmt.Println("Using Dev environment, make sure you did: yarn start")
-		ub.FrontDev(true)
-	}
+	ub := pagui.New()
 
 	mux := http.NewServeMux()
 
