@@ -110,6 +110,10 @@ func I(text string) (r *HTMLTagBuilder) {
 	return Tag("i").Text(text)
 }
 
+func B(text string) (r *HTMLTagBuilder) {
+	return Tag("b").Text(text)
+}
+
 func Section(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {
 	return Tag("section").Children(children...)
 }
