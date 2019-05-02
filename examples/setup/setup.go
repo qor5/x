@@ -39,7 +39,7 @@ func exampleLinks(prefix string, pages []pageItem) (comp ui.HTMLComponent) {
 	for _, p := range pages {
 		links = append(links,
 			Li(
-				A(p.Title()).Href(fmt.Sprintf("%s/%s/", prefix, p.url)),
+				A().Href(fmt.Sprintf("%s/%s/", prefix, p.url)).Text(p.Title()),
 			),
 		)
 	}

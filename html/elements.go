@@ -138,8 +138,8 @@ type HTMLLinkBuilder struct {
 	HTMLTagBuilder
 }
 
-func A(text string) (r *HTMLLinkBuilder) {
-	tag := Tag("a").Text(text)
+func A(children ...ui.HTMLComponent) (r *HTMLLinkBuilder) {
+	tag := Tag("a").Children(children...)
 	return &HTMLLinkBuilder{
 		HTMLTagBuilder: *tag,
 	}

@@ -123,6 +123,9 @@ func (b *HTMLTagBuilder) Disabled(v bool) (r *HTMLTagBuilder) {
 }
 
 func (b *HTMLTagBuilder) OnInput(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params ...string) (r *HTMLTagBuilder) {
+	if ef == nil {
+		return b
+	}
 
 	b.onInputFuncID = &ui.EventFuncID{
 		ID:     hub.RefEventFunc(eventFuncId, ef),
@@ -133,6 +136,9 @@ func (b *HTMLTagBuilder) OnInput(hub ui.EventFuncHub, eventFuncId string, ef ui.
 }
 
 func (b *HTMLTagBuilder) OnClick(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params ...string) (r *HTMLTagBuilder) {
+	if ef == nil {
+		return b
+	}
 
 	fid := &ui.EventFuncID{
 		ID:     hub.RefEventFunc(eventFuncId, ef),
