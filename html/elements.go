@@ -150,6 +150,11 @@ func (b *HTMLLinkBuilder) Href(href string) (r *HTMLLinkBuilder) {
 	return b
 }
 
+func (b *HTMLLinkBuilder) Text(v string) (r *HTMLLinkBuilder) {
+	b.HTMLTagBuilder.Text(v)
+	return b
+}
+
 type HTMLFormBuilder struct {
 	HTMLTagBuilder
 }
