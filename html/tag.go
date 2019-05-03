@@ -70,6 +70,13 @@ func (b *HTMLTagBuilder) Attr(k string, v string) (r *HTMLTagBuilder) {
 	return b
 }
 
+func (b *HTMLTagBuilder) Attrs(vs ...string) (r *HTMLTagBuilder) {
+	for i := 0; i < len(vs); i = i + 2 {
+		b.Attr(vs[i], vs[i+1])
+	}
+	return b
+}
+
 func (b *HTMLTagBuilder) Class(names ...string) (r *HTMLTagBuilder) {
 	b.classNames = []string{}
 	b.AddClass(names...)
@@ -114,6 +121,18 @@ func (b *HTMLTagBuilder) Role(v string) (r *HTMLTagBuilder) {
 
 func (b *HTMLTagBuilder) Alt(v string) (r *HTMLTagBuilder) {
 	b.Attr("alt", v)
+	return b
+}
+
+func (b *HTMLTagBuilder) Target(v string) (r *HTMLTagBuilder) {
+	b.Attr("target", v)
+	return b
+}
+
+func (b *HTMLTagBuilder) Data(vs ...string) (r *HTMLTagBuilder) {
+	for i := 0; i < len(vs); i = i + 2 {
+		b.Attr(fmt.Sprintf("data-%s", vs[i]), vs[i+1])
+	}
 	return b
 }
 
