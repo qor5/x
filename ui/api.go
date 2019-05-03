@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/url"
@@ -41,6 +42,22 @@ func (f ComponentFunc) MarshalHTML(ctx *EventContext) (r []byte, err error) {
 
 func (f ComponentFunc) MarshalSchema(ctx *EventContext) (r []byte, err error) {
 	return f(ctx)
+}
+
+type HTMLComponents []HTMLComponent
+
+func (hcs HTMLComponents) MarshalHTML(ctx *EventContext) (r []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+	for _, h := range hcs {
+		var b []byte
+		b, err = h.MarshalHTML(ctx)
+		if err != nil {
+			return
+		}
+		buf.Write(b)
+	}
+	r = buf.Bytes()
+	return
 }
 
 type PageState interface{}
