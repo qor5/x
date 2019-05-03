@@ -23,6 +23,20 @@ var htmltagCases = []struct {
 </div>
 `,
 	},
+	{
+		name: "case 2",
+		tag: Div(
+			Div().Text("Hello").
+				Attr("class", "menu",
+					"id", "the-menu",
+					"style").
+				Attr("id", "menu-id"),
+		),
+		expected: `<div>
+<div class='menu' id='menu-id' style=''>Hello</div>
+</div>
+`,
+	},
 }
 
 func TestHtmlTag(t *testing.T) {
