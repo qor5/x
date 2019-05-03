@@ -43,7 +43,7 @@ func exampleLinks(prefix string, pages []pageItem) (comp ui.HTMLComponent) {
 			),
 		)
 	}
-	comp = UL(links...)
+	comp = Ul(links...)
 	return
 }
 
