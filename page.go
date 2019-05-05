@@ -66,7 +66,7 @@ type eventBody struct {
 	PageState   ui.PageState   `json:"pageState,omitempty"`
 }
 
-type ServerSideData struct {
+type serverSideData struct {
 	Schema  interface{} `json:"schema,omitempty"`
 	States  url.Values  `json:"states,omitempty"`
 	Scripts string      `json:"scripts,omitempty"`
@@ -74,7 +74,7 @@ type ServerSideData struct {
 }
 
 func (p *PageBuilder) render(
-	serverSideData *ServerSideData,
+	ssd *serverSideData,
 	w http.ResponseWriter,
 	r *http.Request,
 	ctx *ui.EventContext,
@@ -106,18 +106,18 @@ func (p *PageBuilder) render(
 		if err != nil {
 			panic(err)
 		}
-		serverSideData.Schema = json.RawMessage(b)
+		ssd.Schema = json.RawMessage(b)
 	} else if comp, ok := pager.Schema.(ui.HTMLComponent); ok {
 		b, err := comp.MarshalHTML(ctx)
 		if err != nil {
 			panic(err)
 		}
 		isRenderHTML = true
-		serverSideData.Schema = string(b)
+		ssd.Schema = string(b)
 	}
 
-	serverSideData.Scripts = head.MainScripts(false)
-	serverSideData.Styles = head.MainStyles(false)
+	ssd.Scripts = head.MainScripts(false)
+	ssd.Styles = head.MainStyles(false)
 
 	// default page response state to ctx state if not set
 	if ctx.State != nil && pr.State == nil {
@@ -128,7 +128,7 @@ func (p *PageBuilder) render(
 		return
 	}
 
-	p.pageStateType, serverSideData.States = encodePageState(pr.State)
+	p.pageStateType, ssd.States = encodePageState(pr.State)
 	return
 }
 
@@ -151,22 +151,22 @@ func encodePageState(pageState ui.PageState) (pageStateType reflect.Type, values
 func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	var err error
 
-	var serverSideData = &ServerSideData{}
+	var ssd = &serverSideData{}
 	var head = &DefaultPageInjector{}
 
 	ctx := new(ui.EventContext)
-	pr, isRenderHTML := p.render(serverSideData, w, r, ctx, head)
+	pr, isRenderHTML := p.render(ssd, w, r, ctx, head)
 
-	var schema = serverSideData.Schema
+	var schema = ssd.Schema
 
 	if isRenderHTML && !pr.JSONOnly {
-		serverSideData.Schema = nil
-		serverSideData.Scripts = ""
-		serverSideData.Styles = ""
+		ssd.Schema = nil
+		ssd.Scripts = ""
+		ssd.Styles = ""
 	}
 
 	var serverSideDataJSON []byte
-	serverSideDataJSON, err = json.MarshalIndent(serverSideData, "", "\t")
+	serverSideDataJSON, err = json.MarshalIndent(ssd, "", "\t")
 	if err != nil {
 		panic(err)
 	}
@@ -200,12 +200,11 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	body.WriteString("\n")
 
 	var resp string
-	resp, err = p.b.GetLayoutMiddleFunc()(nil, head)(r, body.String())
+	resp, err = p.b.getLayoutMiddleFunc()(nil, head)(r, body.String())
 	if err != nil {
 		panic(err)
 	}
 	fmt.Fprintln(w, resp)
-	return
 }
 
 func getPageStateType(pageState ui.PageState) (t reflect.Type, cantEncode bool) {
@@ -244,10 +243,10 @@ func (p *PageBuilder) eventBodyFromRequest(r *http.Request) *eventBody {
 		panic(err)
 	}
 
-	multif := r.MultipartForm
+	mf := r.MultipartForm
 
 	var eb eventBody
-	err = json.NewDecoder(strings.NewReader(multif.Value["__event_data__"][0])).Decode(&eb)
+	err = json.NewDecoder(strings.NewReader(mf.Value["__event_data__"][0])).Decode(&eb)
 	if err != nil {
 		panic(err)
 	}
@@ -256,13 +255,13 @@ func (p *PageBuilder) eventBodyFromRequest(r *http.Request) *eventBody {
 		pageState := p.NewPageState()
 		dec := form.NewDecoder()
 
-		err = dec.Decode(pageState, multif.Value)
+		err = dec.Decode(pageState, mf.Value)
 		if err != nil {
 			panic(err)
 		}
 
-		if len(multif.File) > 0 {
-			for k, vs := range multif.File {
+		if len(mf.File) > 0 {
+			for k, vs := range mf.File {
 				err = reflectutils.Set(pageState, k, vs)
 				if err != nil {
 					panic(err)
@@ -285,8 +284,8 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	ctx.Injector = &DefaultPageInjector{}
 
 	if len(p.eventFuncRefs) == 0 {
-		log.Println("Rerender because eventFuncs gone, might server restarted")
-		ssd := &ServerSideData{}
+		log.Println("Re-render because eventFuncs gone, might server restarted")
+		ssd := &serverSideData{}
 		head := &DefaultPageInjector{}
 		p.render(ssd, w, r, ctx, head)
 		json.Marshal(ssd) // to fill in event funcs that setup inside a component
@@ -323,7 +322,7 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if er.Reload {
-		ssd := &ServerSideData{}
+		ssd := &serverSideData{}
 		head := &DefaultPageInjector{}
 		p.render(ssd, w, r, ctx, head)
 		er.Schema = ssd.Schema
@@ -337,7 +336,6 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	return
 }
 
 func eventResponseWithContext(ctx *ui.EventContext, er *ui.EventResponse) {

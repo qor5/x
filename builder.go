@@ -74,7 +74,7 @@ func (b *Builder) defaultLayoutMiddleFunc(in ui.LayoutFunc, head ui.PageInjector
 	}
 }
 
-func (b *Builder) GetLayoutMiddleFunc() (lm ui.LayoutMiddleFunc) {
+func (b *Builder) getLayoutMiddleFunc() (lm ui.LayoutMiddleFunc) {
 	if b.layoutMiddleFunc != nil {
 		return b.layoutMiddleFunc
 	}
