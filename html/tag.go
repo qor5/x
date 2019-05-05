@@ -166,6 +166,31 @@ func (b *HTMLTagBuilder) Style(v string) (r *HTMLTagBuilder) {
 	return b
 }
 
+func (b *HTMLTagBuilder) Type(v string) (r *HTMLTagBuilder) {
+	b.Attr("type", v)
+	return b
+}
+
+func (b *HTMLTagBuilder) Placeholder(v string) (r *HTMLTagBuilder) {
+	b.Attr("placeholder", v)
+	return b
+}
+
+func (b *HTMLTagBuilder) Action(v string) (r *HTMLTagBuilder) {
+	b.Attr("action", v)
+	return b
+}
+
+func (b *HTMLTagBuilder) Method(v string) (r *HTMLTagBuilder) {
+	b.Attr("method", v)
+	return b
+}
+
+func (b *HTMLTagBuilder) Content(v string) (r *HTMLTagBuilder) {
+	b.Attr("content", v)
+	return b
+}
+
 func (b *HTMLTagBuilder) Disabled(v bool) (r *HTMLTagBuilder) {
 	b.Attr("disabled", fmt.Sprint(v))
 	return b

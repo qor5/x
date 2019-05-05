@@ -83,21 +83,8 @@ func Br() (r *HTMLTagBuilder) {
 }
 
 //     "button": HTMLButtonElement;
-type ButtonBuilder struct {
-	HTMLTagBuilder
-}
-
-func Button(label string) (r *ButtonBuilder) {
-	tag := Tag("button").Text(label)
-	r = &ButtonBuilder{
-		HTMLTagBuilder: *tag,
-	}
-	return
-}
-
-func (b *ButtonBuilder) Type(v string) (r *ButtonBuilder) {
-	b.Attr("type", v)
-	return b
+func Button(label string) (r *HTMLTagBuilder) {
+	return Tag("button").Text(label)
 }
 
 //     "canvas": HTMLCanvasElement;
@@ -218,26 +205,8 @@ func Footer(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {
 }
 
 //     "form": HTMLFormElement;
-
-type HTMLFormBuilder struct {
-	HTMLTagBuilder
-}
-
-func Form(children ...ui.HTMLComponent) (r *HTMLFormBuilder) {
-	tag := Tag("form").Children(children...)
-	return &HTMLFormBuilder{
-		HTMLTagBuilder: *tag,
-	}
-}
-
-func (b *HTMLFormBuilder) Action(v string) (r *HTMLFormBuilder) {
-	b.Attr("action", v)
-	return b
-}
-
-func (b *HTMLFormBuilder) Method(v string) (r *HTMLFormBuilder) {
-	b.Attr("method", v)
-	return b
+func Form(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {
+	return Tag("form").Children(children...)
 }
 
 //     "frame": HTMLFrameElement;
@@ -319,30 +288,8 @@ func Img(src string) (r *HTMLTagBuilder) {
 
 //     "input": HTMLInputElement;
 
-type HTMLInputBuilder struct {
-	HTMLTagBuilder
-}
-
-func Input(name string) (r *HTMLInputBuilder) {
-	tag := Tag("input").Attr("name", name)
-	return &HTMLInputBuilder{
-		HTMLTagBuilder: *tag,
-	}
-}
-
-func (b *HTMLInputBuilder) Type(v string) (r *HTMLInputBuilder) {
-	b.Attr("type", v)
-	return b
-}
-
-func (b *HTMLInputBuilder) Value(v string) (r *HTMLInputBuilder) {
-	b.Attr("value", v)
-	return b
-}
-
-func (b *HTMLInputBuilder) Placeholder(v string) (r *HTMLInputBuilder) {
-	b.Attr("placeholder", v)
-	return b
+func Input(name string) (r *HTMLTagBuilder) {
+	return Tag("input").Attr("name", name)
 }
 
 //     "ins": HTMLModElement;
@@ -399,20 +346,9 @@ func Menu(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {
 }
 
 //     "meta": HTMLMetaElement;
-type HTMLMetaBuilder struct {
-	HTMLTagBuilder
-}
 
-func Meta(name string) (r *HTMLMetaBuilder) {
-	tag := Tag("meta").Attr("name", name)
-	return &HTMLMetaBuilder{
-		HTMLTagBuilder: *tag,
-	}
-}
-
-func (b *HTMLMetaBuilder) Content(content string) (r *HTMLMetaBuilder) {
-	b.Attr("content", content)
-	return b
+func Meta(name string) (r *HTMLTagBuilder) {
+	return Tag("meta").Attr("name", name)
 }
 
 //     "meter": HTMLMeterElement;
