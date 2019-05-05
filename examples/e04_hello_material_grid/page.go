@@ -2,7 +2,7 @@ package e04_hello_material_grid
 
 import (
 	h "github.com/sunfmin/bran/html"
-	. "github.com/sunfmin/bran/material"
+	. "github.com/sunfmin/material"
 	"github.com/sunfmin/bran/ui"
 )
 

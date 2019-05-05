@@ -15,7 +15,7 @@ import (
 	"github.com/sunfmin/bran/examples/e04_hello_material_grid"
 	"github.com/sunfmin/bran/examples/e05_hello_customized_component"
 	. "github.com/sunfmin/bran/html"
-	m "github.com/sunfmin/bran/material"
+	m "github.com/sunfmin/material"
 	"github.com/sunfmin/bran/ui"
 	"github.com/theplant/appkit/contexts"
 	"github.com/theplant/appkit/server"
