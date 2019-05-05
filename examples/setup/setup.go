@@ -23,7 +23,7 @@ import (
 
 type pageItem struct {
 	url         string
-	renderFunc  ui.PageRenderFunc
+	renderFunc  ui.PageFunc
 	mui         bool
 	withoutCard bool
 }
@@ -49,7 +49,7 @@ func exampleLinks(prefix string, pages []pageItem) (comp ui.HTMLComponent) {
 
 var exampleBox = packr.NewBox("../")
 
-func layout(in ui.PageRenderFunc, pages []pageItem, prefix string, cp pageItem) (out ui.PageRenderFunc) {
+func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out ui.PageFunc) {
 	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
 		tailScript := `<script src='/assets/main.js'></script>`
@@ -154,7 +154,7 @@ func Setup(prefix string) http.Handler {
 		mux.Handle(
 			fmt.Sprintf("/%s/", p.url),
 			bran.StripPrefix(
-				fmt.Sprintf("/%s", p.url), mw(ub.NewPage().RenderFunc(layout(p.renderFunc, pages, prefix, p)).Handler()),
+				fmt.Sprintf("/%s", p.url), mw(ub.Page(layout(p.renderFunc, pages, prefix, p))),
 			),
 			// mw(ub.NewPage().RenderFunc(layout(p.renderFunc, pages, prefix, p)).Handler()),
 		)

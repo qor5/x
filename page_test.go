@@ -150,10 +150,10 @@ window.__serverSideData__={
 }
 
 func TestPageState(t *testing.T) {
-	pb := bran.New().NewPage()
+	pb := bran.New()
 
 	for _, c := range pageStateCases {
-		pb.RenderFunc(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+		p := pb.Page(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 			ctx.State = c.state
 			pr.Schema = ui.RawSchema("{}")
 			if c.schema != nil {
@@ -162,9 +162,10 @@ func TestPageState(t *testing.T) {
 			pr.JSONOnly = !c.renderHTML
 			return
 		})
+
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
-		pb.Handler().ServeHTTP(w, r)
+		p.ServeHTTP(w, r)
 
 		diff := testingutils.PrettyJsonDiff(c.body, w.Body.String())
 		if len(diff) > 0 {
@@ -178,7 +179,7 @@ func runEvent(
 	renderChanger func(ctx *ui.EventContext, pr *ui.PageResponse),
 	eventFormChanger func(mw *multipart.Writer),
 ) (indexResp string, eventResp string) {
-	pb := bran.New().NewPage()
+	pb := bran.New()
 
 	var f = func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 		r.Reload = true
@@ -189,7 +190,7 @@ func runEvent(
 		f = eventFunc
 	}
 
-	var rf = func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+	var p = pb.Page(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		ctx.Hub.RefEventFunc("call", f)
 
 		if renderChanger != nil {
@@ -200,13 +201,11 @@ func runEvent(
 			pr.JSONOnly = true
 		}
 		return
-	}
-
-	pb.RenderFunc(rf)
+	})
 
 	r := httptest.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
-	pb.Handler().ServeHTTP(w, r)
+	p.ServeHTTP(w, r)
 
 	indexResp = w.Body.String()
 
@@ -226,7 +225,7 @@ func runEvent(
 	r.Header.Add("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", mw.Boundary()))
 
 	w = httptest.NewRecorder()
-	pb.Handler().ServeHTTP(w, r)
+	p.ServeHTTP(w, r)
 
 	eventResp = w.Body.String()
 	return
@@ -290,8 +289,8 @@ func TestFileUpload(t *testing.T) {
 		return
 	}
 
-	pb := bran.New().NewPage()
-	pb.RenderFunc(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+	pb := bran.New()
+	p := pb.Page(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
 		s := ctx.StateOrInit(&mystate{}).(*mystate)
 
@@ -329,7 +328,7 @@ func TestFileUpload(t *testing.T) {
 	r.Header.Add("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", mw.Boundary()))
 
 	w := httptest.NewRecorder()
-	pb.Handler().ServeHTTP(w, r)
+	p.ServeHTTP(w, r)
 
 	diff := testingutils.PrettyJsonDiff(`
 {

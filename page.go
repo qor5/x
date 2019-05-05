@@ -20,27 +20,28 @@ import (
 type PageBuilder struct {
 	b              *Builder
 	eventFuncRefs  map[string]ui.EventFunc
-	pageRenderFunc ui.PageRenderFunc
+	pageRenderFunc ui.PageFunc
 	h              http.Handler
 	pageStateType  reflect.Type
 	maxFormSize    int64
 }
 
-func (b *Builder) NewPage() (pb *PageBuilder) {
-	pb = &PageBuilder{}
-	pb.eventFuncRefs = make(map[string]ui.EventFunc)
-	pb.b = b
+func (b *Builder) Page(pslf ui.PageFunc) (p *PageBuilder) {
+	p = &PageBuilder{}
+	p.eventFuncRefs = make(map[string]ui.EventFunc)
+	p.b = b
+	p.pageRenderFunc = pslf
+
+	m := http.NewServeMux()
+	m.HandleFunc("/__execute_event__/", p.executeEvent)
+	m.HandleFunc("/", p.index)
+	p.h = m
+
 	return
 }
 
 func (p *PageBuilder) MaxFormSize(v int64) (r *PageBuilder) {
 	p.maxFormSize = v
-	r = p
-	return
-}
-
-func (p *PageBuilder) RenderFunc(pslf ui.PageRenderFunc) (r *PageBuilder) {
-	p.pageRenderFunc = pslf
 	r = p
 	return
 }
@@ -362,12 +363,6 @@ func (p *PageBuilder) NewPageState() interface{} {
 	return reflect.New(p.pageStateType).Interface()
 }
 
-func (p *PageBuilder) Handler() http.Handler {
-	if p.h == nil {
-		m := http.NewServeMux()
-		m.HandleFunc("/__execute_event__/", p.executeEvent)
-		m.HandleFunc("/", p.index)
-		p.h = m
-	}
-	return p.h
+func (p *PageBuilder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	p.h.ServeHTTP(w, r)
 }

@@ -47,6 +47,16 @@ func (b *HTMLTagBuilder) Id(v string) (r *HTMLTagBuilder) {
 	return b
 }
 
+func (b *HTMLTagBuilder) Href(v string) (r *HTMLTagBuilder) {
+	b.Attr("href", v)
+	return b
+}
+
+func (b *HTMLTagBuilder) Rel(v string) (r *HTMLTagBuilder) {
+	b.Attr("ref", v)
+	return b
+}
+
 func (b *HTMLTagBuilder) FieldName(v string) (r *HTMLTagBuilder) {
 	if len(v) > 0 {
 		b.fieldName = &v

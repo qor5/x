@@ -68,8 +68,6 @@ type PageResponse struct {
 	JSONOnly bool
 }
 
-type PageRenderFunc func(ctx *EventContext) (r PageResponse, err error)
-
 type EventResponse struct {
 	Alert       Component   `json:"alert,omitempty"`
 	Confirm     Component   `json:"confirm,omitempty"`
@@ -84,15 +82,17 @@ type EventResponse struct {
 	Styles      string      `json:"styles,omitempty"`
 }
 
+type PageFunc func(ctx *EventContext) (r PageResponse, err error)
+
 type EventFunc func(ctx *EventContext) (r EventResponse, err error)
+
+type LayoutFunc func(r *http.Request, body string) (output string, err error)
+
+type LayoutMiddleFunc func(in LayoutFunc, injector PageInjector) (out LayoutFunc)
 
 type EventFuncHub interface {
 	RefEventFunc(eventFuncId string, ef EventFunc) (key string)
 }
-
-type LayoutFn func(r *http.Request, body string) (output string, err error)
-
-type LayoutMiddleFn func(in LayoutFn, injector PageInjector) (out LayoutFn)
 
 /*
 	PushState: Whatever put into this, will do window.history.pushState to the current page url with

@@ -7,26 +7,8 @@ import (
 )
 
 //     "a": HTMLAnchorElement;
-
-type HTMLAnchorBuilder struct {
-	HTMLTagBuilder
-}
-
-func A(children ...ui.HTMLComponent) (r *HTMLAnchorBuilder) {
-	tag := Tag("a").Children(children...)
-	return &HTMLAnchorBuilder{
-		HTMLTagBuilder: *tag,
-	}
-}
-
-func (b *HTMLAnchorBuilder) Href(href string) (r *HTMLAnchorBuilder) {
-	b.Attr("href", href)
-	return b
-}
-
-func (b *HTMLAnchorBuilder) Text(v string) (r *HTMLAnchorBuilder) {
-	b.HTMLTagBuilder.Text(v)
-	return b
+func A(children ...ui.HTMLComponent) (r *HTMLTagBuilder) {
+	return Tag("a").Children(children...)
 }
 
 //     "abbr": HTMLElement;
