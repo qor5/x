@@ -42,21 +42,6 @@ func (b *HTMLTagBuilder) Text(v string) (r *HTMLTagBuilder) {
 	return b
 }
 
-func (b *HTMLTagBuilder) Id(v string) (r *HTMLTagBuilder) {
-	b.Attr("id", v)
-	return b
-}
-
-func (b *HTMLTagBuilder) Href(v string) (r *HTMLTagBuilder) {
-	b.Attr("href", v)
-	return b
-}
-
-func (b *HTMLTagBuilder) Rel(v string) (r *HTMLTagBuilder) {
-	b.Attr("ref", v)
-	return b
-}
-
 func (b *HTMLTagBuilder) FieldName(v string) (r *HTMLTagBuilder) {
 	if len(v) > 0 {
 		b.fieldName = &v
@@ -119,6 +104,28 @@ func (b *HTMLTagBuilder) AddClassIf(name string, add bool) (r *HTMLTagBuilder) {
 	return b
 }
 
+func (b *HTMLTagBuilder) Data(vs ...string) (r *HTMLTagBuilder) {
+	for i := 0; i < len(vs); i = i + 2 {
+		b.Attr(fmt.Sprintf("data-%s", vs[i]), vs[i+1])
+	}
+	return b
+}
+
+func (b *HTMLTagBuilder) Id(v string) (r *HTMLTagBuilder) {
+	b.Attr("id", v)
+	return b
+}
+
+func (b *HTMLTagBuilder) Href(v string) (r *HTMLTagBuilder) {
+	b.Attr("href", v)
+	return b
+}
+
+func (b *HTMLTagBuilder) Rel(v string) (r *HTMLTagBuilder) {
+	b.Attr("ref", v)
+	return b
+}
+
 func (b *HTMLTagBuilder) Title(v string) (r *HTMLTagBuilder) {
 	b.Attr("title", html.EscapeString(v))
 	return b
@@ -126,6 +133,16 @@ func (b *HTMLTagBuilder) Title(v string) (r *HTMLTagBuilder) {
 
 func (b *HTMLTagBuilder) TabIndex(v int) (r *HTMLTagBuilder) {
 	b.Attr("tabindex", fmt.Sprint(v))
+	return b
+}
+
+func (b *HTMLTagBuilder) Required(v bool) (r *HTMLTagBuilder) {
+	b.Attr("required", fmt.Sprint(v))
+	return b
+}
+
+func (b *HTMLTagBuilder) Readonly(v bool) (r *HTMLTagBuilder) {
+	b.Attr("readonly", fmt.Sprint(v))
 	return b
 }
 
@@ -141,13 +158,6 @@ func (b *HTMLTagBuilder) Alt(v string) (r *HTMLTagBuilder) {
 
 func (b *HTMLTagBuilder) Target(v string) (r *HTMLTagBuilder) {
 	b.Attr("target", v)
-	return b
-}
-
-func (b *HTMLTagBuilder) Data(vs ...string) (r *HTMLTagBuilder) {
-	for i := 0; i < len(vs); i = i + 2 {
-		b.Attr(fmt.Sprintf("data-%s", vs[i]), vs[i+1])
-	}
 	return b
 }
 
@@ -173,6 +183,16 @@ func (b *HTMLTagBuilder) Type(v string) (r *HTMLTagBuilder) {
 
 func (b *HTMLTagBuilder) Placeholder(v string) (r *HTMLTagBuilder) {
 	b.Attr("placeholder", v)
+	return b
+}
+
+func (b *HTMLTagBuilder) Src(v string) (r *HTMLTagBuilder) {
+	b.Attr("src", v)
+	return b
+}
+
+func (b *HTMLTagBuilder) Property(v string) (r *HTMLTagBuilder) {
+	b.Attr("property", v)
 	return b
 }
 
