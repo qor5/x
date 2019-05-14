@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sunfmin/branoverlay"
+
 	"github.com/gobuffalo/packr"
 	"github.com/sunfmin/bran"
 	"github.com/sunfmin/bran/examples/e01_hello_button"
@@ -14,6 +16,7 @@ import (
 	"github.com/sunfmin/bran/examples/e03_hello_card"
 	"github.com/sunfmin/bran/examples/e04_hello_material_grid"
 	"github.com/sunfmin/bran/examples/e05_hello_customized_component"
+	"github.com/sunfmin/bran/examples/e06_hello_drawer"
 	"github.com/sunfmin/bran/ui"
 	m "github.com/sunfmin/material"
 	"github.com/theplant/appkit/contexts"
@@ -56,7 +59,6 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 		if len(os.Getenv("DEV")) > 0 {
 			fmt.Println("Using Dev environment, make sure you did: yarn start")
 			tailScript = `<script src='http://localhost:3100/app.js'></script>`
-
 		}
 
 		ctx.Injector.Title(cp.Title())
@@ -64,6 +66,8 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+			<script src="https://unpkg.com/vue"></script>
+			<link rel="stylesheet" href="/assets/overlay.css">
 		`)
 		ctx.Injector.PutTailHTML(tailScript)
 
@@ -118,7 +122,10 @@ func Setup(prefix string) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("/assets/main.js",
-		ub.PacksHandler("text/javascript", bran.ComponentsPacks()...))
+		ub.PacksHandler("text/javascript", append([]bran.ComponentsPack{branoverlay.JSComponentsPack()}, bran.ComponentsPacks()...)...))
+
+	mux.Handle("/assets/overlay.css",
+		ub.PacksHandler("text/css", branoverlay.CSSComponentsPack()))
 
 	var pages = []pageItem{
 		{
@@ -140,6 +147,10 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e05_hello_customized_component",
 			renderFunc: e05_hello_customized_component.HelloCustomziedComponent,
+		},
+		{
+			url:        "e06_hello_drawer",
+			renderFunc: e06_hello_drawer.HelloDrawer,
 		},
 	}
 
