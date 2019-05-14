@@ -1,0 +1,77 @@
+<meta charset="utf-8">
+<title>overlayjs demo</title>
+<script src="https://unpkg.com/vue"></script>
+<script src="./dist/branoverlay.umd.min.js"></script>
+
+<link rel="stylesheet" href="./dist/branoverlay.css">
+
+<div id="app">
+  <bran-drawer width="770" title="Hi this is my title">
+    <template v-slot:trigger='{ parent }'>123
+        <a href="#" @click="parent.showDrawer">
+            Open
+        </a>
+    </template>
+    <template v-slot:drawer>
+        <p>Some contents..Some contents...Some contents...Some contents...Some contents...Some contents....</p>
+        <p style="width: 500px;">Some contents...</p>
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+        <demo width="770" title="Hi this is my title inner">
+                <template v-slot:trigger='{ parent }'>123
+                    <a href="#" @click="parent.showDrawer">
+                        Open
+                    </a>
+                </template>
+                <template v-slot:drawer>
+                    <p>Some contents..Some contents...Some contents...Some contents...Some contents...Some contents....</p>
+                    <p style="width: 500px;">Some contents...</p>
+                    <p>Some contents...</p>
+                    <p>Some contents...</p>
+                    <p>Some contents...</p>
+                    <p>Some contents...</p>
+                    <p>Some contents...</p>
+                    <demo width="770" title="Hi this is my title inner">
+                            <template v-slot:trigger='{ parent }'>123
+                                <a href="#" @click="parent.showDrawer">
+                                    Open
+                                </a>
+                            </template>
+                            <template v-slot:drawer>
+                                <p>Some contents..Some contents...Some contents...Some contents...Some contents...Some contents....</p>
+                                <p style="width: 500px;">Some contents...</p>
+                                <p>Some contents...</p>
+                                <p>Some contents...</p>
+                                <p>Some contents...</p>
+                                <p>Some contents...</p>
+                                <p>Some contents...</p>
+                            </template>
+                          </demo>
+                </template>
+              </demo>
+    </template>
+  </bran-drawer>
+<div style="height: 500px"></div>
+  123123123123123123
+
+  <bran-popover title="Hello" trigger="click">
+        <template slot="content">
+            <p>abc</p>
+            <p>def</p>
+            <p>ddd</p>
+        </template>
+
+        <a href="#" >
+            Open
+        </a>
+  </bran-popover>
+</div>
+
+<script>
+new Vue({
+  components: window.__branVueComponents,
+}).$mount('#app')
+</script>
