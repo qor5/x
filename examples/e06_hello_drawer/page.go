@@ -11,10 +11,11 @@ import (
 )
 
 type mystate struct {
-	Message string
+	drawerVisible bool
 }
 
 func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+	s := ctx.StateOrInit(&mystate{}).(*mystate)
 	rand.Seed(time.Now().UnixNano())
 	v := rand.Int31n(100)
 
@@ -24,11 +25,13 @@ func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		Div(Text(fmt.Sprint(v))),
 	).Trigger(
 		A().Text("Open").Href("#"),
-	).Width(500)
+	).Width(500).Visible(s.drawerVisible)
 	return
 }
 
 func reload(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	r.Reload = true
+	s := ctx.State.(*mystate)
+	s.drawerVisible = true
 	return
 }
