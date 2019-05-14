@@ -20,6 +20,7 @@ func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
 	pr.Schema = Drawer(
 		ui.Bind(Button("Hello")).OnClick(ctx.Hub, "reload", reload),
+		Button("Close").Attr("@click", "parent.close"),
 		Div(Text(fmt.Sprint(v))),
 	).Trigger(
 		A().Text("Open").Href("#"),
