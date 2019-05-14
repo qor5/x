@@ -6,72 +6,76 @@
 <link rel="stylesheet" href="./dist/branoverlay.css">
 
 <div id="app">
-  <bran-drawer width="770" title="Hi this is my title">
-    <template v-slot:trigger='{ parent }'>123
-        <a href="#" @click="parent.showDrawer">
-            Open
-        </a>
-    </template>
-    <template v-slot:drawer>
-        <p>Some contents..Some contents...Some contents...Some contents...Some contents...Some contents....</p>
-        <p style="width: 500px;">Some contents...</p>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-        <demo width="770" title="Hi this is my title inner">
-                <template v-slot:trigger='{ parent }'>123
-                    <a href="#" @click="parent.showDrawer">
-                        Open
-                    </a>
-                </template>
-                <template v-slot:drawer>
-                    <p>Some contents..Some contents...Some contents...Some contents...Some contents...Some contents....</p>
-                    <p style="width: 500px;">Some contents...</p>
-                    <p>Some contents...</p>
-                    <p>Some contents...</p>
-                    <p>Some contents...</p>
-                    <p>Some contents...</p>
-                    <p>Some contents...</p>
-                    <demo width="770" title="Hi this is my title inner">
-                            <template v-slot:trigger='{ parent }'>123
-                                <a href="#" @click="parent.showDrawer">
-                                    Open
-                                </a>
-                            </template>
-                            <template v-slot:drawer>
-                                <p>Some contents..Some contents...Some contents...Some contents...Some contents...Some contents....</p>
-                                <p style="width: 500px;">Some contents...</p>
-                                <p>Some contents...</p>
-                                <p>Some contents...</p>
-                                <p>Some contents...</p>
-                                <p>Some contents...</p>
-                                <p>Some contents...</p>
-                            </template>
-                          </demo>
-                </template>
-              </demo>
-    </template>
-  </bran-drawer>
-<div style="height: 500px"></div>
-  123123123123123123
+	<bran-drawer width="770" title="Hi this is my title">
+		<template v-slot:trigger='{ parent }'>123
+			<a href="#" @click="parent.showDrawer">
+				Open
+			</a>
+		</template>
+		<template v-slot:drawer='{ parent }'>
+			<button @click="parent.onClose">close</button>
+			<p>Some contents..Some contents...Some contents...Some contents...Some contents...Some contents....</p>
+			<p style="width: 500px;">Some contents...</p>
+			<p>Some contents...</p>
+			<p>Some contents...</p>
+			<p>Some contents...</p>
+			<p>Some contents...</p>
+			<p>Some contents...</p>
+			<bran-drawer width="770" title="Hi this is my title inner">
+				<template v-slot:trigger='{ parent }'>123
+					<a href="#" @click="parent.showDrawer">
+						Open
+					</a>
+				</template>
+				<template v-slot:drawer>
+					<p>Some contents..Some contents...Some contents...Some contents...Some contents...Some contents....
+					</p>
+					<p style="width: 500px;">Some contents...</p>
+					<p>Some contents...</p>
+					<p>Some contents...</p>
+					<p>Some contents...</p>
+					<p>Some contents...</p>
+					<p>Some contents...</p>
+					<bran-drawer width="770" title="Hi this is my title inner">
+						<template v-slot:trigger='{ parent }'>123
+							<a href="#" @click="parent.showDrawer">
+								Open
+							</a>
+						</template>
+						<template v-slot:drawer>
+							<p>Some contents..Some contents...Some contents...Some contents...Some contents...Some
+								contents....</p>
+							<p style="width: 500px;">Some contents...</p>
+							<p>Some contents...</p>
+							<p>Some contents...</p>
+							<p>Some contents...</p>
+							<p>Some contents...</p>
+							<p>Some contents...</p>
+						</template>
+					</bran-drawer>
+				</template>
+			</bran-drawer>
+		</template>
+	</bran-drawer>
+	<div style="height: 500px"></div>
+	123123123123123123
 
-  <bran-popover title="Hello" trigger="click">
-        <template slot="content">
-            <p>abc</p>
-            <p>def</p>
-            <p>ddd</p>
-        </template>
+	<bran-popover title="Hello" trigger="click">
+		<template slot="content">
+			<p>abc</p>
+			<p>def</p>
+			<p>ddd</p>
+		</template>
 
-        <a href="#" >
-            Open
-        </a>
-  </bran-popover>
+		<a href="#">
+			Open
+		</a>
+	</bran-popover>
 </div>
 
 <script>
-new Vue({
-  components: window.__branVueComponents,
-}).$mount('#app')
+	for (const registerComp of (window.__branVueComponentRegisters || [])) {
+		registerComp(Vue);
+	}
+	new Vue({}).$mount('#app')
 </script>

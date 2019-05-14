@@ -7,4 +7,7 @@ import 'ant-design-vue/lib/popover/style/index.css'
     Vue.component("bran-popover", Popover);
 })
 
-export default {}
+export default {
+	Drawer,
+	Popover,
+}

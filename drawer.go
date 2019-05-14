@@ -42,11 +42,11 @@ func (b *DrawerBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 		panic("Drawer().Trigger() required")
 	}
 
-	b.trigger.SetAttr("@click", "parent.showDrawer")
+	b.trigger.SetAttr("@click", "parent.show")
 
 	b.tag.Children(
 		Template(b.trigger).Attr("v-slot:trigger", "{ parent }"),
-		Template(b.children...).Attr("v-slot:drawer", ""),
+		Template(b.children...).Attr("v-slot:drawer", "{ parent }"),
 	)
 	return b.tag.MarshalHTML(ctx)
 }
