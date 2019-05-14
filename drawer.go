@@ -37,6 +37,11 @@ func (b *DrawerBuilder) Title(v string) (r *DrawerBuilder) {
 	return b
 }
 
+func (b *DrawerBuilder) Visible(v bool) (r *DrawerBuilder) {
+	b.tag.Attr("visible", fmt.Sprint(v))
+	return b
+}
+
 func (b *DrawerBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	if b.trigger == nil {
 		panic("Drawer().Trigger() required")

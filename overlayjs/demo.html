@@ -6,14 +6,14 @@
 <link rel="stylesheet" href="./dist/branoverlay.css">
 
 <div id="app">
-	<bran-drawer width="770" title="Hi this is my title">
+	<bran-drawer width="770" title="Hi this is my title" visible="true">
 		<template v-slot:trigger='{ parent }'>123
-			<a href="#" @click="parent.showDrawer">
+			<a href="#" @click="parent.show">
 				Open
 			</a>
 		</template>
 		<template v-slot:drawer='{ parent }'>
-			<button @click="parent.onClose">close</button>
+			<button @click="parent.close">close</button>
 			<p>Some contents..Some contents...Some contents...Some contents...Some contents...Some contents....</p>
 			<p style="width: 500px;">Some contents...</p>
 			<p>Some contents...</p>
@@ -23,7 +23,7 @@
 			<p>Some contents...</p>
 			<bran-drawer width="770" title="Hi this is my title inner">
 				<template v-slot:trigger='{ parent }'>123
-					<a href="#" @click="parent.showDrawer">
+					<a href="#" @click="parent.show">
 						Open
 					</a>
 				</template>
@@ -38,7 +38,7 @@
 					<p>Some contents...</p>
 					<bran-drawer width="770" title="Hi this is my title inner">
 						<template v-slot:trigger='{ parent }'>123
-							<a href="#" @click="parent.showDrawer">
+							<a href="#" @click="parent.show">
 								Open
 							</a>
 						</template>

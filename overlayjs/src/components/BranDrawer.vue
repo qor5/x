@@ -7,7 +7,8 @@
       :width="width"
       :title="title"
       @close="close"
-      :visible="visible"
+      :visible="isVisible"
+      :getContainer="getContainer"
     >
       <slot name="drawer" :parent="this"></slot>
     </a-drawer>
@@ -23,18 +24,21 @@ export default {
   components: {
     "a-drawer": Drawer
   },
-  props: ["width", "title"],
+  props: ["width", "title", "visible"],
   data() {
     return {
-      visible: false
+      isVisible: this.visible === "true"
     };
   },
   methods: {
     show() {
-      this.visible = true;
+      this.isVisible = true;
     },
     close() {
-      this.visible = false;
+      this.isVisible = false;
+    },
+    getContainer() {
+      return document.getElementById("app");
     }
   }
 };
