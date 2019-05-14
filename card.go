@@ -1,16 +1,18 @@
 package material
 
 import (
-	h "github.com/sunfmin/bran/html"
+	"context"
+
 	"github.com/sunfmin/bran/ui"
+	h "github.com/theplant/htmlgo"
 )
 
 type CardBuilder struct {
-	children   []ui.HTMLComponent
+	children   []h.HTMLComponent
 	classNames []string
 
-	actionButtons []ui.HTMLComponent
-	actionIcons   []ui.HTMLComponent
+	actionButtons []h.HTMLComponent
+	actionIcons   []h.HTMLComponent
 }
 
 func (b *CardBuilder) Class(names ...string) (r *CardBuilder) {
@@ -18,24 +20,24 @@ func (b *CardBuilder) Class(names ...string) (r *CardBuilder) {
 	return b
 }
 
-func Card(children ...ui.HTMLComponent) (r *CardBuilder) {
+func Card(children ...h.HTMLComponent) (r *CardBuilder) {
 	r = &CardBuilder{}
 	r.children = children
 	return
 }
 
-func (b *CardBuilder) ActionButtons(buttons ...ui.HTMLComponent) (r *CardBuilder) {
+func (b *CardBuilder) ActionButtons(buttons ...h.HTMLComponent) (r *CardBuilder) {
 	b.actionButtons = buttons
 	return b
 }
 
-func (b *CardBuilder) ActionIcons(icons ...ui.HTMLComponent) (r *CardBuilder) {
+func (b *CardBuilder) ActionIcons(icons ...h.HTMLComponent) (r *CardBuilder) {
 	b.actionIcons = icons
 	return b
 }
 
-func (b *CardBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
-	ctx.Injector.PutStyle(cardstyles)
+func (b *CardBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	ui.Injector(ctx).PutStyle(cardstyles)
 	root := h.Div(
 		h.Div(b.children...).
 			Class("mdc-card__primary-action").
@@ -44,17 +46,17 @@ func (b *CardBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 
 	if len(b.actionButtons) > 0 || len(b.actionIcons) > 0 {
 		actions := h.Div().Class("mdc-card__actions")
-		root.AddChildren(actions)
+		root.AppendChildren(actions)
 
 		if len(b.actionButtons) > 0 {
-			actions.AddChildren(
+			actions.AppendChildren(
 				h.Div().Class("mdc-card__action-buttons").
 					Children(b.actionButtons...),
 			)
 		}
 
 		if len(b.actionIcons) > 0 {
-			actions.AddChildren(
+			actions.AppendChildren(
 				h.Div().Class("mdc-card__action-icons").
 					Children(b.actionIcons...),
 			)

@@ -1,25 +1,26 @@
 package material
 
 import (
+	"context"
 	"fmt"
 
-	h "github.com/sunfmin/bran/html"
 	"github.com/sunfmin/bran/ui"
+	h "github.com/theplant/htmlgo"
 )
 
 type GridBuilder struct {
 	classNames     []string
-	children       []ui.HTMLComponent
-	styles         *h.Styles
+	children       []h.HTMLComponent
+	styles         *ui.Styles
 	align          string
 	fixColumnWidth string
 	innerOnly      bool
 }
 
-func Grid(cells ...ui.HTMLComponent) (r *GridBuilder) {
+func Grid(cells ...h.HTMLComponent) (r *GridBuilder) {
 	r = &GridBuilder{}
 	r.Children(cells...)
-	r.styles = &h.Styles{}
+	r.styles = &ui.Styles{}
 	return
 }
 
@@ -88,13 +89,13 @@ func (b *GridBuilder) Gutter(v int, screen Screen) (r *GridBuilder) {
 	return b
 }
 
-func (b *GridBuilder) Children(comps ...ui.HTMLComponent) (r *GridBuilder) {
+func (b *GridBuilder) Children(comps ...h.HTMLComponent) (r *GridBuilder) {
 	b.children = comps
 	return b
 }
 
-func (b *GridBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
-	ctx.Injector.PutStyle(gridcss)
+func (b *GridBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	ui.Injector(ctx).PutStyle(gridcss)
 
 	inner := h.Div(b.children...).Class("mdc-layout-grid__inner")
 
@@ -111,11 +112,11 @@ func (b *GridBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
 
 type CellBuilder struct {
 	classNames []string
-	children   []ui.HTMLComponent
+	children   []h.HTMLComponent
 	spans      []string
 }
 
-func Cell(children ...ui.HTMLComponent) (r *CellBuilder) {
+func Cell(children ...h.HTMLComponent) (r *CellBuilder) {
 	r = &CellBuilder{}
 	r.Children(children...)
 	return
@@ -142,12 +143,12 @@ func (b *CellBuilder) Span(v int, screen Screen) (r *CellBuilder) {
 	return b
 }
 
-func (b *CellBuilder) Children(comps ...ui.HTMLComponent) (r *CellBuilder) {
+func (b *CellBuilder) Children(comps ...h.HTMLComponent) (r *CellBuilder) {
 	b.children = comps
 	return b
 }
 
-func (b *CellBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
+func (b *CellBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	root := h.Div(b.children...).
 		Class(append(append(
 			b.classNames,

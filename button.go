@@ -1,10 +1,11 @@
 package material
 
 import (
+	"context"
 	"fmt"
 
-	h "github.com/sunfmin/bran/html"
 	"github.com/sunfmin/bran/ui"
+	h "github.com/theplant/htmlgo"
 )
 
 type ButtonBuilder struct {
@@ -38,14 +39,13 @@ func (b *ButtonBuilder) InCard() (r *ButtonBuilder) {
 	return b
 }
 
-func (b *ButtonBuilder) Children(comps ...ui.HTMLComponent) (r *ButtonBuilder) {
+func (b *ButtonBuilder) Children(comps ...h.HTMLComponent) (r *ButtonBuilder) {
 	b.tag.Children(comps...)
 	return b
 }
 
-func (b *ButtonBuilder) OnClick(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params ...string) (r *ButtonBuilder) {
-	b.tag.OnClick(hub, eventFuncId, ef, params...)
-	return b
+func (b *ButtonBuilder) SetAttr(k string, v string) {
+	b.tag.SetAttr(k, v)
 }
 
 type ButtonVariant string
@@ -62,8 +62,8 @@ func (b *ButtonBuilder) Variant(v ButtonVariant) (r *ButtonBuilder) {
 	return b
 }
 
-func (b *ButtonBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
-	ctx.Injector.PutStyle(buttonstyle)
+func (b *ButtonBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	ui.Injector(ctx).PutStyle(buttonstyle)
 	b.classNames = append(b.classNames, "mdc-button")
 	if b.inCard {
 		b.classNames = append(b.classNames, "mdc-card__action", "mdc-card__action--button")
