@@ -2,12 +2,13 @@ package bran
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"time"
 
 	"github.com/sunfmin/bran/ui"
 
-	h "github.com/sunfmin/bran/html"
+	h "github.com/theplant/htmlgo"
 )
 
 type Builder struct {
@@ -50,10 +51,10 @@ func (b *Builder) defaultLayoutMiddleFunc(in ui.LayoutFunc, head ui.PageInjector
 
 		root := h.HTML(
 			h.Head(
-				ui.RawHTML(head.HeadString()),
+				h.RawHTML(head.HeadString()),
 			),
 			h.Body(
-				ui.RawHTML(body),
+				h.RawHTML(body),
 			).Class("front"),
 		)
 
@@ -63,7 +64,8 @@ func (b *Builder) defaultLayoutMiddleFunc(in ui.LayoutFunc, head ui.PageInjector
 		var b []byte
 		ctx := new(ui.EventContext)
 		ctx.R = r
-		b, err = root.MarshalHTML(ctx)
+
+		b, err = root.MarshalHTML(ui.WrapEventContext(context.TODO(), ctx))
 		if err != nil {
 			return
 		}

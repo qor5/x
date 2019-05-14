@@ -2,16 +2,18 @@ package bran_test
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/theplant/testingutils"
-
 	"github.com/sunfmin/bran"
 	"github.com/sunfmin/bran/ui"
+	h "github.com/theplant/htmlgo"
+	"github.com/theplant/htmltestingutils"
+	"github.com/theplant/testingutils"
 )
 
 type User struct {
@@ -115,7 +117,7 @@ var pageStateCases = []struct {
 	{
 		name:       "html component",
 		state:      &userData,
-		schema:     ui.RawHTML("<h1>Hello</h1>"),
+		schema:     h.RawHTML("<h1>Hello</h1>"),
 		renderHTML: true,
 		body: `<!DOCTYPE html>
 <html>
@@ -167,7 +169,7 @@ func TestPageState(t *testing.T) {
 		r := httptest.NewRequest("GET", "/", nil)
 		p.ServeHTTP(w, r)
 
-		diff := testingutils.PrettyJsonDiff(c.body, w.Body.String())
+		diff := htmltestingutils.PrettyHtmlDiff(w.Body, "*", c.body)
 		if len(diff) > 0 {
 			t.Error(c.name, diff)
 		}
@@ -178,7 +180,7 @@ func runEvent(
 	eventFunc ui.EventFunc,
 	renderChanger func(ctx *ui.EventContext, pr *ui.PageResponse),
 	eventFormChanger func(mw *multipart.Writer),
-) (indexResp string, eventResp string) {
+) (indexResp *bytes.Buffer, eventResp *bytes.Buffer) {
 	pb := bran.New()
 
 	var f = func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
@@ -207,7 +209,7 @@ func runEvent(
 	w := httptest.NewRecorder()
 	p.ServeHTTP(w, r)
 
-	indexResp = w.Body.String()
+	indexResp = w.Body
 
 	body := bytes.NewBuffer(nil)
 
@@ -227,7 +229,7 @@ func runEvent(
 	w = httptest.NewRecorder()
 	p.ServeHTTP(w, r)
 
-	eventResp = w.Body.String()
+	eventResp = w.Body
 	return
 }
 
@@ -252,7 +254,7 @@ func TestPageStateInitAndSet(t *testing.T) {
 		]
 	}
 }
-	`, indexResp)
+	`, indexResp.String())
 	if len(diff) > 0 {
 		t.Error(diff)
 	}
@@ -273,7 +275,7 @@ func TestPageStateInitAndSet(t *testing.T) {
 	},
 	"reload": true
 }
-	`, eventResp)
+	`, eventResp.String())
 	if len(diff) > 0 {
 		t.Error(diff)
 	}
@@ -347,15 +349,15 @@ func TestFileUpload(t *testing.T) {
 type DummyComp struct {
 }
 
-func (dc *DummyComp) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
+func (dc *DummyComp) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	r = []byte("<div>hello</div>")
-	ctx.Injector.PutScript(`
+	ui.Injector(ctx).PutScript(`
 	function hello() {
 		console.log("hello")
 	}
 `)
 
-	ctx.Injector.PutStyle(`
+	ui.Injector(ctx).PutStyle(`
 	div {
 		background-color: red;
 	}
@@ -437,14 +439,15 @@ func TestEvents(t *testing.T) {
 		indexResp, eventResp := runEvent(c.eventFunc, c.renderChanger, c.eventFormChanger)
 		var diff string
 		if len(c.expectedIndexResp) > 0 {
-			diff = testingutils.PrettyJsonDiff(c.expectedIndexResp, indexResp)
+			diff = htmltestingutils.PrettyHtmlDiff(indexResp, "*", c.expectedIndexResp)
+
 			if len(diff) > 0 {
 				t.Error(c.name, diff)
 			}
 		}
 
 		if len(c.expectedEventResp) > 0 {
-			diff = testingutils.PrettyJsonDiff(c.expectedEventResp, eventResp)
+			diff = testingutils.PrettyJsonDiff(c.expectedEventResp, eventResp.String())
 			if len(diff) > 0 {
 				t.Error(c.name, diff)
 			}

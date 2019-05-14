@@ -2,6 +2,7 @@ package bran
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -13,8 +14,8 @@ import (
 	"github.com/sunfmin/reflectutils"
 
 	"github.com/go-playground/form"
-	h "github.com/sunfmin/bran/html"
 	"github.com/sunfmin/bran/ui"
+	h "github.com/theplant/htmlgo"
 )
 
 type PageBuilder struct {
@@ -77,13 +78,15 @@ func (p *PageBuilder) render(
 	ssd *serverSideData,
 	w http.ResponseWriter,
 	r *http.Request,
-	ctx *ui.EventContext,
+	c context.Context,
 	head *DefaultPageInjector,
 ) (pager *ui.PageResponse, isRenderHTML bool) {
 
 	if p.pageRenderFunc == nil {
 		return
 	}
+
+	ctx := ui.MustGetEventContext(c)
 
 	ctx.Hub = p
 	ctx.R = r
@@ -107,8 +110,8 @@ func (p *PageBuilder) render(
 			panic(err)
 		}
 		ssd.Schema = json.RawMessage(b)
-	} else if comp, ok := pager.Schema.(ui.HTMLComponent); ok {
-		b, err := comp.MarshalHTML(ctx)
+	} else if comp, ok := pager.Schema.(h.HTMLComponent); ok {
+		b, err := comp.MarshalHTML(c)
 		if err != nil {
 			panic(err)
 		}
@@ -155,7 +158,8 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	var head = &DefaultPageInjector{}
 
 	ctx := new(ui.EventContext)
-	pr, isRenderHTML := p.render(ssd, w, r, ctx, head)
+	c := ui.WrapEventContext(r.Context(), ctx)
+	pr, isRenderHTML := p.render(ssd, w, r, c, head)
 
 	var schema = ssd.Schema
 
@@ -189,7 +193,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	serverSideDataScript := h.Script(fmt.Sprintf("window.__serverSideData__=%s\n", string(serverSideDataJSON)))
 
 	var b []byte
-	b, err = serverSideDataScript.MarshalHTML(ctx)
+	b, err = serverSideDataScript.MarshalHTML(c)
 	if err != nil {
 		panic(err)
 	}
@@ -283,11 +287,13 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	ctx.Hub = p
 	ctx.Injector = &DefaultPageInjector{}
 
+	c := ui.WrapEventContext(r.Context(), ctx)
+
 	if len(p.eventFuncRefs) == 0 {
 		log.Println("Re-render because eventFuncs gone, might server restarted")
 		ssd := &serverSideData{}
 		head := &DefaultPageInjector{}
-		p.render(ssd, w, r, ctx, head)
+		p.render(ssd, w, r, c, head)
 		json.Marshal(ssd) // to fill in event funcs that setup inside a component
 	}
 
@@ -324,7 +330,7 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	if er.Reload {
 		ssd := &serverSideData{}
 		head := &DefaultPageInjector{}
-		p.render(ssd, w, r, ctx, head)
+		p.render(ssd, w, r, c, head)
 		er.Schema = ssd.Schema
 		er.Scripts = ssd.Scripts
 		er.Styles = ssd.Styles

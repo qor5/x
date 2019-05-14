@@ -1,10 +1,11 @@
 package e05_hello_customized_component
 
 import (
+	"context"
 	"fmt"
 
-	. "github.com/sunfmin/bran/html"
 	"github.com/sunfmin/bran/ui"
+	. "github.com/theplant/htmlgo"
 )
 
 type TagsInputBuilder struct {
@@ -15,7 +16,7 @@ type TagsInputBuilder struct {
 
 type TagsInputOption struct {
 	Key   string
-	Label ui.HTMLComponent
+	Label HTMLComponent
 }
 
 func TagsInput() (r *TagsInputBuilder) {
@@ -47,12 +48,12 @@ func contains(k string, in []string) bool {
 	return false
 }
 
-func (b *TagsInputBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err error) {
-	ctx.Injector.PutScript(tagsInputScript)
-	ctx.Injector.PutStyle(tagsInputStyles)
+func (b *TagsInputBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	ui.Injector(ctx).PutScript(tagsInputScript)
+	ui.Injector(ctx).PutStyle(tagsInputStyles)
 
-	selectedComps := []ui.HTMLComponent{}
-	optionComps := []ui.HTMLComponent{}
+	selectedComps := []HTMLComponent{}
+	optionComps := []HTMLComponent{}
 	for _, op := range b.options {
 		optionComps = append(optionComps, op.Label)
 		if contains(op.Key, b.selectedKeys) {
@@ -80,7 +81,7 @@ func (b *TagsInputBuilder) MarshalHTML(ctx *ui.EventContext) (r []byte, err erro
 }
 
 const tagsInputScript = `
-	(window.vueComps = (window.vueComps || [])).push(function(Vue){
+	(window.__branVueComponentRegisters = (window.__branVueComponentRegisters || [])).push(function(Vue){
 		Vue.component("tags-input", {
 			data: function() {
 				return {
@@ -126,7 +127,7 @@ func HelloCustomziedComponent(ctx *ui.EventContext) (pr ui.PageResponse, err err
 
 	pr.Schema = Div(
 		TagsInput().Selected([]string{"1", "2", "3"}).Options(opts...),
-		Button("Refresh").OnClick(ctx.Hub, "refresh", reload),
+		ui.Bind(Button("Refresh")).OnClick(ctx.Hub, "refresh", reload),
 	)
 	return
 }

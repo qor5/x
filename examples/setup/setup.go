@@ -14,11 +14,11 @@ import (
 	"github.com/sunfmin/bran/examples/e03_hello_card"
 	"github.com/sunfmin/bran/examples/e04_hello_material_grid"
 	"github.com/sunfmin/bran/examples/e05_hello_customized_component"
-	. "github.com/sunfmin/bran/html"
-	m "github.com/sunfmin/material"
 	"github.com/sunfmin/bran/ui"
+	m "github.com/sunfmin/material"
 	"github.com/theplant/appkit/contexts"
 	"github.com/theplant/appkit/server"
+	. "github.com/theplant/htmlgo"
 )
 
 type pageItem struct {
@@ -34,8 +34,8 @@ func (p pageItem) Title() string {
 	return fmt.Sprintf("%s: %s", strings.ToUpper(segs[0]), strings.Join(segs[1:], " "))
 }
 
-func exampleLinks(prefix string, pages []pageItem) (comp ui.HTMLComponent) {
-	var links []ui.HTMLComponent
+func exampleLinks(prefix string, pages []pageItem) (comp HTMLComponent) {
+	var links []HTMLComponent
 	for _, p := range pages {
 		links = append(links,
 			Li(
@@ -75,7 +75,7 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 
 		demo := innerPr.Schema
 
-		var dacComps = []ui.HTMLComponent{demo.(ui.HTMLComponent)}
+		var dacComps = []HTMLComponent{demo.(HTMLComponent)}
 
 		var code string
 		code, err = exampleBox.FindString(cp.url + "/page.go")

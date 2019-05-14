@@ -1,8 +1,8 @@
 package e01_hello_button
 
 import (
-	. "github.com/sunfmin/bran/html"
 	"github.com/sunfmin/bran/ui"
+	. "github.com/theplant/htmlgo"
 )
 
 type mystate struct {
@@ -13,13 +13,13 @@ func HelloButton(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	s := ctx.StateOrInit(&mystate{}).(*mystate)
 
 	pr.Schema = Div(
-		Button("Hello").
+		ui.Bind(Button("Hello")).
 			OnClick(ctx.Hub, "reload", reload),
-		Tag("input").
-			OnInput(ctx.Hub, "reload2", reload).
+		ui.Bind(Tag("input").
 			Attr("type", "text").
-			FieldName("Message").
-			Attr("value", s.Message),
+			Attr("value", s.Message)).
+			OnInput(ctx.Hub, "reload2", reload).
+			FieldName("Message"),
 		Div().
 			Style("font-family: monospace;").
 			Text(s.Message),

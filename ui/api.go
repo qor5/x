@@ -1,19 +1,14 @@
 package ui
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type Component interface {
-}
-
-type SchemaComponent interface {
-	MarshalSchema(ctx *EventContext) ([]byte, error)
-}
-
-type HTMLComponent interface {
-	MarshalHTML(ctx *EventContext) ([]byte, error)
 }
 
 type PageState interface{}
@@ -94,4 +89,49 @@ type PageInjector interface {
 	PutTailHTML(v string)
 
 	HeadString() string
+}
+
+const eventContextKey = iota
+
+func WrapEventContext(parent context.Context, ctx *EventContext) (r context.Context) {
+	r = context.WithValue(parent, eventContextKey, ctx)
+	return
+}
+
+func MustGetEventContext(c context.Context) (r *EventContext) {
+	r, _ = c.Value(eventContextKey).(*EventContext)
+	if r == nil {
+		panic("EventContext required")
+	}
+	return
+}
+
+func Injector(c context.Context) (r PageInjector) {
+	ctx := MustGetEventContext(c)
+	r = ctx.Injector
+	return
+}
+
+type Styles struct {
+	pairs [][]string
+}
+
+func (s *Styles) String() string {
+	segs := []string{}
+	for _, v := range s.pairs {
+		segs = append(segs, fmt.Sprintf("%s:%s;", v[0], v[1]))
+	}
+	return strings.Join(segs, " ")
+}
+
+func (s *Styles) Put(name, value string) (r *Styles) {
+	for _, el := range s.pairs {
+		if el[0] == name {
+			el[1] = value
+			return s
+		}
+	}
+
+	s.pairs = append(s.pairs, []string{name, value})
+	return s
 }

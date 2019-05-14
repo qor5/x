@@ -181,12 +181,12 @@ function controlsOnInput(eventFuncId?: EventFuncID, fieldName?: string, evt?: an
 }
 
 function newVue() {
-	for (const registerComp of (window.vueComps || [])) {
+	for (const registerComp of (window.__branVueComponentRegisters || [])) {
 		registerComp(Vue);
 	}
-	// console.log("window.vueComps", window.vueComps)
 	const vm = new Vue({
 		el: '#app',
+		components: (window.__branVueComponents || {}),
 		data: {},
 		methods: {
 			onclick(eventFuncId: EventFuncID, evt: any) {
