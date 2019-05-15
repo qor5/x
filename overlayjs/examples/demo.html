@@ -1,12 +1,12 @@
 <meta charset="utf-8">
 <title>overlayjs demo</title>
 <script src="https://unpkg.com/vue"></script>
-<script src="./dist/branoverlay.umd.min.js"></script>
+<script src="/dist/branoverlay.umd.min.js"></script>
 
-<link rel="stylesheet" href="./dist/branoverlay.css">
+<link rel="stylesheet" href="/dist/branoverlay.css">
 
 <div id="app">
-	<bran-drawer width="770" title="Hi this is my title" visible="true">
+	<bran-drawer width="770" title="Hi this is my title" visible="false">
 		<template v-slot:trigger='{ parent }'>123
 			<a href="#" @click="parent.show">
 				Open
@@ -18,9 +18,9 @@
 			<p style="width: 500px;">Some contents...</p>
 			<p>Some contents...</p>
 			<p>Some contents...</p>
-			<p>Some contents...</p>
-			<p>Some contents...</p>
-			<p>Some contents...</p>
+			<h1>This is from remote</h1>
+			<bran-lazy-loader :visible='parent.isVisible' eventfuncid='{"id": "loadDrawer", "params": ["1", "2"]}'></bran-lazy-loader>
+			<h1>This is nested</h1>
 			<bran-drawer width="770" title="Hi this is my title inner">
 				<template v-slot:trigger='{ parent }'>123
 					<a href="#" @click="parent.show">
@@ -36,23 +36,6 @@
 					<p>Some contents...</p>
 					<p>Some contents...</p>
 					<p>Some contents...</p>
-					<bran-drawer width="770" title="Hi this is my title inner">
-						<template v-slot:trigger='{ parent }'>123
-							<a href="#" @click="parent.show">
-								Open
-							</a>
-						</template>
-						<template v-slot:drawer>
-							<p>Some contents..Some contents...Some contents...Some contents...Some contents...Some
-								contents....</p>
-							<p style="width: 500px;">Some contents...</p>
-							<p>Some contents...</p>
-							<p>Some contents...</p>
-							<p>Some contents...</p>
-							<p>Some contents...</p>
-							<p>Some contents...</p>
-						</template>
-					</bran-drawer>
 				</template>
 			</bran-drawer>
 		</template>
@@ -72,10 +55,20 @@
 		</a>
 	</bran-popover>
 </div>
-
+<!--
 <script>
-	for (const registerComp of (window.__branVueComponentRegisters || [])) {
-		registerComp(Vue);
-	}
-	new Vue({}).$mount('#app')
-</script>
+	Vue.component("lazy-loader", function(resolve, reject) {
+		fetch("/examples/remote.html").
+			then(function(r) {
+				return r.text()
+			}).then(function(text){
+				console.log("text", text, onclick)
+
+				resolve({
+					template: text
+				})
+			})
+	})
+
+</script> -->
+<script src="/examples/bran.umd.min.js"></script>

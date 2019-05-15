@@ -9,6 +9,7 @@
       @close="close"
       :visible="isVisible"
       :getContainer="getContainer"
+	  :destroyOnClose="true"
     >
       <slot name="drawer" :parent="this"></slot>
     </a-drawer>
