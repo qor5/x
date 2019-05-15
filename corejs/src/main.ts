@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import { newFormWithStates, mergeStatesIntoForm } from './form';
 import debounce from 'lodash/debounce';
-// import wrap from "lodash/wrap";
 import 'whatwg-fetch';
 import querystring from 'query-string';
 
@@ -26,18 +25,16 @@ interface EventResponse {
 	scripts?: string;
 }
 
-// const dialogElement = document.createElement("div");
-
-// function closeDialog() { }
-
 declare var window: any;
 
-const form = window.form = newFormWithStates(window.__serverSideData__.states);
+const ssd = window.__serverSideData__;
+const states = (ssd && ssd.states) || {};
+export const form = newFormWithStates(states);
 
-function fetchEvent(
+export function fetchEvent(
 	eventFuncId: EventFuncID,
 	event: EventData,
-) {
+): Promise<Response> {
 	const eventData = JSON.stringify({
 		eventFuncId,
 		event,
@@ -69,31 +66,19 @@ function fetchEvent(
 		// 	'Content-Type': 'multipart/form-data'
 		// },
 		body: form,
-	})
+	});
+}
+
+function fetchEventAndProcessDefault(eventFuncId: EventFuncID, event: EventData) {
+
+	fetchEvent(eventFuncId, event)
 		.then((r) => {
 			return r.json();
 		})
 		.then((r: EventResponse) => {
-			// var alertServ = alert || window.__uibuilderAlert;
-			// if (r.alert && alertServ) {
-			// 	alertServ.addAlert(
-			// 		r.alert.message,
-			// 		r.alert.type,
-			// 		r.alert.timeout
-			// 	);
-			// }
-
 			if (r.states) {
 				mergeStatesIntoForm(form, r.states);
 			}
-
-			// if (r.dialog) {
-
-			// }
-
-			// if (r.closeDialog) {
-			// 	closeDialog();
-			// }
 
 			if (r.redirectURL) {
 				window.location.replace(r.redirectURL);
@@ -168,7 +153,7 @@ function jsonEvent(evt: any) {
 	return v;
 }
 
-const debounceFetchEvent = debounce(fetchEvent, 800);
+const debounceFetchEvent = debounce(fetchEventAndProcessDefault, 800);
 
 function controlsOnInput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
 	// console.log("evt", evt)
@@ -186,11 +171,10 @@ function newVue() {
 	}
 	const vm = new Vue({
 		el: '#app',
-		components: (window.__branVueComponents || {}),
 		data: {},
 		methods: {
 			onclick(eventFuncId: EventFuncID, evt: any) {
-				fetchEvent(eventFuncId, jsonEvent(evt));
+				fetchEventAndProcessDefault(eventFuncId, jsonEvent(evt));
 			},
 			oninput: controlsOnInput,
 		},

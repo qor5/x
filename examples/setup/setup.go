@@ -122,7 +122,11 @@ func Setup(prefix string) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("/assets/main.js",
-		ub.PacksHandler("text/javascript", append([]bran.ComponentsPack{branoverlay.JSComponentsPack()}, bran.ComponentsPacks()...)...))
+		ub.PacksHandler("text/javascript",
+			branoverlay.JSComponentsPack(),
+			bran.JSComponentsPack(),
+		),
+	)
 
 	mux.Handle("/assets/overlay.css",
 		ub.PacksHandler("text/css", branoverlay.CSSComponentsPack()))

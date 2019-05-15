@@ -336,7 +336,7 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 		er.Styles = ssd.Styles
 	}
 
-	eventResponseWithContext(ctx, &er)
+	eventResponseWithContext(ctx, c, &er)
 
 	err = json.NewEncoder(w).Encode(er)
 	if err != nil {
@@ -344,7 +344,7 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func eventResponseWithContext(ctx *ui.EventContext, er *ui.EventResponse) {
+func eventResponseWithContext(ctx *ui.EventContext, c context.Context, er *ui.EventResponse) {
 	if comp, ok := er.Alert.(ui.SchemaComponent); ok {
 		er.Alert = ui.WithContext(ctx, comp)
 	}
@@ -356,6 +356,10 @@ func eventResponseWithContext(ctx *ui.EventContext, er *ui.EventResponse) {
 	}
 	if comp, ok := er.Dialog.(ui.SchemaComponent); ok {
 		er.Dialog = ui.WithContext(ctx, comp)
+	}
+
+	if comp, ok := er.Schema.(h.HTMLComponent); ok {
+		er.Schema = h.MustString(comp, c)
 	}
 }
 

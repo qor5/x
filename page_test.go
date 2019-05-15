@@ -374,18 +374,38 @@ var eventCases = []struct {
 	expectedEventResp string
 }{
 
-	// 	{
-	// 		name: "case 1",
-	// 		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
-	// 			pr.Schema = ui.RawHTML("<h1>Hello</h1>")
-	// 		},
-	// 		expectedEventResp: `
-	// {
-	// 	"schema": "\u003ch1\u003eHello\u003c/h1\u003e",
-	// 	"reload": true
-	// }
-	// 		`,
-	// 	},
+	{
+		name: "render schema in event func",
+		eventFunc: func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+			r.Schema = h.Div(
+				h.H1("hello"),
+			)
+			return
+		},
+		expectedEventResp: `
+	{
+		"schema": "\n\u003cdiv\u003e\n\u003ch1\u003ehello\u003c/h1\u003e\n\u003c/div\u003e\n",
+		"states": {
+			"Name": [
+				""
+			]
+		}
+	}
+			`,
+	},
+
+	{
+		name: "case 1",
+		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
+			pr.Schema = h.RawHTML("<h1>Hello</h1>")
+		},
+		expectedEventResp: `
+	{
+		"schema": "\u003ch1\u003eHello\u003c/h1\u003e",
+		"reload": true
+	}
+			`,
+	},
 	{
 		name: "case 2",
 		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
