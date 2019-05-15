@@ -49,7 +49,7 @@ func editPage(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 		H1(ctx.Event.Params[0]),
 		Div(Text(randStr("in editPage Drawer"))),
 	).Trigger(
-		A().Text("Open Inner").Href("#"),
+		A().Text("Open " + randStr("inner")).Href("#"),
 	)
 	return
 }
