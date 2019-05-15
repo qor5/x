@@ -44,7 +44,7 @@ func (b *ButtonBuilder) Children(comps ...h.HTMLComponent) (r *ButtonBuilder) {
 	return b
 }
 
-func (b *ButtonBuilder) SetAttr(k string, v string) {
+func (b *ButtonBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
 }
 
