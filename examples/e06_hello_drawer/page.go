@@ -12,6 +12,8 @@ import (
 
 type mystate struct {
 	drawerVisible bool
+	Name          string
+	NameError     string
 }
 
 func randStr(prefix string) string {
@@ -22,21 +24,32 @@ func randStr(prefix string) string {
 func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	s := ctx.StateOrInit(&mystate{}).(*mystate)
 
-	pr.Schema = bo.Drawer(
-		ui.Bind(Button("Hello")).OnClick(ctx.Hub, "reload", reload),
-		Button("Close").Attr("@click", "parent.close"),
-		Div(Text(randStr("homeDrawer"))),
-		bo.LazyLoader(ctx.Hub, "editPage", editPage, "param1").ParentVisible(),
-	).Trigger(
-		A().Text("Open").Href("#"),
-	).Width(500).DefaultOpen(s.drawerVisible)
+	pr.Schema = Div(
+		H1(s.Name),
+		bo.Drawer(
+			Button("Close").Attr("@click", "parent.close"),
+			Div(Text(randStr("homeDrawer"))),
+			bo.LazyLoader(ctx.Hub, "editPage", editPage, "param1").ParentVisible(),
+			ui.Bind(Input("").Type("text").Value(s.Name)).FieldName("Name"),
+			Label(s.NameError).Style("color:red"),
+			ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update),
+		).Trigger(
+			A().Text("Edit").Href("#"),
+		).Width(500).DefaultOpen(s.drawerVisible),
+	)
 	return
 }
 
-func reload(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	r.Reload = true
 	s := ctx.State.(*mystate)
-	s.drawerVisible = true
+	if len(s.Name) < 10 {
+		s.NameError = "name is too short"
+		s.drawerVisible = true
+		s.Name = ""
+	} else {
+		s.drawerVisible = false
+	}
 	return
 }
 
