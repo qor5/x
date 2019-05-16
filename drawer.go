@@ -39,7 +39,9 @@ func (b *DrawerBuilder) Height(v int) (r *DrawerBuilder) {
 }
 
 func (b *DrawerBuilder) DefaultOpen(v bool) (r *DrawerBuilder) {
-	b.tag.Attr(":default-open", fmt.Sprint(v))
+	if v {
+		b.tag.Attr(":default-open", fmt.Sprint(v), ":first-enter", "true")
+	}
 	return b
 }
 

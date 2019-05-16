@@ -15,7 +15,7 @@
 			continue.</strong>
 	</noscript>
 	<div id="app">
-		<bran-drawer width="770" placement="right" :default-open="true" class-name="drawer1">
+		<bran-drawer width="770" placement="right" :default-open="true" :first-enter="true" class-name="drawer1">
 			<template v-slot:trigger='{ parent }'>123
 				<a href="#" @click="parent.show">
 					Open
@@ -30,7 +30,7 @@
 				<bran-lazy-loader :visible='parent.isVisible' :loader-func='{"id": "loadDrawer", "params": ["1", "2"]}'>
 				</bran-lazy-loader>
 				<h1>This is nested</h1>
-				<bran-drawer width="770" placement="right" class-name="drawer2" :level="['.drawer1']">
+				<bran-drawer width="770" placement="right" :default-open="false" class-name="drawer2" :level="['.drawer1']">
 					<template v-slot:trigger='{ parent }'>123
 						<a href="#" @click="parent.show">
 							Open

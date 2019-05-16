@@ -42,6 +42,7 @@ export default {
 	data() {
 		return {
 			isVisible: this.defaultOpen,
+			isFirstEnter: this.firstEnter,
 			destroyOnClose: false,
 			timeout: null,
 		};
@@ -53,6 +54,7 @@ export default {
 		},
 		close() {
 			this.isVisible = false;
+			this.isFirstEnter = false;
 			clearTimeout(this.timeout)
 			this.timeout = setTimeout(() => {
 				this.destroyOnClose = true;
@@ -65,10 +67,8 @@ export default {
 	},
 	render() {
 		const props = getOptionProps(this)
-		const { open, getContainer, handler, level, levelMove, ...rest } = props
-		const defaultGetContainer = () => {
-			return document.getElementById("app");
-		}
+		const { open, getContainer, handler, level, levelMove, firstEnter, ...rest } = props
+		const defaultGetContainer = "#app"
 
 		const vcProps = {
 			props: {
@@ -76,6 +76,7 @@ export default {
 				getContainer: defaultGetContainer,
 				handler: false,
 				levelMove: levelMoveFactory(level),
+				firstEnter: this.isFirstEnter,
 				level,
 				...rest
 			},
