@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/NYTimes/gziphandler"
 	"github.com/sunfmin/bran/ui"
-
 	h "github.com/theplant/htmlgo"
 )
 
@@ -29,7 +29,7 @@ type ComponentsPack string
 
 var startTime = time.Now()
 
-func (b *Builder) PacksHandler(contentType string, packs ...ComponentsPack) http.HandlerFunc {
+func (b *Builder) PacksHandler(contentType string, packs ...ComponentsPack) http.Handler {
 	var buf = bytes.NewBuffer(nil)
 	for _, pk := range packs {
 		// buf = append(buf, []byte(fmt.Sprintf("\n// pack %d\n", i+1))...)
@@ -40,10 +40,10 @@ func (b *Builder) PacksHandler(contentType string, packs ...ComponentsPack) http
 
 	body := bytes.NewReader(buf.Bytes())
 
-	return func(w http.ResponseWriter, r *http.Request) {
+	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", contentType)
 		http.ServeContent(w, r, "", startTime, body)
-	}
+	}))
 }
 
 func (b *Builder) defaultLayoutMiddleFunc(in ui.LayoutFunc, head ui.PageInjector) (out ui.LayoutFunc) {
