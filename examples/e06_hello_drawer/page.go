@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/sunfmin/bran/ui"
-	. "github.com/sunfmin/branoverlay"
+	bo "github.com/sunfmin/branoverlay"
 	. "github.com/theplant/htmlgo"
 )
 
@@ -22,14 +22,14 @@ func randStr(prefix string) string {
 func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	s := ctx.StateOrInit(&mystate{}).(*mystate)
 
-	pr.Schema = Drawer(
+	pr.Schema = bo.Drawer(
 		ui.Bind(Button("Hello")).OnClick(ctx.Hub, "reload", reload),
 		Button("Close").Attr("@click", "parent.close"),
 		Div(Text(randStr("homeDrawer"))),
-		LazyLoader(ctx.Hub, "editPage", editPage, "param1").ParentVisible(),
+		bo.LazyLoader(ctx.Hub, "editPage", editPage, "param1").ParentVisible(),
 	).Trigger(
 		A().Text("Open").Href("#"),
-	).Width(500).Visible(s.drawerVisible)
+	).Width(500).DefaultOpen(s.drawerVisible)
 	return
 }
 
@@ -44,12 +44,12 @@ func editPage(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	s := ctx.State.(*mystate)
 	_ = s
 
-	r.Schema = Drawer(
+	r.Schema = bo.Drawer(
 		Button("Close").Attr("@click", "parent.close"),
 		H1(ctx.Event.Params[0]),
 		Div(Text(randStr("in editPage Drawer"))),
 	).Trigger(
 		A().Text("Open " + randStr("inner")).Href("#"),
-	)
+	).Width(400)
 	return
 }
