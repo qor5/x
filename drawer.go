@@ -18,6 +18,7 @@ func Drawer(children ...HTMLComponent) (r *DrawerBuilder) {
 	r = &DrawerBuilder{
 		tag: Tag("bran-drawer"),
 	}
+	r.Placement("right")
 	r.children = children
 	return
 }
@@ -28,17 +29,32 @@ func (b *DrawerBuilder) Trigger(v MutableAttrHTMLComponent) (r *DrawerBuilder) {
 }
 
 func (b *DrawerBuilder) Width(v int) (r *DrawerBuilder) {
-	b.tag.Attr("width", fmt.Sprint(v))
+	b.tag.Attr(":width", fmt.Sprint(v))
 	return b
 }
 
-func (b *DrawerBuilder) Title(v string) (r *DrawerBuilder) {
-	b.tag.Attr("title", v)
+func (b *DrawerBuilder) Height(v int) (r *DrawerBuilder) {
+	b.tag.Attr(":height", fmt.Sprint(v))
 	return b
 }
 
-func (b *DrawerBuilder) Visible(v bool) (r *DrawerBuilder) {
-	b.tag.Attr("visible", fmt.Sprint(v))
+func (b *DrawerBuilder) DefaultOpen(v bool) (r *DrawerBuilder) {
+	b.tag.Attr(":default-open", fmt.Sprint(v))
+	return b
+}
+
+func (b *DrawerBuilder) ClassName(v string) (r *DrawerBuilder) {
+	b.tag.Attr(":class-name", v)
+	return b
+}
+
+func (b *DrawerBuilder) Level(v []string) (r *DrawerBuilder) {
+	b.tag.Attr(":level", v)
+	return b
+}
+
+func (b *DrawerBuilder) Placement(v string) (r *DrawerBuilder) {
+	b.tag.Attr("placement", v)
 	return b
 }
 

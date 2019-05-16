@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="/dist/branoverlay.css">
 
 <div id="app">
-	<bran-drawer width="770" title="Hi this is my title" visible="false">
+	<bran-drawer width="770" :default-open="true" placement="right">
 		<template v-slot:trigger='{ parent }'>123
 			<a href="#" @click="parent.show">
 				Open
@@ -19,9 +19,9 @@
 			<p>Some contents...</p>
 			<p>Some contents...</p>
 			<h1>This is from remote</h1>
-			<bran-lazy-loader :visible='parent.isVisible' eventfuncid='{"id": "loadDrawer", "params": ["1", "2"]}'></bran-lazy-loader>
+			<bran-lazy-loader :visible='parent.isVisible' :loader-func='{"id": "loadDrawer", "params": ["1", "2"]}'></bran-lazy-loader>
 			<h1>This is nested</h1>
-			<bran-drawer width="770" title="Hi this is my title inner">
+			<bran-drawer height="400" placement="bottom">
 				<template v-slot:trigger='{ parent }'>123
 					<a href="#" @click="parent.show">
 						Open
@@ -55,20 +55,5 @@
 		</a>
 	</bran-popover>
 </div>
-<!--
-<script>
-	Vue.component("lazy-loader", function(resolve, reject) {
-		fetch("/examples/remote.html").
-			then(function(r) {
-				return r.text()
-			}).then(function(text){
-				console.log("text", text, onclick)
 
-				resolve({
-					template: text
-				})
-			})
-	})
-
-</script> -->
-<script src="/examples/bran.umd.min.js"></script>
+<script src="/public/bran.umd.min.js"></script>

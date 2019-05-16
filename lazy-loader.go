@@ -34,6 +34,6 @@ func (b *LazyLoaderBuilder) ParentVisible() (r *LazyLoaderBuilder) {
 }
 
 func (b *LazyLoaderBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	b.tag.SetAttr("loader-func", b.loaderFunc)
+	b.tag.SetAttr(":loader-func", b.loaderFunc)
 	return b.tag.MarshalHTML(ctx)
 }
