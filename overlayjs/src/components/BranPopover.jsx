@@ -11,22 +11,6 @@ export default {
 		};
 	},
 	methods: {
-		show() {
-			this.destroyOnClose = false;
-			this.isVisible = true;
-		},
-		close() {
-			this.isVisible = false
-			this.destroyOnClose = true;
-			clearTimeout(this.timeout)
-			this.timeout = setTimeout(() => {
-				this.destroyOnClose = true;
-				this.$forceUpdate();
-			}, 300);
-		},
-		handleVisibleChange(v) {
-			this.isVisible = v;
-		},
 	},
 	render() {
 		const props = getOptionProps(this)
@@ -41,7 +25,6 @@ export default {
 				...rest
 			},
 			on: {
-				visibleChange: this.handleVisibleChange,
 				...this.$listeners
 			}
 		}
