@@ -23,13 +23,13 @@ func LazyLoader(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params
 	return
 }
 
-func (b *LazyLoaderBuilder) VueVisible(v string) (r *LazyLoaderBuilder) {
+func (b *LazyLoaderBuilder) Visible(v string) (r *LazyLoaderBuilder) {
 	b.tag.Attr(":visible", v)
 	return b
 }
 
-func (b *LazyLoaderBuilder) ParentVisible() (r *LazyLoaderBuilder) {
-	b.VueVisible("parent.isVisible")
+func (b *LazyLoaderBuilder) LoadWhenParentVisible() (r *LazyLoaderBuilder) {
+	b.Visible("parent.isVisible")
 	return b
 }
 

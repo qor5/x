@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: "bran-lazy-loader",
+  name: "BranLazyLoader",
   props: ["loaderFunc", "visible"],
   data: function() {
     const ef = this.loaderFunc;
