@@ -30,6 +30,12 @@ declare var window: any;
 const ssd = window.__serverSideData__;
 const states = (ssd && ssd.states) || {};
 export const form = newFormWithStates(states);
+const app = document.getElementById('app');
+if (!app) {
+	throw new Error('#app required');
+}
+
+console.log("app", app)
 
 export function fetchEvent(
 	eventFuncId: EventFuncID,
@@ -69,7 +75,7 @@ export function fetchEvent(
 	});
 }
 
-function fetchEventAndProcessDefault(eventFuncId: EventFuncID, event: EventData) {
+function fetchEventAndProcessDefault(comp: any, eventFuncId: EventFuncID, event: EventData) {
 
 	fetchEvent(eventFuncId, event)
 		.then((r) => {
@@ -85,43 +91,42 @@ function fetchEventAndProcessDefault(eventFuncId: EventFuncID, event: EventData)
 			}
 
 			if (r.schema) {
-				reload(r);
+				reload(comp, r);
 			}
 			return r;
 		});
 }
 
-function reload(r: EventResponse) {
-	const app = document.querySelector('#app');
-	if (!app) {
-		return;
-	}
+function reload(comp: any, r: EventResponse) {
+	console.log("app2", app)
 
-	app.innerHTML = r.schema;
-	if (r.styles) {
-		let style = document.querySelector('#main_styles');
-		if (style && style.parentNode) {
-			style.parentNode.removeChild(style);
-		}
-		style = document.createElement('style');
-		style.setAttribute('type', 'text/css');
-		style.setAttribute('id', 'main_styles');
-		style.appendChild(document.createTextNode(r.styles));
-		document.body.insertBefore(style, app);
-	}
+	// app.innerHTML = r.schema;
+	// if (r.styles) {
+	// 	let style = document.querySelector('#main_styles');
+	// 	if (style && style.parentNode) {
+	// 		style.parentNode.removeChild(style);
+	// 	}
+	// 	style = document.createElement('style');
+	// 	style.setAttribute('type', 'text/css');
+	// 	style.setAttribute('id', 'main_styles');
+	// 	style.appendChild(document.createTextNode(r.styles));
+	// 	document.body.insertBefore(style, app);
+	// }
 
-	if (r.scripts) {
-		let script = document.querySelector('#main_scripts');
-		if (script && script.parentNode) {
-			script.parentNode.removeChild(script);
-		}
-		script = document.createElement('script');
-		script.setAttribute('id', 'main_scripts');
-		script.appendChild(document.createTextNode(r.scripts));
-		document.body.insertBefore(script, app.nextSibling);
-	}
+	// if (r.scripts) {
+	// 	let script = document.querySelector('#main_scripts');
+	// 	if (script && script.parentNode) {
+	// 		script.parentNode.removeChild(script);
+	// 	}
+	// 	script = document.createElement('script');
+	// 	script.setAttribute('id', 'main_scripts');
+	// 	script.appendChild(document.createTextNode(r.scripts));
+	// 	document.body.insertBefore(script, app.nextSibling);
+	// }
 
-	newVue();
+	comp.dyncTemplate = r.schema;
+	console.log("comp", comp)
+	comp.$forceUpdate()
 }
 
 function jsonEvent(evt: any) {
@@ -155,32 +160,41 @@ function jsonEvent(evt: any) {
 
 const debounceFetchEvent = debounce(fetchEventAndProcessDefault, 800);
 
-function controlsOnInput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
+function controlsOnInput(comp: any, eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
 	// console.log("evt", evt)
 	if (fieldName) {
 		form.set(fieldName, evt.target.value);
 	}
 	if (eventFuncId) {
-		debounceFetchEvent(eventFuncId, jsonEvent(evt));
+		debounceFetchEvent(comp, eventFuncId, jsonEvent(evt));
 	}
 }
 
-function newVue() {
-	for (const registerComp of (window.__branVueComponentRegisters || [])) {
-		registerComp(Vue);
-	}
-	const vm = new Vue({
-		el: '#app',
-		data: {},
-		methods: {
-			onclick(eventFuncId: EventFuncID, evt: any) {
-				fetchEventAndProcessDefault(eventFuncId, jsonEvent(evt));
-			},
-			oninput: controlsOnInput,
-		},
-	});
-	window.vueComps = [];
+export const methods = {
+	onclick(eventFuncId: EventFuncID, evt: any) {
+		fetchEventAndProcessDefault(this, eventFuncId, jsonEvent(evt));
+	},
+	oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
+		controlsOnInput(this, eventFuncId, fieldName, evt);
+	},
+};
 
+const initialTemplate = app.outerHTML;
+for (const registerComp of (window.__branVueComponentRegisters || [])) {
+	registerComp(Vue);
 }
 
-newVue();
+const vm = new Vue({
+	data: {
+		dyncTemplate: initialTemplate,
+	},
+	render(h) {
+		console.log("rendering app", this)
+
+		const t = this.dyncTemplate
+		return h({
+			template: t,
+			methods: { ...methods },
+		})
+	},
+}).$mount('#app');
