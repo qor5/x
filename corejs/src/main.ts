@@ -30,6 +30,10 @@ declare var window: any;
 const ssd = window.__serverSideData__;
 const states = (ssd && ssd.states) || {};
 export const form = newFormWithStates(states);
+const app = document.getElementById('app');
+if (!app) {
+	throw new Error('#app required');
+}
 
 export function fetchEvent(
 	eventFuncId: EventFuncID,
@@ -69,7 +73,29 @@ export function fetchEvent(
 	});
 }
 
-function fetchEventAndProcessDefault(eventFuncId: EventFuncID, event: EventData) {
+
+const debounceFetchEvent = debounce(fetchEventAndProcessDefault, 800);
+
+function controlsOnInput(comp: any, eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
+	// console.log("evt", evt)
+	if (fieldName) {
+		form.set(fieldName, evt.target.value);
+	}
+	if (eventFuncId) {
+		debounceFetchEvent(comp, eventFuncId, jsonEvent(evt));
+	}
+}
+
+export const methods = {
+	onclick(eventFuncId: EventFuncID, evt: any) {
+		fetchEventAndProcessDefault(this, eventFuncId, jsonEvent(evt));
+	},
+	oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
+		controlsOnInput(this, eventFuncId, fieldName, evt);
+	},
+};
+
+function fetchEventAndProcessDefault(comp: any, eventFuncId: EventFuncID, event: EventData) {
 
 	fetchEvent(eventFuncId, event)
 		.then((r) => {
@@ -85,43 +111,41 @@ function fetchEventAndProcessDefault(eventFuncId: EventFuncID, event: EventData)
 			}
 
 			if (r.schema) {
-				reload(r);
+				reload(comp, r);
 			}
 			return r;
 		});
 }
 
-function reload(r: EventResponse) {
-	const app = document.querySelector('#app');
-	if (!app) {
-		return;
-	}
+function reload(comp: any, r: EventResponse) {
 
-	app.innerHTML = r.schema;
-	if (r.styles) {
-		let style = document.querySelector('#main_styles');
-		if (style && style.parentNode) {
-			style.parentNode.removeChild(style);
-		}
-		style = document.createElement('style');
-		style.setAttribute('type', 'text/css');
-		style.setAttribute('id', 'main_styles');
-		style.appendChild(document.createTextNode(r.styles));
-		document.body.insertBefore(style, app);
-	}
+	// app.innerHTML = r.schema;
+	// if (r.styles) {
+	// 	let style = document.querySelector('#main_styles');
+	// 	if (style && style.parentNode) {
+	// 		style.parentNode.removeChild(style);
+	// 	}
+	// 	style = document.createElement('style');
+	// 	style.setAttribute('type', 'text/css');
+	// 	style.setAttribute('id', 'main_styles');
+	// 	style.appendChild(document.createTextNode(r.styles));
+	// 	document.body.insertBefore(style, app);
+	// }
 
-	if (r.scripts) {
-		let script = document.querySelector('#main_scripts');
-		if (script && script.parentNode) {
-			script.parentNode.removeChild(script);
-		}
-		script = document.createElement('script');
-		script.setAttribute('id', 'main_scripts');
-		script.appendChild(document.createTextNode(r.scripts));
-		document.body.insertBefore(script, app.nextSibling);
-	}
-
-	newVue();
+	// if (r.scripts) {
+	// 	let script = document.querySelector('#main_scripts');
+	// 	if (script && script.parentNode) {
+	// 		script.parentNode.removeChild(script);
+	// 	}
+	// 	script = document.createElement('script');
+	// 	script.setAttribute('id', 'main_scripts');
+	// 	script.appendChild(document.createTextNode(r.scripts));
+	// 	document.body.insertBefore(script, app.nextSibling);
+	// }
+	comp.$root.changeCurrent({
+		template: r.schema,
+		methods: { ...methods },
+	});
 }
 
 function jsonEvent(evt: any) {
@@ -153,34 +177,64 @@ function jsonEvent(evt: any) {
 	return v;
 }
 
-const debounceFetchEvent = debounce(fetchEventAndProcessDefault, 800);
 
-function controlsOnInput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
-	// console.log("evt", evt)
-	if (fieldName) {
-		form.set(fieldName, evt.target.value);
-	}
-	if (eventFuncId) {
-		debounceFetchEvent(eventFuncId, jsonEvent(evt));
-	}
+for (const registerComp of (window.__branVueComponentRegisters || [])) {
+	registerComp(Vue);
 }
 
-function newVue() {
-	for (const registerComp of (window.__branVueComponentRegisters || [])) {
-		registerComp(Vue);
-	}
-	const vm = new Vue({
-		el: '#app',
-		data: {},
-		methods: {
-			onclick(eventFuncId: EventFuncID, evt: any) {
-				fetchEventAndProcessDefault(eventFuncId, jsonEvent(evt));
+const DefaultView = {
+	template: app.innerHTML,
+	methods: { ...methods },
+};
+
+Vue.component('bran-lazy-loader', {
+	name: 'BranLazyLoader',
+	props: ['loaderFunc', 'visible'],
+	template: `
+		<div class="bran-lazy-loader" v-if="visible">
+			<component :is="lazyloader"></component>
+		</div>
+	`,
+	data() {
+		const ef = this.loaderFunc;
+		if (!ef) {
+			return {
+				lazyloader: {
+					render() {
+						return null;
+					},
+				},
+			};
+		}
+		return {
+			lazyloader(): any {
+				return fetchEvent(ef, {})
+					.then((r) => {
+						return r.json();
+					})
+					.then((json) => {
+						return {
+							template: json.schema,
+							methods: { ...methods },
+						};
+					});
 			},
-			oninput: controlsOnInput,
+		};
+	},
+});
+
+const vm = new Vue({
+	data: {
+		current: DefaultView,
+	},
+	template: `
+	<div id="app">
+		<component :is="current"></component>
+	</div>
+`,
+	methods: {
+		changeCurrent(newView: any) {
+			this.current = newView;
 		},
-	});
-	window.vueComps = [];
-
-}
-
-newVue();
+	},
+}).$mount('#app');
