@@ -35,7 +35,7 @@ if (!app) {
 	throw new Error('#app required');
 }
 
-export function fetchEvent(
+function fetchEvent(
 	eventFuncId: EventFuncID,
 	event: EventData,
 ): Promise<Response> {
@@ -86,7 +86,7 @@ function controlsOnInput(comp: any, eventFuncId?: EventFuncID, fieldName?: strin
 	}
 }
 
-export const methods = {
+const methods = {
 	onclick(eventFuncId: EventFuncID, evt: any) {
 		fetchEventAndProcessDefault(this, eventFuncId, jsonEvent(evt));
 	},
@@ -117,8 +117,14 @@ function fetchEventAndProcessDefault(comp: any, eventFuncId: EventFuncID, event:
 		});
 }
 
-function reload(comp: any, r: EventResponse) {
+function componentByTemplate(template: string): any {
+	return {
+		template,
+		methods,
+	};
+}
 
+function reload(comp: any, r: EventResponse) {
 	// app.innerHTML = r.schema;
 	// if (r.styles) {
 	// 	let style = document.querySelector('#main_styles');
@@ -142,10 +148,7 @@ function reload(comp: any, r: EventResponse) {
 	// 	script.appendChild(document.createTextNode(r.scripts));
 	// 	document.body.insertBefore(script, app.nextSibling);
 	// }
-	comp.$root.changeCurrent({
-		template: r.schema,
-		methods: { ...methods },
-	});
+	comp.$root.changeCurrent(componentByTemplate(r.schema));
 }
 
 function jsonEvent(evt: any) {
@@ -182,11 +185,6 @@ for (const registerComp of (window.__branVueComponentRegisters || [])) {
 	registerComp(Vue);
 }
 
-const DefaultView = {
-	template: app.innerHTML,
-	methods: { ...methods },
-};
-
 Vue.component('bran-lazy-loader', {
 	name: 'BranLazyLoader',
 	props: ['loaderFunc', 'visible'],
@@ -213,10 +211,7 @@ Vue.component('bran-lazy-loader', {
 						return r.json();
 					})
 					.then((json) => {
-						return {
-							template: json.schema,
-							methods: { ...methods },
-						};
+						return componentByTemplate(json.schema);
 					});
 			},
 		};
@@ -225,7 +220,7 @@ Vue.component('bran-lazy-loader', {
 
 const vm = new Vue({
 	data: {
-		current: DefaultView,
+		current: componentByTemplate(app.innerHTML),
 	},
 	template: `
 	<div id="app">
