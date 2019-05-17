@@ -35,8 +35,6 @@ if (!app) {
 	throw new Error('#app required');
 }
 
-console.log("app", app)
-
 export function fetchEvent(
 	eventFuncId: EventFuncID,
 	event: EventData,
@@ -75,6 +73,28 @@ export function fetchEvent(
 	});
 }
 
+
+const debounceFetchEvent = debounce(fetchEventAndProcessDefault, 800);
+
+function controlsOnInput(comp: any, eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
+	// console.log("evt", evt)
+	if (fieldName) {
+		form.set(fieldName, evt.target.value);
+	}
+	if (eventFuncId) {
+		debounceFetchEvent(comp, eventFuncId, jsonEvent(evt));
+	}
+}
+
+export const methods = {
+	onclick(eventFuncId: EventFuncID, evt: any) {
+		fetchEventAndProcessDefault(this, eventFuncId, jsonEvent(evt));
+	},
+	oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
+		controlsOnInput(this, eventFuncId, fieldName, evt);
+	},
+};
+
 function fetchEventAndProcessDefault(comp: any, eventFuncId: EventFuncID, event: EventData) {
 
 	fetchEvent(eventFuncId, event)
@@ -98,7 +118,6 @@ function fetchEventAndProcessDefault(comp: any, eventFuncId: EventFuncID, event:
 }
 
 function reload(comp: any, r: EventResponse) {
-	console.log("app2", app)
 
 	// app.innerHTML = r.schema;
 	// if (r.styles) {
@@ -123,10 +142,10 @@ function reload(comp: any, r: EventResponse) {
 	// 	script.appendChild(document.createTextNode(r.scripts));
 	// 	document.body.insertBefore(script, app.nextSibling);
 	// }
-
-	comp.dyncTemplate = r.schema;
-	console.log("comp", comp)
-	comp.$forceUpdate()
+	comp.$root.changeCurrent({
+		template: r.schema,
+		methods: { ...methods },
+	});
 }
 
 function jsonEvent(evt: any) {
@@ -158,43 +177,64 @@ function jsonEvent(evt: any) {
 	return v;
 }
 
-const debounceFetchEvent = debounce(fetchEventAndProcessDefault, 800);
 
-function controlsOnInput(comp: any, eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
-	// console.log("evt", evt)
-	if (fieldName) {
-		form.set(fieldName, evt.target.value);
-	}
-	if (eventFuncId) {
-		debounceFetchEvent(comp, eventFuncId, jsonEvent(evt));
-	}
-}
-
-export const methods = {
-	onclick(eventFuncId: EventFuncID, evt: any) {
-		fetchEventAndProcessDefault(this, eventFuncId, jsonEvent(evt));
-	},
-	oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
-		controlsOnInput(this, eventFuncId, fieldName, evt);
-	},
-};
-
-const initialTemplate = app.outerHTML;
 for (const registerComp of (window.__branVueComponentRegisters || [])) {
 	registerComp(Vue);
 }
 
+const DefaultView = {
+	template: app.innerHTML,
+	methods: { ...methods },
+};
+
+Vue.component('bran-lazy-loader', {
+	name: 'BranLazyLoader',
+	props: ['loaderFunc', 'visible'],
+	template: `
+		<div class="bran-lazy-loader" v-if="visible">
+			<component :is="lazyloader"></component>
+		</div>
+	`,
+	data() {
+		const ef = this.loaderFunc;
+		if (!ef) {
+			return {
+				lazyloader: {
+					render() {
+						return null;
+					},
+				},
+			};
+		}
+		return {
+			lazyloader(): any {
+				return fetchEvent(ef, {})
+					.then((r) => {
+						return r.json();
+					})
+					.then((json) => {
+						return {
+							template: json.schema,
+							methods: { ...methods },
+						};
+					});
+			},
+		};
+	},
+});
+
 const vm = new Vue({
 	data: {
-		dyncTemplate: initialTemplate,
+		current: DefaultView,
 	},
-	render(h) {
-		console.log("rendering app", this)
-
-		const t = this.dyncTemplate
-		return h({
-			template: t,
-			methods: { ...methods },
-		})
+	template: `
+	<div id="app">
+		<component :is="current"></component>
+	</div>
+`,
+	methods: {
+		changeCurrent(newView: any) {
+			this.current = newView;
+		},
 	},
 }).$mount('#app');
