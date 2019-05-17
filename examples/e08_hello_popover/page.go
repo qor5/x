@@ -42,7 +42,7 @@ func HelloPopover(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		bo.Popover(
 			A().Text("Remote Loader").Href("#"),
 		).Overlay(
-			bo.LazyLoader(ctx.Hub, "remoteOverlay", remoteOverlay).Visible("true"),
+			ui.LazyLoader(ctx.Hub, "remoteOverlay", remoteOverlay).Visible("true"),
 		).DefaultVisible(s.popoverVisibleRemote),
 	)
 	return

@@ -27,9 +27,9 @@ func HelloLazyLoaderInDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err erro
 	pr.Schema = Div(
 		H1(s.Name),
 		bo.Drawer(
-			bo.LazyLoader(ctx.Hub, "editPage", editPage, "param1").LoadWhenParentVisible(),
+			ui.LazyLoader(ctx.Hub, "editPage", editPage, "param1").LoadWhenParentVisible(),
 			bo.Drawer(
-				bo.LazyLoader(ctx.Hub, "editPage", editPage, "param2").LoadWhenParentVisible(),
+				ui.LazyLoader(ctx.Hub, "editPage", editPage, "param2").LoadWhenParentVisible(),
 			).Trigger(
 				A().Text("New Drawer").Href("#"),
 			),

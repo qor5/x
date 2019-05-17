@@ -29,7 +29,7 @@ func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		bo.Drawer(
 			Button("Close").Attr("@click", "parent.close"),
 			Div(Text(randStr("homeDrawer"))),
-			bo.LazyLoader(ctx.Hub, "editPage", editPage, "param1").LoadWhenParentVisible(),
+			ui.LazyLoader(ctx.Hub, "editPage", editPage, "param1").LoadWhenParentVisible(),
 			ui.Bind(Input("").Type("text").Value(s.Name)).FieldName("Name"),
 			Label(s.NameError).Style("color:red"),
 			ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update),
