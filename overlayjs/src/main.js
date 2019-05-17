@@ -1,7 +1,6 @@
 import BranDrawer from './components/BranDrawer.jsx'
 import BranLazyLoader from './components/BranLazyLoader.vue'
-import BranPopover from 'ant-design-vue/es/popover'
-import 'ant-design-vue/lib/popover/style/index.css'
+import BranPopover from './components/BranPopover.jsx'
 
 import Vue from 'vue'
 if (!window.Vue) {

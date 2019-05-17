@@ -43,17 +43,28 @@
 	<div style="height: 500px"></div>
 	123123123123123123
 
-	<bran-popover title="Hello" trigger="click">
-		<template slot="content">
-			<p>abc</p>
-			<p>def</p>
-			<p>ddd</p>
+	<h1>Bran Popover</h1>
+	<bran-popover title="Hello" trigger="click" :default-visible="true" placement="top">
+		<template v-slot:overlay="{ parent }">
+			<h1>Hello</h1>
+			<p>abc1231231231231312123</p>
 		</template>
 
-		<a href="#">
+		<a href="#" style="margin-left: 300px">
 			Open
 		</a>
 	</bran-popover>
+
+	<bran-popover title="Hello" trigger="click" :default-visible="false" placement="top">
+		<template v-slot:overlay="{ parent }">
+			<bran-lazy-loader :visible='parent.isVisible' :loader-func='{"id": "loadDrawer", "params": ["1", "2"]}'>
+		</template>
+
+		<a href="#" style="margin-left: 300px">
+			Open
+		</a>
+	</bran-popover>
+
 </div>
 
 <script src="/public/bran.umd.min.js"></script>
