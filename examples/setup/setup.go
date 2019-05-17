@@ -17,6 +17,7 @@ import (
 	"github.com/sunfmin/bran/examples/e04_hello_material_grid"
 	"github.com/sunfmin/bran/examples/e05_hello_customized_component"
 	"github.com/sunfmin/bran/examples/e06_hello_drawer"
+	"github.com/sunfmin/bran/examples/e07_hello_lazy_loader_in_drawer"
 	"github.com/sunfmin/bran/ui"
 	m "github.com/sunfmin/material"
 	"github.com/theplant/appkit/contexts"
@@ -155,6 +156,10 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e06_hello_drawer",
 			renderFunc: e06_hello_drawer.HelloDrawer,
+		},
+		{
+			url:        "e07_hello_lazy_loader_in_drawer",
+			renderFunc: e07_hello_lazy_loader_in_drawer.HelloLazyLoaderInDrawer,
 		},
 	}
 

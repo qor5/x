@@ -1,4 +1,4 @@
-package e06_hello_drawer
+package e07_hello_lazy_loader_in_drawer
 
 import (
 	"fmt"
@@ -21,36 +21,22 @@ func randStr(prefix string) string {
 	return fmt.Sprintf("%s: %d", prefix, rand.Int31n(100))
 }
 
-func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+func HelloLazyLoaderInDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	s := ctx.StateOrInit(&mystate{}).(*mystate)
 
 	pr.Schema = Div(
 		H1(s.Name),
 		bo.Drawer(
-			Button("Close").Attr("@click", "parent.close"),
-			Div(Text(randStr("homeDrawer"))),
 			bo.LazyLoader(ctx.Hub, "editPage", editPage, "param1").LoadWhenParentVisible(),
-			ui.Bind(Input("").Type("text").Value(s.Name)).FieldName("Name"),
-			Label(s.NameError).Style("color:red"),
-			ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update),
+			bo.Drawer(
+				bo.LazyLoader(ctx.Hub, "editPage", editPage, "param2").LoadWhenParentVisible(),
+			).Trigger(
+				A().Text("New Drawer").Href("#"),
+			),
 		).Trigger(
 			A().Text("Edit").Href("#"),
 		).Width(500).DefaultOpen(s.drawerVisible),
 	)
-	return
-}
-
-func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	r.Reload = true
-	s := ctx.State.(*mystate)
-	if len(s.Name) < 10 {
-		s.NameError = "name is too short"
-		s.drawerVisible = true
-		s.Name = ""
-	} else {
-		s.NameError = ""
-		s.drawerVisible = false
-	}
 	return
 }
 
