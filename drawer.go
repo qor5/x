@@ -38,9 +38,9 @@ func (b *DrawerBuilder) Height(v int) (r *DrawerBuilder) {
 	return b
 }
 
-func (b *DrawerBuilder) DefaultOpen(v bool) (r *DrawerBuilder) {
-	if v {
-		b.tag.Attr(":default-open", fmt.Sprint(v), ":first-enter", "true")
+func (b *DrawerBuilder) DefaultOpen(open bool, animation bool) (r *DrawerBuilder) {
+	if open {
+		b.tag.Attr(":default-open", fmt.Sprint(open), ":first-enter", fmt.Sprint(!animation))
 	}
 	return b
 }
@@ -61,14 +61,13 @@ func (b *DrawerBuilder) Placement(v string) (r *DrawerBuilder) {
 }
 
 func (b *DrawerBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	if b.trigger == nil {
-		panic("Drawer().Trigger() required")
+
+	if b.trigger != nil {
+		b.trigger.SetAttr("@click", "parent.show")
 	}
 
-	b.trigger.SetAttr("@click", "parent.show")
-
 	b.tag.Children(
-		Template(b.trigger).Attr("v-slot:trigger", "{ parent }"),
+		If(b.trigger != nil, Template(b.trigger).Attr("v-slot:trigger", "{ parent }")),
 		Template(b.children...).Attr("v-slot:drawer", "{ parent }"),
 	)
 	return b.tag.MarshalHTML(ctx)

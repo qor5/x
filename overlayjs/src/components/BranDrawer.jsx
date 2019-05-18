@@ -88,7 +88,7 @@ export default {
 
 		return (
 			<div class="bran-drawer">
-				{this.$scopedSlots.trigger({ parent: this })}
+				{this.$scopedSlots.trigger && this.$scopedSlots.trigger({ parent: this })}
 				{!this.destroyOnClose && <Drawer {...vcProps}>
 					{this.$scopedSlots.drawer({ parent: this })}
 				</Drawer>}
