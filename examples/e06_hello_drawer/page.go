@@ -36,6 +36,24 @@ func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		).Trigger(
 			A().Text("Edit").Href("#"),
 		).Width(500).DefaultOpen(s.drawerVisible),
+
+		bo.Drawer(
+			H2("Bottom"),
+		).Trigger(
+			A().Text("Bottom").Href("#"),
+		).Placement("bottom").Height(300),
+
+		bo.Drawer(
+			H2("Left"),
+		).Trigger(
+			A().Text("Left").Href("#"),
+		).Placement("left").Width(400),
+
+		bo.Drawer(
+			H2("Top"),
+		).Trigger(
+			A().Text("Top").Href("#"),
+		).Placement("top").Height(200),
 	)
 	return
 }
