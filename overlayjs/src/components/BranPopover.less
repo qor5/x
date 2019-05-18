@@ -1,15 +1,9 @@
 
 @tooltip-prefix-cls: rc-tooltip;
 
-//
-// Tooltips
-// --------------------------------------------------
-@border-radius-base : 3px;
-@overlay-shadow : 0 0 4px rgba(0, 0, 0, 0.17);
 
 //** Tooltip background color
 @tooltip-bg: #ffffff;
-@tooltip-opacity: 0.9;
 
 @tooltip-border-width: 1px;
 @tooltip-border-color: #b1b1b1;
@@ -22,69 +16,6 @@
 @tooltip-arrow-color: @tooltip-border-color;
 @tooltip-arrow-inner-color: @tooltip-bg;
 
-.@{tooltip-prefix-cls} {
-  .effect() {
-    animation-duration: 0.3s;
-    animation-fill-mode: both;
-  }
-
-  &&-zoom-enter,
-  &&-zoom-leave {
-    display: block;
-  }
-
-  &-zoom-enter,
-  &-zoom-appear {
-    opacity: 0;
-    .effect();
-    animation-timing-function: cubic-bezier(0.18, 0.89, 0.32, 1.28);
-    animation-play-state: paused;
-  }
-
-  &-zoom-leave {
-    .effect();
-    animation-timing-function: cubic-bezier(0.6, -0.3, 0.74, 0.05);
-    animation-play-state: paused;
-  }
-
-  &-zoom-enter&-zoom-enter-active,
-  &-zoom-appear&-zoom-appear-active {
-    animation-name: rcToolTipZoomIn;
-    animation-play-state: running;
-  }
-
-  &-zoom-leave&-zoom-leave-active {
-    animation-name: rcToolTipZoomOut;
-    animation-play-state: running;
-  }
-
-  @keyframes rcToolTipZoomIn {
-    0% {
-      opacity: 0;
-      transform-origin: 50% 50%;
-      transform: scale(0, 0);
-    }
-    100% {
-      opacity: 1;
-      transform-origin: 50% 50%;
-      transform: scale(1, 1);
-    }
-  }
-  @keyframes rcToolTipZoomOut {
-    0% {
-      opacity: 1;
-      transform-origin: 50% 50%;
-      transform: scale(1, 1);
-    }
-    100% {
-      opacity: 0;
-      transform-origin: 50% 50%;
-      transform: scale(0, 0);
-    }
-  }
-}
-
-
 // Base class
 .@{tooltip-prefix-cls} {
   position: absolute;
@@ -93,7 +24,7 @@
   visibility: visible;
 //   background-color: rgba(0, 0, 0, 0.05);
   padding: @tooltip-shadow-width;
-  opacity: @tooltip-opacity;
+  // opacity: @tooltip-opacity;
 
   &-hidden {
     display: none;
@@ -102,10 +33,6 @@
 
 // Wrapper for the tooltip content
 .@{tooltip-prefix-cls}-inner {
-//   padding: 8px 10px;
-  text-align: left;
-  text-decoration: none;
-  border-radius: @border-radius-base;
   min-height: 18px;
   min-width: 68px;
   border: @tooltip-border-width solid @tooltip-border-color;
