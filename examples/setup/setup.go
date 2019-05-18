@@ -19,6 +19,7 @@ import (
 	"github.com/sunfmin/bran/examples/e06_hello_drawer"
 	"github.com/sunfmin/bran/examples/e07_hello_lazy_loader_in_drawer"
 	"github.com/sunfmin/bran/examples/e08_hello_popover"
+	"github.com/sunfmin/bran/examples/e09_hello_dialog"
 	"github.com/sunfmin/bran/ui"
 	m "github.com/sunfmin/material"
 	"github.com/theplant/appkit/contexts"
@@ -168,6 +169,10 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e08_hello_popover",
 			renderFunc: e08_hello_popover.HelloPopover,
+		},
+		{
+			url:        "e09_hello_dialog",
+			renderFunc: e09_hello_dialog.HelloDialog,
 		},
 	}
 
