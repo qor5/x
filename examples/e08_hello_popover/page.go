@@ -13,9 +13,13 @@ import (
 type mystate struct {
 	popoverVisible       bool
 	popoverVisibleRemote bool
-	Name                 string
+	EditingName          string
 	NameError            string
 }
+
+var globalState = &struct {
+	Name string
+}{}
 
 func randStr(prefix string) string {
 	rand.Seed(time.Now().UnixNano())
@@ -24,17 +28,17 @@ func randStr(prefix string) string {
 
 func overlay(s *mystate, ctx *ui.EventContext) HTMLComponent {
 	return Div(
-		ui.Bind(Input("").Type("text").Value(s.Name)).FieldName("Name"),
+		ui.Bind(Input("").Type("text").Value(s.EditingName)).FieldName("EditingName"),
 		Label(s.NameError).Style("color:red"),
 		ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update),
-	)
+	).Style("padding: 20px; background-color: white;")
 }
 
 func HelloPopover(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
-	s := ctx.StateOrInit(&mystate{}).(*mystate)
+	s := ctx.StateOrInit(&mystate{EditingName: globalState.Name}).(*mystate)
 
 	pr.Schema = Div(
-		H1(s.Name),
+		H1(globalState.Name),
 		bo.Popover(
 			A().Text("Edit").Href("#"),
 		).Overlay(overlay(s, ctx)).DefaultVisible(s.popoverVisible),
@@ -49,7 +53,7 @@ func HelloPopover(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 }
 
 func remoteOverlay(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	s := ctx.StateOrInit(&mystate{}).(*mystate)
+	s := ctx.State.(*mystate)
 	r.Schema = overlay(s, ctx)
 	return
 }
@@ -57,13 +61,14 @@ func remoteOverlay(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	r.Reload = true
 	s := ctx.State.(*mystate)
-	if len(s.Name) < 10 {
+	if len(s.EditingName) < 10 {
 		s.NameError = "name is too short"
 		s.popoverVisible = true
-		s.Name = ""
 	} else {
+		globalState.Name = s.EditingName
 		s.NameError = ""
 		s.popoverVisible = false
 	}
+
 	return
 }

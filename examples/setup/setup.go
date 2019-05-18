@@ -94,6 +94,9 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 			)
 		}
 		ctx.Injector.PutStyle(`
+			body {
+				margin: 0;
+			}
 			pre {
 				padding: 24px;
 				background-color: #eee;
