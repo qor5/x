@@ -35,7 +35,7 @@ func HelloLazyLoaderInDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err erro
 			),
 		).Trigger(
 			A().Text("Edit").Href("#"),
-		).Width(500).DefaultOpen(s.drawerVisible),
+		).Width(500).DefaultOpen(s.drawerVisible, false),
 	)
 	return
 }

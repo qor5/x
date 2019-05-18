@@ -38,7 +38,7 @@ if (!app) {
 function fetchEvent(
 	eventFuncId: EventFuncID,
 	event: EventData,
-): Promise<Response> {
+): Promise<EventResponse> {
 	const eventData = JSON.stringify({
 		eventFuncId,
 		event,
@@ -70,6 +70,17 @@ function fetchEvent(
 		// 	'Content-Type': 'multipart/form-data'
 		// },
 		body: form,
+	}).then((r) => {
+		return r.json();
+	}).then((r: EventResponse) => {
+		if (r.states) {
+			mergeStatesIntoForm(form, r.states);
+		}
+
+		if (r.redirectURL) {
+			window.location.replace(r.redirectURL);
+		}
+		return r;
 	});
 }
 
@@ -96,20 +107,8 @@ const methods = {
 };
 
 function fetchEventAndProcessDefault(comp: any, eventFuncId: EventFuncID, event: EventData) {
-
 	fetchEvent(eventFuncId, event)
-		.then((r) => {
-			return r.json();
-		})
 		.then((r: EventResponse) => {
-			if (r.states) {
-				mergeStatesIntoForm(form, r.states);
-			}
-
-			if (r.redirectURL) {
-				window.location.replace(r.redirectURL);
-			}
-
 			if (r.schema) {
 				reload(comp, r);
 			}
@@ -208,10 +207,7 @@ Vue.component('bran-lazy-loader', {
 			lazyloader(): any {
 				return fetchEvent(ef, {})
 					.then((r) => {
-						return r.json();
-					})
-					.then((json) => {
-						return componentByTemplate(json.schema);
+						return componentByTemplate(r.schema);
 					});
 			},
 		};

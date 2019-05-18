@@ -373,7 +373,37 @@ var eventCases = []struct {
 	expectedIndexResp string
 	expectedEventResp string
 }{
-
+	{
+		name: "run event reload states",
+		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
+			s := ctx.StateOrInit(&User{Address: &Address{}}).(*User)
+			pr.Schema = h.Text(s.Name + " " + s.Address.City)
+			s.Name = "Felix"
+		},
+		eventFunc: func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+			s := ctx.State.(*User)
+			r.Reload = true
+			s.Name = "Felix1"
+			s.Address = &Address{City: "Hangzhou"}
+			return
+		},
+		expectedEventResp: `{
+	"schema": "Felix1 Hangzhou",
+	"states": {
+		"Address.City": [
+			"Hangzhou"
+		],
+		"Address.Zipcode": [
+			""
+		],
+		"Name": [
+			"Felix"
+		]
+	},
+	"reload": true
+}
+`,
+	},
 	{
 		name: "render schema in event func",
 		eventFunc: func(ctx *ui.EventContext) (r ui.EventResponse, err error) {

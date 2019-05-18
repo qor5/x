@@ -323,17 +323,22 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 		er.State = ctx.State
 	}
 
-	if er.State != nil {
-		_, er.State = encodePageState(er.State)
-	}
-
 	if er.Reload {
+		// panic(fmt.Sprintf("er.State %#+v", er.State))
+		ctx.State = er.State
 		ssd := &serverSideData{}
 		head := &DefaultPageInjector{}
 		p.render(ssd, w, r, c, head)
 		er.Schema = ssd.Schema
 		er.Scripts = ssd.Scripts
 		er.Styles = ssd.Styles
+		if ssd.States != nil {
+			er.State = ssd.States
+		}
+	} else {
+		if er.State != nil {
+			_, er.State = encodePageState(er.State)
+		}
 	}
 
 	eventResponseWithContext(ctx, c, &er)
