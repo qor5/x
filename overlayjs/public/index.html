@@ -15,6 +15,32 @@
 			continue.</strong>
 	</noscript>
 	<div id="app">
+		<h1>Bran Dialog</h1>
+		<bran-dialog :mask-closable="true" :visible="true" animation="zoom" :closable="true" :keyboard="true">
+			<template v-slot:trigger='{ parent }'>
+				<a href="#" @click="parent.show">
+					Open
+				</a>
+			</template>
+			<template v-slot:dialog='{ parent }'>
+				<div>
+					<button @click="parent.close">close</button>
+					<p>
+						dialog1....dialog1....dialog1....dialog1....dialog1....dialog1....
+						dialog1....dialog1....dialog1....dialog1....
+						dialog1....dialog1....dialog1....
+						dialog1....dialog1....dialog1....dialog1....dialog1....
+					</p>
+					<p>dialog1...</p>
+					<p>dialog1...</p>
+				</div>
+			</template>
+			<template v-slot:footer>
+
+			</template>
+		</bran-dialog>
+
+
 		<h1>Bran Drawer</h1>
 		<bran-drawer width="770" placement="right" :default-open="false" :first-enter="true" class-name="drawer1">
 			<template v-slot:trigger='{ parent }'>123
@@ -24,58 +50,67 @@
 			</template>
 			<template v-slot:drawer='{ parent }'>
 				<button @click="parent.close">close</button>
-				<p>drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....</p>
+				<p>drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....drawer1....
+				</p>
 				<p>drawer1...</p>
 				<p>drawer1...</p>
 				<h1>This is from remote</h1>
 				<bran-lazy-loader :visible='parent.isVisible' :loader-func='{"id": "loadDrawer", "params": ["1", "2"]}'>
 				</bran-lazy-loader>
 				<h1>This is nested</h1>
-				<bran-drawer width="770" placement="right" :default-open="false" class-name="drawer2" :level="['.drawer1']">
+				<bran-drawer width="770" placement="right" :default-open="false" class-name="drawer2"
+					:level="['.drawer1']">
 					<template v-slot:trigger='{ parent }'>123
 						<a href="#" @click="parent.show">
 							Open
 						</a>
 					</template>
 					<template v-slot:drawer>
-						<p>drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...</p>
+						<p>drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...drawer2...
+						</p>
 						<p>drawer2...</p>
 						<p>drawer2...</p>
 						<p>drawer2...</p>
 
-						<bran-drawer width="770" placement="right" class-name="drawer3" :level="['.drawer1', '.drawer2']">
+						<bran-drawer width="770" placement="right" class-name="drawer3"
+							:level="['.drawer1', '.drawer2']">
 							<template v-slot:trigger='{ parent }'>123
 								<a href="#" @click="parent.show">
 									Open
 								</a>
 							</template>
 							<template v-slot:drawer>
-								<p>drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...</p>
+								<p>drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...drawer3...
+								</p>
 								<p>drawer3...</p>
 								<p>drawer3...</p>
 								<p>drawer3...</p>
 								<p>drawer3...</p>
-								<bran-drawer width="770" placement="right" class-name="drawer4" :level="['.drawer1','.drawer2', '.drawer3']">
+								<bran-drawer width="770" placement="right" class-name="drawer4"
+									:level="['.drawer1','.drawer2', '.drawer3']">
 									<template v-slot:trigger='{ parent }'>123
 										<a href="#" @click="parent.show">
 											Open
 										</a>
 									</template>
 									<template v-slot:drawer>
-										<p>drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...</p>
+										<p>drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...drawer4...
+										</p>
 										<p>drawer4...</p>
 										<p>drawer4...</p>
 										<p>drawer4...</p>
 										<p>drawer4...</p>
 
-										<bran-drawer width="770" placement="right" class-name="drawer5" :level="['.drawer1','.drawer2', '.drawer3', '.drawer4']">
+										<bran-drawer width="770" placement="right" class-name="drawer5"
+											:level="['.drawer1','.drawer2', '.drawer3', '.drawer4']">
 											<template v-slot:trigger='{ parent }'>123
 												<a href="#" @click="parent.show">
 													Open
 												</a>
 											</template>
 											<template v-slot:drawer>
-												<p>drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...</p>
+												<p>drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...drawer5...
+												</p>
 												<p>drawer5...</p>
 												<p>drawer5...</p>
 												<p>drawer5...</p>
@@ -115,6 +150,8 @@
 				Open
 			</a>
 		</bran-popover>
+
+
 
 	</div>
 	<!-- built files will be auto injected -->

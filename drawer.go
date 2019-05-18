@@ -4,26 +4,26 @@ import (
 	"context"
 	"fmt"
 
-	. "github.com/theplant/htmlgo"
+	h "github.com/theplant/htmlgo"
 )
 
 type DrawerBuilder struct {
-	children []HTMLComponent
+	children []h.HTMLComponent
 
-	trigger MutableAttrHTMLComponent
-	tag     *HTMLTagBuilder
+	trigger h.MutableAttrHTMLComponent
+	tag     *h.HTMLTagBuilder
 }
 
-func Drawer(children ...HTMLComponent) (r *DrawerBuilder) {
+func Drawer(children ...h.HTMLComponent) (r *DrawerBuilder) {
 	r = &DrawerBuilder{
-		tag: Tag("bran-drawer"),
+		tag: h.Tag("bran-drawer"),
 	}
 	r.Placement("right")
 	r.children = children
 	return
 }
 
-func (b *DrawerBuilder) Trigger(v MutableAttrHTMLComponent) (r *DrawerBuilder) {
+func (b *DrawerBuilder) Trigger(v h.MutableAttrHTMLComponent) (r *DrawerBuilder) {
 	b.trigger = v
 	return b
 }
@@ -67,8 +67,8 @@ func (b *DrawerBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	}
 
 	b.tag.Children(
-		If(b.trigger != nil, Template(b.trigger).Attr("v-slot:trigger", "{ parent }")),
-		Template(b.children...).Attr("v-slot:drawer", "{ parent }"),
+		h.If(b.trigger != nil, h.Template(b.trigger).Attr("v-slot:trigger", "{ parent }")),
+		h.Template(b.children...).Attr("v-slot:drawer", "{ parent }"),
 	)
 	return b.tag.MarshalHTML(ctx)
 }

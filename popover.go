@@ -4,19 +4,19 @@ import (
 	"context"
 	"fmt"
 
-	. "github.com/theplant/htmlgo"
+	h "github.com/theplant/htmlgo"
 )
 
 type PopoverBuilder struct {
-	children []HTMLComponent
+	children []h.HTMLComponent
 
-	overlay []HTMLComponent
-	tag     *HTMLTagBuilder
+	overlay []h.HTMLComponent
+	tag     *h.HTMLTagBuilder
 }
 
-func Popover(children ...HTMLComponent) (r *PopoverBuilder) {
+func Popover(children ...h.HTMLComponent) (r *PopoverBuilder) {
 	r = &PopoverBuilder{
-		tag: Tag("bran-popover"),
+		tag: h.Tag("bran-popover"),
 	}
 	r.Placement("top")
 	r.Trigger("click")
@@ -24,7 +24,7 @@ func Popover(children ...HTMLComponent) (r *PopoverBuilder) {
 	return
 }
 
-func (b *PopoverBuilder) Overlay(vs ...HTMLComponent) (r *PopoverBuilder) {
+func (b *PopoverBuilder) Overlay(vs ...h.HTMLComponent) (r *PopoverBuilder) {
 	b.overlay = vs
 	return b
 }
@@ -60,7 +60,7 @@ func (b *PopoverBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) 
 
 	b.tag.Children(b.children...)
 	b.tag.AppendChildren(
-		Template(b.overlay...).Attr("v-slot:overlay", "{ parent }"),
+		h.Template(b.overlay...).Attr("v-slot:overlay", "{ parent }"),
 	)
 
 	return b.tag.MarshalHTML(ctx)
