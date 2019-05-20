@@ -11,10 +11,16 @@ export default {
 		};
 	},
 	methods: {
+		forceUpdate() {
+			this.$forceUpdate()
+		},
+		// setIsVisible(v1) {
+		// 	console.log("setIsVisible", v1)
+		// }
 	},
 	render() {
 		const props = getOptionProps(this)
-		const { destroyTooltipOnHide, getTooltipContainer, ...rest } = props
+		const { destroyTooltipOnHide, getTooltipContainer, afterVisibleChange, ...rest } = props
 		const appContainer = () => {
 			return document.getElementById("app")
 		}
@@ -22,6 +28,7 @@ export default {
 			props: {
 				destroyTooltipOnHide: true,
 				getTooltipContainer: appContainer,
+				// afterVisibleChange: this.setIsVisible,
 				...rest
 			},
 			on: {
