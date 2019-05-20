@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/sunfmin/branoverlay"
+	"github.com/sunfmin/codehighlight"
 
 	"github.com/gobuffalo/packr"
 	"github.com/sunfmin/bran"
@@ -91,16 +92,12 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 		}
 		if len(code) > 0 {
 			dacComps = append(dacComps,
-				Pre(code).Style("font-family: monospace"),
+				codehighlight.Code(code).Language("go"),
 			)
 		}
 		ctx.Injector.PutStyle(`
 			body {
 				margin: 0;
-			}
-			pre {
-				padding: 24px;
-				background-color: #eee;
 			}
 		`)
 
@@ -130,12 +127,17 @@ func Setup(prefix string) http.Handler {
 	mux.Handle("/assets/main.js",
 		ub.PacksHandler("text/javascript",
 			branoverlay.JSComponentsPack(),
+			codehighlight.JSComponentsPack(),
 			bran.JSComponentsPack(),
 		),
 	)
 
 	mux.Handle("/assets/overlay.css",
-		ub.PacksHandler("text/css", branoverlay.CSSComponentsPack()))
+		ub.PacksHandler("text/css",
+			codehighlight.CSSComponentsPack(),
+			branoverlay.CSSComponentsPack(),
+		),
+	)
 
 	var pages = []pageItem{
 		{
