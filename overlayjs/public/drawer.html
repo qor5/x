@@ -5,7 +5,6 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
-	<link rel="icon" href="<%= BASE_URL %>favicon.ico">
 	<title>overlayjs</title>
 </head>
 
@@ -15,31 +14,6 @@
 			continue.</strong>
 	</noscript>
 	<div id="app">
-		<h1>Bran Dialog</h1>
-		<bran-dialog :mask-closable="true" :visible="true" animation="zoom" :closable="true" :keyboard="true">
-			<template v-slot:trigger='{ parent }'>
-				<a href="#" @click="parent.show">
-					Open
-				</a>
-			</template>
-			<template v-slot:dialog='{ parent }'>
-				<div>
-					<button @click="parent.close">close</button>
-					<p>
-						dialog1....dialog1....dialog1....dialog1....dialog1....dialog1....
-						dialog1....dialog1....dialog1....dialog1....
-						dialog1....dialog1....dialog1....
-						dialog1....dialog1....dialog1....dialog1....dialog1....
-					</p>
-					<p>dialog1...</p>
-					<p>dialog1...</p>
-				</div>
-			</template>
-			<template v-slot:footer>
-
-			</template>
-		</bran-dialog>
-
 
 		<h1>Bran Drawer</h1>
 		<bran-drawer width="770" placement="right" :default-open="false" :first-enter="true" class-name="drawer1">
@@ -127,35 +101,9 @@
 				</bran-drawer>
 			</template>
 		</bran-drawer>
-		<div style="height: 500px"></div>
-
-		<h1>Bran Popover</h1>
-		<bran-popover title="Hello" trigger="click" :default-visible="true" placement="top">
-			<template v-slot:overlay="{ parent }">
-				<h1>Hello</h1>
-				<p>abc1231231231231312123</p>
-			</template>
-
-			<a href="#" style="margin-left: 300px">
-				Open
-			</a>
-		</bran-popover>
-
-		<bran-popover title="Hello" trigger="click" :default-visible="false" placement="top">
-			<template v-slot:overlay="{ parent }">
-				<bran-lazy-loader :visible='parent.isVisible' :loader-func='{"id": "loadDrawer", "params": ["1", "2"]}'>
-			</template>
-
-			<a href="#" style="margin-left: 300px">
-				Open
-			</a>
-		</bran-popover>
-
-
-
 	</div>
-	<!-- built files will be auto injected -->
+	<script src="http://localhost:3050/app.js"></script>
+	<script src="http://localhost:3100/app.js"></script>
 </body>
-<script src="/bran.umd.min.js"></script>
 
 </html>

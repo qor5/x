@@ -9,9 +9,9 @@ if (!window.Vue) {
 
 (window.__branVueComponentRegisters =
 	window.__branVueComponentRegisters || []).push(function(Vue) {
-	Vue.component("bran-drawer", BranDrawer);
-	Vue.component("bran-popover", BranPopover);
-	Vue.component("bran-dialog", BranDialog);
+	Vue.component("BranDrawer", BranDrawer);
+	Vue.component("BranPopover", BranPopover);
+	Vue.component("BranDialog", BranDialog);
 });
 
 export default {

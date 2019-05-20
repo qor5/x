@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<title>overlayjs</title>
+</head>
+
+<body>
+	<noscript>
+		<strong>We're sorry but overlayjs doesn't work properly without JavaScript enabled. Please enable it to
+			continue.</strong>
+	</noscript>
+	<div id="app">
+		<h1>Bran Dialog</h1>
+		<bran-dialog :mask-closable="true" :visible="true" animation="zoom" :closable="true" :keyboard="true">
+			<template v-slot:trigger='{ parent }'>
+				<a href="#" @click="parent.show">
+					Open
+				</a>
+			</template>
+			<template v-slot:dialog='{ parent }'>
+				<div>
+					<button @click="parent.close">close</button>
+					<p>
+						dialog1....dialog1....dialog1....dialog1....dialog1....dialog1....
+						dialog1....dialog1....dialog1....dialog1....
+						dialog1....dialog1....dialog1....
+						dialog1....dialog1....dialog1....dialog1....dialog1....
+					</p>
+					<p>dialog1...</p>
+					<p>dialog1...</p>
+				</div>
+			</template>
+			<template v-slot:footer>
+
+			</template>
+		</bran-dialog>
+
+	</div>
+	<script src="http://localhost:3050/app.js"></script>
+	<script src="http://localhost:3100/app.js"></script>
+</body>
+
+</html>
