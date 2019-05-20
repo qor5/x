@@ -31,7 +31,7 @@ func overlay(s *mystate, ctx *ui.EventContext) HTMLComponent {
 		ui.Bind(Input("").Type("text").Value(s.EditingName)).FieldName("EditingName"),
 		Label(s.NameError).Style("color:red"),
 		ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update),
-	).Style("padding: 20px; background-color: white;")
+	)
 }
 
 func HelloDialog(ctx *ui.EventContext) (pr ui.PageResponse, err error) {

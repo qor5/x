@@ -1,36 +1,39 @@
 {
-  "name": "corejs",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --target lib --name bran --formats umd-min src/main.ts",
-    "lint": "vue-cli-service lint"
-  },
-  "vue": {
-    "runtimeCompiler": true,
-    "filenameHashing": false,
-    "productionSourceMap": false,
-    "devServer": {
-      "port": 3100
-    }
-  },
-  "dependencies": {
-    "core-js": "^2.6.5",
-    "formdata-polyfill": "^3.0.17",
-    "lodash": "^4.17.11",
-    "query-string": "^6.4.2",
-    "vue": "^2.6.10",
-    "vue-class-component": "^7.0.2",
-    "vue-property-decorator": "^8.1.0",
-    "whatwg-fetch": "^3.0.0"
-  },
-  "devDependencies": {
-    "@types/lodash": "^4.14.123",
-    "@vue/cli-plugin-babel": "^3.6.0",
-    "@vue/cli-plugin-typescript": "^3.6.0",
-    "@vue/cli-service": "^3.6.0",
-    "typescript": "^3.4.3",
-    "vue-template-compiler": "^2.5.21"
-  }
+	"name": "corejs",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"serve": "vue-cli-service serve",
+		"build": "vue-cli-service build --target lib --name bran --formats umd-min src/main.ts",
+		"lint": "vue-cli-service lint"
+	},
+	"vue": {
+		"runtimeCompiler": true,
+		"filenameHashing": false,
+		"productionSourceMap": false,
+		"devServer": {
+			"port": 3100
+		},
+		"configureWebpack": {
+			"externals": {"vue": "Vue"}
+		}
+	},
+	"dependencies": {
+		"core-js": "^2.6.5",
+		"formdata-polyfill": "^3.0.17",
+		"lodash": "^4.17.11",
+		"query-string": "^6.4.2",
+		"vue": "^2.6.10",
+		"vue-class-component": "^7.0.2",
+		"vue-property-decorator": "^8.1.0",
+		"whatwg-fetch": "^3.0.0"
+	},
+	"devDependencies": {
+		"@types/lodash": "^4.14.123",
+		"@vue/cli-plugin-babel": "^3.6.0",
+		"@vue/cli-plugin-typescript": "^3.6.0",
+		"@vue/cli-service": "^3.6.0",
+		"typescript": "^3.4.3",
+		"vue-template-compiler": "^2.5.21"
+	}
 }

@@ -1,8 +1,8 @@
-import Vue from 'vue';
 import { newFormWithStates, mergeStatesIntoForm } from './form';
 import debounce from 'lodash/debounce';
 import 'whatwg-fetch';
 import querystring from 'query-string';
+import Vue from 'vue';
 
 Vue.config.productionTip = true;
 
@@ -118,7 +118,7 @@ function fetchEventAndProcessDefault(comp: any, eventFuncId: EventFuncID, event:
 
 function componentByTemplate(template: string): any {
 	return {
-		template,
+		template: '<div>' + template + '</div>', // to make only one root.
 		methods,
 	};
 }
@@ -228,4 +228,6 @@ const vm = new Vue({
 			this.current = newView;
 		},
 	},
-}).$mount('#app');
+});
+
+vm.$mount('#app');
