@@ -10,8 +10,9 @@ import (
 type DrawerBuilder struct {
 	children []h.HTMLComponent
 
-	trigger h.MutableAttrHTMLComponent
-	tag     *h.HTMLTagBuilder
+	triggerElement h.MutableAttrHTMLComponent
+	trigger        string
+	tag            *h.HTMLTagBuilder
 }
 
 func Drawer(children ...h.HTMLComponent) (r *DrawerBuilder) {
@@ -19,11 +20,17 @@ func Drawer(children ...h.HTMLComponent) (r *DrawerBuilder) {
 		tag: h.Tag("bran-drawer"),
 	}
 	r.Placement("right")
+	r.Trigger("click")
 	r.children = children
 	return
 }
 
-func (b *DrawerBuilder) Trigger(v h.MutableAttrHTMLComponent) (r *DrawerBuilder) {
+func (b *DrawerBuilder) TriggerElement(v h.MutableAttrHTMLComponent) (r *DrawerBuilder) {
+	b.triggerElement = v
+	return b
+}
+
+func (b *DrawerBuilder) Trigger(v string) (r *DrawerBuilder) {
 	b.trigger = v
 	return b
 }
@@ -62,12 +69,12 @@ func (b *DrawerBuilder) Placement(v string) (r *DrawerBuilder) {
 
 func (b *DrawerBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 
-	if b.trigger != nil {
-		b.trigger.SetAttr("@click", "parent.show")
+	if b.triggerElement != nil {
+		b.triggerElement.SetAttr(fmt.Sprintf("@%s", b.trigger), "parent.show")
 	}
 
 	b.tag.Children(
-		h.If(b.trigger != nil, h.Template(b.trigger).Attr("v-slot:trigger", "{ parent }")),
+		h.If(b.triggerElement != nil, h.Template(b.triggerElement).Attr("v-slot:trigger", "{ parent }")),
 		h.Template(b.children...).Attr("v-slot:drawer", "{ parent }"),
 	)
 	return b.tag.MarshalHTML(ctx)

@@ -10,8 +10,9 @@ import (
 type DialogBuilder struct {
 	children []h.HTMLComponent
 
-	trigger h.MutableAttrHTMLComponent
-	tag     *h.HTMLTagBuilder
+	triggerElement h.MutableAttrHTMLComponent
+	trigger        string
+	tag            *h.HTMLTagBuilder
 }
 
 func Dialog(children ...h.HTMLComponent) (r *DialogBuilder) {
@@ -19,11 +20,17 @@ func Dialog(children ...h.HTMLComponent) (r *DialogBuilder) {
 		tag: h.Tag("bran-dialog"),
 	}
 	r.Animation("zoom")
+	r.Trigger("click")
 	r.children = children
 	return
 }
 
-func (b *DialogBuilder) Trigger(v h.MutableAttrHTMLComponent) (r *DialogBuilder) {
+func (b *DialogBuilder) TriggerElement(v h.MutableAttrHTMLComponent) (r *DialogBuilder) {
+	b.triggerElement = v
+	return b
+}
+
+func (b *DialogBuilder) Trigger(v string) (r *DialogBuilder) {
 	b.trigger = v
 	return b
 }
@@ -85,12 +92,12 @@ func (b *DialogBuilder) ZIndex(v int) (r *DialogBuilder) {
 
 func (b *DialogBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 
-	if b.trigger != nil {
-		b.trigger.SetAttr("@click", "parent.show")
+	if b.triggerElement != nil {
+		b.triggerElement.SetAttr(fmt.Sprintf("@%s", b.trigger), "parent.show")
 	}
 
 	b.tag.Children(
-		h.If(b.trigger != nil, h.Template(b.trigger).Attr("v-slot:trigger", "{ parent }")),
+		h.If(b.triggerElement != nil, h.Template(b.triggerElement).Attr("v-slot:trigger", "{ parent }")),
 		h.Template(b.children...).Attr("v-slot:dialog", "{ parent }"),
 	)
 
