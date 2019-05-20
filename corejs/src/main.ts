@@ -116,10 +116,17 @@ function fetchEventAndProcessDefault(comp: any, eventFuncId: EventFuncID, event:
 		});
 }
 
-function componentByTemplate(template: string): any {
+function componentByTemplate(template: string, afterLoaded?: () => void): any {
 	return {
 		template: '<div>' + template + '</div>', // to make only one root.
 		methods,
+		mounted() {
+			this.$nextTick(() => {
+				if (afterLoaded) {
+					afterLoaded();
+				}
+			});
+		},
 	};
 }
 
@@ -184,9 +191,9 @@ for (const registerComp of (window.__branVueComponentRegisters || [])) {
 	registerComp(Vue);
 }
 
-Vue.component('bran-lazy-loader', {
+Vue.component('BranLazyLoader', {
 	name: 'BranLazyLoader',
-	props: ['loaderFunc', 'visible'],
+	props: ['loaderFunc', 'visible', 'afterLoaded'],
 	template: `
 		<div class="bran-lazy-loader" v-if="visible">
 			<component :is="lazyloader"></component>
@@ -194,6 +201,7 @@ Vue.component('bran-lazy-loader', {
 	`,
 	data() {
 		const ef = this.loaderFunc;
+		const afterLoaded = this.afterLoaded;
 		if (!ef) {
 			return {
 				lazyloader: {
@@ -207,7 +215,7 @@ Vue.component('bran-lazy-loader', {
 			lazyloader(): any {
 				return fetchEvent(ef, {})
 					.then((r) => {
-						return componentByTemplate(r.schema);
+						return componentByTemplate(r.schema, afterLoaded);
 					});
 			},
 		};

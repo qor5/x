@@ -32,6 +32,11 @@ func (b *LazyLoaderBuilder) LoadWhenParentVisible() (r *LazyLoaderBuilder) {
 	return b
 }
 
+func (b *LazyLoaderBuilder) ParentForceUpdateAfterLoaded() (r *LazyLoaderBuilder) {
+	b.tag.Attr(":after-loaded", "parent.forceUpdate")
+	return b
+}
+
 func (b *LazyLoaderBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	b.tag.SetAttr(":loader-func", b.loaderFunc)
 	return b.tag.MarshalHTML(ctx)

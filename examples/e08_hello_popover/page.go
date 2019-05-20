@@ -39,24 +39,29 @@ func HelloPopover(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
 	pr.Schema = Div(
 		H1(globalState.Name),
+
+		H2("Default"),
 		bo.Popover(
 			overlay(s, ctx),
 		).TriggerElement(
 			A().Text("Edit").Href("#"),
-		).DefaultVisible(s.popoverVisible),
-
+		).DefaultVisible(s.popoverVisible).Placement("right"),
+		H2("Load from remote"),
 		bo.Popover(
-			ui.LazyLoader(ctx.Hub, "remoteOverlay", remoteOverlay).Visible("true"),
+			ui.LazyLoader(ctx.Hub, "remoteOverlay", remoteOverlay).
+				Visible("true").
+				ParentForceUpdateAfterLoaded(),
 		).TriggerElement(
 			A().Text("Remote Loader").Href("#"),
-		).DefaultVisible(s.popoverVisibleRemote),
+		).DefaultVisible(s.popoverVisibleRemote).Placement("right"),
 
+		H2("Load when mouse over"),
 		bo.Popover(
 			overlay(s, ctx),
 		).TriggerElement(
 			A().Text("Mouseover").Href("#"),
 		).DefaultVisible(s.popoverVisible).
-			Trigger("hover"),
+			Trigger("hover").Placement("bottom"),
 	)
 	return
 }
