@@ -11,10 +11,9 @@ import (
 )
 
 type mystate struct {
-	drawerVisible          bool
-	Name                   string
-	NameError              string
-	NoTriggerDrawerVisible bool
+	drawerVisible bool
+	Name          string
+	NameError     string
 }
 
 func randStr(prefix string) string {
@@ -29,51 +28,13 @@ func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		H1(s.Name),
 		bo.Drawer(
 			Button("Close").Attr("@click", "parent.close"),
-			Div(Text(randStr("homeDrawer"))),
-			ui.LazyLoader(ctx.Hub, "editPage", editPage, "param1").LoadWhenParentVisible(),
 			ui.Bind(Input("").Type("text").Value(s.Name)).FieldName("Name"),
 			Label(s.NameError).Style("color:red"),
 			ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update),
-		).Trigger(
+		).TriggerElement(
 			A().Text("Edit").Href("#"),
 		).Width(500).DefaultOpen(s.drawerVisible, false),
-
-		bo.Drawer(
-			H2("Bottom"),
-		).Trigger(
-			A().Text("Bottom").Href("#"),
-		).Placement("bottom").Height(300),
-
-		bo.Drawer(
-			H2("Left"),
-		).Trigger(
-			A().Text("Left").Href("#"),
-		).Placement("left").Width(400),
-
-		bo.Drawer(
-			H2("Top"),
-		).Trigger(
-			A().Text("Top").Href("#"),
-		).Placement("top").
-			Height(200),
-
-		bo.Drawer(
-			Text("No Trigger Drawer"),
-		).Width(300).
-			DefaultOpen(s.NoTriggerDrawerVisible, true),
-
-		ui.Bind(Button("Open No Trigger Drawer")).
-			OnClick(ctx.Hub, "openNoTriggerDrawer", openNoTriggerDrawer),
 	)
-	s.NoTriggerDrawerVisible = false
-
-	return
-}
-
-func openNoTriggerDrawer(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	r.Reload = true
-	s := ctx.State.(*mystate)
-	s.NoTriggerDrawerVisible = true
 	return
 }
 
@@ -88,18 +49,5 @@ func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 		s.NameError = ""
 		s.drawerVisible = false
 	}
-	return
-}
-
-func editPage(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	s := ctx.State.(*mystate)
-	_ = s
-	r.Schema = bo.Drawer(
-		Button("Close").Attr("@click", "parent.close"),
-		H1(ctx.Event.Params[0]),
-		Div(Text(randStr("in editPage Drawer"))),
-	).Trigger(
-		A().Text("Open " + randStr("inner")).Href("#"),
-	).Width(400)
 	return
 }

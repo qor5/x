@@ -30,10 +30,10 @@ func HelloLazyLoaderInDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err erro
 			ui.LazyLoader(ctx.Hub, "editPage", editPage, "param1").LoadWhenParentVisible(),
 			bo.Drawer(
 				ui.LazyLoader(ctx.Hub, "editPage", editPage, "param2").LoadWhenParentVisible(),
-			).Trigger(
+			).TriggerElement(
 				A().Text("New Drawer").Href("#"),
 			),
-		).Trigger(
+		).TriggerElement(
 			A().Text("Edit").Href("#"),
 		).Width(500).DefaultOpen(s.drawerVisible, false),
 	)
@@ -48,7 +48,7 @@ func editPage(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 		Button("Close").Attr("@click", "parent.close"),
 		H1(ctx.Event.Params[0]),
 		Div(Text(randStr("in editPage Drawer"))),
-	).Trigger(
+	).TriggerElement(
 		A().Text("Open " + randStr("inner")).Href("#"),
 	).Width(400)
 	return

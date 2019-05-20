@@ -41,15 +41,22 @@ func HelloDialog(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		H1(globalState.Name),
 		bo.Dialog(
 			overlay(s, ctx),
-		).Trigger(
+		).TriggerElement(
 			A().Text("Edit").Href("#"),
 		).DefaultVisible(s.dialogVisible),
 
 		bo.Dialog(
 			ui.LazyLoader(ctx.Hub, "remoteOverlay", remoteOverlay).Visible("true"),
-		).Trigger(
+		).TriggerElement(
 			A().Text("Remote Loader").Href("#"),
 		).DefaultVisible(s.dialogVisibleRemote),
+
+		bo.Dialog(
+			overlay(s, ctx),
+		).TriggerElement(
+			A().Text("Mouseover").Href("#"),
+		).DefaultVisible(s.dialogVisible).
+			Trigger("mouseover"),
 	)
 	return
 }
