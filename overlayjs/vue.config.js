@@ -7,5 +7,6 @@ module.exports = {
 		output: {
 			libraryExport: 'default'
 		},
+		externals: {vue: "Vue"},
 	}
 }
