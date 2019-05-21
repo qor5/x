@@ -23,6 +23,7 @@
 	},
 	"vue": {
 		"runtimeCompiler": true,
+		"productionSourceMap": false,
 		"devServer": {
 			"port": 3060
 		},
