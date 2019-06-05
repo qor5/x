@@ -51,8 +51,10 @@ function fetchEvent(
 		if (Object.keys(pstate).length > 0) {
 			const orig = querystring.parse(window.location.search);
 			newSearch = querystring.stringify({ ...orig, ...pstate });
+			search = newSearch;
 			if (newSearch.length > 0) {
 				newSearch = `?${newSearch}`;
+				search = `&${newSearch}`;
 			}
 		}
 		window.history.pushState(
@@ -60,11 +62,10 @@ function fetchEvent(
 			'',
 			window.location.pathname + newSearch,
 		);
-		search = newSearch;
 	}
 
 	form.set('__event_data__', eventData);
-	return fetch('__execute_event__/' + eventFuncId.id + search, {
+	return fetch(`?__execute_event__=${eventFuncId.id}${search}`, {
 		method: 'POST',
 		// headers: {
 		// 	'Content-Type': 'multipart/form-data'

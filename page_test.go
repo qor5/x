@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	goji "goji.io"
+	"goji.io/pat"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http/httptest"
@@ -223,7 +225,7 @@ func runEvent(
 
 	mw.Close()
 
-	r = httptest.NewRequest("POST", "/__execute_event__/call", body)
+	r = httptest.NewRequest("POST", "/?__execute_event__=call", body)
 	r.Header.Add("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", mw.Boundary()))
 
 	w = httptest.NewRecorder()
@@ -326,7 +328,7 @@ func TestFileUpload(t *testing.T) {
 
 	mw.Close()
 
-	r := httptest.NewRequest("POST", "/__execute_event__/uploadFile", body)
+	r := httptest.NewRequest("POST", "/?__execute_event__=uploadFile", body)
 	r.Header.Add("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", mw.Boundary()))
 
 	w := httptest.NewRecorder()
@@ -503,4 +505,85 @@ func TestEvents(t *testing.T) {
 			}
 		}
 	}
+}
+
+var mountCases = []struct {
+	name     string
+	method   string
+	path     string
+	bodyFunc func(w *multipart.Writer)
+	expected string
+}{
+	{
+		name:     "with param get",
+		method:   "GET",
+		path:     "/home/topics/xgb123",
+		bodyFunc: nil,
+		expected: `<div><a href="#" v-on:click='onclick({"id":"bookmark","pushState":null}, $event)'>xgb123</a></div>`,
+	},
+	{
+		name:   "with param post",
+		method: "POST",
+		path:   "/home/topics/xgb123?__execute_event__",
+		bodyFunc: func(w *multipart.Writer) {
+			w.WriteField("__event_data__", `{"eventFuncId":{"id":"bookmark","pushState":null},"event":{"value":""}}`)
+		},
+		expected: `{"schema":"\n\u003ch1\u003exgb123 bookmarked\u003c/h1\u003e\n"}`,
+	},
+}
+
+func TestMultiplePagesAndEvents(t *testing.T) {
+	var topicIndex = func(ctx *ui.EventContext) (r ui.PageResponse, err error) {
+		r.Schema = h.H1("Hello Topic List")
+		return
+	}
+
+	var bookmark = func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+		topicId := pat.Param(ctx.R, "topicID")
+		r.Schema = h.H1(topicId + " bookmarked")
+		return
+	}
+
+	var topicDetail = func(ctx *ui.EventContext) (r ui.PageResponse, err error) {
+		topicId := pat.Param(ctx.R, "topicID")
+		r.Schema = h.Div(
+			ui.Bind(h.A().Href("#").Text(topicId)).
+				OnClick(ctx.Hub, "bookmark", bookmark),
+		)
+		return
+	}
+
+	pb := bran.New()
+
+	mux := goji.NewMux()
+	mux.Handle(pat.New("/home/topics/:topicID"), pb.Page(topicDetail))
+	mux.Handle(pat.New("/home/topics"), pb.Page(topicIndex))
+
+	for _, c := range mountCases {
+
+		buf := new(bytes.Buffer)
+		var mw *multipart.Writer
+		if c.bodyFunc != nil {
+			mw = multipart.NewWriter(buf)
+			c.bodyFunc(mw)
+			_ = mw.Close()
+		}
+
+		r := httptest.NewRequest(c.method, c.path, buf)
+		if mw != nil {
+			r.Header.Add("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", mw.Boundary()))
+		}
+		w := httptest.NewRecorder()
+		mux.ServeHTTP(w, r)
+		selector := "#app div"
+		if mw != nil {
+			selector = "*"
+		}
+		diff := htmltestingutils.PrettyHtmlDiff(w.Body, selector, c.expected)
+		if len(diff) > 0 {
+			t.Error(c.name, diff)
+		}
+
+	}
+
 }

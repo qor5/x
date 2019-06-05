@@ -46,7 +46,7 @@ func exampleLinks(prefix string, pages []pageItem) (comp HTMLComponent) {
 	for _, p := range pages {
 		links = append(links,
 			Li(
-				A().Href(fmt.Sprintf("%s/%s/", prefix, p.url)).Text(p.Title()),
+				A().Href(fmt.Sprintf("%s/%s", prefix, p.url)).Text(p.Title()),
 			),
 		)
 	}
@@ -114,7 +114,7 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 
 func home(prefix string, pages []pageItem) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "e01_hello_button/", 302)
+		http.Redirect(w, r, "/e01_hello_button", 302)
 		return
 	}
 }
@@ -187,11 +187,8 @@ func Setup(prefix string) http.Handler {
 
 	for _, p := range pages {
 		mux.Handle(
-			fmt.Sprintf("/%s/", p.url),
-			bran.StripPrefix(
-				fmt.Sprintf("/%s", p.url), mw(ub.Page(layout(p.renderFunc, pages, prefix, p))),
-			),
-			// mw(ub.NewPage().RenderFunc(layout(p.renderFunc, pages, prefix, p)).Handler()),
+			fmt.Sprintf("/%s", p.url),
+			mw(ub.Page(layout(p.renderFunc, pages, prefix, p))),
 		)
 	}
 
