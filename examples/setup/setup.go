@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sunfmin/branoverlay"
+	branoverlay "github.com/sunfmin/bran/overlay"
 	"github.com/sunfmin/codehighlight"
 
 	"github.com/gobuffalo/packr"
