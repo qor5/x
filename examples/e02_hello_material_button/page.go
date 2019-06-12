@@ -4,8 +4,8 @@ import (
 	"math/rand"
 	"time"
 
+	. "github.com/sunfmin/bran/material"
 	"github.com/sunfmin/bran/ui"
-	. "github.com/sunfmin/material"
 	h "github.com/theplant/htmlgo"
 )
 
