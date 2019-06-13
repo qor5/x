@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	branoverlay "github.com/sunfmin/bran/overlay"
-	"github.com/sunfmin/codehighlight"
+	"github.com/sunfmin/bran/codehighlight"
 
 	"github.com/gobuffalo/packr"
 	"github.com/sunfmin/bran"
