@@ -1,5 +1,6 @@
 module.exports = {
-	runtimeCompiler: true,
+    runtimeCompiler: true,
+    productionSourceMap: false,
 	devServer: {
 		port: 3050
 	},
