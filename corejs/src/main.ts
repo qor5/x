@@ -53,8 +53,8 @@ function fetchEvent(
 			newSearch = querystring.stringify({ ...orig, ...pstate });
 			search = newSearch;
 			if (newSearch.length > 0) {
-				newSearch = `?${newSearch}`;
 				search = `&${newSearch}`;
+				newSearch = `?${newSearch}`;
 			}
 		}
 		window.history.pushState(
