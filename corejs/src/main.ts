@@ -2,7 +2,7 @@ import { newFormWithStates, mergeStatesIntoForm } from './form';
 import debounce from 'lodash/debounce';
 import 'whatwg-fetch';
 import querystring from 'query-string';
-import Vue from 'vue';
+import Vue, { VNode, VNodeDirective } from 'vue';
 
 Vue.config.productionTip = true;
 
@@ -246,8 +246,14 @@ Vue.component('BranLazyLoader', {
 
 Vue.directive('bran', {
 	// When the bound element is inserted into the DOM...
-	inserted: function (el, binding, vnode) {
-		console.log("el", el, "binding", binding, "vnode", vnode, vnode.componentInstance)
+	inserted: function (el: HTMLElement, binding: VNodeDirective, vnode: VNode) {
+		console.log("el", el)
+		console.log("binding", binding)
+		console.log("vnode", vnode)
+		console.log("vnode.componentInstance", vnode.componentInstance)
+		console.log("vnode.context", vnode.context)
+		console.log("vnode.data", vnode.data!)
+		console.log("vnode.directives", vnode.data!.directives)
 		if (vnode.componentInstance) {
 			vnode.componentInstance.$on("change", (v: any) => {
 				console.log("change value", v, "fieldName", binding.value.FieldName)
