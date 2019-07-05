@@ -7,17 +7,6 @@
 		"build": "vue-cli-service build --target lib --name bran --formats umd-min src/main.ts",
 		"lint": "vue-cli-service lint"
 	},
-	"vue": {
-		"runtimeCompiler": true,
-		"filenameHashing": false,
-		"productionSourceMap": false,
-		"devServer": {
-			"port": 3100
-		},
-		"configureWebpack": {
-			"externals": {"vue": "Vue"}
-		}
-	},
 	"dependencies": {
 		"core-js": "^2.6.5",
 		"formdata-polyfill": "^3.0.17",

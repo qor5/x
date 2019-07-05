@@ -88,8 +88,20 @@ function fetchEvent(
 
 const debounceFetchEvent = debounce(fetchEventAndProcessDefault, 800);
 
-function controlsOnInput(comp: any, eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
-	// console.log("evt", evt)
+function controlsOnInput(
+	comp: any,
+	eventFuncId?: EventFuncID,
+	fieldName?: string,
+	evt?: any,
+	toFormFunc?: any,
+) {
+	console.log("comp", comp, "fieldName", fieldName, "event", evt)
+	// console.log("root", comp.$root)
+	// console.log("comp", comp.$el)
+	// console.log("comp.$props", comp.$props)
+	// console.log("comp.$options", comp.$options)
+	console.log("toFormFunc", toFormFunc)
+
 	if (fieldName) {
 		form.set(fieldName, evt.target.value);
 	}
@@ -102,8 +114,8 @@ const methods = {
 	onclick(eventFuncId: EventFuncID, evt: any) {
 		fetchEventAndProcessDefault(this, eventFuncId, jsonEvent(evt));
 	},
-	oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
-		controlsOnInput(this, eventFuncId, fieldName, evt);
+	oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any, toFormFunc?: any) {
+		controlsOnInput(this, eventFuncId, fieldName, evt, toFormFunc);
 	},
 };
 
@@ -222,6 +234,28 @@ Vue.component('BranLazyLoader', {
 		};
 	},
 });
+
+// Vue.mixin({
+// 	props: ['bran-field-name'],
+// 	created: function () {
+// 		// var myOption = this.$options
+// 		// console.log("props", JSON.stringify(this.$props))
+// 		console.log("this.$el", this.$el, this)
+// 	}
+// })
+
+Vue.directive('bran', {
+	// When the bound element is inserted into the DOM...
+	inserted: function (el, binding, vnode) {
+		console.log("el", el, "binding", binding, "vnode", vnode, vnode.componentInstance)
+		if (vnode.componentInstance) {
+			vnode.componentInstance.$on("change", (v: any) => {
+				console.log("change value", v, "fieldName", binding.value.FieldName)
+			})
+		}
+	}
+})
+
 
 const vm = new Vue({
 	data: {
