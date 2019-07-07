@@ -13,19 +13,29 @@
 </head>
 
 <body>
-	<div id="app">
+	<script>
+		window.__serverSideData__ = {
+			states: {
+				GivenNames: ["fizz", "buzz"],
+			}
+		}
+	</script>
+	<div id="branRoot">
 		<v-app>
 			<v-content>
 				<v-container>
+					<input v-on:input='oninput({"id": "hello"}, "FamilyName", $event)' style="border: 1px solid red;" />
+
+					<a href="#" v-on:click='onclick({"id": "hello"}, $event)' >Click</a>
+
 					<v-autocomplete
-					:value="['foo', 'bar']"
-					v-bran='{"FieldName": "names"}'
-					:items="['foo', 'bar', 'fizz', 'buzz', 'fizzbuzz', 'foobar']" multiple
-					chips
-					deletable-chips
-					solo
-					clearable
-					prefix="hello"
+						v-bran='{"fieldName": "GivenNames", "setupFunc": "vuetifyVSelect"}'
+						:items="['foo', 'bar', 'fizz', 'buzz', 'fizzbuzz', 'foobar']" multiple
+						chips
+						deletable-chips
+						solo
+						clearable
+						prefix="hello"
 					>
 					</v-autocomplete>
 				<div v-ripple style="width: 100px; height: 100px; border: 1px solid red;">

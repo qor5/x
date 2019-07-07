@@ -10,10 +10,11 @@
 </head>
 
 <body>
-	<div id="app">
+	<div id="branRoot">
 		<main>
-			<input v-bran='{"FieldName": "names"}' />
-			<a href="#" bran-event-func='{"id": "hello"}' >Click</a>
+			Family Name
+			<input v-on:input='oninput({"id": "hello"}, "FamilyName", $event)'/>
+			<a href="#" v-on:click='onclick({"id": "hello"}, $event)' >Click</a>
 		</main>
 	</div>
 
