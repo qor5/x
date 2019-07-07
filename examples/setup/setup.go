@@ -7,8 +7,12 @@ import (
 	"os"
 	"strings"
 
-	branoverlay "github.com/sunfmin/bran/overlay"
+	"github.com/sunfmin/bran/examples/e10_hello_vuetify_select"
+
+	"github.com/sunfmin/bran/vuetify"
+
 	"github.com/sunfmin/bran/codehighlight"
+	branoverlay "github.com/sunfmin/bran/overlay"
 
 	"github.com/gobuffalo/packr"
 	"github.com/sunfmin/bran"
@@ -29,10 +33,9 @@ import (
 )
 
 type pageItem struct {
-	url         string
-	renderFunc  ui.PageFunc
-	mui         bool
-	withoutCard bool
+	url        string
+	renderFunc ui.PageFunc
+	vuetify    bool
 }
 
 func (p pageItem) Title() string {
@@ -72,7 +75,21 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 			<script src="https://unpkg.com/vue"></script>
 			<link rel="stylesheet" href="/assets/overlay.css">
+			<link rel="stylesheet" href="/assets/overlay.css">
+			<script src='/assets/codehighlight.js'></script>
 		`)
+		if cp.vuetify {
+			ctx.Injector.PutHeadHTML(`
+				<link rel="stylesheet" href="/assets/vuetify.css">
+			`)
+
+			tailScript := `<script src='/assets/vuetify.js'></script>`
+			if len(os.Getenv("DEV")) > 0 {
+				tailScript = `<script src='http://localhost:3080/app.js'></script>`
+			}
+			ctx.Injector.PutHeadHTML(tailScript)
+		}
+
 		ctx.Injector.PutTailHTML(tailScript)
 
 		var innerPr ui.PageResponse
@@ -127,8 +144,19 @@ func Setup(prefix string) http.Handler {
 	mux.Handle("/assets/main.js",
 		ub.PacksHandler("text/javascript",
 			branoverlay.JSComponentsPack(),
-			codehighlight.JSComponentsPack(),
 			bran.JSComponentsPack(),
+		),
+	)
+
+	mux.Handle("/assets/codehighlight.js",
+		ub.PacksHandler("text/javascript",
+			codehighlight.JSComponentsPack(),
+		),
+	)
+
+	mux.Handle("/assets/vuetify.js",
+		ub.PacksHandler("text/javascript",
+			vuetify.JSComponentsPack(),
 		),
 	)
 
@@ -136,6 +164,12 @@ func Setup(prefix string) http.Handler {
 		ub.PacksHandler("text/css",
 			codehighlight.CSSComponentsPack(),
 			branoverlay.CSSComponentsPack(),
+		),
+	)
+
+	mux.Handle("/assets/vuetify.css",
+		ub.PacksHandler("text/css",
+			vuetify.CSSComponentsPack(),
 		),
 	)
 
@@ -175,6 +209,11 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e09_hello_dialog",
 			renderFunc: e09_hello_dialog.HelloDialog,
+		},
+		{
+			url:        "e10_hello_vuetify_select",
+			renderFunc: e10_hello_vuetify_select.HelloVuetifySelect,
+			vuetify:    true,
 		},
 	}
 

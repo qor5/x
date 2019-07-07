@@ -16,11 +16,11 @@
 	<script>
 		window.__serverSideData__ = {
 			states: {
-				GivenNames: ["fizz", "buzz"],
+				GivenNames: ["react", "jquery"],
 			}
 		}
 	</script>
-	<div id="branRoot">
+	<div id="app">
 		<v-app>
 			<v-content>
 				<v-container>
@@ -30,7 +30,7 @@
 
 					<v-autocomplete
 						v-bran='{"fieldName": "GivenNames", "setupFunc": "vuetifyVSelect"}'
-						:items="['foo', 'bar', 'fizz', 'buzz', 'fizzbuzz', 'foobar']" multiple
+						:items='[{"text":"Vue","value":"vue"},{"text":"React","value":"react"},{"text":"Angular","value":"angular"},{"text":"Amber","value":"amber"},{"text":"jQuery","value":"jquery"}]' multiple
 						chips
 						deletable-chips
 						solo

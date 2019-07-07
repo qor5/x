@@ -13,7 +13,7 @@ declare var window: any;
 			const form = core.form;
 			const values = form.getAll(fieldName);
 
-			comp.selectedItems = values;
+			comp.lazyValue = values;
 
 			comp.$on('change', (vals: string[]) => {
 				form.delete(fieldName);

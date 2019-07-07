@@ -1,9 +1,9 @@
 import Vue, { VNode, VNodeDirective } from 'vue';
 import { Core } from './core';
 
-const app = document.getElementById('branRoot');
+const app = document.getElementById('app');
 if (!app) {
-	throw new Error('#branRoot required');
+	throw new Error('#app required');
 }
 
 declare var window: any;
@@ -66,7 +66,7 @@ const vm = new Vue({
 		current: core.componentByTemplate(app.innerHTML),
 	},
 	template: `
-	<div id="branRoot">
+	<div id="app">
 		<component :is="current"></component>
 	</div>
 `,
@@ -77,4 +77,4 @@ const vm = new Vue({
 	},
 });
 
-vm.$mount('#branRoot');
+vm.$mount('#app');
