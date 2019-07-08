@@ -13,23 +13,59 @@ export default Vue.extend({
 		},
 		multiple: Boolean,
 	},
-	render(h: CreateElement): VNode {
-		const props = this.$props;
-		const fieldName = props.fieldName;
-		const form = this.core.form;
-		const values = form.getAll(fieldName);
+	data: () => ({
+		isLoading: false,
+		_items: [],
+		model: null,
+		searchKeyword: '',
+	}),
+	watch: {
+		searchKeyword(val: string) {
+			if (val === null) {
+				return;
+			}
+			console.log('in search', val);
+			if (this._items && this._items.length > 0) { return; }
 
-		const data = {
+			this.isLoading = true;
+
+			// Lazily load input items
+			fetch('https://api.coinmarketcap.com/v2/listings/')
+				.then((res) => res.json())
+				.then((res) => {
+					console.log('res.data', res.data);
+					this._items = res.data;
+				})
+				.catch((err) => {
+					console.log(err);
+				})
+				.finally(() => (this.isLoading = false));
+		},
+	},
+	render(h: CreateElement): VNode {
+		const self = this;
+		const props = self.$props;
+		const fieldName = props.fieldName;
+		const form = self.core.form;
+		const values = form.getAll(fieldName);
+		const data: VNodeData = {
 			props: {
 				solo: true,
-				items: this.$props.items,
+				items: self._items,
 				multiple: true,
 				chips: true,
 				deletableChips: true,
-				value: values,
+				// value: values,
+				// searchInput: 'abc',
+				// noFilter: true,
+				loading: self.isLoading,
+				itemText: 'name',
+				itemValue: 'symbol',
+				noDataText: 'Search your things',
 			},
+
 			on: {
-				change: (vals: any) => {
+				'change': (vals: any) => {
 					form.delete(fieldName);
 					if (typeof vals === 'string') {
 						vals = [vals];
@@ -37,6 +73,9 @@ export default Vue.extend({
 					vals.forEach((v: string) => {
 						form.append(fieldName, v);
 					});
+				},
+				'update:searchInput': (val: string) => {
+					self.searchKeyword = val;
 				},
 			},
 		};
