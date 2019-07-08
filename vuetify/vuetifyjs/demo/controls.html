@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<script src="https://unpkg.com/vue"></script>
+	<title>vuetify demo</title>
+</head>
+
+<body>
+	<script>
+		window.__serverSideData__ = {
+			states: {
+				GivenNames: ["react", "jquery"],
+			}
+		}
+	</script>
+	<div id="app">
+		<v-app>
+			<v-content>
+				<v-container>
+					<input v-on:input='oninput({"id": "hello"}, "FamilyName", $event)' style="border: 1px solid red;" />
+
+					<a href="#" v-on:click='onclick({"id": "hello"}, $event)' >Click</a>
+
+					<v-autocomplete
+						v-bran='{"fieldName": "GivenNames", "setupFunc": "vuetifyVSelect"}'
+						:items='[{"text":"Vue","value":"vue"},{"text":"React","value":"react"},{"text":"Angular","value":"angular"},{"text":"Amber","value":"amber"},{"text":"jQuery","value":"jquery"}]' multiple
+						chips
+						deletable-chips
+						solo
+						clearable
+						prefix="hello"
+					>
+					</v-autocomplete>
+				<div v-ripple style="width: 100px; height: 100px; border: 1px solid red;">
+					A Content
+				</div>
+				<v-btn>Hello</v-btn>
+				</v-container>
+			</v-content>
+		</v-app>
+	</div>
+
+	<script src="http://localhost:3080/app.js"></script>
+	<script src="http://localhost:3100/app.js"></script>
+
+</body>
+
+</html>

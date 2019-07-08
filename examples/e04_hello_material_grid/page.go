@@ -114,7 +114,8 @@ func reload(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 }
 
 func styles(ctx *ui.EventContext) {
-	ctx.Injector.PutStyle(`
+	ctx.Injector.PutHeadHTML(`
+    <style>
       .demo-grid {
         background-color: #DDDDDD;
         margin-bottom: 32px;
@@ -156,10 +157,11 @@ func styles(ctx *ui.EventContext) {
 
       .demo-grid.max-width {
         max-width: 1280px;
-	  }
+      }
 
       .demo-grid-legend {
         margin: 16px 0 8px 0;
       }
+    </style>
 	`)
 }

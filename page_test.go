@@ -2,7 +2,6 @@ package bran_test
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	goji "goji.io"
 	"goji.io/pat"
@@ -348,24 +347,24 @@ func TestFileUpload(t *testing.T) {
 	}
 }
 
-type DummyComp struct {
-}
-
-func (dc *DummyComp) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	r = []byte("<div>hello</div>")
-	ui.Injector(ctx).PutScript(`
-	function hello() {
-		console.log("hello")
-	}
-`)
-
-	ui.Injector(ctx).PutStyle(`
-	div {
-		background-color: red;
-	}
-`)
-	return
-}
+//type DummyComp struct {
+//}
+//
+//func (dc *DummyComp) MarshalHTML(ctx context.Context) (r []byte, err error) {
+//	r = []byte("<div>hello</div>")
+//	ui.Injector(ctx).PutScript(`
+//	function hello() {
+//		console.log("hello")
+//	}
+//`)
+//
+//	ui.Injector(ctx).PutStyle(`
+//	div {
+//		background-color: red;
+//	}
+//`)
+//	return
+//}
 
 var eventCases = []struct {
 	name              string
@@ -438,52 +437,52 @@ var eventCases = []struct {
 	}
 			`,
 	},
-	{
-		name: "case 2",
-		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
-			ctx.Injector.PutTailHTML("<script src='/assets/main.js'></script>")
-			pr.Schema = &DummyComp{}
-		},
-		expectedEventResp: `
-{
-	"schema": "\u003cdiv\u003ehello\u003c/div\u003e",
-	"reload": true,
-	"scripts": "\n\tfunction hello() {\n\t\tconsole.log(\"hello\")\n\t}\n",
-	"styles": "\n\tdiv {\n\t\tbackground-color: red;\n\t}\n"
-}
-`,
-		expectedIndexResp: `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-</head>
-<body class='front'>
-<style id="main_styles" type="text/css">
-
-	div {
-		background-color: red;
-	}
-
-</style>
-<div id="app">
-<div>hello</div></div>
-<script type='text/javascript'>
-window.__serverSideData__={}
-</script>
-<script id="main_scripts">
-
-	function hello() {
-		console.log("hello")
-	}
-
-</script>
-<script src='/assets/main.js'></script>
-</body>
-</html>
-
-`,
-	},
+//	{
+//		name: "case 2",
+//		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
+//			ctx.Injector.PutTailHTML("<script src='/assets/main.js'></script>")
+//			pr.Schema = &DummyComp{}
+//		},
+//		expectedEventResp: `
+//{
+//	"schema": "\u003cdiv\u003ehello\u003c/div\u003e",
+//	"reload": true,
+//	"scripts": "\n\tfunction hello() {\n\t\tconsole.log(\"hello\")\n\t}\n",
+//	"styles": "\n\tdiv {\n\t\tbackground-color: red;\n\t}\n"
+//}
+//`,
+//		expectedIndexResp: `<!DOCTYPE html>
+//<html>
+//<head>
+//<meta charset="utf8"/>
+//<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+//</head>
+//<body class='front'>
+//<style id="main_styles" type="text/css">
+//
+//	div {
+//		background-color: red;
+//	}
+//
+//</style>
+//<div id="app">
+//<div>hello</div></div>
+//<script type='text/javascript'>
+//window.__serverSideData__={}
+//</script>
+//<script id="main_scripts">
+//
+//	function hello() {
+//		console.log("hello")
+//	}
+//
+//</script>
+//<script src='/assets/main.js'></script>
+//</body>
+//</html>
+//
+//`,
+//	},
 }
 
 func TestEvents(t *testing.T) {

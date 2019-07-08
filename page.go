@@ -113,8 +113,8 @@ func (p *PageBuilder) render(
 		ssd.Schema = string(b)
 	}
 
-	ssd.Scripts = head.MainScripts(false)
-	ssd.Styles = head.MainStyles(false)
+	//ssd.Scripts = head.MainScripts(false)
+	//ssd.Styles = head.MainStyles(false)
 
 	// default page response state to ctx state if not set
 	if ctx.State != nil && pr.State == nil {
@@ -176,7 +176,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 
 	body := bytes.NewBuffer(nil)
 
-	body.WriteString(head.MainStyles(true))
+	//body.WriteString(head.MainStyles(true))
 
 	if isRenderHTML {
 		body.WriteString("<div id=\"app\">\n")
@@ -193,7 +193,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	}
 	body.Write(b)
 
-	body.WriteString(head.MainScripts(true))
+	//body.WriteString(head.MainScripts(true))
 	body.WriteString(head.TailHTML())
 	body.WriteString("\n")
 
