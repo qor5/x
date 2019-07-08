@@ -107,13 +107,22 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 		}
 		if len(code) > 0 {
 			dacComps = append(dacComps,
-				codehighlight.Code(code).Language("go"),
+				Div(
+					codehighlight.Code(code).Language("go"),
+				).Class("exampleCode"),
 			)
 		}
 		ctx.Injector.PutHeadHTML(`
 		<style>
 			body {
 				margin: 0;
+			}
+			pre {
+				padding: 0;
+				margin: 0;
+			}
+			.exampleCode {
+				margin-top: 20px;
 			}
 		</style>
 		`)
