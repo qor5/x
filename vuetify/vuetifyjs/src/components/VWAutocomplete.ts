@@ -62,6 +62,7 @@ export default Vue.extend({
 				itemText: 'name',
 				itemValue: 'symbol',
 				noDataText: 'Search your things',
+				hideNoData: true,
 			},
 
 			on: {
@@ -76,6 +77,9 @@ export default Vue.extend({
 				},
 				'update:searchInput': (val: string) => {
 					self.searchKeyword = val;
+				},
+				'click': (e: any) => {
+					self.searchKeyword = '';
 				},
 			},
 		};
