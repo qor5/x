@@ -69,11 +69,11 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 
 		ctx.Injector.Title(cp.Title())
 		ctx.Injector.PutHeadHTML(`
-			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
-			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
-			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-			<script src="https://unpkg.com/vue"></script>
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono" async>
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" async>
+			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" async>
 			<link rel="stylesheet" href="/assets/main.css">
+			<script src='/assets/vue.js'></script>
 			<script src='/assets/codehighlight.js'></script>
 		`)
 		if cp.vuetify {
@@ -145,6 +145,12 @@ func Setup(prefix string) http.Handler {
 		ub.PacksHandler("text/javascript",
 			branoverlay.JSComponentsPack(),
 			bran.JSComponentsPack(),
+		),
+	)
+
+	mux.Handle("/assets/vue.js",
+		ub.PacksHandler("text/javascript",
+			bran.JSVueComponentsPack(),
 		),
 	)
 

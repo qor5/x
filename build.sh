@@ -7,6 +7,7 @@ CUR=$(pwd)
 rm -r $CUR/corejs/dist
 echo "Building corejs"
 cd $CUR/corejs && yarn && yarn build
+curl -fsSL https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js > $CUR/corejs/dist/vue.min.js
 
 echo "Building branoverlay"
 cd $CUR/overlay/ && ./build.sh
@@ -16,5 +17,8 @@ cd $CUR/codehighlight/ && ./build.sh
 
 echo "Building vuetify"
 cd $CUR/vuetify/ && ./build.sh
+
+echo "Building material"
+cd $CUR/material/ && ./build.sh
 
 cd $CUR && packr

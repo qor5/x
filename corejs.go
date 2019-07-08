@@ -14,3 +14,13 @@ func JSComponentsPack() ComponentsPack {
 
 	return ComponentsPack(v)
 }
+
+func JSVueComponentsPack() ComponentsPack {
+	v, err := corejsassetsbox.FindString("vue.min.js")
+	if err != nil {
+		panic(err)
+	}
+
+	return ComponentsPack(v)
+}
+
