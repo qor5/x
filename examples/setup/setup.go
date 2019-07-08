@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sunfmin/bran/core"
+
 	"github.com/sunfmin/bran/examples/e10_hello_vuetify_select"
 
 	"github.com/sunfmin/bran/vuetify"
@@ -153,13 +155,13 @@ func Setup(prefix string) http.Handler {
 	mux.Handle("/assets/main.js",
 		ub.PacksHandler("text/javascript",
 			branoverlay.JSComponentsPack(),
-			bran.JSComponentsPack(),
+			core.JSComponentsPack(),
 		),
 	)
 
 	mux.Handle("/assets/vue.js",
 		ub.PacksHandler("text/javascript",
-			bran.JSVueComponentsPack(),
+			core.JSVueComponentsPack(),
 		),
 	)
 
