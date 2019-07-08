@@ -24,24 +24,14 @@
 		<v-app>
 			<v-content>
 				<v-container>
-					<input v-on:input='oninput({"id": "hello"}, "FamilyName", $event)' style="border: 1px solid red;" />
+					<vw-autocomplete :items='[{"text":"Vue","value":"vue"},{"text":"React","value":"react"},{"text":"Angular","value":"angular"},{"text":"Amber","value":"amber"},{"text":"jQuery","value":"jquery"}]' field-name="GivenNames"></vw-autocomplete>
 
-					<a href="#" v-on:click='onclick({"id": "hello"}, $event)' >Click</a>
+					<v-input append-icon="close" messages="there is an error">
+						<input v-on:input='oninput({"id": "hello"}, "FamilyName", $event)' style="background: greenyellow"/>
+					</v-input>
 
-					<v-autocomplete
-						v-bran='{"fieldName": "GivenNames", "setupFunc": "vuetifyVSelect"}'
-						:items='[{"text":"Vue","value":"vue"},{"text":"React","value":"react"},{"text":"Angular","value":"angular"},{"text":"Amber","value":"amber"},{"text":"jQuery","value":"jquery"}]' multiple
-						chips
-						deletable-chips
-						solo
-						clearable
-						prefix="hello"
-					>
-					</v-autocomplete>
-				<div v-ripple style="width: 100px; height: 100px; border: 1px solid red;">
-					A Content
-				</div>
-				<v-btn>Hello</v-btn>
+					<a href="#" v-on:click='onclick({"id": "hello"}, $event)' >Post</a>
+
 				</v-container>
 			</v-content>
 		</v-app>

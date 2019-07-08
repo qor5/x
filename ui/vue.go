@@ -79,8 +79,3 @@ func (b *VueEventTagBuilder) MarshalHTML(ctx context.Context) (r []byte, err err
 	b.setupChange()
 	return b.tag.MarshalHTML(ctx)
 }
-
-type BranDirectiveData struct {
-	FieldName string `json:"fieldName,omitempty"`
-	SetupFunc string `json:"setupFunc,omitempty"`
-}

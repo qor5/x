@@ -25,6 +25,10 @@
 					<v-btn color="info" :large="true">Info</v-btn>
 					<v-btn color="info" :round="true">Info</v-btn>
 
+					<div v-ripple style="width: 100px; height: 100px; border: 1px solid red;">
+						Ripple
+					</div>
+
 
 					<v-card>
 						<v-card-title>
@@ -142,19 +146,6 @@
 					</v-card>
 				</v-container>
 
-				<v-container>
-					<v-select
-					    :value="form.get('familyNames')"
-
-					:items="['foo', 'bar', 'fizz', 'buzz', 'fizzbuzz', 'foobar']" label="Select Item" multiple>
-						<template v-slot:selection="{ item, index }">
-							<v-chip v-if="index === 0">
-								<span>{{ item }}</span>
-							</v-chip>
-							<span v-if="index === 1" class="grey--text caption">(+{{ value.length - 1 }} others)</span>
-						</template>
-					</v-select>
-				</v-container>
 			</v-content>
 		</v-app>
 	</div>

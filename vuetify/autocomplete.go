@@ -3,8 +3,6 @@ package vuetify
 import (
 	"context"
 
-	"github.com/sunfmin/bran/ui"
-
 	h "github.com/theplant/htmlgo"
 )
 
@@ -14,22 +12,15 @@ type TextValue struct {
 }
 
 type VAutoCompleteBuilder struct {
-	tag     *h.HTMLTagBuilder
-	dirData *ui.BranDirectiveData
+	tag *h.HTMLTagBuilder
 }
 
 func VAutoComplete(v []*TextValue) (r *VAutoCompleteBuilder) {
 	r = &VAutoCompleteBuilder{
-		tag: h.Tag("v-autocomplete"),
-		dirData: &ui.BranDirectiveData{
-			SetupFunc: "vuetifyVSelect",
-		},
+		tag: h.Tag("vw-autocomplete"),
 	}
 	r.Items(v).
-		Multiple(true).
-		Chips(true).
-		DeletableChips(true).
-		Solo(true)
+		Multiple(true)
 	return
 }
 
@@ -39,7 +30,7 @@ func (b *VAutoCompleteBuilder) Items(v []*TextValue) (r *VAutoCompleteBuilder) {
 }
 
 func (b *VAutoCompleteBuilder) FieldName(v string) (r *VAutoCompleteBuilder) {
-	b.dirData.FieldName = v
+	b.tag.Attr("field-name", v)
 	return b
 }
 
@@ -48,27 +39,26 @@ func (b *VAutoCompleteBuilder) Multiple(v bool) (r *VAutoCompleteBuilder) {
 	return b
 }
 
-func (b *VAutoCompleteBuilder) Chips(v bool) (r *VAutoCompleteBuilder) {
-	b.tag.Attr("chips", v)
-	return b
-}
+// func (b *VAutoCompleteBuilder) Chips(v bool) (r *VAutoCompleteBuilder) {
+// 	b.tag.Attr("chips", v)
+// 	return b
+// }
 
-func (b *VAutoCompleteBuilder) DeletableChips(v bool) (r *VAutoCompleteBuilder) {
-	b.tag.Attr("deletable-chips", v)
-	return b
-}
+// func (b *VAutoCompleteBuilder) DeletableChips(v bool) (r *VAutoCompleteBuilder) {
+// 	b.tag.Attr("deletable-chips", v)
+// 	return b
+// }
 
-func (b *VAutoCompleteBuilder) Solo(v bool) (r *VAutoCompleteBuilder) {
-	b.tag.Attr("solo", v)
-	return b
-}
+// func (b *VAutoCompleteBuilder) Solo(v bool) (r *VAutoCompleteBuilder) {
+// 	b.tag.Attr("solo", v)
+// 	return b
+// }
 
-func (b *VAutoCompleteBuilder) Clearable(v bool) (r *VAutoCompleteBuilder) {
-	b.tag.Attr("clearable", v)
-	return b
-}
+// func (b *VAutoCompleteBuilder) Clearable(v bool) (r *VAutoCompleteBuilder) {
+// 	b.tag.Attr("clearable", v)
+// 	return b
+// }
 
 func (b *VAutoCompleteBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	b.tag.Attr("v-bran", b.dirData)
 	return b.tag.MarshalHTML(ctx)
 }

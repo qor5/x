@@ -11,7 +11,7 @@ declare var window: any;
 const core = new Core();
 
 for (const registerComp of (window.__branVueComponentRegisters || [])) {
-	registerComp(Vue, core);
+	registerComp(Vue);
 }
 
 Vue.component('BranLazyLoader', {
@@ -46,22 +46,32 @@ Vue.component('BranLazyLoader', {
 });
 
 // Vue.mixin({
-// 	props: ['bran-field-name'],
-// 	created: function () {
+// 	beforeCreate: function () {
 // 		// var myOption = this.$options
 // 		// console.log("props", JSON.stringify(this.$props))
-// 		console.log("this.$el", this.$el, this)
+// 		const tag = this.$options._componentTag;
+// 		let watch = (this.$options.watch = this.$options.watch || {})
+
+// 		watch.search = function (val) {
+// 			console.log("val", val)
+// 		}
+
+// 		console.log("beforeCreate this", tag, this, this.$options)
+
 // 	}
 // })
 
-Vue.directive('bran', {
-	// When the bound element is inserted into the DOM...
-	inserted: (el: HTMLElement, binding: VNodeDirective, vnode: VNode) => {
-		core.callSetupFunc(binding.value.setupFunc, el, binding, vnode);
-	},
-});
+// Vue.directive('bran', {
+// 	// When the bound element is inserted into the DOM...
+// 	bind: (el: HTMLElement, binding: VNodeDirective, vnode: VNode) => {
+// 		core.callSetupFunc(binding.value.setupFunc, el, binding, vnode);
+// 	},
+// });
 
 const vm = new Vue({
+	provide: {
+		core,
+	},
 	data: {
 		current: core.componentByTemplate(app.innerHTML),
 	},

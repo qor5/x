@@ -29,8 +29,6 @@ type EventResponse struct {
 	Reload      bool        `json:"reload,omitempty"`
 	RedirectURL string      `json:"redirectURL,omitempty"`
 	Data        interface{} `json:"data,omitempty"` // used for return collection data like TagsInput data source
-	Scripts     string      `json:"scripts,omitempty"`
-	Styles      string      `json:"styles,omitempty"`
 }
 
 type PageFunc func(ctx *EventContext) (r PageResponse, err error)

@@ -324,8 +324,6 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 		head := &DefaultPageInjector{}
 		p.render(ssd, w, r, c, head)
 		er.Schema = ssd.Schema
-		er.Scripts = ssd.Scripts
-		er.Styles = ssd.Styles
 		if ssd.States != nil {
 			er.State = ssd.States
 		}
