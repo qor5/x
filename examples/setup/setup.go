@@ -20,7 +20,6 @@ import (
 	"github.com/sunfmin/bran/examples/e02_hello_material_button"
 	"github.com/sunfmin/bran/examples/e03_hello_card"
 	"github.com/sunfmin/bran/examples/e04_hello_material_grid"
-	"github.com/sunfmin/bran/examples/e05_hello_customized_component"
 	"github.com/sunfmin/bran/examples/e06_hello_drawer"
 	"github.com/sunfmin/bran/examples/e07_hello_lazy_loader_in_drawer"
 	"github.com/sunfmin/bran/examples/e08_hello_popover"
@@ -74,8 +73,7 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 			<script src="https://unpkg.com/vue"></script>
-			<link rel="stylesheet" href="/assets/overlay.css">
-			<link rel="stylesheet" href="/assets/overlay.css">
+			<link rel="stylesheet" href="/assets/main.css">
 			<script src='/assets/codehighlight.js'></script>
 		`)
 		if cp.vuetify {
@@ -112,10 +110,12 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 				codehighlight.Code(code).Language("go"),
 			)
 		}
-		ctx.Injector.PutStyle(`
+		ctx.Injector.PutHeadHTML(`
+		<style>
 			body {
 				margin: 0;
 			}
+		</style>
 		`)
 
 		pr.Schema = m.Grid(
@@ -148,6 +148,14 @@ func Setup(prefix string) http.Handler {
 		),
 	)
 
+	mux.Handle("/assets/main.css",
+		ub.PacksHandler("text/css",
+			codehighlight.CSSComponentsPack(),
+			branoverlay.CSSComponentsPack(),
+			m.CSSComponentsPack(),
+		),
+	)
+
 	mux.Handle("/assets/codehighlight.js",
 		ub.PacksHandler("text/javascript",
 			codehighlight.JSComponentsPack(),
@@ -157,13 +165,6 @@ func Setup(prefix string) http.Handler {
 	mux.Handle("/assets/vuetify.js",
 		ub.PacksHandler("text/javascript",
 			vuetify.JSComponentsPack(),
-		),
-	)
-
-	mux.Handle("/assets/overlay.css",
-		ub.PacksHandler("text/css",
-			codehighlight.CSSComponentsPack(),
-			branoverlay.CSSComponentsPack(),
 		),
 	)
 
@@ -190,10 +191,10 @@ func Setup(prefix string) http.Handler {
 			url:        "e04_hello_material_grid",
 			renderFunc: e04_hello_material_grid.HelloGrid,
 		},
-		{
-			url:        "e05_hello_customized_component",
-			renderFunc: e05_hello_customized_component.HelloCustomziedComponent,
-		},
+		//{
+		//	url:        "e05_hello_customized_component",
+		//	renderFunc: e05_hello_customized_component.HelloCustomziedComponent,
+		//},
 		{
 			url:        "e06_hello_drawer",
 			renderFunc: e06_hello_drawer.HelloDrawer,

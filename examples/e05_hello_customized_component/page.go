@@ -49,8 +49,8 @@ func contains(k string, in []string) bool {
 }
 
 func (b *TagsInputBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	ui.Injector(ctx).PutScript(tagsInputScript)
-	ui.Injector(ctx).PutStyle(tagsInputStyles)
+	//ui.Injector(ctx).PutScript(tagsInputScript)
+	//ui.Injector(ctx).PutStyle(tagsInputStyles)
 
 	selectedComps := []HTMLComponent{}
 	optionComps := []HTMLComponent{}
@@ -80,33 +80,33 @@ func (b *TagsInputBuilder) MarshalHTML(ctx context.Context) (r []byte, err error
 	return root.MarshalHTML(ctx)
 }
 
-const tagsInputScript = `
-	(window.__branVueComponentRegisters = (window.__branVueComponentRegisters || [])).push(function(Vue){
-		Vue.component("tags-input", {
-			data: function() {
-				return {
-					isOpen: false
-				};
-			},
-			methods: {
-				toggle: function() {
-					this.isOpen = !this.isOpen;
-				}
-			},
-			template: "<div><slot v-bind:parent='this'/></div>"
-		});
-	})
-`
-
-const tagsInputStyles = `
-.tagsInput .tagsInputOptions {
-	display: none;
-}
-
-.tagsInput .tagsInputOptions.tagsInputOptionsOpen {
-	display: block;
-}
-`
+//const tagsInputScript = `
+//	(window.__branVueComponentRegisters = (window.__branVueComponentRegisters || [])).push(function(Vue){
+//		Vue.component("tags-input", {
+//			data: function() {
+//				return {
+//					isOpen: false
+//				};
+//			},
+//			methods: {
+//				toggle: function() {
+//					this.isOpen = !this.isOpen;
+//				}
+//			},
+//			template: "<div><slot v-bind:parent='this'/></div>"
+//		});
+//	})
+//`
+//
+//const tagsInputStyles = `
+//.tagsInput .tagsInputOptions {
+//	display: none;
+//}
+//
+//.tagsInput .tagsInputOptions.tagsInputOptionsOpen {
+//	display: block;
+//}
+//`
 
 // Above is component code
 
