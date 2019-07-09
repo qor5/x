@@ -3,8 +3,6 @@ import debounce from 'lodash/debounce';
 import 'whatwg-fetch';
 import querystring from 'query-string';
 import { newFormWithStates, mergeStatesIntoForm } from './form';
-import { VNode, VNodeDirective } from 'vue';
-
 
 // Vue.config.productionTip = true;
 
@@ -22,29 +20,17 @@ interface EventData {
 interface EventResponse {
 	states?: any;
 	schema?: any;
+	data?: any;
 	redirectURL?: string;
-	styles?: string;
-	scripts?: string;
-}
-
-interface SetupFuncParams {
-	el: HTMLElement;
-	binding: VNodeDirective;
-	vnode: VNode;
-	fieldName?: string;
-}
-
-interface SetupFuncs {
-	[name: string]: (params: SetupFuncParams) => void;
 }
 
 declare var window: any;
 
 export class Core {
 	public form: FormData;
-	public setupFuncs: SetupFuncs = {};
 
-	private debounceFetchEvent = debounce(this.fetchEventThenReload, 800);
+	public debounceFetchEventThenReload = debounce(this.fetchEventThenReload, 800);
+	public debounce = debounce;
 	private methods: any = {};
 
 	constructor() {
@@ -61,27 +47,6 @@ export class Core {
 				self.controlsOnInput(this, eventFuncId, fieldName, evt);
 			},
 		};
-	}
-
-	public extendMethods(newMethods: any) {
-		this.methods = { ...this.methods, ...newMethods };
-	}
-
-	public extendSetupFuncs(newFuncs: any) {
-		this.setupFuncs = { ...this.setupFuncs, ...newFuncs };
-	}
-
-	public callSetupFunc(setupFunc: string, el: HTMLElement, binding: VNodeDirective, vnode: VNode) {
-		const f = this.setupFuncs[setupFunc];
-		if (!f) {
-			return;
-		}
-		f({
-			el,
-			binding,
-			vnode,
-			fieldName: binding.value!.fieldName,
-		});
 	}
 
 	public fetchEvent(
@@ -205,34 +170,12 @@ export class Core {
 			this.form.set(fieldName, evt.target.value);
 		}
 		if (eventFuncId) {
-			this.debounceFetchEvent(comp, eventFuncId, this.jsonEvent(evt));
+			this.debounceFetchEventThenReload(comp, eventFuncId, this.jsonEvent(evt));
 		}
 	}
 
 	private reload(comp: any, r: EventResponse) {
-		// app.innerHTML = r.schema;
-		// if (r.styles) {
-		// 	let style = document.querySelector('#main_styles');
-		// 	if (style && style.parentNode) {
-		// 		style.parentNode.removeChild(style);
-		// 	}
-		// 	style = document.createElement('style');
-		// 	style.setAttribute('type', 'text/css');
-		// 	style.setAttribute('id', 'main_styles');
-		// 	style.appendChild(document.createTextNode(r.styles));
-		// 	document.body.insertBefore(style, app);
-		// }
 
-		// if (r.scripts) {
-		// 	let script = document.querySelector('#main_scripts');
-		// 	if (script && script.parentNode) {
-		// 		script.parentNode.removeChild(script);
-		// 	}
-		// 	script = document.createElement('script');
-		// 	script.setAttribute('id', 'main_scripts');
-		// 	script.appendChild(document.createTextNode(r.scripts));
-		// 	document.body.insertBefore(script, app.nextSibling);
-		// }
 		comp.$root.changeCurrent(this.componentByTemplate(r.schema));
 	}
 
