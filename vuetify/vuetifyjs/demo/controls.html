@@ -24,7 +24,7 @@
 		<v-app>
 			<v-content>
 				<v-container>
-					<vw-autocomplete :items='[{"text":"Vue","value":"vue"},{"text":"React","value":"react"},{"text":"Angular","value":"angular"},{"text":"Amber","value":"amber"},{"text":"jQuery","value":"jquery"}]' field-name="GivenNames"></vw-autocomplete>
+					<vw-autocomplete :items='[{"text":"Vue","value":"vue"},{"text":"React","value":"react"},{"text":"Angular","value":"angular"},{"text":"Amber","value":"amber"},{"text":"jQuery","value":"jquery"}]' field-name="GivenNames" item-value="symbol" item-text="name" :multiple="true"></vw-autocomplete>
 
 					<v-input append-icon="close" messages="there is an error">
 						<input v-on:input='oninput({"id": "hello"}, "FamilyName", $event)' style="background: greenyellow"/>
