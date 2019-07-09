@@ -6,13 +6,8 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"strings"
-
 	"github.com/sunfmin/bran/core"
-
-	"github.com/sunfmin/bran/examples/e10_hello_vuetify_autocomplete"
-
 	"github.com/sunfmin/bran/vuetify"
-
 	"github.com/sunfmin/bran/codehighlight"
 	branoverlay "github.com/sunfmin/bran/overlay"
 
@@ -26,6 +21,8 @@ import (
 	"github.com/sunfmin/bran/examples/e07_hello_lazy_loader_in_drawer"
 	"github.com/sunfmin/bran/examples/e08_hello_popover"
 	"github.com/sunfmin/bran/examples/e09_hello_dialog"
+	"github.com/sunfmin/bran/examples/e11_hello_vuetify_text_field"
+	"github.com/sunfmin/bran/examples/e10_hello_vuetify_autocomplete"
 	m "github.com/sunfmin/bran/material"
 	"github.com/sunfmin/bran/ui"
 	"github.com/theplant/appkit/contexts"
@@ -231,6 +228,11 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e10_hello_vuetify_autocomplete",
 			renderFunc: e10_hello_vuetify_autocomplete.HelloVuetifyAutocomplete,
+			vuetify:    true,
+		},
+		{
+			url:        "e11_hello_vuetify_text_field",
+			renderFunc: e11_hello_vuetify_text_field.HelloVuetifyTextField,
 			vuetify:    true,
 		},
 	}
