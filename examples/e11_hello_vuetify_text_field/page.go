@@ -26,10 +26,10 @@ func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error)
 				vt.VTextField().Label("Default Value").Value("Hello").Autofocus(true),
 				vt.VTextField().Label("Form Value").Autofocus(true).FieldName("MyValue"),
 				Pre(s.MyValue),
-				vt.VBtn("Update").OnClick(ctx.Hub, "update", update).Color("info"),
+				vt.VBtn("Update").OnClick(ctx.Hub, "update", update).Color("info").Round(true),
 			),
 		),
-	)
+	).Id("mainapp")
 	return
 }
 
