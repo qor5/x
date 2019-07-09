@@ -1,0 +1,275 @@
+{
+    "attention": "WARNING: This API is now deprecated and will be taken offline soon.  Please switch to the new CoinMarketCap API to avoid interruptions in service. (https://pro.coinmarketcap.com/migrate/)",
+    "data": [
+        {
+            "id": 1,
+            "name": "Bitcoin",
+            "symbol": "BTC",
+            "website_slug": "bitcoin"
+        },
+        {
+            "id": 2,
+            "name": "Litecoin",
+            "symbol": "LTC",
+            "website_slug": "litecoin"
+        },
+        {
+            "id": 3,
+            "name": "Namecoin",
+            "symbol": "NMC",
+            "website_slug": "namecoin"
+        },
+        {
+            "id": 4,
+            "name": "Terracoin",
+            "symbol": "TRC",
+            "website_slug": "terracoin"
+        },
+        {
+            "id": 5,
+            "name": "Peercoin",
+            "symbol": "PPC",
+            "website_slug": "peercoin"
+        },
+        {
+            "id": 6,
+            "name": "Novacoin",
+            "symbol": "NVC",
+            "website_slug": "novacoin"
+        },
+        {
+            "id": 8,
+            "name": "Feathercoin",
+            "symbol": "FTC",
+            "website_slug": "feathercoin"
+        },
+        {
+            "id": 9,
+            "name": "Mincoin",
+            "symbol": "MNC",
+            "website_slug": "mincoin"
+        },
+        {
+            "id": 10,
+            "name": "Freicoin",
+            "symbol": "FRC",
+            "website_slug": "freicoin"
+        },
+        {
+            "id": 13,
+            "name": "Ixcoin",
+            "symbol": "IXC",
+            "website_slug": "ixcoin"
+        },
+        {
+            "id": 14,
+            "name": "BitBar",
+            "symbol": "BTB",
+            "website_slug": "bitbar"
+        },
+        {
+            "id": 16,
+            "name": "WorldCoin",
+            "symbol": "WDC",
+            "website_slug": "worldcoin"
+        },
+        {
+            "id": 18,
+            "name": "Digitalcoin",
+            "symbol": "DGC",
+            "website_slug": "digitalcoin"
+        },
+        {
+            "id": 25,
+            "name": "GoldCoin",
+            "symbol": "GLC",
+            "website_slug": "goldcoin"
+        },
+        {
+            "id": 31,
+            "name": "Argentum",
+            "symbol": "ARG",
+            "website_slug": "argentum"
+        },
+        {
+            "id": 35,
+            "name": "Phoenixcoin",
+            "symbol": "PXC",
+            "website_slug": "phoenixcoin"
+        },
+        {
+            "id": 37,
+            "name": "Megacoin",
+            "symbol": "MEC",
+            "website_slug": "megacoin"
+        },
+        {
+            "id": 41,
+            "name": "Infinitecoin",
+            "symbol": "IFC",
+            "website_slug": "infinitecoin"
+        },
+        {
+            "id": 42,
+            "name": "Primecoin",
+            "symbol": "XPM",
+            "website_slug": "primecoin"
+        },
+        {
+            "id": 43,
+            "name": "Anoncoin",
+            "symbol": "ANC",
+            "website_slug": "anoncoin"
+        },
+        {
+            "id": 45,
+            "name": "CasinoCoin",
+            "symbol": "CSC",
+            "website_slug": "casinocoin"
+        },
+        {
+            "id": 50,
+            "name": "Emerald Crypto",
+            "symbol": "EMD",
+            "website_slug": "emerald"
+        },
+        {
+            "id": 52,
+            "name": "XRP",
+            "symbol": "XRP",
+            "website_slug": "ripple"
+        },
+        {
+            "id": 53,
+            "name": "Quark",
+            "symbol": "QRK",
+            "website_slug": "quark"
+        },
+        {
+            "id": 56,
+            "name": "Zetacoin",
+            "symbol": "ZET",
+            "website_slug": "zetacoin"
+        },
+        {
+            "id": 57,
+            "name": "SecureCoin",
+            "symbol": "SRC",
+            "website_slug": "securecoin"
+        },
+        {
+            "id": 58,
+            "name": "Sexcoin",
+            "symbol": "SXC",
+            "website_slug": "sexcoin"
+        },
+        {
+            "id": 61,
+            "name": "TagCoin",
+            "symbol": "TAG",
+            "website_slug": "tagcoin"
+        },
+        {
+            "id": 64,
+            "name": "FLO",
+            "symbol": "FLO",
+            "website_slug": "flo"
+        },
+        {
+            "id": 66,
+            "name": "Nxt",
+            "symbol": "NXT",
+            "website_slug": "nxt"
+        },
+        {
+            "id": 67,
+            "name": "Unobtanium",
+            "symbol": "UNO",
+            "website_slug": "unobtanium"
+        },
+        {
+            "id": 69,
+            "name": "Datacoin",
+            "symbol": "DTC",
+            "website_slug": "datacoin"
+        },
+        {
+            "id": 70,
+            "name": "BetaCoin",
+            "symbol": "BET",
+            "website_slug": "betacoin"
+        },
+        {
+            "id": 72,
+            "name": "Deutsche eMark",
+            "symbol": "DEM",
+            "website_slug": "deutsche-emark"
+        },
+        {
+            "id": 74,
+            "name": "Dogecoin",
+            "symbol": "DOGE",
+            "website_slug": "dogecoin"
+        },
+        {
+            "id": 77,
+            "name": "Diamond",
+            "symbol": "DMD",
+            "website_slug": "diamond"
+        },
+        {
+            "id": 80,
+            "name": "Orbitcoin",
+            "symbol": "ORB",
+            "website_slug": "orbitcoin"
+        },
+        {
+            "id": 83,
+            "name": "Omni",
+            "symbol": "OMNI",
+            "website_slug": "omni"
+        },
+        {
+            "id": 87,
+            "name": "FedoraCoin",
+            "symbol": "TIPS",
+            "website_slug": "fedoracoin"
+        },
+        {
+            "id": 89,
+            "name": "Mooncoin",
+            "symbol": "MOON",
+            "website_slug": "mooncoin"
+        },
+        {
+            "id": 90,
+            "name": "Dimecoin",
+            "symbol": "DIME",
+            "website_slug": "dimecoin"
+        },
+        {
+            "id": 93,
+            "name": "42-coin",
+            "symbol": "42",
+            "website_slug": "42-coin"
+        },
+        {
+            "id": 99,
+            "name": "Vertcoin",
+            "symbol": "VTC",
+            "website_slug": "vertcoin"
+        },
+        {
+            "id": 109,
+            "name": "DigiByte",
+            "symbol": "DGB",
+            "website_slug": "digibyte"
+        }
+    ],
+    "metadata": {
+        "timestamp": 1562652173,
+        "warning": "WARNING: This API is now deprecated and will be taken offline soon.  Please switch to the new CoinMarketCap API to avoid interruptions in service. (https://pro.coinmarketcap.com/migrate/)",
+        "num_cryptocurrencies": 2264,
+        "error": null
+    }
+}

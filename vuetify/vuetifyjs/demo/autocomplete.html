@@ -16,7 +16,7 @@
 	<script>
 		window.__serverSideData__ = {
 			states: {
-				GivenNames: ["react", "jquery"],
+				Name2: ["react", "jquery"],
 			}
 		}
 	</script>
@@ -28,11 +28,7 @@
 
 					<vw-autocomplete field-name="Name2" :items='[{"text":"Vue","value":"vue"},{"text":"React","value":"react"},{"text":"Angular","value":"angular"},{"text":"Amber","value":"amber"},{"text":"jQuery","value":"jquery"}]' :selected-items='[{"text":"Angular","value":"angular"}]'></vw-autocomplete>
 
-					<v-input append-icon="close" messages="there is an error">
-						<input v-on:input='oninput({"id": "hello"}, "FamilyName", $event)' style="background: greenyellow"/>
-					</v-input>
-
-					<a href="#" v-on:click='onclick({"id": "hello"}, $event)' >Post</a>
+					<v-btn color="info" v-on:click='onclick({"id": "update"}, $event)' >Post</v-btn>
 
 				</v-container>
 			</v-content>
