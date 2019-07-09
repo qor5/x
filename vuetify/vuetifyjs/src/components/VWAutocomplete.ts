@@ -39,16 +39,22 @@ export default Vue.extend({
 		console.log('this.$attrs', this.$attrs);
 		const self = this;
 		const {
-			fieldName,
+			multiple,
 		} = self.$attrs;
+
+		const {
+			fieldName,
+		} = self.$props;
+
 		const form = self.core.form;
 		// const values = form.getAll(fieldName);
+		console.log('fieldName', fieldName);
 		const data: VNodeData = {
 			props: {
 				...{
 					solo: true,
-					chips: true,
-					deletableChips: true,
+					chips: multiple,
+					deletableChips: multiple,
 				},
 				...self.$attrs,
 				...{
