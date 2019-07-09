@@ -94,6 +94,7 @@ export default Vue.extend({
 					solo: true,
 					chips: multiple,
 					deletableChips: multiple,
+					clearable: true,
 				},
 				...self.$attrs,
 				...{
@@ -106,7 +107,15 @@ export default Vue.extend({
 			on: {
 				...{
 					change: (vals: any) => {
+						if (!fieldName) {
+							return;
+						}
 						form.delete(fieldName);
+						if (!vals) {
+							form.append(fieldName, '');
+							return;
+						}
+
 						if (typeof vals === 'string') {
 							vals = [vals];
 						}

@@ -9,7 +9,7 @@ import (
 
 	"github.com/sunfmin/bran/core"
 
-	"github.com/sunfmin/bran/examples/e10_hello_vuetify_select"
+	"github.com/sunfmin/bran/examples/e10_hello_vuetify_autocomplete"
 
 	"github.com/sunfmin/bran/vuetify"
 
@@ -229,8 +229,8 @@ func Setup(prefix string) http.Handler {
 			renderFunc: e09_hello_dialog.HelloDialog,
 		},
 		{
-			url:        "e10_hello_vuetify_select",
-			renderFunc: e10_hello_vuetify_select.HelloVuetifySelect,
+			url:        "e10_hello_vuetify_autocomplete",
+			renderFunc: e10_hello_vuetify_autocomplete.HelloVuetifyAutocomplete,
 			vuetify:    true,
 		},
 	}

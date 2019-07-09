@@ -2,30 +2,51 @@ package vuetify
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/sunfmin/bran/ui"
 	h "github.com/theplant/htmlgo"
 )
 
-type TextValue struct {
-	Text  string `json:"text,omitempty"`
-	Value string `json:"value,omitempty"`
-}
-
 type VAutoCompleteBuilder struct {
-	tag *h.HTMLTagBuilder
+	tag           *h.HTMLTagBuilder
+	selectedItems interface{}
+	items         interface{}
 }
 
-func VAutoComplete(v []*TextValue) (r *VAutoCompleteBuilder) {
+func VAutoComplete() (r *VAutoCompleteBuilder) {
 	r = &VAutoCompleteBuilder{
 		tag: h.Tag("vw-autocomplete"),
 	}
-	r.Items(v).
-		Multiple(true)
+	r.Multiple(true)
 	return
 }
 
-func (b *VAutoCompleteBuilder) Items(v []*TextValue) (r *VAutoCompleteBuilder) {
-	b.tag.Attr(":items", v)
+func (b *VAutoCompleteBuilder) Items(v interface{}) (r *VAutoCompleteBuilder) {
+	b.items = v
+	return b
+}
+
+func (b *VAutoCompleteBuilder) SelectedItems(v interface{}) (r *VAutoCompleteBuilder) {
+	b.selectedItems = v
+	return b
+}
+
+func (b *VAutoCompleteBuilder) ItemsEventFunc(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params ...string) (r *VAutoCompleteBuilder) {
+
+	if ef == nil {
+		return b
+	}
+
+	b.tag.Attr(":items-event-func-id", &ui.EventFuncID{
+		ID:     hub.RefEventFunc(eventFuncId, ef),
+		Params: params,
+	})
+	return b
+}
+
+func (b *VAutoCompleteBuilder) Label(v string) (r *VAutoCompleteBuilder) {
+	b.tag.Attr("label", v)
 	return b
 }
 
@@ -34,31 +55,27 @@ func (b *VAutoCompleteBuilder) FieldName(v string) (r *VAutoCompleteBuilder) {
 	return b
 }
 
-func (b *VAutoCompleteBuilder) Multiple(v bool) (r *VAutoCompleteBuilder) {
-	b.tag.Attr("multiple", v)
+func (b *VAutoCompleteBuilder) ItemText(v string) (r *VAutoCompleteBuilder) {
+	b.tag.Attr("item-text", v)
 	return b
 }
 
-// func (b *VAutoCompleteBuilder) Chips(v bool) (r *VAutoCompleteBuilder) {
-// 	b.tag.Attr("chips", v)
-// 	return b
-// }
+func (b *VAutoCompleteBuilder) ItemValue(v string) (r *VAutoCompleteBuilder) {
+	b.tag.Attr("item-value", v)
+	return b
+}
 
-// func (b *VAutoCompleteBuilder) DeletableChips(v bool) (r *VAutoCompleteBuilder) {
-// 	b.tag.Attr("deletable-chips", v)
-// 	return b
-// }
-
-// func (b *VAutoCompleteBuilder) Solo(v bool) (r *VAutoCompleteBuilder) {
-// 	b.tag.Attr("solo", v)
-// 	return b
-// }
-
-// func (b *VAutoCompleteBuilder) Clearable(v bool) (r *VAutoCompleteBuilder) {
-// 	b.tag.Attr("clearable", v)
-// 	return b
-// }
+func (b *VAutoCompleteBuilder) Multiple(v bool) (r *VAutoCompleteBuilder) {
+	b.tag.Attr(":multiple", fmt.Sprint(v))
+	return b
+}
 
 func (b *VAutoCompleteBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	if b.items == nil {
+		b.items = b.selectedItems
+	}
+	b.tag.Attr(":items", b.items)
+	b.tag.Attr(":selected-items", b.selectedItems)
+
 	return b.tag.MarshalHTML(ctx)
 }
