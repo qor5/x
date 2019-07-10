@@ -1,6 +1,11 @@
 import { VueConstructor } from 'vue';
 import Vuetify from 'vuetify';
-import { VTextField, VTextarea } from 'vuetify/lib';
+import {
+	VTextField,
+	VTextarea,
+	VCheckbox,
+	VRadioGroup,
+} from 'vuetify/lib';
 
 import './main.styl';
 
@@ -15,4 +20,10 @@ declare var window: any;
 		Vue.component('vw-autocomplete', VWAutocomplete);
 		Vue.component('vw-text-field', WithField(VTextField));
 		Vue.component('vw-textarea', WithField(VTextarea));
+		Vue.component('vw-checkbox', WithField(VCheckbox, (formValue: string): any => {
+			return {
+				inputValue: formValue === 'true' ? 'true' : '',
+			};
+		}));
+		Vue.component('vw-radio-group', WithField(VRadioGroup));
 	});

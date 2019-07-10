@@ -1,7 +1,7 @@
 import { VAutocomplete } from 'vuetify/lib';
 
-import Vue, { CreateElement, VNode, VNodeData } from 'vue';
-import Core from './Core';
+import Vue, { CreateElement, VNode, VNodeData, Component } from 'vue';
+import { Core, slotTemplates } from './Helpers';
 
 export default Vue.extend({
 	name: 'vw-autocomplete',
@@ -48,7 +48,7 @@ export default Vue.extend({
 
 	watch: {
 		searchKeyword(val: string) {
-			console.log('searchKeyword', val);
+			// console.log('searchKeyword', val);
 			// console.log('this.itemsEventFuncId', this.itemsEventFuncId);
 			if (val === null) {
 				return;
@@ -119,7 +119,12 @@ export default Vue.extend({
 				...onSearchInput,
 			},
 		};
-		return h(VAutocomplete, data);
+		const comp: Component = VAutocomplete;
+		return (
+			<comp {...data}>
+				{slotTemplates(h, this.$slots)}
+			</comp>
+		);
 	},
 });
 

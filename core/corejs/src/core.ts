@@ -160,6 +160,7 @@ export class Core {
 		if (!val) {
 			return;
 		}
+		// console.log('val', val, 'Array.isArray(val)', Array.isArray(val));
 		if (Array.isArray(val)) {
 			val.forEach((v) => {
 				this.form.append(fieldName, v);
