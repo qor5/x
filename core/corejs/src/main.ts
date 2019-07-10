@@ -1,4 +1,4 @@
-import Vue, { VNode, VNodeDirective } from 'vue';
+import Vue from 'vue';
 import { Core } from './core';
 
 const app = document.getElementById('app');

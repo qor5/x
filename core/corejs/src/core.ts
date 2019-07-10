@@ -152,6 +152,42 @@ export class Core {
 		};
 	}
 
+	public setFormValue(fieldName: string, val: any) {
+		if (!fieldName || fieldName.length === 0) {
+			return;
+		}
+		this.form.delete(fieldName);
+		if (!val) {
+			return;
+		}
+		if (Array.isArray(val)) {
+			val.forEach((v) => {
+				this.form.append(fieldName, v);
+			});
+			return;
+		}
+		this.form.set(fieldName, val);
+	}
+
+	public getFormValue(fieldName: string): string {
+		const val = this.form.get(fieldName);
+		if (typeof val === 'string') {
+			return val;
+		}
+		return '';
+	}
+
+	public getFormValueAsArray(fieldName: string): string[] {
+		const vals = this.form.getAll(fieldName);
+		const r: string[] = [];
+		for (const v of vals) {
+			if (typeof v === 'string') {
+				r.push(v);
+			}
+		}
+		return r;
+	}
+
 
 	private controlsOnInput(
 		comp: any,

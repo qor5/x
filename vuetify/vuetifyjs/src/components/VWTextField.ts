@@ -13,8 +13,7 @@ export default Vue.extend({
 			fieldName,
 		} = self.$props;
 
-		const form = self.core.form;
-		const formValue = form.get(fieldName);
+		const formValue = self.core.getFormValue(fieldName);
 
 		const data: VNodeData = {
 			props: {
@@ -26,10 +25,7 @@ export default Vue.extend({
 
 			on: {
 				change: (val: string) => {
-					if (!fieldName) {
-						return;
-					}
-					form.set(fieldName, val);
+					self.core.setFormValue(fieldName, val);
 				},
 			},
 		};

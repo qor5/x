@@ -27,25 +27,28 @@ export default Vue.extend({
 	},
 
 	created() {
-		this.fetchEvent = this.core.debounce((val: string) => {
-			this.isLoading = true;
-			this.core.fetchEvent(this.itemsEventFuncId, { value: val })
+		const self = this;
+		const core = self.core;
+		self.fetchEvent = core.debounce((val: string) => {
+			self.isLoading = true;
+			core.fetchEvent(self.itemsEventFuncId, { value: val })
 				.then((r: any) => {
-					// console.log('res.data', res.data);
-					this._items = r.data;
+					// console.log('r.data', r.data);
+					self._items = r.data;
 				})
 				// .catch((err: any) => {
 				// 	console.log('debounceFetchEvent', err);
 				// })
-				.finally(() => (this.isLoading = false));
+				.finally(() => (self.isLoading = false));
 		}, 500);
 
-		this._items = this.$props.items;
+		self._items = self.$props.items;
 	},
 
 
 	watch: {
 		searchKeyword(val: string) {
+			console.log('searchKeyword', val);
 			// console.log('this.itemsEventFuncId', this.itemsEventFuncId);
 			if (val === null) {
 				return;
@@ -59,6 +62,7 @@ export default Vue.extend({
 
 	render(h: CreateElement): VNode {
 		// console.log('this.$attrs', this.$attrs);
+		// console.log('render', this);
 		const self = this;
 		const {
 			multiple,
@@ -70,17 +74,15 @@ export default Vue.extend({
 			itemsEventFuncId,
 		} = self.$props;
 
-		// console.log('itemsEventFuncId', itemsEventFuncId);
-		const form = self.core.form;
-		// const values = form.getAll(fieldName);
-		// console.log('fieldName', fieldName);
 		let onSearchInput = {};
+		let hideSelected = false;
 		if (itemsEventFuncId) {
 			onSearchInput = {
 				'update:searchInput': (val: string) => {
 					self.searchKeyword = val;
 				},
 			};
+			hideSelected = true;
 		}
 
 		let value = selectedItems;
@@ -91,10 +93,11 @@ export default Vue.extend({
 		const data: VNodeData = {
 			props: {
 				...{
-					solo: true,
-					chips: multiple,
+					// solo: true,
+					chips: true,
 					deletableChips: multiple,
 					clearable: true,
+					hideSelected,
 				},
 				...self.$attrs,
 				...{
@@ -107,21 +110,7 @@ export default Vue.extend({
 			on: {
 				...{
 					change: (vals: any) => {
-						if (!fieldName) {
-							return;
-						}
-						form.delete(fieldName);
-						if (!vals) {
-							form.append(fieldName, '');
-							return;
-						}
-
-						if (typeof vals === 'string') {
-							vals = [vals];
-						}
-						vals.forEach((v: string) => {
-							form.append(fieldName, v);
-						});
+						self.core.setFormValue(fieldName, vals);
 					},
 					click: (e: any) => {
 						self.searchKeyword = '';
