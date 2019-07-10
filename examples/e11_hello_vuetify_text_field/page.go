@@ -7,12 +7,14 @@ import (
 )
 
 type mystate struct {
-	MyValue string
+	MyValue       string
+	TextareaValue string
 }
 
 func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	s := ctx.StateOrInit(&mystate{
 		MyValue: "This is my value",
+		TextareaValue: "123",
 	}).(*mystate)
 
 	pr.Schema = vt.VApp(
@@ -26,6 +28,8 @@ func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error)
 				vt.VTextField().Label("Default Value").Value("Hello").Autofocus(true),
 				vt.VTextField().Label("Form Value").Autofocus(true).FieldName("MyValue"),
 				Pre(s.MyValue),
+				vt.VTextarea().FieldName("TextareaValue").Solo(true),
+				Pre(s.TextareaValue),
 				vt.VBtn("Update").OnClick(ctx.Hub, "update", update).Color("info").Round(true),
 			),
 		),
