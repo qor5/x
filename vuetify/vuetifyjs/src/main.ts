@@ -22,7 +22,7 @@ declare var window: any;
 		Vue.component('vw-textarea', WithField(VTextarea));
 		Vue.component('vw-checkbox', WithField(VCheckbox, (formValue: string): any => {
 			return {
-				inputValue: formValue === 'true' ? 'true' : '',
+				inputValue: formValue,
 			};
 		}));
 		Vue.component('vw-radio-group', WithField(VRadioGroup));

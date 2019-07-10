@@ -20,7 +20,7 @@ func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error)
 		MyValue:       "This is my value",
 		TextareaValue: "123",
 		Gender:        "M",
-		//Agreed:        true,
+		Agreed:        true,
 	}).(*mystate)
 
 	pr.Schema = vt.VApp(

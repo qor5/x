@@ -29,7 +29,6 @@ export const WithField = (comp: Component, valuePropsFunc?: (formValue: string) 
 
 				on: {
 					change: (val: any) => {
-						console.log('change val', val);
 						self.core.setFormValue(fieldName, val);
 					},
 				},

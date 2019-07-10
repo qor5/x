@@ -13,8 +13,9 @@ type VCheckboxBuilder struct {
 
 func VCheckbox(children ...h.HTMLComponent) (r *VCheckboxBuilder) {
 	r = &VCheckboxBuilder{
-		tag: h.Tag("v-checkbox").Children(children...),
+		tag: h.Tag("vw-checkbox").Children(children...),
 	}
+	r.TrueValue("true").FalseValue("false")
 	return
 }
 
