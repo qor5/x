@@ -53,6 +53,8 @@ func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error)
 				vt.VSlider().FieldName("Slider1"),
 				Pre(fmt.Sprint(s.Slider1)),
 
+				vt.VSlider().Step(10).Ticks(true).ThumbLabel("always").FieldName("Slider1"),
+
 				vt.VBtn("Update").OnClick(ctx.Hub, "update", update).Color("info").Round(true),
 			),
 		),

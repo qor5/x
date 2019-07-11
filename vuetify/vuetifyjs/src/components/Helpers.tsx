@@ -7,6 +7,16 @@ export const Core = Vue.extend({
 	},
 });
 
+export const SelectedItems = Vue.extend({
+	props: {
+		selectedItems: {
+			type: Array,
+			default: () => [],
+		},
+		multiple: Boolean,
+	},
+});
+
 
 interface Slots { [key: string]: VNode[] | undefined; }
 

@@ -1,10 +1,22 @@
-import Vue, { CreateElement, VNode, VNodeData, Component, VueConstructor } from 'vue';
+import Vue, {
+	CreateElement,
+	VNode,
+	VNodeData,
+	Component,
+	VueConstructor,
+	ComponentOptions,
+} from 'vue';
 import { Core, slotTemplates } from './Helpers';
 
 
-export const WithField = (comp: Component, valuePropsFunc?: (formValue: string) => any): VueConstructor => {
+export const WithField = (
+	comp: Component,
+	valuePropsFunc?: (formValue: string, props: Record<string, any>) => any,
+	mixins?: Array<ComponentOptions<Vue> | typeof Vue>,
+): VueConstructor => {
+	const m = mixins || [Core];
 	return Vue.extend({
-		mixins: [Core],
+		mixins: m,
 
 		render(h: CreateElement): VNode {
 			const self = this;
@@ -18,7 +30,7 @@ export const WithField = (comp: Component, valuePropsFunc?: (formValue: string) 
 				value: formValue,
 			};
 			if (valuePropsFunc) {
-				valueProps = valuePropsFunc(formValue);
+				valueProps = valuePropsFunc(formValue, this.$props);
 			}
 
 			const data: VNodeData = {

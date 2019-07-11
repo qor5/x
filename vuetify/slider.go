@@ -152,8 +152,8 @@ func (b *VSliderBuilder) ThumbColor(v string) (r *VSliderBuilder) {
 	return b
 }
 
-func (b *VSliderBuilder) ThumbLabel(v bool) (r *VSliderBuilder) {
-	b.tag.Attr(":thumb-label", fmt.Sprint(v))
+func (b *VSliderBuilder) ThumbLabel(v string) (r *VSliderBuilder) {
+	b.tag.Attr("thumb-label", v)
 	return b
 }
 

@@ -1,17 +1,13 @@
 import { VAutocomplete } from 'vuetify/lib';
 
 import Vue, { CreateElement, VNode, VNodeData, Component } from 'vue';
-import { Core, slotTemplates } from './Helpers';
+import { Core, SelectedItems, slotTemplates } from './Helpers';
 
 export default Vue.extend({
 	name: 'vw-autocomplete',
-	mixins: [Core],
+	mixins: [Core, SelectedItems],
 	props: {
 		itemsEventFuncId: Object,
-		selectedItems: {
-			type: Array,
-			default: () => [],
-		},
 		items: {
 			type: Array,
 			default: () => [],
@@ -64,14 +60,12 @@ export default Vue.extend({
 		// console.log('this.$attrs', this.$attrs);
 		// console.log('render', this);
 		const self = this;
-		const {
-			multiple,
-		} = self.$attrs;
 
 		const {
 			fieldName,
 			selectedItems,
 			itemsEventFuncId,
+			multiple,
 		} = self.$props;
 
 		let onSearchInput = {};
@@ -86,7 +80,7 @@ export default Vue.extend({
 		}
 
 		let value = selectedItems;
-		if (!multiple) {
+		if (selectedItems && selectedItems.length > 0 && !multiple) {
 			value = selectedItems[0];
 		}
 
@@ -94,6 +88,7 @@ export default Vue.extend({
 			props: {
 				...{
 					// solo: true,
+					multiple,
 					chips: true,
 					deletableChips: multiple,
 					clearable: true,

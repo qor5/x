@@ -1,6 +1,8 @@
 package e10_hello_vuetify_autocomplete
 
 import (
+	"fmt"
+
 	"github.com/Pallinder/go-randomdata"
 	"github.com/sunfmin/bran/ui"
 	vt "github.com/sunfmin/bran/vuetify"
@@ -8,8 +10,9 @@ import (
 )
 
 type mystate struct {
-	MyValues   []string
-	YourValues []string
+	Values1 []string
+	Values2 []string
+	Value3  string
 }
 
 type User struct {
@@ -17,61 +20,80 @@ type User struct {
 	Name  string
 }
 
-var selectedItems = []*User{
+var selectedItems1 = []*User{
 	{Login: "sam", Name: "Sam"},
 	{Login: "charles", Name: "Charles"},
 }
 
-var options = []*User{
+var options1 = []*User{
 	{Login: "sam", Name: "Sam"},
 	{Login: "john", Name: "John"},
 	{Login: "charles", Name: "Charles"},
 }
 
-var yourSelectedItems = []*User{
+var selectedItems2 = []*User{
 	{Login: "charles", Name: "Charles"},
 }
 
-var yourOptions = []*User{}
+var selectedItems3 = []*User{
+	{Login: "charles", Name: "Charles"},
+}
+
+var options2 = []*User{
+	{Login: "sam", Name: "Sam"},
+	{Login: "john", Name: "John"},
+	{Login: "charles", Name: "Charles"},
+}
 
 func HelloVuetifyAutocomplete(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	s := ctx.StateOrInit(&mystate{
-		MyValues: []string{
+		Values1: []string{
 			"sam",
 			"charles",
 		},
-		YourValues: []string{
+		Values2: []string{
 			"charles",
 		},
+		Value3: "charles",
 	}).(*mystate)
 
 	result := Ul()
-	for _, v := range s.MyValues {
+	for _, v := range s.Values1 {
 		result.AppendChildren(Li().Text(v))
 	}
 	result.AppendChildren(Li().Text("======"))
-	for _, v := range s.YourValues {
+	for _, v := range s.Values2 {
 		result.AppendChildren(Li().Text(v))
 	}
-
+	fmt.Println("selectedItems2", selectedItems2)
 	pr.Schema = vt.VApp(
 		vt.VContent(
 			vt.VContainer(
-				vt.VAutoComplete().Items(options).SelectedItems(selectedItems).
-					FieldName("MyValues").
+				H1("VAutocomplete"),
+				vt.VAutocomplete().Items(options1).SelectedItems(selectedItems1).
+					FieldName("Values1").
 					ItemText("Name").
 					ItemValue("Login").
 					Label("Static Options"),
 
-				vt.VAutoComplete().
+				vt.VAutocomplete().
 					ItemsEventFunc(ctx.Hub, "users", users).
 					ItemText("Name").
 					ItemValue("Login").
-					SelectedItems(yourSelectedItems).
-					FieldName("YourValues").
+					SelectedItems(selectedItems2).
+					FieldName("Values2").
 					Label("Load Options from Remote"),
 
 				result,
+				H1("VSelect"),
+				vt.VSelect().
+					Items(options1).
+					ItemText("Name").
+					ItemValue("Login").
+					SelectedItems(selectedItems3).
+					FieldName("Value3").
+					Solo(true),
+				Pre(s.Value3),
 				vt.VBtn("Update").
 					Color("success").
 					OnClick(ctx.Hub, "update", update),
@@ -83,40 +105,45 @@ func HelloVuetifyAutocomplete(ctx *ui.EventContext) (pr ui.PageResponse, err err
 
 func users(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	us := []*User{}
-	for _, u := range options {
-		us = append(us, u)
-	}
-	if len(yourOptions) <= 100 {
+
+	if len(options2) <= 100 {
 		for i := 0; i < 200; i++ {
 			us = append(us, &User{
 				Login: randomdata.Email(),
 				Name:  randomdata.SillyName(),
 			})
 		}
-		yourOptions = us
+		options2 = us
 	}
 
-	r.Data = yourOptions
+	r.Data = options2
 	return
 }
 
 func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	s := ctx.State.(*mystate)
-	selectedItems = []*User{}
-	for _, login := range s.MyValues {
-		for _, u := range options {
+	selectedItems1 = []*User{}
+	for _, login := range s.Values1 {
+		for _, u := range options1 {
 			if u.Login == login {
-				selectedItems = append(selectedItems, u)
+				selectedItems1 = append(selectedItems1, u)
 			}
 		}
 	}
 
-	yourSelectedItems = []*User{}
-	for _, login := range s.YourValues {
-		for _, u := range yourOptions {
+	selectedItems2 = []*User{}
+	for _, login := range s.Values2 {
+		for _, u := range options2 {
 			if u.Login == login {
-				yourSelectedItems = append(yourSelectedItems, u)
+				selectedItems2 = append(selectedItems2, u)
 			}
+		}
+	}
+
+	selectedItems3 = []*User{}
+	for _, u := range options1 {
+		if u.Login == s.Value3 {
+			selectedItems3 = append(selectedItems3, u)
 		}
 	}
 	r.Reload = true
