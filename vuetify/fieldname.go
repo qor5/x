@@ -24,3 +24,8 @@ func (b *VSwitchBuilder) FieldName(v string) (r *VSwitchBuilder) {
 	b.tag.Attr("field-name", v)
 	return b
 }
+
+func (b *VSliderBuilder) FieldName(v string) (r *VSliderBuilder) {
+	b.tag.Attr("field-name", v)
+	return b
+}

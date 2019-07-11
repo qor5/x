@@ -14,6 +14,7 @@ type mystate struct {
 	Gender        string
 	Agreed        bool
 	Feature1      bool
+	Slider1       int
 }
 
 func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
@@ -23,6 +24,7 @@ func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error)
 		Gender:        "M",
 		Agreed:        true,
 		Feature1:      true,
+		Slider1:       10,
 	}).(*mystate)
 
 	pr.Schema = vt.VApp(
@@ -47,6 +49,9 @@ func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error)
 				Pre(fmt.Sprint(s.Agreed)),
 				vt.VSwitch().FieldName("Feature1"),
 				Pre(fmt.Sprint(s.Feature1)),
+
+				vt.VSlider().FieldName("Slider1"),
+				Pre(fmt.Sprint(s.Slider1)),
 
 				vt.VBtn("Update").OnClick(ctx.Hub, "update", update).Color("info").Round(true),
 			),

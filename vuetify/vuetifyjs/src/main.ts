@@ -6,6 +6,7 @@ import {
 	VCheckbox,
 	VRadioGroup,
 	VSwitch,
+	VSlider,
 } from 'vuetify/lib';
 
 import './main.styl';
@@ -30,4 +31,5 @@ const inputValueFunc = (formValue: string): any => {
 		Vue.component('vw-checkbox', WithField(VCheckbox, inputValueFunc));
 		Vue.component('vw-switch', WithField(VSwitch, inputValueFunc));
 		Vue.component('vw-radio-group', WithField(VRadioGroup));
+		Vue.component('vw-slider', WithField(VSlider));
 	});
