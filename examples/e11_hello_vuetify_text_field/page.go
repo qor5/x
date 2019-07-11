@@ -13,6 +13,7 @@ type mystate struct {
 	TextareaValue string
 	Gender        string
 	Agreed        bool
+	Feature1      bool
 }
 
 func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
@@ -21,6 +22,7 @@ func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error)
 		TextareaValue: "123",
 		Gender:        "M",
 		Agreed:        true,
+		Feature1:      true,
 	}).(*mystate)
 
 	pr.Schema = vt.VApp(
@@ -43,6 +45,8 @@ func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error)
 				Pre(s.Gender),
 				vt.VCheckbox().FieldName("Agreed").Label("Agree"),
 				Pre(fmt.Sprint(s.Agreed)),
+				vt.VSwitch().FieldName("Feature1"),
+				Pre(fmt.Sprint(s.Feature1)),
 
 				vt.VBtn("Update").OnClick(ctx.Hub, "update", update).Color("info").Round(true),
 			),

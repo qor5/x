@@ -151,8 +151,3 @@ func (b *VRadioGroupBuilder) ValidateOnBlur(v bool) (r *VRadioGroupBuilder) {
 func (b *VRadioGroupBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }
-
-func (b *VRadioGroupBuilder) FieldName(v string) (r *VRadioGroupBuilder) {
-	b.tag.Attr("field-name", v)
-	return b
-}

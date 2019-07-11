@@ -187,8 +187,3 @@ func (b *VCheckboxBuilder) Value(v string) (r *VCheckboxBuilder) {
 func (b *VCheckboxBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }
-
-func (b *VCheckboxBuilder) FieldName(v string) (r *VCheckboxBuilder) {
-	b.tag.Attr("field-name", v)
-	return b
-}

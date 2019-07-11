@@ -5,6 +5,7 @@ import {
 	VTextarea,
 	VCheckbox,
 	VRadioGroup,
+	VSwitch,
 } from 'vuetify/lib';
 
 import './main.styl';
@@ -14,16 +15,19 @@ import { WithField } from './components/WithField';
 
 declare var window: any;
 
+const inputValueFunc = (formValue: string): any => {
+	return {
+		inputValue: formValue,
+	};
+};
+
 (window.__branVueComponentRegisters =
 	window.__branVueComponentRegisters || []).push((Vue: VueConstructor): any => {
 		Vue.use(Vuetify);
 		Vue.component('vw-autocomplete', VWAutocomplete);
 		Vue.component('vw-text-field', WithField(VTextField));
 		Vue.component('vw-textarea', WithField(VTextarea));
-		Vue.component('vw-checkbox', WithField(VCheckbox, (formValue: string): any => {
-			return {
-				inputValue: formValue,
-			};
-		}));
+		Vue.component('vw-checkbox', WithField(VCheckbox, inputValueFunc));
+		Vue.component('vw-switch', WithField(VSwitch, inputValueFunc));
 		Vue.component('vw-radio-group', WithField(VRadioGroup));
 	});

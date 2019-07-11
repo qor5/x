@@ -246,8 +246,3 @@ func (b *VTextFieldBuilder) ValidateOnBlur(v bool) (r *VTextFieldBuilder) {
 func (b *VTextFieldBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }
-
-func (b *VTextFieldBuilder) FieldName(v string) (r *VTextFieldBuilder) {
-	b.tag.Attr("field-name", v)
-	return b
-}
