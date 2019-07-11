@@ -24,20 +24,7 @@ const inputValueFunc = (formValue: string, props: Record<string, any>): any => {
 	};
 };
 
-const selectInputValueFunc = (formValue: string, props: Record<string, any>): any => {
-	const {
-		selectedItems,
-		multiple,
-	} = props;
 
-	let value = selectedItems;
-	if (selectedItems && selectedItems.length > 0 && !multiple) {
-		value = selectedItems[0];
-	}
-	return {
-		value,
-	};
-};
 
 (window.__branVueComponentRegisters =
 	window.__branVueComponentRegisters || []).push((Vue: VueConstructor): any => {
@@ -49,5 +36,5 @@ const selectInputValueFunc = (formValue: string, props: Record<string, any>): an
 		Vue.component('vw-switch', WithField(VSwitch, inputValueFunc));
 		Vue.component('vw-radio-group', WithField(VRadioGroup));
 		Vue.component('vw-slider', WithField(VSlider));
-		Vue.component('vw-select', WithField(VSelect, selectInputValueFunc, [Core, SelectedItems]));
+		Vue.component('vw-select', WithField(VSelect, undefined, [Core, SelectedItems]));
 	});

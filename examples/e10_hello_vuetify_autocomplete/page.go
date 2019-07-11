@@ -1,8 +1,6 @@
 package e10_hello_vuetify_autocomplete
 
 import (
-	"fmt"
-
 	"github.com/Pallinder/go-randomdata"
 	"github.com/sunfmin/bran/ui"
 	vt "github.com/sunfmin/bran/vuetify"
@@ -65,12 +63,12 @@ func HelloVuetifyAutocomplete(ctx *ui.EventContext) (pr ui.PageResponse, err err
 	for _, v := range s.Values2 {
 		result.AppendChildren(Li().Text(v))
 	}
-	fmt.Println("selectedItems2", selectedItems2)
 	pr.Schema = vt.VApp(
 		vt.VContent(
 			vt.VContainer(
 				H1("VAutocomplete"),
-				vt.VAutocomplete().Items(options1).SelectedItems(selectedItems1).
+				vt.VAutocomplete().
+					Items(options1).
 					FieldName("Values1").
 					ItemText("Name").
 					ItemValue("Login").
@@ -90,7 +88,6 @@ func HelloVuetifyAutocomplete(ctx *ui.EventContext) (pr ui.PageResponse, err err
 					Items(options1).
 					ItemText("Name").
 					ItemValue("Login").
-					SelectedItems(selectedItems3).
 					FieldName("Value3").
 					Solo(true),
 				Pre(s.Value3),
@@ -105,7 +102,9 @@ func HelloVuetifyAutocomplete(ctx *ui.EventContext) (pr ui.PageResponse, err err
 
 func users(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	us := []*User{}
-
+	for _, u := range options1 {
+		us = append(us, u)
+	}
 	if len(options2) <= 100 {
 		for i := 0; i < 200; i++ {
 			us = append(us, &User{

@@ -6,7 +6,7 @@ import Vue, {
 	VueConstructor,
 	ComponentOptions,
 } from 'vue';
-import { Core, slotTemplates } from './Helpers';
+import { Core, slotTemplates, selectValue } from './Helpers';
 
 
 export const WithField = (
@@ -25,12 +25,14 @@ export const WithField = (
 			} = self.$props;
 
 
-			const formValue = self.core.getFormValue(fieldName);
-			let valueProps = {
-				value: formValue,
-			};
+			let valueProps = {};
 			if (valuePropsFunc) {
+				const formValue = self.core.getFormValue(fieldName);
 				valueProps = valuePropsFunc(formValue, this.$props);
+			} else {
+				valueProps = {
+					value: selectValue(self.core, this.$props),
+				};
 			}
 
 			const data: VNodeData = {

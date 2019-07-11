@@ -1,7 +1,7 @@
 import { VAutocomplete } from 'vuetify/lib';
 
 import Vue, { CreateElement, VNode, VNodeData, Component } from 'vue';
-import { Core, SelectedItems, slotTemplates } from './Helpers';
+import { Core, SelectedItems, slotTemplates, selectValue } from './Helpers';
 
 export default Vue.extend({
 	name: 'vw-autocomplete',
@@ -63,7 +63,6 @@ export default Vue.extend({
 
 		const {
 			fieldName,
-			selectedItems,
 			itemsEventFuncId,
 			multiple,
 		} = self.$props;
@@ -79,10 +78,7 @@ export default Vue.extend({
 			hideSelected = true;
 		}
 
-		let value = selectedItems;
-		if (selectedItems && selectedItems.length > 0 && !multiple) {
-			value = selectedItems[0];
-		}
+		const value = selectValue(self.core, this.$props);
 
 		const data: VNodeData = {
 			props: {
