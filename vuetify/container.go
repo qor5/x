@@ -63,11 +63,6 @@ func (b *VContainerBuilder) AlignStart(v bool) (r *VContainerBuilder) {
 	return b
 }
 
-//func (b *VContainerBuilder) Dtype(v bool) (r *VContainerBuilder) {
-//	b.tag.Attr(":d-{type}", fmt.Sprint(v))
-//	return b
-//}
-
 func (b *VContainerBuilder) FillHeight(v bool) (r *VContainerBuilder) {
 	b.tag.Attr(":fill-height", fmt.Sprint(v))
 	return b
@@ -77,11 +72,6 @@ func (b *VContainerBuilder) Fluid(v bool) (r *VContainerBuilder) {
 	b.tag.Attr(":fluid", fmt.Sprint(v))
 	return b
 }
-
-//func (b *VContainerBuilder) GridListxsThroughXl(v bool) (r *VContainerBuilder) {
-//	b.tag.Attr(":grid-list-{xs-through-xl}", fmt.Sprint(v))
-//	return b
-//}
 
 func (b *VContainerBuilder) Id(v string) (r *VContainerBuilder) {
 	b.tag.Attr("id", v)

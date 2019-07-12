@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sunfmin/bran/examples/e12_hello_vuetify_grid"
+
 	"github.com/sunfmin/bran/codehighlight"
 	"github.com/sunfmin/bran/core"
 	branoverlay "github.com/sunfmin/bran/overlay"
@@ -237,6 +239,11 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e11_hello_vuetify_text_field",
 			renderFunc: e11_hello_vuetify_text_field.HelloVuetifyTextField,
+			vuetify:    true,
+		},
+		{
+			url:        "e12_hello_vuetify_grid",
+			renderFunc: e12_hello_vuetify_grid.HelloVuetifyGrid,
 			vuetify:    true,
 		},
 	}
