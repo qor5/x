@@ -3,17 +3,17 @@ package ui
 import (
 	"context"
 
-	. "github.com/theplant/htmlgo"
+	h "github.com/theplant/htmlgo"
 )
 
 type LazyLoaderBuilder struct {
 	loaderFunc *EventFuncID
-	tag        *HTMLTagBuilder
+	tag        *h.HTMLTagBuilder
 }
 
 func LazyLoader(hub EventFuncHub, eventFuncId string, ef EventFunc, params ...string) (r *LazyLoaderBuilder) {
 	r = &LazyLoaderBuilder{
-		tag: Tag("bran-lazy-loader"),
+		tag: h.Tag("bran-lazy-loader"),
 		loaderFunc: &EventFuncID{
 			ID:     hub.RefEventFunc(eventFuncId, ef),
 			Params: params,

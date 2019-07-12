@@ -117,6 +117,11 @@ func (b *VAutocompleteBuilder) ItemsEventFunc(hub ui.EventFuncHub, eventFuncId s
 	return b
 }
 
+func (b *VBtnBuilder) On(v string) (r *VBtnBuilder) {
+	b.tag.Attr("v-on", v)
+	return b
+}
+
 func (b *VBtnBuilder) Children(comps ...h.HTMLComponent) (r *VBtnBuilder) {
 	b.tag.Children(comps...)
 	return b

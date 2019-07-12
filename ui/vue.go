@@ -5,16 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 
-	. "github.com/theplant/htmlgo"
+	h "github.com/theplant/htmlgo"
 )
 
 type VueEventTagBuilder struct {
-	tag           MutableAttrHTMLComponent
+	tag           h.MutableAttrHTMLComponent
 	fieldName     *string
 	onInputFuncID *EventFuncID
 }
 
-func Bind(b MutableAttrHTMLComponent) (r *VueEventTagBuilder) {
+func Bind(b h.MutableAttrHTMLComponent) (r *VueEventTagBuilder) {
 	r = &VueEventTagBuilder{}
 	r.tag = b
 	return
