@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/sunfmin/bran/ui"
+	h "github.com/theplant/htmlgo"
 )
 
 type DType string
@@ -113,5 +114,10 @@ func (b *VAutocompleteBuilder) ItemsEventFunc(hub ui.EventFuncHub, eventFuncId s
 		ID:     hub.RefEventFunc(eventFuncId, ef),
 		Params: params,
 	})
+	return b
+}
+
+func (b *VBtnBuilder) Children(comps ...h.HTMLComponent) (r *VBtnBuilder) {
+	b.tag.Children(comps...)
 	return b
 }
