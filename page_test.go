@@ -3,8 +3,6 @@ package bran_test
 import (
 	"bytes"
 	"fmt"
-	goji "goji.io"
-	"goji.io/pat"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http/httptest"
@@ -15,6 +13,8 @@ import (
 	h "github.com/theplant/htmlgo"
 	"github.com/theplant/htmltestingutils"
 	"github.com/theplant/testingutils"
+	goji "goji.io"
+	"goji.io/pat"
 )
 
 type User struct {
@@ -127,7 +127,7 @@ var pageStateCases = []struct {
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 </head>
 <body class='front'>
-<div id="app">
+<div id="app" v-cloak="">
 <h1>Hello</h1></div>
 <script type='text/javascript'>
 window.__serverSideData__={
@@ -215,14 +215,14 @@ func runEvent(
 	body := bytes.NewBuffer(nil)
 
 	mw := multipart.NewWriter(body)
-	mw.WriteField("__event_data__", `{"eventFuncId":{"id":"call","pushState":null},"event":{"value":""}}
+	_ = mw.WriteField("__event_data__", `{"eventFuncId":{"id":"call","pushState":null},"event":{"value":""}}
 	`)
 
 	if eventFormChanger != nil {
 		eventFormChanger(mw)
 	}
 
-	mw.Close()
+	_ = mw.Close()
 
 	r = httptest.NewRequest("POST", "/?__execute_event__=call", body)
 	r.Header.Add("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", mw.Boundary()))
@@ -320,12 +320,12 @@ func TestFileUpload(t *testing.T) {
 	body := bytes.NewBuffer(nil)
 
 	mw := multipart.NewWriter(body)
-	mw.WriteField("__event_data__", `{"eventFuncId":{"id":"uploadFile","pushState":null},"event":{"value":""}}
+	_ = mw.WriteField("__event_data__", `{"eventFuncId":{"id":"uploadFile","pushState":null},"event":{"value":""}}
 	`)
 	fw, _ := mw.CreateFormFile("File1", "myfile.txt")
-	fw.Write([]byte("Hello"))
+	_, _ = fw.Write([]byte("Hello"))
 
-	mw.Close()
+	_ = mw.Close()
 
 	r := httptest.NewRequest("POST", "/?__execute_event__=uploadFile", body)
 	r.Header.Add("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", mw.Boundary()))
@@ -437,52 +437,52 @@ var eventCases = []struct {
 	}
 			`,
 	},
-//	{
-//		name: "case 2",
-//		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
-//			ctx.Injector.PutTailHTML("<script src='/assets/main.js'></script>")
-//			pr.Schema = &DummyComp{}
-//		},
-//		expectedEventResp: `
-//{
-//	"schema": "\u003cdiv\u003ehello\u003c/div\u003e",
-//	"reload": true,
-//	"scripts": "\n\tfunction hello() {\n\t\tconsole.log(\"hello\")\n\t}\n",
-//	"styles": "\n\tdiv {\n\t\tbackground-color: red;\n\t}\n"
-//}
-//`,
-//		expectedIndexResp: `<!DOCTYPE html>
-//<html>
-//<head>
-//<meta charset="utf8"/>
-//<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-//</head>
-//<body class='front'>
-//<style id="main_styles" type="text/css">
-//
-//	div {
-//		background-color: red;
-//	}
-//
-//</style>
-//<div id="app">
-//<div>hello</div></div>
-//<script type='text/javascript'>
-//window.__serverSideData__={}
-//</script>
-//<script id="main_scripts">
-//
-//	function hello() {
-//		console.log("hello")
-//	}
-//
-//</script>
-//<script src='/assets/main.js'></script>
-//</body>
-//</html>
-//
-//`,
-//	},
+	//	{
+	//		name: "case 2",
+	//		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
+	//			ctx.Injector.PutTailHTML("<script src='/assets/main.js'></script>")
+	//			pr.Schema = &DummyComp{}
+	//		},
+	//		expectedEventResp: `
+	//{
+	//	"schema": "\u003cdiv\u003ehello\u003c/div\u003e",
+	//	"reload": true,
+	//	"scripts": "\n\tfunction hello() {\n\t\tconsole.log(\"hello\")\n\t}\n",
+	//	"styles": "\n\tdiv {\n\t\tbackground-color: red;\n\t}\n"
+	//}
+	//`,
+	//		expectedIndexResp: `<!DOCTYPE html>
+	//<html>
+	//<head>
+	//<meta charset="utf8"/>
+	//<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+	//</head>
+	//<body class='front'>
+	//<style id="main_styles" type="text/css">
+	//
+	//	div {
+	//		background-color: red;
+	//	}
+	//
+	//</style>
+	//<div id="app" v-cloak="">
+	//<div>hello</div></div>
+	//<script type='text/javascript'>
+	//window.__serverSideData__={}
+	//</script>
+	//<script id="main_scripts">
+	//
+	//	function hello() {
+	//		console.log("hello")
+	//	}
+	//
+	//</script>
+	//<script src='/assets/main.js'></script>
+	//</body>
+	//</html>
+	//
+	//`,
+	//	},
 }
 
 func TestEvents(t *testing.T) {
