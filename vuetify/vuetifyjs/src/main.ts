@@ -24,8 +24,6 @@ const inputValueFunc = (formValue: string, props: Record<string, any>): any => {
 	};
 };
 
-
-
 (window.__branVueComponentRegisters =
 	window.__branVueComponentRegisters || []).push((Vue: VueConstructor): any => {
 		Vue.use(Vuetify);

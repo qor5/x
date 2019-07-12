@@ -179,7 +179,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	//body.WriteString(head.MainStyles(true))
 
 	if isRenderHTML {
-		body.WriteString("<div id=\"app\">\n")
+		body.WriteString("<div id=\"app\" v-cloak>\n")
 		body.WriteString(schema.(string))
 		body.WriteString("</div>\n")
 	}

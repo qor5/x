@@ -76,7 +76,7 @@ const vm = new Vue({
 		current: core.componentByTemplate(app.innerHTML),
 	},
 	template: `
-	<div id="app">
+	<div id="app" v-cloak>
 		<component :is="current"></component>
 	</div>
 `,
@@ -85,6 +85,7 @@ const vm = new Vue({
 			this.current = newView;
 		},
 	},
+
 });
 
 vm.$mount('#app');

@@ -6,10 +6,11 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"strings"
-	"github.com/sunfmin/bran/core"
-	"github.com/sunfmin/bran/vuetify"
+
 	"github.com/sunfmin/bran/codehighlight"
+	"github.com/sunfmin/bran/core"
 	branoverlay "github.com/sunfmin/bran/overlay"
+	"github.com/sunfmin/bran/vuetify"
 
 	"github.com/gobuffalo/packr"
 	"github.com/sunfmin/bran"
@@ -21,8 +22,8 @@ import (
 	"github.com/sunfmin/bran/examples/e07_hello_lazy_loader_in_drawer"
 	"github.com/sunfmin/bran/examples/e08_hello_popover"
 	"github.com/sunfmin/bran/examples/e09_hello_dialog"
-	"github.com/sunfmin/bran/examples/e11_hello_vuetify_text_field"
 	"github.com/sunfmin/bran/examples/e10_hello_vuetify_autocomplete"
+	"github.com/sunfmin/bran/examples/e11_hello_vuetify_text_field"
 	m "github.com/sunfmin/bran/material"
 	"github.com/sunfmin/bran/ui"
 	"github.com/theplant/appkit/contexts"
@@ -122,6 +123,9 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 			}
 			.exampleCode {
 				margin-top: 20px;
+			}
+			[v-cloak] {
+				display: none;
 			}
 		</style>
 		`)
