@@ -133,6 +133,26 @@ func (b *VToolbarBuilder) Tabs(v bool) (r *VToolbarBuilder) {
 	return b
 }
 
+func (b *VToolbarBuilder) Class(names ...string) (r *VToolbarBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VToolbarBuilder) ClassIf(name string, add bool) (r *VToolbarBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VToolbarBuilder) On(name string, value string) (r *VToolbarBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VToolbarBuilder) Bind(name string, value string) (r *VToolbarBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
+	return b
+}
+
 func (b *VToolbarBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }

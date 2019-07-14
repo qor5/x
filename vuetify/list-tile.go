@@ -106,6 +106,26 @@ func (b *VListTileBuilder) Value(v interface{}) (r *VListTileBuilder) {
 	return b
 }
 
+func (b *VListTileBuilder) Class(names ...string) (r *VListTileBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VListTileBuilder) ClassIf(name string, add bool) (r *VListTileBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VListTileBuilder) On(name string, value string) (r *VListTileBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VListTileBuilder) Bind(name string, value string) (r *VListTileBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
+	return b
+}
+
 func (b *VListTileBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }

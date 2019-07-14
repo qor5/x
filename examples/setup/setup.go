@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sunfmin/bran/examples/e15_hello_vuetify_navigation_drawer"
+
 	"github.com/sunfmin/bran/examples/e13_hello_vuetify_list"
 	"github.com/sunfmin/bran/examples/e14_hello_vuetify_menu"
 
@@ -257,6 +259,11 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e14_hello_vuetify_menu",
 			renderFunc: e14_hello_vuetify_menu.HelloVuetifyMenu,
+			vuetify:    true,
+		},
+		{
+			url:        "e15_hello_vuetify_navigation_drawer",
+			renderFunc: e15_hello_vuetify_navigation_drawer.HelloVuetifyNavigationDrawer,
 			vuetify:    true,
 		},
 	}

@@ -53,6 +53,26 @@ func (b *VListBuilder) TwoLine(v bool) (r *VListBuilder) {
 	return b
 }
 
+func (b *VListBuilder) Class(names ...string) (r *VListBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VListBuilder) ClassIf(name string, add bool) (r *VListBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VListBuilder) On(name string, value string) (r *VListBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VListBuilder) Bind(name string, value string) (r *VListBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
+	return b
+}
+
 func (b *VListBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }
