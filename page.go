@@ -62,10 +62,10 @@ type eventBody struct {
 }
 
 type serverSideData struct {
-	Schema  interface{} `json:"schema,omitempty"`
-	States  url.Values  `json:"states,omitempty"`
-	Scripts string      `json:"scripts,omitempty"`
-	Styles  string      `json:"styles,omitempty"`
+	Schema interface{} `json:"schema,omitempty"`
+	States url.Values  `json:"states,omitempty"`
+	//Scripts string      `json:"scripts,omitempty"`
+	//Styles  string      `json:"styles,omitempty"`
 }
 
 func (p *PageBuilder) render(
@@ -159,8 +159,8 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 
 	if isRenderHTML && !pr.JSONOnly {
 		ssd.Schema = nil
-		ssd.Scripts = ""
-		ssd.Styles = ""
+		//ssd.Scripts = ""
+		//ssd.Styles = ""
 	}
 
 	var serverSideDataJSON []byte
@@ -170,7 +170,10 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if pr.JSONOnly {
-		fmt.Fprintln(w, string(serverSideDataJSON))
+		_, err = fmt.Fprintln(w, string(serverSideDataJSON))
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 
@@ -202,7 +205,10 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Fprintln(w, resp)
+	_, err = fmt.Fprintln(w, resp)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func getPageStateType(pageState ui.PageState) (t reflect.Type, cantEncode bool) {
@@ -288,7 +294,10 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 		ssd := &serverSideData{}
 		head := &DefaultPageInjector{}
 		p.render(ssd, w, r, c, head)
-		json.Marshal(ssd) // to fill in event funcs that setup inside a component
+		_, err := json.Marshal(ssd) // to fill in event funcs that setup inside a component
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	eb := p.eventBodyFromRequest(r)

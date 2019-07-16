@@ -1,12 +1,7 @@
 package presets
 
-import (
-	"github.com/sunfmin/bran/ui"
-	h "github.com/theplant/htmlgo"
-)
-
 type ModelBuilder struct {
-	p             *PresetsBuilder
+	p             *Builder
 	model         interface{}
 	uriName       string
 	labels        []string
@@ -50,19 +45,4 @@ func (b *ModelBuilder) Placeholders(vs ...string) (r *ModelBuilder) {
 func (b *ModelBuilder) SearchColumns(vs ...string) (r *ModelBuilder) {
 	b.searchColumns = vs
 	return b
-}
-
-func (b *ModelBuilder) listingFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
-	r.Schema = h.Div(
-		h.Text("Hello"),
-	)
-	return
-}
-
-func (b *ModelBuilder) detailingFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
-	return
-}
-
-func (b *ModelBuilder) editingFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
-	return
 }

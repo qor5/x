@@ -1,9 +1,14 @@
 package presets
 
+import (
+	"github.com/sunfmin/bran/ui"
+)
+
 type EditingBuilder struct {
 	fields      []*FieldBuilder
 	bulkActions []*BulkActionBuilder
 	filters     []string
+	pageFunc    ui.PageFunc
 }
 
 func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
@@ -24,5 +29,21 @@ func (b *EditingBuilder) Field(name string) (r *FieldBuilder) {
 	}
 	r = &FieldBuilder{name: name}
 	b.fields = append(b.fields, r)
+	return
+}
+
+func (b *EditingBuilder) PageFunc(pf ui.PageFunc) (r *EditingBuilder) {
+	b.pageFunc = pf
+	return b
+}
+
+func (b *EditingBuilder) GetPageFunc() ui.PageFunc {
+	if b.pageFunc != nil {
+		return b.pageFunc
+	}
+	return b.defaultPageFunc
+}
+
+func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
 	return
 }

@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"net/http"
 
-	"go.uber.org/zap"
-
-	"github.com/sunfmin/bran"
-
 	"github.com/qor/inflection"
-	"goji.io/pat"
-
+	"github.com/sunfmin/bran"
+	"github.com/sunfmin/bran/core"
+	branoverlay "github.com/sunfmin/bran/overlay"
+	"github.com/sunfmin/bran/ui"
+	. "github.com/sunfmin/bran/vuetify"
+	h "github.com/theplant/htmlgo"
+	"go.uber.org/zap"
 	goji "goji.io"
+	"goji.io/pat"
 )
 
-type PresetsBuilder struct {
+type Builder struct {
 	prefix  string
 	models  []*ModelBuilder
 	mux     *goji.Mux
@@ -22,30 +24,30 @@ type PresetsBuilder struct {
 	logger  *zap.Logger
 }
 
-func New() *PresetsBuilder {
+func New() *Builder {
 	l, _ := zap.NewDevelopment()
-	return &PresetsBuilder{
+	return &Builder{
 		logger:  l,
 		builder: bran.New(),
 	}
 }
 
-func (b *PresetsBuilder) URIPrefix(v string) (r *PresetsBuilder) {
+func (b *Builder) URIPrefix(v string) (r *Builder) {
 	b.prefix = v
 	return b
 }
 
-func (b *PresetsBuilder) Builder(v *bran.Builder) (r *PresetsBuilder) {
+func (b *Builder) Builder(v *bran.Builder) (r *Builder) {
 	b.builder = v
 	return b
 }
 
-func (b *PresetsBuilder) Logger(v *zap.Logger) (r *PresetsBuilder) {
+func (b *Builder) Logger(v *zap.Logger) (r *Builder) {
 	b.logger = v
 	return b
 }
 
-func (b *PresetsBuilder) Model(v interface{}) (r *ModelBuilder) {
+func (b *Builder) Model(v interface{}) (r *ModelBuilder) {
 	r = &ModelBuilder{p: b}
 	r.model = v
 	b.models = append(b.models, r)
@@ -62,31 +64,95 @@ func modelNames(ms []*ModelBuilder) (r []string) {
 	return
 }
 
-func (b *PresetsBuilder) initMux() {
-	b.logger.Info("initializing mux for", zap.Reflect("models", modelNames(b.models)))
-	b.mux = goji.NewMux()
-	for _, m := range b.models {
-		muri := inflection.Plural(m.uriName)
-		b.mux.Handle(
-			pat.New(fmt.Sprintf("%s/%s", b.prefix, muri)),
-			b.builder.Page(m.listingFunc),
-		)
-		b.mux.Handle(
-			pat.New(fmt.Sprintf("%s/%s/:id", b.prefix, muri)),
-			b.builder.Page(m.detailingFunc),
-		)
-		b.mux.Handle(
-			pat.New(fmt.Sprintf("%s/%s/:id/edit", b.prefix, muri)),
-			b.builder.Page(m.editingFunc),
-		)
-		b.mux.Handle(
-			pat.New(fmt.Sprintf("%s/%s/new", b.prefix, muri)),
-			b.builder.Page(m.editingFunc),
-		)
+func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
+	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+
+		ctx.Injector.Title("Hello")
+		ctx.Injector.PutHeadHTML(`
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono" async>
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" async>
+			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" async>
+			<link rel="stylesheet" href="/assets/main.css">
+			<script src='/assets/vue.js'></script>
+			<style>
+				[v-cloak] {
+					display: none;
+				}
+			</style>
+		`)
+
+		ctx.Injector.PutTailHTML(`
+			<script src='/assets/main.js'></script>
+		`)
+
+		var innerPr ui.PageResponse
+		innerPr, err = in(ctx)
+		if err != nil {
+			panic(err)
+		}
+
+		pr.Schema = VApp(
+			VContent(
+				innerPr.Schema.(h.HTMLComponent),
+			),
+		).Id("vt-app")
+
+		pr.State = innerPr.State
+
+		return
 	}
 }
 
-func (b *PresetsBuilder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (b *Builder) initMux() {
+	b.logger.Info("initializing mux for", zap.Reflect("models", modelNames(b.models)))
+	mux := goji.NewMux()
+	ub := b.builder
+
+	mux.Handle(pat.Get("/assets/main.js"),
+		ub.PacksHandler("text/javascript",
+			branoverlay.JSComponentsPack(),
+			JSComponentsPack(),
+			core.JSComponentsPack(),
+		),
+	)
+
+	mux.Handle(pat.Get("/assets/vue.js"),
+		ub.PacksHandler("text/javascript",
+			core.JSVueComponentsPack(),
+		),
+	)
+
+	mux.Handle(pat.Get("/assets/main.css"),
+		ub.PacksHandler("text/css",
+			branoverlay.CSSComponentsPack(),
+			CSSComponentsPack(),
+		),
+	)
+
+	for _, m := range b.models {
+		muri := inflection.Plural(m.uriName)
+		mux.Handle(
+			pat.New(fmt.Sprintf("%s/%s", b.prefix, muri)),
+			b.builder.Page(b.defaultLayout(m.listing.GetPageFunc())),
+		)
+		mux.Handle(
+			pat.New(fmt.Sprintf("%s/%s/:id", b.prefix, muri)),
+			b.builder.Page(b.defaultLayout(m.detailing.GetPageFunc())),
+		)
+		mux.Handle(
+			pat.New(fmt.Sprintf("%s/%s/:id/edit", b.prefix, muri)),
+			b.builder.Page(b.defaultLayout(m.editing.GetPageFunc())),
+		)
+		mux.Handle(
+			pat.New(fmt.Sprintf("%s/%s/new", b.prefix, muri)),
+			b.builder.Page(b.defaultLayout(m.editing.GetPageFunc())),
+		)
+	}
+
+	b.mux = mux
+}
+
+func (b *Builder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if b.mux == nil {
 		b.initMux()
 	}

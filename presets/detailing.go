@@ -1,9 +1,14 @@
 package presets
 
+import (
+	"github.com/sunfmin/bran/ui"
+)
+
 type DetailingBuilder struct {
 	fieldNames []string
 	fields     []*FieldBuilder
 	actions    []*ActionBuilder
+	pageFunc   ui.PageFunc
 }
 
 func (b *ModelBuilder) Detailing(vs ...string) (r *DetailingBuilder) {
@@ -25,5 +30,21 @@ func (b *DetailingBuilder) Field(name string) (r *FieldBuilder) {
 	}
 	r = &FieldBuilder{name: name}
 	b.fields = append(b.fields, r)
+	return
+}
+
+func (b *DetailingBuilder) PageFunc(pf ui.PageFunc) (r *DetailingBuilder) {
+	b.pageFunc = pf
+	return b
+}
+
+func (b *DetailingBuilder) GetPageFunc() ui.PageFunc {
+	if b.pageFunc != nil {
+		return b.pageFunc
+	}
+	return b.defaultPageFunc
+}
+
+func (b *DetailingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
 	return
 }

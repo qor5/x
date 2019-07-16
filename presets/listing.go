@@ -1,9 +1,15 @@
 package presets
 
+import (
+	"github.com/sunfmin/bran/ui"
+	. "github.com/sunfmin/bran/vuetify"
+)
+
 type ListingBuilder struct {
 	fields      []*FieldBuilder
 	bulkActions []*BulkActionBuilder
 	filtering   *FilteringBuilder
+	pageFunc    ui.PageFunc
 }
 
 func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
@@ -24,5 +30,22 @@ func (b *ListingBuilder) Field(name string) (r *FieldBuilder) {
 	}
 	r = &FieldBuilder{name: name}
 	b.fields = append(b.fields, r)
+	return
+}
+
+func (b *ListingBuilder) PageFunc(pf ui.PageFunc) (r *ListingBuilder) {
+	b.pageFunc = pf
+	return b
+}
+
+func (b *ListingBuilder) GetPageFunc() ui.PageFunc {
+	if b.pageFunc != nil {
+		return b.pageFunc
+	}
+	return b.defaultPageFunc
+}
+
+func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
+	r.Schema = VBtn("Hello")
 	return
 }
