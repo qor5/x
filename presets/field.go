@@ -4,7 +4,6 @@ import (
 	"mime/multipart"
 
 	"github.com/sunfmin/bran/ui"
-	h "github.com/theplant/htmlgo"
 )
 
 type FieldBuilder struct {
@@ -15,7 +14,6 @@ type FieldBuilder struct {
 	inplaceEdit *InplaceEditBuilder
 }
 
-type CompFunc func(obj interface{}, ctx *ui.EventContext) h.HTMLComponent
 type UpdateFunc func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) (err error)
 
 func (b *FieldBuilder) Label(v string) (r *FieldBuilder) {

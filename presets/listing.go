@@ -6,6 +6,7 @@ import (
 )
 
 type ListingBuilder struct {
+	CompFuncRegistry
 	fields      []*FieldBuilder
 	bulkActions []*BulkActionBuilder
 	filtering   *FilteringBuilder

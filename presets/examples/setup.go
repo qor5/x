@@ -13,6 +13,10 @@ import (
 	h "github.com/theplant/htmlgo"
 )
 
+type Thumb struct {
+	Name string
+}
+
 type User struct {
 	ID        int
 	Name      string
@@ -20,6 +24,7 @@ type User struct {
 	Date1     *time.Time
 	Int1      int
 	Float1    float64
+	Thumb1    *Thumb
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

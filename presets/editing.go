@@ -5,6 +5,7 @@ import (
 )
 
 type EditingBuilder struct {
+	CompFuncRegistry
 	fields      []*FieldBuilder
 	bulkActions []*BulkActionBuilder
 	filters     []string

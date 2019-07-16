@@ -5,6 +5,7 @@ import (
 )
 
 type DetailingBuilder struct {
+	CompFuncRegistry
 	fieldNames []string
 	fields     []*FieldBuilder
 	actions    []*ActionBuilder

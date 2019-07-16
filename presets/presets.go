@@ -51,9 +51,10 @@ func (b *Builder) Model(v interface{}) (r *ModelBuilder) {
 	r = &ModelBuilder{p: b}
 	r.model = v
 	b.models = append(b.models, r)
-	r.listing = r.defaultListing()
-	r.editing = r.defaultEditing()
-	r.detailing = r.defaultDetailing()
+	r.inspectModel()
+	r.listing = r.newListing()
+	r.editing = r.newEditing()
+	r.detailing = r.newDetailing()
 	return r
 }
 
