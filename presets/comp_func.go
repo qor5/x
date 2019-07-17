@@ -90,27 +90,31 @@ func cfText(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent
 	return h.Text(stringVal(obj, field.Name))
 }
 
+func cfTextTd(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent {
+	return h.Td(h.Text(stringVal(obj, field.Name)))
+}
+
 func cfCheckbox(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent {
-	return VCheckbox().FieldName(field.Name).Label(field.Label).Value(stringVal(obj, field.Name))
+	return VCheckbox().FieldName(field.Name).Label(field.Label)
 }
 
 func cfNumber(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent {
-	return VTextField().Type("number").FieldName(field.Name).Label(field.Label).Value(stringVal(obj, field.Name))
+	return VTextField().Type("number").FieldName(field.Name).Label(field.Label)
 }
 
 func cfTextField(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent {
-	return VTextField().Type("text").FieldName(field.Name).Label(field.Label).Value(stringVal(obj, field.Name))
+	return VTextField().Type("text").FieldName(field.Name).Label(field.Label)
 }
 
 func builtInFieldTypes() (r FieldTypes) {
-	r.FieldType(true).ListingComponentFunc(cfText).DetailingComponentFunc(cfText).EditingComponentFunc(cfCheckbox)
+	r.FieldType(true).ListingComponentFunc(cfTextTd).DetailingComponentFunc(cfText).EditingComponentFunc(cfCheckbox)
 
 	for _, v := range numberVals {
-		r.FieldType(v).ListingComponentFunc(cfText).DetailingComponentFunc(cfText).EditingComponentFunc(cfNumber)
+		r.FieldType(v).ListingComponentFunc(cfTextTd).DetailingComponentFunc(cfText).EditingComponentFunc(cfNumber)
 	}
 
 	for _, v := range stringVals {
-		r.FieldType(v).ListingComponentFunc(cfText).DetailingComponentFunc(cfText).EditingComponentFunc(cfTextField)
+		r.FieldType(v).ListingComponentFunc(cfTextTd).DetailingComponentFunc(cfText).EditingComponentFunc(cfTextField)
 	}
 	return
 }

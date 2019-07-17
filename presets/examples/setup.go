@@ -85,7 +85,7 @@ func Preset1() (r *presets.Builder) {
 	l := m.Listing("Name", "Bool1", "Float1", "Int1").SearchColumns("name", "job_title")
 	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
-		return h.A().Href(fmt.Sprintf("/users/%d", u.ID)).Text(u.Name)
+		return h.Td(h.A().Href(fmt.Sprintf("/admin/users/%d/edit", u.ID)).Text(u.Name))
 	})
 
 	l.BulkAction("ApproveAll").UpdateFunc(func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error) {
@@ -103,8 +103,8 @@ func Preset1() (r *presets.Builder) {
 
 	ef := m.Editing("Name", "Bool1")
 	ef.Field("Name").Label("名字").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
-		u := obj.(*User)
-		return VAutocomplete().FieldName("Name").Value(u.Name).Label(field.Label).Items([]string{"1111", "2222"})
+		//u := obj.(*User)
+		return VAutocomplete().FieldName("Name").Label(field.Label).Items([]string{"Felix", "Hello"})
 	}).SetterFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) {
 		u := obj.(*User)
 		ns := form.Value["Name"]

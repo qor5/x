@@ -1,6 +1,7 @@
 package presets
 
 import (
+	"fmt"
 	"net/url"
 	"reflect"
 )
@@ -20,6 +21,9 @@ type ModelBuilder struct {
 func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
 	r = &ModelBuilder{p: p, model: model}
 	r.modelType = reflect.TypeOf(model)
+	if r.modelType.Kind() != reflect.Ptr {
+		panic(fmt.Sprintf("model %#+v must be pointer", model))
+	}
 	r.newListing()
 	r.newDetailing()
 	r.newEditing()
@@ -39,7 +43,7 @@ type Updater func(obj interface{}, id string, fieldName string, value interface{
 type Saver func(obj interface{}, id string) (err error)
 
 func (b *ModelBuilder) newModel() (r interface{}) {
-	return reflect.New(b.modelType).Interface()
+	return reflect.New(b.modelType.Elem()).Interface()
 }
 
 func (b *ModelBuilder) newModelArray() (r interface{}) {
@@ -104,6 +108,14 @@ func (b *ModelBuilder) Labels(vs ...string) (r *ModelBuilder) {
 func (b *ModelBuilder) Placeholders(vs ...string) (r *ModelBuilder) {
 	b.placeholders = append(b.placeholders, vs...)
 	return b
+}
+
+func (b *ModelBuilder) getComponentFuncField(field *FieldBuilder) (r *Field) {
+	r = &Field{
+		Name:  field.name,
+		Label: b.getLabel(field),
+	}
+	return
 }
 
 func (b *ModelBuilder) getLabel(field *FieldBuilder) (r string) {

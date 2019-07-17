@@ -1,10 +1,10 @@
 package presets
 
 import (
-	"fmt"
-
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
+	h "github.com/theplant/htmlgo"
+	"github.com/thoas/go-funk"
 )
 
 type ListingBuilder struct {
@@ -69,6 +69,44 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	if err != nil {
 		return
 	}
-	r.Schema = VBtn(fmt.Sprint(objs))
+
+	var rows []h.HTMLComponent
+
+	funk.ForEach(objs, func(obj interface{}) {
+		var tds []h.HTMLComponent
+		for _, f := range b.fields {
+			tds = append(tds, f.compFunc(obj, b.mb.getComponentFuncField(f), ctx))
+		}
+		rows = append(rows, h.Tr(tds...))
+	})
+
+	var heads []h.HTMLComponent
+
+	for _, f := range b.fields {
+		label := b.mb.getLabel(f)
+		heads = append(heads, h.Th(label).Role("columnheader").
+			Class("column text-xs-left").
+			Attr(
+				"scope", "col",
+				"aria-label", label,
+			),
+		)
+	}
+
+	r.Schema = VContainer(
+		h.Div(
+			h.Div(
+				h.Table(
+					h.Thead(
+						h.Tr(heads...),
+					),
+					h.Tbody(
+						rows...,
+					),
+				).Class("v-datatable v-table theme--light"),
+			).Class("v-table__overflow"),
+		).Class("elevation-1"),
+	)
+
 	return
 }

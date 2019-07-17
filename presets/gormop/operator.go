@@ -2,6 +2,7 @@ package gormop
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/jinzhu/gorm"
@@ -32,7 +33,7 @@ func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams
 	if err != nil {
 		return
 	}
-	r = obj
+	r = reflect.ValueOf(obj).Elem().Interface()
 	return
 }
 
