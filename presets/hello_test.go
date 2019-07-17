@@ -16,7 +16,7 @@ func TestHello(t *testing.T) {
 	p := examples.Preset1()
 
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest("GET", "/admin/users/1/edit", nil)
+	r := httptest.NewRequest("GET", "/admin/users?keyword=hello", nil)
 	p.ServeHTTP(w, r)
 	//panic(w.Body.String())
 	diff := htmltestingutils.PrettyHtmlDiff(w.Body, "body", "abc")

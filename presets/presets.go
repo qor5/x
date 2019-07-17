@@ -17,12 +17,20 @@ import (
 )
 
 type Builder struct {
-	prefix  string
-	models  []*ModelBuilder
-	mux     *goji.Mux
-	builder *bran.Builder
-	logger  *zap.Logger
+	prefix       string
+	models       []*ModelBuilder
+	mux          *goji.Mux
+	builder      *bran.Builder
+	logger       *zap.Logger
+	dataOperator DataOperator
 	FieldTypes
+}
+
+type DataOperator interface {
+	Search(obj interface{}, params *SearchParams) (r interface{}, err error)
+	Fetch(obj interface{}, id string) (r interface{}, err error)
+	UpdateField(obj interface{}, id string, fieldName string, value interface{}) (err error)
+	Save(obj interface{}, id string) (err error)
 }
 
 func New() *Builder {
@@ -52,6 +60,11 @@ func (b *Builder) Logger(v *zap.Logger) (r *Builder) {
 func (b *Builder) Model(v interface{}) (r *ModelBuilder) {
 	r = NewModelBuilder(b, v)
 	b.models = append(b.models, r)
+	return r
+}
+
+func (b *Builder) DataOperator(v DataOperator) (r *ModelBuilder) {
+	b.dataOperator = v
 	return r
 }
 

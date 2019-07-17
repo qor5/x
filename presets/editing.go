@@ -4,6 +4,7 @@ import (
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"
+	"goji.io/pat"
 )
 
 type EditingBuilder struct {
@@ -12,6 +13,8 @@ type EditingBuilder struct {
 	bulkActions []*BulkActionBuilder
 	filters     []string
 	pageFunc    ui.PageFunc
+	fetcher     Fetcher
+	saver       Saver
 }
 
 func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
@@ -40,6 +43,16 @@ func (b *EditingBuilder) PageFunc(pf ui.PageFunc) (r *EditingBuilder) {
 	return b
 }
 
+func (b *EditingBuilder) Fetcher(v Fetcher) (r *EditingBuilder) {
+	b.fetcher = v
+	return b
+}
+
+func (b *EditingBuilder) Saver(v Saver) (r *EditingBuilder) {
+	b.saver = v
+	return b
+}
+
 func (b *EditingBuilder) GetPageFunc() ui.PageFunc {
 	if b.pageFunc != nil {
 		return b.pageFunc
@@ -48,7 +61,14 @@ func (b *EditingBuilder) GetPageFunc() ui.PageFunc {
 }
 
 func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
-	obj := b.mb.model
+	id := pat.Param(ctx.R, "id")
+	var obj interface{}
+
+	obj, err = b.fetcher(b.mb.newModel(), id)
+	if err != nil {
+		return
+	}
+
 	var comps []h.HTMLComponent
 	for _, f := range b.fields {
 		if f.compFunc == nil {

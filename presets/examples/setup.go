@@ -3,11 +3,15 @@ package examples
 import (
 	"fmt"
 	"mime/multipart"
+	"os"
 	"time"
+
+	"github.com/sunfmin/bran/presets/gormop"
 
 	"github.com/sunfmin/reflectutils"
 
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/sunfmin/bran/presets"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
@@ -21,6 +25,7 @@ type Thumb struct {
 type User struct {
 	ID        int
 	Name      string
+	JobTitle  string
 	Bool1     bool
 	Date1     *time.Time
 	Int1      int
@@ -56,7 +61,17 @@ func Preset1() (r *presets.Builder) {
 			return h.Text(i.(*Thumb).Name)
 		})
 
-	var db *gorm.DB
+	db, err := gorm.Open("postgres", os.Getenv("TEST_DB"))
+	if err != nil {
+		panic(err)
+	}
+	db.LogMode(true)
+
+	err = db.AutoMigrate(&User{}).Error
+	if err != nil {
+		panic(err)
+	}
+	p.DataOperator(gormop.DataOperator(db))
 
 	m := p.Model(&User{}).URIName("user")
 	m.Labels(
@@ -67,9 +82,7 @@ func Preset1() (r *presets.Builder) {
 		"Name", "请输入你的名字",
 	)
 
-	m.SearchColumns("name", "bool1")
-
-	l := m.Listing("Name", "Bool1", "Float1", "Int1")
+	l := m.Listing("Name", "Bool1", "Float1", "Int1").SearchColumns("name", "job_title")
 	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
 		return h.A().Href(fmt.Sprintf("/users/%d", u.ID)).Text(u.Name)

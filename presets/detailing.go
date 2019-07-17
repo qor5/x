@@ -10,6 +10,7 @@ type DetailingBuilder struct {
 	fields     []*FieldBuilder
 	actions    []*ActionBuilder
 	pageFunc   ui.PageFunc
+	fetcher    Fetcher
 }
 
 func (b *ModelBuilder) Detailing(vs ...string) (r *DetailingBuilder) {
@@ -36,6 +37,11 @@ func (b *DetailingBuilder) Field(name string) (r *FieldBuilder) {
 
 func (b *DetailingBuilder) PageFunc(pf ui.PageFunc) (r *DetailingBuilder) {
 	b.pageFunc = pf
+	return b
+}
+
+func (b *DetailingBuilder) Fetcher(v Fetcher) (r *DetailingBuilder) {
+	b.fetcher = v
 	return b
 }
 

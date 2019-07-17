@@ -1,16 +1,20 @@
 package presets
 
 import (
+	"fmt"
+
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 )
 
 type ListingBuilder struct {
-	mb          *ModelBuilder
-	fields      []*FieldBuilder
-	bulkActions []*BulkActionBuilder
-	filtering   *FilteringBuilder
-	pageFunc    ui.PageFunc
+	mb            *ModelBuilder
+	fields        []*FieldBuilder
+	bulkActions   []*BulkActionBuilder
+	filtering     *FilteringBuilder
+	pageFunc      ui.PageFunc
+	searcher      Searcher
+	searchColumns []string
 }
 
 func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
@@ -39,6 +43,16 @@ func (b *ListingBuilder) PageFunc(pf ui.PageFunc) (r *ListingBuilder) {
 	return b
 }
 
+func (b *ListingBuilder) Searcher(v Searcher) (r *ListingBuilder) {
+	b.searcher = v
+	return b
+}
+
+func (b *ListingBuilder) SearchColumns(vs ...string) (r *ListingBuilder) {
+	b.searchColumns = vs
+	return b
+}
+
 func (b *ListingBuilder) GetPageFunc() ui.PageFunc {
 	if b.pageFunc != nil {
 		return b.pageFunc
@@ -47,6 +61,14 @@ func (b *ListingBuilder) GetPageFunc() ui.PageFunc {
 }
 
 func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
-	r.Schema = VBtn("Hello")
+	var objs interface{}
+	objs, err = b.searcher(b.mb.newModelArray(), &SearchParams{
+		KeywordColumns: b.searchColumns,
+		Keyword:        ctx.R.URL.Query().Get("keyword"),
+	})
+	if err != nil {
+		return
+	}
+	r.Schema = VBtn(fmt.Sprint(objs))
 	return
 }
