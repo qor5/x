@@ -61,11 +61,6 @@ func (b *EditingBuilder) GetPageFunc() ui.PageFunc {
 	return b.defaultPageFunc
 }
 
-//type updateState struct {
-//	Obj       interface{}
-//	OKMessage string
-//}
-
 func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
 	id := pat.Param(ctx.R, "id")
 	var obj interface{}
@@ -74,21 +69,37 @@ func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	if err != nil {
 		return
 	}
+	msgs := b.mb.p.messagesFunc(ctx)
 
 	ctx.StateOrInit(obj)
 
+	var notice h.HTMLComponent
+	if msg, ok := ctx.Flash.(string); ok {
+		notice = VSnackbar(h.Text(msg)).Value(true).Top(true).Color("success")
+	}
+
 	var comps []h.HTMLComponent
-	//if len(state.OKMessage) > 0 {
-	//	comps = append(comps, VAlert(h.Text(state.OKMessage)).Type("success"))
-	//}
 	for _, f := range b.fields {
 		if f.compFunc == nil {
 			continue
 		}
 		comps = append(comps, f.compFunc(obj, &Field{Name: f.name, Label: b.mb.getLabel(f)}, ctx))
 	}
-	comps = append(comps, VBtn("Update").Color("primary").OnClick(ctx.Hub, "update", b.defaultUpdate))
-	r.Schema = VContainer(comps...)
+
+	r.Schema = VContainer(
+		notice,
+		VCard(
+			VCardTitle(
+				h.Text(msgs.EditingObjectTitle(b.mb.label)),
+			),
+			VCardText(
+				comps...,
+			),
+			VCardActions(
+				VBtn("Update").Color("primary").OnClick(ctx.Hub, "update", b.defaultUpdate),
+			),
+		),
+	)
 	return
 }
 
@@ -114,6 +125,8 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 	if err != nil {
 		panic(err)
 	}
+	msgs := b.mb.p.messagesFunc(ctx)
+	ctx.Flash = msgs.SuccessfullyUpdated
 
 	r.Reload = true
 	return

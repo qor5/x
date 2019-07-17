@@ -23,6 +23,7 @@ type Builder struct {
 	builder      *bran.Builder
 	logger       *zap.Logger
 	dataOperator DataOperator
+	messagesFunc MessagesFunc
 	FieldTypes
 }
 
@@ -36,9 +37,10 @@ type DataOperator interface {
 func New() *Builder {
 	l, _ := zap.NewDevelopment()
 	return &Builder{
-		logger:     l,
-		builder:    bran.New(),
-		FieldTypes: builtInFieldTypes(),
+		logger:       l,
+		builder:      bran.New(),
+		messagesFunc: defaultMessageFunc,
+		FieldTypes:   builtInFieldTypes(),
 	}
 }
 
@@ -54,6 +56,11 @@ func (b *Builder) Builder(v *bran.Builder) (r *Builder) {
 
 func (b *Builder) Logger(v *zap.Logger) (r *Builder) {
 	b.logger = v
+	return b
+}
+
+func (b *Builder) MessagesFunc(v MessagesFunc) (r *Builder) {
+	b.messagesFunc = v
 	return b
 }
 

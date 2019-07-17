@@ -10,9 +10,9 @@ type VCardTextBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VCardText(text string) (r *VCardTextBuilder) {
+func VCardText(children ...h.HTMLComponent) (r *VCardTextBuilder) {
 	r = &VCardTextBuilder{
-		tag: h.Tag("v-card-text").Text(text),
+		tag: h.Tag("v-card-text").Children(children...),
 	}
 	return
 }

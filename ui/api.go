@@ -75,6 +75,7 @@ type EventContext struct {
 	Injector PageInjector
 	State    PageState
 	Event    *Event
+	Flash    interface{} // pass value from actions to index
 }
 
 type PageInjector interface {

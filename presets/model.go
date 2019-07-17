@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"strings"
+
+	"github.com/iancoleman/strcase"
 )
 
 type ModelBuilder struct {
@@ -11,7 +14,8 @@ type ModelBuilder struct {
 	model        interface{}
 	modelType    reflect.Type
 	uriName      string
-	labels       []string
+	label        string
+	fieldLabels  []string
 	placeholders []string
 	listing      *ListingBuilder
 	editing      *EditingBuilder
@@ -24,6 +28,8 @@ func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
 	if r.modelType.Kind() != reflect.Ptr {
 		panic(fmt.Sprintf("model %#+v must be pointer", model))
 	}
+	modelstr := r.modelType.String()
+	r.label = strcase.ToCamel(modelstr[strings.LastIndex(modelstr, "."):])
 	r.newListing()
 	r.newDetailing()
 	r.newEditing()
@@ -100,8 +106,13 @@ func (b *ModelBuilder) URIName(v string) (r *ModelBuilder) {
 	return b
 }
 
+func (b *ModelBuilder) Label(v string) (r *ModelBuilder) {
+	b.label = v
+	return b
+}
+
 func (b *ModelBuilder) Labels(vs ...string) (r *ModelBuilder) {
-	b.labels = append(b.labels, vs...)
+	b.fieldLabels = append(b.fieldLabels, vs...)
 	return b
 }
 
@@ -123,9 +134,9 @@ func (b *ModelBuilder) getLabel(field *FieldBuilder) (r string) {
 		return field.label
 	}
 
-	for i := 0; i < len(b.labels)-1; i = i + 2 {
-		if b.labels[i] == field.name {
-			return b.labels[i+1]
+	for i := 0; i < len(b.fieldLabels)-1; i = i + 2 {
+		if b.fieldLabels[i] == field.name {
+			return b.fieldLabels[i+1]
 		}
 	}
 
