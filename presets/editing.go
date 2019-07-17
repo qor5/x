@@ -2,10 +2,12 @@ package presets
 
 import (
 	"github.com/sunfmin/bran/ui"
+	. "github.com/sunfmin/bran/vuetify"
+	h "github.com/theplant/htmlgo"
 )
 
 type EditingBuilder struct {
-	CompFuncRegistry
+	mb          *ModelBuilder
 	fields      []*FieldBuilder
 	bulkActions []*BulkActionBuilder
 	filters     []string
@@ -46,5 +48,14 @@ func (b *EditingBuilder) GetPageFunc() ui.PageFunc {
 }
 
 func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
+	obj := b.mb.model
+	var comps []h.HTMLComponent
+	for _, f := range b.fields {
+		if f.compFunc == nil {
+			continue
+		}
+		comps = append(comps, f.compFunc(obj, &Field{Name: f.name, Label: b.mb.getLabel(f)}, ctx))
+	}
+	r.Schema = VContainer(comps...)
 	return
 }

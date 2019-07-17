@@ -1,16 +1,7 @@
 package presets
 
 import (
-	"fmt"
 	"reflect"
-	"strings"
-
-	. "github.com/sunfmin/bran/vuetify"
-
-	"github.com/sunfmin/reflectutils"
-
-	"github.com/sunfmin/bran/ui"
-	h "github.com/theplant/htmlgo"
 )
 
 type ModelBuilder struct {
@@ -25,6 +16,15 @@ type ModelBuilder struct {
 	detailing     *DetailingBuilder
 }
 
+func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
+	r = &ModelBuilder{p: p, model: model}
+	r.newListing()
+	r.newDetailing()
+	r.newEditing()
+	r.inspectModel()
+	return
+}
+
 func (b *ModelBuilder) inspectModel() {
 	v := reflect.ValueOf(b.model)
 
@@ -37,60 +37,26 @@ func (b *ModelBuilder) inspectModel() {
 
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
-		fmt.Println(f.Name, f.Type.String())
+		//fmt.Println(f.Name, f.Type)
+		ft := b.p.fieldTypeByType(f.Type)
+		b.listing.Field(f.Name).ComponentFunc(ft.listingCompFunc)
+		b.detailing.Field(f.Name).ComponentFunc(ft.detailingCompFunc)
+		b.editing.Field(f.Name).ComponentFunc(ft.editingCompFunc)
 	}
 }
 
-var basicTypes = strings.Fields(`
-bool
-string
-int  int8  int16  int32  int64
-uint uint8 uint16 uint32 uint64 uintptr
-byte
-rune
-float32 float64
-complex64 complex128
-`)
-
-var numberTypes = strings.Fields(`
-int  int8  int16  int32  int64
-uint uint8 uint16 uint32 uint64
-float32 float64
-`)
-
-var stringTypes = strings.Fields(`
-string
-[]rune
-[]byte
-`)
-
 func (b *ModelBuilder) newListing() (r *ListingBuilder) {
-	r = &ListingBuilder{filtering: &FilteringBuilder{}}
-	r.RegisterComponentFunc(basicTypes, func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
-		val, _ := reflectutils.Get(obj, fieldName)
-		return h.Text(fmt.Sprint(val))
-	}, true)
+	b.listing = &ListingBuilder{filtering: &FilteringBuilder{}, mb: b}
 	return
 }
 
 func (b *ModelBuilder) newEditing() (r *EditingBuilder) {
-	r = &EditingBuilder{}
-
-	r.RegisterComponentFunc(numberTypes, func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
-		//val, _ := reflectutils.Get(obj, fieldName)
-		return VTextField().Type("number").FieldName(fieldName)
-	}, true)
-
-	r.RegisterComponentFunc(stringTypes, func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
-		//val, _ := reflectutils.Get(obj, fieldName)
-		return VTextField().Type("text").FieldName(fieldName)
-	}, true)
-
+	b.editing = &EditingBuilder{mb: b}
 	return
 }
 
 func (b *ModelBuilder) newDetailing() (r *DetailingBuilder) {
-	r = &DetailingBuilder{}
+	b.detailing = &DetailingBuilder{mb: b}
 	return
 }
 
@@ -112,4 +78,18 @@ func (b *ModelBuilder) Placeholders(vs ...string) (r *ModelBuilder) {
 func (b *ModelBuilder) SearchColumns(vs ...string) (r *ModelBuilder) {
 	b.searchColumns = vs
 	return b
+}
+
+func (b *ModelBuilder) getLabel(field *FieldBuilder) (r string) {
+	if len(field.label) > 0 {
+		return field.label
+	}
+
+	for i := 0; i < len(b.labels)-1; i = i + 2 {
+		if b.labels[i] == field.name {
+			return b.labels[i+1]
+		}
+	}
+
+	return field.name
 }

@@ -5,10 +5,11 @@ import (
 	"mime/multipart"
 	"time"
 
+	"github.com/sunfmin/reflectutils"
+
 	"github.com/jinzhu/gorm"
 	"github.com/sunfmin/bran/presets"
 	"github.com/sunfmin/bran/ui"
-	"github.com/sunfmin/bran/vuetify"
 	. "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"
 )
@@ -32,6 +33,29 @@ type User struct {
 func Preset1() (r *presets.Builder) {
 	p := presets.New().URIPrefix("/admin")
 
+	p.FieldType(&Thumb{}).
+		ListingComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+			i, err := reflectutils.Get(obj, field.Name)
+			if err != nil {
+				panic(err)
+			}
+			return h.Text(i.(*Thumb).Name)
+		}).
+		DetailingComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+			i, err := reflectutils.Get(obj, field.Name)
+			if err != nil {
+				panic(err)
+			}
+			return h.Text(i.(*Thumb).Name)
+		}).
+		EditingComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+			i, err := reflectutils.Get(obj, field.Name)
+			if err != nil {
+				panic(err)
+			}
+			return h.Text(i.(*Thumb).Name)
+		})
+
 	var db *gorm.DB
 
 	m := p.Model(&User{}).URIName("user")
@@ -46,7 +70,7 @@ func Preset1() (r *presets.Builder) {
 	m.SearchColumns("name", "bool1")
 
 	l := m.Listing("Name", "Bool1", "Float1", "Int1")
-	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, ctx *ui.EventContext) h.HTMLComponent {
+	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
 		return h.A().Href(fmt.Sprintf("/users/%d", u.ID)).Text(u.Name)
 	})
@@ -59,15 +83,15 @@ func Preset1() (r *presets.Builder) {
 	})
 
 	fl := l.Filtering("Name", "Int1", "Date1")
-	fl.Filter("Name").ComponentFunc(func(obj interface{}, ctx *ui.EventContext) h.HTMLComponent {
+	fl.Filter("Name").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
-		return vuetify.VAutocomplete().FieldName("Name").Value(u.Name)
+		return VAutocomplete().FieldName("Name").Value(u.Name).Label(field.Label).Items([]string{"1111", "2222"})
 	})
 
 	ef := m.Editing("Name", "Bool1")
-	ef.Field("Name").Label("名字").ComponentFunc(func(obj interface{}, ctx *ui.EventContext) h.HTMLComponent {
+	ef.Field("Name").Label("名字").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
-		return vuetify.VAutocomplete().FieldName("Name").Value(u.Name)
+		return VAutocomplete().FieldName("Name").Value(u.Name).Label(field.Label).Items([]string{"1111", "2222"})
 	}).SetterFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) {
 		u := obj.(*User)
 		ns := form.Value["Name"]
@@ -78,7 +102,7 @@ func Preset1() (r *presets.Builder) {
 
 	dp := m.Detailing("Name", "Bool1", "Float1", "Int1", "Date1", "CreatedAt", "UpdatedAt")
 	ie := dp.Field("Bool1").InplaceEdit()
-	ie.ComponentFunc(func(obj interface{}, ctx *ui.EventContext) h.HTMLComponent {
+	ie.ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 		//u := obj.(*User)
 		return VCheckbox().FieldName("Bool1")
 	}).UpdateFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) (err error) {
@@ -91,7 +115,7 @@ func Preset1() (r *presets.Builder) {
 		u := obj.(*User)
 		err = db.Model(&User{}).Where("id = ?", u.ID).UpdateColumn("approved_at = ?", time.Now()).Error
 		return
-	}).ComponentFunc(func(obj interface{}, ctx *ui.EventContext) h.HTMLComponent {
+	}).ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 		return VBtn("Approve")
 	})
 	return p

@@ -22,13 +22,15 @@ type Builder struct {
 	mux     *goji.Mux
 	builder *bran.Builder
 	logger  *zap.Logger
+	FieldTypes
 }
 
 func New() *Builder {
 	l, _ := zap.NewDevelopment()
 	return &Builder{
-		logger:  l,
-		builder: bran.New(),
+		logger:     l,
+		builder:    bran.New(),
+		FieldTypes: builtInFieldTypes(),
 	}
 }
 
@@ -48,13 +50,8 @@ func (b *Builder) Logger(v *zap.Logger) (r *Builder) {
 }
 
 func (b *Builder) Model(v interface{}) (r *ModelBuilder) {
-	r = &ModelBuilder{p: b}
-	r.model = v
+	r = NewModelBuilder(b, v)
 	b.models = append(b.models, r)
-	r.inspectModel()
-	r.listing = r.newListing()
-	r.editing = r.newEditing()
-	r.detailing = r.newDetailing()
 	return r
 }
 
