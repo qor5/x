@@ -89,13 +89,14 @@ func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	r.Schema = VContainer(
 		notice,
 		VCard(
-			VCardTitle(
-				h.Text(msgs.EditingObjectTitle(b.mb.label)),
-			),
+			VToolbar(
+				VToolbarTitle(msgs.EditingObjectTitle(b.mb.label)),
+			).Card(true).Color("primary").Dark(true).Prominent(true),
 			VCardText(
 				comps...,
 			),
 			VCardActions(
+				VSpacer(),
 				VBtn("Update").Color("primary").OnClick(ctx.Hub, "update", b.defaultUpdate),
 			),
 		),
