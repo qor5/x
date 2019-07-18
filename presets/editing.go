@@ -91,13 +91,13 @@ func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		VCard(
 			VToolbar(
 				VToolbarTitle(msgs.EditingObjectTitle(b.mb.label)),
-			).Card(true).Color("primary").Dark(true).Prominent(true),
+			).Card(true).Dense(true).Prominent(true),
 			VCardText(
 				comps...,
 			),
 			VCardActions(
 				VSpacer(),
-				VBtn("Update").Color("primary").OnClick(ctx.Hub, "update", b.defaultUpdate),
+				VBtn(msgs.Update).Color("primary").OnClick(ctx.Hub, "update", b.defaultUpdate),
 			),
 		),
 	)

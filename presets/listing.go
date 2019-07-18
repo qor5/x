@@ -1,6 +1,7 @@
 package presets
 
 import (
+	"github.com/qor/inflection"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"
@@ -92,20 +93,29 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 			),
 		)
 	}
+	msgs := b.mb.p.messagesFunc(ctx)
 
 	r.Schema = VContainer(
-		h.Div(
-			h.Div(
-				h.Table(
-					h.Thead(
-						h.Tr(heads...),
-					),
-					h.Tbody(
-						rows...,
-					),
-				).Class("v-datatable v-table theme--light"),
-			).Class("v-table__overflow"),
-		).Class("elevation-1"),
+
+		VCard(
+			VToolbar(
+				VToolbarTitle(msgs.ListingObjectTitle(inflection.Plural(b.mb.label))),
+				VSpacer(),
+				VBtn(msgs.New).Flat(true),
+			).Card(true).Prominent(true).Dense(true),
+			VCardText(
+				h.Div(
+					h.Table(
+						h.Thead(
+							h.Tr(heads...),
+						),
+						h.Tbody(
+							rows...,
+						),
+					).Class("v-datatable v-table theme--light"),
+				).Class("v-table__overflow"),
+			).Class("pa-0"),
+		),
 	)
 
 	return

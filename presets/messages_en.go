@@ -8,7 +8,10 @@ import (
 
 type Messages struct {
 	SuccessfullyUpdated string
+	New                 string
+	Update              string
 	EditingObjectTitle  func(label string) string
+	ListingObjectTitle  func(label string) string
 }
 
 type MessagesFunc func(ctx *ui.EventContext) *Messages
@@ -18,6 +21,11 @@ var Messages_en_US = Messages{
 	EditingObjectTitle: func(label string) string {
 		return fmt.Sprintf("Editing %s", label)
 	},
+	ListingObjectTitle: func(label string) string {
+		return fmt.Sprintf("Listing %s", label)
+	},
+	New:    "New",
+	Update: "Update",
 }
 
 func defaultMessageFunc(ctx *ui.EventContext) *Messages {
