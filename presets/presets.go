@@ -110,6 +110,24 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 		}
 
 		pr.Schema = VApp(
+			VNavigationDrawer(
+				VToolbar(
+					VToolbarTitle("Hello"),
+				),
+			).App(true),
+			VToolbar(
+				h.Form(
+					VTextField().
+						SoloInverted(true).
+						PrependInnerIcon("search").
+						Label("Search").
+						Flat(true).
+						Clearable(true).HideDetails(true),
+				).Method("GET"),
+
+				VSpacer(),
+				VToolbarItems(),
+			).App(true).Dark(true).Color("indigo"),
 			VContent(
 				innerPr.Schema.(h.HTMLComponent),
 			),

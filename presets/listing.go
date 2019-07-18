@@ -97,12 +97,13 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 	r.Schema = VContainer(
 
+		VLayout(
+			h.H2(msgs.ListingObjectTitle(inflection.Plural(b.mb.label))).Class("title"),
+			VSpacer(),
+			VBtn(msgs.New).Color("primary mr-0"),
+		).Class("align-center"),
+
 		VCard(
-			VToolbar(
-				VToolbarTitle(msgs.ListingObjectTitle(inflection.Plural(b.mb.label))),
-				VSpacer(),
-				VBtn(msgs.New).Flat(true),
-			).Card(true).Prominent(true).Dense(true),
 			VCardText(
 				h.Div(
 					h.Table(
@@ -116,7 +117,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 				).Class("v-table__overflow"),
 			).Class("pa-0"),
 		),
-	)
+	).Fluid(true)
 
 	return
 }

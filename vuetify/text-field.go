@@ -243,6 +243,16 @@ func (b *VTextFieldBuilder) ValidateOnBlur(v bool) (r *VTextFieldBuilder) {
 	return b
 }
 
+func (b *VTextFieldBuilder) Class(names ...string) (r *VTextFieldBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VTextFieldBuilder) ClassIf(name string, add bool) (r *VTextFieldBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
 func (b *VTextFieldBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }

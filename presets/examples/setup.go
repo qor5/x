@@ -101,7 +101,7 @@ func Preset1() (r *presets.Builder) {
 		return VAutocomplete().FieldName("Name").Value(u.Name).Label(field.Label).Items([]string{"1111", "2222"})
 	})
 
-	ef := m.Editing("Name", "Bool1")
+	ef := m.Editing("Name", "Bool1", "Int1")
 	ef.Field("Name").Label("名字").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 		//u := obj.(*User)
 		return VAutocomplete().FieldName("Name").Label(field.Label).Items([]string{"Felix", "Hello"})
