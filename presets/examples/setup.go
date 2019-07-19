@@ -103,6 +103,15 @@ func Preset1() (r *presets.Builder) {
 		return h.Td(h.A().Href(fmt.Sprintf("/admin/users/%d/edit", u.ID)).Text(u.Name))
 	})
 
+	l.Field("Actions").Label(" ").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+		//u := obj.(*User)
+		return h.Td(
+			VBtn("").Icon(true).Children(
+				VIcon("edit"),
+			),
+		).Style("width: 48px")
+	})
+
 	l.BulkAction("ApproveAll").UpdateFunc(func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error) {
 		err = db.Model(&User{}).Where("id IN (?)", selectedIds).UpdateColumn("approved_at = ?", time.Now()).Error
 		return
