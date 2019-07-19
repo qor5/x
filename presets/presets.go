@@ -24,7 +24,9 @@ type Builder struct {
 	logger       *zap.Logger
 	dataOperator DataOperator
 	messagesFunc MessagesFunc
+	homePageFunc ui.PageFunc
 	FieldTypes
+	MenuGroups
 }
 
 type DataOperator interface {
@@ -64,6 +66,11 @@ func (b *Builder) MessagesFunc(v MessagesFunc) (r *Builder) {
 	return b
 }
 
+func (b *Builder) HomePageFunc(v ui.PageFunc) (r *Builder) {
+	b.homePageFunc = v
+	return b
+}
+
 func (b *Builder) Model(v interface{}) (r *ModelBuilder) {
 	r = NewModelBuilder(b, v)
 	b.models = append(b.models, r)
@@ -79,6 +86,56 @@ func modelNames(ms []*ModelBuilder) (r []string) {
 	for _, m := range ms {
 		r = append(r, m.uriName)
 	}
+	return
+}
+
+func (b *Builder) createMenus() (r h.HTMLComponent) {
+
+	var menus []h.HTMLComponent
+	for _, mg := range b.menuGroups {
+		var subMenus = []h.HTMLComponent{
+			VListTile(
+				VListTileContent(
+					VListTileTitle(h.Text(mg.label)),
+				),
+			).Slot("activator"),
+		}
+		for _, m := range mg.models {
+			subMenus = append(subMenus,
+				VListTile(
+					VListTileAction(
+						VIcon(""),
+					),
+					VListTileContent(
+						VListTileTitle(
+							h.Text(m.label),
+						),
+					),
+				).Href(m.listingHref()),
+			)
+		}
+		menus = append(menus, VListGroup(subMenus...).PrependIcon(mg.icon).Value(true))
+	}
+
+	for _, m := range b.models {
+		if m.inGroup {
+			continue
+		}
+		menus = append(menus,
+			VListTile(
+				VListTileAction(
+					VIcon(m.menuIcon),
+				),
+				VListTileContent(
+					VListTileTitle(
+						h.Text(m.label),
+					),
+				),
+			).Href(m.listingHref()),
+		)
+	}
+
+	r = VList(menus...)
 	return
 }
 
@@ -114,6 +171,7 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 				VToolbar(
 					VToolbarTitle("Hello"),
 				),
+				b.createMenus(),
 			).App(true),
 			VToolbar(
 				h.Form(
@@ -137,6 +195,18 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 
 		return
 	}
+}
+
+func (b *Builder) defaultHomePageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
+	r.Schema = h.Div().Text("home")
+	return
+}
+
+func (b *Builder) getHomePageFunc() ui.PageFunc {
+	if b.homePageFunc != nil {
+		return b.homePageFunc
+	}
+	return b.defaultHomePageFunc
 }
 
 func (b *Builder) initMux() {
@@ -165,10 +235,15 @@ func (b *Builder) initMux() {
 		),
 	)
 
+	mux.Handle(
+		pat.New(b.prefix),
+		b.builder.Page(b.defaultLayout(b.getHomePageFunc())),
+	)
+
 	for _, m := range b.models {
 		muri := inflection.Plural(m.uriName)
 		mux.Handle(
-			pat.New(fmt.Sprintf("%s/%s", b.prefix, muri)),
+			pat.New(m.listingHref()),
 			b.builder.Page(b.defaultLayout(m.listing.GetPageFunc())),
 		)
 		mux.Handle(

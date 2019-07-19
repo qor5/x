@@ -35,6 +35,11 @@ type User struct {
 	UpdatedAt time.Time
 }
 
+type Product struct {
+	ID   int
+	Name string
+}
+
 func Preset1() (r *presets.Builder) {
 	p := presets.New().URIPrefix("/admin")
 
@@ -67,13 +72,15 @@ func Preset1() (r *presets.Builder) {
 	}
 	db.LogMode(true)
 
-	err = db.AutoMigrate(&User{}).Error
+	err = db.AutoMigrate(&User{}, &Product{}).Error
 	if err != nil {
 		panic(err)
 	}
 	p.DataOperator(gormop.DataOperator(db))
 
-	m := p.Model(&User{}).URIName("user")
+	p.MenuGroup("User Management").Icon("group")
+	p.Model(&Product{}).MenuIcon("laptop")
+	m := p.Model(&User{}).URIName("user").MenuGroup("User Management")
 	m.Labels(
 		"Name", "名字",
 		"Bool1", "性别",

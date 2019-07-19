@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/jinzhu/inflection"
+
 	"github.com/iancoleman/strcase"
 )
 
@@ -13,6 +15,8 @@ type ModelBuilder struct {
 	p            *Builder
 	model        interface{}
 	modelType    reflect.Type
+	inGroup      bool
+	menuIcon     string
 	uriName      string
 	label        string
 	fieldLabels  []string
@@ -29,7 +33,9 @@ func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
 		panic(fmt.Sprintf("model %#+v must be pointer", model))
 	}
 	modelstr := r.modelType.String()
-	r.label = strcase.ToCamel(modelstr[strings.LastIndex(modelstr, "."):])
+	modelName := modelstr[strings.LastIndex(modelstr, ".")+1:]
+	r.label = strcase.ToCamel(inflection.Plural(modelName))
+	r.uriName = strcase.ToKebab(modelName)
 	r.newListing()
 	r.newDetailing()
 	r.newEditing()
@@ -101,8 +107,24 @@ func (b *ModelBuilder) newDetailing() (r *DetailingBuilder) {
 	return
 }
 
+func (b *ModelBuilder) listingHref() string {
+	muri := inflection.Plural(b.uriName)
+	return fmt.Sprintf("%s/%s", b.p.prefix, muri)
+}
+
 func (b *ModelBuilder) URIName(v string) (r *ModelBuilder) {
 	b.uriName = v
+	return b
+}
+
+func (b *ModelBuilder) MenuGroup(v string) (r *ModelBuilder) {
+	b.p.MenuGroup(v).AppendModels(b)
+	b.inGroup = true
+	return b
+}
+
+func (b *ModelBuilder) MenuIcon(v string) (r *ModelBuilder) {
+	b.menuIcon = v
 	return b
 }
 

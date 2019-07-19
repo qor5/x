@@ -3,6 +3,7 @@ package vuetify
 import (
 	"context"
 	"fmt"
+
 	h "github.com/theplant/htmlgo"
 )
 
@@ -115,6 +116,16 @@ func (b *VListTileBuilder) ClassIf(name string, add bool) (r *VListTileBuilder) 
 	b.tag.ClassIf(name, add)
 	return b
 }
+
+func (b *VListTileBuilder) Slot(v string) (r *VListTileBuilder) {
+	b.tag.Attr("slot", v)
+	return b
+}
+
+//func (b *VListTileBuilder) Slot(v string) (r *VListTileBuilder) {
+//	b.tag.Attr("slot", v)
+//	return b
+//}
 
 func (b *VListTileBuilder) On(name string, value string) (r *VListTileBuilder) {
 	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
