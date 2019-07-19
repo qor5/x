@@ -43,6 +43,14 @@ type Product struct {
 func Preset1() (r *presets.Builder) {
 	p := presets.New().URIPrefix("/admin")
 
+	p.BrandFunc(func(ctx *ui.EventContext) h.HTMLComponent {
+		return VToolbar(
+			//h.Img("https://material.io/tools/icons/static/ic_material_192px_light.svg").Style("height: 32px"),
+			VIcon("directions_boat"),
+			VToolbarTitle("My Admin"),
+		)
+	})
+
 	p.FieldType(&Thumb{}).
 		ListingComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 			i, err := reflectutils.Get(obj, field.Name)

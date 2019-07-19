@@ -1,32 +1,22 @@
 package presets
 
-import (
-	"mime/multipart"
-
-	"github.com/sunfmin/bran/ui"
-)
-
 type FieldBuilder struct {
 	name        string
 	label       string
-	compFunc    CompFunc
+	compFunc    FieldComponentFunc
 	setterFunc  SetterFunc
 	inplaceEdit *InplaceEditBuilder
 }
-
-type UpdateFunc func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) (err error)
 
 func (b *FieldBuilder) Label(v string) (r *FieldBuilder) {
 	b.label = v
 	return b
 }
 
-func (b *FieldBuilder) ComponentFunc(v CompFunc) (r *FieldBuilder) {
+func (b *FieldBuilder) ComponentFunc(v FieldComponentFunc) (r *FieldBuilder) {
 	b.compFunc = v
 	return b
 }
-
-type SetterFunc func(obj interface{}, form *multipart.Form, ctx *ui.EventContext)
 
 func (b *FieldBuilder) SetterFunc(v SetterFunc) (r *FieldBuilder) {
 	b.setterFunc = v
@@ -40,11 +30,11 @@ func (b *FieldBuilder) InplaceEdit() (r *InplaceEditBuilder) {
 }
 
 type InplaceEditBuilder struct {
-	compFunc   CompFunc
+	compFunc   FieldComponentFunc
 	updateFunc UpdateFunc
 }
 
-func (b *InplaceEditBuilder) ComponentFunc(v CompFunc) (r *InplaceEditBuilder) {
+func (b *InplaceEditBuilder) ComponentFunc(v FieldComponentFunc) (r *InplaceEditBuilder) {
 	b.compFunc = v
 	return b
 }

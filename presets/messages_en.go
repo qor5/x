@@ -14,8 +14,6 @@ type Messages struct {
 	ListingObjectTitle  func(label string) string
 }
 
-type MessagesFunc func(ctx *ui.EventContext) *Messages
-
 var Messages_en_US = Messages{
 	SuccessfullyUpdated: "Successfully Updated",
 	EditingObjectTitle: func(label string) string {

@@ -1,20 +1,10 @@
 package presets
 
-import (
-	"mime/multipart"
-
-	"github.com/sunfmin/bran/ui"
-	h "github.com/theplant/htmlgo"
-)
-
 type BulkActionBuilder struct {
 	name       string
 	updateFunc BulkActionUpdateFunc
-	compFunc   BulkActionCompFunc
+	compFunc   ComponentFunc
 }
-
-type BulkActionUpdateFunc func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error)
-type BulkActionCompFunc func(ctx *ui.EventContext) h.HTMLComponent
 
 func (b *ListingBuilder) BulkAction(name string) (r *BulkActionBuilder) {
 	for _, f := range b.bulkActions {
@@ -32,7 +22,7 @@ func (b *BulkActionBuilder) UpdateFunc(v BulkActionUpdateFunc) (r *BulkActionBui
 	return b
 }
 
-func (b *BulkActionBuilder) ComponentFunc(v BulkActionCompFunc) (r *BulkActionBuilder) {
+func (b *BulkActionBuilder) ComponentFunc(v ComponentFunc) (r *BulkActionBuilder) {
 	b.compFunc = v
 	return b
 }
@@ -40,7 +30,7 @@ func (b *BulkActionBuilder) ComponentFunc(v BulkActionCompFunc) (r *BulkActionBu
 type ActionBuilder struct {
 	name       string
 	updateFunc UpdateFunc
-	compFunc   CompFunc
+	compFunc   FieldComponentFunc
 }
 
 func (b *DetailingBuilder) Action(name string) (r *ActionBuilder) {
@@ -59,7 +49,7 @@ func (b *ActionBuilder) UpdateFunc(v UpdateFunc) (r *ActionBuilder) {
 	return b
 }
 
-func (b *ActionBuilder) ComponentFunc(v CompFunc) (r *ActionBuilder) {
+func (b *ActionBuilder) ComponentFunc(v FieldComponentFunc) (r *ActionBuilder) {
 	b.compFunc = v
 	return b
 }

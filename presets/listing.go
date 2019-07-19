@@ -14,7 +14,7 @@ type ListingBuilder struct {
 	bulkActions   []*BulkActionBuilder
 	filtering     *FilteringBuilder
 	pageFunc      ui.PageFunc
-	searcher      Searcher
+	searcher      SearchOpFunc
 	searchColumns []string
 }
 
@@ -44,7 +44,7 @@ func (b *ListingBuilder) PageFunc(pf ui.PageFunc) (r *ListingBuilder) {
 	return b
 }
 
-func (b *ListingBuilder) Searcher(v Searcher) (r *ListingBuilder) {
+func (b *ListingBuilder) Searcher(v SearchOpFunc) (r *ListingBuilder) {
 	b.searcher = v
 	return b
 }

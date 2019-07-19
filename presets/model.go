@@ -2,7 +2,6 @@ package presets
 
 import (
 	"fmt"
-	"net/url"
 	"reflect"
 	"strings"
 
@@ -42,17 +41,6 @@ func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
 	r.inspectModel()
 	return
 }
-
-type SearchParams struct {
-	KeywordColumns []string
-	Keyword        string
-	Params         url.Values
-}
-
-type Searcher func(obj interface{}, params *SearchParams) (r interface{}, err error)
-type Fetcher func(obj interface{}, id string) (r interface{}, err error)
-type Updater func(obj interface{}, id string, fieldName string, value interface{}) (err error)
-type Saver func(obj interface{}, id string) (err error)
 
 func (b *ModelBuilder) newModel() (r interface{}) {
 	return reflect.New(b.modelType.Elem()).Interface()

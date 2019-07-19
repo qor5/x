@@ -15,13 +15,11 @@ type Field struct {
 	Label string
 }
 
-type CompFunc func(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent
-
 type FieldTypeBuilder struct {
 	valType           reflect.Type
-	listingCompFunc   CompFunc
-	detailingCompFunc CompFunc
-	editingCompFunc   CompFunc
+	listingCompFunc   FieldComponentFunc
+	detailingCompFunc FieldComponentFunc
+	editingCompFunc   FieldComponentFunc
 }
 
 func NewFieldType(t reflect.Type) (r *FieldTypeBuilder) {
@@ -29,17 +27,17 @@ func NewFieldType(t reflect.Type) (r *FieldTypeBuilder) {
 	return
 }
 
-func (b *FieldTypeBuilder) ListingComponentFunc(v CompFunc) (r *FieldTypeBuilder) {
+func (b *FieldTypeBuilder) ListingComponentFunc(v FieldComponentFunc) (r *FieldTypeBuilder) {
 	b.listingCompFunc = v
 	return b
 }
 
-func (b *FieldTypeBuilder) EditingComponentFunc(v CompFunc) (r *FieldTypeBuilder) {
+func (b *FieldTypeBuilder) EditingComponentFunc(v FieldComponentFunc) (r *FieldTypeBuilder) {
 	b.editingCompFunc = v
 	return b
 }
 
-func (b *FieldTypeBuilder) DetailingComponentFunc(v CompFunc) (r *FieldTypeBuilder) {
+func (b *FieldTypeBuilder) DetailingComponentFunc(v FieldComponentFunc) (r *FieldTypeBuilder) {
 	b.detailingCompFunc = v
 	return b
 }

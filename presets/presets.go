@@ -25,15 +25,9 @@ type Builder struct {
 	dataOperator DataOperator
 	messagesFunc MessagesFunc
 	homePageFunc ui.PageFunc
+	brandFunc    ComponentFunc
 	FieldTypes
 	MenuGroups
-}
-
-type DataOperator interface {
-	Search(obj interface{}, params *SearchParams) (r interface{}, err error)
-	Fetch(obj interface{}, id string) (r interface{}, err error)
-	UpdateField(obj interface{}, id string, fieldName string, value interface{}) (err error)
-	Save(obj interface{}, id string) (err error)
 }
 
 func New() *Builder {
@@ -71,6 +65,11 @@ func (b *Builder) HomePageFunc(v ui.PageFunc) (r *Builder) {
 	return b
 }
 
+func (b *Builder) BrandFunc(v ComponentFunc) (r *Builder) {
+	b.brandFunc = v
+	return b
+}
+
 func (b *Builder) Model(v interface{}) (r *ModelBuilder) {
 	r = NewModelBuilder(b, v)
 	b.models = append(b.models, r)
@@ -86,6 +85,10 @@ func modelNames(ms []*ModelBuilder) (r []string) {
 	for _, m := range ms {
 		r = append(r, m.uriName)
 	}
+	return
+}
+
+func (b *Builder) defaultBrandFunc(ctx *ui.EventContext) (r h.HTMLComponent) {
 	return
 }
 
@@ -139,6 +142,16 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 	return
 }
 
+func (b *Builder) runBrandFunc(ctx *ui.EventContext) (r h.HTMLComponent) {
+	if b.brandFunc != nil {
+		return b.brandFunc(ctx)
+	}
+
+	return VToolbar(
+		VToolbarTitle("Admin"),
+	)
+}
+
 func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
@@ -168,9 +181,7 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 
 		pr.Schema = VApp(
 			VNavigationDrawer(
-				VToolbar(
-					VToolbarTitle("Hello"),
-				),
+				b.runBrandFunc(ctx),
 				b.createMenus(),
 			).App(true),
 			VToolbar(
