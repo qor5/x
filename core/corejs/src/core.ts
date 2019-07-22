@@ -2,7 +2,7 @@
 import debounce from 'lodash/debounce';
 import 'whatwg-fetch';
 import querystring from 'query-string';
-import { newFormWithStates, mergeStatesIntoForm } from './form';
+import { mergeStatesIntoForm } from './form';
 
 // Vue.config.productionTip = true;
 
@@ -28,28 +28,28 @@ interface EventResponse {
 declare var window: any;
 
 export class Core {
-	public form: FormData;
-
-	public debounceFetchEventThenDo = debounce(this.fetchEventThenDo, 800);
 	public debounce = debounce;
 
-	public rootChangeCurrent: any;
+	private debounceFetchEventThenDo = debounce(this.fetchEventThenDo, 800);
+	private form: FormData;
+	private rootChangeCurrent: any;
+	private changeCurrent: any;
 
-	constructor() {
-		const ssd = window.__serverSideData__;
-		const states = (ssd && ssd.states) || {};
-		this.form = newFormWithStates(states);
 
+	constructor(form: FormData, rootChangeCurrent: any, changeCurrent: any) {
+		this.form = form;
+		this.rootChangeCurrent = rootChangeCurrent;
+		this.changeCurrent = changeCurrent;
 	}
 
-	public newMethods(doFunc: any): any {
+	public newMethods(): any {
 		const self = this;
 		return {
 			onclick(eventFuncId: EventFuncID, evt: any) {
-				self.fetchEventThenDo(doFunc, eventFuncId, self.jsonEvent(evt));
+				self.fetchEventThenDo(eventFuncId, self.jsonEvent(evt));
 			},
 			oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
-				self.controlsOnInput(doFunc, eventFuncId, fieldName, evt);
+				self.controlsOnInput(eventFuncId, fieldName, evt);
 			},
 		};
 	}
@@ -133,22 +133,23 @@ export class Core {
 		return v;
 	}
 
-	public fetchEventThenDo(doFunc: any, eventFuncId: EventFuncID, event: EventData) {
+	public fetchEventThenDo(eventFuncId: EventFuncID, event: EventData) {
 		this.fetchEvent(eventFuncId, event)
 			.then((r: EventResponse) => {
 				if (r.schema && r.reload) {
-					this.rootChangeCurrent(this.componentByTemplate(this.rootChangeCurrent, r.schema));
+					this.rootChangeCurrent(this.componentByTemplate(r.schema));
 				} else if (r.schema) {
-					doFunc(this.componentByTemplate(doFunc, r.schema));
+					this.changeCurrent(this.componentByTemplate(r.schema));
 				}
 				return r;
 			});
 	}
 
-	public componentByTemplate(doFunc: any, template: string, afterLoaded?: () => void): any {
+	public componentByTemplate(template: string, afterLoaded?: () => void): any {
 		return {
+			provide: { core: this },
 			template: '<div>' + template + '</div>', // to make only one root.
-			methods: this.newMethods(doFunc),
+			methods: this.newMethods(),
 			mounted() {
 				this.$nextTick(() => {
 					if (afterLoaded) {
@@ -198,7 +199,6 @@ export class Core {
 
 
 	private controlsOnInput(
-		doFunc: any,
 		eventFuncId?: EventFuncID,
 		fieldName?: string,
 		evt?: any,
@@ -214,7 +214,7 @@ export class Core {
 			this.form.set(fieldName, evt.target.value);
 		}
 		if (eventFuncId) {
-			this.debounceFetchEventThenDo(doFunc, eventFuncId, this.jsonEvent(evt));
+			this.debounceFetchEventThenDo(eventFuncId, this.jsonEvent(evt));
 		}
 	}
 

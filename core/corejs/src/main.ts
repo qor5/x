@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import { Core } from './core';
+import { newFormWithStates } from './form';
 
 const app = document.getElementById('app');
 if (!app) {
@@ -11,8 +12,6 @@ declare var window: any;
 for (const registerComp of (window.__branVueComponentRegisters || [])) {
 	registerComp(Vue);
 }
-
-const core = new Core();
 
 Vue.component('BranLazyLoader', {
 	name: 'BranLazyLoader',
@@ -27,10 +26,12 @@ Vue.component('BranLazyLoader', {
 		const ef = this.loaderFunc;
 		const afterLoaded = this.afterLoaded;
 		const self = this;
-		const doFunc = this.changeCurrent;
+		const rootChangeCurrent = (this.$root as any).changeCurrent;
+		const core = new Core(new FormData(), rootChangeCurrent, this.changeCurrent);
+
 		core.fetchEvent(ef, {})
 			.then((r) => {
-				self.current = core.componentByTemplate(doFunc, r.schema, afterLoaded);
+				self.current = core.componentByTemplate(r.schema, afterLoaded);
 			});
 	},
 
@@ -49,9 +50,6 @@ Vue.component('BranLazyLoader', {
 
 
 const vm = new Vue({
-	provide: {
-		core,
-	},
 	template: `
 	<div id="app" v-cloak>
 		<component :is="current"></component>
@@ -64,8 +62,10 @@ const vm = new Vue({
 	},
 
 	mounted() {
-		core.rootChangeCurrent = this.changeCurrent;
-		this.current = core.componentByTemplate(this.changeCurrent, app.innerHTML);
+		const ssd = window.__serverSideData__;
+		const states = (ssd && ssd.states) || {};
+		const core = new Core(newFormWithStates(states), this.changeCurrent, this.changeCurrent);
+		this.current = core.componentByTemplate(app.innerHTML);
 	},
 
 	data() {
