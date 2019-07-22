@@ -11,9 +11,8 @@ import (
 )
 
 type mystate struct {
-	drawerVisible bool
-	Name          string
-	NameError     string
+	Name      string
+	NameError string
 }
 
 func randStr(prefix string) string {
@@ -27,27 +26,34 @@ func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	pr.Schema = Div(
 		H1(s.Name),
 		bo.Drawer(
-			Button("Close").Attr("@click", "parent.close"),
-			ui.Bind(Input("").Type("text").Value(s.Name)).FieldName("Name"),
-			Label(s.NameError).Style("color:red"),
-			ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update),
+			ui.LazyLoader(ctx.Hub, "form", form, "param1").LoadWhenParentVisible(),
 		).TriggerElement(
 			A().Text("Edit").Href("#"),
-		).Width(500).DefaultOpen(s.drawerVisible, false),
+		).Width(500),
+	)
+	return
+}
+
+func form(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	s := ctx.State.(*mystate)
+	r.Schema = Div(
+		Button("Close").Attr("@click", "parent.close"),
+		ui.Bind(Input("").Type("text").Value(s.Name)).FieldName("Name"),
+		Label(s.NameError).Style("color:red"),
+		ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update),
 	)
 	return
 }
 
 func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	r.Reload = true
 	s := ctx.State.(*mystate)
 	if len(s.Name) < 10 {
 		s.NameError = "name is too short"
-		s.drawerVisible = true
 		s.Name = ""
+		r, err = form(ctx)
 	} else {
 		s.NameError = ""
-		s.drawerVisible = false
+		r.Reload = true
 	}
 	return
 }

@@ -1,0 +1,3 @@
+{
+	"schema": "<h1>Hello</h1> <button v-on:click='onclick({\"id\": \"hello\"}, $event)' >Validate</button>"
+}

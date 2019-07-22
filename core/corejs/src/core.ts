@@ -22,6 +22,7 @@ interface EventResponse {
 	schema?: any;
 	data?: any;
 	redirectURL?: string;
+	reload: boolean;
 }
 
 declare var window: any;
@@ -29,22 +30,26 @@ declare var window: any;
 export class Core {
 	public form: FormData;
 
-	public debounceFetchEventThenReload = debounce(this.fetchEventThenReload, 800);
+	public debounceFetchEventThenDo = debounce(this.fetchEventThenDo, 800);
 	public debounce = debounce;
-	private methods: any = {};
+
+	public rootChangeCurrent: any;
 
 	constructor() {
 		const ssd = window.__serverSideData__;
 		const states = (ssd && ssd.states) || {};
 		this.form = newFormWithStates(states);
-		const self = this;
 
-		this.methods = {
+	}
+
+	public newMethods(doFunc: any): any {
+		const self = this;
+		return {
 			onclick(eventFuncId: EventFuncID, evt: any) {
-				self.fetchEventThenReload(this, eventFuncId, self.jsonEvent(evt));
+				self.fetchEventThenDo(doFunc, eventFuncId, self.jsonEvent(evt));
 			},
 			oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
-				self.controlsOnInput(this, eventFuncId, fieldName, evt);
+				self.controlsOnInput(doFunc, eventFuncId, fieldName, evt);
 			},
 		};
 	}
@@ -128,20 +133,22 @@ export class Core {
 		return v;
 	}
 
-	public fetchEventThenReload(comp: any, eventFuncId: EventFuncID, event: EventData) {
+	public fetchEventThenDo(doFunc: any, eventFuncId: EventFuncID, event: EventData) {
 		this.fetchEvent(eventFuncId, event)
 			.then((r: EventResponse) => {
-				if (r.schema) {
-					this.reload(comp, r);
+				if (r.schema && r.reload) {
+					this.rootChangeCurrent(this.componentByTemplate(this.rootChangeCurrent, r.schema));
+				} else if (r.schema) {
+					doFunc(this.componentByTemplate(doFunc, r.schema));
 				}
 				return r;
 			});
 	}
 
-	public componentByTemplate(template: string, afterLoaded?: () => void): any {
+	public componentByTemplate(doFunc: any, template: string, afterLoaded?: () => void): any {
 		return {
 			template: '<div>' + template + '</div>', // to make only one root.
-			methods: this.methods,
+			methods: this.newMethods(doFunc),
 			mounted() {
 				this.$nextTick(() => {
 					if (afterLoaded) {
@@ -191,7 +198,7 @@ export class Core {
 
 
 	private controlsOnInput(
-		comp: any,
+		doFunc: any,
 		eventFuncId?: EventFuncID,
 		fieldName?: string,
 		evt?: any,
@@ -207,14 +214,8 @@ export class Core {
 			this.form.set(fieldName, evt.target.value);
 		}
 		if (eventFuncId) {
-			this.debounceFetchEventThenReload(comp, eventFuncId, this.jsonEvent(evt));
+			this.debounceFetchEventThenDo(doFunc, eventFuncId, this.jsonEvent(evt));
 		}
 	}
-
-	private reload(comp: any, r: EventResponse) {
-
-		comp.$root.changeCurrent(this.componentByTemplate(r.schema));
-	}
-
 
 }

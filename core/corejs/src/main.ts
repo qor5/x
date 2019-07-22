@@ -8,72 +8,49 @@ if (!app) {
 
 declare var window: any;
 
-const core = new Core();
-
 for (const registerComp of (window.__branVueComponentRegisters || [])) {
 	registerComp(Vue);
 }
+
+const core = new Core();
 
 Vue.component('BranLazyLoader', {
 	name: 'BranLazyLoader',
 	props: ['loaderFunc', 'visible', 'afterLoaded'],
 	template: `
 		<div class="bran-lazy-loader" v-if="visible">
-			<component :is="lazyloader"></component>
+			<component :is="current"></component>
 		</div>
 	`,
-	data() {
+
+	mounted() {
 		const ef = this.loaderFunc;
 		const afterLoaded = this.afterLoaded;
-		if (!ef) {
-			return {
-				lazyloader: {
-					render() {
-						return null;
-					},
-				},
-			};
-		}
+		const self = this;
+		const doFunc = this.changeCurrent;
+		core.fetchEvent(ef, {})
+			.then((r) => {
+				self.current = core.componentByTemplate(doFunc, r.schema, afterLoaded);
+			});
+	},
+
+	data() {
 		return {
-			lazyloader(): any {
-				return core.fetchEvent(ef, {})
-					.then((r) => {
-						return core.componentByTemplate(r.schema, afterLoaded);
-					});
-			},
+			current: null,
 		};
+	},
+
+	methods: {
+		changeCurrent(newView: any) {
+			this.current = newView;
+		},
 	},
 });
 
-// Vue.mixin({
-// 	beforeCreate: function () {
-// 		// var myOption = this.$options
-// 		// console.log("props", JSON.stringify(this.$props))
-// 		const tag = this.$options._componentTag;
-// 		let watch = (this.$options.watch = this.$options.watch || {})
-
-// 		watch.search = function (val) {
-// 			console.log("val", val)
-// 		}
-
-// 		console.log("beforeCreate this", tag, this, this.$options)
-
-// 	}
-// })
-
-// Vue.directive('bran', {
-// 	// When the bound element is inserted into the DOM...
-// 	bind: (el: HTMLElement, binding: VNodeDirective, vnode: VNode) => {
-// 		core.callSetupFunc(binding.value.setupFunc, el, binding, vnode);
-// 	},
-// });
 
 const vm = new Vue({
 	provide: {
 		core,
-	},
-	data: {
-		current: core.componentByTemplate(app.innerHTML),
 	},
 	template: `
 	<div id="app" v-cloak>
@@ -84,6 +61,17 @@ const vm = new Vue({
 		changeCurrent(newView: any) {
 			this.current = newView;
 		},
+	},
+
+	mounted() {
+		core.rootChangeCurrent = this.changeCurrent;
+		this.current = core.componentByTemplate(this.changeCurrent, app.innerHTML);
+	},
+
+	data() {
+		return {
+			current: null,
+		};
 	},
 
 });

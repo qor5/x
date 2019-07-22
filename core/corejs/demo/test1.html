@@ -15,6 +15,12 @@
 			Family Name
 			<input v-on:input='oninput({"id": "hello"}, "FamilyName", $event)'/>
 			<a href="#" v-on:click='onclick({"id": "hello"}, $event)' >Click</a>
+
+
+			<div style="border: 3px solid blue; min-height: 60px;">
+				<bran-lazy-loader :visible='true' :loader-func='{"id": "hello", "params": ["1", "2"]}'>
+				</bran-lazy-loader>
+			</div>
 		</main>
 	</div>
 

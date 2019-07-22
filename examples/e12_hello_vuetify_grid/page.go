@@ -14,7 +14,7 @@ func HelloVuetifyGrid(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		for i := 0; i < count; i++ {
 			r = append(r, VFlex(
 				VCard(
-					VCardText(fmt.Sprint(col)),
+					VCardText(h.Text(fmt.Sprint(col))),
 				).Dark(true).Color(color),
 			).Col(Xs, col))
 		}
