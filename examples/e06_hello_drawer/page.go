@@ -13,6 +13,7 @@ import (
 type mystate struct {
 	Name      string
 	NameError string
+	Group     string
 }
 
 func randStr(prefix string) string {
@@ -30,7 +31,14 @@ func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		).TriggerElement(
 			A().Text("Edit").Href("#"),
 		).Width(500),
+		ui.Bind(Input("").Type("text").Value(s.Group)).FieldName("Group"),
+		ui.Bind(Button("Check value")).OnClick(ctx.Hub, "update", update),
 	)
+	return
+}
+
+func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	r.Reload = true
 	return
 }
 
@@ -40,12 +48,12 @@ func form(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 		Button("Close").Attr("@click", "parent.close"),
 		ui.Bind(Input("").Type("text").Value(s.Name)).FieldName("Name"),
 		Label(s.NameError).Style("color:red"),
-		ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update),
+		ui.Bind(Button("Update")).OnClick(ctx.Hub, "updateForm", updateForm),
 	)
 	return
 }
 
-func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+func updateForm(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	s := ctx.State.(*mystate)
 	if len(s.Name) < 10 {
 		s.NameError = "name is too short"
