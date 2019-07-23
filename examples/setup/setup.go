@@ -195,6 +195,8 @@ func Setup(prefix string) http.Handler {
 		),
 	)
 
+	mux.Handle("/favicon.ico", http.NotFoundHandler())
+
 	mux.Handle("/assets/vuetify.css",
 		ub.PacksHandler("text/css",
 			vuetify.CSSComponentsPack(),
