@@ -1,6 +1,6 @@
-import Vue from 'vue';
+import Vue, { VueConstructor } from 'vue';
 import { Core } from './core';
-import { newFormWithStates } from './form';
+import { newFormWithStates } from './utils';
 
 const app = document.getElementById('app');
 if (!app) {
@@ -11,6 +11,15 @@ declare var window: any;
 
 for (const registerComp of (window.__branVueComponentRegisters || [])) {
 	registerComp(Vue);
+}
+
+const ssd = window.__serverSideData__;
+const states = (ssd && ssd.states) || {};
+
+const form = newFormWithStates(states);
+
+interface DynaCompData {
+	current: VueConstructor | null;
 }
 
 Vue.component('BranLazyLoader', {
@@ -27,7 +36,7 @@ Vue.component('BranLazyLoader', {
 		const afterLoaded = this.afterLoaded;
 		const self = this;
 		const rootChangeCurrent = (this.$root as any).changeCurrent;
-		const core = new Core(new FormData(), rootChangeCurrent, this.changeCurrent);
+		const core = new Core(form, rootChangeCurrent, this.changeCurrent);
 
 		core.fetchEvent(ef, {})
 			.then((r) => {
@@ -35,7 +44,7 @@ Vue.component('BranLazyLoader', {
 			});
 	},
 
-	data() {
+	data(): DynaCompData {
 		return {
 			current: null,
 		};
@@ -62,18 +71,15 @@ const vm = new Vue({
 	},
 
 	mounted() {
-		const ssd = window.__serverSideData__;
-		const states = (ssd && ssd.states) || {};
-		const core = new Core(newFormWithStates(states), this.changeCurrent, this.changeCurrent);
+		const core = new Core(form, this.changeCurrent, this.changeCurrent);
 		this.current = core.componentByTemplate(app.innerHTML);
 	},
 
-	data() {
+	data(): DynaCompData {
 		return {
 			current: null,
 		};
 	},
-
 });
 
 vm.$mount('#app');
