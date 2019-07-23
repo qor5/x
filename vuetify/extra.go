@@ -111,7 +111,7 @@ func (b *VAutocompleteBuilder) ItemsEventFunc(hub ui.EventFuncHub, eventFuncId s
 	}
 
 	b.tag.Attr(":items-event-func-id", &ui.EventFuncID{
-		ID:     hub.RefEventFunc(eventFuncId, ef),
+		ID:     hub.RegisterEventFunc(eventFuncId, ef),
 		Params: params,
 	})
 	return b

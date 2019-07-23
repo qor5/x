@@ -30,11 +30,13 @@ func overlay(s *mystate, ctx *ui.EventContext) HTMLComponent {
 	return Div(
 		ui.Bind(Input("").Type("text").Value(s.EditingName)).FieldName("EditingName"),
 		Label(s.NameError).Style("color:red"),
-		ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update),
+		ui.Bind(Button("Update")).OnClick("update"),
 	)
 }
 
 func HelloDialog(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+	ctx.Hub.RegisterEventFunc("remoteOverlay", remoteOverlay)
+
 	s := ctx.StateOrInit(&mystate{EditingName: globalState.Name}).(*mystate)
 
 	pr.Schema = Div(
@@ -46,7 +48,7 @@ func HelloDialog(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		).DefaultVisible(s.dialogVisible),
 
 		bo.Dialog(
-			ui.LazyLoader(ctx.Hub, "remoteOverlay", remoteOverlay).Visible("true"),
+			ui.LazyLoader("remoteOverlay").Visible("true"),
 		).TriggerElement(
 			A().Text("Remote Loader").Href("#"),
 		).DefaultVisible(s.dialogVisibleRemote),

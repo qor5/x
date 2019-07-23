@@ -40,7 +40,7 @@ type LayoutFunc func(r *http.Request, body string) (output string, err error)
 type LayoutMiddleFunc func(in LayoutFunc, injector PageInjector) (out LayoutFunc)
 
 type EventFuncHub interface {
-	RefEventFunc(eventFuncId string, ef EventFunc) (key string)
+	RegisterEventFunc(eventFuncId string, ef EventFunc) (key string)
 }
 
 /*

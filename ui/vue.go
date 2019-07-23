@@ -20,26 +20,20 @@ func Bind(b h.MutableAttrHTMLComponent) (r *VueEventTagBuilder) {
 	return
 }
 
-func (b *VueEventTagBuilder) OnInput(hub EventFuncHub, eventFuncId string, ef EventFunc, params ...string) (r *VueEventTagBuilder) {
-	if ef == nil {
-		return b
-	}
+func (b *VueEventTagBuilder) OnInput(eventFuncId string, params ...string) (r *VueEventTagBuilder) {
 
 	b.onInputFuncID = &EventFuncID{
-		ID:     hub.RefEventFunc(eventFuncId, ef),
+		ID:     eventFuncId,
 		Params: params,
 	}
 
 	return b
 }
 
-func (b *VueEventTagBuilder) OnClick(hub EventFuncHub, eventFuncId string, ef EventFunc, params ...string) (r *VueEventTagBuilder) {
-	if ef == nil {
-		return b
-	}
+func (b *VueEventTagBuilder) OnClick(eventFuncId string, params ...string) (r *VueEventTagBuilder) {
 
 	fid := &EventFuncID{
-		ID:     hub.RefEventFunc(eventFuncId, ef),
+		ID:     eventFuncId,
 		Params: params,
 	}
 

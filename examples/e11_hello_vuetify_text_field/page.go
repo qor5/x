@@ -18,6 +18,8 @@ type mystate struct {
 }
 
 func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+	ctx.Hub.RegisterEventFunc("update", update)
+
 	s := ctx.StateOrInit(&mystate{
 		MyValue:       "This is my value",
 		TextareaValue: "123",
@@ -55,7 +57,7 @@ func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error)
 
 				vt.VSlider().Step(10).Ticks(true).ThumbLabel("always").FieldName("Slider1"),
 
-				vt.VBtn("Update").OnClick(ctx.Hub, "update", update).Color("info").Round(true),
+				vt.VBtn("Update").OnClick("update"),
 			),
 		),
 	).Id("mainapp")

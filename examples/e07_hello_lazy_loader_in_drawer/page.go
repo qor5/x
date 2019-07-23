@@ -22,14 +22,16 @@ func randStr(prefix string) string {
 }
 
 func HelloLazyLoaderInDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+	ctx.Hub.RegisterEventFunc("editPage", editPage)
+
 	s := ctx.StateOrInit(&mystate{}).(*mystate)
 
 	pr.Schema = Div(
 		H1(s.Name),
 		bo.Drawer(
-			ui.LazyLoader(ctx.Hub, "editPage", editPage, "param1").LoadWhenParentVisible(),
+			ui.LazyLoader("editPage", "param1").LoadWhenParentVisible(),
 			bo.Drawer(
-				ui.LazyLoader(ctx.Hub, "editPage", editPage, "param2").LoadWhenParentVisible(),
+				ui.LazyLoader("editPage", "param2").LoadWhenParentVisible(),
 			).TriggerElement(
 				A().Text("New Drawer").Href("#"),
 			),

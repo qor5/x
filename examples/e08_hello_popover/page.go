@@ -35,11 +35,13 @@ func overlay(s *popoverState, ctx *ui.EventContext, subState string) HTMLCompone
 	return Div(
 		ui.Bind(Input("").Type("text").Value(s.EditingName)).FieldName(fmt.Sprintf("%s.EditingName", subState)),
 		Label(s.NameError).Style("color:red"),
-		ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update, subState),
+		ui.Bind(Button("Update")).OnClick("update"),
 	).Style("padding: 20px; background-color: white;")
 }
 
 func HelloPopover(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+	ctx.Hub.RegisterEventFunc("remoteOverlay", remoteOverlay)
+
 	s := ctx.StateOrInit(&mystate{
 		Popover1: &popoverState{
 			EditingName: globalState.Name,
@@ -64,7 +66,7 @@ func HelloPopover(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
 		H2("Load from remote"),
 		bo.Popover(
-			ui.LazyLoader(ctx.Hub, "remoteOverlay", remoteOverlay).
+			ui.LazyLoader("remoteOverlay").
 				Visible("true").
 				ParentForceUpdateAfterLoaded(),
 		).TriggerElement(

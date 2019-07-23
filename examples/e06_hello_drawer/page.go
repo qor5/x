@@ -15,17 +15,22 @@ type mystate struct {
 var name string
 
 func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+	ctx.Hub.RegisterEventFunc("form", form)
+	ctx.Hub.RegisterEventFunc("close", close)
+	ctx.Hub.RegisterEventFunc("update", update)
+	ctx.Hub.RegisterEventFunc("updateForm", updateForm)
+
 	s := ctx.StateOrInit(&mystate{}).(*mystate)
 
 	pr.Schema = Div(
 		H1(name),
 		bo.Drawer(
-			ui.LazyLoader(ctx.Hub, "form", form, "param1").LoadWhenParentVisible(),
+			ui.LazyLoader("form", "param1").LoadWhenParentVisible(),
 		).TriggerElement(
 			A().Text("Edit").Href("#"),
 		).Width(500),
 		ui.Bind(Input("").Type("text").Value(s.Group)).FieldName("Group"),
-		ui.Bind(Button("Check value")).OnClick(ctx.Hub, "update", update),
+		ui.Bind(Button("Check value")).OnClick("update"),
 	)
 	return
 }
@@ -38,10 +43,10 @@ func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 func form(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	s := ctx.State.(*mystate)
 	r.Schema = Div(
-		ui.Bind(Button("Close")).OnClick(ctx.Hub, "close", close),
+		ui.Bind(Button("Close")).OnClick("close"),
 		ui.Bind(Input("").Type("text").Value(s.InputName)).FieldName("InputName"),
 		Label(s.NameError).Style("color:red"),
-		ui.Bind(Button("Update")).OnClick(ctx.Hub, "updateForm", updateForm),
+		ui.Bind(Button("Update")).OnClick("updateForm"),
 	)
 	return
 }

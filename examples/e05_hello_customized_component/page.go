@@ -127,7 +127,7 @@ func HelloCustomziedComponent(ctx *ui.EventContext) (pr ui.PageResponse, err err
 
 	pr.Schema = Div(
 		TagsInput().Selected([]string{"1", "2", "3"}).Options(opts...),
-		ui.Bind(Button("Refresh")).OnClick(ctx.Hub, "refresh", reload),
+		ui.Bind(Button("Refresh")).OnClick("refresh"),
 	)
 	return
 }

@@ -11,11 +11,11 @@ type LazyLoaderBuilder struct {
 	tag        *h.HTMLTagBuilder
 }
 
-func LazyLoader(hub EventFuncHub, eventFuncId string, ef EventFunc, params ...string) (r *LazyLoaderBuilder) {
+func LazyLoader(eventFuncId string, params ...string) (r *LazyLoaderBuilder) {
 	r = &LazyLoaderBuilder{
 		tag: h.Tag("bran-lazy-loader"),
 		loaderFunc: &EventFuncID{
-			ID:     hub.RefEventFunc(eventFuncId, ef),
+			ID:     eventFuncId,
 			Params: params,
 		},
 	}

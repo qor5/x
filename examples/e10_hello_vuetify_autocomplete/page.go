@@ -44,6 +44,7 @@ var options2 = []*User{
 }
 
 func HelloVuetifyAutocomplete(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+	ctx.Hub.RegisterEventFunc("update", update)
 	s := ctx.StateOrInit(&mystate{
 		Values1: []string{
 			"sam",
@@ -93,7 +94,7 @@ func HelloVuetifyAutocomplete(ctx *ui.EventContext) (pr ui.PageResponse, err err
 				Pre(s.Value3),
 				vt.VBtn("Update").
 					Color("success").
-					OnClick(ctx.Hub, "update", update),
+					OnClick("update"),
 			),
 		),
 	)

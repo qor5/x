@@ -97,7 +97,7 @@ func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 			),
 			VCardActions(
 				VSpacer(),
-				VBtn(msgs.Update).Color("primary").OnClick(ctx.Hub, "update", b.defaultUpdate),
+				VBtn(msgs.Update).Color("primary").OnClick("update"),
 			),
 		),
 	)

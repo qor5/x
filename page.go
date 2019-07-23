@@ -41,7 +41,7 @@ func (p *PageBuilder) MaxFormSize(v int64) (r *PageBuilder) {
 	return
 }
 
-func (p *PageBuilder) RefEventFunc(eventFuncId string, ef ui.EventFunc) (key string) {
+func (p *PageBuilder) RegisterEventFunc(eventFuncId string, ef ui.EventFunc) (key string) {
 	key = eventFuncId
 	if f, ok := p.eventFuncRefs[eventFuncId]; ok {
 		funcAddress := fmt.Sprint(ef)

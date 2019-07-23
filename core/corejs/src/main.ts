@@ -32,16 +32,7 @@ Vue.component('BranLazyLoader', {
 	`,
 
 	mounted() {
-		const ef = this.loaderFunc;
-		const afterLoaded = this.afterLoaded;
-		const self = this;
-		const rootChangeCurrent = (this.$root as any).changeCurrent;
-		const core = new Core(form, rootChangeCurrent, this.changeCurrent);
-
-		core.fetchEvent(ef, {})
-			.then((r) => {
-				self.current = core.componentByTemplate(r.schema, afterLoaded);
-			});
+		this.reload();
 	},
 
 	data(): DynaCompData {
@@ -51,6 +42,18 @@ Vue.component('BranLazyLoader', {
 	},
 
 	methods: {
+		reload() {
+			const ef = this.loaderFunc;
+			const afterLoaded = this.afterLoaded;
+			const self = this;
+			const rootChangeCurrent = (this.$root as any).changeCurrent;
+			const core = new Core(form, rootChangeCurrent, this.changeCurrent);
+
+			core.fetchEvent(ef, {})
+				.then((r) => {
+					self.current = core.componentByTemplate(r.schema, afterLoaded);
+				});
+		},
 		changeCurrent(newView: any) {
 			this.current = newView;
 		},

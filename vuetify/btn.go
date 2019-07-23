@@ -179,7 +179,7 @@ func (b *VBtnBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }
 
-func (b *VBtnBuilder) OnClick(hub ui.EventFuncHub, eventFuncId string, ef ui.EventFunc, params ...string) (r *VBtnBuilder) {
-	ui.Bind(b.tag).OnClick(hub, eventFuncId, ef, params...)
+func (b *VBtnBuilder) OnClick(eventFuncId string, params ...string) (r *VBtnBuilder) {
+	ui.Bind(b.tag).OnClick(eventFuncId, params...)
 	return b
 }
