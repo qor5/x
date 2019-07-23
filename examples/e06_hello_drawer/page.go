@@ -1,31 +1,24 @@
 package e06_hello_drawer
 
 import (
-	"fmt"
-	"math/rand"
-	"time"
-
 	bo "github.com/sunfmin/bran/overlay"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/theplant/htmlgo"
 )
 
 type mystate struct {
-	Name      string
+	InputName string
 	NameError string
 	Group     string
 }
 
-func randStr(prefix string) string {
-	rand.Seed(time.Now().UnixNano())
-	return fmt.Sprintf("%s: %d", prefix, rand.Int31n(100))
-}
+var name string
 
 func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	s := ctx.StateOrInit(&mystate{}).(*mystate)
 
 	pr.Schema = Div(
-		H1(s.Name),
+		H1(name),
 		bo.Drawer(
 			ui.LazyLoader(ctx.Hub, "form", form, "param1").LoadWhenParentVisible(),
 		).TriggerElement(
@@ -45,22 +38,28 @@ func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 func form(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	s := ctx.State.(*mystate)
 	r.Schema = Div(
-		Button("Close").Attr("@click", "parent.close"),
-		ui.Bind(Input("").Type("text").Value(s.Name)).FieldName("Name"),
+		ui.Bind(Button("Close")).OnClick(ctx.Hub, "close", close),
+		ui.Bind(Input("").Type("text").Value(s.InputName)).FieldName("InputName"),
 		Label(s.NameError).Style("color:red"),
 		ui.Bind(Button("Update")).OnClick(ctx.Hub, "updateForm", updateForm),
 	)
 	return
 }
 
+func close(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	r.Reload = true
+	return
+}
+
 func updateForm(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	s := ctx.State.(*mystate)
-	if len(s.Name) < 10 {
+	if len(s.InputName) < 10 {
 		s.NameError = "name is too short"
-		s.Name = ""
 		r, err = form(ctx)
 	} else {
+		name = s.InputName
 		s.NameError = ""
+		s.InputName = ""
 		r.Reload = true
 	}
 	return
