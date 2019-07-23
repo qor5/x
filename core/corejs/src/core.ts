@@ -1,7 +1,7 @@
 
 import debounce from 'lodash/debounce';
 import 'whatwg-fetch';
-import Vue, { Component, VueConstructor } from 'vue';
+import Vue, { VueConstructor } from 'vue';
 
 import {
 	mergeStatesIntoForm,
