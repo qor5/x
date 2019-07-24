@@ -8,7 +8,7 @@ import (
 var overlayjsassetsbox = packr.NewBox("./overlayjs/dist/")
 
 func JSComponentsPack() bran.ComponentsPack {
-	v, err := overlayjsassetsbox.FindString("overlay.umd.min.js")
+	v, err := overlayjsassetsbox.FindString("branoverlay.umd.min.js")
 	if err != nil {
 		panic(err)
 	}
@@ -17,7 +17,7 @@ func JSComponentsPack() bran.ComponentsPack {
 }
 
 func CSSComponentsPack() bran.ComponentsPack {
-	v, err := overlayjsassetsbox.FindString("overlay.css")
+	v, err := overlayjsassetsbox.FindString("branoverlay.css")
 	if err != nil {
 		panic(err)
 	}

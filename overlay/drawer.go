@@ -57,6 +57,11 @@ func (b *DrawerBuilder) ClassName(v string) (r *DrawerBuilder) {
 	return b
 }
 
+func (b *DrawerBuilder) GetContainer(v string) (r *DrawerBuilder) {
+	b.tag.Attr("get-container", v)
+	return b
+}
+
 func (b *DrawerBuilder) Level(v []string) (r *DrawerBuilder) {
 	b.tag.Attr(":level", v)
 	return b

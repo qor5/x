@@ -122,6 +122,10 @@ func (b *VBtnBuilder) On(v string) (r *VBtnBuilder) {
 	return b
 }
 
+func (b *VBtnBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
 func (b *VBtnBuilder) Children(comps ...h.HTMLComponent) (r *VBtnBuilder) {
 	b.tag.Children(comps...)
 	return b

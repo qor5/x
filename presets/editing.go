@@ -63,12 +63,31 @@ func (b *EditingBuilder) GetPageFunc() ui.PageFunc {
 
 func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
 	id := pat.Param(ctx.R, "id")
-	var obj interface{}
+	ctx.Event = &ui.Event{
+		Params: []string{id},
+	}
 
-	obj, err = b.fetcher(b.mb.newModel(), id)
+	var er ui.EventResponse
+	er, err = b.editForm(ctx)
 	if err != nil {
 		return
 	}
+	r.Schema = er.Schema
+	return
+}
+
+func (b *EditingBuilder) editForm(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	id := ctx.Event.Params[0]
+	ctx.Hub.RegisterEventFunc("update", b.defaultUpdate)
+	var obj = b.mb.newModel()
+
+	if len(id) > 0 {
+		obj, err = b.fetcher(obj, id)
+		if err != nil {
+			return
+		}
+	}
+
 	msgs := b.mb.p.messagesFunc(ctx)
 
 	ctx.StateOrInit(obj)
@@ -97,20 +116,23 @@ func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 			),
 			VCardActions(
 				VSpacer(),
-				VBtn(msgs.Update).Color("primary").OnClick("update"),
+				VBtn(msgs.Update).Color("primary").OnClick("update", id),
 			),
 		),
 	)
+
 	return
 }
 
 func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	id := pat.Param(ctx.R, "id")
-	var obj interface{}
+	id := ctx.Event.Params[0]
+	var obj = b.mb.newModel()
 
-	obj, err = b.fetcher(b.mb.newModel(), id)
-	if err != nil {
-		return
+	if len(id) > 0 {
+		obj, err = b.fetcher(obj, id)
+		if err != nil {
+			return
+		}
 	}
 
 	newObj := ctx.State
