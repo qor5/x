@@ -19,6 +19,7 @@ func LazyPortal(eventFuncId string, params ...string) (r *LazyPortalBuilder) {
 			Params: params,
 		},
 	}
+	r.Visible("true")
 	return
 }
 

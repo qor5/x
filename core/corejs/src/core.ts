@@ -28,7 +28,7 @@ interface EventResponse {
 	data?: any;
 	redirectURL?: string;
 	reload: boolean;
-	reloadPortal?: string;
+	reloadPortals?: string[];
 }
 
 export class Core {
@@ -113,12 +113,14 @@ export class Core {
 	private fetchEventThenRefresh(eventFuncId: EventFuncID, event: EventData) {
 		this.fetchEvent(eventFuncId, event)
 			.then((r: EventResponse) => {
-				if (r.reloadPortal) {
-					const portal = window.branLazyPortals[r.reloadPortal];
-					if (portal) {
-						portal.reload();
-						return r;
+				if (r.reloadPortals && r.reloadPortals.length > 0) {
+					for (const portalName of r.reloadPortals) {
+						const portal = window.branLazyPortals[portalName];
+						if (portal) {
+							portal.reload();
+						}
 					}
+					return r;
 				}
 
 				if (r.schema && r.reload) {

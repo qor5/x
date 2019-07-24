@@ -544,6 +544,8 @@ func TestMultiplePagesAndEvents(t *testing.T) {
 	}
 
 	var topicDetail = func(ctx *ui.EventContext) (r ui.PageResponse, err error) {
+		ctx.Hub.RegisterEventFunc("bookmark", bookmark)
+
 		topicId := pat.Param(ctx.R, "topicID")
 		r.Schema = h.Div(
 			ui.Bind(h.A().Href("#").Text(topicId)).

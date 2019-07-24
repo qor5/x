@@ -1,6 +1,9 @@
 package e17_hello_lazy_portals_and_reload
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"
@@ -17,6 +20,8 @@ func HelloLazyPortalsAndReload(ctx *ui.EventContext) (pr ui.PageResponse, err er
 	ctx.Hub.RegisterEventFunc("addItem", addItem)
 	ctx.Hub.RegisterEventFunc("menuItems", menuItems)
 	ctx.Hub.RegisterEventFunc("addItemForm", addItemForm)
+	ctx.Hub.RegisterEventFunc("portal1", portal1)
+	ctx.Hub.RegisterEventFunc("reloadAB", reloadAB)
 
 	ctx.StateOrInit(&mystate{})
 
@@ -27,8 +32,20 @@ func HelloLazyPortalsAndReload(ctx *ui.EventContext) (pr ui.PageResponse, err er
 					ui.Slot(
 						VBtn("Select").Color("primary").On("on"),
 					).Name("activator").Scope("{ on }"),
-					ui.LazyPortal("menuItems").Name("menuContent").Visible("true"),
+					ui.LazyPortal("menuItems").Name("menuContent"),
 				).OffsetY(true),
+
+				h.Div(
+					h.H1("Portal A"),
+					ui.LazyPortal("portal1").Name("portalA"),
+				).Style("border: 2px solid blue;"),
+
+				h.Div(
+					h.H1("Portal B"),
+					ui.LazyPortal("portal1").Name("portalB"),
+				).Style("border: 2px solid red;"),
+
+				VBtn("Reload Portal A and B").OnClick("reloadAB").Color("orange").Dark(true),
 			),
 		),
 	)
@@ -84,13 +101,23 @@ func addItem(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	s := ctx.State.(*mystate)
 	if len(s.Company) < 5 {
 		s.Error = "too short"
-		r.ReloadPortal = "addItemForm"
+		r.ReloadPortals = []string{"addItemForm"}
 		return
 	}
 
 	listItems = append(listItems, s.Company)
 	s.Company = ""
 	s.Error = ""
-	r.ReloadPortal = "menuContent"
+	r.ReloadPortals = []string{"menuContent"}
+	return
+}
+
+func portal1(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	r.Schema = h.Text(fmt.Sprint(time.Now().UnixNano()))
+	return
+}
+
+func reloadAB(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	r.ReloadPortals = []string{"portalA", "portalB"}
 	return
 }
