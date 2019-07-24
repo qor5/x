@@ -7,24 +7,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sunfmin/bran/examples/e17_hello_lazy_portals_and_reload"
-
-	"github.com/sunfmin/bran/examples/e16_hello_vuetify_simple_components"
-
-	"github.com/sunfmin/bran/examples/e15_hello_vuetify_navigation_drawer"
-
-	"github.com/sunfmin/bran/examples/e13_hello_vuetify_list"
-	"github.com/sunfmin/bran/examples/e14_hello_vuetify_menu"
-
-	"github.com/sunfmin/bran/examples/e12_hello_vuetify_grid"
-
-	"github.com/sunfmin/bran/codehighlight"
-	"github.com/sunfmin/bran/core"
-	branoverlay "github.com/sunfmin/bran/overlay"
-	"github.com/sunfmin/bran/vuetify"
-
 	"github.com/gobuffalo/packr"
 	"github.com/sunfmin/bran"
+	"github.com/sunfmin/bran/codehighlight"
+	"github.com/sunfmin/bran/core"
 	"github.com/sunfmin/bran/examples/e01_hello_button"
 	"github.com/sunfmin/bran/examples/e02_hello_material_button"
 	"github.com/sunfmin/bran/examples/e03_hello_card"
@@ -35,8 +21,16 @@ import (
 	"github.com/sunfmin/bran/examples/e09_hello_dialog"
 	"github.com/sunfmin/bran/examples/e10_hello_vuetify_autocomplete"
 	"github.com/sunfmin/bran/examples/e11_hello_vuetify_text_field"
+	"github.com/sunfmin/bran/examples/e12_hello_vuetify_grid"
+	"github.com/sunfmin/bran/examples/e13_hello_vuetify_list"
+	"github.com/sunfmin/bran/examples/e14_hello_vuetify_menu"
+	"github.com/sunfmin/bran/examples/e15_hello_vuetify_navigation_drawer"
+	"github.com/sunfmin/bran/examples/e16_hello_vuetify_simple_components"
+	"github.com/sunfmin/bran/examples/e17_hello_lazy_portals_and_reload"
 	m "github.com/sunfmin/bran/material"
+	"github.com/sunfmin/bran/overlay"
 	"github.com/sunfmin/bran/ui"
+	"github.com/sunfmin/bran/vuetify"
 	"github.com/theplant/appkit/contexts"
 	"github.com/theplant/appkit/server"
 	. "github.com/theplant/htmlgo"
@@ -166,7 +160,7 @@ func Setup(prefix string) http.Handler {
 
 	mux.Handle("/assets/main.js",
 		ub.PacksHandler("text/javascript",
-			branoverlay.JSComponentsPack(),
+			overlay.JSComponentsPack(),
 			core.JSComponentsPack(),
 		),
 	)
@@ -180,7 +174,7 @@ func Setup(prefix string) http.Handler {
 	mux.Handle("/assets/main.css",
 		ub.PacksHandler("text/css",
 			codehighlight.CSSComponentsPack(),
-			branoverlay.CSSComponentsPack(),
+			overlay.CSSComponentsPack(),
 			m.CSSComponentsPack(),
 		),
 	)

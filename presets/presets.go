@@ -7,7 +7,7 @@ import (
 	"github.com/qor/inflection"
 	"github.com/sunfmin/bran"
 	"github.com/sunfmin/bran/core"
-	branoverlay "github.com/sunfmin/bran/overlay"
+	overlay "github.com/sunfmin/bran/overlay"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"
@@ -227,7 +227,7 @@ func (b *Builder) initMux() {
 
 	mux.Handle(pat.Get("/assets/main.js"),
 		ub.PacksHandler("text/javascript",
-			branoverlay.JSComponentsPack(),
+			overlay.JSComponentsPack(),
 			JSComponentsPack(),
 			core.JSComponentsPack(),
 		),
@@ -241,7 +241,7 @@ func (b *Builder) initMux() {
 
 	mux.Handle(pat.Get("/assets/main.css"),
 		ub.PacksHandler("text/css",
-			branoverlay.CSSComponentsPack(),
+			overlay.CSSComponentsPack(),
 			CSSComponentsPack(),
 		),
 	)
