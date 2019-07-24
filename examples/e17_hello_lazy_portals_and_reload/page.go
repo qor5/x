@@ -8,6 +8,7 @@ import (
 
 type mystate struct {
 	Company string
+	Error   string
 }
 
 var listItems = []string{"Apple", "Microsoft", "Google"}
@@ -15,6 +16,7 @@ var listItems = []string{"Apple", "Microsoft", "Google"}
 func HelloLazyPortalsAndReload(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("addItem", addItem)
 	ctx.Hub.RegisterEventFunc("menuItems", menuItems)
+	ctx.Hub.RegisterEventFunc("addItemForm", addItemForm)
 
 	ctx.StateOrInit(&mystate{})
 
@@ -34,6 +36,7 @@ func HelloLazyPortalsAndReload(ctx *ui.EventContext) (pr ui.PageResponse, err er
 }
 
 func menuItems(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+
 	var items []h.HTMLComponent
 	for _, item := range listItems {
 		items = append(items, VListTile(
@@ -50,15 +53,7 @@ func menuItems(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 					VBtn("Create New").Flat(true).On("on"),
 				),
 			).Name("activator").Scope("{ on }"),
-
-			VCard(
-				VCardText(
-					VTextField().FieldName("Company"),
-				),
-				VCardActions(
-					VBtn("Create").Color("primary").OnClick("addItem"),
-				),
-			),
+			ui.LazyPortal("addItemForm").Name("addItemForm").Visible("true"),
 		).Width("500"),
 	)
 
@@ -66,10 +61,36 @@ func menuItems(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	return
 }
 
+func addItemForm(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	s := ctx.State.(*mystate)
+	textField := VTextField().FieldName("Company")
+
+	if len(s.Error) > 0 {
+		textField.Error(true).ErrorMessages(s.Error)
+	}
+
+	r.Schema = VCard(
+		VCardText(
+			textField,
+		),
+		VCardActions(
+			VBtn("Create").Color("primary").OnClick("addItem"),
+		),
+	)
+	return
+}
+
 func addItem(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	s := ctx.State.(*mystate)
+	if len(s.Company) < 5 {
+		s.Error = "too short"
+		r.ReloadPortal = "addItemForm"
+		return
+	}
+
 	listItems = append(listItems, s.Company)
 	s.Company = ""
+	s.Error = ""
 	r.ReloadPortal = "menuContent"
 	return
 }
