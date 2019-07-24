@@ -1,4 +1,4 @@
-package e07_hello_lazy_loader_in_drawer
+package e07_hello_lazy_portal_in_drawer
 
 import (
 	"fmt"
@@ -29,9 +29,9 @@ func HelloLazyLoaderInDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err erro
 	pr.Schema = Div(
 		H1(s.Name),
 		bo.Drawer(
-			ui.LazyLoader("editPage", "param1").LoadWhenParentVisible(),
+			ui.LazyPortal("editPage", "param1").LoadWhenParentVisible(),
 			bo.Drawer(
-				ui.LazyLoader("editPage", "param2").LoadWhenParentVisible(),
+				ui.LazyPortal("editPage", "param2").LoadWhenParentVisible(),
 			).TriggerElement(
 				A().Text("New Drawer").Href("#"),
 			),

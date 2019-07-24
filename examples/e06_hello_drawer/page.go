@@ -25,7 +25,7 @@ func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	pr.Schema = Div(
 		H1(name),
 		bo.Drawer(
-			ui.LazyLoader("form", "param1").LoadWhenParentVisible(),
+			ui.LazyPortal("form", "param1").LoadWhenParentVisible(),
 		).TriggerElement(
 			A().Text("Edit").Href("#"),
 		).Width(500),

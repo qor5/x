@@ -13,6 +13,8 @@ for (const registerComp of (window.__branVueComponentRegisters || [])) {
 	registerComp(Vue);
 }
 
+window.branLazyPortals = {};
+
 const ssd = window.__serverSideData__;
 const states = (ssd && ssd.states) || {};
 
@@ -22,9 +24,9 @@ interface DynaCompData {
 	current: VueConstructor | null;
 }
 
-Vue.component('BranLazyLoader', {
-	name: 'BranLazyLoader',
-	props: ['loaderFunc', 'visible', 'afterLoaded'],
+Vue.component('BranLazyPortal', {
+	name: 'BranLazyPortal',
+	props: ['loaderFunc', 'visible', 'afterLoaded', 'portalName'],
 	template: `
 		<div class="bran-lazy-loader" v-if="visible">
 			<component :is="current"></component>
@@ -32,6 +34,10 @@ Vue.component('BranLazyLoader', {
 	`,
 
 	mounted() {
+		const pn = this.$props.portalName;
+		if (pn) {
+			window.branLazyPortals[pn] = this;
+		}
 		this.reload();
 	},
 

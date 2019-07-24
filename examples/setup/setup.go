@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sunfmin/bran/examples/e17_hello_lazy_portals_and_reload"
+
 	"github.com/sunfmin/bran/examples/e16_hello_vuetify_simple_components"
 
 	"github.com/sunfmin/bran/examples/e15_hello_vuetify_navigation_drawer"
@@ -28,7 +30,7 @@ import (
 	"github.com/sunfmin/bran/examples/e03_hello_card"
 	"github.com/sunfmin/bran/examples/e04_hello_material_grid"
 	"github.com/sunfmin/bran/examples/e06_hello_drawer"
-	"github.com/sunfmin/bran/examples/e07_hello_lazy_loader_in_drawer"
+	"github.com/sunfmin/bran/examples/e07_hello_lazy_portal_in_drawer"
 	"github.com/sunfmin/bran/examples/e08_hello_popover"
 	"github.com/sunfmin/bran/examples/e09_hello_dialog"
 	"github.com/sunfmin/bran/examples/e10_hello_vuetify_autocomplete"
@@ -229,8 +231,8 @@ func Setup(prefix string) http.Handler {
 			renderFunc: e06_hello_drawer.HelloDrawer,
 		},
 		{
-			url:        "e07_hello_lazy_loader_in_drawer",
-			renderFunc: e07_hello_lazy_loader_in_drawer.HelloLazyLoaderInDrawer,
+			url:        "e07_hello_lazy_portal_in_drawer",
+			renderFunc: e07_hello_lazy_portal_in_drawer.HelloLazyLoaderInDrawer,
 		},
 		{
 			url:        "e08_hello_popover",
@@ -273,6 +275,11 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e16_hello_vuetify_simple_components",
 			renderFunc: e16_hello_vuetify_simple_components.HelloVuetifySimpleComponents,
+			vuetify:    true,
+		},
+		{
+			url:        "e17_hello_lazy_portals_and_reload",
+			renderFunc: e17_hello_lazy_portals_and_reload.HelloLazyPortalsAndReload,
 			vuetify:    true,
 		},
 	}

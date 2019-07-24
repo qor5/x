@@ -48,7 +48,7 @@ func HelloDialog(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		).DefaultVisible(s.dialogVisible),
 
 		bo.Dialog(
-			ui.LazyLoader("remoteOverlay").Visible("true"),
+			ui.LazyPortal("remoteOverlay").Visible("true"),
 		).TriggerElement(
 			A().Text("Remote Loader").Href("#"),
 		).DefaultVisible(s.dialogVisibleRemote),

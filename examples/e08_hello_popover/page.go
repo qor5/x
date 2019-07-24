@@ -66,7 +66,7 @@ func HelloPopover(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
 		H2("Load from remote"),
 		bo.Popover(
-			ui.LazyLoader("remoteOverlay").
+			ui.LazyPortal("remoteOverlay").
 				Visible("true").
 				ParentForceUpdateAfterLoaded(),
 		).TriggerElement(

@@ -14,6 +14,7 @@ import {
 } from './utils';
 
 // Vue.config.productionTip = true;
+declare var window: any;
 
 interface EventFuncID {
 	id: string;
@@ -27,6 +28,7 @@ interface EventResponse {
 	data?: any;
 	redirectURL?: string;
 	reload: boolean;
+	reloadPortal?: string;
 }
 
 export class Core {
@@ -111,11 +113,24 @@ export class Core {
 	private fetchEventThenRefresh(eventFuncId: EventFuncID, event: EventData) {
 		this.fetchEvent(eventFuncId, event)
 			.then((r: EventResponse) => {
+				if (r.reloadPortal) {
+					const portal = window.branLazyPortals[r.reloadPortal];
+					if (portal) {
+						portal.reload();
+						return r;
+					}
+				}
+
 				if (r.schema && r.reload) {
 					this.rootChangeCurrent(this.componentByTemplate(r.schema));
-				} else if (r.schema) {
-					this.changeCurrent(this.componentByTemplate(r.schema));
+					return r;
 				}
+
+				if (r.schema) {
+					this.changeCurrent(this.componentByTemplate(r.schema));
+					return r;
+				}
+
 				return r;
 			});
 	}
