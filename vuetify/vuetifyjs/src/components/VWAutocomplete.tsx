@@ -71,7 +71,7 @@ export default Vue.extend({
 		let hideSelected = false;
 		if (itemsEventFuncId) {
 			onSearchInput = {
-				'update:searchInput': (val: string) => {
+				'update:search-input': (val: string) => {
 					self.searchKeyword = val;
 				},
 			};

@@ -17,6 +17,10 @@ func VRadioGroup(children ...h.HTMLComponent) (r *VRadioGroupBuilder) {
 	}
 	return
 }
+func (b *VRadioGroupBuilder) ActiveClass(v string) (r *VRadioGroupBuilder) {
+	b.tag.Attr("active-class", v)
+	return b
+}
 
 func (b *VRadioGroupBuilder) AppendIcon(v string) (r *VRadioGroupBuilder) {
 	b.tag.Attr("append-icon", v)
@@ -78,6 +82,11 @@ func (b *VRadioGroupBuilder) Hint(v string) (r *VRadioGroupBuilder) {
 	return b
 }
 
+func (b *VRadioGroupBuilder) Id(v string) (r *VRadioGroupBuilder) {
+	b.tag.Attr("id", v)
+	return b
+}
+
 func (b *VRadioGroupBuilder) Label(v string) (r *VRadioGroupBuilder) {
 	b.tag.Attr("label", v)
 	return b
@@ -98,8 +107,18 @@ func (b *VRadioGroupBuilder) Mandatory(v bool) (r *VRadioGroupBuilder) {
 	return b
 }
 
+func (b *VRadioGroupBuilder) Max(v int) (r *VRadioGroupBuilder) {
+	b.tag.Attr(":max", fmt.Sprint(v))
+	return b
+}
+
 func (b *VRadioGroupBuilder) Messages(v string) (r *VRadioGroupBuilder) {
 	b.tag.Attr("messages", v)
+	return b
+}
+
+func (b *VRadioGroupBuilder) Multiple(v bool) (r *VRadioGroupBuilder) {
+	b.tag.Attr(":multiple", fmt.Sprint(v))
 	return b
 }
 
@@ -128,8 +147,8 @@ func (b *VRadioGroupBuilder) Row(v bool) (r *VRadioGroupBuilder) {
 	return b
 }
 
-func (b *VRadioGroupBuilder) Rules(v interface{}) (r *VRadioGroupBuilder) {
-	b.tag.Attr("rules", v)
+func (b *VRadioGroupBuilder) Rules(v []string) (r *VRadioGroupBuilder) {
+	b.tag.Attr(":rules", v)
 	return b
 }
 
@@ -145,6 +164,46 @@ func (b *VRadioGroupBuilder) SuccessMessages(v string) (r *VRadioGroupBuilder) {
 
 func (b *VRadioGroupBuilder) ValidateOnBlur(v bool) (r *VRadioGroupBuilder) {
 	b.tag.Attr(":validate-on-blur", fmt.Sprint(v))
+	return b
+}
+
+func (b *VRadioGroupBuilder) Value(v interface{}) (r *VRadioGroupBuilder) {
+	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VRadioGroupBuilder) Children(children ...h.HTMLComponent) (r *VRadioGroupBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VRadioGroupBuilder) AppendChildren(children ...h.HTMLComponent) (r *VRadioGroupBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VRadioGroupBuilder) PrependChildren(children ...h.HTMLComponent) (r *VRadioGroupBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VRadioGroupBuilder) Class(names ...string) (r *VRadioGroupBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VRadioGroupBuilder) ClassIf(name string, add bool) (r *VRadioGroupBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VRadioGroupBuilder) On(name string, value string) (r *VRadioGroupBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VRadioGroupBuilder) Bind(name string, value string) (r *VRadioGroupBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

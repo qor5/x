@@ -97,20 +97,20 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 	var menus []h.HTMLComponent
 	for _, mg := range b.menuGroups {
 		var subMenus = []h.HTMLComponent{
-			VListTile(
-				VListTileContent(
-					VListTileTitle(h.Text(mg.label)),
+			VListItem(
+				VListItemContent(
+					VListItemTitle(h.Text(mg.label)),
 				),
 			).Slot("activator"),
 		}
 		for _, m := range mg.models {
 			subMenus = append(subMenus,
-				VListTile(
-					VListTileAction(
+				VListItem(
+					VListItemAction(
 						VIcon(""),
 					),
-					VListTileContent(
-						VListTileTitle(
+					VListItemContent(
+						VListItemTitle(
 							h.Text(m.label),
 						),
 					),
@@ -125,12 +125,12 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 			continue
 		}
 		menus = append(menus,
-			VListTile(
-				VListTileAction(
+			VListItem(
+				VListItemAction(
 					VIcon(m.menuIcon),
 				),
-				VListTileContent(
-					VListTileTitle(
+				VListItemContent(
+					VListItemTitle(
 						h.Text(m.label),
 					),
 				),

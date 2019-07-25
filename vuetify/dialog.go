@@ -18,13 +18,23 @@ func VDialog(children ...h.HTMLComponent) (r *VDialogBuilder) {
 	return
 }
 
+func (b *VDialogBuilder) Activator(v interface{}) (r *VDialogBuilder) {
+	b.tag.Attr(":activator", v)
+	return b
+}
+
 func (b *VDialogBuilder) Attach(v interface{}) (r *VDialogBuilder) {
 	b.tag.Attr(":attach", v)
 	return b
 }
 
-func (b *VDialogBuilder) ContentClass(v interface{}) (r *VDialogBuilder) {
-	b.tag.Attr(":content-class", v)
+func (b *VDialogBuilder) CloseDelay(v int) (r *VDialogBuilder) {
+	b.tag.Attr(":close-delay", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDialogBuilder) ContentClass(v string) (r *VDialogBuilder) {
+	b.tag.Attr("content-class", v)
 	return b
 }
 
@@ -35,6 +45,11 @@ func (b *VDialogBuilder) Dark(v bool) (r *VDialogBuilder) {
 
 func (b *VDialogBuilder) Disabled(v bool) (r *VDialogBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDialogBuilder) Eager(v bool) (r *VDialogBuilder) {
+	b.tag.Attr(":eager", fmt.Sprint(v))
 	return b
 }
 
@@ -53,8 +68,8 @@ func (b *VDialogBuilder) HideOverlay(v bool) (r *VDialogBuilder) {
 	return b
 }
 
-func (b *VDialogBuilder) Lazy(v bool) (r *VDialogBuilder) {
-	b.tag.Attr(":lazy", fmt.Sprint(v))
+func (b *VDialogBuilder) InternalActivator(v bool) (r *VDialogBuilder) {
+	b.tag.Attr(":internal-activator", fmt.Sprint(v))
 	return b
 }
 
@@ -73,6 +88,16 @@ func (b *VDialogBuilder) NoClickAnimation(v bool) (r *VDialogBuilder) {
 	return b
 }
 
+func (b *VDialogBuilder) OpenDelay(v int) (r *VDialogBuilder) {
+	b.tag.Attr(":open-delay", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDialogBuilder) OpenOnHover(v bool) (r *VDialogBuilder) {
+	b.tag.Attr(":open-on-hover", fmt.Sprint(v))
+	return b
+}
+
 func (b *VDialogBuilder) Origin(v string) (r *VDialogBuilder) {
 	b.tag.Attr("origin", v)
 	return b
@@ -80,6 +105,11 @@ func (b *VDialogBuilder) Origin(v string) (r *VDialogBuilder) {
 
 func (b *VDialogBuilder) Persistent(v bool) (r *VDialogBuilder) {
 	b.tag.Attr(":persistent", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDialogBuilder) RetainFocus(v bool) (r *VDialogBuilder) {
+	b.tag.Attr(":retain-focus", fmt.Sprint(v))
 	return b
 }
 
@@ -98,13 +128,28 @@ func (b *VDialogBuilder) Transition(v string) (r *VDialogBuilder) {
 	return b
 }
 
-func (b *VDialogBuilder) Value(v interface{}) (r *VDialogBuilder) {
-	b.tag.Attr(":value", v)
+func (b *VDialogBuilder) Value(v bool) (r *VDialogBuilder) {
+	b.tag.Attr(":value", fmt.Sprint(v))
 	return b
 }
 
 func (b *VDialogBuilder) Width(v string) (r *VDialogBuilder) {
 	b.tag.Attr("width", v)
+	return b
+}
+
+func (b *VDialogBuilder) Children(children ...h.HTMLComponent) (r *VDialogBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VDialogBuilder) AppendChildren(children ...h.HTMLComponent) (r *VDialogBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VDialogBuilder) PrependChildren(children ...h.HTMLComponent) (r *VDialogBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

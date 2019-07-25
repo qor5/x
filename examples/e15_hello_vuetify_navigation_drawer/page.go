@@ -22,25 +22,25 @@ func HelloVuetifyNavigationDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err
 		VNavigationDrawer(
 			VToolbar(
 				VList(
-					VListTile(h.Text("Application")).Class("title"),
+					VListItem(h.Text("Application")).Class("title"),
 				),
 			).Flat(true),
 			VDivider(),
 			VList(
-				VListTile(
-					VListTileAction(
+				VListItem(
+					VListItemAction(
 						VIcon("dashboard"),
 					),
-					VListTileContent(
-						VListTileTitle(h.Text("Home")),
+					VListItemContent(
+						VListItemTitle(h.Text("Home")),
 					),
 				).On("click", ""),
-				VListTile(
-					VListTileAction(
+				VListItem(
+					VListItemAction(
 						VIcon("question_answer"),
 					),
-					VListTileContent(
-						VListTileTitle(h.Text("About")),
+					VListItemContent(
+						VListItemTitle(h.Text("About")),
 					),
 				).On("click", ""),
 			).Dense(true).Class("pt-0"),

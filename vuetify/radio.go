@@ -17,6 +17,10 @@ func VRadio() (r *VRadioBuilder) {
 	}
 	return
 }
+func (b *VRadioBuilder) ActiveClass(v string) (r *VRadioBuilder) {
+	b.tag.Attr("active-class", v)
+	return b
+}
 
 func (b *VRadioBuilder) Color(v string) (r *VRadioBuilder) {
 	b.tag.Attr("color", v)
@@ -33,6 +37,11 @@ func (b *VRadioBuilder) Disabled(v bool) (r *VRadioBuilder) {
 	return b
 }
 
+func (b *VRadioBuilder) Id(v string) (r *VRadioBuilder) {
+	b.tag.Attr("id", v)
+	return b
+}
+
 func (b *VRadioBuilder) Label(v string) (r *VRadioBuilder) {
 	b.tag.Attr("label", v)
 	return b
@@ -40,6 +49,11 @@ func (b *VRadioBuilder) Label(v string) (r *VRadioBuilder) {
 
 func (b *VRadioBuilder) Light(v bool) (r *VRadioBuilder) {
 	b.tag.Attr(":light", fmt.Sprint(v))
+	return b
+}
+
+func (b *VRadioBuilder) Name(v string) (r *VRadioBuilder) {
+	b.tag.Attr("name", v)
 	return b
 }
 
@@ -65,6 +79,41 @@ func (b *VRadioBuilder) Ripple(v bool) (r *VRadioBuilder) {
 
 func (b *VRadioBuilder) Value(v string) (r *VRadioBuilder) {
 	b.tag.Attr("value", v)
+	return b
+}
+
+func (b *VRadioBuilder) Children(children ...h.HTMLComponent) (r *VRadioBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VRadioBuilder) AppendChildren(children ...h.HTMLComponent) (r *VRadioBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VRadioBuilder) PrependChildren(children ...h.HTMLComponent) (r *VRadioBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VRadioBuilder) Class(names ...string) (r *VRadioBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VRadioBuilder) ClassIf(name string, add bool) (r *VRadioBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VRadioBuilder) On(name string, value string) (r *VRadioBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VRadioBuilder) Bind(name string, value string) (r *VRadioBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

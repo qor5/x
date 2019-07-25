@@ -27,18 +27,23 @@ func (b *VListGroupBuilder) AppendIcon(v string) (r *VListGroupBuilder) {
 	return b
 }
 
+func (b *VListGroupBuilder) Color(v string) (r *VListGroupBuilder) {
+	b.tag.Attr("color", v)
+	return b
+}
+
 func (b *VListGroupBuilder) Disabled(v bool) (r *VListGroupBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
 	return b
 }
 
-func (b *VListGroupBuilder) Group(v string) (r *VListGroupBuilder) {
-	b.tag.Attr("group", v)
+func (b *VListGroupBuilder) Eager(v bool) (r *VListGroupBuilder) {
+	b.tag.Attr(":eager", fmt.Sprint(v))
 	return b
 }
 
-func (b *VListGroupBuilder) Lazy(v bool) (r *VListGroupBuilder) {
-	b.tag.Attr(":lazy", fmt.Sprint(v))
+func (b *VListGroupBuilder) Group(v string) (r *VListGroupBuilder) {
+	b.tag.Attr("group", v)
 	return b
 }
 
@@ -52,6 +57,11 @@ func (b *VListGroupBuilder) PrependIcon(v string) (r *VListGroupBuilder) {
 	return b
 }
 
+func (b *VListGroupBuilder) Ripple(v bool) (r *VListGroupBuilder) {
+	b.tag.Attr(":ripple", fmt.Sprint(v))
+	return b
+}
+
 func (b *VListGroupBuilder) SubGroup(v bool) (r *VListGroupBuilder) {
 	b.tag.Attr(":sub-group", fmt.Sprint(v))
 	return b
@@ -59,6 +69,41 @@ func (b *VListGroupBuilder) SubGroup(v bool) (r *VListGroupBuilder) {
 
 func (b *VListGroupBuilder) Value(v bool) (r *VListGroupBuilder) {
 	b.tag.Attr(":value", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListGroupBuilder) Children(children ...h.HTMLComponent) (r *VListGroupBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VListGroupBuilder) AppendChildren(children ...h.HTMLComponent) (r *VListGroupBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VListGroupBuilder) PrependChildren(children ...h.HTMLComponent) (r *VListGroupBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VListGroupBuilder) Class(names ...string) (r *VListGroupBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VListGroupBuilder) ClassIf(name string, add bool) (r *VListGroupBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VListGroupBuilder) On(name string, value string) (r *VListGroupBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VListGroupBuilder) Bind(name string, value string) (r *VListGroupBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

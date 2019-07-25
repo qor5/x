@@ -9,8 +9,9 @@ if (!app) {
 
 declare var window: any;
 
+const vueOptions = {};
 for (const registerComp of (window.__branVueComponentRegisters || [])) {
-	registerComp(Vue);
+	registerComp(Vue, vueOptions);
 }
 
 window.branLazyPortals = {};
@@ -68,27 +69,30 @@ Vue.component('BranLazyPortal', {
 
 
 const vm = new Vue({
-	template: `
+	...{
+		template: `
 	<div id="app" v-cloak>
 		<component :is="current"></component>
 	</div>
 `,
-	methods: {
-		changeCurrent(newView: any) {
-			this.current = newView;
+		methods: {
+			changeCurrent(newView: any) {
+				this.current = newView;
+			},
+		},
+
+		mounted() {
+			const core = new Core(form, this.changeCurrent, this.changeCurrent);
+			this.current = core.componentByTemplate(app.innerHTML);
+		},
+
+		data(): DynaCompData {
+			return {
+				current: null,
+			};
 		},
 	},
-
-	mounted() {
-		const core = new Core(form, this.changeCurrent, this.changeCurrent);
-		this.current = core.componentByTemplate(app.innerHTML);
-	},
-
-	data(): DynaCompData {
-		return {
-			current: null,
-		};
-	},
+	...vueOptions,
 });
 
 vm.$mount('#app');

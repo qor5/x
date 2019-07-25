@@ -62,8 +62,8 @@ func (b *VMenuBuilder) CloseOnContentClick(v bool) (r *VMenuBuilder) {
 	return b
 }
 
-func (b *VMenuBuilder) ContentClass(v interface{}) (r *VMenuBuilder) {
-	b.tag.Attr(":content-class", v)
+func (b *VMenuBuilder) ContentClass(v string) (r *VMenuBuilder) {
+	b.tag.Attr("content-class", v)
 	return b
 }
 
@@ -82,6 +82,11 @@ func (b *VMenuBuilder) Disabled(v bool) (r *VMenuBuilder) {
 	return b
 }
 
+func (b *VMenuBuilder) Eager(v bool) (r *VMenuBuilder) {
+	b.tag.Attr(":eager", fmt.Sprint(v))
+	return b
+}
+
 func (b *VMenuBuilder) Fixed(v bool) (r *VMenuBuilder) {
 	b.tag.Attr(":fixed", fmt.Sprint(v))
 	return b
@@ -92,13 +97,8 @@ func (b *VMenuBuilder) FullWidth(v bool) (r *VMenuBuilder) {
 	return b
 }
 
-func (b *VMenuBuilder) InputActivator(v bool) (r *VMenuBuilder) {
-	b.tag.Attr(":input-activator", fmt.Sprint(v))
-	return b
-}
-
-func (b *VMenuBuilder) Lazy(v bool) (r *VMenuBuilder) {
-	b.tag.Attr(":lazy", fmt.Sprint(v))
+func (b *VMenuBuilder) InternalActivator(v bool) (r *VMenuBuilder) {
+	b.tag.Attr(":internal-activator", fmt.Sprint(v))
 	return b
 }
 
@@ -112,8 +112,8 @@ func (b *VMenuBuilder) Light(v bool) (r *VMenuBuilder) {
 	return b
 }
 
-func (b *VMenuBuilder) MaxHeight(v interface{}) (r *VMenuBuilder) {
-	b.tag.Attr(":max-height", v)
+func (b *VMenuBuilder) MaxHeight(v int) (r *VMenuBuilder) {
+	b.tag.Attr(":max-height", fmt.Sprint(v))
 	return b
 }
 
@@ -224,6 +224,41 @@ func (b *VMenuBuilder) Value(v interface{}) (r *VMenuBuilder) {
 
 func (b *VMenuBuilder) ZIndex(v int) (r *VMenuBuilder) {
 	b.tag.Attr(":z-index", fmt.Sprint(v))
+	return b
+}
+
+func (b *VMenuBuilder) Children(children ...h.HTMLComponent) (r *VMenuBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VMenuBuilder) AppendChildren(children ...h.HTMLComponent) (r *VMenuBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VMenuBuilder) PrependChildren(children ...h.HTMLComponent) (r *VMenuBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VMenuBuilder) Class(names ...string) (r *VMenuBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VMenuBuilder) ClassIf(name string, add bool) (r *VMenuBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VMenuBuilder) On(name string, value string) (r *VMenuBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VMenuBuilder) Bind(name string, value string) (r *VMenuBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

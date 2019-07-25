@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sunfmin/bran/ui"
-
 	h "github.com/theplant/htmlgo"
 )
 
@@ -19,7 +17,6 @@ func VBtn(text string) (r *VBtnBuilder) {
 	}
 	return
 }
-
 func (b *VBtnBuilder) Absolute(v bool) (r *VBtnBuilder) {
 	b.tag.Attr(":absolute", fmt.Sprint(v))
 	return b
@@ -65,6 +62,11 @@ func (b *VBtnBuilder) Disabled(v bool) (r *VBtnBuilder) {
 	return b
 }
 
+func (b *VBtnBuilder) Elevation(v int) (r *VBtnBuilder) {
+	b.tag.Attr(":elevation", fmt.Sprint(v))
+	return b
+}
+
 func (b *VBtnBuilder) Exact(v bool) (r *VBtnBuilder) {
 	b.tag.Attr(":exact", fmt.Sprint(v))
 	return b
@@ -85,8 +87,8 @@ func (b *VBtnBuilder) Fixed(v bool) (r *VBtnBuilder) {
 	return b
 }
 
-func (b *VBtnBuilder) Flat(v bool) (r *VBtnBuilder) {
-	b.tag.Attr(":flat", fmt.Sprint(v))
+func (b *VBtnBuilder) Height(v int) (r *VBtnBuilder) {
+	b.tag.Attr(":height", fmt.Sprint(v))
 	return b
 }
 
@@ -97,6 +99,11 @@ func (b *VBtnBuilder) Href(v string) (r *VBtnBuilder) {
 
 func (b *VBtnBuilder) Icon(v bool) (r *VBtnBuilder) {
 	b.tag.Attr(":icon", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBtnBuilder) InputValue(v interface{}) (r *VBtnBuilder) {
+	b.tag.Attr(":input-value", v)
 	return b
 }
 
@@ -115,13 +122,43 @@ func (b *VBtnBuilder) Light(v bool) (r *VBtnBuilder) {
 	return b
 }
 
+func (b *VBtnBuilder) Link(v bool) (r *VBtnBuilder) {
+	b.tag.Attr(":link", fmt.Sprint(v))
+	return b
+}
+
 func (b *VBtnBuilder) Loading(v bool) (r *VBtnBuilder) {
 	b.tag.Attr(":loading", fmt.Sprint(v))
 	return b
 }
 
-func (b *VBtnBuilder) Outline(v bool) (r *VBtnBuilder) {
-	b.tag.Attr(":outline", fmt.Sprint(v))
+func (b *VBtnBuilder) MaxHeight(v int) (r *VBtnBuilder) {
+	b.tag.Attr(":max-height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBtnBuilder) MaxWidth(v int) (r *VBtnBuilder) {
+	b.tag.Attr(":max-width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBtnBuilder) MinHeight(v int) (r *VBtnBuilder) {
+	b.tag.Attr(":min-height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBtnBuilder) MinWidth(v int) (r *VBtnBuilder) {
+	b.tag.Attr(":min-width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBtnBuilder) Nuxt(v bool) (r *VBtnBuilder) {
+	b.tag.Attr(":nuxt", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBtnBuilder) Outlined(v bool) (r *VBtnBuilder) {
+	b.tag.Attr(":outlined", fmt.Sprint(v))
 	return b
 }
 
@@ -140,8 +177,8 @@ func (b *VBtnBuilder) Ripple(v bool) (r *VBtnBuilder) {
 	return b
 }
 
-func (b *VBtnBuilder) Round(v bool) (r *VBtnBuilder) {
-	b.tag.Attr(":round", fmt.Sprint(v))
+func (b *VBtnBuilder) Rounded(v bool) (r *VBtnBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
 	return b
 }
 
@@ -160,6 +197,16 @@ func (b *VBtnBuilder) Target(v string) (r *VBtnBuilder) {
 	return b
 }
 
+func (b *VBtnBuilder) Text(v bool) (r *VBtnBuilder) {
+	b.tag.Attr(":text", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBtnBuilder) Tile(v bool) (r *VBtnBuilder) {
+	b.tag.Attr(":tile", fmt.Sprint(v))
+	return b
+}
+
 func (b *VBtnBuilder) To(v string) (r *VBtnBuilder) {
 	b.tag.Attr("to", v)
 	return b
@@ -175,11 +222,61 @@ func (b *VBtnBuilder) Type(v string) (r *VBtnBuilder) {
 	return b
 }
 
-func (b *VBtnBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	return b.tag.MarshalHTML(ctx)
+func (b *VBtnBuilder) Value(v interface{}) (r *VBtnBuilder) {
+	b.tag.Attr(":value", v)
+	return b
 }
 
-func (b *VBtnBuilder) OnClick(eventFuncId string, params ...string) (r *VBtnBuilder) {
-	ui.Bind(b.tag).OnClick(eventFuncId, params...)
+func (b *VBtnBuilder) Width(v int) (r *VBtnBuilder) {
+	b.tag.Attr(":width", fmt.Sprint(v))
 	return b
+}
+
+func (b *VBtnBuilder) XLarge(v bool) (r *VBtnBuilder) {
+	b.tag.Attr(":x-large", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBtnBuilder) XSmall(v bool) (r *VBtnBuilder) {
+	b.tag.Attr(":x-small", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBtnBuilder) Children(children ...h.HTMLComponent) (r *VBtnBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VBtnBuilder) AppendChildren(children ...h.HTMLComponent) (r *VBtnBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VBtnBuilder) PrependChildren(children ...h.HTMLComponent) (r *VBtnBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VBtnBuilder) Class(names ...string) (r *VBtnBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VBtnBuilder) ClassIf(name string, add bool) (r *VBtnBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VBtnBuilder) On(name string) (r *VBtnBuilder) {
+	b.tag.Attr("v-on", name)
+	return b
+}
+
+func (b *VBtnBuilder) Bind(name string, value string) (r *VBtnBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
+	return b
+}
+
+func (b *VBtnBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	return b.tag.MarshalHTML(ctx)
 }

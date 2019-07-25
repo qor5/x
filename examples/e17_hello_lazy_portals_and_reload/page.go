@@ -28,12 +28,12 @@ func HelloLazyPortalsAndReload(ctx *ui.EventContext) (pr ui.PageResponse, err er
 	pr.Schema = VApp(
 		VContent(
 			VContainer(
-				VMenu(
+				VDialog(
 					ui.Slot(
 						VBtn("Select").Color("primary").On("on"),
 					).Name("activator").Scope("{ on }"),
 					ui.LazyPortal("menuItems").Name("menuContent"),
-				).OffsetY(true),
+				),
 
 				h.Div(
 					h.H1("Portal A"),
@@ -56,8 +56,8 @@ func menuItems(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 
 	var items []h.HTMLComponent
 	for _, item := range listItems {
-		items = append(items, VListTile(
-			VListTileTitle(h.Text(item)),
+		items = append(items, VListItem(
+			VListItemTitle(h.Text(item)),
 		))
 	}
 
@@ -66,8 +66,8 @@ func menuItems(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	items = append(items,
 		VDialog(
 			ui.Slot(
-				VListTile(
-					VBtn("Create New").Flat(true).On("on"),
+				VListItemAction(
+					VBtn("Create New").Text(true).On("on"),
 				),
 			).Name("activator").Scope("{ on }"),
 			ui.LazyPortal("addItemForm").Name("addItemForm").Visible("true"),

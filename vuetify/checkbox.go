@@ -15,10 +15,8 @@ func VCheckbox(children ...h.HTMLComponent) (r *VCheckboxBuilder) {
 	r = &VCheckboxBuilder{
 		tag: h.Tag("vw-checkbox").Children(children...),
 	}
-	r.TrueValue("true").FalseValue("false")
 	return
 }
-
 func (b *VCheckboxBuilder) AppendIcon(v string) (r *VCheckboxBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b
@@ -179,8 +177,43 @@ func (b *VCheckboxBuilder) ValidateOnBlur(v bool) (r *VCheckboxBuilder) {
 	return b
 }
 
-func (b *VCheckboxBuilder) Value(v string) (r *VCheckboxBuilder) {
-	b.tag.Attr("value", v)
+func (b *VCheckboxBuilder) Value(v interface{}) (r *VCheckboxBuilder) {
+	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VCheckboxBuilder) Children(children ...h.HTMLComponent) (r *VCheckboxBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VCheckboxBuilder) AppendChildren(children ...h.HTMLComponent) (r *VCheckboxBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VCheckboxBuilder) PrependChildren(children ...h.HTMLComponent) (r *VCheckboxBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VCheckboxBuilder) Class(names ...string) (r *VCheckboxBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VCheckboxBuilder) ClassIf(name string, add bool) (r *VCheckboxBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VCheckboxBuilder) On(name string, value string) (r *VCheckboxBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VCheckboxBuilder) Bind(name string, value string) (r *VCheckboxBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

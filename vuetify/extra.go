@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/sunfmin/bran/ui"
-	h "github.com/theplant/htmlgo"
 )
 
 type DType string
@@ -117,16 +116,11 @@ func (b *VAutocompleteBuilder) ItemsEventFunc(hub ui.EventFuncHub, eventFuncId s
 	return b
 }
 
-func (b *VBtnBuilder) On(v string) (r *VBtnBuilder) {
-	b.tag.Attr("v-on", v)
+func (b *VBtnBuilder) OnClick(eventFuncId string, params ...string) (r *VBtnBuilder) {
+	ui.Bind(b.tag).OnClick(eventFuncId, params...)
 	return b
 }
 
 func (b *VBtnBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
-}
-
-func (b *VBtnBuilder) Children(comps ...h.HTMLComponent) (r *VBtnBuilder) {
-	b.tag.Children(comps...)
-	return b
 }
