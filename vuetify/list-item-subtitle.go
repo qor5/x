@@ -18,6 +18,15 @@ func VListItemSubtitle(children ...h.HTMLComponent) (r *VListItemSubtitleBuilder
 	return
 }
 
+func (b *VListItemSubtitleBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VListItemSubtitleBuilder) Attr(vs ...interface{}) (r *VListItemSubtitleBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
 func (b *VListItemSubtitleBuilder) Children(children ...h.HTMLComponent) (r *VListItemSubtitleBuilder) {
 	b.tag.Children(children...)
 	return b

@@ -18,6 +18,15 @@ func VListItemAction(children ...h.HTMLComponent) (r *VListItemActionBuilder) {
 	return
 }
 
+func (b *VListItemActionBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VListItemActionBuilder) Attr(vs ...interface{}) (r *VListItemActionBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
 func (b *VListItemActionBuilder) Children(children ...h.HTMLComponent) (r *VListItemActionBuilder) {
 	b.tag.Children(children...)
 	return b

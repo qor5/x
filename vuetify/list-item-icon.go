@@ -18,6 +18,15 @@ func VListItemIcon() (r *VListItemIconBuilder) {
 	return
 }
 
+func (b *VListItemIconBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VListItemIconBuilder) Attr(vs ...interface{}) (r *VListItemIconBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
 func (b *VListItemIconBuilder) Children(children ...h.HTMLComponent) (r *VListItemIconBuilder) {
 	b.tag.Children(children...)
 	return b

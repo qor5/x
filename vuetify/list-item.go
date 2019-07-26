@@ -17,6 +17,7 @@ func VListItem(children ...h.HTMLComponent) (r *VListItemBuilder) {
 	}
 	return
 }
+
 func (b *VListItemBuilder) ActiveClass(v string) (r *VListItemBuilder) {
 	b.tag.Attr("active-class", v)
 	return b
@@ -124,6 +125,15 @@ func (b *VListItemBuilder) TwoLine(v bool) (r *VListItemBuilder) {
 
 func (b *VListItemBuilder) Value(v interface{}) (r *VListItemBuilder) {
 	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VListItemBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VListItemBuilder) Attr(vs ...interface{}) (r *VListItemBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 

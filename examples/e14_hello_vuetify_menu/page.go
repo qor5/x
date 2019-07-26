@@ -22,7 +22,7 @@ func HelloVuetifyMenu(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		VMenu(
 			ui.Slot(
 				VBtn("Menu as Popover").
-					On("on").
+					Attr("v-on", "on").
 					Dark(true).
 					Color("indigo"),
 			).Name("activator").
@@ -39,7 +39,7 @@ func HelloVuetifyMenu(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 						),
 						VListItemAction(
 							VBtn("").Icon(true).Children(
-								VIcon("mdi-heart"),
+								VIcon("favorite"),
 							),
 						),
 					),

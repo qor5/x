@@ -67,7 +67,6 @@ Vue.component('BranLazyPortal', {
 	},
 });
 
-
 const vm = new Vue({
 	...{
 		template: `
@@ -83,7 +82,7 @@ const vm = new Vue({
 
 		mounted() {
 			const core = new Core(form, this.changeCurrent, this.changeCurrent);
-			this.current = core.componentByTemplate(app.innerHTML);
+			this.changeCurrent(core.componentByTemplate(app.innerHTML));
 		},
 
 		data(): DynaCompData {

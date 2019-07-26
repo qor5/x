@@ -18,6 +18,15 @@ func VAppBarNavIcon(children ...h.HTMLComponent) (r *VAppBarNavIconBuilder) {
 	return
 }
 
+func (b *VAppBarNavIconBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VAppBarNavIconBuilder) Attr(vs ...interface{}) (r *VAppBarNavIconBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
 func (b *VAppBarNavIconBuilder) Children(children ...h.HTMLComponent) (r *VAppBarNavIconBuilder) {
 	b.tag.Children(children...)
 	return b

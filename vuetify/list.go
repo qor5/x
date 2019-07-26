@@ -17,6 +17,7 @@ func VList(children ...h.HTMLComponent) (r *VListBuilder) {
 	}
 	return
 }
+
 func (b *VListBuilder) Color(v string) (r *VListBuilder) {
 	b.tag.Attr("color", v)
 	return b
@@ -124,6 +125,15 @@ func (b *VListBuilder) TwoLine(v bool) (r *VListBuilder) {
 
 func (b *VListBuilder) Width(v int) (r *VListBuilder) {
 	b.tag.Attr(":width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VListBuilder) Attr(vs ...interface{}) (r *VListBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 

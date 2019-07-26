@@ -15,7 +15,7 @@ func HelloVuetifyNavigationDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err
 					children...,
 				),
 			),
-		).Id("mainapp")
+		).Id("mainapp").Class("overflow-hidden")
 	}
 
 	pr.Schema = wrapper(
@@ -45,6 +45,17 @@ func HelloVuetifyNavigationDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err
 				).On("click", ""),
 			).Dense(true).Class("pt-0"),
 		).Permanent(true),
+
+		VBtn("show").On("click", "drawerShow = !drawerShow"),
+
+		VNavigationDrawer(
+			h.Text("Hi"),
+		).Temporary(true).
+			Attr("v-model", "drawerShow").
+			Right(true).
+			Bottom(true).
+			Absolute(true).
+			Width(600),
 	)
 
 	return

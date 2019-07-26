@@ -121,6 +121,7 @@ func (b *VBtnBuilder) OnClick(eventFuncId string, params ...string) (r *VBtnBuil
 	return b
 }
 
-func (b *VBtnBuilder) SetAttr(k string, v interface{}) {
-	b.tag.SetAttr(k, v)
+func (b *VListItemBuilder) Slot(v string) (r *VListItemBuilder) {
+	b.tag.Attr("slot", v)
+	return b
 }

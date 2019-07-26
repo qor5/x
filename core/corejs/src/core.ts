@@ -95,6 +95,11 @@ export class Core {
 					}
 				});
 			},
+			data() {
+				return {
+					drawerShow: false,
+				};
+			},
 		});
 	}
 

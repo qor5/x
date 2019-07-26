@@ -17,6 +17,7 @@ func VListItemAvatar(children ...h.HTMLComponent) (r *VListItemAvatarBuilder) {
 	}
 	return
 }
+
 func (b *VListItemAvatarBuilder) Color(v string) (r *VListItemAvatarBuilder) {
 	b.tag.Attr("color", v)
 	return b
@@ -74,6 +75,15 @@ func (b *VListItemAvatarBuilder) Tile(v bool) (r *VListItemAvatarBuilder) {
 
 func (b *VListItemAvatarBuilder) Width(v int) (r *VListItemAvatarBuilder) {
 	b.tag.Attr(":width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListItemAvatarBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VListItemAvatarBuilder) Attr(vs ...interface{}) (r *VListItemAvatarBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 

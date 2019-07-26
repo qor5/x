@@ -17,6 +17,7 @@ func VListGroup(children ...h.HTMLComponent) (r *VListGroupBuilder) {
 	}
 	return
 }
+
 func (b *VListGroupBuilder) ActiveClass(v string) (r *VListGroupBuilder) {
 	b.tag.Attr("active-class", v)
 	return b
@@ -67,8 +68,17 @@ func (b *VListGroupBuilder) SubGroup(v bool) (r *VListGroupBuilder) {
 	return b
 }
 
-func (b *VListGroupBuilder) Value(v bool) (r *VListGroupBuilder) {
-	b.tag.Attr(":value", fmt.Sprint(v))
+func (b *VListGroupBuilder) Value(v interface{}) (r *VListGroupBuilder) {
+	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VListGroupBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VListGroupBuilder) Attr(vs ...interface{}) (r *VListGroupBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 

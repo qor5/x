@@ -30,7 +30,7 @@ func HelloLazyPortalsAndReload(ctx *ui.EventContext) (pr ui.PageResponse, err er
 			VContainer(
 				VDialog(
 					ui.Slot(
-						VBtn("Select").Color("primary").On("on"),
+						VBtn("Select").Color("primary").Attr("v-on", "on"),
 					).Name("activator").Scope("{ on }"),
 					ui.LazyPortal("menuItems").Name("menuContent"),
 				),
@@ -67,7 +67,7 @@ func menuItems(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 		VDialog(
 			ui.Slot(
 				VListItemAction(
-					VBtn("Create New").Text(true).On("on"),
+					VBtn("Create New").Text(true).Attr("v-on", "on"),
 				),
 			).Name("activator").Scope("{ on }"),
 			ui.LazyPortal("addItemForm").Name("addItemForm").Visible("true"),

@@ -2,7 +2,6 @@ package presets
 
 import (
 	"github.com/qor/inflection"
-	"github.com/sunfmin/bran/overlay"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"
@@ -103,11 +102,11 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		VLayout(
 			h.H2(msgs.ListingObjectTitle(inflection.Plural(b.mb.label))).Class("title"),
 			VSpacer(),
-			overlay.Drawer(
-				ui.LazyPortal("formNew", "").LoadWhenParentVisible(),
-			).TriggerElement(
-				VBtn(msgs.New).Color("primary mr-0"),
-			).Width(500).GetContainer("#vt-app"),
+			//overlay.Drawer(
+			//	ui.LazyPortal("formNew", "").LoadWhenParentVisible(),
+			//).TriggerElement(
+			VBtn(msgs.New).Color("primary mr-0"),
+			//).Width(500).GetContainer("#vt-app"),
 		).Class("align-center"),
 
 		VCard(

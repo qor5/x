@@ -3,11 +3,11 @@ package presets
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/qor/inflection"
 	"github.com/sunfmin/bran"
 	"github.com/sunfmin/bran/core"
-	overlay "github.com/sunfmin/bran/overlay"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"
@@ -164,14 +164,22 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 			<script src='/assets/vue.js'></script>
 			<style>
 				[v-cloak] {
-					display: none;
+					display: block;
 				}
 			</style>
 		`)
 
-		ctx.Injector.PutTailHTML(`
+		if len(os.Getenv("DEV")) > 0 {
+			ctx.Injector.PutTailHTML(`
+			<script src='http://localhost:3080/app.js'></script>
+			<script src='http://localhost:3100/app.js'></script>
+			`)
+
+		} else {
+			ctx.Injector.PutTailHTML(`
 			<script src='/assets/main.js'></script>
-		`)
+			`)
+		}
 
 		var innerPr ui.PageResponse
 		innerPr, err = in(ctx)
@@ -227,7 +235,6 @@ func (b *Builder) initMux() {
 
 	mux.Handle(pat.Get("/assets/main.js"),
 		ub.PacksHandler("text/javascript",
-			overlay.JSComponentsPack(),
 			JSComponentsPack(),
 			core.JSComponentsPack(),
 		),
@@ -241,7 +248,6 @@ func (b *Builder) initMux() {
 
 	mux.Handle(pat.Get("/assets/main.css"),
 		ub.PacksHandler("text/css",
-			overlay.CSSComponentsPack(),
 			CSSComponentsPack(),
 		),
 	)

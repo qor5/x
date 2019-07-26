@@ -17,6 +17,7 @@ func VBtn(text string) (r *VBtnBuilder) {
 	}
 	return
 }
+
 func (b *VBtnBuilder) Absolute(v bool) (r *VBtnBuilder) {
 	b.tag.Attr(":absolute", fmt.Sprint(v))
 	return b
@@ -242,6 +243,15 @@ func (b *VBtnBuilder) XSmall(v bool) (r *VBtnBuilder) {
 	return b
 }
 
+func (b *VBtnBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VBtnBuilder) Attr(vs ...interface{}) (r *VBtnBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
 func (b *VBtnBuilder) Children(children ...h.HTMLComponent) (r *VBtnBuilder) {
 	b.tag.Children(children...)
 	return b
@@ -267,8 +277,8 @@ func (b *VBtnBuilder) ClassIf(name string, add bool) (r *VBtnBuilder) {
 	return b
 }
 
-func (b *VBtnBuilder) On(name string) (r *VBtnBuilder) {
-	b.tag.Attr("v-on", name)
+func (b *VBtnBuilder) On(name string, value string) (r *VBtnBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
 	return b
 }
 

@@ -17,6 +17,7 @@ func VBtnToggle(children ...h.HTMLComponent) (r *VBtnToggleBuilder) {
 	}
 	return
 }
+
 func (b *VBtnToggleBuilder) ActiveClass(v string) (r *VBtnToggleBuilder) {
 	b.tag.Attr("active-class", v)
 	return b
@@ -59,6 +60,15 @@ func (b *VBtnToggleBuilder) Rounded(v bool) (r *VBtnToggleBuilder) {
 
 func (b *VBtnToggleBuilder) Value(v interface{}) (r *VBtnToggleBuilder) {
 	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VBtnToggleBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VBtnToggleBuilder) Attr(vs ...interface{}) (r *VBtnToggleBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 
