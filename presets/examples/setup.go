@@ -6,15 +6,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/sunfmin/bran/presets/gormop"
-
-	"github.com/sunfmin/reflectutils"
-
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/sunfmin/bran/presets"
+	"github.com/sunfmin/bran/presets/gormop"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
+	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -44,7 +42,7 @@ func Preset1() (r *presets.Builder) {
 	p := presets.New().URIPrefix("/admin")
 
 	p.BrandFunc(func(ctx *ui.EventContext) h.HTMLComponent {
-		return VToolbar(
+		return h.Components(
 			//h.Img("https://material.io/tools/icons/static/ic_material_192px_light.svg").Style("height: 32px"),
 			VIcon("directions_boat"),
 			VToolbarTitle("My Admin"),

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<title>vuetify demo</title>
+	<style>
+		[v-cloak] {
+			display: none;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<v-app id="inspire">
+			<v-navigation-drawer app :value="true" clipped :permanent="true">
+
+				<v-list>
+					<v-list-item @click="">
+						<v-list-item-action>
+							<v-icon>search</v-icon>
+						</v-list-item-action>
+						<v-list-item-content>
+							<v-list-item-title>
+								Text 1
+							</v-list-item-title>
+						</v-list-item-content>
+					</v-list-item>
+					<v-subheader class="mt-4 grey--text text--darken-1">SUBSCRIPTIONS</v-subheader>
+					<v-list>
+						<v-list-item @click="">
+							<v-list-item-avatar>
+								<img :src="`https://randomuser.me/api/portraits/men/28.jpg`" alt="">
+							</v-list-item-avatar>
+							<v-list-item-title> Text 1</v-list-item-title>
+						</v-list-item>
+					</v-list>
+					<v-list-item class="mt-4" @click="">
+						<v-list-item-action>
+							<v-icon color="grey darken-1">add_circle_outline</v-icon>
+						</v-list-item-action>
+						<v-list-item-title class="grey--text text--darken-1">Browse Channels</v-list-item-title>
+					</v-list-item>
+					<v-list-item @click="">
+						<v-list-item-action>
+							<v-icon color="grey darken-1">settings</v-icon>
+						</v-list-item-action>
+						<v-list-item-title class="grey--text text--darken-1">Manage Subscriptions</v-list-item-title>
+					</v-list-item>
+				</v-list>
+			</v-navigation-drawer>
+
+			<v-app-bar app clipped-left>
+				<v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+				<v-icon class="mx-4">fab fa-youtube</v-icon>
+				<v-toolbar-title class="mr-12 align-center">
+						<span class="title">Youtube</span>
+					</v-toolbar-title>
+
+				<v-spacer></v-spacer>
+				<v-layout align-center style="max-width: 650px">
+					<v-text-field :append-icon-cb="() => {}" placeholder="Search..." single-line append-icon="search"
+						color="white" hide-details></v-text-field>
+				</v-layout>
+			</v-app-bar>
+
+			<v-content>
+				<v-container fill-height>
+					Hello
+				</v-container>
+			</v-content>
+		</v-app>
+	</div>
+
+	<script src="http://localhost:3080/app.js"></script>
+	<script src="http://localhost:3100/app.js"></script>
+
+</body>
+
+</html>

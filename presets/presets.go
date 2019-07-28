@@ -101,7 +101,7 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 				VListItemContent(
 					VListItemTitle(h.Text(mg.label)),
 				),
-			).Slot("activator"),
+			).Slot("activator").Class("pa-0"),
 		}
 		for _, m := range mg.models {
 			subMenus = append(subMenus,
@@ -147,7 +147,7 @@ func (b *Builder) runBrandFunc(ctx *ui.EventContext) (r h.HTMLComponent) {
 		return b.brandFunc(ctx)
 	}
 
-	return VToolbar(
+	return VAppBar(
 		VToolbarTitle("Admin"),
 	)
 }
@@ -164,7 +164,7 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 			<script src='/assets/vue.js'></script>
 			<style>
 				[v-cloak] {
-					display: block;
+					display: none;
 				}
 			</style>
 		`)
@@ -189,22 +189,24 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 
 		pr.Schema = VApp(
 			VNavigationDrawer(
-				b.runBrandFunc(ctx),
 				b.createMenus(),
-			).App(true),
-			VToolbar(
-				h.Form(
+			).App(true).Clipped(true).Value(true).Permanent(true),
+
+			VAppBar(
+				b.runBrandFunc(ctx),
+				VSpacer(),
+				VLayout(
+					// h.Form(
 					VTextField().
 						SoloInverted(true).
 						PrependInnerIcon("search").
 						Label("Search").
 						Flat(true).
-						Clearable(true).HideDetails(true),
-				).Method("GET"),
-
-				VSpacer(),
-				VToolbarItems(),
-			).App(true).Dark(true).Color("indigo"),
+						Clearable(true).
+						HideDetails(true),
+					// ).Method("GET"),
+				).AlignCenter(true).Attr("style", "max-width: 650px"),
+			).Dark(true).Color("indigo").App(true).ClippedLeft(true),
 			VContent(
 				innerPr.Schema.(h.HTMLComponent),
 			),
