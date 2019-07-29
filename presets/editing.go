@@ -1,6 +1,7 @@
 package presets
 
 import (
+	"github.com/jinzhu/inflection"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 	"github.com/sunfmin/reflectutils"
@@ -107,10 +108,8 @@ func (b *EditingBuilder) editForm(ctx *ui.EventContext) (r ui.EventResponse, err
 
 	r.Schema = VContainer(
 		notice,
+		h.H2(msgs.EditingObjectTitle(inflection.Singular(b.mb.label))).Class("title pb-3"),
 		VCard(
-			VToolbar(
-				VToolbarTitle(msgs.EditingObjectTitle(b.mb.label)),
-			).Card(true).Dense(true).Prominent(true),
 			VCardText(
 				comps...,
 			),
@@ -119,7 +118,7 @@ func (b *EditingBuilder) editForm(ctx *ui.EventContext) (r ui.EventResponse, err
 				VBtn(msgs.Update).Color("primary").OnClick("update", id),
 			),
 		),
-	)
+	).Fluid(true)
 
 	return
 }
