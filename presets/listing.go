@@ -87,13 +87,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 	for _, f := range b.fields {
 		label := b.mb.getLabel(f)
-		heads = append(heads, h.Th(label).Role("columnheader").
-			Class("column text-xs-left").
-			Attr(
-				"scope", "col",
-				"aria-label", label,
-			),
-		)
+		heads = append(heads, h.Th(label))
 	}
 	msgs := b.mb.p.messagesFunc(ctx)
 
@@ -111,16 +105,14 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 		VCard(
 			VCardText(
-				h.Div(
-					h.Table(
-						h.Thead(
-							h.Tr(heads...),
-						),
-						h.Tbody(
-							rows...,
-						),
-					).Class("v-datatable v-table theme--light"),
-				).Class("v-table__overflow"),
+				VSimpleTable(
+					h.Thead(
+						h.Tr(heads...),
+					),
+					h.Tbody(
+						rows...,
+					),
+				),
 			).Class("pa-0"),
 		),
 	).Fluid(true)
