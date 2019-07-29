@@ -199,9 +199,22 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 		}
 
 		pr.Schema = VApp(
+
 			VNavigationDrawer(
 				b.createMenus(),
-			).App(true).Clipped(true).Value(true).Permanent(true),
+			).App(true).
+				Clipped(true).
+				Value(true).
+				Permanent(true),
+
+			VNavigationDrawer(
+				ui.LazyPortal("formNew", ""),
+			).Attr("v-model", "drawer1").
+				Bottom(true).
+				Right(true).
+				Absolute(true).
+				Width(600).
+				Temporary(true),
 
 			VAppBar(
 				b.runBrandFunc(ctx),
@@ -217,7 +230,11 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 						HideDetails(true),
 					// ).Method("GET"),
 				).AlignCenter(true).Attr("style", "max-width: 650px"),
-			).Dark(true).Color(b.primaryColor).App(true).ClippedLeft(true),
+			).Dark(true).
+				Color(b.primaryColor).
+				App(true).
+				ClippedLeft(true),
+
 			VContent(
 				innerPr.Schema.(h.HTMLComponent),
 			),

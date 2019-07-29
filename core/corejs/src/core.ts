@@ -97,7 +97,11 @@ export class Core {
 			},
 			data() {
 				return {
-					drawerShow: false,
+					drawer1: false,
+					drawer2: false,
+					drawer3: false,
+					drawer4: false,
+					drawer5: false,
 				};
 			},
 		});

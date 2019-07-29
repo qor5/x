@@ -113,9 +113,11 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 					Bottom(true).
 					Right(true).
 					Dark(true).
-					Absolute(true).Children(
-					VIcon("add"),
-				),
+					On("click", "drawer1 = !drawer1").
+					Absolute(true).
+					Children(
+						VIcon("add"),
+					),
 			).Attr("style", "position: relative"),
 		),
 	).Fluid(true)

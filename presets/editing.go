@@ -117,7 +117,7 @@ func (b *EditingBuilder) editForm(ctx *ui.EventContext) (r ui.EventResponse, err
 				VSpacer(),
 				VBtn(msgs.Update).Color("primary").OnClick("update", id),
 			),
-		),
+		).Flat(true),
 	).Fluid(true)
 
 	return

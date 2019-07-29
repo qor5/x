@@ -46,12 +46,12 @@ func HelloVuetifyNavigationDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err
 			).Dense(true).Class("pt-0"),
 		).Permanent(true),
 
-		VBtn("show").On("click", "drawerShow = !drawerShow"),
+		VBtn("show").On("click", "drawer1 = !drawer1"),
 
 		VNavigationDrawer(
 			h.Text("Hi"),
 		).Temporary(true).
-			Attr("v-model", "drawerShow").
+			Attr("v-model", "drawer1").
 			Right(true).
 			Bottom(true).
 			Absolute(true).
