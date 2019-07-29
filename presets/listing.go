@@ -93,15 +93,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 	r.Schema = VContainer(
 
-		VLayout(
-			h.H2(msgs.ListingObjectTitle(inflection.Plural(b.mb.label))).Class("title"),
-			VSpacer(),
-			//overlay.Drawer(
-			//	ui.LazyPortal("formNew", "").LoadWhenParentVisible(),
-			//).TriggerElement(
-			VBtn(msgs.New).Color("primary mr-0"),
-			//).Width(500).GetContainer("#vt-app"),
-		).Class("align-center"),
+		h.H2(msgs.ListingObjectTitle(inflection.Plural(b.mb.label))).Class("title pb-3"),
 
 		VCard(
 			VCardText(
@@ -114,6 +106,17 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 					),
 				),
 			).Class("pa-0"),
+			VCardText(
+				VBtn("").
+					Color(b.mb.p.primaryColor).
+					Fab(true).
+					Bottom(true).
+					Right(true).
+					Dark(true).
+					Absolute(true).Children(
+					VIcon("add"),
+				),
+			).Attr("style", "position: relative"),
 		),
 	).Fluid(true)
 

@@ -39,7 +39,7 @@ type Product struct {
 }
 
 func Preset1() (r *presets.Builder) {
-	p := presets.New().URIPrefix("/admin")
+	p := presets.New().URIPrefix("/admin").PrimaryColor("cyan darken-3")
 
 	p.BrandFunc(func(ctx *ui.EventContext) h.HTMLComponent {
 		return h.Components(

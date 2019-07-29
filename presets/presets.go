@@ -26,6 +26,7 @@ type Builder struct {
 	messagesFunc MessagesFunc
 	homePageFunc ui.PageFunc
 	brandFunc    ComponentFunc
+	primaryColor string
 	FieldTypes
 	MenuGroups
 }
@@ -37,6 +38,7 @@ func New() *Builder {
 		builder:      bran.New(),
 		messagesFunc: defaultMessageFunc,
 		FieldTypes:   builtInFieldTypes(),
+		primaryColor: "indigo",
 	}
 }
 
@@ -67,6 +69,11 @@ func (b *Builder) HomePageFunc(v ui.PageFunc) (r *Builder) {
 
 func (b *Builder) BrandFunc(v ComponentFunc) (r *Builder) {
 	b.brandFunc = v
+	return b
+}
+
+func (b *Builder) PrimaryColor(v string) (r *Builder) {
+	b.primaryColor = v
 	return b
 }
 
@@ -117,7 +124,11 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 				).Href(m.listingHref()),
 			)
 		}
-		menus = append(menus, VListGroup(subMenus...).PrependIcon(mg.icon).Value(true))
+		menus = append(menus, VListGroup(subMenus...).
+			PrependIcon(mg.icon).
+			Value(true).
+			Color(b.primaryColor),
+		)
 	}
 
 	for _, m := range b.models {
@@ -134,7 +145,7 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 						h.Text(m.label),
 					),
 				),
-			).Href(m.listingHref()),
+			).Href(m.listingHref()).Color(b.primaryColor),
 		)
 	}
 
@@ -206,7 +217,7 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 						HideDetails(true),
 					// ).Method("GET"),
 				).AlignCenter(true).Attr("style", "max-width: 650px"),
-			).Dark(true).Color("indigo").App(true).ClippedLeft(true),
+			).Dark(true).Color(b.primaryColor).App(true).ClippedLeft(true),
 			VContent(
 				innerPr.Schema.(h.HTMLComponent),
 			),

@@ -18,8 +18,27 @@ func VCardTitle(children ...h.HTMLComponent) (r *VCardTitleBuilder) {
 	return
 }
 
-func (b *VCardTitleBuilder) PrimaryTitle(v bool) (r *VCardTitleBuilder) {
-	b.tag.Attr(":primary-title", fmt.Sprint(v))
+func (b *VCardTitleBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VCardTitleBuilder) Attr(vs ...interface{}) (r *VCardTitleBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VCardTitleBuilder) Children(children ...h.HTMLComponent) (r *VCardTitleBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VCardTitleBuilder) AppendChildren(children ...h.HTMLComponent) (r *VCardTitleBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VCardTitleBuilder) PrependChildren(children ...h.HTMLComponent) (r *VCardTitleBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 
