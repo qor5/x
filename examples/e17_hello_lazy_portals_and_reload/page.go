@@ -137,11 +137,11 @@ func reloadAB(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 
 func updateCD(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	r.UpdatePortals = append(r.UpdatePortals,
-		ui.PortalUpdate{
+		&ui.PortalUpdate{
 			Name:   "portalC",
 			Schema: h.Text(fmt.Sprint(time.Now().UnixNano())),
 		},
-		ui.PortalUpdate{
+		&ui.PortalUpdate{
 			Name:   "portalD",
 			Schema: h.Text(fmt.Sprint(time.Now().UnixNano())),
 		},

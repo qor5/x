@@ -77,6 +77,27 @@ func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	return
 }
 
+func (b *EditingBuilder) formNew(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	var er ui.EventResponse
+	er, err = b.editForm(ctx)
+	if err != nil {
+		return
+	}
+
+	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
+		Name: "rightDrawer",
+		Schema: VNavigationDrawer(
+			er.Schema.(h.HTMLComponent),
+		).Value(true).
+			Bottom(true).
+			Right(true).
+			Absolute(true).
+			Width(600).
+			Temporary(true),
+	})
+	return
+}
+
 func (b *EditingBuilder) editForm(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	id := ctx.Event.Params[0]
 	ctx.Hub.RegisterEventFunc("update", b.defaultUpdate)

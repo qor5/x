@@ -62,7 +62,9 @@ func (b *ListingBuilder) GetPageFunc() ui.PageFunc {
 }
 
 func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("formNew", b.mb.editing.editForm)
+	ctx.Hub.RegisterEventFunc("formNew", b.mb.editing.formNew)
+	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
+	ctx.StateOrInit(b.mb.newModel())
 
 	var objs interface{}
 	objs, err = b.searcher(b.mb.newModelArray(), &SearchParams{
@@ -113,11 +115,10 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 					Bottom(true).
 					Right(true).
 					Dark(true).
-					On("click", "drawer1 = !drawer1").
 					Absolute(true).
 					Children(
 						VIcon("add"),
-					),
+					).OnClick("formNew", ""),
 			).Attr("style", "position: relative"),
 		),
 	).Fluid(true)

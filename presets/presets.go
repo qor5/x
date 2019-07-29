@@ -207,14 +207,7 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 				Value(true).
 				Permanent(true),
 
-			VNavigationDrawer(
-				ui.LazyPortal("formNew", ""),
-			).Attr("v-model", "drawer1").
-				Bottom(true).
-				Right(true).
-				Absolute(true).
-				Width(600).
-				Temporary(true),
+			ui.LazyPortal("").Name("rightDrawer"),
 
 			VAppBar(
 				b.runBrandFunc(ctx),

@@ -367,6 +367,12 @@ func eventResponseWithContext(ctx *ui.EventContext, c context.Context, er *ui.Ev
 	if comp, ok := er.Schema.(h.HTMLComponent); ok {
 		er.Schema = h.MustString(comp, c)
 	}
+
+	for _, up := range er.UpdatePortals {
+		if comp, ok := up.Schema.(h.HTMLComponent); ok {
+			up.Schema = h.MustString(comp, c)
+		}
+	}
 }
 
 func (p *PageBuilder) NewPageState() interface{} {
