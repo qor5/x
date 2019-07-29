@@ -51,6 +51,9 @@ Vue.component('BranLazyPortal', {
 	methods: {
 		reload() {
 			const ef = this.loaderFunc;
+			if (!ef || !ef.id) {
+				return;
+			}
 			const afterLoaded = this.afterLoaded;
 			const self = this;
 			const rootChangeCurrent = (this.$root as any).changeCurrent;

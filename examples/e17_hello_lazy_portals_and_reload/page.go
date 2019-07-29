@@ -22,6 +22,7 @@ func HelloLazyPortalsAndReload(ctx *ui.EventContext) (pr ui.PageResponse, err er
 	ctx.Hub.RegisterEventFunc("addItemForm", addItemForm)
 	ctx.Hub.RegisterEventFunc("portal1", portal1)
 	ctx.Hub.RegisterEventFunc("reloadAB", reloadAB)
+	ctx.Hub.RegisterEventFunc("updateCD", updateCD)
 
 	ctx.StateOrInit(&mystate{})
 
@@ -46,6 +47,18 @@ func HelloLazyPortalsAndReload(ctx *ui.EventContext) (pr ui.PageResponse, err er
 				).Style("border: 2px solid red;"),
 
 				VBtn("Reload Portal A and B").OnClick("reloadAB").Color("orange").Dark(true),
+
+				h.Div(
+					h.H1("Portal C"),
+					ui.LazyPortal("").Name("portalC"),
+				).Style("border: 2px solid blue;"),
+
+				h.Div(
+					h.H1("Portal D"),
+					ui.LazyPortal("").Name("portalD"),
+				).Style("border: 2px solid red;"),
+
+				VBtn("Update Portal C and D").OnClick("updateCD").Color("primary").Dark(true),
 			),
 		),
 	)
@@ -119,5 +132,19 @@ func portal1(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 
 func reloadAB(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	r.ReloadPortals = []string{"portalA", "portalB"}
+	return
+}
+
+func updateCD(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	r.UpdatePortals = append(r.UpdatePortals,
+		ui.PortalUpdate{
+			Name:   "portalC",
+			Schema: h.Text(fmt.Sprint(time.Now().UnixNano())),
+		},
+		ui.PortalUpdate{
+			Name:   "portalD",
+			Schema: h.Text(fmt.Sprint(time.Now().UnixNano())),
+		},
+	)
 	return
 }

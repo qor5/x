@@ -22,6 +22,11 @@ interface EventFuncID {
 	pushState?: any;
 }
 
+interface PortalUpdate {
+	name: string;
+	schema: string;
+}
+
 interface EventResponse {
 	states?: any;
 	schema?: any;
@@ -29,6 +34,7 @@ interface EventResponse {
 	redirectURL?: string;
 	reload: boolean;
 	reloadPortals?: string[];
+	updatePortals?: PortalUpdate[];
 }
 
 export class Core {
@@ -127,6 +133,16 @@ export class Core {
 						const portal = window.branLazyPortals[portalName];
 						if (portal) {
 							portal.reload();
+						}
+					}
+					return r;
+				}
+
+				if (r.updatePortals && r.updatePortals.length > 0) {
+					for (const portalUpdate of r.updatePortals) {
+						const portal = window.branLazyPortals[portalUpdate.name];
+						if (portal) {
+							portal.changeCurrent(this.componentByTemplate(portalUpdate.schema));
 						}
 					}
 					return r;

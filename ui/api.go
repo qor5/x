@@ -19,17 +19,23 @@ type PageResponse struct {
 	JSONOnly bool
 }
 
+type PortalUpdate struct {
+	Name   string    `json:"name,omitempty"`
+	Schema Component `json:"schema,omitempty"`
+}
+
 type EventResponse struct {
-	Alert         Component   `json:"alert,omitempty"`
-	Confirm       Component   `json:"confirm,omitempty"`
-	Dialog        Component   `json:"dialog,omitempty"`
-	CloseDialog   bool        `json:"closeDialog,omitempty"`
-	Schema        Component   `json:"schema,omitempty"`
-	State         PageState   `json:"states,omitempty"`
-	Reload        bool        `json:"reload,omitempty"`
-	ReloadPortals []string    `json:"reloadPortals,omitempty"`
-	RedirectURL   string      `json:"redirectURL,omitempty"`
-	Data          interface{} `json:"data,omitempty"` // used for return collection data like TagsInput data source
+	Alert         Component      `json:"alert,omitempty"`
+	Confirm       Component      `json:"confirm,omitempty"`
+	Dialog        Component      `json:"dialog,omitempty"`
+	CloseDialog   bool           `json:"closeDialog,omitempty"`
+	Schema        Component      `json:"schema,omitempty"`
+	State         PageState      `json:"states,omitempty"`
+	Reload        bool           `json:"reload,omitempty"`
+	ReloadPortals []string       `json:"reloadPortals,omitempty"`
+	UpdatePortals []PortalUpdate `json:"updatePortals,omitempty"`
+	RedirectURL   string         `json:"redirectURL,omitempty"`
+	Data          interface{}    `json:"data,omitempty"` // used for return collection data like TagsInput data source
 }
 
 type PageFunc func(ctx *EventContext) (r PageResponse, err error)
