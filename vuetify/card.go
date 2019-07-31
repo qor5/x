@@ -3,6 +3,7 @@ package vuetify
 import (
 	"context"
 	"fmt"
+
 	h "github.com/theplant/htmlgo"
 )
 
@@ -16,6 +17,7 @@ func VCard(children ...h.HTMLComponent) (r *VCardBuilder) {
 	}
 	return
 }
+
 func (b *VCardBuilder) ActiveClass(v string) (r *VCardBuilder) {
 	b.tag.Attr("active-class", v)
 	return b
@@ -86,6 +88,21 @@ func (b *VCardBuilder) Light(v bool) (r *VCardBuilder) {
 	return b
 }
 
+func (b *VCardBuilder) Link(v bool) (r *VCardBuilder) {
+	b.tag.Attr(":link", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCardBuilder) LoaderHeight(v int) (r *VCardBuilder) {
+	b.tag.Attr(":loader-height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCardBuilder) Loading(v bool) (r *VCardBuilder) {
+	b.tag.Attr(":loading", fmt.Sprint(v))
+	return b
+}
+
 func (b *VCardBuilder) MaxHeight(v int) (r *VCardBuilder) {
 	b.tag.Attr(":max-height", fmt.Sprint(v))
 	return b
@@ -108,6 +125,11 @@ func (b *VCardBuilder) MinWidth(v int) (r *VCardBuilder) {
 
 func (b *VCardBuilder) Nuxt(v bool) (r *VCardBuilder) {
 	b.tag.Attr(":nuxt", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCardBuilder) Outlined(v bool) (r *VCardBuilder) {
+	b.tag.Attr(":outlined", fmt.Sprint(v))
 	return b
 }
 
@@ -148,6 +170,50 @@ func (b *VCardBuilder) To(v string) (r *VCardBuilder) {
 
 func (b *VCardBuilder) Width(v int) (r *VCardBuilder) {
 	b.tag.Attr(":width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCardBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VCardBuilder) Attr(vs ...interface{}) (r *VCardBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VCardBuilder) Children(children ...h.HTMLComponent) (r *VCardBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VCardBuilder) AppendChildren(children ...h.HTMLComponent) (r *VCardBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VCardBuilder) PrependChildren(children ...h.HTMLComponent) (r *VCardBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VCardBuilder) Class(names ...string) (r *VCardBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VCardBuilder) ClassIf(name string, add bool) (r *VCardBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VCardBuilder) On(name string, value string) (r *VCardBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VCardBuilder) Bind(name string, value string) (r *VCardBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

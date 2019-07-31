@@ -59,8 +59,6 @@ func (b *Builder) defaultLayoutMiddleFunc(in ui.LayoutFunc, head ui.PageInjector
 		)
 
 		buf := bytes.NewBuffer(nil)
-		buf.WriteString("<!DOCTYPE html>\n")
-
 		var b []byte
 		ctx := new(ui.EventContext)
 		ctx.R = r

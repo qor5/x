@@ -7,34 +7,29 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sunfmin/bran/examples/e16_hello_vuetify_simple_components"
-
-	"github.com/sunfmin/bran/examples/e15_hello_vuetify_navigation_drawer"
-
-	"github.com/sunfmin/bran/examples/e13_hello_vuetify_list"
-	"github.com/sunfmin/bran/examples/e14_hello_vuetify_menu"
-
-	"github.com/sunfmin/bran/examples/e12_hello_vuetify_grid"
-
-	"github.com/sunfmin/bran/codehighlight"
-	"github.com/sunfmin/bran/core"
-	branoverlay "github.com/sunfmin/bran/overlay"
-	"github.com/sunfmin/bran/vuetify"
-
 	"github.com/gobuffalo/packr"
 	"github.com/sunfmin/bran"
+	"github.com/sunfmin/bran/codehighlight"
+	"github.com/sunfmin/bran/core"
 	"github.com/sunfmin/bran/examples/e01_hello_button"
 	"github.com/sunfmin/bran/examples/e02_hello_material_button"
-	"github.com/sunfmin/bran/examples/e03_hello_card"
 	"github.com/sunfmin/bran/examples/e04_hello_material_grid"
 	"github.com/sunfmin/bran/examples/e06_hello_drawer"
-	"github.com/sunfmin/bran/examples/e07_hello_lazy_loader_in_drawer"
+	"github.com/sunfmin/bran/examples/e07_hello_lazy_portal_in_drawer"
 	"github.com/sunfmin/bran/examples/e08_hello_popover"
 	"github.com/sunfmin/bran/examples/e09_hello_dialog"
 	"github.com/sunfmin/bran/examples/e10_hello_vuetify_autocomplete"
 	"github.com/sunfmin/bran/examples/e11_hello_vuetify_text_field"
+	"github.com/sunfmin/bran/examples/e12_hello_vuetify_grid"
+	"github.com/sunfmin/bran/examples/e13_hello_vuetify_list"
+	"github.com/sunfmin/bran/examples/e14_hello_vuetify_menu"
+	"github.com/sunfmin/bran/examples/e15_hello_vuetify_navigation_drawer"
+	"github.com/sunfmin/bran/examples/e16_hello_vuetify_simple_components"
+	"github.com/sunfmin/bran/examples/e17_hello_lazy_portals_and_reload"
 	m "github.com/sunfmin/bran/material"
+	"github.com/sunfmin/bran/overlay"
 	"github.com/sunfmin/bran/ui"
+	"github.com/sunfmin/bran/vuetify"
 	"github.com/theplant/appkit/contexts"
 	"github.com/theplant/appkit/server"
 	. "github.com/theplant/htmlgo"
@@ -144,8 +139,6 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 			m.Cell(dacComps...).Span(9, m.ScreenAll),
 		)
 
-		pr.State = innerPr.State
-
 		return
 	}
 }
@@ -164,7 +157,7 @@ func Setup(prefix string) http.Handler {
 
 	mux.Handle("/assets/main.js",
 		ub.PacksHandler("text/javascript",
-			branoverlay.JSComponentsPack(),
+			overlay.JSComponentsPack(),
 			core.JSComponentsPack(),
 		),
 	)
@@ -178,7 +171,7 @@ func Setup(prefix string) http.Handler {
 	mux.Handle("/assets/main.css",
 		ub.PacksHandler("text/css",
 			codehighlight.CSSComponentsPack(),
-			branoverlay.CSSComponentsPack(),
+			overlay.CSSComponentsPack(),
 			m.CSSComponentsPack(),
 		),
 	)
@@ -195,6 +188,8 @@ func Setup(prefix string) http.Handler {
 		),
 	)
 
+	mux.Handle("/favicon.ico", http.NotFoundHandler())
+
 	mux.Handle("/assets/vuetify.css",
 		ub.PacksHandler("text/css",
 			vuetify.CSSComponentsPack(),
@@ -210,10 +205,10 @@ func Setup(prefix string) http.Handler {
 			url:        "e02_hello_material_button",
 			renderFunc: e02_hello_material_button.HelloButton,
 		},
-		{
-			url:        "e03_hello_card",
-			renderFunc: e03_hello_card.HelloCard,
-		},
+		//{
+		//	url:        "e03_hello_card",
+		//	renderFunc: e03_hello_card.HelloCard,
+		//},
 		{
 			url:        "e04_hello_material_grid",
 			renderFunc: e04_hello_material_grid.HelloGrid,
@@ -227,8 +222,8 @@ func Setup(prefix string) http.Handler {
 			renderFunc: e06_hello_drawer.HelloDrawer,
 		},
 		{
-			url:        "e07_hello_lazy_loader_in_drawer",
-			renderFunc: e07_hello_lazy_loader_in_drawer.HelloLazyLoaderInDrawer,
+			url:        "e07_hello_lazy_portal_in_drawer",
+			renderFunc: e07_hello_lazy_portal_in_drawer.HelloLazyLoaderInDrawer,
 		},
 		{
 			url:        "e08_hello_popover",
@@ -271,6 +266,11 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e16_hello_vuetify_simple_components",
 			renderFunc: e16_hello_vuetify_simple_components.HelloVuetifySimpleComponents,
+			vuetify:    true,
+		},
+		{
+			url:        "e17_hello_lazy_portals_and_reload",
+			renderFunc: e17_hello_lazy_portals_and_reload.HelloLazyPortalsAndReload,
 			vuetify:    true,
 		},
 	}

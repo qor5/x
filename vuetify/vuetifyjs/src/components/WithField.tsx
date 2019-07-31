@@ -6,17 +6,22 @@ import Vue, {
 	VueConstructor,
 	ComponentOptions,
 } from 'vue';
-import { Core, slotTemplates, selectValue } from './Helpers';
+import { Core, slotTemplates } from './Helpers';
 
 
 export const WithField = (
 	comp: Component,
-	valuePropsFunc?: (formValue: string, props: Record<string, any>) => any,
+	valueField?: string,
 	mixins?: Array<ComponentOptions<Vue> | typeof Vue>,
 ): VueConstructor => {
 	const m = mixins || [Core];
 	return Vue.extend({
 		mixins: m,
+
+		mounted() {
+			const val = this.$attrs[valueField || 'value'];
+			this.core.setFormValue(this.$props.fieldName, val);
+		},
 
 		render(h: CreateElement): VNode {
 			const self = this;
@@ -25,19 +30,8 @@ export const WithField = (
 			} = self.$props;
 
 
-			let valueProps = {};
-			if (valuePropsFunc) {
-				const formValue = self.core.getFormValue(fieldName);
-				valueProps = valuePropsFunc(formValue, this.$props);
-			} else {
-				valueProps = {
-					value: selectValue(self.core, this.$props),
-				};
-			}
-
 			const data: VNodeData = {
 				props: {
-					...valueProps,
 					...self.$attrs,
 				},
 

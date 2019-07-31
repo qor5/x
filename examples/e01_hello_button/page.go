@@ -10,15 +10,20 @@ type mystate struct {
 }
 
 func HelloButton(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
-	s := ctx.StateOrInit(&mystate{}).(*mystate)
+	ctx.Hub.RegisterEventFunc("reload", reload)
+
+	var s = &mystate{}
+	if ctx.Flash != nil {
+		s = ctx.Flash.(*mystate)
+	}
 
 	pr.Schema = Div(
 		ui.Bind(Button("Hello")).
-			OnClick(ctx.Hub, "reload", reload),
+			OnClick("reload"),
 		ui.Bind(Tag("input").
 			Attr("type", "text").
 			Attr("value", s.Message)).
-			OnInput(ctx.Hub, "reload2", reload).
+			OnInput("reload").
 			FieldName("Message"),
 		Div().
 			Style("font-family: monospace;").
@@ -28,6 +33,10 @@ func HelloButton(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 }
 
 func reload(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	var s = &mystate{}
+	ctx.MustUnmarshalForm(s)
+	ctx.Flash = s
+
 	r.Reload = true
 	return
 }

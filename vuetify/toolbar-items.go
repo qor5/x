@@ -11,9 +11,9 @@ type VToolbarItemsBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VToolbarItems() (r *VToolbarItemsBuilder) {
+func VToolbarItems(children ...h.HTMLComponent) (r *VToolbarItemsBuilder) {
 	r = &VToolbarItemsBuilder{
-		tag: h.Tag("v-toolbar-items"),
+		tag: h.Tag("v-toolbar-items").Children(children...),
 	}
 	return
 }

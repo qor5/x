@@ -123,6 +123,25 @@ func (b *VLayoutBuilder) Wrap(v bool) (r *VLayoutBuilder) {
 	return b
 }
 
+func (b *VLayoutBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VLayoutBuilder) Attr(vs ...interface{}) (r *VLayoutBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VLayoutBuilder) Class(names ...string) (r *VLayoutBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VLayoutBuilder) ClassIf(name string, add bool) (r *VLayoutBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
 func (b *VLayoutBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }

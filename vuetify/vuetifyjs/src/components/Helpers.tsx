@@ -37,21 +37,21 @@ export const slotTemplates = (h: CreateElement, slots: Slots): VNode[] => {
 };
 
 
-export const selectValue = (core: any, props: Record<string, any>): any => {
-	const {
-		selectedItems,
-		multiple,
-		fieldName,
-	} = props;
+// export const selectValue = (core: any, props: Record<string, any>): any => {
+// 	const {
+// 		selectedItems,
+// 		multiple,
+// 		fieldName,
+// 	} = props;
 
-	if (multiple) {
-		const formValues: string[] = core.getFormValueAsArray(fieldName);
-		return selectedItems || formValues;
-	}
+// 	if (multiple) {
+// 		const formValues: string[] = core.getFormValueAsArray(fieldName);
+// 		return selectedItems || formValues;
+// 	}
 
-	let value = core.getFormValue(fieldName);
-	if (selectedItems && selectedItems.length) {
-		value = selectedItems[0];
-	}
-	return value;
-};
+// 	let value = core.getFormValue(fieldName);
+// 	if (selectedItems && selectedItems.length) {
+// 		value = selectedItems[0];
+// 	}
+// 	return value;
+// };

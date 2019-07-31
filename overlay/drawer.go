@@ -1,4 +1,4 @@
-package branoverlay
+package overlay
 
 import (
 	"context"
@@ -54,6 +54,11 @@ func (b *DrawerBuilder) DefaultOpen(open bool, animation bool) (r *DrawerBuilder
 
 func (b *DrawerBuilder) ClassName(v string) (r *DrawerBuilder) {
 	b.tag.Attr(":class-name", v)
+	return b
+}
+
+func (b *DrawerBuilder) GetContainer(v string) (r *DrawerBuilder) {
+	b.tag.Attr("get-container", v)
 	return b
 }
 

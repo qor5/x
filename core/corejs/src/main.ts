@@ -1,5 +1,6 @@
-import Vue from 'vue';
+import Vue, { VueConstructor } from 'vue';
 import { Core } from './core';
+import { newFormWithStates } from './utils';
 
 const app = document.getElementById('app');
 if (!app) {
@@ -8,84 +9,92 @@ if (!app) {
 
 declare var window: any;
 
-const core = new Core();
-
+const vueOptions = {};
 for (const registerComp of (window.__branVueComponentRegisters || [])) {
-	registerComp(Vue);
+	registerComp(Vue, vueOptions);
 }
 
-Vue.component('BranLazyLoader', {
-	name: 'BranLazyLoader',
-	props: ['loaderFunc', 'visible', 'afterLoaded'],
+window.branLazyPortals = {};
+
+const ssd = window.__serverSideData__;
+const states = (ssd && ssd.states) || {};
+
+const form = newFormWithStates(states);
+
+interface DynaCompData {
+	current: VueConstructor | null;
+}
+
+Vue.component('BranLazyPortal', {
+	name: 'BranLazyPortal',
+	props: ['loaderFunc', 'visible', 'afterLoaded', 'portalName'],
 	template: `
 		<div class="bran-lazy-loader" v-if="visible">
-			<component :is="lazyloader"></component>
+			<component :is="current"></component>
 		</div>
 	`,
-	data() {
-		const ef = this.loaderFunc;
-		const afterLoaded = this.afterLoaded;
-		if (!ef) {
-			return {
-				lazyloader: {
-					render() {
-						return null;
-					},
-				},
-			};
+
+	mounted() {
+		const pn = this.$props.portalName;
+		if (pn) {
+			window.branLazyPortals[pn] = this;
 		}
+		this.reload();
+	},
+
+	data(): DynaCompData {
 		return {
-			lazyloader(): any {
-				return core.fetchEvent(ef, {})
-					.then((r) => {
-						return core.componentByTemplate(r.schema, afterLoaded);
-					});
-			},
+			current: null,
 		};
 	},
-});
 
-// Vue.mixin({
-// 	beforeCreate: function () {
-// 		// var myOption = this.$options
-// 		// console.log("props", JSON.stringify(this.$props))
-// 		const tag = this.$options._componentTag;
-// 		let watch = (this.$options.watch = this.$options.watch || {})
-
-// 		watch.search = function (val) {
-// 			console.log("val", val)
-// 		}
-
-// 		console.log("beforeCreate this", tag, this, this.$options)
-
-// 	}
-// })
-
-// Vue.directive('bran', {
-// 	// When the bound element is inserted into the DOM...
-// 	bind: (el: HTMLElement, binding: VNodeDirective, vnode: VNode) => {
-// 		core.callSetupFunc(binding.value.setupFunc, el, binding, vnode);
-// 	},
-// });
-
-const vm = new Vue({
-	provide: {
-		core,
-	},
-	data: {
-		current: core.componentByTemplate(app.innerHTML),
-	},
-	template: `
-	<div id="app" v-cloak>
-		<component :is="current"></component>
-	</div>
-`,
 	methods: {
+		reload() {
+			const ef = this.loaderFunc;
+			if (!ef || !ef.id) {
+				return;
+			}
+			const afterLoaded = this.afterLoaded;
+			const self = this;
+			const rootChangeCurrent = (this.$root as any).changeCurrent;
+			const core = new Core(form, rootChangeCurrent, this.changeCurrent);
+
+			core.fetchEvent(ef, {})
+				.then((r) => {
+					self.current = core.componentByTemplate(r.schema, afterLoaded);
+				});
+		},
 		changeCurrent(newView: any) {
 			this.current = newView;
 		},
 	},
+});
 
+const vm = new Vue({
+	...{
+		template: `
+	<div id="app" v-cloak>
+		<component :is="current"></component>
+	</div>
+`,
+		methods: {
+			changeCurrent(newView: any) {
+				this.current = newView;
+			},
+		},
+
+		mounted() {
+			const core = new Core(form, this.changeCurrent, this.changeCurrent);
+			this.changeCurrent(core.componentByTemplate(app.innerHTML));
+		},
+
+		data(): DynaCompData {
+			return {
+				current: null,
+			};
+		},
+	},
+	...vueOptions,
 });
 
 vm.$mount('#app');

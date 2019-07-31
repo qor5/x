@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/go-playground/form"
+	"github.com/sunfmin/reflectutils"
 )
 
 type Component interface {
@@ -15,20 +18,26 @@ type PageState interface{}
 
 type PageResponse struct {
 	Schema   Component
-	State    PageState
 	JSONOnly bool
 }
 
+type PortalUpdate struct {
+	Name        string    `json:"name,omitempty"`
+	Schema      Component `json:"schema,omitempty"`
+	AfterLoaded string    `json:"afterLoaded,omitempty"`
+}
+
 type EventResponse struct {
-	Alert       Component   `json:"alert,omitempty"`
-	Confirm     Component   `json:"confirm,omitempty"`
-	Dialog      Component   `json:"dialog,omitempty"`
-	CloseDialog bool        `json:"closeDialog,omitempty"`
-	Schema      Component   `json:"schema,omitempty"`
-	State       PageState   `json:"states,omitempty"`
-	Reload      bool        `json:"reload,omitempty"`
-	RedirectURL string      `json:"redirectURL,omitempty"`
-	Data        interface{} `json:"data,omitempty"` // used for return collection data like TagsInput data source
+	Alert         Component       `json:"alert,omitempty"`
+	Confirm       Component       `json:"confirm,omitempty"`
+	Dialog        Component       `json:"dialog,omitempty"`
+	CloseDialog   bool            `json:"closeDialog,omitempty"`
+	Schema        Component       `json:"schema,omitempty"`
+	Reload        bool            `json:"reload,omitempty"`
+	ReloadPortals []string        `json:"reloadPortals,omitempty"`
+	UpdatePortals []*PortalUpdate `json:"updatePortals,omitempty"`
+	RedirectURL   string          `json:"redirectURL,omitempty"`
+	Data          interface{}     `json:"data,omitempty"` // used for return collection data like TagsInput data source
 }
 
 type PageFunc func(ctx *EventContext) (r PageResponse, err error)
@@ -40,7 +49,7 @@ type LayoutFunc func(r *http.Request, body string) (output string, err error)
 type LayoutMiddleFunc func(in LayoutFunc, injector PageInjector) (out LayoutFunc)
 
 type EventFuncHub interface {
-	RefEventFunc(eventFuncId string, ef EventFunc) (key string)
+	RegisterEventFunc(eventFuncId string, ef EventFunc) (key string)
 }
 
 /*
@@ -73,8 +82,39 @@ type EventContext struct {
 	W        http.ResponseWriter
 	Hub      EventFuncHub
 	Injector PageInjector
-	State    PageState
 	Event    *Event
+	Flash    interface{} // pass value from actions to index
+}
+
+func (ctx *EventContext) MustUnmarshalForm(v interface{}) {
+	err := ctx.UnmarshalForm(v)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (ctx *EventContext) UnmarshalForm(v interface{}) (err error) {
+	mf := ctx.R.MultipartForm
+	if ctx.R.MultipartForm == nil {
+		panic("POST request with form required, can't use UnmarshalForm in PageFunc")
+	}
+
+	dec := form.NewDecoder()
+	err = dec.Decode(v, mf.Value)
+	if err != nil {
+		panic(err)
+		return
+	}
+
+	if len(mf.File) > 0 {
+		for k, vs := range mf.File {
+			err = reflectutils.Set(v, k, vs)
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 type PageInjector interface {

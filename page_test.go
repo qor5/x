@@ -194,7 +194,7 @@ func runEvent(
 	}
 
 	var p = pb.Page(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
-		ctx.Hub.RefEventFunc("call", f)
+		ctx.Hub.RegisterEventFunc("call", f)
 
 		if renderChanger != nil {
 			renderChanger(ctx, &pr)
@@ -310,7 +310,7 @@ func TestFileUpload(t *testing.T) {
 			}
 		}
 
-		ctx.Hub.RefEventFunc("uploadFile", uploadFile)
+		ctx.Hub.RegisterEventFunc("uploadFile", uploadFile)
 
 		pr.Schema = ui.RawSchema(fmt.Sprintf(`{"__text__": "%s"}`, string(data)))
 		pr.JSONOnly = true
@@ -544,10 +544,12 @@ func TestMultiplePagesAndEvents(t *testing.T) {
 	}
 
 	var topicDetail = func(ctx *ui.EventContext) (r ui.PageResponse, err error) {
+		ctx.Hub.RegisterEventFunc("bookmark", bookmark)
+
 		topicId := pat.Param(ctx.R, "topicID")
 		r.Schema = h.Div(
 			ui.Bind(h.A().Href("#").Text(topicId)).
-				OnClick(ctx.Hub, "bookmark", bookmark),
+				OnClick("bookmark"),
 		)
 		return
 	}

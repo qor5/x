@@ -22,48 +22,48 @@ func HelloVuetifyMenu(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		VMenu(
 			ui.Slot(
 				VBtn("Menu as Popover").
-					On("on").
+					Attr("v-on", "on").
 					Dark(true).
 					Color("indigo"),
 			).Name("activator").
 				Scope("{ on }"),
 			VCard(
 				VList(
-					VListTile(
-						VListTileAvatar(
+					VListItem(
+						VListItemAvatar(
 							h.Img("https://cdn.vuetifyjs.com/images/john.jpg").Alt("John"),
 						),
-						VListTileContent(
-							VListTileTitle(h.Text("John Leider")),
-							VListTileSubTitle(h.Text("Founder of Vuetify.js")),
+						VListItemContent(
+							VListItemTitle(h.Text("John Leider")),
+							VListItemSubtitle(h.Text("Founder of Vuetify.js")),
 						),
-						VListTileAction(
+						VListItemAction(
 							VBtn("").Icon(true).Children(
 								VIcon("favorite"),
 							),
 						),
-					).Avatar(true),
+					),
 				),
 				VDivider(),
 				VList(
-					VListTile(
-						VListTileAction(
+					VListItem(
+						VListItemAction(
 							VSwitch().Color("purple"),
 						),
-						VListTileTitle(h.Text("Enable messages")),
+						VListItemTitle(h.Text("Enable messages")),
 					),
-					VListTile(
-						VListTileAction(
+					VListItem(
+						VListItemAction(
 							VSwitch().Color("purple"),
 						),
-						VListTileTitle(h.Text("Enable hints")),
+						VListItemTitle(h.Text("Enable hints")),
 					),
 				),
 
 				VCardActions(
 					VSpacer(),
-					VBtn("Cancel").Flat(true),
-					VBtn("Save").Color("primary").Flat(true),
+					VBtn("Cancel").Text(true),
+					VBtn("Save").Color("primary").Text(true),
 				),
 			),
 		).CloseOnContentClick(false).

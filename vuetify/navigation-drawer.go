@@ -3,6 +3,7 @@ package vuetify
 import (
 	"context"
 	"fmt"
+
 	h "github.com/theplant/htmlgo"
 )
 
@@ -16,6 +17,7 @@ func VNavigationDrawer(children ...h.HTMLComponent) (r *VNavigationDrawerBuilder
 	}
 	return
 }
+
 func (b *VNavigationDrawerBuilder) Absolute(v bool) (r *VNavigationDrawerBuilder) {
 	b.tag.Attr(":absolute", fmt.Sprint(v))
 	return b
@@ -26,8 +28,18 @@ func (b *VNavigationDrawerBuilder) App(v bool) (r *VNavigationDrawerBuilder) {
 	return b
 }
 
+func (b *VNavigationDrawerBuilder) Bottom(v bool) (r *VNavigationDrawerBuilder) {
+	b.tag.Attr(":bottom", fmt.Sprint(v))
+	return b
+}
+
 func (b *VNavigationDrawerBuilder) Clipped(v bool) (r *VNavigationDrawerBuilder) {
 	b.tag.Attr(":clipped", fmt.Sprint(v))
+	return b
+}
+
+func (b *VNavigationDrawerBuilder) Color(v string) (r *VNavigationDrawerBuilder) {
+	b.tag.Attr("color", v)
 	return b
 }
 
@@ -43,6 +55,11 @@ func (b *VNavigationDrawerBuilder) DisableResizeWatcher(v bool) (r *VNavigationD
 
 func (b *VNavigationDrawerBuilder) DisableRouteWatcher(v bool) (r *VNavigationDrawerBuilder) {
 	b.tag.Attr(":disable-route-watcher", fmt.Sprint(v))
+	return b
+}
+
+func (b *VNavigationDrawerBuilder) ExpandOnHover(v bool) (r *VNavigationDrawerBuilder) {
+	b.tag.Attr(":expand-on-hover", fmt.Sprint(v))
 	return b
 }
 
@@ -96,8 +113,18 @@ func (b *VNavigationDrawerBuilder) Right(v bool) (r *VNavigationDrawerBuilder) {
 	return b
 }
 
+func (b *VNavigationDrawerBuilder) Src(v string) (r *VNavigationDrawerBuilder) {
+	b.tag.Attr("src", v)
+	return b
+}
+
 func (b *VNavigationDrawerBuilder) Stateless(v bool) (r *VNavigationDrawerBuilder) {
 	b.tag.Attr(":stateless", fmt.Sprint(v))
+	return b
+}
+
+func (b *VNavigationDrawerBuilder) Tag(v string) (r *VNavigationDrawerBuilder) {
+	b.tag.Attr("tag", v)
 	return b
 }
 
@@ -111,13 +138,37 @@ func (b *VNavigationDrawerBuilder) Touchless(v bool) (r *VNavigationDrawerBuilde
 	return b
 }
 
-func (b *VNavigationDrawerBuilder) Value(v interface{}) (r *VNavigationDrawerBuilder) {
-	b.tag.Attr(":value", v)
+func (b *VNavigationDrawerBuilder) Value(v bool) (r *VNavigationDrawerBuilder) {
+	b.tag.Attr(":value", fmt.Sprint(v))
 	return b
 }
 
 func (b *VNavigationDrawerBuilder) Width(v int) (r *VNavigationDrawerBuilder) {
 	b.tag.Attr(":width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VNavigationDrawerBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VNavigationDrawerBuilder) Attr(vs ...interface{}) (r *VNavigationDrawerBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VNavigationDrawerBuilder) Children(children ...h.HTMLComponent) (r *VNavigationDrawerBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VNavigationDrawerBuilder) AppendChildren(children ...h.HTMLComponent) (r *VNavigationDrawerBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VNavigationDrawerBuilder) PrependChildren(children ...h.HTMLComponent) (r *VNavigationDrawerBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

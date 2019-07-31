@@ -1,17 +1,12 @@
 package e08_hello_popover
 
 import (
-	"fmt"
-	"math/rand"
-	"time"
-
 	bo "github.com/sunfmin/bran/overlay"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/theplant/htmlgo"
 )
 
 type popoverState struct {
-	Visible     bool
 	EditingName string
 	NameError   string
 }
@@ -22,83 +17,78 @@ type mystate struct {
 	Popover3 *popoverState
 }
 
-var globalState = &struct {
-	Name string
-}{}
+var globalName string
 
-func randStr(prefix string) string {
-	rand.Seed(time.Now().UnixNano())
-	return fmt.Sprintf("%s: %d", prefix, rand.Int31n(100))
-}
-
-func overlay(s *popoverState, ctx *ui.EventContext, subState string) HTMLComponent {
-	return Div(
-		ui.Bind(Input("").Type("text").Value(s.EditingName)).FieldName(fmt.Sprintf("%s.EditingName", subState)),
-		Label(s.NameError).Style("color:red"),
-		ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update, subState),
-	).Style("padding: 20px; background-color: white;")
+var globalState = &mystate{
+	Popover1: &popoverState{EditingName: "popover 1"},
+	Popover2: &popoverState{EditingName: "popover 2"},
+	Popover3: &popoverState{EditingName: "popover 3"},
 }
 
 func HelloPopover(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
-	s := ctx.StateOrInit(&mystate{
-		Popover1: &popoverState{
-			EditingName: globalState.Name,
-		},
-		Popover2: &popoverState{
-			EditingName: globalState.Name,
-		},
-		Popover3: &popoverState{
-			EditingName: globalState.Name,
-		},
-	}).(*mystate)
+	ctx.Hub.RegisterEventFunc("remoteOverlay", remoteOverlay)
+	ctx.Hub.RegisterEventFunc("update", update)
 
 	pr.Schema = Div(
-		H1(globalState.Name),
+		H1(globalName),
 
 		H2("Default"),
 		bo.Popover(
-			overlay(s.Popover1, ctx, "Popover1"),
+			ui.LazyPortal("remoteOverlay").
+				Visible("true").
+				ParentForceUpdateAfterLoaded(),
 		).TriggerElement(
 			A().Text("Edit").Href("#"),
-		).DefaultVisible(s.Popover1.Visible).Placement("right"),
+		).Placement("right"),
 
 		H2("Load from remote"),
 		bo.Popover(
-			ui.LazyLoader(ctx.Hub, "remoteOverlay", remoteOverlay).
+			ui.LazyPortal("remoteOverlay").
 				Visible("true").
 				ParentForceUpdateAfterLoaded(),
 		).TriggerElement(
 			A().Text("Remote Loader").Href("#"),
-		).DefaultVisible(s.Popover2.Visible).Placement("right"),
+		).Placement("right"),
 
 		H2("Load when mouse over"),
 		bo.Popover(
-			overlay(s.Popover3, ctx, "Popover3"),
+			ui.LazyPortal("remoteOverlay").
+				Visible("true").
+				ParentForceUpdateAfterLoaded(),
 		).TriggerElement(
 			A().Text("Mouseover").Href("#"),
-		).DefaultVisible(s.Popover3.Visible).
-			Trigger("hover").Placement("bottom"),
+		).Trigger("hover").Placement("bottom"),
 	)
 	return
 }
 
 func remoteOverlay(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	s := ctx.State.(*mystate)
-	r.Schema = overlay(s.Popover2, ctx, "Popover2")
+	ctx.MustUnmarshalForm(&globalState)
+
+	r.Schema = overlay(globalState.Popover2, ctx)
 	return
 }
 
+func overlay(s *popoverState, ctx *ui.EventContext) HTMLComponent {
+	return Div(
+		ui.Bind(Input("").Type("text").Value(s.EditingName)).FieldName("EditingName"),
+		Label(s.NameError).Style("color:red"),
+		ui.Bind(Button("Update")).OnClick("update"),
+	).Style("padding: 20px; background-color: white;")
+}
+
 func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	r.Reload = true
-	subState := ctx.Event.Params[0]
-	s := ctx.SubStateOrInit(subState, &popoverState{}).(*popoverState)
+	var s = &popoverState{}
+	ctx.MustUnmarshalForm(s)
+
 	if len(s.EditingName) < 10 {
 		s.NameError = "name is too short"
-		s.Visible = true
+		r.Schema = overlay(s, ctx)
+		return
 	} else {
-		globalState.Name = s.EditingName
+		globalName = s.EditingName
 		s.NameError = ""
-		s.Visible = false
+		r.Reload = true
 	}
 	return
 }

@@ -335,7 +335,7 @@ func (b *VSelectBuilder) ValidateOnBlur(v bool) (r *VSelectBuilder) {
 }
 
 func (b *VSelectBuilder) Value(v interface{}) (r *VSelectBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

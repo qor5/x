@@ -1,10 +1,18 @@
 
 import debounce from 'lodash/debounce';
 import 'whatwg-fetch';
-import querystring from 'query-string';
-import { newFormWithStates, mergeStatesIntoForm } from './form';
+import Vue, { VueConstructor } from 'vue';
+
+import {
+	mergeStatesIntoForm,
+	setPushState,
+	EventData,
+	setFormValue,
+	jsonEvent,
+} from './utils';
 
 // Vue.config.productionTip = true;
+declare var window: any;
 
 interface EventFuncID {
 	id: string;
@@ -12,9 +20,10 @@ interface EventFuncID {
 	pushState?: any;
 }
 
-interface EventData {
-	value?: string;
-	checked?: boolean;
+interface PortalUpdate {
+	name: string;
+	schema: string;
+	afterLoaded?: string;
 }
 
 interface EventResponse {
@@ -22,31 +31,24 @@ interface EventResponse {
 	schema?: any;
 	data?: any;
 	redirectURL?: string;
+	reload: boolean;
+	reloadPortals?: string[];
+	updatePortals?: PortalUpdate[];
 }
 
-declare var window: any;
-
 export class Core {
-	public form: FormData;
-
-	public debounceFetchEventThenReload = debounce(this.fetchEventThenReload, 800);
 	public debounce = debounce;
-	private methods: any = {};
 
-	constructor() {
-		const ssd = window.__serverSideData__;
-		const states = (ssd && ssd.states) || {};
-		this.form = newFormWithStates(states);
-		const self = this;
+	private debounceFetchEventThenRefresh = debounce(this.fetchEventThenRefresh, 800);
+	private form: FormData;
+	private rootChangeCurrent: any;
+	private changeCurrent: any;
 
-		this.methods = {
-			onclick(eventFuncId: EventFuncID, evt: any) {
-				self.fetchEventThenReload(this, eventFuncId, self.jsonEvent(evt));
-			},
-			oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
-				self.controlsOnInput(this, eventFuncId, fieldName, evt);
-			},
-		};
+
+	constructor(form: FormData, rootChangeCurrent: any, changeCurrent: any) {
+		this.form = form;
+		this.rootChangeCurrent = rootChangeCurrent;
+		this.changeCurrent = changeCurrent;
 	}
 
 	public fetchEvent(
@@ -58,25 +60,12 @@ export class Core {
 			event,
 		});
 
-		let search = window.location.search;
-		const pstate = eventFuncId.pushState;
-		if (pstate) {
-			let newSearch = '';
-			if (Object.keys(pstate).length > 0) {
-				const orig = querystring.parse(window.location.search);
-				newSearch = querystring.stringify({ ...orig, ...pstate });
-				search = newSearch;
-				if (newSearch.length > 0) {
-					search = `&${newSearch}`;
-					newSearch = `?${newSearch}`;
-				}
-			}
-			window.history.pushState(
-				pstate,
-				'',
-				window.location.pathname + newSearch,
-			);
-		}
+		const search = setPushState(
+			eventFuncId.pushState,
+			window.location.search,
+			window.location.pathname,
+			window.history.pushState,
+		);
 
 		this.form.set('__event_data__', eventData);
 		return fetch(`?__execute_event__=${eventFuncId.id}${search}`, {
@@ -99,122 +88,106 @@ export class Core {
 		});
 	}
 
-	public jsonEvent(evt: any) {
-		const v: EventData = {};
-
-		if (evt && evt.target) {
-			// For Checkbox
-			if (evt.target.checked) {
-				v.checked = evt.target.checked;
-			}
-
-			// For Input
-			if (evt.target.value !== undefined) {
-				v.value = evt.target.value;
-			}
-			return v;
-		}
-
-		// For List
-		if (evt.key) {
-			v.value = evt.key;
-			return v;
-		}
-
-		if (typeof evt === 'string' || typeof evt === 'number') {
-			v.value = evt.toString(); // For Radio, Pager
-		}
-
-		return v;
+	public componentByTemplate(template: string, afterLoaded?: any): VueConstructor {
+		return Vue.extend({
+			provide: { core: this },
+			template: '<div>' + template + '</div>', // to make only one root.
+			methods: this.newVueMethods(),
+			mounted() {
+				this.$nextTick(() => {
+					if (afterLoaded) {
+						afterLoaded(this);
+					}
+				});
+			},
+			data() {
+				return {
+					boolean1: false,
+					boolean2: false,
+					boolean3: false,
+					boolean4: false,
+					boolean5: false,
+				};
+			},
+		});
 	}
 
-	public fetchEventThenReload(comp: any, eventFuncId: EventFuncID, event: EventData) {
+	public setFormValue(fieldName: string, val: any) {
+		setFormValue(this.form, fieldName, val);
+	}
+
+	// public getFormValue(fieldName: string): string {
+	// 	return getFormValue(this.form, fieldName);
+	// }
+
+	// public getFormValueAsArray(fieldName: string): string[] {
+	// 	return getFormValueAsArray(this.form, fieldName);
+	// }
+
+	private fetchEventThenRefresh(eventFuncId: EventFuncID, event: EventData) {
 		this.fetchEvent(eventFuncId, event)
 			.then((r: EventResponse) => {
-				if (r.schema) {
-					this.reload(comp, r);
+				if (r.reloadPortals && r.reloadPortals.length > 0) {
+					for (const portalName of r.reloadPortals) {
+						const portal = window.branLazyPortals[portalName];
+						if (portal) {
+							portal.reload();
+						}
+					}
+					return r;
 				}
+
+				if (r.updatePortals && r.updatePortals.length > 0) {
+					for (const pu of r.updatePortals) {
+						const portal = window.branLazyPortals[pu.name];
+						if (portal) {
+							let afterLoaded;
+							if (pu.afterLoaded) {
+								afterLoaded = new Function('comp', pu.afterLoaded);
+							}
+							portal.changeCurrent(this.componentByTemplate(pu.schema, afterLoaded));
+						}
+					}
+					return r;
+				}
+
+				if (r.schema && r.reload) {
+					this.rootChangeCurrent(this.componentByTemplate(r.schema));
+					return r;
+				}
+
+				if (r.schema) {
+					this.changeCurrent(this.componentByTemplate(r.schema));
+					return r;
+				}
+
 				return r;
 			});
 	}
 
-	public componentByTemplate(template: string, afterLoaded?: () => void): any {
+	private newVueMethods(): any {
+		const self = this;
 		return {
-			template: '<div>' + template + '</div>', // to make only one root.
-			methods: this.methods,
-			mounted() {
-				this.$nextTick(() => {
-					if (afterLoaded) {
-						afterLoaded();
-					}
-				});
+			onclick(eventFuncId: EventFuncID, evt: any) {
+				self.fetchEventThenRefresh(eventFuncId, jsonEvent(evt));
+			},
+			oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
+				self.controlsOnInput(eventFuncId, fieldName, evt);
 			},
 		};
 	}
 
-	public setFormValue(fieldName: string, val: any) {
-		if (!fieldName || fieldName.length === 0) {
-			return;
-		}
-		this.form.delete(fieldName);
-		if (!val) {
-			return;
-		}
-		// console.log('val', val, 'Array.isArray(val)', Array.isArray(val));
-		if (Array.isArray(val)) {
-			val.forEach((v) => {
-				this.form.append(fieldName, v);
-			});
-			return;
-		}
-		this.form.set(fieldName, val);
-	}
-
-	public getFormValue(fieldName: string): string {
-		const val = this.form.get(fieldName);
-		if (typeof val === 'string') {
-			return val;
-		}
-		return '';
-	}
-
-	public getFormValueAsArray(fieldName: string): string[] {
-		const vals = this.form.getAll(fieldName);
-		const r: string[] = [];
-		for (const v of vals) {
-			if (typeof v === 'string') {
-				r.push(v);
-			}
-		}
-		return r;
-	}
-
-
 	private controlsOnInput(
-		comp: any,
 		eventFuncId?: EventFuncID,
 		fieldName?: string,
 		evt?: any,
 	) {
-		// console.log("comp", comp, "fieldName", fieldName, "event", evt)
-		// // console.log("root", comp.$root)
-		// // console.log("comp", comp.$el)
-		// // console.log("comp.$props", comp.$props)
-		// // console.log("comp.$options", comp.$options)
-		// console.log("toFormFunc", toFormFunc)
-
 		if (fieldName) {
 			this.form.set(fieldName, evt.target.value);
 		}
 		if (eventFuncId) {
-			this.debounceFetchEventThenReload(comp, eventFuncId, this.jsonEvent(evt));
+			this.debounceFetchEventThenRefresh(eventFuncId, jsonEvent(evt));
 		}
 	}
-
-	private reload(comp: any, r: EventResponse) {
-
-		comp.$root.changeCurrent(this.componentByTemplate(r.schema));
-	}
-
 
 }

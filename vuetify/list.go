@@ -18,6 +18,11 @@ func VList(children ...h.HTMLComponent) (r *VListBuilder) {
 	return
 }
 
+func (b *VListBuilder) Color(v string) (r *VListBuilder) {
+	b.tag.Attr("color", v)
+	return b
+}
+
 func (b *VListBuilder) Dark(v bool) (r *VListBuilder) {
 	b.tag.Attr(":dark", fmt.Sprint(v))
 	return b
@@ -28,8 +33,28 @@ func (b *VListBuilder) Dense(v bool) (r *VListBuilder) {
 	return b
 }
 
+func (b *VListBuilder) Disabled(v bool) (r *VListBuilder) {
+	b.tag.Attr(":disabled", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) Elevation(v int) (r *VListBuilder) {
+	b.tag.Attr(":elevation", fmt.Sprint(v))
+	return b
+}
+
 func (b *VListBuilder) Expand(v bool) (r *VListBuilder) {
 	b.tag.Attr(":expand", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) Flat(v bool) (r *VListBuilder) {
+	b.tag.Attr(":flat", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) Height(v int) (r *VListBuilder) {
+	b.tag.Attr(":height", fmt.Sprint(v))
 	return b
 }
 
@@ -38,8 +63,48 @@ func (b *VListBuilder) Light(v bool) (r *VListBuilder) {
 	return b
 }
 
+func (b *VListBuilder) MaxHeight(v int) (r *VListBuilder) {
+	b.tag.Attr(":max-height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) MaxWidth(v int) (r *VListBuilder) {
+	b.tag.Attr(":max-width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) MinHeight(v int) (r *VListBuilder) {
+	b.tag.Attr(":min-height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) MinWidth(v int) (r *VListBuilder) {
+	b.tag.Attr(":min-width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) Nav(v bool) (r *VListBuilder) {
+	b.tag.Attr(":nav", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) Rounded(v bool) (r *VListBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) Shaped(v bool) (r *VListBuilder) {
+	b.tag.Attr(":shaped", fmt.Sprint(v))
+	return b
+}
+
 func (b *VListBuilder) Subheader(v bool) (r *VListBuilder) {
 	b.tag.Attr(":subheader", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) Tag(v string) (r *VListBuilder) {
+	b.tag.Attr("tag", v)
 	return b
 }
 
@@ -48,8 +113,42 @@ func (b *VListBuilder) ThreeLine(v bool) (r *VListBuilder) {
 	return b
 }
 
+func (b *VListBuilder) Tile(v bool) (r *VListBuilder) {
+	b.tag.Attr(":tile", fmt.Sprint(v))
+	return b
+}
+
 func (b *VListBuilder) TwoLine(v bool) (r *VListBuilder) {
 	b.tag.Attr(":two-line", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) Width(v int) (r *VListBuilder) {
+	b.tag.Attr(":width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VListBuilder) Attr(vs ...interface{}) (r *VListBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VListBuilder) Children(children ...h.HTMLComponent) (r *VListBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VListBuilder) AppendChildren(children ...h.HTMLComponent) (r *VListBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VListBuilder) PrependChildren(children ...h.HTMLComponent) (r *VListBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

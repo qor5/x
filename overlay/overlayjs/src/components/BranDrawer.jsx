@@ -68,8 +68,7 @@ export default {
 	render() {
 		const props = getOptionProps(this)
 		const { open, getContainer, handler, level, levelMove, firstEnter, ...rest } = props
-		const defaultGetContainer = "#app"
-
+		const defaultGetContainer = getContainer || "#app"
 		const vcProps = {
 			props: {
 				open: this.isVisible,

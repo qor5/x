@@ -1,53 +1,84 @@
 package e06_hello_drawer
 
 import (
-	"fmt"
-	"math/rand"
-	"time"
-
 	bo "github.com/sunfmin/bran/overlay"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/theplant/htmlgo"
 )
 
 type mystate struct {
-	drawerVisible bool
-	Name          string
-	NameError     string
+	InputName string
+	NameError string
+	Group     string
 }
 
-func randStr(prefix string) string {
-	rand.Seed(time.Now().UnixNano())
-	return fmt.Sprintf("%s: %d", prefix, rand.Int31n(100))
-}
+var globalName string
 
 func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
-	s := ctx.StateOrInit(&mystate{}).(*mystate)
+	ctx.Hub.RegisterEventFunc("form", form)
+	ctx.Hub.RegisterEventFunc("close", close)
+	ctx.Hub.RegisterEventFunc("update", update)
+	ctx.Hub.RegisterEventFunc("updateForm", updateForm)
+
+	var s = &mystate{}
+	if ctx.Flash != nil {
+		s = ctx.Flash.(*mystate)
+	}
 
 	pr.Schema = Div(
-		H1(s.Name),
+		H1(globalName),
 		bo.Drawer(
-			Button("Close").Attr("@click", "parent.close"),
-			ui.Bind(Input("").Type("text").Value(s.Name)).FieldName("Name"),
-			Label(s.NameError).Style("color:red"),
-			ui.Bind(Button("Update")).OnClick(ctx.Hub, "update", update),
+			ui.LazyPortal("form", "param1").LoadWhenParentVisible(),
 		).TriggerElement(
 			A().Text("Edit").Href("#"),
-		).Width(500).DefaultOpen(s.drawerVisible, false),
+		).Width(500),
+		ui.Bind(Input("").Type("text").Value(s.Group)).FieldName("Group"),
+		ui.Bind(Button("Check value")).OnClick("update"),
 	)
 	return
 }
 
 func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	var s = &mystate{}
+	ctx.MustUnmarshalForm(s)
+	ctx.Flash = s
+
 	r.Reload = true
-	s := ctx.State.(*mystate)
-	if len(s.Name) < 10 {
-		s.NameError = "name is too short"
-		s.drawerVisible = true
-		s.Name = ""
+	return
+}
+
+func form(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	var s = &mystate{InputName: globalName}
+
+	if ctx.Flash != nil {
+		s = ctx.Flash.(*mystate)
+	}
+
+	r.Schema = Div(
+		ui.Bind(Button("Close")).OnClick("close"),
+		ui.Bind(Input("").Type("text").Value(s.InputName)).FieldName("InputName"),
+		Label(s.NameError).Style("color:red"),
+		ui.Bind(Button("Update")).OnClick("updateForm"),
+	)
+	return
+}
+
+func close(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	r.Reload = true
+	return
+}
+
+func updateForm(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	var s = &mystate{}
+	ctx.MustUnmarshalForm(s)
+
+	if len(s.InputName) < 10 {
+		s.NameError = "is too short"
+		ctx.Flash = s
+		r, err = form(ctx)
 	} else {
-		s.NameError = ""
-		s.drawerVisible = false
+		globalName = s.InputName
+		r.Reload = true
 	}
 	return
 }

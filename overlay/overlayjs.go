@@ -1,8 +1,8 @@
-package branoverlay
+package overlay
 
 import (
-	"github.com/sunfmin/bran"
 	"github.com/gobuffalo/packr"
+	"github.com/sunfmin/bran"
 )
 
 var overlayjsassetsbox = packr.NewBox("./overlayjs/dist/")

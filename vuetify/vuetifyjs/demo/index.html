@@ -10,10 +10,15 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
 	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 	<title>vuetify demo</title>
+	<style>
+	[v-cloak] {
+		display: none;
+	}
+	</style>
 </head>
 
 <body>
-	<div id="app">
+	<div id="app" v-cloak>
 		<v-app>
 			<v-content>
 				<v-container>

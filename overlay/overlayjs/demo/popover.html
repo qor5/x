@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<title>overlayjs</title>
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+
+<body>
+	<noscript>
+		<strong>We're sorry but overlayjs doesn't work properly without JavaScript enabled. Please enable it to
+			continue.</strong>
+	</noscript>
+	<div id="app">
+
+		<h1>Bran Popover</h1>
+		<bran-popover title="Hello" trigger="click" :default-visible="true" placement="top">
+			<template v-slot:overlay="{ parent }">
+				<h1>Hello</h1>
+				<p>abc1231231231231312123</p>
+			</template>
+
+			<a href="#" style="margin-left: 300px">
+				Open
+			</a>
+		</bran-popover>
+
+		<bran-popover title="Hello" trigger="click" :default-visible="false" placement="top">
+			<template v-slot:overlay="{ parent }">
+				<bran-lazy-portal :visible='true' :loader-func='{"id": "loadDrawer", "params": ["1", "2"]}' :after-loaded='parent.forceUpdate'>
+			</template>
+
+			<a href="#" style="margin-left: 300px">
+				Open with Remote
+			</a>
+		</bran-popover>
+
+	</div>
+	<script src="http://localhost:3050/app.js"></script>
+	<script src="http://localhost:3100/app.js"></script>
+</body>
+
+</html>

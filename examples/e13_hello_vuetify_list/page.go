@@ -33,38 +33,38 @@ func HelloVuetifyList(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		).Color("cyan").Dark(true),
 		VList(
 			VSubheader(h.Text("Today")),
-			VListTile(
-				VListTileAvatar(
+			VListItem(
+				VListItemAvatar(
 					h.Img("https://cdn.vuetifyjs.com/images/lists/1.jpg"),
 				),
-				VListTileContent(
-					VListTileTitle(h.Text("Brunch this weekend?")),
-					VListTileSubTitle(
+				VListItemContent(
+					VListItemTitle(h.Text("Brunch this weekend?")),
+					VListItemSubtitle(
 						h.Span("Ali Connors").Class("text--primary"),
 						h.Text("&mdash; I'll be in your neighborhood doing errands this weekend. Do you want to hang out?"),
 					),
 				),
-			).Avatar(true),
+			),
 			VDivider().Inset(true),
-			VListTile(
-				VListTileAvatar(
+			VListItem(
+				VListItemAvatar(
 					h.Img("https://cdn.vuetifyjs.com/images/lists/2.jpg"),
 				),
-				VListTileContent(
-					VListTileTitle(h.RawHTML(`Summer BBQ <span class="grey--text text--lighten-1">4</span>`)),
-					VListTileSubTitle(h.RawHTML(`<span class='text--primary'>to Alex, Scott, Jennifer</span> &mdash; Wish I could come, but I'm out of town this weekend.`)),
+				VListItemContent(
+					VListItemTitle(h.RawHTML(`Summer BBQ <span class="grey--text text--lighten-1">4</span>`)),
+					VListItemSubtitle(h.RawHTML(`<span class='text--primary'>to Alex, Scott, Jennifer</span> &mdash; Wish I could come, but I'm out of town this weekend.`)),
 				),
-			).Avatar(true),
+			),
 			VDivider().Inset(true),
-			VListTile(
-				VListTileAvatar(
+			VListItem(
+				VListItemAvatar(
 					h.Img("https://cdn.vuetifyjs.com/images/lists/3.jpg"),
 				),
-				VListTileContent(
-					VListTileTitle(h.Text(`Oui oui`)),
-					VListTileSubTitle(h.RawHTML(`<span class='text--primary'>Sandra Adams</span> &mdash; Do you have Paris recommendations? Have you ever been?`)),
+				VListItemContent(
+					VListItemTitle(h.Text(`Oui oui`)),
+					VListItemSubtitle(h.RawHTML(`<span class='text--primary'>Sandra Adams</span> &mdash; Do you have Paris recommendations? Have you ever been?`)),
 				),
-			).Avatar(true),
+			),
 		).TwoLine(true),
 	)
 

@@ -28,6 +28,11 @@ func (b *VIconBuilder) Dark(v bool) (r *VIconBuilder) {
 	return b
 }
 
+func (b *VIconBuilder) Dense(v bool) (r *VIconBuilder) {
+	b.tag.Attr(":dense", fmt.Sprint(v))
+	return b
+}
+
 func (b *VIconBuilder) Disabled(v bool) (r *VIconBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
 	return b
@@ -48,11 +53,6 @@ func (b *VIconBuilder) Light(v bool) (r *VIconBuilder) {
 	return b
 }
 
-func (b *VIconBuilder) Medium(v bool) (r *VIconBuilder) {
-	b.tag.Attr(":medium", fmt.Sprint(v))
-	return b
-}
-
 func (b *VIconBuilder) Right(v bool) (r *VIconBuilder) {
 	b.tag.Attr(":right", fmt.Sprint(v))
 	return b
@@ -68,8 +68,53 @@ func (b *VIconBuilder) Small(v bool) (r *VIconBuilder) {
 	return b
 }
 
+func (b *VIconBuilder) Tag(v string) (r *VIconBuilder) {
+	b.tag.Attr("tag", v)
+	return b
+}
+
 func (b *VIconBuilder) XLarge(v bool) (r *VIconBuilder) {
 	b.tag.Attr(":x-large", fmt.Sprint(v))
+	return b
+}
+
+func (b *VIconBuilder) XSmall(v bool) (r *VIconBuilder) {
+	b.tag.Attr(":x-small", fmt.Sprint(v))
+	return b
+}
+
+func (b *VIconBuilder) Children(children ...h.HTMLComponent) (r *VIconBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VIconBuilder) AppendChildren(children ...h.HTMLComponent) (r *VIconBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VIconBuilder) PrependChildren(children ...h.HTMLComponent) (r *VIconBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VIconBuilder) Class(names ...string) (r *VIconBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VIconBuilder) ClassIf(name string, add bool) (r *VIconBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VIconBuilder) On(name string, value string) (r *VIconBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VIconBuilder) Bind(name string, value string) (r *VIconBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

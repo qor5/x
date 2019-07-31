@@ -18,18 +18,19 @@ func randText() string {
 }
 
 func HelloButton(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+	ctx.Hub.RegisterEventFunc("reload", reload)
 
 	pr.Schema = h.Div(
 		ui.Bind(Button(randText()).Variant(ButtonVariantRaised)).
-			OnClick(ctx.Hub, "reload3", reload),
+			OnClick("reload"),
 		ui.Bind(Button(randText()).Variant(ButtonVariantRaised).Disabled(true)).
-			OnClick(ctx.Hub, "reload8", reload),
+			OnClick("reload"),
 		ui.Bind(Button(randText()).Variant(ButtonVariantUnelevated)).
-			OnClick(ctx.Hub, "reload4", reload),
+			OnClick("reload"),
 		ui.Bind(Button(randText()).Variant(ButtonVariantOutlined)).
-			OnClick(ctx.Hub, "reload5", reload),
+			OnClick("reload"),
 		ui.Bind(Button(randText()).Variant(ButtonVariantText)).
-			OnClick(ctx.Hub, "reload6", reload),
+			OnClick("reload"),
 		ui.Bind(Button("").Variant(ButtonVariantOutlined).
 			Children(
 				h.RawHTML(`
@@ -40,7 +41,7 @@ func HelloButton(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 				`),
 				h.RawHTML(randText()),
 			)).
-			OnClick(ctx.Hub, "reload7", reload),
+			OnClick("reload"),
 	)
 	return
 }
