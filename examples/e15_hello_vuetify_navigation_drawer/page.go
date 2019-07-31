@@ -8,6 +8,7 @@ import (
 )
 
 func HelloVuetifyNavigationDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+	ctx.Hub.RegisterEventFunc("showDrawer", showDrawer)
 	wrapper := func(children ...h.HTMLComponent) h.HTMLComponent {
 		return VApp(
 			VContent(
@@ -46,17 +47,40 @@ func HelloVuetifyNavigationDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err
 			).Dense(true).Class("pt-0"),
 		).Permanent(true),
 
-		VBtn("show").On("click", "drawer1 = !drawer1"),
+		VBtn("show").On("click", "boolean1 = !boolean1"),
 
 		VNavigationDrawer(
 			h.Text("Hi"),
 		).Temporary(true).
-			Attr("v-model", "drawer1").
+			Attr("v-model", "boolean1").
 			Right(true).
 			Bottom(true).
 			Absolute(true).
 			Width(600),
+
+		VBtn("Show Drawer 2").OnClick("showDrawer"),
+
+		ui.LazyPortal("").Name("drawer2"),
 	)
 
+	return
+}
+
+func showDrawer(ctx *ui.EventContext) (er ui.EventResponse, err error) {
+	er.UpdatePortals = append(er.UpdatePortals,
+		&ui.PortalUpdate{
+			Name: "drawer2",
+			Schema: VNavigationDrawer(
+				h.Text("Drawer 2"),
+			).Right(true).
+				Attr("v-model", "boolean1").
+				Bottom(true).
+				Temporary(true).
+				Absolute(true).
+				Value(true).
+				Width(800),
+			AfterLoaded: `setTimeout(function(){ comp.boolean1 = true }, 100)`,
+		},
+	)
 	return
 }

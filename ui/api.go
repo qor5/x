@@ -20,8 +20,9 @@ type PageResponse struct {
 }
 
 type PortalUpdate struct {
-	Name   string    `json:"name,omitempty"`
-	Schema Component `json:"schema,omitempty"`
+	Name        string    `json:"name,omitempty"`
+	Schema      Component `json:"schema,omitempty"`
+	AfterLoaded string    `json:"afterLoaded,omitempty"`
 }
 
 type EventResponse struct {

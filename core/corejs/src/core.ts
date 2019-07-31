@@ -25,6 +25,7 @@ interface EventFuncID {
 interface PortalUpdate {
 	name: string;
 	schema: string;
+	afterLoaded?: string;
 }
 
 interface EventResponse {
@@ -89,7 +90,7 @@ export class Core {
 		});
 	}
 
-	public componentByTemplate(template: string, afterLoaded?: () => void): VueConstructor {
+	public componentByTemplate(template: string, afterLoaded?: any): VueConstructor {
 		return Vue.extend({
 			provide: { core: this },
 			template: '<div>' + template + '</div>', // to make only one root.
@@ -97,17 +98,17 @@ export class Core {
 			mounted() {
 				this.$nextTick(() => {
 					if (afterLoaded) {
-						afterLoaded();
+						afterLoaded(this);
 					}
 				});
 			},
 			data() {
 				return {
-					drawer1: false,
-					drawer2: false,
-					drawer3: false,
-					drawer4: false,
-					drawer5: false,
+					boolean1: false,
+					boolean2: false,
+					boolean3: false,
+					boolean4: false,
+					boolean5: false,
 				};
 			},
 		});
@@ -139,10 +140,14 @@ export class Core {
 				}
 
 				if (r.updatePortals && r.updatePortals.length > 0) {
-					for (const portalUpdate of r.updatePortals) {
-						const portal = window.branLazyPortals[portalUpdate.name];
+					for (const pu of r.updatePortals) {
+						const portal = window.branLazyPortals[pu.name];
 						if (portal) {
-							portal.changeCurrent(this.componentByTemplate(portalUpdate.schema));
+							let afterLoaded;
+							if (pu.afterLoaded) {
+								afterLoaded = new Function('comp', pu.afterLoaded);
+							}
+							portal.changeCurrent(this.componentByTemplate(pu.schema, afterLoaded));
 						}
 					}
 					return r;

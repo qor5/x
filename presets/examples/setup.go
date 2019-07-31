@@ -106,7 +106,7 @@ func Preset1() (r *presets.Builder) {
 		return h.Td(
 			VBtn("").Icon(true).Children(
 				VIcon("edit"),
-			).OnClick("formNew", fmt.Sprint(reflectutils.MustGet(obj, "ID"))),
+			).OnClick("formDrawerEdit", fmt.Sprint(reflectutils.MustGet(obj, "ID"))),
 		).Style("width: 48px")
 	})
 

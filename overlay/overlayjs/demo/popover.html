@@ -30,7 +30,7 @@
 
 		<bran-popover title="Hello" trigger="click" :default-visible="false" placement="top">
 			<template v-slot:overlay="{ parent }">
-				<bran-lazy-loader :visible='true' :loader-func='{"id": "loadDrawer", "params": ["1", "2"]}' :after-loaded='parent.forceUpdate'>
+				<bran-lazy-portal :visible='true' :loader-func='{"id": "loadDrawer", "params": ["1", "2"]}' :after-loaded='parent.forceUpdate'>
 			</template>
 
 			<a href="#" style="margin-left: 300px">

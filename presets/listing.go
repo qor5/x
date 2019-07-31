@@ -62,7 +62,8 @@ func (b *ListingBuilder) GetPageFunc() ui.PageFunc {
 }
 
 func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("formNew", b.mb.editing.formNew)
+	ctx.Hub.RegisterEventFunc("formDrawerNew", b.mb.editing.formDrawerNew)
+	ctx.Hub.RegisterEventFunc("formDrawerEdit", b.mb.editing.formDrawerEdit)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
 	ctx.StateOrInit(b.mb.newModel())
 
@@ -118,7 +119,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 					Absolute(true).
 					Children(
 						VIcon("add"),
-					).OnClick("formNew", ""),
+					).OnClick("formDrawerNew", ""),
 			).Attr("style", "position: relative"),
 		),
 	).Fluid(true)

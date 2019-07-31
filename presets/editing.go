@@ -67,9 +67,10 @@ func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	ctx.Event = &ui.Event{
 		Params: []string{id},
 	}
+	msgs := b.mb.p.messagesFunc(ctx)
 
 	var er ui.EventResponse
-	er, err = b.editForm(ctx)
+	er, err = b.editFormFor(msgs.EditingObjectTitle(inflection.Singular(b.mb.label)), msgs.Update)(ctx)
 	if err != nil {
 		return
 	}
@@ -77,9 +78,10 @@ func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	return
 }
 
-func (b *EditingBuilder) formNew(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+func (b *EditingBuilder) formDrawerNew(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	var er ui.EventResponse
-	er, err = b.editForm(ctx)
+	msgs := b.mb.p.messagesFunc(ctx)
+	er, err = b.editFormFor(msgs.CreatingObjectTitle(inflection.Singular(b.mb.label)), msgs.Create)(ctx)
 	if err != nil {
 		return
 	}
@@ -88,60 +90,88 @@ func (b *EditingBuilder) formNew(ctx *ui.EventContext) (r ui.EventResponse, err 
 		Name: "rightDrawer",
 		Schema: VNavigationDrawer(
 			er.Schema.(h.HTMLComponent),
-		).Value(true).
+		).Attr("v-model", "boolean1").
 			Bottom(true).
 			Right(true).
 			Absolute(true).
 			Width(600).
 			Temporary(true),
+		AfterLoaded: `setTimeout(function(){ comp.boolean1 = true }, 100)`,
 	})
 	return
 }
 
-func (b *EditingBuilder) editForm(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	id := ctx.Event.Params[0]
-	ctx.Hub.RegisterEventFunc("update", b.defaultUpdate)
-	var obj = b.mb.newModel()
-
-	if len(id) > 0 {
-		obj, err = b.fetcher(obj, id)
-		if err != nil {
-			return
-		}
-	}
-
+func (b *EditingBuilder) formDrawerEdit(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	var er ui.EventResponse
 	msgs := b.mb.p.messagesFunc(ctx)
-
-	ctx.StateOrInit(obj)
-
-	var notice h.HTMLComponent
-	if msg, ok := ctx.Flash.(string); ok {
-		notice = VSnackbar(h.Text(msg)).Value(true).Top(true).Color("success")
+	er, err = b.editFormFor(msgs.EditingObjectTitle(inflection.Singular(b.mb.label)), msgs.Update)(ctx)
+	if err != nil {
+		return
 	}
 
-	var comps []h.HTMLComponent
-	for _, f := range b.fields {
-		if f.compFunc == nil {
-			continue
-		}
-		comps = append(comps, f.compFunc(obj, &Field{Name: f.name, Label: b.mb.getLabel(f)}, ctx))
-	}
-
-	r.Schema = VContainer(
-		notice,
-		h.H2(msgs.EditingObjectTitle(inflection.Singular(b.mb.label))).Class("title pb-3"),
-		VCard(
-			VCardText(
-				comps...,
-			),
-			VCardActions(
-				VSpacer(),
-				VBtn(msgs.Update).Color("primary").OnClick("update", id),
-			),
-		).Flat(true),
-	).Fluid(true)
-
+	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
+		Name: "rightDrawer",
+		Schema: VNavigationDrawer(
+			er.Schema.(h.HTMLComponent),
+		).Attr("v-model", "boolean1").
+			Bottom(true).
+			Right(true).
+			Absolute(true).
+			Width(600).
+			Temporary(true),
+		AfterLoaded: `setTimeout(function(){ comp.boolean1 = true }, 100)`,
+	})
 	return
+}
+
+func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
+	return func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+		id := ctx.Event.Params[0]
+		ctx.Hub.RegisterEventFunc("update", b.defaultUpdate)
+		var obj = b.mb.newModel()
+
+		if len(id) > 0 {
+			obj, err = b.fetcher(obj, id)
+			if err != nil {
+				return
+			}
+		}
+
+		ctx.StateOrInit(obj)
+		r.State = obj
+
+		var notice h.HTMLComponent
+		if msg, ok := ctx.Flash.(string); ok {
+			notice = VSnackbar(h.Text(msg)).Value(true).Top(true).Color("success").Value(true)
+		}
+
+		var comps []h.HTMLComponent
+		for _, f := range b.fields {
+			if f.compFunc == nil {
+				continue
+			}
+			comps = append(comps, f.compFunc(obj, &Field{Name: f.name, Label: b.mb.getLabel(f)}, ctx))
+		}
+
+		r.Schema = VContainer(
+			notice,
+			h.H2(title).Class("title pb-3"),
+			VCard(
+				VCardText(
+					comps...,
+				),
+				VCardActions(
+					VSpacer(),
+					VBtn(buttonLabel).
+						Dark(true).
+						Color(b.mb.p.primaryColor).
+						OnClick("update", id),
+				),
+			).Flat(true),
+		).Fluid(true)
+
+		return
+	}
 }
 
 func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse, err error) {
