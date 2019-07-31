@@ -3,7 +3,6 @@ package examples
 import (
 	"fmt"
 	"mime/multipart"
-	"os"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -38,7 +37,13 @@ type Product struct {
 	Name string
 }
 
-func Preset1() (r *presets.Builder) {
+func Preset1(db *gorm.DB) (r *presets.Builder) {
+
+	err := db.AutoMigrate(&User{}, &Product{}).Error
+	if err != nil {
+		panic(err)
+	}
+
 	p := presets.New().URIPrefix("/admin").PrimaryColor("cyan darken-3")
 
 	p.BrandFunc(func(ctx *ui.EventContext) h.HTMLComponent {
@@ -72,16 +77,6 @@ func Preset1() (r *presets.Builder) {
 			return h.Text(i.(*Thumb).Name)
 		})
 
-	db, err := gorm.Open("postgres", os.Getenv("TEST_DB"))
-	if err != nil {
-		panic(err)
-	}
-	db.LogMode(true)
-
-	err = db.AutoMigrate(&User{}, &Product{}).Error
-	if err != nil {
-		panic(err)
-	}
 	p.DataOperator(gormop.DataOperator(db))
 
 	p.MenuGroup("User Management").Icon("group")
@@ -126,7 +121,12 @@ func Preset1() (r *presets.Builder) {
 	ef := m.Editing("Name", "Bool1", "Int1")
 	ef.Field("Name").Label("名字").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 		//u := obj.(*User)
-		return VAutocomplete().FieldName("Name").Label(field.Label).Items([]string{"Felix", "Hello"})
+		return VAutocomplete().
+			FieldName("Name").
+			Label(field.Label).
+			Items([]string{"Felix", "Hello"}).
+			Multiple(false).
+			Value(reflectutils.MustGet(obj, field.Name))
 	}).SetterFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) {
 		u := obj.(*User)
 		ns := form.Value["Name"]

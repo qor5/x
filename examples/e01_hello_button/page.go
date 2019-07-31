@@ -12,7 +12,10 @@ type mystate struct {
 func HelloButton(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("reload", reload)
 
-	s := ctx.StateOrInit(&mystate{}).(*mystate)
+	var s = &mystate{}
+	if ctx.Flash != nil {
+		s = ctx.Flash.(*mystate)
+	}
 
 	pr.Schema = Div(
 		ui.Bind(Button("Hello")).
@@ -30,6 +33,10 @@ func HelloButton(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 }
 
 func reload(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	var s = &mystate{}
+	ctx.MustUnmarshalForm(s)
+	ctx.Flash = s
+
 	r.Reload = true
 	return
 }

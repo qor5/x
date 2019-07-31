@@ -24,8 +24,6 @@ func HelloLazyPortalsAndReload(ctx *ui.EventContext) (pr ui.PageResponse, err er
 	ctx.Hub.RegisterEventFunc("reloadAB", reloadAB)
 	ctx.Hub.RegisterEventFunc("updateCD", updateCD)
 
-	ctx.StateOrInit(&mystate{})
-
 	pr.Schema = VApp(
 		VContent(
 			VContainer(
@@ -92,7 +90,9 @@ func menuItems(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 }
 
 func addItemForm(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	s := ctx.State.(*mystate)
+	var s = &mystate{}
+	ctx.MustUnmarshalForm(s)
+
 	textField := VTextField().FieldName("Company")
 
 	if len(s.Error) > 0 {
@@ -111,7 +111,9 @@ func addItemForm(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 }
 
 func addItem(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	s := ctx.State.(*mystate)
+	var s = &mystate{}
+	ctx.MustUnmarshalForm(s)
+
 	if len(s.Company) < 5 {
 		s.Error = "too short"
 		r.ReloadPortals = []string{"addItemForm"}

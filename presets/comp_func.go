@@ -93,15 +93,26 @@ func cfTextTd(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLCompone
 }
 
 func cfCheckbox(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent {
-	return VCheckbox().FieldName(field.Name).Label(field.Label)
+	return VCheckbox().
+		FieldName(field.Name).
+		Label(field.Label).
+		InputValue(reflectutils.MustGet(obj, field.Name).(bool))
 }
 
 func cfNumber(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent {
-	return VTextField().Type("number").FieldName(field.Name).Label(field.Label)
+	return VTextField().
+		Type("number").
+		FieldName(field.Name).
+		Label(field.Label).
+		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name)))
 }
 
 func cfTextField(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent {
-	return VTextField().Type("text").FieldName(field.Name).Label(field.Label)
+	return VTextField().
+		Type("text").
+		FieldName(field.Name).
+		Label(field.Label).
+		Value(reflectutils.MustGet(obj, field.Name).(string))
 }
 
 func builtInFieldTypes() (r FieldTypes) {

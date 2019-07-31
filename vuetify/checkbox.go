@@ -15,6 +15,7 @@ func VCheckbox(children ...h.HTMLComponent) (r *VCheckboxBuilder) {
 	r = &VCheckboxBuilder{
 		tag: h.Tag("vw-checkbox").Children(children...),
 	}
+	//r.FalseValue("false").TrueValue("true")
 	return
 }
 func (b *VCheckboxBuilder) AppendIcon(v string) (r *VCheckboxBuilder) {
@@ -92,8 +93,8 @@ func (b *VCheckboxBuilder) IndeterminateIcon(v string) (r *VCheckboxBuilder) {
 	return b
 }
 
-func (b *VCheckboxBuilder) InputValue(v string) (r *VCheckboxBuilder) {
-	b.tag.Attr("input-value", v)
+func (b *VCheckboxBuilder) InputValue(v bool) (r *VCheckboxBuilder) {
+	b.tag.Attr(":input-value", fmt.Sprint(v))
 	return b
 }
 
@@ -178,7 +179,7 @@ func (b *VCheckboxBuilder) ValidateOnBlur(v bool) (r *VCheckboxBuilder) {
 }
 
 func (b *VCheckboxBuilder) Value(v interface{}) (r *VCheckboxBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", fmt.Sprint(v))
 	return b
 }
 

@@ -1,10 +1,6 @@
 package e09_hello_dialog
 
 import (
-	"fmt"
-	"math/rand"
-	"time"
-
 	bo "github.com/sunfmin/bran/overlay"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/theplant/htmlgo"
@@ -21,28 +17,16 @@ var globalState = &struct {
 	Name string
 }{}
 
-func randStr(prefix string) string {
-	rand.Seed(time.Now().UnixNano())
-	return fmt.Sprintf("%s: %d", prefix, rand.Int31n(100))
-}
-
-func overlay(s *mystate, ctx *ui.EventContext) HTMLComponent {
-	return Div(
-		ui.Bind(Input("").Type("text").Value(s.EditingName)).FieldName("EditingName"),
-		Label(s.NameError).Style("color:red"),
-		ui.Bind(Button("Update")).OnClick("update"),
-	)
-}
-
 func HelloDialog(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("remoteOverlay", remoteOverlay)
+	ctx.Hub.RegisterEventFunc("update", update)
 
-	s := ctx.StateOrInit(&mystate{EditingName: globalState.Name}).(*mystate)
+	var s = &mystate{}
 
 	pr.Schema = Div(
 		H1(globalState.Name),
 		bo.Dialog(
-			overlay(s, ctx),
+			ui.LazyPortal("remoteOverlay").Visible("true"),
 		).TriggerElement(
 			A().Text("Edit").Href("#"),
 		).DefaultVisible(s.dialogVisible),
@@ -54,7 +38,7 @@ func HelloDialog(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		).DefaultVisible(s.dialogVisibleRemote),
 
 		bo.Dialog(
-			overlay(s, ctx),
+			ui.LazyPortal("remoteOverlay").Visible("true"),
 		).TriggerElement(
 			A().Text("Mouseover").Href("#"),
 		).DefaultVisible(s.dialogVisible).
@@ -63,22 +47,33 @@ func HelloDialog(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	return
 }
 
+func overlay(s *mystate, ctx *ui.EventContext) HTMLComponent {
+	return Div(
+		ui.Bind(Input("").Type("text").Value(s.EditingName)).FieldName("EditingName"),
+		Label(s.NameError).Style("color:red"),
+		ui.Bind(Button("Update")).OnClick("update"),
+	)
+}
+
 func remoteOverlay(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	s := ctx.State.(*mystate)
+	var s = &mystate{}
+	ctx.MustUnmarshalForm(s)
+
 	r.Schema = overlay(s, ctx)
 	return
 }
 
 func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	r.Reload = true
-	s := ctx.State.(*mystate)
+	var s = &mystate{}
+	ctx.MustUnmarshalForm(s)
+
 	if len(s.EditingName) < 10 {
 		s.NameError = "name is too short"
-		s.dialogVisible = true
+		r.Schema = overlay(s, ctx)
 	} else {
 		globalState.Name = s.EditingName
 		s.NameError = ""
-		s.dialogVisible = false
+		r.Reload = true
 	}
 
 	return

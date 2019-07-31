@@ -352,7 +352,7 @@ func (b *VAutocompleteBuilder) ValidateOnBlur(v bool) (r *VAutocompleteBuilder) 
 }
 
 func (b *VAutocompleteBuilder) Value(v interface{}) (r *VAutocompleteBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

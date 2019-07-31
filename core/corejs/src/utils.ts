@@ -103,21 +103,21 @@ export function setFormValue(form: FormData, fieldName: string, val: any) {
 	form.set(fieldName, val);
 }
 
-export function getFormValue(form: FormData, fieldName: string): string {
-	const val = form.get(fieldName);
-	if (typeof val === 'string') {
-		return val;
-	}
-	return '';
-}
+// export function getFormValue(form: FormData, fieldName: string): string {
+// 	const val = form.get(fieldName);
+// 	if (typeof val === 'string') {
+// 		return val;
+// 	}
+// 	return '';
+// }
 
-export function getFormValueAsArray(form: FormData, fieldName: string): string[] {
-	const vals = form.getAll(fieldName);
-	const r: string[] = [];
-	for (const v of vals) {
-		if (typeof v === 'string') {
-			r.push(v);
-		}
-	}
-	return r;
-}
+// export function getFormValueAsArray(form: FormData, fieldName: string): string[] {
+// 	const vals = form.getAll(fieldName);
+// 	const r: string[] = [];
+// 	for (const v of vals) {
+// 		if (typeof v === 'string') {
+// 			r.push(v);
+// 		}
+// 	}
+// 	return r;
+// }

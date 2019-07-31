@@ -13,7 +13,6 @@ import (
 	"github.com/sunfmin/bran/core"
 	"github.com/sunfmin/bran/examples/e01_hello_button"
 	"github.com/sunfmin/bran/examples/e02_hello_material_button"
-	"github.com/sunfmin/bran/examples/e03_hello_card"
 	"github.com/sunfmin/bran/examples/e04_hello_material_grid"
 	"github.com/sunfmin/bran/examples/e06_hello_drawer"
 	"github.com/sunfmin/bran/examples/e07_hello_lazy_portal_in_drawer"
@@ -140,8 +139,6 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 			m.Cell(dacComps...).Span(9, m.ScreenAll),
 		)
 
-		pr.State = innerPr.State
-
 		return
 	}
 }
@@ -208,10 +205,10 @@ func Setup(prefix string) http.Handler {
 			url:        "e02_hello_material_button",
 			renderFunc: e02_hello_material_button.HelloButton,
 		},
-		{
-			url:        "e03_hello_card",
-			renderFunc: e03_hello_card.HelloCard,
-		},
+		//{
+		//	url:        "e03_hello_card",
+		//	renderFunc: e03_hello_card.HelloCard,
+		//},
 		{
 			url:        "e04_hello_material_grid",
 			renderFunc: e04_hello_material_grid.HelloGrid,

@@ -6,14 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"mime/multipart"
 	"net/http"
-	"net/url"
 	"reflect"
 	"strings"
 
-	"github.com/sunfmin/reflectutils"
-
-	"github.com/go-playground/form"
 	"github.com/sunfmin/bran/ui"
 	h "github.com/theplant/htmlgo"
 )
@@ -63,9 +60,6 @@ type eventBody struct {
 
 type serverSideData struct {
 	Schema interface{} `json:"schema,omitempty"`
-	States url.Values  `json:"states,omitempty"`
-	//Scripts string      `json:"scripts,omitempty"`
-	//Styles  string      `json:"styles,omitempty"`
 }
 
 func (p *PageBuilder) render(
@@ -113,35 +107,6 @@ func (p *PageBuilder) render(
 		ssd.Schema = string(b)
 	}
 
-	//ssd.Scripts = head.MainScripts(false)
-	//ssd.Styles = head.MainStyles(false)
-
-	// default page response state to ctx state if not set
-	if ctx.State != nil && pr.State == nil {
-		pr.State = ctx.State
-	}
-
-	if pr.State == nil {
-		return
-	}
-
-	p.pageStateType, ssd.States = encodePageState(pr.State)
-	return
-}
-
-func encodePageState(pageState ui.PageState) (pageStateType reflect.Type, values url.Values) {
-	var cantEncode bool
-	pageStateType, cantEncode = getPageStateType(pageState)
-	if cantEncode {
-		return
-	}
-
-	fe := form.NewEncoder()
-	var err error
-	values, err = fe.Encode(pageState)
-	if err != nil {
-		panic(err)
-	}
 	return
 }
 
@@ -159,8 +124,6 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 
 	if isRenderHTML && !pr.JSONOnly {
 		ssd.Schema = nil
-		//ssd.Scripts = ""
-		//ssd.Styles = ""
 	}
 
 	var serverSideDataJSON []byte
@@ -211,32 +174,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getPageStateType(pageState ui.PageState) (t reflect.Type, cantEncode bool) {
-	v := reflect.ValueOf(pageState)
-
-	if v.Kind() != reflect.Ptr {
-		t = v.Type()
-		return
-	}
-
-	if v.IsNil() {
-		cantEncode = true
-		t = v.Type()
-		for t.Kind() == reflect.Ptr {
-			t = t.Elem()
-		}
-		return
-	}
-
-	for v.Elem().Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-
-	t = v.Elem().Type()
-	return
-}
-
-func (p *PageBuilder) eventBodyFromRequest(r *http.Request) *eventBody {
+func (p *PageBuilder) parseForm(r *http.Request) *multipart.Form {
 	maxSize := p.maxFormSize
 	if maxSize == 0 {
 		maxSize = 128 << 20 // 128MB
@@ -247,7 +185,12 @@ func (p *PageBuilder) eventBodyFromRequest(r *http.Request) *eventBody {
 		panic(err)
 	}
 
-	mf := r.MultipartForm
+	return r.MultipartForm
+}
+
+func (p *PageBuilder) eventBodyFromRequest(r *http.Request) *eventBody {
+	var err error
+	mf := p.parseForm(r)
 
 	var eb eventBody
 	err = json.NewDecoder(strings.NewReader(mf.Value["__event_data__"][0])).Decode(&eb)
@@ -255,26 +198,6 @@ func (p *PageBuilder) eventBodyFromRequest(r *http.Request) *eventBody {
 		panic(err)
 	}
 
-	if p.pageStateType != nil {
-		pageState := p.NewPageState()
-		dec := form.NewDecoder()
-
-		err = dec.Decode(pageState, mf.Value)
-		if err != nil {
-			panic(err)
-		}
-
-		if len(mf.File) > 0 {
-			for k, vs := range mf.File {
-				err = reflectutils.Set(pageState, k, vs)
-				if err != nil {
-					panic(err)
-				}
-			}
-		}
-
-		eb.PageState = pageState
-	}
 	return &eb
 }
 
@@ -302,7 +225,6 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 
 	eb := p.eventBodyFromRequest(r)
 	ctx.Event = &eb.Event
-	ctx.State = eb.PageState
 
 	ef, ok := p.eventFuncRefs[eb.EventFuncID.ID]
 	if !ok {
@@ -316,30 +238,13 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	// for TagsInput like needs datasource to return data, don't need to return State
-	if er.Data != nil {
-		ctx.State = nil
-	}
-
-	// default event response state to ctx state if not set
-	if er.State == nil && ctx.State != nil {
-		er.State = ctx.State
-	}
-
 	if er.Reload {
 		// panic(fmt.Sprintf("er.State %#+v", er.State))
-		ctx.State = er.State
 		ssd := &serverSideData{}
 		head := &DefaultPageInjector{}
 		p.render(ssd, w, r, c, head)
 		er.Schema = ssd.Schema
-		if ssd.States != nil {
-			er.State = ssd.States
-		}
-	} else {
-		if er.State != nil {
-			_, er.State = encodePageState(er.State)
-		}
+
 	}
 
 	eventResponseWithContext(ctx, c, &er)

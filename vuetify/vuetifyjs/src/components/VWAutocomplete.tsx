@@ -1,7 +1,7 @@
 import { VAutocomplete } from 'vuetify/lib';
 
 import Vue, { CreateElement, VNode, VNodeData, Component } from 'vue';
-import { Core, SelectedItems, slotTemplates, selectValue } from './Helpers';
+import { Core, SelectedItems, slotTemplates } from './Helpers';
 
 export default Vue.extend({
 	name: 'vw-autocomplete',
@@ -41,6 +41,9 @@ export default Vue.extend({
 		self._items = self.$props.items;
 	},
 
+	mounted() {
+		this.core.setFormValue(this.$props.fieldName, this.$attrs.value);
+	},
 
 	watch: {
 		searchKeyword(val: string) {
@@ -78,8 +81,6 @@ export default Vue.extend({
 			hideSelected = true;
 		}
 
-		const value = selectValue(self.core, this.$props);
-
 		const data: VNodeData = {
 			props: {
 				...{
@@ -94,7 +95,6 @@ export default Vue.extend({
 				...{
 					items: self._items,
 					loading: self.isLoading,
-					value,
 				},
 			},
 

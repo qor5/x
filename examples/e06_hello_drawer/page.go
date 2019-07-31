@@ -12,7 +12,7 @@ type mystate struct {
 	Group     string
 }
 
-var name string
+var globalName string
 
 func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("form", form)
@@ -20,10 +20,13 @@ func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("update", update)
 	ctx.Hub.RegisterEventFunc("updateForm", updateForm)
 
-	s := ctx.StateOrInit(&mystate{}).(*mystate)
+	var s = &mystate{}
+	if ctx.Flash != nil {
+		s = ctx.Flash.(*mystate)
+	}
 
 	pr.Schema = Div(
-		H1(name),
+		H1(globalName),
 		bo.Drawer(
 			ui.LazyPortal("form", "param1").LoadWhenParentVisible(),
 		).TriggerElement(
@@ -36,12 +39,21 @@ func HelloDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 }
 
 func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	var s = &mystate{}
+	ctx.MustUnmarshalForm(s)
+	ctx.Flash = s
+
 	r.Reload = true
 	return
 }
 
 func form(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	s := ctx.State.(*mystate)
+	var s = &mystate{InputName: globalName}
+
+	if ctx.Flash != nil {
+		s = ctx.Flash.(*mystate)
+	}
+
 	r.Schema = Div(
 		ui.Bind(Button("Close")).OnClick("close"),
 		ui.Bind(Input("").Type("text").Value(s.InputName)).FieldName("InputName"),
@@ -57,14 +69,15 @@ func close(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 }
 
 func updateForm(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	s := ctx.State.(*mystate)
+	var s = &mystate{}
+	ctx.MustUnmarshalForm(s)
+
 	if len(s.InputName) < 10 {
-		s.NameError = "name is too short"
+		s.NameError = "is too short"
+		ctx.Flash = s
 		r, err = form(ctx)
 	} else {
-		name = s.InputName
-		s.NameError = ""
-		s.InputName = ""
+		globalName = s.InputName
 		r.Reload = true
 	}
 	return

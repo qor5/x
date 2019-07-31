@@ -17,17 +17,17 @@ type mystate struct {
 	Slider1       int
 }
 
+var s = &mystate{
+	MyValue:       "This is my value",
+	TextareaValue: "123",
+	Gender:        "M",
+	Agreed:        true,
+	Feature1:      true,
+	Slider1:       10,
+}
+
 func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("update", update)
-
-	s := ctx.StateOrInit(&mystate{
-		MyValue:       "This is my value",
-		TextareaValue: "123",
-		Gender:        "M",
-		Agreed:        true,
-		Feature1:      true,
-		Slider1:       10,
-	}).(*mystate)
 
 	pr.Schema = vt.VApp(
 		vt.VContent(
@@ -38,24 +38,24 @@ func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error)
 				vt.VTextField().Clearable(true).Label("Clearable"),
 				vt.VTextField().Error(true).Label("Error"),
 				vt.VTextField().Label("Default Value").Value("Hello"),
-				vt.VTextField().Label("Form Value").FieldName("MyValue"),
+				vt.VTextField().Label("Form Value").FieldName("MyValue").Value(s.MyValue),
 				Pre(s.MyValue),
-				vt.VTextarea().FieldName("TextareaValue").Solo(true),
+				vt.VTextarea().FieldName("TextareaValue").Solo(true).Value(s.TextareaValue),
 				Pre(s.TextareaValue),
 				vt.VRadioGroup(
 					vt.VRadio().Value("F").Label("Female"),
 					vt.VRadio().Value("M").Label("Male"),
-				).FieldName("Gender"),
+				).FieldName("Gender").Value(s.Gender),
 				Pre(s.Gender),
-				vt.VCheckbox().FieldName("Agreed").Label("Agree"),
+				vt.VCheckbox().FieldName("Agreed").Label("Agree").InputValue(s.Agreed),
 				Pre(fmt.Sprint(s.Agreed)),
-				vt.VSwitch().FieldName("Feature1"),
+				vt.VSwitch().FieldName("Feature1").InputValue(s.Feature1),
 				Pre(fmt.Sprint(s.Feature1)),
 
-				vt.VSlider().FieldName("Slider1"),
+				vt.VSlider().FieldName("Slider1").Value(s.Slider1),
 				Pre(fmt.Sprint(s.Slider1)),
 
-				vt.VSlider().Step(10).Ticks(true).ThumbLabel("always").FieldName("Slider1"),
+				vt.VSlider().Step(10).Ticks(true).ThumbLabel("always").FieldName("Slider1").Value(s.Slider1),
 
 				vt.VBtn("Update").OnClick("update"),
 			),
@@ -65,7 +65,8 @@ func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error)
 }
 
 func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-
+	s = &mystate{}
+	ctx.UnmarshalForm(s)
 	r.Reload = true
 
 	return

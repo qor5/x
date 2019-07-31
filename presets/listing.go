@@ -65,7 +65,6 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	ctx.Hub.RegisterEventFunc("formDrawerNew", b.mb.editing.formDrawerNew)
 	ctx.Hub.RegisterEventFunc("formDrawerEdit", b.mb.editing.formDrawerEdit)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
-	ctx.StateOrInit(b.mb.newModel())
 
 	var objs interface{}
 	objs, err = b.searcher(b.mb.newModelArray(), &SearchParams{

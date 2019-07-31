@@ -233,8 +233,6 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 			),
 		).Id("vt-app")
 
-		pr.State = innerPr.State
-
 		return
 	}
 }

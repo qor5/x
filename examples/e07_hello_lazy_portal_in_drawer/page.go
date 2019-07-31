@@ -10,12 +10,6 @@ import (
 	. "github.com/theplant/htmlgo"
 )
 
-type mystate struct {
-	drawerVisible bool
-	Name          string
-	NameError     string
-}
-
 func randStr(prefix string) string {
 	rand.Seed(time.Now().UnixNano())
 	return fmt.Sprintf("%s: %d", prefix, rand.Int31n(100))
@@ -24,10 +18,7 @@ func randStr(prefix string) string {
 func HelloLazyLoaderInDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("editPage", editPage)
 
-	s := ctx.StateOrInit(&mystate{}).(*mystate)
-
 	pr.Schema = Div(
-		H1(s.Name),
 		bo.Drawer(
 			ui.LazyPortal("editPage", "param1").LoadWhenParentVisible(),
 			bo.Drawer(
@@ -37,14 +28,12 @@ func HelloLazyLoaderInDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err erro
 			),
 		).TriggerElement(
 			A().Text("Edit").Href("#"),
-		).Width(500).DefaultOpen(s.drawerVisible, false),
+		).Width(500),
 	)
 	return
 }
 
 func editPage(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	s := ctx.State.(*mystate)
-	_ = s
 
 	r.Schema = bo.Drawer(
 		Button("Close").Attr("@click", "parent.close"),

@@ -8,8 +8,6 @@ import {
 	setPushState,
 	EventData,
 	setFormValue,
-	getFormValue,
-	getFormValueAsArray,
 	jsonEvent,
 } from './utils';
 
@@ -118,13 +116,13 @@ export class Core {
 		setFormValue(this.form, fieldName, val);
 	}
 
-	public getFormValue(fieldName: string): string {
-		return getFormValue(this.form, fieldName);
-	}
+	// public getFormValue(fieldName: string): string {
+	// 	return getFormValue(this.form, fieldName);
+	// }
 
-	public getFormValueAsArray(fieldName: string): string[] {
-		return getFormValueAsArray(this.form, fieldName);
-	}
+	// public getFormValueAsArray(fieldName: string): string[] {
+	// 	return getFormValueAsArray(this.form, fieldName);
+	// }
 
 	private fetchEventThenRefresh(eventFuncId: EventFuncID, event: EventData) {
 		this.fetchEvent(eventFuncId, event)

@@ -86,8 +86,6 @@ func (b *EditingBuilder) formDrawerNew(ctx *ui.EventContext) (r ui.EventResponse
 		return
 	}
 
-	r.State = er.State
-
 	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
 		Name: "rightDrawer",
 		Schema: VNavigationDrawer(
@@ -111,7 +109,6 @@ func (b *EditingBuilder) formDrawerEdit(ctx *ui.EventContext) (r ui.EventRespons
 		return
 	}
 
-	r.State = er.State
 	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
 		Name: "rightDrawer",
 		Schema: VNavigationDrawer(
@@ -133,16 +130,12 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 		ctx.Hub.RegisterEventFunc("update", b.defaultUpdate)
 		var obj = b.mb.newModel()
 
-		ctx.StateOrInit(obj)
 		if len(id) > 0 {
 			obj, err = b.fetcher(obj, id)
 			if err != nil {
 				return
 			}
-			ctx.State = obj
 		}
-
-		r.State = obj
 
 		var notice h.HTMLComponent
 		if msg, ok := ctx.Flash.(string); ok {
@@ -154,7 +147,10 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 			if f.compFunc == nil {
 				continue
 			}
-			comps = append(comps, f.compFunc(obj, &Field{Name: f.name, Label: b.mb.getLabel(f)}, ctx))
+			comps = append(comps, f.compFunc(obj, &Field{
+				Name:  f.name,
+				Label: b.mb.getLabel(f),
+			}, ctx))
 		}
 
 		r.Schema = VContainer(
@@ -180,8 +176,10 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 
 func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	id := ctx.Event.Params[0]
-	var obj = b.mb.newModel()
+	var newObj = b.mb.newModel()
+	ctx.MustUnmarshalForm(newObj)
 
+	var obj = b.mb.newModel()
 	if len(id) > 0 {
 		obj, err = b.fetcher(obj, id)
 		if err != nil {
@@ -189,9 +187,8 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 		}
 	}
 
-	newObj := ctx.State
-
 	for _, f := range b.fields {
+
 		err = reflectutils.Set(obj, f.name, reflectutils.MustGet(newObj, f.name))
 		if err != nil {
 			panic(err)

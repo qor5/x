@@ -43,16 +43,6 @@ func (b *VTextareaBuilder) BackgroundColor(v string) (r *VTextareaBuilder) {
 	return b
 }
 
-func (b *VTextareaBuilder) Box(v bool) (r *VTextareaBuilder) {
-	b.tag.Attr(":box", fmt.Sprint(v))
-	return b
-}
-
-func (b *VTextareaBuilder) BrowserAutocomplete(v string) (r *VTextareaBuilder) {
-	b.tag.Attr("browser-autocomplete", v)
-	return b
-}
-
 func (b *VTextareaBuilder) ClearIcon(v string) (r *VTextareaBuilder) {
 	b.tag.Attr("clear-icon", v)
 	return b
@@ -83,11 +73,6 @@ func (b *VTextareaBuilder) Disabled(v bool) (r *VTextareaBuilder) {
 	return b
 }
 
-func (b *VTextareaBuilder) DontFillMaskBlanks(v bool) (r *VTextareaBuilder) {
-	b.tag.Attr(":dont-fill-mask-blanks", fmt.Sprint(v))
-	return b
-}
-
 func (b *VTextareaBuilder) Error(v bool) (r *VTextareaBuilder) {
 	b.tag.Attr(":error", fmt.Sprint(v))
 	return b
@@ -100,6 +85,11 @@ func (b *VTextareaBuilder) ErrorCount(v int) (r *VTextareaBuilder) {
 
 func (b *VTextareaBuilder) ErrorMessages(v string) (r *VTextareaBuilder) {
 	b.tag.Attr("error-messages", v)
+	return b
+}
+
+func (b *VTextareaBuilder) Filled(v bool) (r *VTextareaBuilder) {
+	b.tag.Attr(":filled", fmt.Sprint(v))
 	return b
 }
 
@@ -128,6 +118,11 @@ func (b *VTextareaBuilder) Hint(v string) (r *VTextareaBuilder) {
 	return b
 }
 
+func (b *VTextareaBuilder) Id(v string) (r *VTextareaBuilder) {
+	b.tag.Attr("id", v)
+	return b
+}
+
 func (b *VTextareaBuilder) Label(v string) (r *VTextareaBuilder) {
 	b.tag.Attr("label", v)
 	return b
@@ -138,13 +133,13 @@ func (b *VTextareaBuilder) Light(v bool) (r *VTextareaBuilder) {
 	return b
 }
 
-func (b *VTextareaBuilder) Loading(v bool) (r *VTextareaBuilder) {
-	b.tag.Attr(":loading", fmt.Sprint(v))
+func (b *VTextareaBuilder) LoaderHeight(v int) (r *VTextareaBuilder) {
+	b.tag.Attr(":loader-height", fmt.Sprint(v))
 	return b
 }
 
-func (b *VTextareaBuilder) Mask(v string) (r *VTextareaBuilder) {
-	b.tag.Attr("mask", v)
+func (b *VTextareaBuilder) Loading(v bool) (r *VTextareaBuilder) {
+	b.tag.Attr(":loading", fmt.Sprint(v))
 	return b
 }
 
@@ -158,8 +153,8 @@ func (b *VTextareaBuilder) NoResize(v bool) (r *VTextareaBuilder) {
 	return b
 }
 
-func (b *VTextareaBuilder) Outline(v bool) (r *VTextareaBuilder) {
-	b.tag.Attr(":outline", fmt.Sprint(v))
+func (b *VTextareaBuilder) Outlined(v bool) (r *VTextareaBuilder) {
+	b.tag.Attr(":outlined", fmt.Sprint(v))
 	return b
 }
 
@@ -193,13 +188,13 @@ func (b *VTextareaBuilder) Readonly(v bool) (r *VTextareaBuilder) {
 	return b
 }
 
-func (b *VTextareaBuilder) ReturnMaskedValue(v bool) (r *VTextareaBuilder) {
-	b.tag.Attr(":return-masked-value", fmt.Sprint(v))
+func (b *VTextareaBuilder) Reverse(v bool) (r *VTextareaBuilder) {
+	b.tag.Attr(":reverse", fmt.Sprint(v))
 	return b
 }
 
-func (b *VTextareaBuilder) Reverse(v bool) (r *VTextareaBuilder) {
-	b.tag.Attr(":reverse", fmt.Sprint(v))
+func (b *VTextareaBuilder) Rounded(v bool) (r *VTextareaBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
 	return b
 }
 
@@ -213,8 +208,13 @@ func (b *VTextareaBuilder) Rows(v int) (r *VTextareaBuilder) {
 	return b
 }
 
-func (b *VTextareaBuilder) Rules(v interface{}) (r *VTextareaBuilder) {
-	b.tag.Attr("rules", v)
+func (b *VTextareaBuilder) Rules(v []string) (r *VTextareaBuilder) {
+	b.tag.Attr(":rules", v)
+	return b
+}
+
+func (b *VTextareaBuilder) Shaped(v bool) (r *VTextareaBuilder) {
+	b.tag.Attr(":shaped", fmt.Sprint(v))
 	return b
 }
 
@@ -255,6 +255,55 @@ func (b *VTextareaBuilder) Type(v string) (r *VTextareaBuilder) {
 
 func (b *VTextareaBuilder) ValidateOnBlur(v bool) (r *VTextareaBuilder) {
 	b.tag.Attr(":validate-on-blur", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTextareaBuilder) Value(v interface{}) (r *VTextareaBuilder) {
+	b.tag.Attr(":value", h.JSONString(v))
+	return b
+}
+
+func (b *VTextareaBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VTextareaBuilder) Attr(vs ...interface{}) (r *VTextareaBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VTextareaBuilder) Children(children ...h.HTMLComponent) (r *VTextareaBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VTextareaBuilder) AppendChildren(children ...h.HTMLComponent) (r *VTextareaBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VTextareaBuilder) PrependChildren(children ...h.HTMLComponent) (r *VTextareaBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VTextareaBuilder) Class(names ...string) (r *VTextareaBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VTextareaBuilder) ClassIf(name string, add bool) (r *VTextareaBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VTextareaBuilder) On(name string, value string) (r *VTextareaBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VTextareaBuilder) Bind(name string, value string) (r *VTextareaBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

@@ -43,27 +43,29 @@ var options2 = []*User{
 	{Login: "charles", Name: "Charles"},
 }
 
+var globalState = &mystate{
+	Values1: []string{
+		"sam",
+		"charles",
+	},
+	Values2: []string{
+		"charles",
+	},
+	Value3: "charles",
+}
+
 func HelloVuetifyAutocomplete(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("update", update)
-	s := ctx.StateOrInit(&mystate{
-		Values1: []string{
-			"sam",
-			"charles",
-		},
-		Values2: []string{
-			"charles",
-		},
-		Value3: "charles",
-	}).(*mystate)
 
 	result := Ul()
-	for _, v := range s.Values1 {
+	for _, v := range globalState.Values1 {
 		result.AppendChildren(Li().Text(v))
 	}
 	result.AppendChildren(Li().Text("======"))
-	for _, v := range s.Values2 {
+	for _, v := range globalState.Values2 {
 		result.AppendChildren(Li().Text(v))
 	}
+
 	pr.Schema = vt.VApp(
 		vt.VContent(
 			vt.VContainer(
@@ -73,7 +75,8 @@ func HelloVuetifyAutocomplete(ctx *ui.EventContext) (pr ui.PageResponse, err err
 					FieldName("Values1").
 					ItemText("Name").
 					ItemValue("Login").
-					Label("Static Options"),
+					Label("Static Options").
+					Value(globalState.Values1),
 
 				vt.VAutocomplete().
 					ItemsEventFunc(ctx.Hub, "users", users).
@@ -81,7 +84,8 @@ func HelloVuetifyAutocomplete(ctx *ui.EventContext) (pr ui.PageResponse, err err
 					ItemValue("Login").
 					SelectedItems(selectedItems2).
 					FieldName("Values2").
-					Label("Load Options from Remote"),
+					Label("Load Options from Remote").
+					Value(globalState.Values2),
 
 				result,
 				H1("VSelect"),
@@ -90,8 +94,9 @@ func HelloVuetifyAutocomplete(ctx *ui.EventContext) (pr ui.PageResponse, err err
 					ItemText("Name").
 					ItemValue("Login").
 					FieldName("Value3").
-					Solo(true),
-				Pre(s.Value3),
+					Solo(true).
+					Value(globalState.Value3),
+				Pre(globalState.Value3),
 				vt.VBtn("Update").
 					Color("success").
 					OnClick("update"),
@@ -121,9 +126,11 @@ func users(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 }
 
 func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	s := ctx.State.(*mystate)
+	globalState = &mystate{}
+	ctx.MustUnmarshalForm(globalState)
+
 	selectedItems1 = []*User{}
-	for _, login := range s.Values1 {
+	for _, login := range globalState.Values1 {
 		for _, u := range options1 {
 			if u.Login == login {
 				selectedItems1 = append(selectedItems1, u)
@@ -132,7 +139,7 @@ func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	}
 
 	selectedItems2 = []*User{}
-	for _, login := range s.Values2 {
+	for _, login := range globalState.Values2 {
 		for _, u := range options2 {
 			if u.Login == login {
 				selectedItems2 = append(selectedItems2, u)
@@ -142,7 +149,7 @@ func update(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 
 	selectedItems3 = []*User{}
 	for _, u := range options1 {
-		if u.Login == s.Value3 {
+		if u.Login == globalState.Value3 {
 			selectedItems3 = append(selectedItems3, u)
 		}
 	}

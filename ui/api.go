@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/go-playground/form"
+	"github.com/sunfmin/reflectutils"
 )
 
 type Component interface {
@@ -15,7 +18,6 @@ type PageState interface{}
 
 type PageResponse struct {
 	Schema   Component
-	State    PageState
 	JSONOnly bool
 }
 
@@ -31,7 +33,6 @@ type EventResponse struct {
 	Dialog        Component       `json:"dialog,omitempty"`
 	CloseDialog   bool            `json:"closeDialog,omitempty"`
 	Schema        Component       `json:"schema,omitempty"`
-	State         PageState       `json:"states,omitempty"`
 	Reload        bool            `json:"reload,omitempty"`
 	ReloadPortals []string        `json:"reloadPortals,omitempty"`
 	UpdatePortals []*PortalUpdate `json:"updatePortals,omitempty"`
@@ -81,9 +82,39 @@ type EventContext struct {
 	W        http.ResponseWriter
 	Hub      EventFuncHub
 	Injector PageInjector
-	State    PageState
 	Event    *Event
 	Flash    interface{} // pass value from actions to index
+}
+
+func (ctx *EventContext) MustUnmarshalForm(v interface{}) {
+	err := ctx.UnmarshalForm(v)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (ctx *EventContext) UnmarshalForm(v interface{}) (err error) {
+	mf := ctx.R.MultipartForm
+	if ctx.R.MultipartForm == nil {
+		panic("POST request with form required, can't use UnmarshalForm in PageFunc")
+	}
+
+	dec := form.NewDecoder()
+	err = dec.Decode(v, mf.Value)
+	if err != nil {
+		panic(err)
+		return
+	}
+
+	if len(mf.File) > 0 {
+		for k, vs := range mf.File {
+			err = reflectutils.Set(v, k, vs)
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 type PageInjector interface {

@@ -15,7 +15,6 @@ func VSwitch(children ...h.HTMLComponent) (r *VSwitchBuilder) {
 	r = &VSwitchBuilder{
 		tag: h.Tag("vw-switch").Children(children...),
 	}
-	r.TrueValue("true").FalseValue("false")
 	return
 }
 
@@ -84,8 +83,8 @@ func (b *VSwitchBuilder) Id(v string) (r *VSwitchBuilder) {
 	return b
 }
 
-func (b *VSwitchBuilder) InputValue(v string) (r *VSwitchBuilder) {
-	b.tag.Attr("input-value", v)
+func (b *VSwitchBuilder) InputValue(v bool) (r *VSwitchBuilder) {
+	b.tag.Attr(":input-value", fmt.Sprint(v))
 	return b
 }
 
@@ -159,8 +158,8 @@ func (b *VSwitchBuilder) ValidateOnBlur(v bool) (r *VSwitchBuilder) {
 	return b
 }
 
-func (b *VSwitchBuilder) Value(v string) (r *VSwitchBuilder) {
-	b.tag.Attr("value", v)
+func (b *VSwitchBuilder) Value(v bool) (r *VSwitchBuilder) {
+	b.tag.Attr("value", fmt.Sprint(v))
 	return b
 }
 
