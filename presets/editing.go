@@ -86,6 +86,8 @@ func (b *EditingBuilder) formDrawerNew(ctx *ui.EventContext) (r ui.EventResponse
 		return
 	}
 
+	r.State = er.State
+
 	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
 		Name: "rightDrawer",
 		Schema: VNavigationDrawer(
@@ -109,6 +111,7 @@ func (b *EditingBuilder) formDrawerEdit(ctx *ui.EventContext) (r ui.EventRespons
 		return
 	}
 
+	r.State = er.State
 	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
 		Name: "rightDrawer",
 		Schema: VNavigationDrawer(
@@ -130,14 +133,15 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 		ctx.Hub.RegisterEventFunc("update", b.defaultUpdate)
 		var obj = b.mb.newModel()
 
+		ctx.StateOrInit(obj)
 		if len(id) > 0 {
 			obj, err = b.fetcher(obj, id)
 			if err != nil {
 				return
 			}
+			ctx.State = obj
 		}
 
-		ctx.StateOrInit(obj)
 		r.State = obj
 
 		var notice h.HTMLComponent

@@ -29,7 +29,7 @@ func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams
 		}
 		wh = wh.Where(strings.Join(segs, " OR "), args...)
 	}
-	err = wh.Find(obj).Error
+	err = wh.Order("id DESC").Find(obj).Error
 	if err != nil {
 		return
 	}
