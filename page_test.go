@@ -27,156 +27,6 @@ type Address struct {
 	City    string
 }
 
-var userData = &User{
-	Name:    "Felix",
-	Address: &Address{"123123", "Hangzhou"},
-}
-
-var userZero *User
-var userZero2 ****User
-
-var zeroBody = `
-{
-	"schema": {}
-}
-`
-
-var userBody = `
-{
-	"schema": {},
-	"states": {
-		"Address.City": [
-			"Hangzhou"
-		],
-		"Address.Zipcode": [
-			"123123"
-		],
-		"Name": [
-			"Felix"
-		]
-	}
-}
-`
-var pageStateCases = []struct {
-	name       string
-	state      interface{}
-	schema     ui.Component
-	body       string
-	renderHTML bool
-}{
-	{
-		name:  "empty",
-		state: nil,
-		body:  zeroBody,
-	},
-	{
-		name:  "zero",
-		state: userZero,
-		body:  zeroBody,
-	},
-	{
-		name:  "zero 2",
-		state: userZero2,
-		body:  zeroBody,
-	},
-	{
-		name:  "valid 1",
-		state: User{Name: "Felix", Address: &Address{"123123", "Hangzhou"}},
-		body:  userBody,
-	},
-	{
-		name:  "valid 2",
-		state: userData,
-		body:  userBody,
-	},
-	{
-		name:  "valid 3",
-		state: &userData,
-		body:  userBody,
-	},
-	{
-		name:   "html",
-		state:  &userData,
-		schema: ui.RawSchema("{}"),
-		body: `
-{
-	"schema": {},
-	"states": {
-		"Address.City": [
-			"Hangzhou"
-		],
-		"Address.Zipcode": [
-			"123123"
-		],
-		"Name": [
-			"Felix"
-		]
-	}
-}
-		`,
-	},
-	{
-		name:       "html component",
-		state:      &userData,
-		schema:     h.RawHTML("<h1>Hello</h1>"),
-		renderHTML: true,
-		body: `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-</head>
-<body class='front'>
-<div id="app" v-cloak="">
-<h1>Hello</h1></div>
-<script type='text/javascript'>
-window.__serverSideData__={
-	"states": {
-		"Address.City": [
-			"Hangzhou"
-		],
-		"Address.Zipcode": [
-			"123123"
-		],
-		"Name": [
-			"Felix"
-		]
-	}
-}
-</script>
-
-</body>
-</html>
-
-`,
-	},
-}
-
-func TestPageState(t *testing.T) {
-	pb := bran.New()
-
-	for _, c := range pageStateCases {
-		p := pb.Page(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
-			ctx.State = c.state
-			pr.Schema = ui.RawSchema("{}")
-			if c.schema != nil {
-				pr.Schema = c.schema
-			}
-			pr.JSONOnly = !c.renderHTML
-			return
-		})
-
-		w := httptest.NewRecorder()
-		r := httptest.NewRequest("GET", "/", nil)
-		p.ServeHTTP(w, r)
-
-		diff := htmltestingutils.PrettyHtmlDiff(w.Body, "*", c.body)
-		if len(diff) > 0 {
-			t.Error(c.name, diff)
-		}
-	}
-}
-
 func runEvent(
 	eventFunc ui.EventFunc,
 	renderChanger func(ctx *ui.EventContext, pr *ui.PageResponse),
@@ -199,7 +49,6 @@ func runEvent(
 		if renderChanger != nil {
 			renderChanger(ctx, &pr)
 		} else {
-			ctx.StateOrInit(&User{})
 			pr.Schema = ui.RawSchema("{}")
 			pr.JSONOnly = true
 		}
@@ -234,60 +83,16 @@ func runEvent(
 	return
 }
 
-func TestPageStateInitAndSet(t *testing.T) {
-
-	var login = func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-		add := ctx.SubStateOrInit("Address", &Address{}).(*Address)
-		add.City = "hz"
-
-		r.Reload = true
-		return
-	}
-
-	indexResp, eventResp := runEvent(login, nil, nil)
-
-	diff := testingutils.PrettyJsonDiff(`
-{
-	"schema": {},
-	"states": {
-		"Name": [
-			""
-		]
-	}
-}
-	`, indexResp.String())
-	if len(diff) > 0 {
-		t.Error(diff)
-	}
-
-	diff = testingutils.PrettyJsonDiff(`
-{
-	"schema": {},
-	"states": {
-		"Address.City": [
-			"hz"
-		],
-		"Address.Zipcode": [
-			""
-		],
-		"Name": [
-			""
-		]
-	},
-	"reload": true
-}
-	`, eventResp.String())
-	if len(diff) > 0 {
-		t.Error(diff)
-	}
-}
-
 func TestFileUpload(t *testing.T) {
 	type mystate struct {
 		File1 []*multipart.FileHeader `form:"-"`
 	}
 
 	var uploadFile = func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+		s := &mystate{}
+		ctx.MustUnmarshalForm(s)
+
+		ctx.Flash = s
 		r.Reload = true
 		return
 	}
@@ -295,7 +100,10 @@ func TestFileUpload(t *testing.T) {
 	pb := bran.New()
 	p := pb.Page(func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
-		s := ctx.StateOrInit(&mystate{}).(*mystate)
+		s := &mystate{}
+		if ctx.Flash != nil {
+			s = ctx.Flash.(*mystate)
+		}
 
 		var data []byte
 		if len(s.File1) > 0 {
@@ -338,7 +146,6 @@ func TestFileUpload(t *testing.T) {
 	"schema": {
 		"__text__": "Hello"
 	},
-	"states": {},
 	"reload": true
 }
 	`, w.Body.String())
@@ -377,30 +184,27 @@ var eventCases = []struct {
 	{
 		name: "run event reload states",
 		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
-			s := ctx.StateOrInit(&User{Address: &Address{}}).(*User)
+			s := &User{
+				Address: &Address{},
+			}
+			if ctx.Flash != nil {
+				s = ctx.Flash.(*User)
+			}
 			pr.Schema = h.Text(s.Name + " " + s.Address.City)
 			s.Name = "Felix"
 		},
 		eventFunc: func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-			s := ctx.State.(*User)
+			s := &User{}
+			ctx.MustUnmarshalForm(s)
 			r.Reload = true
 			s.Name = "Felix1"
 			s.Address = &Address{City: "Hangzhou"}
+
+			ctx.Flash = s
 			return
 		},
 		expectedEventResp: `{
 	"schema": "Felix1 Hangzhou",
-	"states": {
-		"Address.City": [
-			"Hangzhou"
-		],
-		"Address.Zipcode": [
-			""
-		],
-		"Name": [
-			"Felix"
-		]
-	},
 	"reload": true
 }
 `,
@@ -413,16 +217,9 @@ var eventCases = []struct {
 			)
 			return
 		},
-		expectedEventResp: `
-	{
-		"schema": "\n\u003cdiv\u003e\n\u003ch1\u003ehello\u003c/h1\u003e\n\u003c/div\u003e\n",
-		"states": {
-			"Name": [
-				""
-			]
-		}
-	}
-			`,
+		expectedEventResp: `{
+	"schema": "\n\u003cdiv\u003e\n\u003ch1\u003ehello\u003c/h1\u003e\n\u003c/div\u003e\n"
+}`,
 	},
 
 	{
@@ -525,7 +322,7 @@ var mountCases = []struct {
 		method: "POST",
 		path:   "/home/topics/xgb123?__execute_event__",
 		bodyFunc: func(w *multipart.Writer) {
-			w.WriteField("__event_data__", `{"eventFuncId":{"id":"bookmark","pushState":null},"event":{"value":""}}`)
+			_ = w.WriteField("__event_data__", `{"eventFuncId":{"id":"bookmark","pushState":null},"event":{"value":""}}`)
 		},
 		expected: `{"schema":"\n\u003ch1\u003exgb123 bookmarked\u003c/h1\u003e\n"}`,
 	},

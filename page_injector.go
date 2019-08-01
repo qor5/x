@@ -40,32 +40,6 @@ func (b *DefaultPageInjector) Meta(attrs ...string) {
 	return
 }
 
-//
-//func (b *DefaultPageInjector) PutScript(script string) {
-//	var exists bool
-//	for _, s := range b.scripts {
-//		if s == script {
-//			exists = true
-//			break
-//		}
-//	}
-//	if !exists {
-//		b.scripts = append(b.scripts, script)
-//	}
-//	return
-//}
-//
-//func (b *DefaultPageInjector) PutStyle(style string) {
-//	for _, s := range b.styles {
-//		if s == style {
-//			return
-//		}
-//	}
-//
-//	b.styles = append(b.styles, style)
-//	return
-//}
-
 func (b *DefaultPageInjector) PutTailHTML(v string) {
 	for _, s := range b.tailHtmls {
 		if s == v {
@@ -76,41 +50,6 @@ func (b *DefaultPageInjector) PutTailHTML(v string) {
 	b.tailHtmls = append(b.tailHtmls, v)
 	return
 }
-//
-//func (b *DefaultPageInjector) MainStyles(htmlTag bool) (r string) {
-//
-//	if len(b.styles) == 0 {
-//		return
-//	}
-//
-//	body := bytes.NewBuffer(nil)
-//	if htmlTag {
-//		body.WriteString(`<style id="main_styles" type="text/css">`)
-//		body.WriteString("\n")
-//	}
-//	body.WriteString(strings.Join(b.styles, "\n\n"))
-//	if htmlTag {
-//		body.WriteString("\n</style>\n")
-//	}
-//
-//	return body.String()
-//}
-//
-//func (b *DefaultPageInjector) MainScripts(htmlTag bool) (r string) {
-//	if len(b.scripts) == 0 {
-//		return
-//	}
-//
-//	body := bytes.NewBuffer(nil)
-//	if htmlTag {
-//		body.WriteString("<script id=\"main_scripts\">\n")
-//	}
-//	body.WriteString(strings.Join(b.scripts, "\n\n"))
-//	if htmlTag {
-//		body.WriteString("\n</script>\n")
-//	}
-//	return body.String()
-//}
 
 func (b *DefaultPageInjector) TailHTML() (r string) {
 	return strings.Join(b.tailHtmls, "\n")
@@ -169,7 +108,10 @@ func (b *DefaultPageInjector) HeadString() string {
 	b.addCharsetViewPortIfMissing()
 	buf := bytes.NewBuffer(nil)
 	for _, n := range b.headNodes {
-		html.Render(buf, n)
+		err := html.Render(buf, n)
+		if err != nil {
+			panic(err)
+		}
 		buf.WriteString("\n")
 	}
 	return buf.String()

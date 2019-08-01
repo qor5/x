@@ -8,7 +8,6 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
-	"reflect"
 	"strings"
 
 	"github.com/sunfmin/bran/ui"
@@ -19,7 +18,6 @@ type PageBuilder struct {
 	b              *Builder
 	eventFuncRefs  map[string]ui.EventFunc
 	pageRenderFunc ui.PageFunc
-	pageStateType  reflect.Type
 	maxFormSize    int64
 }
 
@@ -278,14 +276,6 @@ func eventResponseWithContext(ctx *ui.EventContext, c context.Context, er *ui.Ev
 			up.Schema = h.MustString(comp, c)
 		}
 	}
-}
-
-func (p *PageBuilder) NewPageState() interface{} {
-	if p.pageStateType == nil {
-		return nil
-	}
-
-	return reflect.New(p.pageStateType).Interface()
 }
 
 func (p *PageBuilder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
