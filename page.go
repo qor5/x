@@ -143,19 +143,26 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	//body.WriteString(head.MainStyles(true))
 
 	if isRenderHTML {
-		body.WriteString("<div id=\"app\" v-cloak>\n")
-		body.WriteString(schema.(string))
-		body.WriteString("</div>\n")
+		err = h.Fprint(
+			body,
+			h.Div(
+				h.RawHTML(schema.(string)),
+			).Id("app").Attr("v-cloak", true),
+			c,
+		)
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	serverSideDataScript := h.Script(fmt.Sprintf("window.__serverSideData__=%s\n", string(serverSideDataJSON)))
-
-	var b []byte
-	b, err = serverSideDataScript.MarshalHTML(c)
+	err = h.Fprint(
+		body,
+		h.Script(fmt.Sprintf("window.__serverSideData__=%s\n", string(serverSideDataJSON))),
+		c,
+	)
 	if err != nil {
 		panic(err)
 	}
-	body.Write(b)
 
 	//body.WriteString(head.MainScripts(true))
 	body.WriteString(head.TailHTML())

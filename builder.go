@@ -59,15 +59,13 @@ func (b *Builder) defaultLayoutMiddleFunc(in ui.LayoutFunc, head ui.PageInjector
 		)
 
 		buf := bytes.NewBuffer(nil)
-		var b []byte
 		ctx := new(ui.EventContext)
 		ctx.R = r
 
-		b, err = root.MarshalHTML(ui.WrapEventContext(context.TODO(), ctx))
+		err = h.Fprint(buf, root, ui.WrapEventContext(context.TODO(), ctx))
 		if err != nil {
 			return
 		}
-		buf.Write(b)
 
 		output = buf.String()
 		return
