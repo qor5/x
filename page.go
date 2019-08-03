@@ -16,14 +16,13 @@ import (
 
 type PageBuilder struct {
 	b              *Builder
-	eventFuncRefs  map[string]ui.EventFunc
+	eventFuncs     []*idEventFunc
 	pageRenderFunc ui.PageFunc
 	maxFormSize    int64
 }
 
 func (b *Builder) Page(pslf ui.PageFunc) (p *PageBuilder) {
 	p = &PageBuilder{}
-	p.eventFuncRefs = make(map[string]ui.EventFunc)
 	p.b = b
 	p.pageRenderFunc = pslf
 
@@ -38,16 +37,27 @@ func (p *PageBuilder) MaxFormSize(v int64) (r *PageBuilder) {
 
 func (p *PageBuilder) RegisterEventFunc(eventFuncId string, ef ui.EventFunc) (key string) {
 	key = eventFuncId
-	if f, ok := p.eventFuncRefs[eventFuncId]; ok {
-		funcAddress := fmt.Sprint(ef)
-		if fmt.Sprint(f) == funcAddress {
+	if p.eventFuncById(eventFuncId) != nil {
+		return
+	}
+
+	p.eventFuncs = append(p.eventFuncs, &idEventFunc{eventFuncId, ef})
+	return
+}
+
+func (p *PageBuilder) eventFuncById(id string) (r ui.EventFunc) {
+	for _, ne := range p.eventFuncs {
+		if ne.id == id {
+			r = ne.ef
 			return
 		}
-
-		panic(fmt.Sprintf("%s already registered in this page", eventFuncId))
 	}
-	p.eventFuncRefs[eventFuncId] = ef
 	return
+}
+
+type idEventFunc struct {
+	id string
+	ef ui.EventFunc
 }
 
 type eventBody struct {
@@ -89,7 +99,7 @@ func (p *PageBuilder) render(
 		panic("page's RenderFunc returns nil schema, use pr.Schema = root to set it")
 	}
 
-	// fmt.Println("eventFuncRefs count: ", len(p.eventFuncRefs))
+	// fmt.Println("eventFuncs count: ", len(p.eventFuncs))
 	if comp, ok := pager.Schema.(ui.SchemaComponent); ok {
 		b, err := comp.MarshalSchema(ctx)
 		if err != nil {
@@ -217,7 +227,7 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 
 	c := ui.WrapEventContext(r.Context(), ctx)
 
-	if len(p.eventFuncRefs) == 0 {
+	if len(p.eventFuncs) == 0 {
 		log.Println("Re-render because eventFuncs gone, might server restarted")
 		ssd := &serverSideData{}
 		head := &DefaultPageInjector{}
@@ -231,8 +241,8 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	eb := p.eventBodyFromRequest(r)
 	ctx.Event = &eb.Event
 
-	ef, ok := p.eventFuncRefs[eb.EventFuncID.ID]
-	if !ok {
+	ef := p.eventFuncById(eb.EventFuncID.ID)
+	if ef == nil {
 		panic(fmt.Errorf("event %s not found", eb.EventFuncID.ID))
 	}
 
