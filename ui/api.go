@@ -121,8 +121,6 @@ type PageInjector interface {
 	Title(title string)
 	Meta(attrs ...string)
 	MetaNameContent(name, content string)
-	//PutScript(script string)
-	//PutStyle(style string)
 	PutHeadHTML(v string)
 	PutTailHTML(v string)
 

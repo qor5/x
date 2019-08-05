@@ -2,7 +2,6 @@ package ui
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	h "github.com/theplant/htmlgo"
@@ -37,12 +36,7 @@ func (b *VueEventTagBuilder) OnClick(eventFuncId string, params ...string) (r *V
 		Params: params,
 	}
 
-	jb, err := json.Marshal(fid)
-	if err != nil {
-		panic(err)
-	}
-
-	b.tag.SetAttr("v-on:click", fmt.Sprintf("onclick(%s, $event)", string(jb)))
+	b.tag.SetAttr("v-on:click", fmt.Sprintf("onclick(%s, $event)", h.JSONString(fid)))
 	return b
 }
 
@@ -56,17 +50,8 @@ func (b *VueEventTagBuilder) setupChange() {
 		return
 	}
 
-	jb, err := json.Marshal(b.onInputFuncID)
-	if err != nil {
-		panic(err)
-	}
-
-	fieldName, err := json.Marshal(b.fieldName)
-	if err != nil {
-		panic(err)
-	}
-
-	b.tag.SetAttr("v-on:input", fmt.Sprintf(`oninput(%s, %s, $event)`, string(jb), string(fieldName)))
+	b.tag.SetAttr("v-on:input",
+		fmt.Sprintf(`oninput(%s, %s, $event)`, h.JSONString(b.onInputFuncID), h.JSONString(b.fieldName)))
 }
 
 func (b *VueEventTagBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
