@@ -11,8 +11,6 @@ import (
 
 type DefaultPageInjector struct {
 	headNodes []*html.Node
-	scripts   []string
-	styles    []string
 	tailHtmls []string
 }
 

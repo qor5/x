@@ -21,10 +21,10 @@ type PageBuilder struct {
 	maxFormSize    int64
 }
 
-func (b *Builder) Page(pslf ui.PageFunc) (p *PageBuilder) {
+func (b *Builder) Page(pf ui.PageFunc) (p *PageBuilder) {
 	p = &PageBuilder{}
 	p.b = b
-	p.pageRenderFunc = pslf
+	p.pageRenderFunc = pf
 
 	return
 }
@@ -254,7 +254,6 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if er.Reload {
-		// panic(fmt.Sprintf("er.State %#+v", er.State))
 		ssd := &serverSideData{}
 		head := &DefaultPageInjector{}
 		p.render(ssd, w, r, c, head)
