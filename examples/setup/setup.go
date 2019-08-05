@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sunfmin/bran/examples/e18_filter_component"
+
 	"github.com/gobuffalo/packr"
 	"github.com/sunfmin/bran"
 	"github.com/sunfmin/bran/codehighlight"
@@ -271,6 +273,11 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e17_hello_lazy_portals_and_reload",
 			renderFunc: e17_hello_lazy_portals_and_reload.HelloLazyPortalsAndReload,
+			vuetify:    true,
+		},
+		{
+			url:        "e18_filter_component",
+			renderFunc: e18_filter_component.FilterComponent,
 			vuetify:    true,
 		},
 	}

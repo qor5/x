@@ -17,12 +17,13 @@ func VMenu(children ...h.HTMLComponent) (r *VMenuBuilder) {
 	}
 	return
 }
+
 func (b *VMenuBuilder) Absolute(v bool) (r *VMenuBuilder) {
 	b.tag.Attr(":absolute", fmt.Sprint(v))
 	return b
 }
 
-func (b *VMenuBuilder) Activator(v string) (r *VMenuBuilder) {
+func (b *VMenuBuilder) Activator(v interface{}) (r *VMenuBuilder) {
 	b.tag.Attr(":activator", v)
 	return b
 }
@@ -224,6 +225,15 @@ func (b *VMenuBuilder) Value(v interface{}) (r *VMenuBuilder) {
 
 func (b *VMenuBuilder) ZIndex(v int) (r *VMenuBuilder) {
 	b.tag.Attr(":z-index", fmt.Sprint(v))
+	return b
+}
+
+func (b *VMenuBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VMenuBuilder) Attr(vs ...interface{}) (r *VMenuBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 

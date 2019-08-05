@@ -18,8 +18,8 @@ func VExpansionPanel(children ...h.HTMLComponent) (r *VExpansionPanelBuilder) {
 	return
 }
 
-func (b *VExpansionPanelBuilder) Dark(v bool) (r *VExpansionPanelBuilder) {
-	b.tag.Attr(":dark", fmt.Sprint(v))
+func (b *VExpansionPanelBuilder) ActiveClass(v string) (r *VExpansionPanelBuilder) {
+	b.tag.Attr("active-class", v)
 	return b
 }
 
@@ -28,38 +28,32 @@ func (b *VExpansionPanelBuilder) Disabled(v bool) (r *VExpansionPanelBuilder) {
 	return b
 }
 
-func (b *VExpansionPanelBuilder) Expand(v bool) (r *VExpansionPanelBuilder) {
-	b.tag.Attr(":expand", fmt.Sprint(v))
-	return b
-}
-
-func (b *VExpansionPanelBuilder) Focusable(v bool) (r *VExpansionPanelBuilder) {
-	b.tag.Attr(":focusable", fmt.Sprint(v))
-	return b
-}
-
-func (b *VExpansionPanelBuilder) Inset(v bool) (r *VExpansionPanelBuilder) {
-	b.tag.Attr(":inset", fmt.Sprint(v))
-	return b
-}
-
-func (b *VExpansionPanelBuilder) Light(v bool) (r *VExpansionPanelBuilder) {
-	b.tag.Attr(":light", fmt.Sprint(v))
-	return b
-}
-
-func (b *VExpansionPanelBuilder) Popout(v bool) (r *VExpansionPanelBuilder) {
-	b.tag.Attr(":popout", fmt.Sprint(v))
-	return b
-}
-
 func (b *VExpansionPanelBuilder) Readonly(v bool) (r *VExpansionPanelBuilder) {
 	b.tag.Attr(":readonly", fmt.Sprint(v))
 	return b
 }
 
-func (b *VExpansionPanelBuilder) Value(v int) (r *VExpansionPanelBuilder) {
-	b.tag.Attr(":value", fmt.Sprint(v))
+func (b *VExpansionPanelBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VExpansionPanelBuilder) Attr(vs ...interface{}) (r *VExpansionPanelBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VExpansionPanelBuilder) Children(children ...h.HTMLComponent) (r *VExpansionPanelBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VExpansionPanelBuilder) AppendChildren(children ...h.HTMLComponent) (r *VExpansionPanelBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VExpansionPanelBuilder) PrependChildren(children ...h.HTMLComponent) (r *VExpansionPanelBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

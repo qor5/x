@@ -18,38 +18,32 @@ func VExpansionPanelContent(children ...h.HTMLComponent) (r *VExpansionPanelCont
 	return
 }
 
-func (b *VExpansionPanelContentBuilder) Disabled(v bool) (r *VExpansionPanelContentBuilder) {
-	b.tag.Attr(":disabled", fmt.Sprint(v))
+func (b *VExpansionPanelContentBuilder) Eager(v bool) (r *VExpansionPanelContentBuilder) {
+	b.tag.Attr(":eager", fmt.Sprint(v))
 	return b
 }
 
-func (b *VExpansionPanelContentBuilder) ExpandIcon(v string) (r *VExpansionPanelContentBuilder) {
-	b.tag.Attr("expand-icon", v)
+func (b *VExpansionPanelContentBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VExpansionPanelContentBuilder) Attr(vs ...interface{}) (r *VExpansionPanelContentBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 
-func (b *VExpansionPanelContentBuilder) HideActions(v bool) (r *VExpansionPanelContentBuilder) {
-	b.tag.Attr(":hide-actions", fmt.Sprint(v))
+func (b *VExpansionPanelContentBuilder) Children(children ...h.HTMLComponent) (r *VExpansionPanelContentBuilder) {
+	b.tag.Children(children...)
 	return b
 }
 
-func (b *VExpansionPanelContentBuilder) Lazy(v bool) (r *VExpansionPanelContentBuilder) {
-	b.tag.Attr(":lazy", fmt.Sprint(v))
+func (b *VExpansionPanelContentBuilder) AppendChildren(children ...h.HTMLComponent) (r *VExpansionPanelContentBuilder) {
+	b.tag.AppendChildren(children...)
 	return b
 }
 
-func (b *VExpansionPanelContentBuilder) Readonly(v bool) (r *VExpansionPanelContentBuilder) {
-	b.tag.Attr(":readonly", fmt.Sprint(v))
-	return b
-}
-
-func (b *VExpansionPanelContentBuilder) Ripple(v bool) (r *VExpansionPanelContentBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
-	return b
-}
-
-func (b *VExpansionPanelContentBuilder) Value(v interface{}) (r *VExpansionPanelContentBuilder) {
-	b.tag.Attr(":value", v)
+func (b *VExpansionPanelContentBuilder) PrependChildren(children ...h.HTMLComponent) (r *VExpansionPanelContentBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

@@ -17,6 +17,7 @@ func VMenuTransition() (r *VMenuTransitionBuilder) {
 	}
 	return
 }
+
 func (b *VMenuTransitionBuilder) Group(v bool) (r *VMenuTransitionBuilder) {
 	b.tag.Attr(":group", fmt.Sprint(v))
 	return b
@@ -39,6 +40,15 @@ func (b *VMenuTransitionBuilder) Mode(v string) (r *VMenuTransitionBuilder) {
 
 func (b *VMenuTransitionBuilder) Origin(v string) (r *VMenuTransitionBuilder) {
 	b.tag.Attr("origin", v)
+	return b
+}
+
+func (b *VMenuTransitionBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VMenuTransitionBuilder) Attr(vs ...interface{}) (r *VMenuTransitionBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 
