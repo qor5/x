@@ -202,11 +202,13 @@ export const DateItem = Vue.extend({
 						<datePicker
 							value={this.valueFrom}
 							onChange={this.setDateFrom}
+							key={modifier + 'from'}
 						/>{' '}
 						<span class='pr-5'>and</span>
 						<datePicker
 							value={this.valueTo}
 							onChange={this.setDateTo}
+							key={modifier + 'to'}
 						/>
 					</div>
 				);
@@ -220,6 +222,7 @@ export const DateItem = Vue.extend({
 					<datePicker
 						value={this.valueIs}
 						onChange={this.setDate}
+						key={modifier}
 					/>
 				</div >
 			);
