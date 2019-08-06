@@ -18,6 +18,7 @@ import './main.css';
 import VWAutocomplete from './components/VWAutocomplete';
 import { WithField } from './components/WithField';
 import { Core, SelectedItems } from './components/Helpers';
+import { DateItem } from './components/Filter';
 
 const vuetify = new Vuetify({
 	icons: {
@@ -38,6 +39,7 @@ declare var window: any;
 		Vue.component('vw-radio-group', WithField(VRadioGroup));
 		Vue.component('vw-slider', WithField(VSlider));
 		Vue.component('vw-select', WithField(VSelect, undefined, [Core, SelectedItems]));
+		Vue.component('vw-date-item', DateItem);
 
 		vueOptions.vuetify = vuetify;
 	});
