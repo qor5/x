@@ -6,9 +6,6 @@ import {
 	VDatePicker,
 	VSelect,
 	VTextField,
-	VContainer,
-	VLayout,
-	VFlex,
 	VMenu,
 	VIcon,
 } from 'vuetify/lib';
@@ -31,33 +28,35 @@ const TextDatePicker = Vue.extend({
 		vmenu: VMenu,
 	},
 	props: {
-		// value: String,
-		// onChange: {},
+		value: String,
 	},
 	data() {
 		return {
 			show: false,
-			value: '',
+			internalValue: this.value,
 		};
 	},
 
 	methods: {
 		onChange(value: any) {
 			this.show = false;
-			this.value = value;
+			this.internalValue = value;
+			this.$emit('input', this.internalValue);
 		},
 		toggle() {
 			this.show = !this.show;
 		},
 	},
 	render(h: CreateElement) {
+		console.log('internalValue', this.internalValue);
 		const self = this;
 		return (<vmenu class='d-inline-block' props={{ value: this.show }} scopedSlots={{
 			activator: ({ on }: any) => {
 				return <vtextfield
 					class='d-inline-block'
+					style='width: 120px'
 					on={on}
-					value={self.value}
+					value={self.internalValue}
 					hideDetails={true}
 					prependInnerIcon='event'
 				></vtextfield>;
@@ -69,17 +68,15 @@ const TextDatePicker = Vue.extend({
 			closeOnContentClick={false}
 			on={
 				{
-					input: (event: any) => {
+					input: (value: any) => {
 						self.toggle();
 					},
 				}
 			}
 		>
 			<datePicker
-				value={this.value}
+				value={this.internalValue}
 				on={{ change: this.onChange }}
-				inputFormat='MM/DD/YYYY'
-				active={true}
 			/>
 		</vmenu >);
 	},
@@ -90,15 +87,12 @@ export const DateItem = Vue.extend({
 		datePicker: TextDatePicker,
 		radioGroup: VRadioGroup,
 		radio: VRadio,
-		vcontainer: VContainer,
 		vselect: VSelect,
 		vtextfield: VTextField,
-		vlayout: VLayout,
-		vflex: VFlex,
 		vicon: VIcon,
 	},
 	props: {
-		data: Object,
+		value: Object,
 		translations: {
 			type: Object,
 			default: () => {
@@ -119,109 +113,113 @@ export const DateItem = Vue.extend({
 
 	data() {
 		return {
-			// data: this.$props.data,
+			modifier: this.$props.value.modifier,
+			valueIs: this.$props.value.value,
+			valueFrom: this.$props.value.valueFrom,
+			valueTo: this.$props.value.valueTo,
+			inTheLastUnit: this.$props.value.inTheLastUnit,
+			inTheLastValue: this.$props.value.inTheLastValue,
+			timezone: this.$props.value.timezone,
 		};
 	},
 
 	methods: {
-		onSelectChange(e: string) {
-			this.data.modifier = e;
-			this.$forceUpdate();
+		setModifier(e: string) {
+			console.log('this.$data', this.$data);
+			this.modifier = e;
+			this.$emit('input', this.$data);
 		},
 
 		setDate(e: any) {
-			this.data.value = e;
-			this.$forceUpdate();
+			this.valueIs = e;
+			this.$emit('input', this.$data);
 		},
 
 		setDateFrom(e: any) {
-			this.data.valueFrom = e;
-			this.$forceUpdate();
+			this.valueFrom = e;
+			this.$emit('input', this.$data);
 		},
 
 		setDateTo(e: any) {
-			this.data.valueTo = e;
-			this.$forceUpdate();
+			this.valueTo = e;
+			this.$emit('input', this.$data);
 		},
 
 		setInTheLastValue(e: any) {
-			this.data.inTheLastValue = e;
-			this.$forceUpdate();
+			this.inTheLastValue = e;
+			this.$emit('input', this.$data);
 		},
 
 		setInTheLastUnit(e: any) {
-			this.data.inTheLastUnit = e;
-			this.$forceUpdate();
+			this.inTheLastUnit = e;
+			this.$emit('input', this.$data);
 		},
 
 		setTimezone(e: any) {
-			this.data.timezone = e;
-			this.$forceUpdate();
+			this.timezone = e;
+			this.$emit('input', this.$data);
 		},
 
-		getInput(modifier: string) {
+		getInput(modifier: string): VNode {
 			const t = this.$props.translations;
-			const inTheLast = (
-				<div>
-					<vicon class='pr-5'>subdirectory_arrow_right</vicon>
-					<vtextfield
-						class='d-inline-block pr-5'
-						type='number'
-						on={{ change: this.setInTheLastValue }}
-						value={(this.data.inTheLastValue || '').toString()}
-						hideDetails={true}
-					/>
-					<vselect
-						class='d-inline-block'
-						on={{ change: this.setInTheLastUnit }}
-						value={this.data.inTheLastUnit || 'days'}
-						items={
-							[
-								{ text: t.days, value: 'days' },
-								{ text: t.months, value: 'months' },
-							]
-						}
-						hideDetails={true}
-					>
-					</vselect>
-				</div>
-			);
 
-			const between = (
-				<div>
-					<vicon class='pr-5'>subdirectory_arrow_right</vicon>
-					<datePicker
-						date={this.data.valueFrom}
-						onChange={this.setDateFrom}
-						inputFormat='MM/DD/YYYY'
-						active={true}
-					/>{' '}
-					<span class='pr-5'>and</span>
-					<datePicker
-						date={this.data.valueTo}
-						onChange={this.setDateTo}
-						inputFormat='MM/DD/YYYY'
-						active={true}
-					/>
-				</div>
-			);
-
-			const inputs: any = {
-				inTheLast,
-				between,
-			};
-
-			if (inputs[modifier]) {
-				return inputs[modifier];
+			if (modifier === 'inTheLast') {
+				console.log('return = inTheLast');
+				return (
+					<div>
+						<vicon class='pr-5'>subdirectory_arrow_right</vicon>
+						<vtextfield
+							class='d-inline-block pr-5'
+							type='number'
+							style='width: 80px'
+							on={{ change: this.setInTheLastValue }}
+							value={(this.inTheLastValue || '').toString()}
+							hideDetails={true}
+						/>
+						<vselect
+							class='d-inline-block'
+							style='width: 120px'
+							on={{ change: this.setInTheLastUnit }}
+							value={this.inTheLastUnit || 'days'}
+							items={
+								[
+									{ text: t.days, value: 'days' },
+									{ text: t.months, value: 'months' },
+								]
+							}
+							hideDetails={true}
+						>
+						</vselect>
+					</div>
+				);
 			}
 
+			if (modifier === 'between') {
+				console.log('return = between');
+				return (
+					<div>
+						<vicon class='pr-5'>subdirectory_arrow_right</vicon>
+						<datePicker
+							value={this.valueFrom}
+							onChange={this.setDateFrom}
+						/>{' '}
+						<span class='pr-5'>and</span>
+						<datePicker
+							value={this.valueTo}
+							onChange={this.setDateTo}
+						/>
+					</div>
+				);
+
+			}
+
+			console.log('return = is', this.valueIs);
 			return (
 				<div>
 					<vicon class='pr-5'>subdirectory_arrow_right</vicon>
 					<datePicker
-						date={this.data.value}
+						value={this.valueIs}
 						onChange={this.setDate}
-						inputFormat='MM/DD/YYYY'
 					/>
 				</div >
 			);
@@ -236,7 +234,8 @@ export const DateItem = Vue.extend({
 				<div>
 					<vselect
 						class='d-inline-block'
-						value={this.data.modifier}
+						style='width: 200px'
+						value={this.modifier}
 						items={
 							[
 								{ text: t.inTheLast, value: 'inTheLast' },
@@ -248,19 +247,19 @@ export const DateItem = Vue.extend({
 								{ text: t.isBeforeOrOn, value: 'isBeforeOrOn' },
 							]
 						}
-						on={{ change: this.onSelectChange }}
+						on={{ change: this.setModifier }}
 						hideDetails={true}
 					>
 					</vselect>
 				</div>
 				<div>
-					{this.getInput(this.data.modifier || 'inTheLast')}
+					{this.getInput(this.modifier || 'inTheLast')}
 				</div>
 				<div>
 
 					<radioGroup
 						on={{ change: this.setTimezone }}
-						value={this.data.timezone || 'local'}
+						value={this.timezone || 'local'}
 						row={true}
 						label='Timezone'
 						hideDetails={true}
