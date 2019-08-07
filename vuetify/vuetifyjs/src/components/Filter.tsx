@@ -673,7 +673,7 @@ export const Filter = Vue.extend({
 			if (count === 0) {
 				return;
 			}
-			return <span>{count}</span>;
+			return <vchip small={true}>{count}</vchip>;
 		},
 
 		onPanelExpand(value: any) {
@@ -746,13 +746,14 @@ export const Filter = Vue.extend({
 			);
 		});
 		const self = this;
+		const count = this.filterCount();
 		return (
 			<vmenu props={{ value: self.visible }} scopedSlots={{
 				activator: ({ on }: any) => {
 					return (<vbtn on={on}>
 						<vicon>filter_list</vicon>
 						<span class='px-2'>Filter</span>
-						<vchip small={true}>{this.filterCount()}</vchip>
+						{this.filterCount()}
 					</vbtn>);
 				},
 			}}
