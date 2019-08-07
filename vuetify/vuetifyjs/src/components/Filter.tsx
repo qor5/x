@@ -46,20 +46,20 @@ export const DateItem = Vue.extend({
 		value: Object,
 		translations: {
 			type: Object,
-			default: () => {
-				return {
-					inTheLast: 'is in the last',
-					equals: 'is equal to',
-					between: 'is between',
-					isAfter: 'is after',
-					isAfterOrOn: 'is on or after',
-					isBefore: 'is before',
-					isBeforeOrOn: 'is before or on',
-					days: 'days',
-					months: 'months',
-					and: 'and',
-				};
-			},
+			// default: () => {
+			// 	return {
+			// 		inTheLast: 'is in the last',
+			// 		equals: 'is equal to',
+			// 		between: 'is between',
+			// 		isAfter: 'is after',
+			// 		isAfterOrOn: 'is on or after',
+			// 		isBefore: 'is before',
+			// 		isBeforeOrOn: 'is before or on',
+			// 		days: 'days',
+			// 		months: 'months',
+			// 		and: 'and',
+			// 	};
+			// },
 		},
 	},
 
@@ -245,15 +245,15 @@ export const NumberItem = Vue.extend({
 		value: Object,
 		translations: {
 			type: Object,
-			default: () => {
-				return {
-					equals: 'is equal to',
-					between: 'between',
-					greaterThan: 'is greater than',
-					lessThan: 'is less than',
-					and: 'and',
-				};
-			},
+			// default: () => {
+			// 	return {
+			// 		equals: 'is equal to',
+			// 		between: 'between',
+			// 		greaterThan: 'is greater than',
+			// 		lessThan: 'is less than',
+			// 		and: 'and',
+			// 	};
+			// },
 		},
 	},
 
@@ -377,12 +377,12 @@ export const StringItem = Vue.extend({
 		value: Object,
 		translations: {
 			type: Object,
-			default: () => {
-				return {
-					equals: 'is equal to',
-					contains: 'contains',
-				};
-			},
+			// default: () => {
+			// 	return {
+			// 		equals: 'is equal to',
+			// 		contains: 'contains',
+			// 	};
+			// },
 		},
 	},
 
@@ -644,7 +644,7 @@ export const Filter = Vue.extend({
 				encodedFilterData: encodeFilterData(this.internalValue),
 			};
 			this.$emit('input', event);
-			// console.log('event', event);
+			console.log('event', event);
 			this.visible = false;
 		},
 
@@ -746,7 +746,6 @@ export const Filter = Vue.extend({
 			);
 		});
 		const self = this;
-		const count = this.filterCount();
 		return (
 			<vmenu props={{ value: self.visible }} scopedSlots={{
 				activator: ({ on }: any) => {
@@ -770,7 +769,7 @@ export const Filter = Vue.extend({
 				}
 				zIndex='2'
 			>
-				<vtoolbar class='mb-1' flat={true}>
+				<vtoolbar class='mb-1' color='grey lighten-5' flat={true}>
 					<vbtn on={{ click: this.clear }} depressed={true}>{t.clear}</vbtn>
 					<vspacer />
 					<vtoolbarTitle class=''>
