@@ -50,6 +50,8 @@ export default Vue.extend({
 			},
 		}}
 			offsetY={true}
+			eager={true}
+			fixed={true}
 			fullWidth={true}
 			minWidth='290px'
 			closeOnContentClick={false}

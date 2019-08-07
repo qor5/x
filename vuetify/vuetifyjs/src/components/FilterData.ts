@@ -34,8 +34,8 @@ function pushDateItem(segs: any, op: any) {
 		return;
 	}
 
-	if (mod === 'equals' && op.value) {
-		pushKeyVal(segs, op.key, '', convertUTC(op, op.value).unix());
+	if (mod === 'equals' && op.valueIs) {
+		pushKeyVal(segs, op.key, '', convertUTC(op, op.valueIs).unix());
 		return;
 	}
 
@@ -54,12 +54,12 @@ function pushDateItem(segs: any, op: any) {
 		return;
 	}
 
-	if (mod === 'isAfter' && op.value) {
+	if (mod === 'isAfter' && op.valueIs) {
 		pushKeyVal(
 			segs,
 			op.key,
 			'gt',
-			convertUTC(op, op.value)
+			convertUTC(op, op.valueIs)
 				.add(1, 'days')
 				.subtract(1, 'seconds')
 				.unix(),
@@ -68,12 +68,12 @@ function pushDateItem(segs: any, op: any) {
 	}
 
 	if (mod === 'isAfterOrOn') {
-		pushKeyVal(segs, op.key, 'gte', convertUTC(op, op.value).unix());
+		pushKeyVal(segs, op.key, 'gte', convertUTC(op, op.valueIs).unix());
 		return;
 	}
 
 	if (mod === 'isBefore') {
-		pushKeyVal(segs, op.key, 'lt', convertUTC(op, op.value).unix());
+		pushKeyVal(segs, op.key, 'lt', convertUTC(op, op.valueIs).unix());
 		return;
 	}
 
@@ -82,7 +82,7 @@ function pushDateItem(segs: any, op: any) {
 			segs,
 			op.key,
 			'lte',
-			convertUTC(op, op.value)
+			convertUTC(op, op.valueIs)
 				.add(1, 'days')
 				.subtract(1, 'seconds')
 				.unix(),
@@ -95,7 +95,7 @@ function pushNumberItem(segs: any, op: any) {
 	const mod = op.modifier || 'equals';
 
 	if (mod === 'equals') {
-		const floatValue = parseFloat(op.value);
+		const floatValue = parseFloat(op.valueIs);
 		if (!isNaN(floatValue)) {
 			pushKeyVal(segs, op.key, '', floatValue);
 		}
@@ -115,7 +115,7 @@ function pushNumberItem(segs: any, op: any) {
 	}
 
 	if (mod === 'greaterThan') {
-		const floatValue = parseFloat(op.value);
+		const floatValue = parseFloat(op.valueIs);
 		if (!isNaN(floatValue)) {
 			pushKeyVal(segs, op.key, 'gt', floatValue);
 		}
@@ -123,7 +123,7 @@ function pushNumberItem(segs: any, op: any) {
 	}
 
 	if (mod === 'lessThan') {
-		const floatValue = parseFloat(op.value);
+		const floatValue = parseFloat(op.valueIs);
 		if (!isNaN(floatValue)) {
 			pushKeyVal(segs, op.key, 'lt', floatValue);
 		}
@@ -133,21 +133,21 @@ function pushNumberItem(segs: any, op: any) {
 
 function pushStringItem(segs: any, op: any) {
 	const mod = op.modifier || 'equals';
-	if (mod === 'equals' && op.value) {
-		pushKeyVal(segs, op.key, '', op.value);
+	if (mod === 'equals' && op.valueIs) {
+		pushKeyVal(segs, op.key, '', op.valueIs);
 		return;
 	}
 
-	if (mod === 'contains' && op.value) {
-		pushKeyVal(segs, op.key, 'ilike', op.value);
+	if (mod === 'contains' && op.valueIs) {
+		pushKeyVal(segs, op.key, 'ilike', op.valueIs);
 		return;
 	}
 }
 
 function pushSelectItem(segs: any, op: any) {
 	const mod = op.modifier || 'equals';
-	if (mod === 'equals' && op.value) {
-		pushKeyVal(segs, op.key, '', op.value);
+	if (mod === 'equals' && op.valueIs) {
+		pushKeyVal(segs, op.key, '', op.valueIs);
 		return;
 	}
 }
@@ -158,8 +158,7 @@ export function filterData(data: any): any {
 	}
 
 	const r: any = [];
-	data
-		.filter((op: any) => op.selected)
+	data.filter((op: any) => op.selected)
 		.map((op: any) => {
 			if (op.itemType === 'DateItem') {
 				pushDateItem(r, op);

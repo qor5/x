@@ -3,15 +3,11 @@ import Vue, { VNode, CreateElement } from 'vue';
 import {
 	VRadio,
 	VRadioGroup,
-	VDatePicker,
 	VSelect,
 	VTextField,
 	VMenu,
 	VIcon,
 	VBtn,
-	VCard,
-	VCardText,
-	VCardActions,
 	VExpansionPanels,
 	VExpansionPanel,
 	VExpansionPanelHeader,
@@ -19,6 +15,8 @@ import {
 	VToolbar,
 	VToolbarTitle,
 	VSpacer,
+	VCheckbox,
+	VChip,
 } from 'vuetify/lib';
 
 import TextDatePicker from './TextDatePicker';
@@ -79,36 +77,40 @@ export const DateItem = Vue.extend({
 	},
 
 	methods: {
+		inputEmit() {
+			this.$emit('input', { ...this.$props.value, ...this.$data });
+		},
+
 		setModifier(e: string) {
 			this.modifier = e;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 			this.datePickerVisible = true;
 			this.$forceUpdate();
 		},
 
 		setDate(e: any) {
 			this.valueIs = e;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 		},
 
 		setDateFrom(e: any) {
 			this.valueFrom = e;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 		},
 
 		setDateTo(e: any) {
 			this.valueTo = e;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 		},
 
 		setInTheLastValue(e: any) {
 			this.inTheLastValue = e;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 		},
 
 		setInTheLastUnit(e: any) {
 			this.inTheLastUnit = e;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 		},
 
 		setTimezone(e: any) {
@@ -164,7 +166,6 @@ export const DateItem = Vue.extend({
 							value={this.valueTo}
 							on={{ input: this.setDateTo }}
 							key={modifier + 'to'}
-							visible={this.datePickerVisible}
 						/>
 					</div>
 				);
@@ -266,25 +267,28 @@ export const NumberItem = Vue.extend({
 	},
 
 	methods: {
+		inputEmit() {
+			this.$emit('input', { ...this.$props.value, ...this.$data });
+		},
 
 		setModifier(value: any) {
 			this.modifier = value;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 		},
 
 		setNumber(value: any) {
 			this.valueIs = value;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 		},
 
 		setNumberFrom(value: any) {
 			this.valueFrom = value;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 		},
 
 		setNumberTo(value: any) {
 			this.valueTo = value;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 		},
 
 		getInput(modifier: string) {
@@ -390,15 +394,18 @@ export const StringItem = Vue.extend({
 	},
 
 	methods: {
+		inputEmit() {
+			this.$emit('input', { ...this.$props.value, ...this.$data });
+		},
 
 		setModifier(value: any) {
 			this.modifier = value;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 		},
 
 		setValue(value: any) {
 			this.valueIs = value;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 		},
 
 		getInput(modifier: string) {
@@ -465,10 +472,13 @@ export const SelectItem = Vue.extend({
 	},
 
 	methods: {
+		inputEmit() {
+			this.$emit('input', { ...this.$props.value, ...this.$data });
+		},
+
 		setValue(value: any) {
 			this.valueIs = value;
-			this.$emit('input', this.$data);
-
+			this.inputEmit();
 		},
 	},
 
@@ -489,46 +499,6 @@ export const SelectItem = Vue.extend({
 	},
 });
 
-/*
-const CheckboxToogle = Vue.extend({
-	public static propTypes = {
-		data: PropTypes.object.isRequired,
-		filterUpdate: PropTypes.func,
-	};
-
-	public state = {
-		data: this.props.data,
-	};
-
-	public onCheckboxChange = (e) => {
-		this.state.data.selected = e.target.checked;
-		const update = this.props.filterUpdate || this.forceUpdate;
-		update();
-	}
-
-		public render() {
-		const classes = classNames({
-			[styles.hidden]: !this.state.data.selected,
-		});
-
-		return (
-			<div className={styles.checkboxToggle}>
-				<label>
-					<input
-						type='checkbox'
-						value={this.state.data.value}
-						onChange={this.onCheckboxChange}
-						checked={this.state.data.selected ? 'checked' : ''}
-					/>
-					<span>{this.state.data.label}</span>
-				</label>
-				<div className={classes}>{this.props.children}</div>
-			</div>
-		);
-	},
-});
-
-*/
 /*
 data = [
   {
@@ -603,21 +573,17 @@ export const Filter = Vue.extend({
 		vselect: VSelect,
 		vtextfield: VTextField,
 		vicon: VIcon,
-		// dateItem: DateItem,
-		// numberItem: NumberItem,
-		// stringItem: StringItem,
-		// selectItem: SelectItem,
 		vbtn: VBtn,
 		vmenu: VMenu,
 		vexpPanels: VExpansionPanels,
 		vexpPanel: VExpansionPanel,
 		vexpPanelHeader: VExpansionPanelHeader,
 		vexpPanelContent: VExpansionPanelContent,
-		vcard: VCard,
-		vcardText: VCardText,
 		vtoolbar: VToolbar,
 		vtoolbarTitle: VToolbarTitle,
 		vspacer: VSpacer,
+		vcheckbox: VCheckbox,
+		vchip: VChip,
 	},
 
 	props: {
@@ -636,12 +602,14 @@ export const Filter = Vue.extend({
 						isBeforeOrOn: 'is before or on',
 						days: 'days',
 						months: 'months',
+						and: 'and',
 					},
 					number: {
 						equals: 'is equal to',
 						between: 'between',
 						greaterThan: 'is greater than',
 						lessThan: 'is less than',
+						and: 'and',
 					},
 					string: {
 						equals: 'is equal to',
@@ -659,16 +627,24 @@ export const Filter = Vue.extend({
 		return {
 			internalValue: this.$props.value as FilterItem[],
 			visible: false,
+			selectedIndexs: (this.$props.value as FilterItem[]).map((op: FilterItem, i: number) => {
+				if (op.selected) {
+					return i;
+				}
+				return -1;
+			}).filter((i: number) => i !== -1),
 		};
 	},
 
 	methods: {
 
 		clickDone(e: any) {
-			this.$emit('input', {
+			const event = {
 				filterData: filterData(this.internalValue),
-				encodeFilterData: encodeFilterData(this.internalValue),
-			});
+				encodedFilterData: encodeFilterData(this.internalValue),
+			};
+			this.$emit('input', event);
+			// console.log('event', event);
 			this.visible = false;
 		},
 
@@ -697,8 +673,25 @@ export const Filter = Vue.extend({
 			if (count === 0) {
 				return;
 			}
-
 			return <span>{count}</span>;
+		},
+
+		onPanelExpand(value: any) {
+			this.selectedIndexs = value;
+			for (const fi of this.internalValue) {
+				fi.selected = false;
+			}
+			for (const i of this.selectedIndexs) {
+				this.internalValue[i].selected = true;
+			}
+		},
+
+		newUpdateFilterItem(i: number): (val: FilterItem) => void {
+			const self = this;
+			return (val: FilterItem) => {
+				self.internalValue[i] = val;
+				self.internalValue[i].selected = true;
+			};
 		},
 	},
 
@@ -721,7 +714,7 @@ export const Filter = Vue.extend({
 			SelectItem: {},
 		};
 
-		const body = this.internalValue.map((op: FilterItem) => {
+		const body = this.internalValue.map((op: FilterItem, i: number) => {
 			if (!itemTypes[op.itemType]) {
 				throw new Error(`itemType '${op.itemType}' not supported`);
 			}
@@ -731,6 +724,7 @@ export const Filter = Vue.extend({
 			const comp = <itemComp
 				translations={trans[op.itemType]}
 				value={op}
+				on={{ input: this.newUpdateFilterItem(i) }}
 			/>;
 
 			return (
@@ -739,10 +733,13 @@ export const Filter = Vue.extend({
 					key={op.key}
 					filterUpdate={this.update}
 				>
-					<vexpPanelHeader class='subtitle-2'>
-						{op.label}
+					<vexpPanelHeader ripple={true}>
+						<vcheckbox
+							hideDetails={true}
+							inputValue={this.selectedIndexs.includes(i)}
+							label={op.label} class='ma-0'></vcheckbox>
 					</vexpPanelHeader>
-					<vexpPanelContent>
+					<vexpPanelContent eager={false}>
 						{comp}
 					</vexpPanelContent>
 				</vexpPanel>
@@ -754,12 +751,13 @@ export const Filter = Vue.extend({
 				activator: ({ on }: any) => {
 					return (<vbtn on={on}>
 						<vicon>filter_list</vicon>
-						Filter
-				{this.filterCount()}
+						<span class='px-2'>Filter</span>
+						<vchip small={true}>{this.filterCount()}</vchip>
 					</vbtn>);
 				},
 			}}
 				offsetY={true}
+				// absolute={true}
 				maxWidth='400px'
 				closeOnContentClick={false}
 				on={
@@ -771,17 +769,24 @@ export const Filter = Vue.extend({
 				}
 				zIndex='2'
 			>
-				<vtoolbar>
-					<vbtn on={{ click: this.clear }}>{t.clear}</vbtn>
-					<vtoolbarTitle>
+				<vtoolbar class='mb-1' flat={true}>
+					<vbtn on={{ click: this.clear }} depressed={true}>{t.clear}</vbtn>
+					<vspacer />
+					<vtoolbarTitle class=''>
 						{t.filters}
 					</vtoolbarTitle>
 					<vspacer />
-					<vbtn color='primary' on={{ click: this.clickDone }}>
+					<vbtn color='primary' depressed={true} on={{ click: this.clickDone }}>
 						{t.done}
 					</vbtn>
 				</vtoolbar>
-				<vexpPanels multiple={true}>{body}</vexpPanels>
+				<vexpPanels
+					on={{ change: this.onPanelExpand }}
+					focusable={true}
+					accordion={true}
+					multiple={true}
+					value={this.selectedIndexs}
+				>{body}</vexpPanels>
 			</vmenu>
 		);
 	},
