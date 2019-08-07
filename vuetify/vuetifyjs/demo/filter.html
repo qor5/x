@@ -18,7 +18,53 @@
 		<v-app>
 			<v-content>
 				<v-container>
-					<vw-date-item :value='{"modifier": "between", "valueFrom": "2018-01-02", "valueTo": "2019-01-02", "value": "2017-01-02", "inTheLastUnit": "months", "inTheLastValue": 5}'></vw-date-item>
+					<vw-filter :value='[
+					{
+					  key: "created",
+					  label: "Created",
+					  itemType: "DateItem",
+					  selected: false,
+					  modifier: "between",
+					  valueFrom: "",
+					  valueTo: "",
+					},
+					{
+					  key: "updated",
+					  label: "Updated",
+					  itemType: "DateItem",
+					  selected: true,
+					  modifier: "inTheLast",
+					  inTheLastValue: 4,
+					  inTheLastUnit: "months",
+					},
+					{
+					  key: "amount",
+					  label: "Amount",
+					  itemType: "NumberItem",
+					  selected: true,
+					  modifier: "lessThan",
+					  valueIs: 100,
+					},
+					{
+					  key: "name",
+					  label: "Name",
+					  itemType: "StringItem",
+					  modifier: "contains",
+					  valueIs: "aaa",
+					},
+					{
+					  key: "refund",
+					  label: "Refund",
+					  itemType: "SelectItem",
+					  selected: true,
+					  options: [
+						{ value: "true", text: "is fully refunded" },
+						{ value: "false", text: "is not refunded" },
+						{ value: "partial", text: "is partially refunded" },
+					  ],
+					  valueIs: "partial",
+					},
+				  ]'></vw-filter>
 				</v-container>
 			</v-content>
 		</v-app>

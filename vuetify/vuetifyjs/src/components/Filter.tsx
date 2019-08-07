@@ -1,5 +1,5 @@
 import { encodeFilterData, filterData } from './FilterData';
-import Vue, { VNode, Component, CreateElement } from 'vue';
+import Vue, { VNode, CreateElement } from 'vue';
 import {
 	VRadio,
 	VRadioGroup,
@@ -8,7 +8,20 @@ import {
 	VTextField,
 	VMenu,
 	VIcon,
+	VBtn,
+	VCard,
+	VCardText,
+	VCardActions,
+	VExpansionPanels,
+	VExpansionPanel,
+	VExpansionPanelHeader,
+	VExpansionPanelContent,
+	VToolbar,
+	VToolbarTitle,
+	VSpacer,
 } from 'vuetify/lib';
+
+import TextDatePicker from './TextDatePicker';
 
 export function localTimezoneAbbr() {
 	const d = new Date().toString();
@@ -21,66 +34,6 @@ export function localTimezoneAbbr() {
 		.join('');
 }
 
-const TextDatePicker = Vue.extend({
-	components: {
-		datePicker: VDatePicker,
-		vtextfield: VTextField,
-		vmenu: VMenu,
-	},
-	props: {
-		value: String,
-	},
-	data() {
-		return {
-			show: false,
-			internalValue: this.value,
-		};
-	},
-
-	methods: {
-		onChange(value: any) {
-			this.show = false;
-			this.internalValue = value;
-			this.$emit('input', this.internalValue);
-		},
-		toggle() {
-			this.show = !this.show;
-		},
-	},
-	render(h: CreateElement) {
-		console.log('internalValue', this.internalValue);
-		const self = this;
-		return (<vmenu class='d-inline-block' props={{ value: this.show }} scopedSlots={{
-			activator: ({ on }: any) => {
-				return <vtextfield
-					class='d-inline-block'
-					style='width: 120px'
-					on={on}
-					value={self.internalValue}
-					hideDetails={true}
-					prependInnerIcon='event'
-				></vtextfield>;
-			},
-		}}
-			offsetY={true}
-			fullWidth={true}
-			minWidth='290px'
-			closeOnContentClick={false}
-			on={
-				{
-					input: (value: any) => {
-						self.toggle();
-					},
-				}
-			}
-		>
-			<datePicker
-				value={this.internalValue}
-				on={{ change: this.onChange }}
-			/>
-		</vmenu >);
-	},
-});
 
 export const DateItem = Vue.extend({
 	components: {
@@ -106,6 +59,7 @@ export const DateItem = Vue.extend({
 					isBeforeOrOn: 'is before or on',
 					days: 'days',
 					months: 'months',
+					and: 'and',
 				};
 			},
 		},
@@ -114,20 +68,22 @@ export const DateItem = Vue.extend({
 	data() {
 		return {
 			modifier: this.$props.value.modifier,
-			valueIs: this.$props.value.value,
+			valueIs: this.$props.value.valueIs,
 			valueFrom: this.$props.value.valueFrom,
 			valueTo: this.$props.value.valueTo,
 			inTheLastUnit: this.$props.value.inTheLastUnit,
 			inTheLastValue: this.$props.value.inTheLastValue,
 			timezone: this.$props.value.timezone,
+			datePickerVisible: false,
 		};
 	},
 
 	methods: {
 		setModifier(e: string) {
-			console.log('this.$data', this.$data);
 			this.modifier = e;
 			this.$emit('input', this.$data);
+			this.datePickerVisible = true;
+			this.$forceUpdate();
 		},
 
 		setDate(e: any) {
@@ -164,14 +120,13 @@ export const DateItem = Vue.extend({
 			const t = this.$props.translations;
 
 			if (modifier === 'inTheLast') {
-				console.log('return = inTheLast');
 				return (
 					<div>
 						<vicon class='pr-5'>subdirectory_arrow_right</vicon>
 						<vtextfield
 							class='d-inline-block pr-5'
-							type='number'
 							style='width: 80px'
+							type='number'
 							on={{ change: this.setInTheLastValue }}
 							value={(this.inTheLastValue || '').toString()}
 							hideDetails={true}
@@ -195,34 +150,35 @@ export const DateItem = Vue.extend({
 			}
 
 			if (modifier === 'between') {
-				console.log('return = between');
 				return (
 					<div>
 						<vicon class='pr-5'>subdirectory_arrow_right</vicon>
 						<datePicker
 							value={this.valueFrom}
-							onChange={this.setDateFrom}
+							on={{ input: this.setDateFrom }}
 							key={modifier + 'from'}
+							visible={this.datePickerVisible}
 						/>{' '}
-						<span class='pr-5'>and</span>
+						<span class='px-3'>{t.and}</span>
 						<datePicker
 							value={this.valueTo}
-							onChange={this.setDateTo}
+							on={{ input: this.setDateTo }}
 							key={modifier + 'to'}
+							visible={this.datePickerVisible}
 						/>
 					</div>
 				);
 
 			}
 
-			console.log('return = is', this.valueIs);
 			return (
 				<div>
 					<vicon class='pr-5'>subdirectory_arrow_right</vicon>
 					<datePicker
 						value={this.valueIs}
-						onChange={this.setDate}
+						on={{ input: this.setDate }}
 						key={modifier}
+						visible={this.datePickerVisible}
 					/>
 				</div >
 			);
@@ -277,185 +233,263 @@ export const DateItem = Vue.extend({
 	},
 });
 
-/*
-const NumberItem = Vue.extend({
-	public static propTypes = {
-		data: PropTypes.object.isRequired,
-	};
 
-	public state = {
-		data: this.props.data,
-	};
+export const NumberItem = Vue.extend({
+	components: {
+		vselect: VSelect,
+		vtextfield: VTextField,
+		vicon: VIcon,
+	},
+	props: {
+		value: Object,
+		translations: {
+			type: Object,
+			default: () => {
+				return {
+					equals: 'is equal to',
+					between: 'between',
+					greaterThan: 'is greater than',
+					lessThan: 'is less than',
+					and: 'and',
+				};
+			},
+		},
+	},
 
-	public onSelectChange = (e) => {
-		this.state.data.modifier = e.target.value;
-		this.forceUpdate();
-	};
-
-	public setNumber = (e) => {
-		this.state.data.value = e.target.value;
-		this.forceUpdate();
-	};
-
-	public setNumberFrom = (e) => {
-		this.state.data.valueFrom = e.target.value;
-		this.forceUpdate();
-	};
-
-	public setNumberTo = (e) => {
-		this.state.data.valueTo = e.target.value;
-		this.forceUpdate();
-	};
-
-	public getInput(modifier); {
-		const between = (
-			<div className={classNames(styles.between, styles.number)}>
-				<input
-					type='number'
-					onChange={this.setNumberFrom}
-					value={(this.state.data.valueFrom || '').toString()}
-				/>
-				<span>and</span>
-				<input
-					type='number'
-					onChange={this.setNumberTo}
-					value={(this.state.data.valueTo || '').toString()}
-				/>
-			</div>
-		);
-
-		const inputs = {
-			between,
+	data() {
+		return {
+			modifier: this.$props.value.modifier,
+			valueIs: this.$props.value.valueIs,
+			valueFrom: this.$props.value.valueFrom,
+			valueTo: this.$props.value.valueTo,
 		};
+	},
 
-		if(inputs[modifier]) {
-			return inputs[modifier];
-		}
+	methods: {
 
-	return(
-		<div className = { styles.number } >
-				<input
-					type='number'
-					onChange={this.setNumber}
-					value={(this.state.data.value || '').toString()}
-				/>;
-		</div > ;
-	)
-}
+		setModifier(value: any) {
+			this.modifier = value;
+			this.$emit('input', this.$data);
+		},
 
-	public render(); {
-	const t = this.props.translations;
-	return (
-		<div className={styles.control}>
-			<div className={styles.modifierContainer}>
-				<select
-					onChange={this.onSelectChange}
-					value={this.state.data.modifier}
-				>
-					<option value='equals'>{t.equals}</option>
-					<option value='between'>{t.between}</option>
-					<option value='greaterThan'>{t.greaterThan}</option>
-					<option value='lessThan'>{t.lessThan}</option>
-				</select>
-			</div>
-			<div className={styles.inputContainer}>
-				{this.getInput(this.state.data.modifier)}
-			</div>
-		</div>
-	);
-}
-})
+		setNumber(value: any) {
+			this.valueIs = value;
+			this.$emit('input', this.$data);
+		},
 
-const StringItem = Vue.extend({
-	public static propTypes = {
-		data: PropTypes.object.isRequired,
-	};
+		setNumberFrom(value: any) {
+			this.valueFrom = value;
+			this.$emit('input', this.$data);
+		},
 
-	public state = {
-		data: this.props.data,
-	};
+		setNumberTo(value: any) {
+			this.valueTo = value;
+			this.$emit('input', this.$data);
+		},
 
-	public onSelectChange = (e) => {
-		this.state.data.modifier = e.target.value;
-		this.forceUpdate();
-	}
+		getInput(modifier: string) {
+			const t = this.$props.translations;
+			if (modifier === 'between') {
+				return (
+					<div>
+						<vicon class='pr-5'>subdirectory_arrow_right</vicon>
+						<vtextfield
+							class='d-inline-block'
+							style='width: 80px'
+							type='number'
+							on={{ change: this.setNumberFrom }}
+							value={(this.valueFrom || '').toString()}
+							hideDetails={true}
+						/>
+						<span class='px-3'>{t.and}</span>
+						<vtextfield
+							class='d-inline-block'
+							style='width: 80px'
+							type='number'
+							on={{ change: this.setNumberTo }}
+							value={(this.valueTo || '').toString()}
+							hideDetails={true}
+						/>
+					</div>
+				);
+			}
 
-	public setValue = (e) => {
-		this.state.data.value = e.target.value;
-		this.forceUpdate();
-	}
+			return (
+				<div>
+					<vicon class='pr-5'>subdirectory_arrow_right</vicon>
+					<vtextfield
+						class='d-inline-block'
+						style='width: 120px'
+						type='number'
+						on={{ change: this.setNumber }}
+						value={(this.valueIs || '').toString()}
+						key={modifier}
+						hideDetails={true}
+					/>
+				</div >
+			);
+		},
+	},
 
-	public getInput(modifier) {
+
+	render() {
+		const t = this.$props.translations;
 		return (
-			<div className={styles.string}>
-				<input
-					type='text'
-					onChange={this.setValue}
-					value={this.state.data.value}
-				/>
-			</div>
-		);
-	}
-
-	public render() {
-		return (
-			<div className={styles.control}>
-				<div className={styles.modifierContainer}>
-					<select
-						onChange={this.onSelectChange}
-						value={this.state.data.modifier}
+			<div>
+				<div>
+					<vselect
+						class='d-inline-block'
+						style='width: 200px'
+						on={{ change: this.setModifier }}
+						value={this.modifier}
+						items={
+							[
+								{ text: t.equals, value: 'equals' },
+								{ text: t.between, value: 'between' },
+								{ text: t.greaterThan, value: 'greaterThan' },
+								{ text: t.lessThan, value: 'lessThan' },
+							]
+						}
+						hideDetails={true}
 					>
-						<option value='equals'>is equal to</option>
-						<option value='contains'>contains</option>
-					</select>
+					</vselect>
 				</div>
-				<div className={styles.inputContainer}>
-					{this.getInput(this.state.data.modifier)}
+				<div >
+					{this.getInput(this.modifier)}
 				</div>
 			</div>
 		);
 	},
 });
 
-const SelectItem = Vue.extend({
-	public static propTypes = {
-		data: PropTypes.object.isRequired,
-	};
 
-	public state = {
-		data: this.defaultData(this.props.data),
-	};
+export const StringItem = Vue.extend({
+	components: {
+		vselect: VSelect,
+		vtextfield: VTextField,
+		vicon: VIcon,
+	},
+	props: {
+		value: Object,
+		translations: {
+			type: Object,
+			default: () => {
+				return {
+					equals: 'is equal to',
+					contains: 'contains',
+				};
+			},
+		},
+	},
 
-	public defaultData = (data) => {
-		if (!data.value) {
-			data.value = data.options[0].key;
-		}
-		return data;
-	}
+	data() {
+		return {
+			modifier: this.$props.value.modifier,
+			valueIs: this.$props.value.valueIs,
+		};
+	},
 
-	public setValue = (e) => {
-		this.state.data.value = e.target.value;
-		this.forceUpdate();
-	}
+	methods: {
 
-	public render() {
-		const ops = this.props.data.options.map((op) => {
+		setModifier(value: any) {
+			this.modifier = value;
+			this.$emit('input', this.$data);
+		},
+
+		setValue(value: any) {
+			this.valueIs = value;
+			this.$emit('input', this.$data);
+		},
+
+		getInput(modifier: string) {
 			return (
-				<option value={op.key} key={op.key}>
-					{op.label}
-				</option>
+				<div>
+					<vicon class='pr-5'>subdirectory_arrow_right</vicon>
+					<vtextfield
+						class='d-inline-block'
+						style='width: 120px'
+						type='text'
+						onChange={this.setValue}
+						value={this.valueIs}
+						hideDetails={true}
+					/>
+				</div>
 			);
-		});
+		},
+	},
+
+
+	render() {
+		const t = this.$props.translations;
 		return (
-			<div className={classNames(styles.control, styles.selectContainer)}>
-				<select onChange={this.setValue} value={this.state.data.value}>
-					{ops}
-				</select>
+			<div>
+				<div>
+					<vselect
+						class='d-inline-block'
+						style='width: 200px'
+						on={{ change: this.setModifier }}
+						value={this.modifier}
+						items={
+							[
+								{ text: t.equals, value: 'equals' },
+								{ text: t.contains, value: 'contains' },
+							]
+						}
+						hideDetails={true}
+					>
+					</vselect>
+				</div>
+				<div >
+					{this.getInput(this.modifier)}
+				</div>
 			</div>
 		);
 	},
-};
+});
 
+
+export const SelectItem = Vue.extend({
+	components: {
+		vselect: VSelect,
+		vtextfield: VTextField,
+		vicon: VIcon,
+	},
+	props: {
+		value: Object,
+	},
+
+	data() {
+		return {
+			valueIs: this.$props.value.valueIs || this.$props.value.options[0].value,
+		};
+	},
+
+	methods: {
+		setValue(value: any) {
+			this.valueIs = value;
+			this.$emit('input', this.$data);
+
+		},
+	},
+
+	render() {
+		return (
+			<div>
+				<vselect
+					class='d-inline-block'
+					style='width: 200px'
+					hideDetails={true}
+					on={{ change: this.setValue }}
+					value={this.valueIs}
+					items={this.value.options}
+				>
+				</vselect>
+			</div>
+		);
+	},
+});
+
+/*
 const CheckboxToogle = Vue.extend({
 	public static propTypes = {
 		data: PropTypes.object.isRequired,
@@ -544,145 +578,212 @@ data = [
 ]
 */
 
-/*
+interface SelectOption {
+	text: string;
+	value: string;
+}
+
+interface FilterItem {
+	key: string;
+	label: string;
+	itemType: string;
+	modifier: string;
+	valueIs: string;
+	selected?: boolean;
+	valueFrom?: string;
+	valueTo?: string;
+	inTheLastValue?: string;
+	inTheLastUnit?: string;
+	timezone?: string;
+	options?: SelectOption[];
+}
+
 export const Filter = Vue.extend({
-	public static propTypes = {
-		data: PropTypes.any.isRequired,
-		onDone: PropTypes.func.isRequired,
-	};
+	components: {
+		vselect: VSelect,
+		vtextfield: VTextField,
+		vicon: VIcon,
+		// dateItem: DateItem,
+		// numberItem: NumberItem,
+		// stringItem: StringItem,
+		// selectItem: SelectItem,
+		vbtn: VBtn,
+		vmenu: VMenu,
+		vexpPanels: VExpansionPanels,
+		vexpPanel: VExpansionPanel,
+		vexpPanelHeader: VExpansionPanelHeader,
+		vexpPanelContent: VExpansionPanelContent,
+		vcard: VCard,
+		vcardText: VCardText,
+		vtoolbar: VToolbar,
+		vtoolbarTitle: VToolbarTitle,
+		vspacer: VSpacer,
+	},
 
-	public static defaultProps = {
+	props: {
+		value: { type: Array },
 		translations: {
-			date: {
-				inTheLast: 'is in the last',
-				equals: 'is equal to',
-				between: 'is between',
-				isAfter: 'is after',
-				isAfterOrOn: 'is on or after',
-				isBefore: 'is before',
-				isBeforeOrOn: 'is before or on',
-				days: 'days',
-				months: 'months',
+			type: Object,
+			default: () => {
+				return {
+					date: {
+						inTheLast: 'is in the last',
+						equals: 'is equal to',
+						between: 'is between',
+						isAfter: 'is after',
+						isAfterOrOn: 'is on or after',
+						isBefore: 'is before',
+						isBeforeOrOn: 'is before or on',
+						days: 'days',
+						months: 'months',
+					},
+					number: {
+						equals: 'is equal to',
+						between: 'between',
+						greaterThan: 'is greater than',
+						lessThan: 'is less than',
+					},
+					string: {
+						equals: 'is equal to',
+						contains: 'contains',
+					},
+					clear: 'Clear',
+					filters: 'Filters',
+					done: 'Done',
+				};
 			},
-			number: {
-				equals: 'is equal to',
-				between: 'between',
-				greaterThan: 'is greater than',
-				lessThan: 'is less than',
-			},
-			string: {
-				equals: 'is equal to',
-				contains: 'contains',
-			},
-			clear: 'Clear',
-			filters: 'Filters',
-			done: 'Done',
 		},
-	};
+	},
 
-	public state = {
-		data: this.props.data,
-		hidden: true,
-	};
+	data() {
+		return {
+			internalValue: this.$props.value as FilterItem[],
+			visible: false,
+		};
+	},
 
-	public itemTypes = {
-		DateItem,
-		NumberItem,
-		StringItem,
-		SelectItem,
-	};
+	methods: {
 
-	public clickDone = (e) => {
-		this.props.onDone(
-			filterData(this.state.data),
-			encodeFilterData(this.state.data),
-		);
-		this.setState({ hidden: true });
-	}
+		clickDone(e: any) {
+			this.$emit('input', {
+				filterData: filterData(this.internalValue),
+				encodeFilterData: encodeFilterData(this.internalValue),
+			});
+			this.visible = false;
+		},
 
-	public clear = (e) => {
-		this.state.data.map((op) => {
-			op.selected = false;
-		});
-		this.forceUpdate();
-	}
+		clear(e: any) {
+			this.internalValue.map((op: any) => {
+				op.selected = false;
+			});
+			this.$forceUpdate();
+		},
 
-	public update = () => {
-		this.forceUpdate();
-	}
+		update() {
+			this.$forceUpdate();
+		},
 
-	public togglePopup = (e) => {
-		this.setState({ hidden: !this.state.hidden });
-	}
+		togglePopup() {
+			this.visible = !this.visible;
+		},
 
-	public filterCount = () => {
-		let count = 0;
-		this.state.data.map((op) => {
-			if (op.selected) {
-				count++;
+		filterCount() {
+			let count = 0;
+			this.internalValue.map((op: any) => {
+				if (op.selected) {
+					count++;
+				}
+			});
+			if (count === 0) {
+				return;
 			}
-		});
-		if (count == 0) {
-			return;
-		}
 
-		return <span className={styles.filterCount}>{count}</span>;
-	}
+			return <span>{count}</span>;
+		},
+	},
 
-	public render() {
-		const t = this.props.translations;
 
-		const trans = {
+	render() {
+
+		const itemTypes: any = {
+			DateItem,
+			NumberItem,
+			StringItem,
+			SelectItem,
+		};
+
+		const t = this.$props.translations;
+
+		const trans: any = {
 			DateItem: t.date,
 			NumberItem: t.number,
 			StringItem: t.string,
 			SelectItem: {},
 		};
 
-		const body = this.state.data.map((op) => {
-			if (!this.itemTypes[op.itemType]) {
+		const body = this.internalValue.map((op: FilterItem) => {
+			if (!itemTypes[op.itemType]) {
 				throw new Error(`itemType '${op.itemType}' not supported`);
 			}
 
-			const comp = React.createElement(this.itemTypes[op.itemType], {
-				translations: trans[op.itemType],
-				data: op,
-			});
+			const itemComp = itemTypes[op.itemType];
+
+			const comp = <itemComp
+				translations={trans[op.itemType]}
+				value={op}
+			/>;
 
 			return (
-				<CheckboxToogle
-					data={op}
+				<vexpPanel
+					value={op}
 					key={op.key}
 					filterUpdate={this.update}
 				>
-					{comp}
-				</CheckboxToogle>
+					<vexpPanelHeader class='subtitle-2'>
+						{op.label}
+					</vexpPanelHeader>
+					<vexpPanelContent>
+						{comp}
+					</vexpPanelContent>
+				</vexpPanel>
 			);
 		});
-
+		const self = this;
 		return (
-			<div className={classNames(styles.filter, this.props.className)}>
-				<Button onMouseDown={this.togglePopup}>
-					<Icon
-						glyph={filterIcon}
-						className={styles.filterIcon}
-					/>
-					Filter{this.filterCount()}
-				</Button>
-				<Popup hidden={this.state.hidden}>
-					<div className={styles.header}>
-						<Button onMouseDown={this.clear}>{t.clear}</Button>
-						<h2>
-							<span>{t.filters}</span>
-						</h2>
-						<Button primary onMouseDown={this.clickDone}>
-							{t.done}
-						</Button>
-					</div>
-					<div>{body}</div>
-				</Popup>
-			</div>
+			<vmenu props={{ value: self.visible }} scopedSlots={{
+				activator: ({ on }: any) => {
+					return (<vbtn on={on}>
+						<vicon>filter_list</vicon>
+						Filter
+				{this.filterCount()}
+					</vbtn>);
+				},
+			}}
+				offsetY={true}
+				maxWidth='400px'
+				closeOnContentClick={false}
+				on={
+					{
+						input: (value: any) => {
+							self.togglePopup();
+						},
+					}
+				}
+				zIndex='2'
+			>
+				<vtoolbar>
+					<vbtn on={{ click: this.clear }}>{t.clear}</vbtn>
+					<vtoolbarTitle>
+						{t.filters}
+					</vtoolbarTitle>
+					<vspacer />
+					<vbtn color='primary' on={{ click: this.clickDone }}>
+						{t.done}
+					</vbtn>
+				</vtoolbar>
+				<vexpPanels multiple={true}>{body}</vexpPanels>
+			</vmenu>
 		);
 	},
 });
-*/
+
