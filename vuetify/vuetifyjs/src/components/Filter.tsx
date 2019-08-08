@@ -568,6 +568,15 @@ interface FilterItem {
 	options?: SelectOption[];
 }
 
+function getSelectedIndexes(value: FilterItem[]): number[] {
+	return (value).map((op: FilterItem, i: number) => {
+		if (op.selected) {
+			return i;
+		}
+		return -1;
+	}).filter((i: number) => i !== -1);
+}
+
 export const Filter = Vue.extend({
 	components: {
 		vselect: VSelect,
@@ -627,12 +636,7 @@ export const Filter = Vue.extend({
 		return {
 			internalValue: this.$props.value as FilterItem[],
 			visible: false,
-			selectedIndexs: (this.$props.value as FilterItem[]).map((op: FilterItem, i: number) => {
-				if (op.selected) {
-					return i;
-				}
-				return -1;
-			}).filter((i: number) => i !== -1),
+			selectedIndexs: getSelectedIndexes(this.$props.value),
 		};
 	},
 
@@ -644,7 +648,7 @@ export const Filter = Vue.extend({
 				encodedFilterData: encodeFilterData(this.internalValue),
 			};
 			this.$emit('input', event);
-			console.log('event', event);
+			// console.log('event', event);
 			this.visible = false;
 		},
 
@@ -652,11 +656,7 @@ export const Filter = Vue.extend({
 			this.internalValue.map((op: any) => {
 				op.selected = false;
 			});
-			this.$forceUpdate();
-		},
-
-		update() {
-			this.$forceUpdate();
+			this.selectedIndexs = getSelectedIndexes(this.internalValue);
 		},
 
 		togglePopup() {
@@ -695,7 +695,6 @@ export const Filter = Vue.extend({
 		},
 	},
 
-
 	render() {
 
 		const itemTypes: any = {
@@ -731,7 +730,6 @@ export const Filter = Vue.extend({
 				<vexpPanel
 					value={op}
 					key={op.key}
-					filterUpdate={this.update}
 				>
 					<vexpPanelHeader ripple={true}>
 						<vcheckbox
