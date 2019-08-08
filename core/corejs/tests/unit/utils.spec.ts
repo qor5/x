@@ -1,7 +1,6 @@
 import {
 	newFormWithStates,
 	setPushState,
-	PushStateFunc,
 	setFormValue,
 } from '@/utils';
 
@@ -23,22 +22,25 @@ describe('utils', () => {
 
 	it('setPushState', () => {
 
-		let pushed: any;
-		const pushFunc: PushStateFunc = (data: any, title: string, url?: string | null) => {
-			pushed = {
-				data,
-				title,
-				url,
-			};
+		const pusher = {
+			pushed: {} as any,
+			pushState: (data: any, title: string, url?: string | null) => {
+				pusher.pushed = {
+					data,
+					title,
+					url,
+				};
+			},
 		};
+
 
 		const search = setPushState(
 			{ name: 'felix' },
 			'hello=1&page=2',
 			'/page1',
-			pushFunc,
+			pusher,
 		);
 		expect(search).toBe('&hello=1&name=felix&page=2');
-		expect(pushed.url).toBe('/page1?hello=1&name=felix&page=2');
+		expect(pusher.pushed.url).toBe('/page1?hello=1&name=felix&page=2');
 	});
 });

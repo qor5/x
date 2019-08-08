@@ -112,7 +112,7 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 		}
 		for _, m := range mg.models {
 			subMenus = append(subMenus,
-				VListItem(
+				ui.Bind(VListItem(
 					VListItemAction(
 						VIcon(""),
 					),
@@ -121,7 +121,7 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 							h.Text(m.label),
 						),
 					),
-				).Href(m.listingHref()),
+				)).PushStateLink(m.listingHref()),
 			)
 		}
 		menus = append(menus, VListGroup(subMenus...).
@@ -136,7 +136,7 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 			continue
 		}
 		menus = append(menus,
-			VListItem(
+			ui.Bind(VListItem(
 				VListItemAction(
 					VIcon(m.menuIcon),
 				),
@@ -145,7 +145,7 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 						h.Text(m.label),
 					),
 				),
-			).Href(m.listingHref()).Color(b.primaryColor),
+			).Color(b.primaryColor)).PushStateLink(m.listingHref()),
 		)
 	}
 

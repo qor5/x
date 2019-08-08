@@ -22,12 +22,15 @@ export function mergeStatesIntoForm(form: FormData, states: any) {
 	}
 }
 
-export type PushStateFunc = (data: any, title: string, url?: string | null) => void;
+interface StatePusher {
+	pushState(data: any, title: string, url?: string | null): void;
+}
+
 export function setPushState(
 	pstate: any,
 	query: string,
 	pathname: string,
-	pushStateFunc: PushStateFunc,
+	pusher: StatePusher,
 ): string {
 	if (pstate) {
 		let newquery = '';
@@ -40,7 +43,7 @@ export function setPushState(
 				newquery = `?${newquery}`;
 			}
 		}
-		pushStateFunc(
+		pusher.pushState(
 			pstate,
 			'',
 			pathname + newquery,

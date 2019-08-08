@@ -2,9 +2,9 @@
 import debounce from 'lodash/debounce';
 import 'whatwg-fetch';
 import Vue, { VueConstructor } from 'vue';
+import querystring from 'query-string';
 
 import {
-	mergeStatesIntoForm,
 	setPushState,
 	EventData,
 	setFormValue,
@@ -51,35 +51,52 @@ export class Core {
 		this.changeCurrent = changeCurrent;
 	}
 
+	public loadPage(pushState: any, pageURL?: string) {
+		this.fetchEventThenRefresh(
+			{
+				id: '__reload__',
+				pushState,
+			},
+			{},
+			pageURL,
+		);
+	}
+
 	public fetchEvent(
 		eventFuncId: EventFuncID,
 		event: EventData,
+		pageURL?: string,
 	): Promise<EventResponse> {
+		let pstate = eventFuncId.pushState;
+		let currentSearch = window.location.search;
+
+		if (typeof pstate === 'string') {
+			eventFuncId.pushState = {};
+			pstate = querystring.parse(pstate);
+			currentSearch = '';
+		}
+
 		const eventData = JSON.stringify({
 			eventFuncId,
 			event,
 		});
 
+		const pathname = pageURL || window.location.pathname;
 		const search = setPushState(
-			eventFuncId.pushState,
-			window.location.search,
-			window.location.pathname,
-			window.history.pushState,
+			pstate,
+			currentSearch,
+			pathname,
+			window.history,
 		);
 
+		pageURL = pageURL || '';
 		this.form.set('__event_data__', eventData);
-		return fetch(`?__execute_event__=${eventFuncId.id}${search}`, {
+		return fetch(`${pageURL}?__execute_event__=${eventFuncId.id}${search}`, {
 			method: 'POST',
-			// headers: {
-			// 	'Content-Type': 'multipart/form-data'
-			// },
 			body: this.form,
 		}).then((r) => {
 			return r.json();
 		}).then((r: EventResponse) => {
-			if (r.states) {
-				mergeStatesIntoForm(this.form, r.states);
-			}
 
 			if (r.redirectURL) {
 				window.location.replace(r.redirectURL);
@@ -124,8 +141,12 @@ export class Core {
 	// 	return getFormValueAsArray(this.form, fieldName);
 	// }
 
-	private fetchEventThenRefresh(eventFuncId: EventFuncID, event: EventData) {
-		this.fetchEvent(eventFuncId, event)
+	private fetchEventThenRefresh(
+		eventFuncId: EventFuncID,
+		event: EventData,
+		pageURL?: string,
+	) {
+		this.fetchEvent(eventFuncId, event, pageURL)
 			.then((r: EventResponse) => {
 				if (r.reloadPortals && r.reloadPortals.length > 0) {
 					for (const portalName of r.reloadPortals) {
@@ -168,8 +189,8 @@ export class Core {
 	private newVueMethods(): any {
 		const self = this;
 		return {
-			onclick(eventFuncId: EventFuncID, evt: any) {
-				self.fetchEventThenRefresh(eventFuncId, jsonEvent(evt));
+			onclick(eventFuncId: EventFuncID, evt: any, pageURL?: string) {
+				self.fetchEventThenRefresh(eventFuncId, jsonEvent(evt), pageURL);
 			},
 			oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
 				self.controlsOnInput(eventFuncId, fieldName, evt);

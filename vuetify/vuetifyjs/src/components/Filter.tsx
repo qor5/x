@@ -578,6 +578,7 @@ function getSelectedIndexes(value: FilterItem[]): number[] {
 }
 
 export const Filter = Vue.extend({
+	inject: ['core'],
 	components: {
 		vselect: VSelect,
 		vtextfield: VTextField,
@@ -657,11 +658,8 @@ export const Filter = Vue.extend({
 		},
 
 		replaceWindowLocation(event: any) {
-			let qs = event.encodedFilterData;
-			if (qs && qs.length > 0) {
-				qs = `?${qs}`;
-			}
-			window.location.replace(`${window.location.pathname}${qs}`);
+			const qs = event.encodedFilterData;
+			this.core.loadPage(qs);
 		},
 
 		clear(e: any) {

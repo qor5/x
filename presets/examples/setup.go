@@ -93,7 +93,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	l := m.Listing("Name", "Bool1", "Float1", "Int1").SearchColumns("name", "job_title")
 	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
-		return h.Td(h.A().Href(fmt.Sprintf("/admin/users/%d/edit", u.ID)).Text(u.Name))
+		return h.Td(ui.Bind(h.A().Text(u.Name)).PushStateLink(fmt.Sprintf("/admin/users/%d/edit", u.ID)))
 	})
 
 	l.Field("Actions").Label(" ").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {

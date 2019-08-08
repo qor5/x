@@ -25,7 +25,7 @@ func (b *Builder) Page(pf ui.PageFunc) (p *PageBuilder) {
 	p = &PageBuilder{}
 	p.b = b
 	p.pageRenderFunc = pf
-
+	p.RegisterEventFunc("__reload__", reload)
 	return
 }
 
@@ -267,6 +267,11 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func reload(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	r.Reload = true
+	return
 }
 
 func eventResponseWithContext(ctx *ui.EventContext, c context.Context, er *ui.EventResponse) {
