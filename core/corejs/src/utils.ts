@@ -44,7 +44,7 @@ export function setPushState(
 			}
 		}
 		pusher.pushState(
-			pstate,
+			{ ...pstate, ...{ url: pathname + newquery } },
 			'',
 			pathname + newquery,
 		);

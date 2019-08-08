@@ -62,6 +62,10 @@ export class Core {
 		);
 	}
 
+	public onpopstate(event: any) {
+		this.loadPage(null, event.url);
+	}
+
 	public fetchEvent(
 		eventFuncId: EventFuncID,
 		event: EventData,
@@ -71,7 +75,7 @@ export class Core {
 		let currentSearch = window.location.search;
 
 		if (typeof pstate === 'string') {
-			eventFuncId.pushState = {};
+			eventFuncId.pushState = { url: [pstate] };
 			pstate = querystring.parse(pstate);
 			currentSearch = '';
 		}
@@ -189,6 +193,9 @@ export class Core {
 	private newVueMethods(): any {
 		const self = this;
 		return {
+			topage(pushState: any, pageURL?: string) {
+				self.loadPage(pushState, pageURL);
+			},
 			onclick(eventFuncId: EventFuncID, evt: any, pageURL?: string) {
 				self.fetchEventThenRefresh(eventFuncId, jsonEvent(evt), pageURL);
 			},

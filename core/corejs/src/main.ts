@@ -86,6 +86,9 @@ const vm = new Vue({
 		mounted() {
 			const core = new Core(form, this.changeCurrent, this.changeCurrent);
 			this.changeCurrent(core.componentByTemplate(app.innerHTML));
+			window.onpopstate = (evt: any) => {
+				core.onpopstate(evt);
+			};
 		},
 
 		data(): DynaCompData {
