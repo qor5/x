@@ -71,7 +71,7 @@ func (b *ModelBuilder) inspectModel() {
 }
 
 func (b *ModelBuilder) newListing() (r *ListingBuilder) {
-	b.listing = &ListingBuilder{filtering: &FilteringBuilder{}, mb: b}
+	b.listing = &ListingBuilder{mb: b}
 	if b.p.dataOperator != nil {
 		b.listing.Searcher(b.p.dataOperator.Search)
 	}

@@ -18,6 +18,30 @@ func VToolbarItems(children ...h.HTMLComponent) (r *VToolbarItemsBuilder) {
 	return
 }
 
+func (b *VToolbarItemsBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VToolbarItemsBuilder) Attr(vs ...interface{}) (r *VToolbarItemsBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VToolbarItemsBuilder) Children(children ...h.HTMLComponent) (r *VToolbarItemsBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VToolbarItemsBuilder) AppendChildren(children ...h.HTMLComponent) (r *VToolbarItemsBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VToolbarItemsBuilder) PrependChildren(children ...h.HTMLComponent) (r *VToolbarItemsBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
 func (b *VToolbarItemsBuilder) Class(names ...string) (r *VToolbarItemsBuilder) {
 	b.tag.Class(names...)
 	return b

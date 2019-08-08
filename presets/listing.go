@@ -12,7 +12,7 @@ type ListingBuilder struct {
 	mb            *ModelBuilder
 	fields        []*FieldBuilder
 	bulkActions   []*BulkActionBuilder
-	filtering     *FilteringBuilder
+	filterData    FilterData
 	pageFunc      ui.PageFunc
 	searcher      SearchOpFunc
 	searchColumns []string
@@ -65,12 +65,37 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	ctx.Hub.RegisterEventFunc("formDrawerNew", b.mb.editing.formDrawerNew)
 	ctx.Hub.RegisterEventFunc("formDrawerEdit", b.mb.editing.formDrawerEdit)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
+	msgs := b.mb.p.messagesFunc(ctx)
 
-	var objs interface{}
-	objs, err = b.searcher(b.mb.newModelArray(), &SearchParams{
+	searchParams := &SearchParams{
 		KeywordColumns: b.searchColumns,
 		Keyword:        ctx.R.URL.Query().Get("keyword"),
-	})
+	}
+
+	var toolbar = VToolbar(
+		VSpacer(),
+		VBtn(msgs.New).
+			Color(b.mb.p.primaryColor).
+			Depressed(true).
+			Dark(true).
+			OnClick("formDrawerNew", ""),
+	).Flat(true)
+
+	if b.filterData != nil {
+		fd := b.filterData.Clone()
+
+		cond, args := fd.SetByQueryString(ctx.R.URL.RawQuery)
+
+		searchParams.SQLConditions = append(searchParams.SQLConditions, &SQLCondition{
+			Query: cond,
+			Args:  args,
+		})
+
+		toolbar.PrependChildren(Filter(fd))
+	}
+
+	var objs interface{}
+	objs, err = b.searcher(b.mb.newModelArray(), searchParams)
 	if err != nil {
 		return
 	}
@@ -91,13 +116,14 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		label := b.mb.getLabel(f)
 		heads = append(heads, h.Th(label))
 	}
-	msgs := b.mb.p.messagesFunc(ctx)
 
 	r.Schema = VContainer(
 
 		h.H2(msgs.ListingObjectTitle(inflection.Plural(b.mb.label))).Class("title pb-3"),
 
 		VCard(
+			toolbar,
+			VDivider(),
 			VCardText(
 				VSimpleTable(
 					h.Thead(
@@ -108,18 +134,18 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 					),
 				),
 			).Class("pa-0"),
-			VCardText(
-				VBtn("").
-					Color(b.mb.p.primaryColor).
-					Fab(true).
-					Bottom(true).
-					Right(true).
-					Dark(true).
-					Absolute(true).
-					Children(
-						VIcon("add"),
-					).OnClick("formDrawerNew", ""),
-			).Attr("style", "position: relative"),
+			//VCardText(
+			//	VBtn("").
+			//		Color(b.mb.p.primaryColor).
+			//		Fab(true).
+			//		Bottom(true).
+			//		Right(true).
+			//		Dark(true).
+			//		Absolute(true).
+			//		Children(
+			//			VIcon("add"),
+			//		).OnClick("formDrawerNew", ""),
+			//).Attr("style", "position: relative"),
 		),
 	).Fluid(true)
 
