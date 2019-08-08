@@ -29,6 +29,11 @@ func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams
 		}
 		wh = wh.Where(strings.Join(segs, " OR "), args...)
 	}
+
+	for _, cond := range params.SQLConditions {
+		wh = wh.Where(cond.Query, cond.Args...)
+	}
+
 	err = wh.Order("id DESC").Find(obj).Error
 	if err != nil {
 		return

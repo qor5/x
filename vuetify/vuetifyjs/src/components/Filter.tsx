@@ -597,6 +597,7 @@ export const Filter = Vue.extend({
 
 	props: {
 		value: { type: Array },
+		replaceWindowLocation: Boolean,
 		translations: {
 			type: Object,
 			default: () => {
@@ -648,8 +649,19 @@ export const Filter = Vue.extend({
 				encodedFilterData: encodeFilterData(this.internalValue),
 			};
 			this.$emit('input', event);
+			if (this.$props.replaceWindowLocation) {
+				this.replaceWindowLocation(event);
+			}
 			// console.log('event', event);
 			this.visible = false;
+		},
+
+		replaceWindowLocation(event: any) {
+			let qs = event.encodedFilterData;
+			if (qs && qs.length > 0) {
+				qs = `?${qs}`;
+			}
+			window.location.replace(`${window.location.pathname}${qs}`);
 		},
 
 		clear(e: any) {
@@ -747,7 +759,7 @@ export const Filter = Vue.extend({
 		return (
 			<vmenu props={{ value: self.visible }} scopedSlots={{
 				activator: ({ on }: any) => {
-					return (<vbtn on={on}>
+					return (<vbtn on={on} depressed>
 						<vicon>filter_list</vicon>
 						<span class='px-2'>Filter</span>
 						{this.filterCount()}

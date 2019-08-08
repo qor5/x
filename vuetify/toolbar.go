@@ -23,23 +23,13 @@ func (b *VToolbarBuilder) Absolute(v bool) (r *VToolbarBuilder) {
 	return b
 }
 
-func (b *VToolbarBuilder) App(v bool) (r *VToolbarBuilder) {
-	b.tag.Attr(":app", fmt.Sprint(v))
+func (b *VToolbarBuilder) Bottom(v bool) (r *VToolbarBuilder) {
+	b.tag.Attr(":bottom", fmt.Sprint(v))
 	return b
 }
 
-func (b *VToolbarBuilder) Card(v bool) (r *VToolbarBuilder) {
-	b.tag.Attr(":card", fmt.Sprint(v))
-	return b
-}
-
-func (b *VToolbarBuilder) ClippedLeft(v bool) (r *VToolbarBuilder) {
-	b.tag.Attr(":clipped-left", fmt.Sprint(v))
-	return b
-}
-
-func (b *VToolbarBuilder) ClippedRight(v bool) (r *VToolbarBuilder) {
-	b.tag.Attr(":clipped-right", fmt.Sprint(v))
+func (b *VToolbarBuilder) Collapse(v bool) (r *VToolbarBuilder) {
+	b.tag.Attr(":collapse", fmt.Sprint(v))
 	return b
 }
 
@@ -58,6 +48,11 @@ func (b *VToolbarBuilder) Dense(v bool) (r *VToolbarBuilder) {
 	return b
 }
 
+func (b *VToolbarBuilder) Elevation(v int) (r *VToolbarBuilder) {
+	b.tag.Attr(":elevation", fmt.Sprint(v))
+	return b
+}
+
 func (b *VToolbarBuilder) Extended(v bool) (r *VToolbarBuilder) {
 	b.tag.Attr(":extended", fmt.Sprint(v))
 	return b
@@ -65,11 +60,6 @@ func (b *VToolbarBuilder) Extended(v bool) (r *VToolbarBuilder) {
 
 func (b *VToolbarBuilder) ExtensionHeight(v int) (r *VToolbarBuilder) {
 	b.tag.Attr(":extension-height", fmt.Sprint(v))
-	return b
-}
-
-func (b *VToolbarBuilder) Fixed(v bool) (r *VToolbarBuilder) {
-	b.tag.Attr(":fixed", fmt.Sprint(v))
 	return b
 }
 
@@ -88,18 +78,28 @@ func (b *VToolbarBuilder) Height(v int) (r *VToolbarBuilder) {
 	return b
 }
 
-func (b *VToolbarBuilder) InvertedScroll(v bool) (r *VToolbarBuilder) {
-	b.tag.Attr(":inverted-scroll", fmt.Sprint(v))
-	return b
-}
-
 func (b *VToolbarBuilder) Light(v bool) (r *VToolbarBuilder) {
 	b.tag.Attr(":light", fmt.Sprint(v))
 	return b
 }
 
-func (b *VToolbarBuilder) ManualScroll(v bool) (r *VToolbarBuilder) {
-	b.tag.Attr(":manual-scroll", fmt.Sprint(v))
+func (b *VToolbarBuilder) MaxHeight(v int) (r *VToolbarBuilder) {
+	b.tag.Attr(":max-height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VToolbarBuilder) MaxWidth(v int) (r *VToolbarBuilder) {
+	b.tag.Attr(":max-width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VToolbarBuilder) MinHeight(v int) (r *VToolbarBuilder) {
+	b.tag.Attr(":min-height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VToolbarBuilder) MinWidth(v int) (r *VToolbarBuilder) {
+	b.tag.Attr(":min-width", fmt.Sprint(v))
 	return b
 }
 
@@ -108,28 +108,52 @@ func (b *VToolbarBuilder) Prominent(v bool) (r *VToolbarBuilder) {
 	return b
 }
 
-func (b *VToolbarBuilder) ScrollOffScreen(v bool) (r *VToolbarBuilder) {
-	b.tag.Attr(":scroll-off-screen", fmt.Sprint(v))
+func (b *VToolbarBuilder) Short(v bool) (r *VToolbarBuilder) {
+	b.tag.Attr(":short", fmt.Sprint(v))
 	return b
 }
 
-func (b *VToolbarBuilder) ScrollTarget(v string) (r *VToolbarBuilder) {
-	b.tag.Attr("scroll-target", v)
+func (b *VToolbarBuilder) Src(v string) (r *VToolbarBuilder) {
+	b.tag.Attr("src", v)
 	return b
 }
 
-func (b *VToolbarBuilder) ScrollThreshold(v int) (r *VToolbarBuilder) {
-	b.tag.Attr(":scroll-threshold", fmt.Sprint(v))
+func (b *VToolbarBuilder) Tag(v string) (r *VToolbarBuilder) {
+	b.tag.Attr("tag", v)
 	return b
 }
 
-func (b *VToolbarBuilder) ScrollToolbarOffScreen(v bool) (r *VToolbarBuilder) {
-	b.tag.Attr(":scroll-toolbar-off-screen", fmt.Sprint(v))
+func (b *VToolbarBuilder) Tile(v bool) (r *VToolbarBuilder) {
+	b.tag.Attr(":tile", fmt.Sprint(v))
 	return b
 }
 
-func (b *VToolbarBuilder) Tabs(v bool) (r *VToolbarBuilder) {
-	b.tag.Attr(":tabs", fmt.Sprint(v))
+func (b *VToolbarBuilder) Width(v int) (r *VToolbarBuilder) {
+	b.tag.Attr(":width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VToolbarBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VToolbarBuilder) Attr(vs ...interface{}) (r *VToolbarBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VToolbarBuilder) Children(children ...h.HTMLComponent) (r *VToolbarBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VToolbarBuilder) AppendChildren(children ...h.HTMLComponent) (r *VToolbarBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VToolbarBuilder) PrependChildren(children ...h.HTMLComponent) (r *VToolbarBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

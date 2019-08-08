@@ -112,10 +112,19 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		return VBtn("ApproveAll")
 	})
 
-	fl := l.Filtering("Name", "Int1", "Date1")
-	fl.Filter("Name").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
-		u := obj.(*User)
-		return VAutocomplete().FieldName("Name").Value(u.Name).Label(field.Label).Items([]string{"1111", "2222"})
+	l.Filter([]*FilterItem{
+		{
+			Key:          "created",
+			Label:        "Created",
+			ItemType:     ItemTypeDate,
+			SQLCondition: `extract(epoch from created_at) %s ?`,
+		},
+		{
+			Key:          "name",
+			Label:        "Name",
+			ItemType:     ItemTypeString,
+			SQLCondition: `name %s ?`,
+		},
 	})
 
 	ef := m.Editing("Name", "Bool1", "Int1")

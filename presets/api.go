@@ -2,7 +2,6 @@ package presets
 
 import (
 	"mime/multipart"
-	"net/url"
 
 	"github.com/sunfmin/bran/ui"
 	h "github.com/theplant/htmlgo"
@@ -34,8 +33,13 @@ type FetchOpFunc func(obj interface{}, id string) (r interface{}, err error)
 type UpdateFieldOpFunc func(obj interface{}, id string, fieldName string, value interface{}) (err error)
 type SaveOpFunc func(obj interface{}, id string) (err error)
 
+type SQLCondition struct {
+	Query string
+	Args  []interface{}
+}
+
 type SearchParams struct {
 	KeywordColumns []string
 	Keyword        string
-	Params         url.Values
+	SQLConditions  []*SQLCondition
 }

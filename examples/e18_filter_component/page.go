@@ -1,41 +1,40 @@
 package e18_filter_component
 
 import (
-	fp "github.com/sunfmin/bran/filterpanel"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 )
 
 func FilterComponent(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
-	fd := fp.FilterData([]*fp.FilterItem{
+	fd := FilterData([]*FilterItem{
 		{
 			Key:          "invoiceDate",
 			Label:        "Invoice Date",
-			ItemType:     fp.ItemTypeDate,
+			ItemType:     ItemTypeDate,
 			SQLCondition: "InvoiceDate %s datetime(?, 'unixepoch')",
 			Selected:     true,
 		},
 		{
 			Key:          "country",
 			Label:        "Country",
-			ItemType:     fp.ItemTypeSelect,
+			ItemType:     ItemTypeSelect,
 			SQLCondition: "upper(BillingCountry) %s upper(?)",
-			Options: []*fp.SelectItem{
+			Options: []*SelectItem{
 				{
-					Key:   "US",
-					Label: "United States",
+					Value: "US",
+					Text:  "United States",
 				},
 				{
-					Key:   "CN",
-					Label: "China",
+					Value: "CN",
+					Text:  "China",
 				},
 			},
 		},
 		{
 			Key:          "totalAmount",
 			Label:        "Total Amount",
-			ItemType:     fp.ItemTypeNumber,
+			ItemType:     ItemTypeNumber,
 			SQLCondition: "Total %s ?",
 		},
 	})
@@ -44,7 +43,7 @@ func FilterComponent(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
 	pr.Schema = VApp(
 		VContent(
-			fp.Filter(fd),
+			Filter(fd),
 		),
 	)
 	return
