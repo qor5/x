@@ -27,29 +27,55 @@ interface StatePusher {
 }
 
 export function setPushState(
-	pstate: any,
-	query: string,
-	pathname: string,
+	eventFuncId: any,
+	url: string,
 	pusher: StatePusher,
-): string {
+	popstate: boolean | undefined,
+): any {
+	let pstate = eventFuncId.pushState;
+
+	if (typeof pstate === 'string') {
+		pstate = querystring.parse(pstate);
+	}
+
+	Object.keys(pstate).forEach((key) => {
+		const v = pstate[key];
+		if (!Array.isArray(v)) {
+			pstate[key] = [v];
+		}
+	});
+
+	eventFuncId.pushState = pstate;
+
+	const orig = querystring.parseUrl(url);
+	let eventQuery = { __execute_event__: eventFuncId.id };
+
 	if (pstate) {
-		let newquery = '';
+		let pushStateQuery = '';
 		if (Object.keys(pstate).length > 0) {
-			const orig = querystring.parse(query);
-			newquery = querystring.stringify({ ...orig, ...pstate });
-			query = newquery;
-			if (newquery.length > 0) {
-				query = `&${newquery}`;
-				newquery = `?${newquery}`;
+			pstate = { ...orig.query, ...pstate };
+			pushStateQuery = querystring.stringify(pstate);
+			eventQuery = { ...eventQuery, ...pstate };
+			if (pushStateQuery.length > 0) {
+				pushStateQuery = `?${pushStateQuery}`;
 			}
 		}
-		pusher.pushState(
-			{ ...pstate, ...{ url: pathname + newquery } },
-			'',
-			pathname + newquery,
-		);
+
+		if (popstate !== true) {
+			const newUrl = orig.url + pushStateQuery;
+			const pushedState = { ...pstate, ...{ url: newUrl } };
+			pusher.pushState(
+				pushedState,
+				'',
+				newUrl,
+			);
+		}
 	}
-	return query;
+
+	return {
+		newEventFuncId: eventFuncId,
+		eventURL: `${orig.url}?${querystring.stringify(eventQuery)}`,
+	};
 }
 
 

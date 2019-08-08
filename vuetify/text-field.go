@@ -38,16 +38,6 @@ func (b *VTextFieldBuilder) BackgroundColor(v string) (r *VTextFieldBuilder) {
 	return b
 }
 
-func (b *VTextFieldBuilder) Box(v bool) (r *VTextFieldBuilder) {
-	b.tag.Attr(":box", fmt.Sprint(v))
-	return b
-}
-
-func (b *VTextFieldBuilder) BrowserAutocomplete(v string) (r *VTextFieldBuilder) {
-	b.tag.Attr("browser-autocomplete", v)
-	return b
-}
-
 func (b *VTextFieldBuilder) ClearIcon(v string) (r *VTextFieldBuilder) {
 	b.tag.Attr("clear-icon", v)
 	return b
@@ -78,11 +68,6 @@ func (b *VTextFieldBuilder) Disabled(v bool) (r *VTextFieldBuilder) {
 	return b
 }
 
-func (b *VTextFieldBuilder) DontFillMaskBlanks(v bool) (r *VTextFieldBuilder) {
-	b.tag.Attr(":dont-fill-mask-blanks", fmt.Sprint(v))
-	return b
-}
-
 func (b *VTextFieldBuilder) Error(v bool) (r *VTextFieldBuilder) {
 	b.tag.Attr(":error", fmt.Sprint(v))
 	return b
@@ -95,6 +80,11 @@ func (b *VTextFieldBuilder) ErrorCount(v int) (r *VTextFieldBuilder) {
 
 func (b *VTextFieldBuilder) ErrorMessages(v string) (r *VTextFieldBuilder) {
 	b.tag.Attr("error-messages", v)
+	return b
+}
+
+func (b *VTextFieldBuilder) Filled(v bool) (r *VTextFieldBuilder) {
+	b.tag.Attr(":filled", fmt.Sprint(v))
 	return b
 }
 
@@ -123,6 +113,11 @@ func (b *VTextFieldBuilder) Hint(v string) (r *VTextFieldBuilder) {
 	return b
 }
 
+func (b *VTextFieldBuilder) Id(v string) (r *VTextFieldBuilder) {
+	b.tag.Attr("id", v)
+	return b
+}
+
 func (b *VTextFieldBuilder) Label(v string) (r *VTextFieldBuilder) {
 	b.tag.Attr("label", v)
 	return b
@@ -133,13 +128,13 @@ func (b *VTextFieldBuilder) Light(v bool) (r *VTextFieldBuilder) {
 	return b
 }
 
-func (b *VTextFieldBuilder) Loading(v bool) (r *VTextFieldBuilder) {
-	b.tag.Attr(":loading", fmt.Sprint(v))
+func (b *VTextFieldBuilder) LoaderHeight(v int) (r *VTextFieldBuilder) {
+	b.tag.Attr(":loader-height", fmt.Sprint(v))
 	return b
 }
 
-func (b *VTextFieldBuilder) Mask(v string) (r *VTextFieldBuilder) {
-	b.tag.Attr("mask", v)
+func (b *VTextFieldBuilder) Loading(v bool) (r *VTextFieldBuilder) {
+	b.tag.Attr(":loading", fmt.Sprint(v))
 	return b
 }
 
@@ -148,8 +143,8 @@ func (b *VTextFieldBuilder) Messages(v string) (r *VTextFieldBuilder) {
 	return b
 }
 
-func (b *VTextFieldBuilder) Outline(v bool) (r *VTextFieldBuilder) {
-	b.tag.Attr(":outline", fmt.Sprint(v))
+func (b *VTextFieldBuilder) Outlined(v bool) (r *VTextFieldBuilder) {
+	b.tag.Attr(":outlined", fmt.Sprint(v))
 	return b
 }
 
@@ -183,18 +178,23 @@ func (b *VTextFieldBuilder) Readonly(v bool) (r *VTextFieldBuilder) {
 	return b
 }
 
-func (b *VTextFieldBuilder) ReturnMaskedValue(v bool) (r *VTextFieldBuilder) {
-	b.tag.Attr(":return-masked-value", fmt.Sprint(v))
-	return b
-}
-
 func (b *VTextFieldBuilder) Reverse(v bool) (r *VTextFieldBuilder) {
 	b.tag.Attr(":reverse", fmt.Sprint(v))
 	return b
 }
 
-func (b *VTextFieldBuilder) Rules(v interface{}) (r *VTextFieldBuilder) {
-	b.tag.Attr("rules", v)
+func (b *VTextFieldBuilder) Rounded(v bool) (r *VTextFieldBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTextFieldBuilder) Rules(v []string) (r *VTextFieldBuilder) {
+	b.tag.Attr(":rules", v)
+	return b
+}
+
+func (b *VTextFieldBuilder) Shaped(v bool) (r *VTextFieldBuilder) {
+	b.tag.Attr(":shaped", fmt.Sprint(v))
 	return b
 }
 
@@ -233,13 +233,37 @@ func (b *VTextFieldBuilder) Type(v string) (r *VTextFieldBuilder) {
 	return b
 }
 
+func (b *VTextFieldBuilder) ValidateOnBlur(v bool) (r *VTextFieldBuilder) {
+	b.tag.Attr(":validate-on-blur", fmt.Sprint(v))
+	return b
+}
+
 func (b *VTextFieldBuilder) Value(v string) (r *VTextFieldBuilder) {
 	b.tag.Attr("value", v)
 	return b
 }
 
-func (b *VTextFieldBuilder) ValidateOnBlur(v bool) (r *VTextFieldBuilder) {
-	b.tag.Attr(":validate-on-blur", fmt.Sprint(v))
+func (b *VTextFieldBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VTextFieldBuilder) Attr(vs ...interface{}) (r *VTextFieldBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VTextFieldBuilder) Children(children ...h.HTMLComponent) (r *VTextFieldBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VTextFieldBuilder) AppendChildren(children ...h.HTMLComponent) (r *VTextFieldBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VTextFieldBuilder) PrependChildren(children ...h.HTMLComponent) (r *VTextFieldBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 
@@ -250,6 +274,16 @@ func (b *VTextFieldBuilder) Class(names ...string) (r *VTextFieldBuilder) {
 
 func (b *VTextFieldBuilder) ClassIf(name string, add bool) (r *VTextFieldBuilder) {
 	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VTextFieldBuilder) On(name string, value string) (r *VTextFieldBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VTextFieldBuilder) Bind(name string, value string) (r *VTextFieldBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

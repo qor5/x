@@ -29,16 +29,18 @@ export const WithField = (
 				fieldName,
 			} = self.$props;
 
-
 			const data: VNodeData = {
 				props: {
 					...self.$attrs,
 				},
 
 				on: {
-					change: (val: any) => {
-						self.core.setFormValue(fieldName, val);
+					...{
+						change: (val: any) => {
+							self.core.setFormValue(fieldName, val);
+						},
 					},
+					...this.$listeners,
 				},
 
 				scopedSlots: this.$scopedSlots,

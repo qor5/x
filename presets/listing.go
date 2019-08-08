@@ -66,7 +66,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	ctx.Hub.RegisterEventFunc("formDrawerEdit", b.mb.editing.formDrawerEdit)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
 	msgs := b.mb.p.messagesFunc(ctx)
-
+	//time.Sleep(1 * time.Second)
 	searchParams := &SearchParams{
 		KeywordColumns: b.searchColumns,
 		Keyword:        ctx.R.URL.Query().Get("keyword"),

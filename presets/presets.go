@@ -220,7 +220,9 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 						Label("Search").
 						Flat(true).
 						Clearable(true).
-						HideDetails(true),
+						HideDetails(true).
+						Value(ctx.R.URL.Query().Get("keyword")).
+						Attr("@keyup.enter", `topage({keyword: [$event.target.value]}, "")`),
 					// ).Method("GET"),
 				).AlignCenter(true).Attr("style", "max-width: 650px"),
 			).Dark(true).

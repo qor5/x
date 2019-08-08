@@ -34,13 +34,31 @@ describe('utils', () => {
 		};
 
 
-		const search = setPushState(
-			{ name: 'felix' },
-			'hello=1&page=2',
-			'/page1',
+		const { newEventFuncId, eventURL } = setPushState(
+			{
+				id: 'hello',
+				pushState: { name: 'felix' },
+			},
+			'/page1?hello=1&page=2',
 			pusher,
+			false,
 		);
-		expect(search).toBe('&hello=1&name=felix&page=2');
+		expect(eventURL).toBe('/page1?__execute_event__=hello&hello=1&name=felix&page=2');
 		expect(pusher.pushed.url).toBe('/page1?hello=1&name=felix&page=2');
+		expect(newEventFuncId.pushState).toEqual({ name: ['felix'] });
+
+		const r2 = setPushState(
+			{
+				id: 'hello',
+				pushState: 'name=felix',
+			},
+			'/page1?hello=1&page=2',
+			pusher,
+			false,
+		);
+		expect(r2.eventURL).toBe('/page1?__execute_event__=hello&hello=1&name=felix&page=2');
+		expect(pusher.pushed.url).toBe('/page1?hello=1&name=felix&page=2');
+		expect(r2.newEventFuncId.pushState).toEqual({ name: ['felix'] });
+
 	});
 });

@@ -2,7 +2,6 @@
 import debounce from 'lodash/debounce';
 import 'whatwg-fetch';
 import Vue, { VueConstructor } from 'vue';
-import querystring from 'query-string';
 
 import {
 	setPushState,
@@ -51,7 +50,7 @@ export class Core {
 		this.changeCurrent = changeCurrent;
 	}
 
-	public loadPage(pushState: any, pageURL?: string) {
+	public loadPage(pushState: any, pageURL?: string, popstate?: boolean) {
 		this.fetchEventThenRefresh(
 			{
 				id: '__reload__',
@@ -59,43 +58,36 @@ export class Core {
 			},
 			{},
 			pageURL,
+			popstate,
 		);
 	}
 
 	public onpopstate(event: any) {
-		this.loadPage(null, event.url);
+		const { url, ...pushState } = event.state;
+		this.loadPage(pushState, url, true);
 	}
 
 	public fetchEvent(
 		eventFuncId: EventFuncID,
 		event: EventData,
 		pageURL?: string,
+		popstate?: boolean,
 	): Promise<EventResponse> {
-		let pstate = eventFuncId.pushState;
-		let currentSearch = window.location.search;
 
-		if (typeof pstate === 'string') {
-			eventFuncId.pushState = { url: [pstate] };
-			pstate = querystring.parse(pstate);
-			currentSearch = '';
-		}
+		const { newEventFuncId, eventURL } = setPushState(
+			eventFuncId,
+			pageURL || (window.location.pathname + '?' + window.window.location.search),
+			window.history,
+			popstate,
+		);
 
 		const eventData = JSON.stringify({
-			eventFuncId,
+			eventFuncId: newEventFuncId,
 			event,
 		});
 
-		const pathname = pageURL || window.location.pathname;
-		const search = setPushState(
-			pstate,
-			currentSearch,
-			pathname,
-			window.history,
-		);
-
-		pageURL = pageURL || '';
 		this.form.set('__event_data__', eventData);
-		return fetch(`${pageURL}?__execute_event__=${eventFuncId.id}${search}`, {
+		return fetch(eventURL, {
 			method: 'POST',
 			body: this.form,
 		}).then((r) => {
@@ -149,8 +141,9 @@ export class Core {
 		eventFuncId: EventFuncID,
 		event: EventData,
 		pageURL?: string,
+		popstate?: boolean,
 	) {
-		this.fetchEvent(eventFuncId, event, pageURL)
+		this.fetchEvent(eventFuncId, event, pageURL, popstate)
 			.then((r: EventResponse) => {
 				if (r.reloadPortals && r.reloadPortals.length > 0) {
 					for (const portalName of r.reloadPortals) {
