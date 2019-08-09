@@ -766,6 +766,7 @@ export const Filter = Vue.extend({
 			}}
 				offsetY={true}
 				// absolute={true}
+				minWidth='400px'
 				maxWidth='400px'
 				closeOnContentClick={false}
 				on={

@@ -216,7 +216,7 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 					// h.Form(
 					VTextField().
 						SoloInverted(true).
-						PrependInnerIcon("search").
+						PrependIcon("search").
 						Label("Search").
 						Flat(true).
 						Clearable(true).

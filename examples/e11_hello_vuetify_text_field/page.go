@@ -34,7 +34,6 @@ func HelloVuetifyTextField(ctx *ui.EventContext) (pr ui.PageResponse, err error)
 			vt.VContainer(
 				vt.VTextField().Label("Default"),
 				vt.VTextField().Solo(true).Label("Solo"),
-				vt.VTextField().Box(true).Label("Mask").Mask("###-####").Hint("Input number like 123-1231"),
 				vt.VTextField().Clearable(true).Label("Clearable"),
 				vt.VTextField().Error(true).Label("Error"),
 				vt.VTextField().Label("Default ValueIs").Value("Hello"),

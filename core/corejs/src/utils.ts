@@ -38,19 +38,18 @@ export function setPushState(
 		pstate = querystring.parse(pstate);
 	}
 
-	Object.keys(pstate).forEach((key) => {
-		const v = pstate[key];
-		if (!Array.isArray(v)) {
-			pstate[key] = [v];
-		}
-	});
-
-	eventFuncId.pushState = pstate;
-
 	const orig = querystring.parseUrl(url);
 	let eventQuery = { __execute_event__: eventFuncId.id };
 
 	if (pstate) {
+
+		Object.keys(pstate).forEach((key) => {
+			const v = pstate[key];
+			if (!Array.isArray(v)) {
+				pstate[key] = [v];
+			}
+		});
+
 		let pushStateQuery = '';
 		if (Object.keys(pstate).length > 0) {
 			pstate = { ...orig.query, ...pstate };
@@ -71,6 +70,8 @@ export function setPushState(
 			);
 		}
 	}
+
+	eventFuncId.pushState = pstate;
 
 	return {
 		newEventFuncId: eventFuncId,
