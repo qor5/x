@@ -61,21 +61,21 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	})
 
 	p.FieldType(&Thumb{}).
-		ListingComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+		ComponentFunc(presets.LISTING, func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 			i, err := reflectutils.Get(obj, field.Name)
 			if err != nil {
 				panic(err)
 			}
 			return h.Text(i.(*Thumb).Name)
 		}).
-		DetailingComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+		ComponentFunc(presets.DETAILING, func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 			i, err := reflectutils.Get(obj, field.Name)
 			if err != nil {
 				panic(err)
 			}
 			return h.Text(i.(*Thumb).Name)
 		}).
-		EditingComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+		ComponentFunc(presets.EDITING, func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 			i, err := reflectutils.Get(obj, field.Name)
 			if err != nil {
 				panic(err)

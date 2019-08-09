@@ -64,9 +64,15 @@ func (b *ModelBuilder) inspectModel() {
 		f := t.Field(i)
 		//fmt.Println(f.Name, f.Type)
 		ft := b.p.fieldTypeByType(f.Type)
-		b.listing.Field(f.Name).ComponentFunc(ft.listingCompFunc)
-		b.detailing.Field(f.Name).ComponentFunc(ft.detailingCompFunc)
-		b.editing.Field(f.Name).ComponentFunc(ft.editingCompFunc)
+		if !b.p.fieldNameExcluded(LISTING, f.Name) {
+			b.listing.Field(f.Name).ComponentFunc(ft.listingCompFunc)
+		}
+		if !b.p.fieldNameExcluded(DETAILING, f.Name) {
+			b.detailing.Field(f.Name).ComponentFunc(ft.detailingCompFunc)
+		}
+		if !b.p.fieldNameExcluded(EDITING, f.Name) {
+			b.editing.Field(f.Name).ComponentFunc(ft.editingCompFunc)
+		}
 	}
 }
 

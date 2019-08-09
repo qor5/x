@@ -2,6 +2,7 @@ package presets
 
 import (
 	"fmt"
+	"path/filepath"
 	"reflect"
 
 	"github.com/sunfmin/bran/ui"
@@ -22,23 +23,28 @@ type FieldTypeBuilder struct {
 	editingCompFunc   FieldComponentFunc
 }
 
+type PageType string
+
+const (
+	LISTING   PageType = "listing"
+	EDITING   PageType = "editing"
+	DETAILING PageType = "detailing"
+)
+
 func NewFieldType(t reflect.Type) (r *FieldTypeBuilder) {
 	r = &FieldTypeBuilder{valType: t}
 	return
 }
 
-func (b *FieldTypeBuilder) ListingComponentFunc(v FieldComponentFunc) (r *FieldTypeBuilder) {
-	b.listingCompFunc = v
-	return b
-}
-
-func (b *FieldTypeBuilder) EditingComponentFunc(v FieldComponentFunc) (r *FieldTypeBuilder) {
-	b.editingCompFunc = v
-	return b
-}
-
-func (b *FieldTypeBuilder) DetailingComponentFunc(v FieldComponentFunc) (r *FieldTypeBuilder) {
-	b.detailingCompFunc = v
+func (b *FieldTypeBuilder) ComponentFunc(t PageType, v FieldComponentFunc) (r *FieldTypeBuilder) {
+	switch t {
+	case LISTING:
+		b.listingCompFunc = v
+	case EDITING:
+		b.editingCompFunc = v
+	case DETAILING:
+		b.detailingCompFunc = v
+	}
 	return b
 }
 
@@ -55,11 +61,50 @@ var stringVals = []interface{}{
 }
 
 type FieldTypes struct {
-	fieldTypes []*FieldTypeBuilder
+	fieldTypes                []*FieldTypeBuilder
+	excludesListingPatterns   []string
+	excludesEditingPatterns   []string
+	excludesDetailingPatterns []string
 }
 
 func (b *FieldTypes) FieldType(v interface{}) (r *FieldTypeBuilder) {
 	return b.fieldTypeByType(reflect.TypeOf(v))
+}
+
+func (b *FieldTypes) ExcludeFields(t PageType, patterns ...string) {
+	switch t {
+	case LISTING:
+		b.excludesListingPatterns = patterns
+	case EDITING:
+		b.excludesEditingPatterns = patterns
+	case DETAILING:
+		b.excludesDetailingPatterns = patterns
+	}
+}
+
+func hasMatched(patterns []string, name string) bool {
+	for _, p := range patterns {
+		ok, err := filepath.Match(p, name)
+		if err != nil {
+			panic(err)
+		}
+		if ok {
+			return true
+		}
+	}
+	return false
+}
+
+func (b *FieldTypes) fieldNameExcluded(t PageType, name string) bool {
+	switch t {
+	case LISTING:
+		return hasMatched(b.excludesListingPatterns, name)
+	case EDITING:
+		return hasMatched(b.excludesEditingPatterns, name)
+	case DETAILING:
+		return hasMatched(b.excludesDetailingPatterns, name)
+	}
+	return false
 }
 
 func (b *FieldTypes) fieldTypeByType(tv reflect.Type) (r *FieldTypeBuilder) {
@@ -116,14 +161,25 @@ func cfTextField(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComp
 }
 
 func builtInFieldTypes() (r FieldTypes) {
-	r.FieldType(true).ListingComponentFunc(cfTextTd).DetailingComponentFunc(cfText).EditingComponentFunc(cfCheckbox)
+	r.FieldType(true).
+		ComponentFunc(LISTING, cfTextTd).
+		ComponentFunc(DETAILING, cfText).
+		ComponentFunc(EDITING, cfCheckbox)
 
 	for _, v := range numberVals {
-		r.FieldType(v).ListingComponentFunc(cfTextTd).DetailingComponentFunc(cfText).EditingComponentFunc(cfNumber)
+		r.FieldType(v).
+			ComponentFunc(LISTING, cfTextTd).
+			ComponentFunc(DETAILING, cfText).
+			ComponentFunc(EDITING, cfNumber)
 	}
 
 	for _, v := range stringVals {
-		r.FieldType(v).ListingComponentFunc(cfTextTd).DetailingComponentFunc(cfText).EditingComponentFunc(cfTextField)
+		r.FieldType(v).
+			ComponentFunc(LISTING, cfTextTd).
+			ComponentFunc(DETAILING, cfText).
+			ComponentFunc(EDITING, cfTextField)
 	}
+
+	r.ExcludeFields(EDITING, "ID")
 	return
 }
