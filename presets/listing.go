@@ -115,13 +115,20 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		for _, f := range b.fields {
 			tds = append(tds, f.compFunc(obj, b.mb.getComponentFuncField(f), ctx))
 		}
-		v, err := reflectutils.Get(obj, "ID")
+		id := fmt.Sprint(reflectutils.MustGet(obj, "ID"))
 		if err != nil {
 			panic(err)
 		}
-		rows = append(rows, ui.Bind(h.Tr(tds...)).PushStateLink(
-			b.mb.detailingHref(fmt.Sprint(v)),
-		))
+
+		trbind := ui.Bind(h.Tr(tds...))
+		if b.mb.hasDetailing {
+			trbind.PushStateLink(
+				b.mb.detailingHref(id),
+			)
+		} else {
+			trbind.OnClick("formDrawerEdit", id)
+		}
+		rows = append(rows, trbind)
 	})
 
 	var heads []h.HTMLComponent

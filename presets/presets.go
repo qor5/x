@@ -297,10 +297,12 @@ func (b *Builder) initMux() {
 			pat.New(m.listingHref()),
 			b.builder.Page(b.defaultLayout(m.listing.GetPageFunc())),
 		)
-		mux.Handle(
-			pat.New(fmt.Sprintf("%s/%s/:id", b.prefix, muri)),
-			b.builder.Page(b.defaultLayout(m.detailing.GetPageFunc())),
-		)
+		if m.hasDetailing {
+			mux.Handle(
+				pat.New(fmt.Sprintf("%s/%s/:id", b.prefix, muri)),
+				b.builder.Page(b.defaultLayout(m.detailing.GetPageFunc())),
+			)
+		}
 		mux.Handle(
 			pat.New(fmt.Sprintf("%s/%s/:id/edit", b.prefix, muri)),
 			b.builder.Page(b.defaultLayout(m.editing.GetPageFunc())),

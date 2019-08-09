@@ -23,6 +23,7 @@ type ModelBuilder struct {
 	listing      *ListingBuilder
 	editing      *EditingBuilder
 	detailing    *DetailingBuilder
+	hasDetailing bool
 }
 
 func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {

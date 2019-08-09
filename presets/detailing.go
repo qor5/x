@@ -18,6 +18,7 @@ type DetailingBuilder struct {
 
 func (b *ModelBuilder) Detailing(vs ...string) (r *DetailingBuilder) {
 	r = b.detailing
+	b.hasDetailing = true
 	if len(vs) == 0 {
 		return
 	}
