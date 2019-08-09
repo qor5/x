@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/qor/inflection"
 	"github.com/sunfmin/bran"
@@ -99,7 +100,7 @@ func (b *Builder) defaultBrandFunc(ctx *ui.EventContext) (r h.HTMLComponent) {
 	return
 }
 
-func (b *Builder) createMenus() (r h.HTMLComponent) {
+func (b *Builder) createMenus(ctx *ui.EventContext) (r h.HTMLComponent) {
 
 	var menus []h.HTMLComponent
 	for _, mg := range b.menuGroups {
@@ -111,6 +112,7 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 			).Slot("activator").Class("pa-0"),
 		}
 		for _, m := range mg.models {
+			href := m.listingHref()
 			subMenus = append(subMenus,
 				ui.Bind(VListItem(
 					VListItemAction(
@@ -121,10 +123,11 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 							h.Text(m.label),
 						),
 					),
-				)).PushStateLink(m.listingHref()),
+				).Class(activeClass(ctx, href))).PushStateLink(href),
 			)
 		}
-		menus = append(menus, VListGroup(subMenus...).
+		menus = append(menus, VListGroup(
+			subMenus...).
 			PrependIcon(mg.icon).
 			Value(true).
 			Color(b.primaryColor),
@@ -135,6 +138,7 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 		if m.inGroup {
 			continue
 		}
+		href := m.listingHref()
 		menus = append(menus,
 			ui.Bind(VListItem(
 				VListItemAction(
@@ -145,12 +149,19 @@ func (b *Builder) createMenus() (r h.HTMLComponent) {
 						h.Text(m.label),
 					),
 				),
-			).Color(b.primaryColor)).PushStateLink(m.listingHref()),
+			).Class(activeClass(ctx, href)).Color(b.primaryColor)).PushStateLink(href),
 		)
 	}
 
 	r = VList(menus...)
 	return
+}
+
+func activeClass(ctx *ui.EventContext, url string) string {
+	if strings.HasPrefix(ctx.R.URL.Path, url) {
+		return "v-list-item--active"
+	}
+	return ""
 }
 
 func (b *Builder) runBrandFunc(ctx *ui.EventContext) (r h.HTMLComponent) {
@@ -201,7 +212,7 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 		pr.Schema = VApp(
 
 			VNavigationDrawer(
-				b.createMenus(),
+				b.createMenus(ctx),
 			).App(true).
 				Clipped(true).
 				Value(true).
