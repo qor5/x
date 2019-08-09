@@ -1,6 +1,10 @@
 package presets
 
 import (
+	"fmt"
+
+	"github.com/sunfmin/reflectutils"
+
 	"github.com/qor/inflection"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
@@ -111,7 +115,13 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		for _, f := range b.fields {
 			tds = append(tds, f.compFunc(obj, b.mb.getComponentFuncField(f), ctx))
 		}
-		rows = append(rows, h.Tr(tds...))
+		v, err := reflectutils.Get(obj, "ID")
+		if err != nil {
+			panic(err)
+		}
+		rows = append(rows, ui.Bind(h.Tr(tds...)).PushStateLink(
+			b.mb.detailingHref(fmt.Sprint(v)),
+		))
 	})
 
 	var heads []h.HTMLComponent

@@ -112,6 +112,11 @@ func (b *ModelBuilder) listingHref() string {
 	return fmt.Sprintf("%s/%s", b.p.prefix, muri)
 }
 
+func (b *ModelBuilder) detailingHref(id string) string {
+	muri := inflection.Plural(b.uriName)
+	return fmt.Sprintf("%s/%s/%s", b.p.prefix, muri, id)
+}
+
 func (b *ModelBuilder) URIName(v string) (r *ModelBuilder) {
 	b.uriName = v
 	return b

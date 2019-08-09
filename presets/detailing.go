@@ -2,6 +2,9 @@ package presets
 
 import (
 	"github.com/sunfmin/bran/ui"
+	. "github.com/sunfmin/bran/vuetify"
+	h "github.com/theplant/htmlgo"
+	"goji.io/pat"
 )
 
 type DetailingBuilder struct {
@@ -57,5 +60,44 @@ func (b *DetailingBuilder) GetPageFunc() ui.PageFunc {
 }
 
 func (b *DetailingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
+	id := pat.Param(ctx.R, "id")
+	r.Schema = VContainer(h.Text(id))
+
+	var obj = b.mb.newModel()
+
+	if len(id) == 0 {
+		panic("not found")
+	}
+
+	obj, err = b.fetcher(obj, id)
+	if err != nil {
+		return
+	}
+
+	var notice h.HTMLComponent
+	if msg, ok := ctx.Flash.(string); ok {
+		notice = VSnackbar(h.Text(msg)).Value(true).Top(true).Color("success").Value(true)
+	}
+
+	var comps []h.HTMLComponent
+	for _, f := range b.fields {
+		if f.compFunc == nil {
+			continue
+		}
+		comps = append(comps, f.compFunc(obj, &Field{
+			Name:  f.name,
+			Label: b.mb.getLabel(f),
+		}, ctx))
+	}
+
+	r.Schema = VContainer(
+		notice,
+		//h.H2(title).Class("title pb-3"),
+		VCard(
+			VCardText(
+				comps...,
+			),
+		).Flat(true),
+	).Fluid(true)
 	return
 }
