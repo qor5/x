@@ -28,8 +28,14 @@ type User struct {
 	Int1      int
 	Float1    float64
 	Thumb1    *Thumb
+	CompanyID int
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+type Company struct {
+	ID   int
+	Name string
 }
 
 type Product struct {
@@ -39,7 +45,7 @@ type Product struct {
 
 func Preset1(db *gorm.DB) (r *presets.Builder) {
 
-	err := db.AutoMigrate(&User{}, &Product{}).Error
+	err := db.AutoMigrate(&User{}, &Product{}, &Company{}).Error
 	if err != nil {
 		panic(err)
 	}
@@ -82,18 +88,30 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	p.MenuGroup("User Management").Icon("group")
 	p.Model(&Product{}).MenuIcon("laptop")
 	m := p.Model(&User{}).URIName("user").MenuGroup("User Management")
+	p.Model(&Company{}).MenuGroup("User Management")
 	m.Labels(
 		"Name", "名字",
 		"Bool1", "性别",
 		"Float1", "体重",
+		"CompanyID", "公司",
 	).Placeholders(
 		"Name", "请输入你的名字",
 	)
 
-	l := m.Listing("Name", "Bool1", "Float1", "Int1").SearchColumns("name", "job_title")
+	l := m.Listing("Name", "CompanyID", "Bool1", "Float1", "Int1").SearchColumns("name", "job_title")
 	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
 		return h.Td(ui.Bind(h.A().Text(u.Name)).PushStateLink(fmt.Sprintf("/admin/users/%d/edit", u.ID)))
+	})
+
+	l.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+		u := obj.(*User)
+		var comp Company
+		err := db.Find(&comp, u.CompanyID).Error
+		if err != nil && err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+		return h.Td(ui.Bind(h.A().Text(comp.Name)).PushStateLink(fmt.Sprintf("/admin/companies/%d/edit", comp.ID)))
 	})
 
 	l.Field("Actions").Label(" ").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
@@ -127,7 +145,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		},
 	})
 
-	ef := m.Editing("Name", "Bool1", "Int1")
+	ef := m.Editing("Name", "CompanyID", "Bool1", "Int1")
 	ef.Field("Name").Label("名字").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
 		//u := obj.(*User)
 		return VAutocomplete().
@@ -142,6 +160,23 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		if len(ns) > 0 {
 			u.Name = ns[0]
 		}
+	})
+
+	ef.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+		u := obj.(*User)
+		var companies []*Company
+		err := db.Find(&companies).Error
+		if err != nil {
+			panic(err)
+		}
+		return VSelect().
+			FieldName("CompanyID").
+			Label(field.Label).
+			Items(companies).
+			ItemText("Name").
+			ItemValue("ID").
+			Multiple(false).
+			Value(u.CompanyID)
 	})
 
 	dp := m.Detailing("Name", "Bool1", "Float1", "Int1", "Date1", "CreatedAt", "UpdatedAt")

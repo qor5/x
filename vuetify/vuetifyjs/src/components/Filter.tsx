@@ -65,7 +65,7 @@ export const DateItem = Vue.extend({
 
 	data() {
 		return {
-			modifier: this.$props.value.modifier,
+			modifier: this.$props.value.modifier || 'inTheLast',
 			valueIs: this.$props.value.valueIs,
 			valueFrom: this.$props.value.valueFrom,
 			valueTo: this.$props.value.valueTo,
@@ -259,7 +259,7 @@ export const NumberItem = Vue.extend({
 
 	data() {
 		return {
-			modifier: this.$props.value.modifier,
+			modifier: this.$props.value.modifier || 'equals',
 			valueIs: this.$props.value.valueIs,
 			valueFrom: this.$props.value.valueFrom,
 			valueTo: this.$props.value.valueTo,
@@ -388,7 +388,7 @@ export const StringItem = Vue.extend({
 
 	data() {
 		return {
-			modifier: this.$props.value.modifier,
+			modifier: this.$props.value.modifier || 'contains',
 			valueIs: this.$props.value.valueIs,
 		};
 	},
