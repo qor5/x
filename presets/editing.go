@@ -21,6 +21,10 @@ type EditingBuilder struct {
 
 func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
 	r = b.editing
+	if len(vs) == 0 {
+		return
+	}
+
 	var newfields []*FieldBuilder
 	for _, f := range vs {
 		newfields = append(newfields, r.Field(f))

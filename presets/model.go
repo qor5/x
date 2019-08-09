@@ -60,6 +60,8 @@ func (b *ModelBuilder) inspectModel() {
 
 	t := v.Type()
 
+	var sc []string
+	var stringType = reflect.TypeOf("")
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		//fmt.Println(f.Name, f.Type)
@@ -73,7 +75,11 @@ func (b *ModelBuilder) inspectModel() {
 		if !b.p.fieldNameExcluded(EDITING, f.Name) {
 			b.editing.Field(f.Name).ComponentFunc(ft.editingCompFunc)
 		}
+		if f.Type == stringType {
+			sc = append(sc, strcase.ToSnake(f.Name))
+		}
 	}
+	b.listing.searchColumns = sc
 }
 
 func (b *ModelBuilder) newListing() (r *ListingBuilder) {

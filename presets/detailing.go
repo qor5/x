@@ -15,6 +15,10 @@ type DetailingBuilder struct {
 
 func (b *ModelBuilder) Detailing(vs ...string) (r *DetailingBuilder) {
 	r = b.detailing
+	if len(vs) == 0 {
+		return
+	}
+
 	r.fieldNames = vs
 	var newfields []*FieldBuilder
 	for _, f := range vs {

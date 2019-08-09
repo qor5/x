@@ -20,6 +20,10 @@ type ListingBuilder struct {
 
 func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
 	r = b.listing
+	if len(vs) == 0 {
+		return
+	}
+
 	var newfields []*FieldBuilder
 	for _, f := range vs {
 		newfields = append(newfields, r.Field(f))

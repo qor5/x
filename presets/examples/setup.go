@@ -39,8 +39,9 @@ type Company struct {
 }
 
 type Product struct {
-	ID   int
-	Name string
+	ID        int
+	Name      string
+	OwnerName string
 }
 
 func Preset1(db *gorm.DB) (r *presets.Builder) {
