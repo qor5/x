@@ -87,7 +87,9 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	p.DataOperator(gormop.DataOperator(db))
 
 	p.MenuGroup("User Management").Icon("group")
-	p.Model(&Product{}).MenuIcon("laptop")
+	mp := p.Model(&Product{}).MenuIcon("laptop")
+	mp.Listing().PerPage(3)
+
 	m := p.Model(&User{}).URIName("user").MenuGroup("User Management")
 	p.Model(&Company{}).MenuGroup("User Management")
 	m.Labels(

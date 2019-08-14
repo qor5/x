@@ -13,7 +13,7 @@ type VPaginationBuilder struct {
 
 func VPagination() (r *VPaginationBuilder) {
 	r = &VPaginationBuilder{
-		tag: h.Tag("v-pagination"),
+		tag: h.Tag("vw-pagination"),
 	}
 	return
 }
@@ -65,6 +65,30 @@ func (b *VPaginationBuilder) TotalVisible(v int) (r *VPaginationBuilder) {
 
 func (b *VPaginationBuilder) Value(v int) (r *VPaginationBuilder) {
 	b.tag.Attr(":value", fmt.Sprint(v))
+	return b
+}
+
+func (b *VPaginationBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VPaginationBuilder) Attr(vs ...interface{}) (r *VPaginationBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VPaginationBuilder) Children(children ...h.HTMLComponent) (r *VPaginationBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VPaginationBuilder) AppendChildren(children ...h.HTMLComponent) (r *VPaginationBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VPaginationBuilder) PrependChildren(children ...h.HTMLComponent) (r *VPaginationBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

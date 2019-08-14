@@ -18,8 +18,8 @@ type dataOperatorImpl struct {
 	db *gorm.DB
 }
 
-func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams) (r interface{}, err error) {
-	wh := op.db
+func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams) (r interface{}, totalCount int, err error) {
+	wh := op.db.Model(obj)
 	if len(params.KeywordColumns) > 0 && len(params.Keyword) > 0 {
 		var segs []string
 		var args []interface{}
@@ -32,6 +32,21 @@ func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams
 
 	for _, cond := range params.SQLConditions {
 		wh = wh.Where(cond.Query, cond.Args...)
+	}
+
+	err = wh.Count(&totalCount).Error
+	if err != nil {
+		return
+	}
+
+	if params.PerPage > 0 {
+		wh = wh.Limit(params.PerPage)
+		page := params.Page
+		if page == 0 {
+			page = 1
+		}
+		offset := (page - 1) * params.PerPage
+		wh = wh.Offset(offset)
 	}
 
 	err = wh.Order("id DESC").Find(obj).Error

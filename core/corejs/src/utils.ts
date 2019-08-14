@@ -59,7 +59,7 @@ export function setPushState(
 			if (!Array.isArray(v)) {
 				serverPushState[key] = [v];
 			} else {
-				serverPushState = v;
+				serverPushState[key] = v;
 			}
 		});
 

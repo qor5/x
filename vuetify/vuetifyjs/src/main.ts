@@ -15,10 +15,11 @@ import './main.css';
 
 // import './main.styl';
 
-import VWAutocomplete from './components/VWAutocomplete';
+import Autocomplete from './components/Autocomplete';
 import { WithField } from './components/WithField';
 import { Core, SelectedItems } from './components/Helpers';
 import { Filter } from './components/Filter';
+import Pagination from './components/Pagination';
 
 const vuetify = new Vuetify({
 	icons: {
@@ -31,7 +32,7 @@ declare var window: any;
 (window.__branVueComponentRegisters =
 	window.__branVueComponentRegisters || []).push((Vue: VueConstructor, vueOptions: any): any => {
 		Vue.use(Vuetify);
-		Vue.component('vw-autocomplete', VWAutocomplete);
+		Vue.component('vw-autocomplete', Autocomplete);
 		Vue.component('vw-text-field', WithField(VTextField));
 		Vue.component('vw-textarea', WithField(VTextarea));
 		Vue.component('vw-checkbox', WithField(VCheckbox, 'input-value'));
@@ -40,6 +41,7 @@ declare var window: any;
 		Vue.component('vw-slider', WithField(VSlider));
 		Vue.component('vw-select', WithField(VSelect, undefined, [Core, SelectedItems]));
 		Vue.component('vw-filter', Filter);
+		Vue.component('vw-pagination', Pagination);
 
 		vueOptions.vuetify = vuetify;
 	});

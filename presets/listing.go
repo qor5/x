@@ -2,6 +2,7 @@ package presets
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/sunfmin/reflectutils"
 
@@ -20,6 +21,7 @@ type ListingBuilder struct {
 	pageFunc      ui.PageFunc
 	searcher      SearchOpFunc
 	searchColumns []string
+	perPage       int64
 }
 
 func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
@@ -62,6 +64,11 @@ func (b *ListingBuilder) SearchColumns(vs ...string) (r *ListingBuilder) {
 	return b
 }
 
+func (b *ListingBuilder) PerPage(v int64) (r *ListingBuilder) {
+	b.perPage = v
+	return b
+}
+
 func (b *ListingBuilder) GetPageFunc() ui.PageFunc {
 	if b.pageFunc != nil {
 		return b.pageFunc
@@ -74,10 +81,22 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	ctx.Hub.RegisterEventFunc("formDrawerEdit", b.mb.editing.formDrawerEdit)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
 	msgr := b.mb.p.messagesFunc(ctx)
+
+	perPage := b.perPage
+	if perPage == 0 {
+		perPage = 50
+	}
+
 	//time.Sleep(1 * time.Second)
 	searchParams := &SearchParams{
 		KeywordColumns: b.searchColumns,
 		Keyword:        ctx.R.URL.Query().Get("keyword"),
+		PerPage:        perPage,
+	}
+
+	searchParams.Page, _ = strconv.ParseInt(ctx.R.URL.Query().Get("page"), 10, 64)
+	if searchParams.Page == 0 {
+		searchParams.Page = 1
 	}
 
 	var toolbar = VToolbar(
@@ -103,9 +122,15 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	}
 
 	var objs interface{}
-	objs, err = b.searcher(b.mb.newModelArray(), searchParams)
+	var totalCount int
+	objs, totalCount, err = b.searcher(b.mb.newModelArray(), searchParams)
 	if err != nil {
 		return
+	}
+
+	pagesCount := int(int64(totalCount)/searchParams.PerPage + 1)
+	if int64(totalCount)%searchParams.PerPage == 0 {
+		pagesCount--
 	}
 
 	var rows []h.HTMLComponent
@@ -155,6 +180,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 					),
 				),
 			).Class("pa-0"),
+
 			//VCardText(
 			//	VBtn("").
 			//		Color(b.mb.p.primaryColor).
@@ -168,6 +194,10 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 			//		).OnClick("formDrawerNew", ""),
 			//).Attr("style", "position: relative"),
 		),
+
+		h.If(pagesCount > 1, h.Components(
+			VPagination().Length(pagesCount).Value(int(searchParams.Page)),
+		)),
 	).Fluid(true)
 
 	return

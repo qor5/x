@@ -22,13 +22,13 @@ type MessagesFunc func(ctx *ui.EventContext) *Messages
 
 // Data Layer
 type DataOperator interface {
-	Search(obj interface{}, params *SearchParams) (r interface{}, err error)
+	Search(obj interface{}, params *SearchParams) (r interface{}, totalCount int, err error)
 	Fetch(obj interface{}, id string) (r interface{}, err error)
 	UpdateField(obj interface{}, id string, fieldName string, value interface{}) (err error)
 	Save(obj interface{}, id string) (err error)
 }
 
-type SearchOpFunc func(model interface{}, params *SearchParams) (r interface{}, err error)
+type SearchOpFunc func(model interface{}, params *SearchParams) (r interface{}, totalCount int, err error)
 type FetchOpFunc func(obj interface{}, id string) (r interface{}, err error)
 type UpdateFieldOpFunc func(obj interface{}, id string, fieldName string, value interface{}) (err error)
 type SaveOpFunc func(obj interface{}, id string) (err error)
@@ -42,4 +42,6 @@ type SearchParams struct {
 	KeywordColumns []string
 	Keyword        string
 	SQLConditions  []*SQLCondition
+	PerPage        int64
+	Page           int64
 }

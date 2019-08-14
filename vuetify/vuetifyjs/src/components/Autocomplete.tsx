@@ -4,7 +4,6 @@ import Vue, { CreateElement, VNode, VNodeData, Component } from 'vue';
 import { Core, SelectedItems, slotTemplates } from './Helpers';
 
 export default Vue.extend({
-	name: 'vw-autocomplete',
 	mixins: [Core, SelectedItems],
 	props: {
 		itemsEventFuncId: Object,
