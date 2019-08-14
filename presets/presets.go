@@ -112,7 +112,7 @@ func (b *Builder) createMenus(ctx *ui.EventContext) (r h.HTMLComponent) {
 			).Slot("activator").Class("pa-0"),
 		}
 		for _, m := range mg.models {
-			href := m.ListingHref()
+			href := m.Info().ListingHref()
 			subMenus = append(subMenus,
 				ui.Bind(VListItem(
 					VListItemAction(
@@ -138,7 +138,7 @@ func (b *Builder) createMenus(ctx *ui.EventContext) (r h.HTMLComponent) {
 		if m.inGroup {
 			continue
 		}
-		href := m.ListingHref()
+		href := m.Info().ListingHref()
 		menus = append(menus,
 			ui.Bind(VListItem(
 				VListItemAction(
@@ -293,11 +293,12 @@ func (b *Builder) initMux() {
 
 	for _, m := range b.models {
 		muri := inflection.Plural(m.uriName)
+		info := m.Info()
 		mux.Handle(
-			pat.New(m.ListingHref()),
+			pat.New(info.ListingHref()),
 			b.builder.Page(b.defaultLayout(m.listing.GetPageFunc())),
 		)
-		if m.HasDetailing {
+		if m.hasDetailing {
 			mux.Handle(
 				pat.New(fmt.Sprintf("%s/%s/:id", b.prefix, muri)),
 				b.builder.Page(b.defaultLayout(m.detailing.GetPageFunc())),

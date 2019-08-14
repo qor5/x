@@ -121,9 +121,9 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		}
 
 		trbind := ui.Bind(h.Tr(tds...))
-		if b.mb.HasDetailing {
+		if b.mb.hasDetailing {
 			trbind.PushStateLink(
-				b.mb.DetailingHref(id),
+				b.mb.Info().DetailingHref(id),
 			)
 		} else {
 			trbind.OnClick("formDrawerEdit", id)

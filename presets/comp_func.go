@@ -12,9 +12,9 @@ import (
 )
 
 type FieldContext struct {
-	Name  string
-	Label string
-	MB    *ModelBuilder
+	Name      string
+	Label     string
+	ModelInfo *ModelInfo
 }
 
 func (fc *FieldContext) StringValue(obj interface{}) (r string) {
@@ -140,9 +140,9 @@ func cfTextTd(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTML
 		id := field.StringValue(obj)
 		if len(id) > 0 {
 			a := ui.Bind(h.A().Text(id))
-			if field.MB.HasDetailing {
+			if field.ModelInfo.HasDetailing() {
 				a.PushStateLink(
-					field.MB.DetailingHref(id),
+					field.ModelInfo.DetailingHref(id),
 				)
 			} else {
 				a.OnClick("formDrawerEdit", id)
