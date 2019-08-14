@@ -34,34 +34,47 @@ export function setPushState(
 ): any {
 	let pstate = eventFuncId.pushState;
 
+	// If pushState is string, then replace query string to it
+	// If pushState it object, merge url query
+	let mergeURLQuery = true;
 	if (typeof pstate === 'string') {
 		pstate = querystring.parse(pstate);
+		mergeURLQuery = false;
 	}
 
 	const orig = querystring.parseUrl(url);
-	let eventQuery = { __execute_event__: eventFuncId.id };
+	let query: any = {};
 
+	let requestQuery = { __execute_event__: eventFuncId.id };
+	if (mergeURLQuery) {
+		query = { ...query, ...orig.query };
+	}
+
+	let serverPushState: any = null;
 	if (pstate) {
 
+		serverPushState = {};
 		Object.keys(pstate).forEach((key) => {
 			const v = pstate[key];
 			if (!Array.isArray(v)) {
-				pstate[key] = [v];
+				serverPushState[key] = [v];
+			} else {
+				serverPushState = v;
 			}
 		});
 
-		let pushStateQuery = '';
+		let addressBarQuery = '';
 		if (Object.keys(pstate).length > 0) {
-			pstate = { ...orig.query, ...pstate };
-			pushStateQuery = querystring.stringify(pstate);
-			eventQuery = { ...eventQuery, ...pstate };
-			if (pushStateQuery.length > 0) {
-				pushStateQuery = `?${pushStateQuery}`;
+			addressBarQuery = querystring.stringify({ ...query, ...pstate });
+			if (addressBarQuery.length > 0) {
+				addressBarQuery = `?${addressBarQuery}`;
 			}
+
+			requestQuery = { ...requestQuery, ...query, ...pstate };
 		}
 
 		if (popstate !== true) {
-			const newUrl = orig.url + pushStateQuery;
+			const newUrl = orig.url + addressBarQuery;
 			const pushedState = { ...pstate, ...{ url: newUrl } };
 			pusher.pushState(
 				pushedState,
@@ -71,11 +84,11 @@ export function setPushState(
 		}
 	}
 
-	eventFuncId.pushState = pstate;
+	eventFuncId.pushState = serverPushState;
 
 	return {
 		newEventFuncId: eventFuncId,
-		eventURL: `${orig.url}?${querystring.stringify(eventQuery)}`,
+		eventURL: `${orig.url}?${querystring.stringify(requestQuery)}`,
 	};
 }
 

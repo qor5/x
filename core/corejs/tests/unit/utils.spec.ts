@@ -56,8 +56,9 @@ describe('utils', () => {
 			pusher,
 			false,
 		);
-		expect(r2.eventURL).toBe('/page1?__execute_event__=hello&hello=1&name=felix&page=2');
-		expect(pusher.pushed.url).toBe('/page1?hello=1&name=felix&page=2');
+		expect(r2.eventURL).toBe('/page1?__execute_event__=hello&name=felix');
+		expect(pusher.pushed.url).toBe('/page1?name=felix');
+		expect(pusher.pushed.data).toEqual({ name: 'felix', url: '/page1?name=felix' });
 		expect(r2.newEventFuncId.pushState).toEqual({ name: ['felix'] });
 
 	});

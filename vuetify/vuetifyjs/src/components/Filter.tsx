@@ -778,7 +778,7 @@ export const Filter = Vue.extend({
 				}
 				zIndex='2'
 			>
-				<vtoolbar class='mb-1' color='grey lighten-5' flat={true}>
+				<vtoolbar class='pb-1' color='grey lighten-5' flat={true}>
 					<vbtn on={{ click: this.clear }} depressed={true}>{t.clear}</vbtn>
 					<vspacer />
 					<vtoolbarTitle class=''>
