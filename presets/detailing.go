@@ -18,7 +18,7 @@ type DetailingBuilder struct {
 
 func (b *ModelBuilder) Detailing(vs ...string) (r *DetailingBuilder) {
 	r = b.detailing
-	b.hasDetailing = true
+	b.HasDetailing = true
 	if len(vs) == 0 {
 		return
 	}
@@ -85,7 +85,7 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespo
 		if f.compFunc == nil {
 			continue
 		}
-		comps = append(comps, f.compFunc(obj, &Field{
+		comps = append(comps, f.compFunc(obj, &FieldContext{
 			Name:  f.name,
 			Label: b.mb.getLabel(f),
 		}, ctx))

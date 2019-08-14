@@ -31,7 +31,7 @@ func (b *VueEventTagBuilder) OnInput(eventFuncId string, params ...string) (r *V
 }
 
 func (b *VueEventTagBuilder) PushStateLink(pageURL string) (r *VueEventTagBuilder) {
-	b.tag.SetAttr("v-on:click", fmt.Sprintf("topage(%s, %s)", h.JSONString(url.Values{}), h.JSONString(pageURL)))
+	b.tag.SetAttr("v-on:click.stop", fmt.Sprintf("topage(%s, %s)", h.JSONString(url.Values{}), h.JSONString(pageURL)))
 	return b
 }
 
@@ -42,7 +42,7 @@ func (b *VueEventTagBuilder) OnClick(eventFuncId string, params ...string) (r *V
 		Params: params,
 	}
 
-	b.tag.SetAttr("v-on:click", fmt.Sprintf("onclick(%s, $event)", h.JSONString(fid)))
+	b.tag.SetAttr("v-on:click.stop", fmt.Sprintf("onclick(%s, $event)", h.JSONString(fid)))
 	return b
 }
 

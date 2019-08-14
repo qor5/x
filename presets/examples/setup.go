@@ -62,21 +62,21 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	})
 
 	p.FieldType(&Thumb{}).
-		ComponentFunc(presets.LISTING, func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+		ComponentFunc(presets.LISTING, func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 			i, err := reflectutils.Get(obj, field.Name)
 			if err != nil {
 				panic(err)
 			}
 			return h.Text(i.(*Thumb).Name)
 		}).
-		ComponentFunc(presets.DETAILING, func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+		ComponentFunc(presets.DETAILING, func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 			i, err := reflectutils.Get(obj, field.Name)
 			if err != nil {
 				panic(err)
 			}
 			return h.Text(i.(*Thumb).Name)
 		}).
-		ComponentFunc(presets.EDITING, func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+		ComponentFunc(presets.EDITING, func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 			i, err := reflectutils.Get(obj, field.Name)
 			if err != nil {
 				panic(err)
@@ -100,12 +100,12 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	)
 
 	l := m.Listing("Name", "CompanyID", "Bool1", "Float1", "Int1").SearchColumns("name", "job_title")
-	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
 		return h.Td(ui.Bind(h.A().Text(u.Name)).PushStateLink(fmt.Sprintf("/admin/users/%d/edit", u.ID)))
 	})
 
-	l.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+	l.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
 		var comp Company
 		err := db.Find(&comp, u.CompanyID).Error
@@ -115,7 +115,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		return h.Td(ui.Bind(h.A().Text(comp.Name)).PushStateLink(fmt.Sprintf("/admin/companies/%d/edit", comp.ID)))
 	})
 
-	l.Field("Actions").Label(" ").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+	l.Field("Actions").Label(" ").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		//u := obj.(*User)
 		return h.Td(
 			VBtn("").Icon(true).Children(
@@ -147,7 +147,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	})
 
 	ef := m.Editing("Name", "CompanyID", "Bool1", "Int1")
-	ef.Field("Name").Label("名字").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+	ef.Field("Name").Label("名字").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		//u := obj.(*User)
 		return VAutocomplete().
 			FieldName("Name").
@@ -163,7 +163,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		}
 	})
 
-	ef.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+	ef.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
 		var companies []*Company
 		err := db.Find(&companies).Error
@@ -182,7 +182,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 
 	dp := m.Detailing("Name", "Bool1", "Float1", "Int1", "Date1", "CreatedAt", "UpdatedAt")
 	ie := dp.Field("Bool1").InplaceEdit()
-	ie.ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+	ie.ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		//u := obj.(*User)
 		return VCheckbox().FieldName("Bool1")
 	}).UpdateFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) (err error) {
@@ -195,7 +195,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		u := obj.(*User)
 		err = db.Model(&User{}).Where("id = ?", u.ID).UpdateColumn("approved_at = ?", time.Now()).Error
 		return
-	}).ComponentFunc(func(obj interface{}, field *presets.Field, ctx *ui.EventContext) h.HTMLComponent {
+	}).ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		return VBtn("Approve")
 	})
 	return p

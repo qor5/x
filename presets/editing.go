@@ -151,7 +151,7 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 			if f.compFunc == nil {
 				continue
 			}
-			comps = append(comps, f.compFunc(obj, &Field{
+			comps = append(comps, f.compFunc(obj, &FieldContext{
 				Name:  f.name,
 				Label: b.mb.getLabel(f),
 			}, ctx))

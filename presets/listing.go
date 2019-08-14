@@ -73,7 +73,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	ctx.Hub.RegisterEventFunc("formDrawerNew", b.mb.editing.formDrawerNew)
 	ctx.Hub.RegisterEventFunc("formDrawerEdit", b.mb.editing.formDrawerEdit)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
-	msgs := b.mb.p.messagesFunc(ctx)
+	msgr := b.mb.p.messagesFunc(ctx)
 	//time.Sleep(1 * time.Second)
 	searchParams := &SearchParams{
 		KeywordColumns: b.searchColumns,
@@ -82,7 +82,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 	var toolbar = VToolbar(
 		VSpacer(),
-		VBtn(msgs.New).
+		VBtn(msgr.New).
 			Color(b.mb.p.primaryColor).
 			Depressed(true).
 			Dark(true).
@@ -121,9 +121,9 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		}
 
 		trbind := ui.Bind(h.Tr(tds...))
-		if b.mb.hasDetailing {
+		if b.mb.HasDetailing {
 			trbind.PushStateLink(
-				b.mb.detailingHref(id),
+				b.mb.DetailingHref(id),
 			)
 		} else {
 			trbind.OnClick("formDrawerEdit", id)
@@ -140,7 +140,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 	r.Schema = VContainer(
 
-		h.H2(msgs.ListingObjectTitle(inflection.Plural(b.mb.label))).Class("title pb-3"),
+		h.H2(msgr.ListingObjectTitle(inflection.Plural(b.mb.label))).Class("title pb-3"),
 
 		VCard(
 			toolbar,

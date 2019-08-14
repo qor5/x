@@ -11,9 +11,22 @@ import (
 	h "github.com/theplant/htmlgo"
 )
 
-type Field struct {
+type FieldContext struct {
 	Name  string
 	Label string
+	MB    *ModelBuilder
+}
+
+func (fc *FieldContext) StringValue(obj interface{}) (r string) {
+	fieldName := fc.Name
+	val := reflectutils.MustGet(obj, fieldName)
+	switch vt := val.(type) {
+	case []rune:
+		return string(vt)
+	case []byte:
+		return string(vt)
+	}
+	return fmt.Sprint(val)
 }
 
 type FieldTypeBuilder struct {
@@ -118,33 +131,36 @@ func (b *FieldTypes) fieldTypeByType(tv reflect.Type) (r *FieldTypeBuilder) {
 	return
 }
 
-func stringVal(obj interface{}, fieldName string) (r string) {
-	val := reflectutils.MustGet(obj, fieldName)
-	switch vt := val.(type) {
-	case []rune:
-		return string(vt)
-	case []byte:
-		return string(vt)
+func cfText(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent {
+	return h.Text(field.StringValue(obj))
+}
+
+func cfTextTd(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent {
+	if field.Name == "ID" {
+		id := field.StringValue(obj)
+		if len(id) > 0 {
+			a := ui.Bind(h.A().Text(id))
+			if field.MB.HasDetailing {
+				a.PushStateLink(
+					field.MB.DetailingHref(id),
+				)
+			} else {
+				a.OnClick("formDrawerEdit", id)
+			}
+			return h.Td(a)
+		}
 	}
-	return fmt.Sprint(val)
+	return h.Td(h.Text(field.StringValue(obj)))
 }
 
-func cfText(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent {
-	return h.Text(stringVal(obj, field.Name))
-}
-
-func cfTextTd(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent {
-	return h.Td(h.Text(stringVal(obj, field.Name)))
-}
-
-func cfCheckbox(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent {
+func cfCheckbox(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 	return VCheckbox().
 		FieldName(field.Name).
 		Label(field.Label).
 		InputValue(reflectutils.MustGet(obj, field.Name).(bool))
 }
 
-func cfNumber(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent {
+func cfNumber(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 	return VTextField().
 		Type("number").
 		FieldName(field.Name).
@@ -152,7 +168,7 @@ func cfNumber(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLCompone
 		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name)))
 }
 
-func cfTextField(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent {
+func cfTextField(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 	return VTextField().
 		Type("text").
 		FieldName(field.Name).

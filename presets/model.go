@@ -23,7 +23,7 @@ type ModelBuilder struct {
 	listing      *ListingBuilder
 	editing      *EditingBuilder
 	detailing    *DetailingBuilder
-	hasDetailing bool
+	HasDetailing bool
 }
 
 func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
@@ -108,12 +108,17 @@ func (b *ModelBuilder) newDetailing() (r *DetailingBuilder) {
 	return
 }
 
-func (b *ModelBuilder) listingHref() string {
+func (b *ModelBuilder) ListingHref() string {
 	muri := inflection.Plural(b.uriName)
 	return fmt.Sprintf("%s/%s", b.p.prefix, muri)
 }
 
-func (b *ModelBuilder) detailingHref(id string) string {
+func (b *ModelBuilder) EditingHref(id string) string {
+	muri := inflection.Plural(b.uriName)
+	return fmt.Sprintf("%s/%s/%d/edit", b.p.prefix, muri, id)
+}
+
+func (b *ModelBuilder) DetailingHref(id string) string {
 	muri := inflection.Plural(b.uriName)
 	return fmt.Sprintf("%s/%s/%s", b.p.prefix, muri, id)
 }
@@ -149,10 +154,11 @@ func (b *ModelBuilder) Placeholders(vs ...string) (r *ModelBuilder) {
 	return b
 }
 
-func (b *ModelBuilder) getComponentFuncField(field *FieldBuilder) (r *Field) {
-	r = &Field{
+func (b *ModelBuilder) getComponentFuncField(field *FieldBuilder) (r *FieldContext) {
+	r = &FieldContext{
 		Name:  field.name,
 		Label: b.getLabel(field),
+		MB:    b,
 	}
 	return
 }

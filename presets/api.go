@@ -10,7 +10,7 @@ import (
 // UI Layer
 type ComponentFunc func(ctx *ui.EventContext) h.HTMLComponent
 
-type FieldComponentFunc func(obj interface{}, field *Field, ctx *ui.EventContext) h.HTMLComponent
+type FieldComponentFunc func(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent
 
 type BulkActionUpdateFunc func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error)
 
