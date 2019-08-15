@@ -174,138 +174,137 @@ describe('filter', () => {
 				'created.gte=1523203200&created.lt=1523376000&created1.gte=1523203200&created2.lt=1523289600&confirmed.gte=1523232000&confirmed.lt=1523404800',
 			);
 		});
-
-		describe('encodeFilterData NumberItem', () => {
-			it('equals', () => {
-				expect(encodeFilterData([
-					{
-						key: 'amount',
-						label: 'Amount',
-						itemType: 'NumberItem',
-						selected: true,
-						modifier: 'equals',
-						valueIs: '12',
-					},
-					{
-						key: 'amount1',
-						label: 'Amount1',
-						itemType: 'NumberItem',
-						selected: true,
-						modifier: 'equals',
-						valueIs: null,
-					},
-				])).toEqual('amount=12');
-			});
-
-			it('between', () => {
-				expect(encodeFilterData([
-					{
-						key: 'amount',
-						label: 'Amount',
-						itemType: 'NumberItem',
-						selected: true,
-						modifier: 'between',
-						valueFrom: 12,
-						valueTo: 24,
-					},
-					{
-						key: 'amount1',
-						label: 'Amount',
-						itemType: 'NumberItem',
-						selected: true,
-						modifier: 'between',
-						valueTo: 24,
-					},
-					{
-						key: 'amount2',
-						label: 'Amount',
-						itemType: 'NumberItem',
-						selected: true,
-						modifier: 'between',
-						valueFrom: 12,
-					},
-					{
-						key: 'amount3',
-						label: 'Amount',
-						itemType: 'NumberItem',
-						selected: true,
-						modifier: 'between',
-					},
-				])).toEqual('amount.gte=12&amount.lte=24&amount1.lte=24&amount2.gte=12');
-			});
-
-			it('greaterThan', () => {
-				expect(encodeFilterData([
-					{
-						key: 'amount',
-						label: 'Amount',
-						itemType: 'NumberItem',
-						selected: true,
-						modifier: 'greaterThan',
-						valueIs: 12,
-					},
-				])).toEqual('amount.gt=12');
-			});
-
-			it('lessThan', () => {
-				expect(encodeFilterData([
-					{
-						key: 'amount',
-						label: 'Amount',
-						itemType: 'NumberItem',
-						selected: true,
-						modifier: 'lessThan',
-						valueIs: 12,
-					},
-				])).toEqual('amount.lt=12');
-			});
-		});
-
-
-
-		describe('encodeFilterData StringItem', () => {
-			it('equals', () => {
-				expect(encodeFilterData([
-					{
-						key: 'name',
-						label: 'Name',
-						itemType: 'StringItem',
-						selected: true,
-						modifier: 'equals',
-						valueIs: 'felix[]',
-					},
-					{
-						key: 'name1',
-						label: 'Name',
-						itemType: 'StringItem',
-						selected: true,
-						modifier: 'equals',
-						valueIs: null,
-					},
-				])).toEqual('name=felix%5B%5D');
-			});
-
-			it('contains', () => {
-				expect(encodeFilterData([
-					{
-						key: 'name',
-						label: 'Name',
-						itemType: 'StringItem',
-						selected: true,
-						modifier: 'contains',
-						valueIs: 'felix[]',
-					},
-					{
-						key: 'name',
-						label: 'Name',
-						itemType: 'StringItem',
-						selected: true,
-						modifier: 'contains',
-					},
-				])).toEqual('name.ilike=felix%5B%5D');
-			});
-		});
-
-
 	});
+
+	describe('encodeFilterData NumberItem', () => {
+		it('equals', () => {
+			expect(encodeFilterData([
+				{
+					key: 'amount',
+					label: 'Amount',
+					itemType: 'NumberItem',
+					selected: true,
+					modifier: 'equals',
+					valueIs: '12',
+				},
+				{
+					key: 'amount1',
+					label: 'Amount1',
+					itemType: 'NumberItem',
+					selected: true,
+					modifier: 'equals',
+					valueIs: null,
+				},
+			])).toEqual('amount=12');
+		});
+
+		it('between', () => {
+			expect(encodeFilterData([
+				{
+					key: 'amount',
+					label: 'Amount',
+					itemType: 'NumberItem',
+					selected: true,
+					modifier: 'between',
+					valueFrom: 12,
+					valueTo: 24,
+				},
+				{
+					key: 'amount1',
+					label: 'Amount',
+					itemType: 'NumberItem',
+					selected: true,
+					modifier: 'between',
+					valueTo: 24,
+				},
+				{
+					key: 'amount2',
+					label: 'Amount',
+					itemType: 'NumberItem',
+					selected: true,
+					modifier: 'between',
+					valueFrom: 12,
+				},
+				{
+					key: 'amount3',
+					label: 'Amount',
+					itemType: 'NumberItem',
+					selected: true,
+					modifier: 'between',
+				},
+			])).toEqual('amount.gte=12&amount.lte=24&amount1.lte=24&amount2.gte=12');
+		});
+
+		it('greaterThan', () => {
+			expect(encodeFilterData([
+				{
+					key: 'amount',
+					label: 'Amount',
+					itemType: 'NumberItem',
+					selected: true,
+					modifier: 'greaterThan',
+					valueIs: 12,
+				},
+			])).toEqual('amount.gt=12');
+		});
+
+		it('lessThan', () => {
+			expect(encodeFilterData([
+				{
+					key: 'amount',
+					label: 'Amount',
+					itemType: 'NumberItem',
+					selected: true,
+					modifier: 'lessThan',
+					valueIs: 12,
+				},
+			])).toEqual('amount.lt=12');
+		});
+	});
+
+
+
+	describe('encodeFilterData StringItem', () => {
+		it('equals', () => {
+			expect(encodeFilterData([
+				{
+					key: 'name',
+					label: 'Name',
+					itemType: 'StringItem',
+					selected: true,
+					modifier: 'equals',
+					valueIs: 'felix[]',
+				},
+				{
+					key: 'name1',
+					label: 'Name',
+					itemType: 'StringItem',
+					selected: true,
+					modifier: 'equals',
+					valueIs: null,
+				},
+			])).toEqual('name=felix%5B%5D');
+		});
+
+		it('contains', () => {
+			expect(encodeFilterData([
+				{
+					key: 'name',
+					label: 'Name',
+					itemType: 'StringItem',
+					selected: true,
+					modifier: 'contains',
+					valueIs: 'felix[]',
+				},
+				{
+					key: 'name',
+					label: 'Name',
+					itemType: 'StringItem',
+					selected: true,
+					modifier: 'contains',
+				},
+			])).toEqual('name.ilike=felix%5B%5D');
+		});
+	});
+
 });
