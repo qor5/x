@@ -10,13 +10,14 @@ module.exports = {
   transform: {
     '^.+\\.vue$': 'vue-jest',
     '.+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$': 'jest-transform-stub',
-    '^.+\\.tsx?$': 'ts-jest'
+    '^.+\\.[jt]sx?$': 'ts-jest'
   },
   transformIgnorePatterns: [
-    '/node_modules/'
+    "node_modules/(?!(vuetify)/)"
   ],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1'
+	'^@/(.*)$': '<rootDir>/src/$1',
+	"^vuetify/lib$": "vuetify"
   },
   snapshotSerializers: [
     'jest-serializer-vue'

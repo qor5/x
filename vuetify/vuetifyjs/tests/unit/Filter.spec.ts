@@ -1,307 +1,311 @@
-/*
-import { localTimezoneAbbr } from "@/components/Filter";
-import { encodeFilterData } from "@/components/FilterData";
-import moment from "moment";
-import qs from "query-string";
 
-describe("filter", () => {
-	it("localTimezoneAbbr", () => {
-		expect(localTimezoneAbbr()).toEqual("CST");
+import { localTimezoneAbbr } from '@/components/Filter';
+import { encodeFilterData } from '@/components/FilterData';
+import moment from 'moment';
+import qs from 'query-string';
+
+describe('filter', () => {
+	it('localTimezoneAbbr', () => {
+		expect(localTimezoneAbbr()).toEqual('CST');
 	});
 
-	describe("encodeFilterData DateItem", () => {
-		it("equals", () => {
+	describe('encodeFilterData DateItem', () => {
+		it('equals', () => {
 			expect(encodeFilterData([
 				{
-					key: "created",
-					label: "Created",
-					itemType: "DateItem",
+					key: 'created',
+					label: 'Created',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "equals",
-					value: moment("2018-04-09"),
-					timezone: "utc"
+					modifier: 'equals',
+					valueIs: '2018-04-09',
+					timezone: 'utc',
 				},
 				{
-					key: "updated",
-					label: "Updated",
-					itemType: "DateItem",
+					key: 'updated',
+					label: 'Updated',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "equals",
-					value: moment("2018-04-09")
-				}
-			])).toEqual("created=1523232000&updated=1523203200");
+					modifier: 'equals',
+					valueIs: '2018-04-09',
+				},
+			])).toEqual('created=1523232000&updated=1523203200');
 		});
 
-		it("inTheLast days", () => {
-			var v = encodeFilterData([
+		it('inTheLast days', () => {
+			const v = encodeFilterData([
 				{
-					key: "created",
-					label: "Created",
-					itemType: "DateItem",
+					key: 'created',
+					label: 'Created',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "inTheLast",
-					inTheLastValue: "3",
-					inTheLastUnit: "days"
-				}
+					modifier: 'inTheLast',
+					inTheLastValue: '3',
+					inTheLastUnit: 'days',
+				},
 			]);
 
-			expect(qs.parse(v)).to.have.property("created.lt");
-			expect(qs.parse(v)).to.have.property("created.gte");
+			expect(qs.parse(v)).toMatchObject({
+				'created.lt': expect.stringMatching(/.+/),
+				'created.gte': expect.stringMatching(/.+/),
+			});
 		});
 
-		it("inTheLast months", () => {
-			var v = encodeFilterData([
+		it('inTheLast months', () => {
+			const v = encodeFilterData([
 				{
-					key: "created",
-					label: "Created",
-					itemType: "DateItem",
+					key: 'created',
+					label: 'Created',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "inTheLast",
-					inTheLastValue: "3",
-					inTheLastUnit: "months"
-				}
+					modifier: 'inTheLast',
+					inTheLastValue: '3',
+					inTheLastUnit: 'months',
+				},
 			]);
 
-			expect(qs.parse(v)).to.have.property("created.lt");
-			expect(qs.parse(v)).to.have.property("created.gte");
+			expect(qs.parse(v)).toMatchObject({
+				'created.lt': expect.stringMatching(/.+/),
+				'created.gte': expect.stringMatching(/.+/),
+			});
 		});
 
-		it("isAfterOrOn", () => {
-			encodeFilterData([
+		it('isAfterOrOn', () => {
+			expect(encodeFilterData([
 				{
-					key: "created",
-					label: "Created",
-					itemType: "DateItem",
+					key: 'created',
+					label: 'Created',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "isAfterOrOn",
-					value: moment("2018-04-09"),
-					timezone: "utc"
-				}
-			]).should.equal("created.gte=1523232000");
+					modifier: 'isAfterOrOn',
+					valueIs: moment('2018-04-09'),
+					timezone: 'utc',
+				},
+			])).toEqual('created.gte=1523232000');
 		});
 
-		it("isAfter", () => {
-			encodeFilterData([
+		it('isAfter', () => {
+			expect(encodeFilterData([
 				{
-					key: "created",
-					label: "Created",
-					itemType: "DateItem",
+					key: 'created',
+					label: 'Created',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "isAfter",
-					value: moment("2018-04-09")
-				}
-			]).should.equal("created.gte=1523289600");
+					modifier: 'isAfter',
+					valueIs: moment('2018-04-09'),
+				},
+			])).toEqual('created.gt=1523289599');
 		});
 
-		it("isBefore", () => {
-			encodeFilterData([
+		it('isBefore', () => {
+			expect(encodeFilterData([
 				{
-					key: "created",
-					label: "Created",
-					itemType: "DateItem",
+					key: 'created',
+					label: 'Created',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "isBefore",
-					value: moment("2018-04-09"),
-					timezone: "utc"
-				}
-			]).should.equal("created.lt=1523232000");
+					modifier: 'isBefore',
+					valueIs: moment('2018-04-09'),
+					timezone: 'utc',
+				},
+			])).toEqual('created.lt=1523232000');
 		});
 
-		it("isBeforeOrOn", () => {
-			encodeFilterData([
+		it('isBeforeOrOn', () => {
+			expect(encodeFilterData([
 				{
-					key: "created",
-					label: "Created",
-					itemType: "DateItem",
+					key: 'created',
+					label: 'Created',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "isBeforeOrOn",
-					value: moment("2018-04-09"),
-					timezone: "utc"
-				}
-			]).should.equal("created.lt=1523318400");
+					modifier: 'isBeforeOrOn',
+					valueIs: moment('2018-04-09'),
+					timezone: 'utc',
+				},
+			])).toEqual('created.lte=1523318399');
 		});
 
-		it("between", () => {
-			encodeFilterData([
+		it('between', () => {
+			expect(encodeFilterData([
 				{
-					key: "created",
-					label: "Created",
-					itemType: "DateItem",
+					key: 'created',
+					label: 'Created',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "between",
-					valueFrom: moment("2018-04-09"),
-					valueTo: moment("2018-04-10")
+					modifier: 'between',
+					valueFrom: moment('2018-04-09'),
+					valueTo: moment('2018-04-10'),
 				},
 				{
-					key: "created1",
-					label: "Created1",
-					itemType: "DateItem",
+					key: 'created1',
+					label: 'Created1',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "between",
-					valueFrom: moment("2018-04-09")
+					modifier: 'between',
+					valueFrom: moment('2018-04-09'),
 				},
 				{
-					key: "created2",
-					label: "Created2",
-					itemType: "DateItem",
+					key: 'created2',
+					label: 'Created2',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "between",
-					valueTo: moment("2018-04-09")
+					modifier: 'between',
+					valueTo: moment('2018-04-09'),
 				},
 				{
-					key: "created3",
-					label: "Created3",
-					itemType: "DateItem",
+					key: 'created3',
+					label: 'Created3',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "between"
+					modifier: 'between',
 				},
 				{
-					key: "confirmed",
-					label: "Confirmed",
-					itemType: "DateItem",
+					key: 'confirmed',
+					label: 'Confirmed',
+					itemType: 'DateItem',
 					selected: true,
-					modifier: "between",
-					valueFrom: moment("2018-04-09"),
-					valueTo: moment("2018-04-10"),
-					timezone: "utc"
-				}
-			]).should.equal(
-				"created.gte=1523203200&created.lte=1523289600&created1.gte=1523203200&created2.lte=1523203200&confirmed.gte=1523232000&confirmed.lte=1523318400"
+					modifier: 'between',
+					valueFrom: moment('2018-04-09'),
+					valueTo: moment('2018-04-10'),
+					timezone: 'utc',
+				},
+			])).toEqual(
+				// tslint:disable-next-line: max-line-length
+				'created.gte=1523203200&created.lt=1523376000&created1.gte=1523203200&created2.lt=1523289600&confirmed.gte=1523232000&confirmed.lt=1523404800',
 			);
 		});
 
-		describe("encodeFilterData NumberItem", () => {
-			it("equals", () => {
-				encodeFilterData([
+		describe('encodeFilterData NumberItem', () => {
+			it('equals', () => {
+				expect(encodeFilterData([
 					{
-						key: "amount",
-						label: "Amount",
-						itemType: "NumberItem",
+						key: 'amount',
+						label: 'Amount',
+						itemType: 'NumberItem',
 						selected: true,
-						modifier: "equals",
-						value: "12"
+						modifier: 'equals',
+						valueIs: '12',
 					},
 					{
-						key: "amount1",
-						label: "Amount1",
-						itemType: "NumberItem",
+						key: 'amount1',
+						label: 'Amount1',
+						itemType: 'NumberItem',
 						selected: true,
-						modifier: "equals",
-						value: null
-					}
-				]).should.equal("amount=12");
+						modifier: 'equals',
+						valueIs: null,
+					},
+				])).toEqual('amount=12');
 			});
 
-			it("between", () => {
-				encodeFilterData([
+			it('between', () => {
+				expect(encodeFilterData([
 					{
-						key: "amount",
-						label: "Amount",
-						itemType: "NumberItem",
+						key: 'amount',
+						label: 'Amount',
+						itemType: 'NumberItem',
 						selected: true,
-						modifier: "between",
+						modifier: 'between',
 						valueFrom: 12,
-						valueTo: 24
+						valueTo: 24,
 					},
 					{
-						key: "amount1",
-						label: "Amount",
-						itemType: "NumberItem",
+						key: 'amount1',
+						label: 'Amount',
+						itemType: 'NumberItem',
 						selected: true,
-						modifier: "between",
-						valueTo: 24
+						modifier: 'between',
+						valueTo: 24,
 					},
 					{
-						key: "amount2",
-						label: "Amount",
-						itemType: "NumberItem",
+						key: 'amount2',
+						label: 'Amount',
+						itemType: 'NumberItem',
 						selected: true,
-						modifier: "between",
-						valueFrom: 12
+						modifier: 'between',
+						valueFrom: 12,
 					},
 					{
-						key: "amount3",
-						label: "Amount",
-						itemType: "NumberItem",
+						key: 'amount3',
+						label: 'Amount',
+						itemType: 'NumberItem',
 						selected: true,
-						modifier: "between"
-					}
-				]).should.equal("amount.gte=12&amount.lte=24&amount1.lte=24&amount2.gte=12");
+						modifier: 'between',
+					},
+				])).toEqual('amount.gte=12&amount.lte=24&amount1.lte=24&amount2.gte=12');
 			});
 
-			it("greaterThan", () => {
-				encodeFilterData([
+			it('greaterThan', () => {
+				expect(encodeFilterData([
 					{
-						key: "amount",
-						label: "Amount",
-						itemType: "NumberItem",
+						key: 'amount',
+						label: 'Amount',
+						itemType: 'NumberItem',
 						selected: true,
-						modifier: "greaterThan",
-						value: 12,
-					}
-				]).should.equal("amount.gt=12");
+						modifier: 'greaterThan',
+						valueIs: 12,
+					},
+				])).toEqual('amount.gt=12');
 			});
 
-			it("lessThan", () => {
-				encodeFilterData([
+			it('lessThan', () => {
+				expect(encodeFilterData([
 					{
-						key: "amount",
-						label: "Amount",
-						itemType: "NumberItem",
+						key: 'amount',
+						label: 'Amount',
+						itemType: 'NumberItem',
 						selected: true,
-						modifier: "lessThan",
-						value: 12,
-					}
-				]).should.equal("amount.lt=12");
+						modifier: 'lessThan',
+						valueIs: 12,
+					},
+				])).toEqual('amount.lt=12');
 			});
 		});
 
 
 
-		describe("encodeFilterData StringItem", () => {
-			it("equals", () => {
-				encodeFilterData([
+		describe('encodeFilterData StringItem', () => {
+			it('equals', () => {
+				expect(encodeFilterData([
 					{
-						key: "name",
-						label: "Name",
-						itemType: "StringItem",
+						key: 'name',
+						label: 'Name',
+						itemType: 'StringItem',
 						selected: true,
-						modifier: "equals",
-						value: "felix[]"
+						modifier: 'equals',
+						valueIs: 'felix[]',
 					},
 					{
-						key: "name1",
-						label: "Name",
-						itemType: "StringItem",
+						key: 'name1',
+						label: 'Name',
+						itemType: 'StringItem',
 						selected: true,
-						modifier: "equals",
-						value: null
-					}
-				]).should.equal("name=felix%5B%5D");
+						modifier: 'equals',
+						valueIs: null,
+					},
+				])).toEqual('name=felix%5B%5D');
 			});
 
-			it("contains", () => {
-				encodeFilterData([
+			it('contains', () => {
+				expect(encodeFilterData([
 					{
-						key: "name",
-						label: "Name",
-						itemType: "StringItem",
+						key: 'name',
+						label: 'Name',
+						itemType: 'StringItem',
 						selected: true,
-						modifier: "contains",
-						value: "felix[]",
+						modifier: 'contains',
+						valueIs: 'felix[]',
 					},
 					{
-						key: "name",
-						label: "Name",
-						itemType: "StringItem",
+						key: 'name',
+						label: 'Name',
+						itemType: 'StringItem',
 						selected: true,
-						modifier: "contains"
-					}
-				]).should.equal("name.ilike=felix%5B%5D");
+						modifier: 'contains',
+					},
+				])).toEqual('name.ilike=felix%5B%5D');
 			});
 		});
 
 
 	});
 });
-*/
