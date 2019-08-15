@@ -81,6 +81,8 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	ctx.Hub.RegisterEventFunc("formDrawerEdit", b.mb.editing.formDrawerEdit)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
 	msgr := b.mb.p.messagesFunc(ctx)
+	title := msgr.ListingObjectTitle(inflection.Plural(b.mb.label))
+	r.PageTitle = fmt.Sprintf("%s - %s", title, b.mb.p.brandTitle)
 
 	perPage := b.perPage
 	if perPage == 0 {
@@ -182,7 +184,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 	r.Schema = VContainer(
 
-		h.H2(msgr.ListingObjectTitle(inflection.Plural(b.mb.label))).Class("title pb-3"),
+		h.H2(title).Class("title pb-3"),
 
 		VCard(
 			toolbar,

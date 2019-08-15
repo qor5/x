@@ -59,7 +59,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			VIcon("directions_boat").Class("pr-2"),
 			VToolbarTitle("My Admin"),
 		)
-	})
+	}).BrandTitle("The Plant")
 
 	p.FieldType(&Thumb{}).
 		ComponentFunc(presets.LISTING, func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {

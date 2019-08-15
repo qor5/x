@@ -30,6 +30,7 @@ interface EventResponse {
 	schema?: any;
 	data?: any;
 	redirectURL?: string;
+	pageTitle?: string;
 	reloadWindowURL?: string;
 	reload: boolean;
 	reloadPortals?: string[];
@@ -94,6 +95,10 @@ export class Core {
 		}).then((r) => {
 			return r.json();
 		}).then((r: EventResponse) => {
+
+			if (r.pageTitle) {
+				document.title = r.pageTitle;
+			}
 
 			if (r.redirectURL) {
 				// window.location.replace(r.redirectURL);

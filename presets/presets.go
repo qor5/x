@@ -27,6 +27,7 @@ type Builder struct {
 	messagesFunc MessagesFunc
 	homePageFunc ui.PageFunc
 	brandFunc    ComponentFunc
+	brandTitle   string
 	primaryColor string
 	FieldTypes
 	MenuGroups
@@ -40,6 +41,7 @@ func New() *Builder {
 		messagesFunc: defaultMessageFunc,
 		FieldTypes:   builtInFieldTypes(),
 		primaryColor: "indigo",
+		brandTitle:   "Admin",
 	}
 }
 
@@ -70,6 +72,11 @@ func (b *Builder) HomePageFunc(v ui.PageFunc) (r *Builder) {
 
 func (b *Builder) BrandFunc(v ComponentFunc) (r *Builder) {
 	b.brandFunc = v
+	return b
+}
+
+func (b *Builder) BrandTitle(v string) (r *Builder) {
+	b.brandTitle = v
 	return b
 }
 
@@ -177,7 +184,6 @@ func (b *Builder) runBrandFunc(ctx *ui.EventContext) (r h.HTMLComponent) {
 func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
-		ctx.Injector.Title("Hello")
 		ctx.Injector.PutHeadHTML(`
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono" async>
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" async>
@@ -208,7 +214,7 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 		if err != nil {
 			panic(err)
 		}
-
+		pr.PageTitle = innerPr.PageTitle
 		pr.Schema = VApp(
 
 			VNavigationDrawer(

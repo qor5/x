@@ -128,6 +128,10 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	c := ui.WrapEventContext(r.Context(), ctx)
 	pr, isRenderHTML := p.render(ssd, w, r, c, head)
 
+	if len(pr.PageTitle) > 0 {
+		head.Title(pr.PageTitle)
+	}
+
 	var schema = ssd.Schema
 
 	if isRenderHTML && !pr.JSONOnly {
@@ -256,8 +260,11 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	if er.Reload {
 		ssd := &serverSideData{}
 		head := &DefaultPageInjector{}
-		p.render(ssd, w, r, c, head)
+		pr, _ := p.render(ssd, w, r, c, head)
 		er.Schema = ssd.Schema
+		if len(er.PageTitle) == 0 {
+			er.PageTitle = pr.PageTitle
+		}
 	}
 
 	eventResponseWithContext(ctx, c, &er)

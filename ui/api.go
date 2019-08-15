@@ -17,8 +17,9 @@ type Component interface {
 type PageState interface{}
 
 type PageResponse struct {
-	Schema   Component
-	JSONOnly bool
+	Schema    Component
+	PageTitle string
+	JSONOnly  bool
 }
 
 type PortalUpdate struct {
@@ -32,6 +33,7 @@ type EventResponse struct {
 	Confirm         Component       `json:"confirm,omitempty"`
 	Dialog          Component       `json:"dialog,omitempty"`
 	CloseDialog     bool            `json:"closeDialog,omitempty"`
+	PageTitle       string          `json:"pageTitle,omitempty"`
 	Schema          Component       `json:"schema,omitempty"`
 	Reload          bool            `json:"reload,omitempty"`
 	ReloadWindowURL bool            `json:"reloadWindowURL,omitempty"`
