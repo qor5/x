@@ -56,7 +56,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	p.BrandFunc(func(ctx *ui.EventContext) h.HTMLComponent {
 		return h.Components(
 			//h.Img("https://material.io/tools/icons/static/ic_material_192px_light.svg").Style("height: 32px"),
-			VIcon("directions_boat"),
+			VIcon("directions_boat").Class("pr-2"),
 			VToolbarTitle("My Admin"),
 		)
 	})

@@ -135,29 +135,49 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 	var rows []h.HTMLComponent
 
+	haveCheckboxes := len(b.bulkActions) > 0
+
 	funk.ForEach(objs, func(obj interface{}) {
 		var tds []h.HTMLComponent
+		if haveCheckboxes {
+			tds = append(tds, h.Td(VCheckbox().Class("mt-0").FieldName("selected").HideDetails(true)).Class("pr-0"))
+		}
 		for _, f := range b.fields {
 			tds = append(tds, f.compFunc(obj, b.mb.getComponentFuncField(f), ctx))
 		}
-		id := fmt.Sprint(reflectutils.MustGet(obj, "ID"))
 		if err != nil {
 			panic(err)
 		}
+		id := fmt.Sprint(reflectutils.MustGet(obj, "ID"))
+		var bindTds []h.HTMLComponent
+		for _, td := range tds {
+			std, ok := td.(h.MutableAttrHTMLComponent)
+			if !ok {
+				bindTds = append(bindTds, td)
+				continue
+			}
 
-		trbind := ui.Bind(h.Tr(tds...))
-		if b.mb.hasDetailing {
-			trbind.PushStateLink(
-				b.mb.Info().DetailingHref(id),
-			)
-		} else {
-			trbind.OnClick("formDrawerEdit", id)
+			tdbind := ui.Bind(std)
+			if b.mb.hasDetailing {
+				tdbind.PushStateLinkOn(
+					"click.self",
+					b.mb.Info().DetailingHref(id),
+				)
+			} else {
+				tdbind.On("click.self", "formDrawerEdit", id)
+			}
+
+			bindTds = append(bindTds, tdbind)
 		}
-		rows = append(rows, trbind)
+
+		rows = append(rows, h.Tr(bindTds...))
 	})
 
 	var heads []h.HTMLComponent
 
+	if haveCheckboxes {
+		heads = append(heads, h.Th("").Children(VCheckbox().Class("mt-0").HideDetails(true)).Style("width: 48px;").Class("pr-0"))
+	}
 	for _, f := range b.fields {
 		label := b.mb.getLabel(f)
 		heads = append(heads, h.Th(label))

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-chi/chi/middleware"
 	"github.com/jinzhu/gorm"
-
 	"github.com/sunfmin/bran/presets/examples"
 )
 
@@ -20,5 +20,6 @@ func main() {
 	p := examples.Preset1(db)
 
 	log.Println("serving on :7000")
-	log.Fatal(http.ListenAndServe(":7000", p))
+	log.Fatal(http.ListenAndServe(":7000", middleware.Logger(
+		middleware.RequestID(p))))
 }

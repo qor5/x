@@ -83,6 +83,15 @@ func (b *VIconBuilder) XSmall(v bool) (r *VIconBuilder) {
 	return b
 }
 
+func (b *VIconBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VIconBuilder) Attr(vs ...interface{}) (r *VIconBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
 func (b *VIconBuilder) Children(children ...h.HTMLComponent) (r *VIconBuilder) {
 	b.tag.Children(children...)
 	return b
