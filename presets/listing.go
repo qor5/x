@@ -159,12 +159,9 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 			tdbind := ui.Bind(std)
 			if b.mb.hasDetailing {
-				tdbind.PushStateLinkOn(
-					"click.self",
-					b.mb.Info().DetailingHref(id),
-				)
+				tdbind.On("click.self").PushStateLink(b.mb.Info().DetailingHref(id))
 			} else {
-				tdbind.On("click.self", "formDrawerEdit", id)
+				tdbind.On("click.self").EventFunc("formDrawerEdit", id)
 			}
 
 			bindTds = append(bindTds, tdbind)

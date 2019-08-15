@@ -30,6 +30,7 @@ interface EventResponse {
 	schema?: any;
 	data?: any;
 	redirectURL?: string;
+	reloadWindowURL?: string;
 	reload: boolean;
 	reloadPortals?: string[];
 	updatePortals?: PortalUpdate[];
@@ -76,7 +77,7 @@ export class Core {
 
 		const { newEventFuncId, eventURL } = setPushState(
 			eventFuncId,
-			pageURL || (window.location.pathname + '?' + window.window.location.search),
+			pageURL || (window.location.pathname + '?' + window.location.search),
 			window.history,
 			popstate,
 		);
@@ -95,7 +96,12 @@ export class Core {
 		}).then((r: EventResponse) => {
 
 			if (r.redirectURL) {
-				window.location.replace(r.redirectURL);
+				// window.location.replace(r.redirectURL);
+				this.loadPage(null, r.redirectURL);
+			}
+
+			if (r.reloadWindowURL) {
+				this.loadPage(window.location.search, window.location.path);
 			}
 			return r;
 		});
@@ -189,7 +195,7 @@ export class Core {
 			topage(pushState: any, pageURL?: string) {
 				self.loadPage(pushState, pageURL);
 			},
-			onclick(eventFuncId: EventFuncID, evt: any, pageURL?: string) {
+			triggerEventFunc(eventFuncId: EventFuncID, evt: any, pageURL?: string) {
 				self.fetchEventThenRefresh(eventFuncId, jsonEvent(evt), pageURL);
 			},
 			oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {

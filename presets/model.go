@@ -122,7 +122,7 @@ func (b *ModelInfo) ListingHref() string {
 
 func (b *ModelInfo) EditingHref(id string) string {
 	muri := inflection.Plural(b.uriName)
-	return fmt.Sprintf("%s/%s/%d/edit", b.p.prefix, muri, id)
+	return fmt.Sprintf("%s/%s/%s/edit", b.p.prefix, muri, id)
 }
 
 func (b *ModelInfo) DetailingHref(id string) string {

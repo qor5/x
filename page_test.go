@@ -287,7 +287,7 @@ var mountCases = []struct {
 		method:   "GET",
 		path:     "/home/topics/xgb123",
 		bodyFunc: nil,
-		expected: `<div><a href="#" v-on:click='onclick({"id":"bookmark","pushState":null}, $event)'>xgb123</a></div>`,
+		expected: `<div><a href="#" v-on:click='triggerEventFunc({"id":"bookmark","pushState":null}, $event)'>xgb123</a></div>`,
 	},
 	{
 		name:   "with param post",

@@ -28,16 +28,17 @@ type PortalUpdate struct {
 }
 
 type EventResponse struct {
-	Alert         Component       `json:"alert,omitempty"`
-	Confirm       Component       `json:"confirm,omitempty"`
-	Dialog        Component       `json:"dialog,omitempty"`
-	CloseDialog   bool            `json:"closeDialog,omitempty"`
-	Schema        Component       `json:"schema,omitempty"`
-	Reload        bool            `json:"reload,omitempty"`
-	ReloadPortals []string        `json:"reloadPortals,omitempty"`
-	UpdatePortals []*PortalUpdate `json:"updatePortals,omitempty"`
-	RedirectURL   string          `json:"redirectURL,omitempty"`
-	Data          interface{}     `json:"data,omitempty"` // used for return collection data like TagsInput data source
+	Alert           Component       `json:"alert,omitempty"`
+	Confirm         Component       `json:"confirm,omitempty"`
+	Dialog          Component       `json:"dialog,omitempty"`
+	CloseDialog     bool            `json:"closeDialog,omitempty"`
+	Schema          Component       `json:"schema,omitempty"`
+	Reload          bool            `json:"reload,omitempty"`
+	ReloadWindowURL bool            `json:"reloadWindowURL,omitempty"`
+	ReloadPortals   []string        `json:"reloadPortals,omitempty"`
+	UpdatePortals   []*PortalUpdate `json:"updatePortals,omitempty"`
+	RedirectURL     string          `json:"redirectURL,omitempty"`
+	Data            interface{}     `json:"data,omitempty"` // used for return collection data like TagsInput data source
 }
 
 type PageFunc func(ctx *EventContext) (r PageResponse, err error)

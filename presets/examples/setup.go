@@ -114,7 +114,8 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		if err != nil && err != gorm.ErrRecordNotFound {
 			panic(err)
 		}
-		return h.Td(ui.Bind(h.A().Text(comp.Name)).PushStateLink(fmt.Sprintf("/admin/companies/%d/edit", comp.ID)))
+		return h.Td(ui.Bind(h.A().Text(comp.Name)).
+			PageURL("/admin/companies").EventFunc("formDrawerEdit", fmt.Sprint(comp.ID)))
 	})
 
 	l.Field("Actions").Label(" ").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {

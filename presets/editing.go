@@ -166,10 +166,10 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 				),
 				VCardActions(
 					VSpacer(),
-					VBtn(buttonLabel).
+					ui.Bind(VBtn(buttonLabel).
 						Dark(true).
-						Color(b.mb.p.primaryColor).
-						OnClick("update", id),
+						Color(b.mb.p.primaryColor)).
+						OnClick("update", id).PageURL(b.mb.Info().ListingHref()),
 				),
 			).Flat(true),
 		).Fluid(true)
@@ -206,6 +206,6 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 	msgs := b.mb.p.messagesFunc(ctx)
 	ctx.Flash = msgs.SuccessfullyUpdated
 
-	r.Reload = true
+	r.ReloadWindowURL = true
 	return
 }

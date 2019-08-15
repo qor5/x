@@ -12,10 +12,17 @@ type VueEventTagBuilder struct {
 	tag           h.MutableAttrHTMLComponent
 	fieldName     *string
 	onInputFuncID *EventFuncID
+	eventType     string
+	eventFunc     *EventFuncID
+	pageURL       string
+	toPage        bool
 }
 
 func Bind(b h.MutableAttrHTMLComponent) (r *VueEventTagBuilder) {
-	r = &VueEventTagBuilder{}
+	r = &VueEventTagBuilder{
+		eventType: "click",
+		eventFunc: &EventFuncID{},
+	}
 	r.tag = b
 	return
 }
@@ -31,26 +38,28 @@ func (b *VueEventTagBuilder) OnInput(eventFuncId string, params ...string) (r *V
 }
 
 func (b *VueEventTagBuilder) PushStateLink(pageURL string) (r *VueEventTagBuilder) {
-	return b.PushStateLinkOn("click", pageURL)
-}
-
-func (b *VueEventTagBuilder) PushStateLinkOn(eventType string, pageURL string) (r *VueEventTagBuilder) {
-	b.tag.SetAttr(fmt.Sprintf("v-on:%s", eventType), fmt.Sprintf("topage(%s, %s)", h.JSONString(url.Values{}), h.JSONString(pageURL)))
+	b.pageURL = pageURL
+	b.toPage = true
 	return b
 }
 
 func (b *VueEventTagBuilder) OnClick(eventFuncId string, params ...string) (r *VueEventTagBuilder) {
-	return b.On("click", eventFuncId, params...)
+	return b.EventFunc(eventFuncId, params...)
 }
 
-func (b *VueEventTagBuilder) On(eventType string, eventFuncId string, params ...string) (r *VueEventTagBuilder) {
+func (b *VueEventTagBuilder) On(eventType string) (r *VueEventTagBuilder) {
+	b.eventType = eventType
+	return b
+}
 
-	fid := &EventFuncID{
-		ID:     eventFuncId,
-		Params: params,
-	}
+func (b *VueEventTagBuilder) EventFunc(eventFuncId string, params ...string) (r *VueEventTagBuilder) {
+	b.eventFunc.ID = eventFuncId
+	b.eventFunc.Params = params
+	return b
+}
 
-	b.tag.SetAttr(fmt.Sprintf("v-on:%s", eventType), fmt.Sprintf("onclick(%s, $event)", h.JSONString(fid)))
+func (b *VueEventTagBuilder) PageURL(pageURL string) (r *VueEventTagBuilder) {
+	b.pageURL = pageURL
 	return b
 }
 
@@ -68,7 +77,34 @@ func (b *VueEventTagBuilder) setupChange() {
 		fmt.Sprintf(`oninput(%s, %s, $event)`, h.JSONString(b.onInputFuncID), h.JSONString(b.fieldName)))
 }
 
-func (b *VueEventTagBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+func (b *VueEventTagBuilder) Update() {
 	b.setupChange()
+
+	callFunc := ""
+
+	if len(b.eventFunc.ID) > 0 {
+		if len(b.pageURL) > 0 {
+			callFunc = fmt.Sprintf("triggerEventFunc(%s, $event, %s)",
+				h.JSONString(b.eventFunc),
+				h.JSONString(b.pageURL),
+			)
+		} else {
+			callFunc = fmt.Sprintf("triggerEventFunc(%s, $event)",
+				h.JSONString(b.eventFunc),
+			)
+		}
+	}
+
+	if b.toPage {
+		callFunc = fmt.Sprintf("topage(%s, %s)", h.JSONString(url.Values{}), h.JSONString(b.pageURL))
+	}
+
+	if len(callFunc) > 0 {
+		b.tag.SetAttr(fmt.Sprintf("v-on:%s", b.eventType), callFunc)
+	}
+}
+
+func (b *VueEventTagBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	b.Update()
 	return b.tag.MarshalHTML(ctx)
 }

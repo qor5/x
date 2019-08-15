@@ -117,7 +117,7 @@ func (b *VAutocompleteBuilder) ItemsEventFunc(hub ui.EventFuncHub, eventFuncId s
 }
 
 func (b *VBtnBuilder) OnClick(eventFuncId string, params ...string) (r *VBtnBuilder) {
-	ui.Bind(b.tag).OnClick(eventFuncId, params...)
+	ui.Bind(b.tag).OnClick(eventFuncId, params...).Update()
 	return b
 }
 

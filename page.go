@@ -227,7 +227,10 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 
 	c := ui.WrapEventContext(r.Context(), ctx)
 
-	if len(p.eventFuncs) == 0 {
+	eb := p.eventBodyFromRequest(r)
+	ctx.Event = &eb.Event
+	// because default added reload
+	if len(p.eventFuncs) <= 1 && p.eventFuncById(eb.EventFuncID.ID) == nil {
 		log.Println("Re-render because eventFuncs gone, might server restarted")
 		ssd := &serverSideData{}
 		head := &DefaultPageInjector{}
@@ -237,9 +240,6 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 	}
-
-	eb := p.eventBodyFromRequest(r)
-	ctx.Event = &eb.Event
 
 	ef := p.eventFuncById(eb.EventFuncID.ID)
 	if ef == nil {
@@ -258,7 +258,6 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 		head := &DefaultPageInjector{}
 		p.render(ssd, w, r, c, head)
 		er.Schema = ssd.Schema
-
 	}
 
 	eventResponseWithContext(ctx, c, &er)
