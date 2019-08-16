@@ -111,6 +111,18 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		searchParams.Page = 1
 	}
 
+	var fd FilterData
+	if b.filterData != nil {
+		fd = b.filterData.Clone()
+
+		cond, args := fd.SetByQueryString(ctx.R.URL.RawQuery)
+
+		searchParams.SQLConditions = append(searchParams.SQLConditions, &SQLCondition{
+			Query: cond,
+			Args:  args,
+		})
+	}
+
 	haveCheckboxes := len(b.bulkActions) > 0
 
 	selected := getSelectedIds(ctx)
@@ -123,7 +135,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		if haveCheckboxes && len(selected) > 0 {
 			toolbar = b.bulkActionsToolbar(msgr, ctx)
 		} else {
-			toolbar = b.newAndFilterToolbar(msgr, ctx, searchParams)
+			toolbar = b.newAndFilterToolbar(msgr, ctx, fd)
 		}
 	} else {
 		bulkPanel = ui.LazyPortal(b.bulkPanel(bulk, selected, ctx)).Name(bulkPanelPortalName)
@@ -322,7 +334,7 @@ func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *ui.EventContext
 	return toolbar
 }
 
-func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *ui.EventContext, searchParams *SearchParams) h.HTMLComponent {
+func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *ui.EventContext, fd FilterData) h.HTMLComponent {
 	var toolbar = VToolbar(
 		VSpacer(),
 		VBtn(msgr.New).
@@ -332,15 +344,6 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *ui.EventContex
 			OnClick("formDrawerNew", ""),
 	).Flat(true)
 	if b.filterData != nil {
-		fd := b.filterData.Clone()
-
-		cond, args := fd.SetByQueryString(ctx.R.URL.RawQuery)
-
-		searchParams.SQLConditions = append(searchParams.SQLConditions, &SQLCondition{
-			Query: cond,
-			Args:  args,
-		})
-
 		toolbar.PrependChildren(Filter(fd))
 	}
 	return toolbar
