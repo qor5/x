@@ -10,32 +10,15 @@ import {
 	jsonEvent,
 } from './utils';
 
+import {
+	EventFuncID,
+	EventResponse,
+} from './types';
+
 // Vue.config.productionTip = true;
 declare var window: any;
 
-interface EventFuncID {
-	id: string;
-	params?: string[];
-	pushState?: any;
-}
 
-interface PortalUpdate {
-	name: string;
-	schema: string;
-	afterLoaded?: string;
-}
-
-interface EventResponse {
-	states?: any;
-	schema?: any;
-	data?: any;
-	redirectURL?: string;
-	pageTitle?: string;
-	reloadWindowURL?: string;
-	reload: boolean;
-	reloadPortals?: string[];
-	updatePortals?: PortalUpdate[];
-}
 
 export class Core {
 	public debounce = debounce;

@@ -4,6 +4,7 @@ export const Core = Vue.extend({
 	inject: ['core'],
 	props: {
 		fieldName: String,
+		loadPageWithArrayOp: Boolean,
 	},
 });
 

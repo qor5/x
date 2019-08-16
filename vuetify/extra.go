@@ -68,6 +68,11 @@ func (b *VCheckboxBuilder) FieldName(v string) (r *VCheckboxBuilder) {
 	return b
 }
 
+func (b *VCheckboxBuilder) LoadPageWithArrayOp(v bool) (r *VCheckboxBuilder) {
+	b.tag.Attr("load-page-with-array-op", v)
+	return b
+}
+
 func (b *VRadioGroupBuilder) FieldName(v string) (r *VRadioGroupBuilder) {
 	b.tag.Attr("field-name", v)
 	return b

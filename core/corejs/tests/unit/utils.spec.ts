@@ -20,7 +20,119 @@ describe('utils', () => {
 		expect(fd.get('f1')).toEqual('1');
 	});
 
-	it('setPushState', () => {
+	describe('setPushState', () => {
+
+		interface MyTestCase {
+			desc: string;
+			eventFuncID: any;
+			url: string;
+			popstate: boolean;
+			expectedEventURL: string;
+			expectedPushedURL: string;
+			expectedPushedState: any;
+			expectedPushedData?: any;
+		}
+
+		const testCases: MyTestCase[] = [
+			{
+				desc: 'pushState with object will merge into url queries',
+				eventFuncID: {
+					id: 'hello',
+					pushState: { name: 'felix' },
+				},
+				url: '/page1?hello=1&page=2',
+				popstate: false,
+				expectedEventURL: '/page1?__execute_event__=hello&hello=1&name=felix&page=2',
+				expectedPushedURL: '/page1?hello=1&name=felix&page=2',
+				expectedPushedState: { name: ['felix'], hello: ['1'], page: ['2'] },
+			},
+			{
+				desc: 'pushState with string will replace url queries',
+				eventFuncID: {
+					id: 'hello',
+					pushState: 'name=felix',
+				},
+				url: '/page1?hello=1&page=2',
+				popstate: false,
+				expectedEventURL: '/page1?__execute_event__=hello&name=felix',
+				expectedPushedURL: '/page1?name=felix',
+				expectedPushedState: { name: ['felix'] },
+				expectedPushedData: { name: 'felix', url: '/page1?name=felix' },
+			},
+			{
+				desc: 'add operator will add to current query values',
+				eventFuncID: {
+					id: 'hello',
+					pushState: { selectedIds: { value: '5', add: true } },
+				},
+				url: '/page1?selectedIds=1,2,3&page=2',
+				popstate: false,
+				expectedEventURL: '/page1?__execute_event__=hello&page=2&selectedIds=1,2,3,5',
+				expectedPushedURL: '/page1?page=2&selectedIds=1,2,3,5',
+				expectedPushedState: { page: ['2'], selectedIds: ['1', '2', '3', '5'] },
+			},
+			{
+				desc: 'remove operator will add to current query values',
+				eventFuncID: {
+					id: 'hello',
+					pushState: { selectedIds: { value: '5', remove: true } },
+				},
+				url: '/page1?selectedIds=1,2,3,5&page=2',
+				popstate: false,
+				expectedEventURL: '/page1?__execute_event__=hello&page=2&selectedIds=1,2,3',
+				expectedPushedURL: '/page1?page=2&selectedIds=1,2,3',
+				expectedPushedState: { page: ['2'], selectedIds: ['1', '2', '3'] },
+			},
+			{
+				desc: 'array with comma',
+				eventFuncID: {
+					id: 'hello',
+					pushState: { names: ['Hello, Felix', 'How are you'] },
+				},
+				url: '/page1?selectedIds=1,2,3,5&page=2',
+				popstate: false,
+				expectedEventURL: '/page1?__execute_event__=hello&names=Hello%2C%20Felix,How%20are%20you&page=2&selectedIds=1,2,3,5',
+				expectedPushedURL: '/page1?names=Hello%2C%20Felix,How%20are%20you&page=2&selectedIds=1,2,3,5',
+				expectedPushedState: { page: ['2'], selectedIds: ['1', '2', '3', '5'], names: ['Hello, Felix', 'How are you'] },
+			},
+			{
+				desc: 'first time add',
+				eventFuncID: {
+					id: 'hello',
+					pushState: { name: { value: '1', add: true } },
+				},
+				url: '/page1',
+				popstate: false,
+				expectedEventURL: '/page1?__execute_event__=hello&name=1',
+				expectedPushedURL: '/page1?name=1',
+				expectedPushedState: { name: ['1'] },
+			},
+			{
+				desc: 'add operator with value array',
+				eventFuncID: {
+					id: 'hello',
+					pushState: { name: { value: ['1', '2'], add: true } },
+				},
+				url: '/page1',
+				popstate: false,
+				expectedEventURL: '/page1?__execute_event__=hello&name=1,2',
+				expectedPushedURL: '/page1?name=1,2',
+				expectedPushedState: { name: ['1', '2'] },
+			},
+			{
+				desc: 'remove operator with value array',
+				eventFuncID: {
+					id: 'hello',
+					pushState: { name: { value: ['1', '2', '5', '8'], remove: true } },
+				},
+				url: '/page1?name=1,2,3,4,5,6,7,8,9',
+				popstate: false,
+				expectedEventURL: '/page1?__execute_event__=hello&name=3,4,6,7,9',
+				expectedPushedURL: '/page1?name=3,4,6,7,9',
+				expectedPushedState: { name: ['3', '4', '6', '7', '9'] },
+			},
+		];
+
 
 		const pusher = {
 			pushed: {} as any,
@@ -33,33 +145,22 @@ describe('utils', () => {
 			},
 		};
 
-
-		const { newEventFuncId, eventURL } = setPushState(
-			{
-				id: 'hello',
-				pushState: { name: 'felix' },
-			},
-			'/page1?hello=1&page=2',
-			pusher,
-			false,
-		);
-		expect(eventURL).toBe('/page1?__execute_event__=hello&hello=1&name=felix&page=2');
-		expect(pusher.pushed.url).toBe('/page1?hello=1&name=felix&page=2');
-		expect(newEventFuncId.pushState).toEqual({ name: ['felix'] });
-
-		const r2 = setPushState(
-			{
-				id: 'hello',
-				pushState: 'name=felix',
-			},
-			'/page1?hello=1&page=2',
-			pusher,
-			false,
-		);
-		expect(r2.eventURL).toBe('/page1?__execute_event__=hello&name=felix');
-		expect(pusher.pushed.url).toBe('/page1?name=felix');
-		expect(pusher.pushed.data).toEqual({ name: 'felix', url: '/page1?name=felix' });
-		expect(r2.newEventFuncId.pushState).toEqual({ name: ['felix'] });
+		for (const c of testCases) {
+			it(c.desc, () => {
+				const { newEventFuncId, eventURL } = setPushState(
+					c.eventFuncID,
+					c.url,
+					pusher,
+					c.popstate,
+				);
+				expect(eventURL).toBe(c.expectedEventURL);
+				expect(pusher.pushed.url).toBe(c.expectedPushedURL);
+				expect(newEventFuncId.pushState).toEqual(c.expectedPushedState);
+				if (c.expectedPushedData) {
+					expect(pusher.pushed.data).toEqual(c.expectedPushedData);
+				}
+			});
+		}
 
 	});
 });

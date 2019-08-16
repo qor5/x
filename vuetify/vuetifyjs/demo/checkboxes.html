@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<title>vuetify demo</title>
+</head>
+
+<body>
+	<script>
+		window.__serverSideData__ = {
+		}
+	</script>
+	<div id="app">
+		<v-app>
+			<v-content>
+				<v-container>
+					<vw-checkbox field-name="Name2" label="Hello1" true-value="1" false-value="" hide-details load-page-with-array-op></vw-checkbox>
+					<vw-checkbox field-name="Name2" label="Hello2" true-value="2" false-value="" hide-details load-page-with-array-op></vw-checkbox>
+					<vw-checkbox field-name="Name2" label="All" :true-value='"1,2,3"' false-value="" hide-details load-page-with-array-op :input-value='"1,2,3"'></vw-checkbox>
+
+				</v-container>
+			</v-content>
+		</v-app>
+	</div>
+
+	<script src="http://localhost:3080/app.js"></script>
+	<script src="http://localhost:3100/app.js"></script>
+
+</body>
+
+</html>

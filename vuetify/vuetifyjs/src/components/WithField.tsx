@@ -27,7 +27,10 @@ export const WithField = (
 			const self = this;
 			const {
 				fieldName,
+				loadPageWithArrayOp,
 			} = self.$props;
+
+			const trueValue = self.$attrs['true-value'];
 
 			const data: VNodeData = {
 				props: {
@@ -37,6 +40,17 @@ export const WithField = (
 				on: {
 					...{
 						change: (val: any) => {
+							if (loadPageWithArrayOp && trueValue) {
+								const opValue: any = { value: trueValue.split(',') };
+								if (val === true || val === trueValue) {
+									opValue.add = true;
+								} else {
+									opValue.remove = true;
+								}
+								const pushState = { [fieldName]: opValue };
+								self.core.loadPage(pushState);
+								return;
+							}
 							self.core.setFormValue(fieldName, val);
 						},
 					},

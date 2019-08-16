@@ -101,7 +101,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		"Name", "请输入你的名字",
 	)
 
-	l := m.Listing("Name", "CompanyID", "Bool1", "Float1", "Int1").SearchColumns("name", "job_title")
+	l := m.Listing("Name", "CompanyID", "Bool1", "Float1", "Int1").SearchColumns("name", "job_title").PerPage(5)
 	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
 		return h.Td(ui.Bind(h.A().Text(u.Name)).PushStateLink(fmt.Sprintf("/admin/users/%d/edit", u.ID)))

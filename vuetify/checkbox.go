@@ -93,8 +93,8 @@ func (b *VCheckboxBuilder) IndeterminateIcon(v string) (r *VCheckboxBuilder) {
 	return b
 }
 
-func (b *VCheckboxBuilder) InputValue(v bool) (r *VCheckboxBuilder) {
-	b.tag.Attr(":input-value", fmt.Sprint(v))
+func (b *VCheckboxBuilder) InputValue(v interface{}) (r *VCheckboxBuilder) {
+	b.tag.Attr(":input-value", h.JSONString(v))
 	return b
 }
 

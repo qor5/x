@@ -1,5 +1,14 @@
 import 'formdata-polyfill';
 import querystring from 'query-string';
+import union from 'lodash/union';
+import without from 'lodash/without';
+
+import {
+	EventFuncID,
+	StatePusher,
+	ValueOp,
+} from './types';
+
 
 export function newFormWithStates(states: any): FormData {
 	const f = new FormData();
@@ -22,12 +31,8 @@ export function mergeStatesIntoForm(form: FormData, states: any) {
 	}
 }
 
-interface StatePusher {
-	pushState(data: any, title: string, url?: string | null): void;
-}
-
 export function setPushState(
-	eventFuncId: any,
+	eventFuncId: EventFuncID,
 	url: string,
 	pusher: StatePusher,
 	popstate: boolean | undefined,
@@ -38,11 +43,11 @@ export function setPushState(
 	// If pushState it object, merge url query
 	let mergeURLQuery = true;
 	if (typeof pstate === 'string') {
-		pstate = querystring.parse(pstate);
+		pstate = { ...querystring.parse(pstate, { arrayFormat: 'comma' }) };
 		mergeURLQuery = false;
 	}
 
-	const orig = querystring.parseUrl(url);
+	const orig = querystring.parseUrl(url, { arrayFormat: 'comma' });
 	let query: any = {};
 
 	let requestQuery = { __execute_event__: eventFuncId.id };
@@ -52,46 +57,88 @@ export function setPushState(
 
 	let serverPushState: any = null;
 	if (pstate) {
-
-		serverPushState = {};
-		Object.keys(pstate).forEach((key) => {
-			const v = pstate[key];
-			if (!Array.isArray(v)) {
-				serverPushState[key] = [v];
-			} else {
-				serverPushState[key] = v;
-			}
-		});
+		const st = pstate;
 
 		let addressBarQuery = '';
-		if (Object.keys(pstate).length > 0) {
-			addressBarQuery = querystring.stringify({ ...query, ...pstate });
+		if (Object.keys(st).length > 0) {
+			Object.keys(st).forEach((key) => {
+				const v = st[key];
+				if (Array.isArray(v)) {
+					query[key] = v;
+				} else if (typeof v === 'object') {
+					const valueOp = v as ValueOp;
+					queryUpdateByValueOp(query, key, valueOp);
+				} else {
+					query[key] = v;
+				}
+			});
+			addressBarQuery = querystring.stringify(query, { arrayFormat: 'comma' });
 			if (addressBarQuery.length > 0) {
 				addressBarQuery = `?${addressBarQuery}`;
 			}
 
-			requestQuery = { ...requestQuery, ...query, ...pstate };
+			requestQuery = { ...requestQuery, ...query };
 		}
 
 		if (popstate !== true) {
 			const newUrl = orig.url + addressBarQuery;
-			const pushedState = { ...pstate, ...{ url: newUrl } };
+			const pushedState = { ...query, ...{ url: newUrl } };
 			pusher.pushState(
 				pushedState,
 				'',
 				newUrl,
 			);
 		}
+
+		serverPushState = {};
+		Object.keys(query).forEach((key) => {
+			const v = query[key];
+			if (Array.isArray(v)) {
+				serverPushState[key] = v;
+			} else {
+				serverPushState[key] = [`${v}`];
+			}
+		});
 	}
 
 	eventFuncId.pushState = serverPushState;
 
 	return {
 		newEventFuncId: eventFuncId,
-		eventURL: `${orig.url}?${querystring.stringify(requestQuery)}`,
+		eventURL: `${orig.url}?${querystring.stringify(requestQuery, { arrayFormat: 'comma' })}`,
 	};
 }
 
+function queryUpdateByValueOp(query: any, key: string, valueOp: ValueOp): void {
+	if (!valueOp.value) {
+		return;
+	}
+
+	let opValues: any = valueOp.value;
+	if (!Array.isArray(valueOp.value)) {
+		opValues = [valueOp.value];
+	}
+
+	let values = query[key];
+	if (values && !Array.isArray(values)) {
+		values = [values];
+	}
+
+	if (valueOp.add) {
+		query[key] = union(values, opValues);
+		return;
+	}
+
+	if (valueOp.remove) {
+		const newValues = without(values, ...opValues);
+		if (newValues.length === 0) {
+			delete query[key];
+		} else {
+			query[key] = newValues;
+		}
+	}
+	return;
+}
 
 export interface EventData {
 	value?: string;

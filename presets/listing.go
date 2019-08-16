@@ -3,6 +3,7 @@ package presets
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/sunfmin/reflectutils"
 
@@ -76,6 +77,8 @@ func (b *ListingBuilder) GetPageFunc() ui.PageFunc {
 	return b.defaultPageFunc
 }
 
+const selectedParamName = "selected"
+
 func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("formDrawerNew", b.mb.editing.formDrawerNew)
 	ctx.Hub.RegisterEventFunc("formDrawerEdit", b.mb.editing.formDrawerEdit)
@@ -138,11 +141,28 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	var rows []h.HTMLComponent
 
 	haveCheckboxes := len(b.bulkActions) > 0
+	var selected = strings.Split(ctx.R.URL.Query().Get(selectedParamName), ",")
 
+	var idsOfPage []string
 	funk.ForEach(objs, func(obj interface{}) {
+		id := fmt.Sprint(reflectutils.MustGet(obj, "ID"))
+		idsOfPage = append(idsOfPage, id)
+		inputValue := ""
+		if funk.ContainsString(selected, id) {
+			inputValue = id
+		}
 		var tds []h.HTMLComponent
 		if haveCheckboxes {
-			tds = append(tds, h.Td(VCheckbox().Class("mt-0").FieldName("selected").HideDetails(true)).Class("pr-0"))
+			tds = append(tds, h.Td(
+				VCheckbox().
+					Class("mt-0").
+					FieldName(selectedParamName).
+					LoadPageWithArrayOp(true).
+					InputValue(inputValue).
+					TrueValue(id).
+					FalseValue("").
+					HideDetails(true),
+			).Class("pr-0"))
 		}
 		for _, f := range b.fields {
 			tds = append(tds, f.compFunc(obj, b.mb.getComponentFuncField(f), ctx))
@@ -150,7 +170,6 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		if err != nil {
 			panic(err)
 		}
-		id := fmt.Sprint(reflectutils.MustGet(obj, "ID"))
 		var bindTds []h.HTMLComponent
 		for _, td := range tds {
 			std, ok := td.(h.MutableAttrHTMLComponent)
@@ -175,8 +194,22 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	var heads []h.HTMLComponent
 
 	if haveCheckboxes {
-		heads = append(heads, h.Th("").Children(VCheckbox().Class("mt-0").HideDetails(true)).Style("width: 48px;").Class("pr-0"))
+		allInputValue := ""
+		idsOfPageComma := strings.Join(idsOfPage, ",")
+		if allSelected(selected, idsOfPage) {
+			allInputValue = idsOfPageComma
+		}
+		heads = append(heads, h.Th("").Children(
+			VCheckbox().
+				Class("mt-0").
+				TrueValue(idsOfPageComma).
+				InputValue(allInputValue).
+				FieldName(selectedParamName).
+				LoadPageWithArrayOp(true).
+				HideDetails(true),
+		).Style("width: 48px;").Class("pr-0"))
 	}
+
 	for _, f := range b.fields {
 		label := b.mb.getLabel(f)
 		heads = append(heads, h.Th(label))
@@ -220,4 +253,13 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	).Fluid(true)
 
 	return
+}
+
+func allSelected(selectedInURL []string, pageSelected []string) bool {
+	for _, ps := range pageSelected {
+		if !funk.ContainsString(selectedInURL, ps) {
+			return false
+		}
+	}
+	return true
 }
