@@ -36,6 +36,10 @@ export class Core {
 	}
 
 	public loadPage(pushState: any, pageURL?: string, popstate?: boolean) {
+		for (const key of this.form.keys()) {
+			this.form.delete(key);
+		}
+
 		this.fetchEventThenRefresh(
 			{
 				id: '__reload__',

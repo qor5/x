@@ -224,7 +224,7 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 				Value(true).
 				Permanent(true),
 
-			ui.LazyPortal("").Name("rightDrawer"),
+			ui.LazyPortal().EventFunc("").Name("rightDrawer"),
 
 			VAppBar(
 				b.runBrandFunc(ctx),

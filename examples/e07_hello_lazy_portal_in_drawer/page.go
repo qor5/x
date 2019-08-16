@@ -20,9 +20,9 @@ func HelloLazyLoaderInDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err erro
 
 	pr.Schema = Div(
 		bo.Drawer(
-			ui.LazyPortal("editPage", "param1").LoadWhenParentVisible(),
+			ui.LazyPortal().EventFunc("editPage", "param1").LoadWhenParentVisible(),
 			bo.Drawer(
-				ui.LazyPortal("editPage", "param2").LoadWhenParentVisible(),
+				ui.LazyPortal().EventFunc("editPage", "param2").LoadWhenParentVisible(),
 			).TriggerElement(
 				A().Text("New Drawer").Href("#"),
 			),

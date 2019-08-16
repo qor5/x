@@ -88,7 +88,6 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	ctx.Hub.RegisterEventFunc("formDrawerEdit", b.mb.editing.formDrawerEdit)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
 	ctx.Hub.RegisterEventFunc("doBulkAction", b.doBulkAction)
-	ctx.Hub.RegisterEventFunc("bulkPanel", b.bulkPanel)
 
 	msgr := b.mb.p.messagesFunc(ctx)
 	title := msgr.ListingObjectTitle(inflection.Plural(b.mb.label))
@@ -127,7 +126,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 			toolbar = b.newAndFilterToolbar(msgr, ctx, searchParams)
 		}
 	} else {
-		bulkPanel = ui.LazyPortal("bulkPanel", bulk.name, strings.Join(selected, ",")).Visible("true").Name(bulkPanelPortalName)
+		bulkPanel = ui.LazyPortal(b.bulkPanel(bulk, selected, ctx)).Name(bulkPanelPortalName)
 	}
 
 	var objs interface{}
@@ -264,11 +263,10 @@ func getSelectedIds(ctx *ui.EventContext) (selected []string) {
 	return selected
 }
 
-func (b *ListingBuilder) bulkPanel(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+func (b *ListingBuilder) bulkPanel(bulk *BulkActionBuilder, selectedIds []string, ctx *ui.EventContext) (r h.HTMLComponent) {
 	msgr := b.mb.p.messagesFunc(ctx)
-	bulk := b.getBulkAction(ctx.Event.Params[0])
 
-	r.Schema = VCard(
+	return VCard(
 		VCardText(
 			bulk.compFunc(ctx),
 		),
@@ -282,10 +280,9 @@ func (b *ListingBuilder) bulkPanel(ctx *ui.EventContext) (r ui.EventResponse, er
 				Color(b.mb.p.primaryColor).
 				Depressed(true).
 				Dark(true).
-				OnClick("doBulkAction", ctx.Event.Params...),
+				OnClick("doBulkAction", bulk.name, strings.Join(selectedIds, ",")),
 		),
 	).Class("mb-5")
-	return
 }
 
 func (b *ListingBuilder) doBulkAction(ctx *ui.EventContext) (r ui.EventResponse, err error) {
@@ -293,13 +290,12 @@ func (b *ListingBuilder) doBulkAction(ctx *ui.EventContext) (r ui.EventResponse,
 	if bulk == nil {
 		panic("bulk required")
 	}
-
-	err1 := bulk.updateFunc(strings.Split(ctx.Event.Params[1], ","), ctx.R.MultipartForm, ctx)
+	selectedIds := strings.Split(ctx.Event.Params[1], ",")
+	err1 := bulk.updateFunc(selectedIds, ctx.R.MultipartForm, ctx)
 	if err1 != nil || ctx.Flash != nil {
-		bpr, _ := b.bulkPanel(ctx)
 		r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
 			Name:   bulkPanelPortalName,
-			Schema: bpr.Schema,
+			Schema: b.bulkPanel(bulk, selectedIds, ctx),
 		})
 		return
 	}

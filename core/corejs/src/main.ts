@@ -1,6 +1,5 @@
 import Vue, { VueConstructor } from 'vue';
 import { Core } from './core';
-import { newFormWithStates } from './utils';
 
 const app = document.getElementById('app');
 if (!app) {
@@ -16,10 +15,7 @@ for (const registerComp of (window.__branVueComponentRegisters || [])) {
 
 window.branLazyPortals = {};
 
-const ssd = window.__serverSideData__;
-const states = (ssd && ssd.states) || {};
-
-const form = newFormWithStates(states);
+const form = new FormData();
 
 interface DynaCompData {
 	current: VueConstructor | null;
@@ -29,8 +25,8 @@ Vue.component('BranLazyPortal', {
 	name: 'BranLazyPortal',
 	props: ['loaderFunc', 'visible', 'afterLoaded', 'portalName'],
 	template: `
-		<div class="bran-lazy-loader" v-if="visible">
-			<component :is="current"></component>
+		<div class="bran-lazy-portal" v-if="visible">
+			<component :is="current"><slot></slot></component>
 		</div>
 	`,
 
@@ -39,6 +35,7 @@ Vue.component('BranLazyPortal', {
 		if (pn) {
 			window.branLazyPortals[pn] = this;
 		}
+
 		this.reload();
 	},
 
@@ -50,15 +47,20 @@ Vue.component('BranLazyPortal', {
 
 	methods: {
 		reload() {
+			const rootChangeCurrent = (this.$root as any).changeCurrent;
+			const core = new Core(form, rootChangeCurrent, this.changeCurrent);
+
+			if (this.$slots.default) {
+				this.current = core.componentByTemplate('<slot></slot>');
+				return;
+			}
+
 			const ef = this.loaderFunc;
 			if (!ef || !ef.id) {
 				return;
 			}
 			const afterLoaded = this.afterLoaded;
 			const self = this;
-			const rootChangeCurrent = (this.$root as any).changeCurrent;
-			const core = new Core(form, rootChangeCurrent, this.changeCurrent);
-
 			core.fetchEvent(ef, {})
 				.then((r) => {
 					self.current = core.componentByTemplate(r.schema, afterLoaded);

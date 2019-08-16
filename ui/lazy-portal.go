@@ -11,16 +11,20 @@ type LazyPortalBuilder struct {
 	tag        *h.HTMLTagBuilder
 }
 
-func LazyPortal(eventFuncId string, params ...string) (r *LazyPortalBuilder) {
+func LazyPortal(children ...h.HTMLComponent) (r *LazyPortalBuilder) {
 	r = &LazyPortalBuilder{
-		tag: h.Tag("bran-lazy-portal"),
-		loaderFunc: &EventFuncID{
-			ID:     eventFuncId,
-			Params: params,
-		},
+		tag: h.Tag("bran-lazy-portal").Children(children...),
 	}
 	r.Visible("true")
 	return
+}
+
+func (b *LazyPortalBuilder) EventFunc(eventFuncId string, params ...string) (r *LazyPortalBuilder) {
+	b.loaderFunc = &EventFuncID{
+		ID:     eventFuncId,
+		Params: params,
+	}
+	return b
 }
 
 func (b *LazyPortalBuilder) Visible(v string) (r *LazyPortalBuilder) {
@@ -30,6 +34,11 @@ func (b *LazyPortalBuilder) Visible(v string) (r *LazyPortalBuilder) {
 
 func (b *LazyPortalBuilder) Name(v string) (r *LazyPortalBuilder) {
 	b.tag.Attr("portal-name", v)
+	return b
+}
+
+func (b *LazyPortalBuilder) Children(comps ...h.HTMLComponent) (r *LazyPortalBuilder) {
+	b.tag.Children(comps...)
 	return b
 }
 

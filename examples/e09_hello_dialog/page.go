@@ -26,19 +26,19 @@ func HelloDialog(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	pr.Schema = Div(
 		H1(globalState.Name),
 		bo.Dialog(
-			ui.LazyPortal("remoteOverlay").Visible("true"),
+			ui.LazyPortal().EventFunc("remoteOverlay").Visible("true"),
 		).TriggerElement(
 			A().Text("Edit").Href("#"),
 		).DefaultVisible(s.dialogVisible),
 
 		bo.Dialog(
-			ui.LazyPortal("remoteOverlay").Visible("true"),
+			ui.LazyPortal().EventFunc("remoteOverlay").Visible("true"),
 		).TriggerElement(
 			A().Text("Remote Loader").Href("#"),
 		).DefaultVisible(s.dialogVisibleRemote),
 
 		bo.Dialog(
-			ui.LazyPortal("remoteOverlay").Visible("true"),
+			ui.LazyPortal().EventFunc("remoteOverlay").Visible("true"),
 		).TriggerElement(
 			A().Text("Mouseover").Href("#"),
 		).DefaultVisible(s.dialogVisible).

@@ -60,7 +60,7 @@ func HelloVuetifyNavigationDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err
 
 		VBtn("Show Drawer 2").OnClick("showDrawer"),
 
-		ui.LazyPortal("").Name("drawer2"),
+		ui.LazyPortal().EventFunc("").Name("drawer2"),
 	)
 
 	return
