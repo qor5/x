@@ -88,8 +88,8 @@ export class Core {
 				this.loadPage(null, r.redirectURL);
 			}
 
-			if (r.reloadWindowURL) {
-				this.loadPage(window.location.search, window.location.path);
+			if (r.pushState) {
+				this.loadPage(r.pushState);
 			}
 			return r;
 		});

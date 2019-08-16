@@ -10,6 +10,8 @@ type Messages struct {
 	SuccessfullyUpdated string
 	New                 string
 	Update              string
+	OK                  string
+	Cancel              string
 	Create              string
 	EditingObjectTitle  func(label string) string
 	CreatingObjectTitle func(label string) string
@@ -29,6 +31,8 @@ var Messages_en_US = Messages{
 	},
 	New:    "New",
 	Update: "Update",
+	OK:     "OK",
+	Cancel: "Cancel",
 	Create: "Create",
 }
 

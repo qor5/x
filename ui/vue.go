@@ -68,6 +68,14 @@ func (b *VueEventTagBuilder) FieldName(v string) (r *VueEventTagBuilder) {
 	return b
 }
 
+func (b *VueEventTagBuilder) PushState(v url.Values) (r *VueEventTagBuilder) {
+	if len(b.eventFunc.ID) == 0 {
+		b.eventFunc.ID = "__reload__"
+	}
+	b.eventFunc.PushState = v
+	return b
+}
+
 func (b *VueEventTagBuilder) setupChange() {
 	if b.fieldName == nil && b.onInputFuncID == nil {
 		return

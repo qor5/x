@@ -20,17 +20,18 @@ type Thumb struct {
 }
 
 type User struct {
-	ID        int
-	Name      string
-	JobTitle  string
-	Bool1     bool
-	Date1     *time.Time
-	Int1      int
-	Float1    float64
-	Thumb1    *Thumb
-	CompanyID int
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID              int
+	Name            string
+	JobTitle        string
+	Bool1           bool
+	Date1           *time.Time
+	Int1            int
+	Float1          float64
+	Thumb1          *Thumb
+	CompanyID       int
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	ApprovalComment string
 }
 
 type Company struct {
@@ -101,7 +102,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		"Name", "请输入你的名字",
 	)
 
-	l := m.Listing("Name", "CompanyID", "Bool1", "Float1", "Int1").SearchColumns("name", "job_title").PerPage(5)
+	l := m.Listing("Name", "CompanyID", "Bool1", "Float1", "Int1", "ApprovalComment").SearchColumns("name", "job_title").PerPage(5)
 	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
 		return h.Td(ui.Bind(h.A().Text(u.Name)).PushStateLink(fmt.Sprintf("/admin/users/%d/edit", u.ID)))
@@ -127,11 +128,38 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		).Style("width: 48px")
 	})
 
-	l.BulkAction("ApproveAll").UpdateFunc(func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error) {
-		err = db.Model(&User{}).Where("id IN (?)", selectedIds).UpdateColumn("approved_at = ?", time.Now()).Error
+	l.BulkAction("Approve").Label("Approve").UpdateFunc(func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error) {
+		comment := ctx.R.FormValue("ApprovalComment")
+		if len(comment) < 10 {
+			ctx.Flash = "comment should larger than 10"
+			return
+		}
+		err = db.Model(&User{}).
+			Where("id IN (?)", selectedIds).
+			Updates(map[string]interface{}{"approved_at": time.Now(), "approval_comment": comment}).Error
+		if err != nil {
+			ctx.Flash = err.Error()
+		}
 		return
 	}).ComponentFunc(func(ctx *ui.EventContext) h.HTMLComponent {
-		return VBtn("ApproveAll")
+		comment := ctx.R.FormValue("ApprovalComment")
+		errorMessage := ""
+		if ctx.Flash != nil {
+			errorMessage = ctx.Flash.(string)
+		}
+		return VTextField().
+			FieldName("ApprovalComment").
+			Value(comment).
+			Label("Comment").
+			Error(len(errorMessage) > 0).
+			ErrorMessages(errorMessage)
+	})
+
+	l.BulkAction("Delete").Label("Delete").UpdateFunc(func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error) {
+		err = db.Where("id IN (?)", selectedIds).Delete(&User{}).Error
+		return
+	}).ComponentFunc(func(ctx *ui.EventContext) h.HTMLComponent {
+		return h.Div().Text(fmt.Sprintf("Are you sure you want to delete %s ?", ctx.Event.Params[1])).Class("title deep-orange--text")
 	})
 
 	l.Filter([]*FilterItem{

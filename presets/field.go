@@ -1,8 +1,7 @@
 package presets
 
 type FieldBuilder struct {
-	name        string
-	label       string
+	NameLabel
 	compFunc    FieldComponentFunc
 	setterFunc  SetterFunc
 	inplaceEdit *InplaceEditBuilder
@@ -42,4 +41,9 @@ func (b *InplaceEditBuilder) ComponentFunc(v FieldComponentFunc) (r *InplaceEdit
 func (b *InplaceEditBuilder) UpdateFunc(v UpdateFunc) (r *InplaceEditBuilder) {
 	b.updateFunc = v
 	return b
+}
+
+type NameLabel struct {
+	name  string
+	label string
 }

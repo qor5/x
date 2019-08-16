@@ -2,6 +2,7 @@ package presets
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/jinzhu/inflection"
 	"github.com/sunfmin/bran/ui"
@@ -41,7 +42,8 @@ func (b *EditingBuilder) Field(name string) (r *FieldBuilder) {
 			return f
 		}
 	}
-	r = &FieldBuilder{name: name}
+	r = &FieldBuilder{}
+	r.name = name
 	b.fields = append(b.fields, r)
 	return
 }
@@ -158,7 +160,7 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 			}
 			comps = append(comps, f.compFunc(obj, &FieldContext{
 				Name:  f.name,
-				Label: b.mb.getLabel(f),
+				Label: b.mb.getLabel(f.NameLabel),
 			}, ctx))
 		}
 
@@ -211,6 +213,6 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 	msgs := b.mb.p.messagesFunc(ctx)
 	ctx.Flash = msgs.SuccessfullyUpdated
 
-	r.ReloadWindowURL = true
+	r.PushState = url.Values{}
 	return
 }

@@ -168,13 +168,13 @@ func (b *ModelBuilder) Placeholders(vs ...string) (r *ModelBuilder) {
 func (b *ModelBuilder) getComponentFuncField(field *FieldBuilder) (r *FieldContext) {
 	r = &FieldContext{
 		Name:      field.name,
-		Label:     b.getLabel(field),
+		Label:     b.getLabel(field.NameLabel),
 		ModelInfo: b.Info(),
 	}
 	return
 }
 
-func (b *ModelBuilder) getLabel(field *FieldBuilder) (r string) {
+func (b *ModelBuilder) getLabel(field NameLabel) (r string) {
 	if len(field.label) > 0 {
 		return field.label
 	}

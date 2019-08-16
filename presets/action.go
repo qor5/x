@@ -1,24 +1,38 @@
 package presets
 
 type BulkActionBuilder struct {
-	name       string
+	NameLabel
 	updateFunc BulkActionUpdateFunc
 	compFunc   ComponentFunc
 }
 
 func (b *ListingBuilder) BulkAction(name string) (r *BulkActionBuilder) {
+	builder := b.getBulkAction(name)
+	if builder != nil {
+		return builder
+	}
+	r = &BulkActionBuilder{}
+	r.name = name
+	b.bulkActions = append(b.bulkActions, r)
+	return
+}
+
+func (b *ListingBuilder) getBulkAction(name string) *BulkActionBuilder {
 	for _, f := range b.bulkActions {
 		if f.name == name {
 			return f
 		}
 	}
-	r = &BulkActionBuilder{name: name}
-	b.bulkActions = append(b.bulkActions, r)
-	return
+	return nil
 }
 
 func (b *BulkActionBuilder) UpdateFunc(v BulkActionUpdateFunc) (r *BulkActionBuilder) {
 	b.updateFunc = v
+	return b
+}
+
+func (b *BulkActionBuilder) Label(v string) (r *BulkActionBuilder) {
+	b.label = v
 	return b
 }
 

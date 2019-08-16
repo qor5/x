@@ -38,7 +38,8 @@ func (b *DetailingBuilder) Field(name string) (r *FieldBuilder) {
 			return f
 		}
 	}
-	r = &FieldBuilder{name: name}
+	r = &FieldBuilder{}
+	r.name = name
 	b.fields = append(b.fields, r)
 	return
 }
@@ -87,7 +88,7 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespo
 		}
 		comps = append(comps, f.compFunc(obj, &FieldContext{
 			Name:  f.name,
-			Label: b.mb.getLabel(f),
+			Label: b.mb.getLabel(f.NameLabel),
 		}, ctx))
 	}
 

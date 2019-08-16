@@ -2,6 +2,7 @@ package presets
 
 import (
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -45,7 +46,8 @@ func (b *ListingBuilder) Field(name string) (r *FieldBuilder) {
 			return f
 		}
 	}
-	r = &FieldBuilder{name: name}
+	r = &FieldBuilder{}
+	r.name = name
 	b.fields = append(b.fields, r)
 	return
 }
@@ -78,11 +80,16 @@ func (b *ListingBuilder) GetPageFunc() ui.PageFunc {
 }
 
 const selectedParamName = "selected"
+const bulkPanelOpenParamName = "bulkOpen"
+const bulkPanelPortalName = "bulkPanel"
 
 func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("formDrawerNew", b.mb.editing.formDrawerNew)
 	ctx.Hub.RegisterEventFunc("formDrawerEdit", b.mb.editing.formDrawerEdit)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
+	ctx.Hub.RegisterEventFunc("doBulkAction", b.doBulkAction)
+	ctx.Hub.RegisterEventFunc("bulkPanel", b.bulkPanel)
+
 	msgr := b.mb.p.messagesFunc(ctx)
 	title := msgr.ListingObjectTitle(inflection.Plural(b.mb.label))
 	r.PageTitle = fmt.Sprintf("%s - %s", title, b.mb.p.brandTitle)
@@ -93,37 +100,34 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	}
 
 	//time.Sleep(1 * time.Second)
+	urlQuery := ctx.R.URL.Query()
 	searchParams := &SearchParams{
 		KeywordColumns: b.searchColumns,
-		Keyword:        ctx.R.URL.Query().Get("keyword"),
+		Keyword:        urlQuery.Get("keyword"),
 		PerPage:        perPage,
 	}
 
-	searchParams.Page, _ = strconv.ParseInt(ctx.R.URL.Query().Get("page"), 10, 64)
+	searchParams.Page, _ = strconv.ParseInt(urlQuery.Get("page"), 10, 64)
 	if searchParams.Page == 0 {
 		searchParams.Page = 1
 	}
 
-	var toolbar = VToolbar(
-		VSpacer(),
-		VBtn(msgr.New).
-			Color(b.mb.p.primaryColor).
-			Depressed(true).
-			Dark(true).
-			OnClick("formDrawerNew", ""),
-	).Flat(true)
+	haveCheckboxes := len(b.bulkActions) > 0
 
-	if b.filterData != nil {
-		fd := b.filterData.Clone()
+	selected := getSelectedIds(ctx)
 
-		cond, args := fd.SetByQueryString(ctx.R.URL.RawQuery)
-
-		searchParams.SQLConditions = append(searchParams.SQLConditions, &SQLCondition{
-			Query: cond,
-			Args:  args,
-		})
-
-		toolbar.PrependChildren(Filter(fd))
+	var toolbar h.HTMLComponent
+	var bulkPanel h.HTMLComponent
+	bulkName := ctx.R.URL.Query().Get(bulkPanelOpenParamName)
+	bulk := b.getBulkAction(bulkName)
+	if bulk == nil {
+		if haveCheckboxes && len(selected) > 0 {
+			toolbar = b.bulkActionsToolbar(msgr, ctx)
+		} else {
+			toolbar = b.newAndFilterToolbar(msgr, ctx, searchParams)
+		}
+	} else {
+		bulkPanel = ui.LazyPortal("bulkPanel", bulk.name, strings.Join(selected, ",")).Visible("true").Name(bulkPanelPortalName)
 	}
 
 	var objs interface{}
@@ -139,9 +143,6 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	}
 
 	var rows []h.HTMLComponent
-
-	haveCheckboxes := len(b.bulkActions) > 0
-	var selected = strings.Split(ctx.R.URL.Query().Get(selectedParamName), ",")
 
 	var idsOfPage []string
 	funk.ForEach(objs, func(obj interface{}) {
@@ -211,14 +212,14 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	}
 
 	for _, f := range b.fields {
-		label := b.mb.getLabel(f)
+		label := b.mb.getLabel(f.NameLabel)
 		heads = append(heads, h.Th(label))
 	}
 
 	r.Schema = VContainer(
 
 		h.H2(title).Class("title pb-3"),
-
+		bulkPanel,
 		VCard(
 			toolbar,
 			VDivider(),
@@ -253,6 +254,100 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	).Fluid(true)
 
 	return
+}
+
+func getSelectedIds(ctx *ui.EventContext) (selected []string) {
+	selectedValue := ctx.R.URL.Query().Get(selectedParamName)
+	if len(selectedValue) > 0 {
+		selected = strings.Split(selectedValue, ",")
+	}
+	return selected
+}
+
+func (b *ListingBuilder) bulkPanel(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	msgr := b.mb.p.messagesFunc(ctx)
+	bulk := b.getBulkAction(ctx.Event.Params[0])
+
+	r.Schema = VCard(
+		VCardText(
+			bulk.compFunc(ctx),
+		),
+		VCardActions(
+			VSpacer(),
+			ui.Bind(VBtn(msgr.Cancel).
+				Depressed(true).
+				Class("ml-2")).PushState(url.Values{bulkPanelOpenParamName: []string{""}}),
+
+			VBtn(msgr.OK).
+				Color(b.mb.p.primaryColor).
+				Depressed(true).
+				Dark(true).
+				OnClick("doBulkAction", ctx.Event.Params...),
+		),
+	).Class("mb-5")
+	return
+}
+
+func (b *ListingBuilder) doBulkAction(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	bulk := b.getBulkAction(ctx.Event.Params[0])
+	if bulk == nil {
+		panic("bulk required")
+	}
+
+	err1 := bulk.updateFunc(strings.Split(ctx.Event.Params[1], ","), ctx.R.MultipartForm, ctx)
+	if err1 != nil || ctx.Flash != nil {
+		bpr, _ := b.bulkPanel(ctx)
+		r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
+			Name:   bulkPanelPortalName,
+			Schema: bpr.Schema,
+		})
+		return
+	}
+
+	r.PushState = url.Values{bulkPanelOpenParamName: []string{}, selectedParamName: []string{}}
+
+	return
+}
+
+func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *ui.EventContext) h.HTMLComponent {
+	var toolbar = VToolbar(
+		VSpacer(),
+	).Flat(true)
+
+	for _, ba := range b.bulkActions {
+		toolbar.AppendChildren(
+			ui.Bind(VBtn(b.mb.getLabel(ba.NameLabel)).
+				Color(b.mb.p.primaryColor).
+				Depressed(true).
+				Dark(true).
+				Class("ml-2")).PushState(url.Values{bulkPanelOpenParamName: []string{ba.name}}),
+		)
+	}
+	return toolbar
+}
+
+func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *ui.EventContext, searchParams *SearchParams) h.HTMLComponent {
+	var toolbar = VToolbar(
+		VSpacer(),
+		VBtn(msgr.New).
+			Color(b.mb.p.primaryColor).
+			Depressed(true).
+			Dark(true).
+			OnClick("formDrawerNew", ""),
+	).Flat(true)
+	if b.filterData != nil {
+		fd := b.filterData.Clone()
+
+		cond, args := fd.SetByQueryString(ctx.R.URL.RawQuery)
+
+		searchParams.SQLConditions = append(searchParams.SQLConditions, &SQLCondition{
+			Query: cond,
+			Args:  args,
+		})
+
+		toolbar.PrependChildren(Filter(fd))
+	}
+	return toolbar
 }
 
 func allSelected(selectedInURL []string, pageSelected []string) bool {
