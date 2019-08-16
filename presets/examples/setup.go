@@ -141,7 +141,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			ctx.Flash = err.Error()
 		}
 		return
-	}).ComponentFunc(func(ctx *ui.EventContext) h.HTMLComponent {
+	}).ComponentFunc(func(selectedIds []string, ctx *ui.EventContext) h.HTMLComponent {
 		comment := ctx.R.FormValue("ApprovalComment")
 		errorMessage := ""
 		if ctx.Flash != nil {
@@ -158,8 +158,8 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	l.BulkAction("Delete").Label("Delete").UpdateFunc(func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error) {
 		err = db.Where("id IN (?)", selectedIds).Delete(&User{}).Error
 		return
-	}).ComponentFunc(func(ctx *ui.EventContext) h.HTMLComponent {
-		return h.Div().Text(fmt.Sprintf("Are you sure you want to delete %s ?", ctx.Event.Params[1])).Class("title deep-orange--text")
+	}).ComponentFunc(func(selectedIds []string, ctx *ui.EventContext) h.HTMLComponent {
+		return h.Div().Text(fmt.Sprintf("Are you sure you want to delete %s ?", selectedIds)).Class("title deep-orange--text")
 	})
 
 	l.Filter([]*FilterItem{

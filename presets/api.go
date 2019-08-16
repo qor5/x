@@ -8,7 +8,10 @@ import (
 )
 
 // UI Layer
+
 type ComponentFunc func(ctx *ui.EventContext) h.HTMLComponent
+
+type BulkComponentFunc func(selectedIds []string, ctx *ui.EventContext) h.HTMLComponent
 
 type FieldComponentFunc func(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent
 

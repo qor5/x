@@ -268,7 +268,7 @@ func (b *ListingBuilder) bulkPanel(bulk *BulkActionBuilder, selectedIds []string
 
 	return VCard(
 		VCardText(
-			bulk.compFunc(ctx),
+			bulk.compFunc(selectedIds, ctx),
 		),
 		VCardActions(
 			VSpacer(),

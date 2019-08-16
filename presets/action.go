@@ -3,7 +3,7 @@ package presets
 type BulkActionBuilder struct {
 	NameLabel
 	updateFunc BulkActionUpdateFunc
-	compFunc   ComponentFunc
+	compFunc   BulkComponentFunc
 }
 
 func (b *ListingBuilder) BulkAction(name string) (r *BulkActionBuilder) {
@@ -36,7 +36,7 @@ func (b *BulkActionBuilder) Label(v string) (r *BulkActionBuilder) {
 	return b
 }
 
-func (b *BulkActionBuilder) ComponentFunc(v ComponentFunc) (r *BulkActionBuilder) {
+func (b *BulkActionBuilder) ComponentFunc(v BulkComponentFunc) (r *BulkActionBuilder) {
 	b.compFunc = v
 	return b
 }
