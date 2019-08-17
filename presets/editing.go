@@ -172,7 +172,7 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 
 		r.Schema = VContainer(
 			notice,
-			h.H2(title).Class("title pb-3"),
+			h.H2(title).Class("title px-4 py-2"),
 			VCard(
 				VCardText(
 					comps...,
