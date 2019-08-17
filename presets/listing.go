@@ -321,16 +321,19 @@ func (b *ListingBuilder) deleteConfirmation(ctx *ui.EventContext) (r ui.EventRes
 					VSpacer(),
 					VBtn(msgr.Cancel).
 						Depressed(true).
-						Class("ml-2"),
+						Class("ml-2").
+						On("click", "boolean1 = false"),
 
-					VBtn(msgr.OK).
+					VBtn(msgr.Delete).
 						Color(b.mb.p.primaryColor).
 						Depressed(true).
 						Dark(true).
 						OnClick("doDelete", id),
 				),
 			),
-		).Value(true).MaxWidth("300px"),
+		).MaxWidth("600px").
+			Attr("v-model", "boolean1"),
+		AfterLoaded: "setTimeout(function(){ comp.boolean1 = true }, 100)",
 	})
 	return
 }
