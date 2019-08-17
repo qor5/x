@@ -11,14 +11,17 @@
 
 <body>
 	<div id="app">
-		<main>
+		<main v-init-context-vars='{school: "DLMU"}'>
 			Family Name
 			<input v-on:input='oninput({"id": "hello"}, "FamilyName", $event)'/>
 			<a href="#" v-on:click='triggerEventFunc({"id": "hello"}, $event)' >Click</a>
 
 
-			<div style="border: 3px solid blue; min-height: 60px;">
-				<bran-lazy-portal :visible='true' :loader-func='{"id": "hello", "params": ["1", "2"]}'>
+			<div style="border: 3px solid blue; min-height: 60px;" >
+				<bran-lazy-portal v-init-context-vars='{name: "ABC", age: 1}' :visible='true' :loader-func='{"id": "hello", "params": ["1", "2"]}'>
+					<bran-lazy-portal v-init-context-vars='{name: "CDE", company: "the plant"}' :visible='true' :loader-func='{"id": "hello", "params": ["1", "2"]}'>
+					{{vars.name}} - {{vars.age}} - {{vars.company}} - {{vars.school}}
+					</bran-lazy-portal>
 				</bran-lazy-portal>
 			</div>
 

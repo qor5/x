@@ -1,4 +1,4 @@
-import Vue, { VueConstructor } from 'vue';
+import Vue, { VueConstructor, VNode } from 'vue';
 import { Core } from './core';
 
 const app = document.getElementById('app');
@@ -69,6 +69,23 @@ Vue.component('BranLazyPortal', {
 		changeCurrent(newView: any) {
 			this.current = newView;
 		},
+	},
+});
+
+Vue.directive('init-context-vars', {
+	inserted: (el, binding, vnode: VNode) => {
+		const ctx = vnode.context!;
+		if (!ctx) {
+			throw new Error('v-init-context-vars set on node that have no context');
+		}
+
+		if (typeof binding.value !== 'object') {
+			return;
+		}
+
+		Object.keys(binding.value).forEach((k) => {
+			ctx.$set(ctx.$data.vars, k, binding.value[k]);
+		});
 	},
 });
 

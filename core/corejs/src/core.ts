@@ -113,11 +113,7 @@ export class Core {
 			},
 			data() {
 				return {
-					boolean1: false,
-					boolean2: false,
-					boolean3: false,
-					boolean4: false,
-					boolean5: false,
+					vars: {},
 				};
 			},
 		});

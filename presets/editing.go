@@ -107,13 +107,14 @@ func (b *EditingBuilder) formDrawerNew(ctx *ui.EventContext) (r ui.EventResponse
 		Name: "rightDrawer",
 		Schema: VNavigationDrawer(
 			er.Schema.(h.HTMLComponent),
-		).Attr("v-model", "boolean1").
+		).Attr("v-model", "vars.formDrawerNew").
 			Bottom(true).
 			Right(true).
 			Absolute(true).
 			Width(600).
-			Temporary(true),
-		AfterLoaded: `setTimeout(function(){ comp.boolean1 = true }, 100)`,
+			Temporary(true).
+			Attr("v-init-context-vars", `{formDrawerNew: false}`),
+		AfterLoaded: `setTimeout(function(){ comp.vars.formDrawerNew = true }, 100)`,
 	})
 	return
 }
@@ -130,13 +131,14 @@ func (b *EditingBuilder) formDrawerEdit(ctx *ui.EventContext) (r ui.EventRespons
 		Name: "rightDrawer",
 		Schema: VNavigationDrawer(
 			er.Schema.(h.HTMLComponent),
-		).Attr("v-model", "boolean1").
+		).Attr("v-model", "vars.formDrawerEdit").
 			Bottom(true).
 			Right(true).
 			Absolute(true).
 			Width(600).
-			Temporary(true),
-		AfterLoaded: `setTimeout(function(){ comp.boolean1 = true }, 100)`,
+			Temporary(true).
+			Attr("v-init-context-vars", `{formDrawerEdit: false}`),
+		AfterLoaded: `setTimeout(function(){ comp.vars.formDrawerEdit = true }, 100)`,
 	})
 	return
 }

@@ -222,12 +222,13 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 			).App(true).
 				Clipped(true).
 				Value(true).
-				Attr("v-model", "boolean5"),
+				Attr("v-model", "vars.navDrawer").
+				Attr("v-init-context-vars", `{navDrawer: null}`),
 
 			ui.LazyPortal().EventFunc("").Name("rightDrawer"),
 
 			VAppBar(
-				VAppBarNavIcon().On("click.stop", "boolean5 = !boolean5"),
+				VAppBarNavIcon().On("click.stop", "vars.navDrawer = !vars.navDrawer"),
 				b.runBrandFunc(ctx),
 				VSpacer(),
 				VLayout(

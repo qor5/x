@@ -47,16 +47,16 @@ func HelloVuetifyNavigationDrawer(ctx *ui.EventContext) (pr ui.PageResponse, err
 			).Dense(true).Class("pt-0"),
 		).Permanent(true),
 
-		VBtn("show").On("click", "boolean1 = !boolean1"),
+		VBtn("show").On("click", "vars.drawer1 = !vars.drawer1"),
 
 		VNavigationDrawer(
 			h.Text("Hi"),
 		).Temporary(true).
-			Attr("v-model", "boolean1").
+			Attr("v-model", "vars.drawer1").
 			Right(true).
 			Bottom(true).
 			Absolute(true).
-			Width(600),
+			Width(600).Attr("v-init-context-vars", `{drawer1: true}`),
 
 		VBtn("Show Drawer 2").OnClick("showDrawer"),
 
@@ -73,13 +73,14 @@ func showDrawer(ctx *ui.EventContext) (er ui.EventResponse, err error) {
 			Schema: VNavigationDrawer(
 				h.Text("Drawer 2"),
 			).Right(true).
-				Attr("v-model", "boolean1").
+				Attr("v-model", "vars.drawer2").
 				Bottom(true).
 				Temporary(true).
 				Absolute(true).
 				Value(true).
-				Width(800),
-			AfterLoaded: `setTimeout(function(){ comp.boolean1 = true }, 100)`,
+				Width(800).
+				Attr("v-init-context-vars", `{drawer2: false}`),
+			AfterLoaded: `setTimeout(function(){ comp.vars.drawer2 = true }, 100)`,
 		},
 	)
 	return
