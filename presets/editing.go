@@ -20,6 +20,7 @@ type EditingBuilder struct {
 	pageFunc    ui.PageFunc
 	fetcher     FetchOpFunc
 	saver       SaveOpFunc
+	deleter     DeleteOpFunc
 }
 
 func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
@@ -60,6 +61,11 @@ func (b *EditingBuilder) Fetcher(v FetchOpFunc) (r *EditingBuilder) {
 
 func (b *EditingBuilder) Saver(v SaveOpFunc) (r *EditingBuilder) {
 	b.saver = v
+	return b
+}
+
+func (b *EditingBuilder) Deleter(v DeleteOpFunc) (r *EditingBuilder) {
+	b.deleter = v
 	return b
 }
 
@@ -183,6 +189,20 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 
 		return
 	}
+}
+
+func (b *EditingBuilder) doDelete(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	id := ctx.Event.Params[0]
+	var obj = b.mb.newModel()
+	if len(id) > 0 {
+		err = b.deleter(obj, id)
+		if err != nil {
+			return
+		}
+	}
+
+	r.PushState = url.Values{}
+	return
 }
 
 func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse, err error) {

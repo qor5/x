@@ -11,9 +11,9 @@ type VListItemIconBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VListItemIcon() (r *VListItemIconBuilder) {
+func VListItemIcon(children ...h.HTMLComponent) (r *VListItemIconBuilder) {
 	r = &VListItemIconBuilder{
-		tag: h.Tag("v-list-item-icon"),
+		tag: h.Tag("v-list-item-icon").Children(children...),
 	}
 	return
 }

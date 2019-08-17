@@ -82,11 +82,14 @@ func (b *ListingBuilder) GetPageFunc() ui.PageFunc {
 const selectedParamName = "selected"
 const bulkPanelOpenParamName = "bulkOpen"
 const bulkPanelPortalName = "bulkPanel"
+const deleteConfirmPortalName = "deleteConfirm"
 
 func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("formDrawerNew", b.mb.editing.formDrawerNew)
 	ctx.Hub.RegisterEventFunc("formDrawerEdit", b.mb.editing.formDrawerEdit)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
+	ctx.Hub.RegisterEventFunc("deleteConfirmation", b.deleteConfirmation)
+	ctx.Hub.RegisterEventFunc("doDelete", b.mb.editing.doDelete)
 	ctx.Hub.RegisterEventFunc("doBulkAction", b.doBulkAction)
 
 	msgr := b.mb.p.messagesFunc(ctx)
@@ -179,9 +182,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		for _, f := range b.fields {
 			tds = append(tds, f.compFunc(obj, b.mb.getComponentFuncField(f), ctx))
 		}
-		if err != nil {
-			panic(err)
-		}
+
 		var bindTds []h.HTMLComponent
 		for _, td := range tds {
 			std, ok := td.(h.MutableAttrHTMLComponent)
@@ -199,6 +200,27 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 			bindTds = append(bindTds, tdbind)
 		}
+
+		bindTds = append(bindTds, h.Td(
+			VMenu(
+				ui.Slot(
+					VBtn("").Children(
+						VIcon("more_horiz"),
+					).Attr("v-on", "on").Text(true).Fab(true).Small(true),
+				).Name("activator").Scope("{ on }"),
+
+				VList(
+					ui.Bind(VListItem(
+						VListItemIcon(VIcon("edit")),
+						VListItemTitle(h.Text(msgr.Edit)),
+					)).OnClick("formDrawerEdit", id),
+					ui.Bind(VListItem(
+						VListItemIcon(VIcon("delete")),
+						VListItemTitle(h.Text(msgr.Delete)),
+					)).OnClick("deleteConfirmation", id),
+				).Dense(true),
+			),
+		).Class("pl-0"))
 
 		rows = append(rows, h.Tr(bindTds...))
 	})
@@ -226,7 +248,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		label := b.mb.getLabel(f.NameLabel)
 		heads = append(heads, h.Th(label))
 	}
-
+	heads = append(heads, h.Th(" ").Style("width: 56px;")) // Edit, Delete menu
 	r.Schema = VContainer(
 
 		h.H2(title).Class("title pb-3"),
@@ -235,6 +257,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 			toolbar,
 			VDivider(),
 			VCardText(
+				ui.LazyPortal().Name(deleteConfirmPortalName),
 				VSimpleTable(
 					h.Thead(
 						h.Tr(heads...),
@@ -244,19 +267,6 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 					),
 				),
 			).Class("pa-0"),
-
-			//VCardText(
-			//	VBtn("").
-			//		Color(b.mb.p.primaryColor).
-			//		Fab(true).
-			//		Bottom(true).
-			//		Right(true).
-			//		Dark(true).
-			//		Absolute(true).
-			//		Children(
-			//			VIcon("add"),
-			//		).OnClick("formDrawerNew", ""),
-			//).Attr("style", "position: relative"),
 		),
 
 		h.If(pagesCount > 1, h.Components(
@@ -295,6 +305,34 @@ func (b *ListingBuilder) bulkPanel(bulk *BulkActionBuilder, selectedIds []string
 				OnClick("doBulkAction", bulk.name, strings.Join(selectedIds, ",")),
 		),
 	).Class("mb-5")
+}
+
+func (b *ListingBuilder) deleteConfirmation(ctx *ui.EventContext) (r ui.EventResponse, err error) {
+	msgr := b.mb.p.messagesFunc(ctx)
+	id := ctx.Event.Params[0]
+
+	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
+		Name: deleteConfirmPortalName,
+		Schema: VDialog(
+			VCard(
+				VCardTitle(h.Text(msgr.DeleteConfirmationText(id))),
+				VCardActions(
+					VSpacer(),
+					VSpacer(),
+					VBtn(msgr.Cancel).
+						Depressed(true).
+						Class("ml-2"),
+
+					VBtn(msgr.OK).
+						Color(b.mb.p.primaryColor).
+						Depressed(true).
+						Dark(true).
+						OnClick("doDelete", id),
+				),
+			),
+		).Value(true).MaxWidth("300px"),
+	})
+	return
 }
 
 func (b *ListingBuilder) doBulkAction(ctx *ui.EventContext) (r ui.EventResponse, err error) {

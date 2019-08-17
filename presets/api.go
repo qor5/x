@@ -29,12 +29,14 @@ type DataOperator interface {
 	Fetch(obj interface{}, id string) (r interface{}, err error)
 	UpdateField(obj interface{}, id string, fieldName string, value interface{}) (err error)
 	Save(obj interface{}, id string) (err error)
+	Delete(obj interface{}, id string) (err error)
 }
 
 type SearchOpFunc func(model interface{}, params *SearchParams) (r interface{}, totalCount int, err error)
 type FetchOpFunc func(obj interface{}, id string) (r interface{}, err error)
 type UpdateFieldOpFunc func(obj interface{}, id string, fieldName string, value interface{}) (err error)
 type SaveOpFunc func(obj interface{}, id string) (err error)
+type DeleteOpFunc func(obj interface{}, id string) (err error)
 
 type SQLCondition struct {
 	Query string

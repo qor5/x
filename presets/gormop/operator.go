@@ -75,3 +75,8 @@ func (op *dataOperatorImpl) Save(obj interface{}, id string) (err error) {
 	err = op.db.Save(obj).Error
 	return
 }
+
+func (op *dataOperatorImpl) Delete(obj interface{}, id string) (err error) {
+	err = op.db.Delete(obj, id).Error
+	return
+}

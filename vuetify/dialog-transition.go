@@ -17,6 +17,7 @@ func VDialogTransition() (r *VDialogTransitionBuilder) {
 	}
 	return
 }
+
 func (b *VDialogTransitionBuilder) Group(v bool) (r *VDialogTransitionBuilder) {
 	b.tag.Attr(":group", fmt.Sprint(v))
 	return b
@@ -39,6 +40,15 @@ func (b *VDialogTransitionBuilder) Mode(v string) (r *VDialogTransitionBuilder) 
 
 func (b *VDialogTransitionBuilder) Origin(v string) (r *VDialogTransitionBuilder) {
 	b.tag.Attr("origin", v)
+	return b
+}
+
+func (b *VDialogTransitionBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VDialogTransitionBuilder) Attr(vs ...interface{}) (r *VDialogTransitionBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 

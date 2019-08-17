@@ -119,15 +119,6 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			PageURL("/admin/companies").EventFunc("formDrawerEdit", fmt.Sprint(comp.ID)))
 	})
 
-	l.Field("Actions").Label(" ").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-		//u := obj.(*User)
-		return h.Td(
-			VBtn("").Icon(true).Children(
-				VIcon("edit"),
-			).OnClick("formDrawerEdit", fmt.Sprint(reflectutils.MustGet(obj, "ID"))),
-		).Style("width: 48px")
-	})
-
 	l.BulkAction("Approve").Label("Approve").UpdateFunc(func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error) {
 		comment := ctx.R.FormValue("ApprovalComment")
 		if len(comment) < 10 {

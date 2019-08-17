@@ -96,6 +96,7 @@ func (b *ModelBuilder) newEditing() (r *EditingBuilder) {
 	if b.p.dataOperator != nil {
 		b.editing.Fetcher(b.p.dataOperator.Fetch)
 		b.editing.Saver(b.p.dataOperator.Save)
+		b.editing.Deleter(b.p.dataOperator.Delete)
 	}
 	return
 }

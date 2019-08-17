@@ -7,15 +7,18 @@ import (
 )
 
 type Messages struct {
-	SuccessfullyUpdated string
-	New                 string
-	Update              string
-	OK                  string
-	Cancel              string
-	Create              string
-	EditingObjectTitle  func(label string) string
-	CreatingObjectTitle func(label string) string
-	ListingObjectTitle  func(label string) string
+	SuccessfullyUpdated    string
+	New                    string
+	Update                 string
+	Delete                 string
+	Edit                   string
+	OK                     string
+	Cancel                 string
+	Create                 string
+	DeleteConfirmationText func(id string) string
+	EditingObjectTitle     func(label string) string
+	CreatingObjectTitle    func(label string) string
+	ListingObjectTitle     func(label string) string
 }
 
 var Messages_en_US = Messages{
@@ -29,8 +32,14 @@ var Messages_en_US = Messages{
 	ListingObjectTitle: func(label string) string {
 		return fmt.Sprintf("Listing %s", label)
 	},
+	DeleteConfirmationText: func(id string) string {
+		return fmt.Sprintf("Are you sure you want to delete object with id: %s?", id)
+	},
+
 	New:    "New",
 	Update: "Update",
+	Delete: "Delete",
+	Edit:   "Edit",
 	OK:     "OK",
 	Cancel: "Cancel",
 	Create: "Create",

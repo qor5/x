@@ -128,13 +128,22 @@ func (b *VDialogBuilder) Transition(v string) (r *VDialogBuilder) {
 	return b
 }
 
-func (b *VDialogBuilder) Value(v bool) (r *VDialogBuilder) {
-	b.tag.Attr(":value", fmt.Sprint(v))
+func (b *VDialogBuilder) Value(v interface{}) (r *VDialogBuilder) {
+	b.tag.Attr(":value", v)
 	return b
 }
 
 func (b *VDialogBuilder) Width(v string) (r *VDialogBuilder) {
 	b.tag.Attr("width", v)
+	return b
+}
+
+func (b *VDialogBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VDialogBuilder) Attr(vs ...interface{}) (r *VDialogBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 
