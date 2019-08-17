@@ -222,11 +222,12 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 			).App(true).
 				Clipped(true).
 				Value(true).
-				Permanent(true),
+				Attr("v-model", "boolean5"),
 
 			ui.LazyPortal().EventFunc("").Name("rightDrawer"),
 
 			VAppBar(
+				VAppBarNavIcon().On("click.stop", "boolean5 = !boolean5"),
 				b.runBrandFunc(ctx),
 				VSpacer(),
 				VLayout(
