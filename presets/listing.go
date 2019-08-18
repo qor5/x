@@ -333,7 +333,7 @@ func (b *ListingBuilder) deleteConfirmation(ctx *ui.EventContext) (r ui.EventRes
 			),
 		).MaxWidth("600px").
 			Attr("v-model", "vars.deleteConfirmation").
-			Attr("v-init-context-vars", "deleteConfirmation"),
+			Attr("v-init-context-vars", `{deleteConfirmation: false}`),
 		AfterLoaded: "setTimeout(function(){ comp.vars.deleteConfirmation = true }, 100)",
 	})
 	return
