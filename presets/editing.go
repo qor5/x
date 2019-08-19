@@ -183,7 +183,7 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 					ui.Bind(VBtn(buttonLabel).
 						Dark(true).
 						Color(b.mb.p.primaryColor)).
-						OnClick("update", id).PushStateURL(b.mb.Info().ListingHref()),
+						OnClick("update", id).URL(b.mb.Info().ListingHref()),
 				),
 			).Flat(true),
 		).Fluid(true)

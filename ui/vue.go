@@ -14,7 +14,7 @@ type VueEventTagBuilder struct {
 	onInputFuncID *EventFuncID
 	eventType     string
 	eventFunc     *EventFuncID
-	toPage        bool
+	url           *string
 }
 
 func Bind(b h.MutableAttrHTMLComponent) (r *VueEventTagBuilder) {
@@ -33,6 +33,12 @@ func (b *VueEventTagBuilder) OnInput(eventFuncId string, params ...string) (r *V
 		Params: params,
 	}
 
+	return b
+}
+
+// request page url without push state
+func (b *VueEventTagBuilder) URL(url string) (r *VueEventTagBuilder) {
+	b.url = &url
 	return b
 }
 
@@ -100,8 +106,9 @@ func (b *VueEventTagBuilder) Update() {
 	callFunc := ""
 
 	if len(b.eventFunc.ID) > 0 {
-		callFunc = fmt.Sprintf("triggerEventFunc(%s, $event)",
+		callFunc = fmt.Sprintf("triggerEventFunc(%s, $event, %s)",
 			h.JSONString(b.eventFunc),
+			h.JSONString(b.url),
 		)
 	} else {
 		callFunc = fmt.Sprintf("topage(%s)", h.JSONString(b.eventFunc.PushState))

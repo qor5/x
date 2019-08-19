@@ -59,11 +59,13 @@ export class Core {
 		eventFuncId: EventFuncID,
 		event: EventData,
 		popstate?: boolean,
+		pageURL?: string,
 	): Promise<EventResponse> {
+		const defaultURL = (window.location.pathname + window.location.search);
 
 		const { newEventFuncId, eventURL } = setPushState(
 			eventFuncId,
-			(window.location.pathname + '?' + window.location.search),
+			pageURL || defaultURL,
 			window.history,
 			popstate,
 		);
@@ -86,7 +88,6 @@ export class Core {
 			}
 
 			if (r.redirectURL) {
-				// window.location.replace(r.redirectURL);
 				this.loadPage({ url: r.redirectURL });
 			}
 
@@ -133,8 +134,9 @@ export class Core {
 		eventFuncId: EventFuncID,
 		event: EventData,
 		popstate?: boolean,
+		pageURL?: string,
 	) {
-		this.fetchEvent(eventFuncId, event, popstate)
+		this.fetchEvent(eventFuncId, event, popstate, pageURL)
 			.then((r: EventResponse) => {
 				if (r.reloadPortals && r.reloadPortals.length > 0) {
 					for (const portalName of r.reloadPortals) {
@@ -180,8 +182,8 @@ export class Core {
 			topage(pushState: any) {
 				self.loadPage(pushState);
 			},
-			triggerEventFunc(eventFuncId: EventFuncID, evt: any) {
-				self.fetchEventThenRefresh(eventFuncId, jsonEvent(evt));
+			triggerEventFunc(eventFuncId: EventFuncID, evt: any, pageURL?: string) {
+				self.fetchEventThenRefresh(eventFuncId, jsonEvent(evt), false, pageURL);
 			},
 			oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
 				self.controlsOnInput(eventFuncId, fieldName, evt);
