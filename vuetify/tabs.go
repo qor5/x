@@ -28,6 +28,16 @@ func (b *VTabsBuilder) AlignWithTitle(v bool) (r *VTabsBuilder) {
 	return b
 }
 
+func (b *VTabsBuilder) BackgroundColor(v string) (r *VTabsBuilder) {
+	b.tag.Attr("background-color", v)
+	return b
+}
+
+func (b *VTabsBuilder) CenterActive(v bool) (r *VTabsBuilder) {
+	b.tag.Attr(":center-active", fmt.Sprint(v))
+	return b
+}
+
 func (b *VTabsBuilder) Centered(v bool) (r *VTabsBuilder) {
 	b.tag.Attr(":centered", fmt.Sprint(v))
 	return b
@@ -73,28 +83,18 @@ func (b *VTabsBuilder) Light(v bool) (r *VTabsBuilder) {
 	return b
 }
 
-func (b *VTabsBuilder) Mandatory(v bool) (r *VTabsBuilder) {
-	b.tag.Attr(":mandatory", fmt.Sprint(v))
-	return b
-}
-
-func (b *VTabsBuilder) Max(v int) (r *VTabsBuilder) {
-	b.tag.Attr(":max", fmt.Sprint(v))
-	return b
-}
-
 func (b *VTabsBuilder) MobileBreakPoint(v int) (r *VTabsBuilder) {
 	b.tag.Attr(":mobile-break-point", fmt.Sprint(v))
 	return b
 }
 
-func (b *VTabsBuilder) Multiple(v bool) (r *VTabsBuilder) {
-	b.tag.Attr(":multiple", fmt.Sprint(v))
+func (b *VTabsBuilder) NextIcon(v string) (r *VTabsBuilder) {
+	b.tag.Attr("next-icon", v)
 	return b
 }
 
-func (b *VTabsBuilder) NextIcon(v string) (r *VTabsBuilder) {
-	b.tag.Attr("next-icon", v)
+func (b *VTabsBuilder) Optional(v bool) (r *VTabsBuilder) {
+	b.tag.Attr(":optional", fmt.Sprint(v))
 	return b
 }
 
@@ -118,8 +118,37 @@ func (b *VTabsBuilder) SliderColor(v string) (r *VTabsBuilder) {
 	return b
 }
 
-func (b *VTabsBuilder) Value(v int) (r *VTabsBuilder) {
-	b.tag.Attr(":value", fmt.Sprint(v))
+func (b *VTabsBuilder) Value(v interface{}) (r *VTabsBuilder) {
+	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VTabsBuilder) Vertical(v bool) (r *VTabsBuilder) {
+	b.tag.Attr(":vertical", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTabsBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VTabsBuilder) Attr(vs ...interface{}) (r *VTabsBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VTabsBuilder) Children(children ...h.HTMLComponent) (r *VTabsBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VTabsBuilder) AppendChildren(children ...h.HTMLComponent) (r *VTabsBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VTabsBuilder) PrependChildren(children ...h.HTMLComponent) (r *VTabsBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

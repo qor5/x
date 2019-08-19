@@ -130,7 +130,7 @@ func (b *Builder) createMenus(ctx *ui.EventContext) (r h.HTMLComponent) {
 							h.Text(m.label),
 						),
 					),
-				).Class(activeClass(ctx, href))).PushStateLink(href),
+				).Class(activeClass(ctx, href))).PushStateURL(href),
 			)
 		}
 		menus = append(menus, VListGroup(
@@ -156,7 +156,7 @@ func (b *Builder) createMenus(ctx *ui.EventContext) (r h.HTMLComponent) {
 						h.Text(m.label),
 					),
 				),
-			).Class(activeClass(ctx, href)).Color(b.primaryColor)).PushStateLink(href),
+			).Class(activeClass(ctx, href)).Color(b.primaryColor)).PushStateURL(href),
 		)
 	}
 

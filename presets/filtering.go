@@ -1,9 +1,9 @@
 package presets
 
-import (
-	vt "github.com/sunfmin/bran/vuetify"
-)
+func (b *ListingBuilder) FilterDataFunc(v FilterDataFunc) {
+	b.filterDataFunc = v
+}
 
-func (b *ListingBuilder) Filter(v vt.FilterData) {
-	b.filterData = v
+func (b *ListingBuilder) FilterTabsFunc(v FilterTabsFunc) {
+	b.filterTabsFunc = v
 }

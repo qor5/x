@@ -28,13 +28,13 @@ func (b *VTabItemBuilder) Disabled(v bool) (r *VTabItemBuilder) {
 	return b
 }
 
-func (b *VTabItemBuilder) Id(v string) (r *VTabItemBuilder) {
-	b.tag.Attr("id", v)
+func (b *VTabItemBuilder) Eager(v bool) (r *VTabItemBuilder) {
+	b.tag.Attr(":eager", fmt.Sprint(v))
 	return b
 }
 
-func (b *VTabItemBuilder) Lazy(v bool) (r *VTabItemBuilder) {
-	b.tag.Attr(":lazy", fmt.Sprint(v))
+func (b *VTabItemBuilder) Id(v string) (r *VTabItemBuilder) {
+	b.tag.Attr("id", v)
 	return b
 }
 
@@ -50,6 +50,30 @@ func (b *VTabItemBuilder) Transition(v bool) (r *VTabItemBuilder) {
 
 func (b *VTabItemBuilder) Value(v interface{}) (r *VTabItemBuilder) {
 	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VTabItemBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VTabItemBuilder) Attr(vs ...interface{}) (r *VTabItemBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VTabItemBuilder) Children(children ...h.HTMLComponent) (r *VTabItemBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VTabItemBuilder) AppendChildren(children ...h.HTMLComponent) (r *VTabItemBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VTabItemBuilder) PrependChildren(children ...h.HTMLComponent) (r *VTabItemBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

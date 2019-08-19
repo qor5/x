@@ -3,6 +3,7 @@ package examples
 import (
 	"fmt"
 	"mime/multipart"
+	"net/url"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -31,6 +32,7 @@ type User struct {
 	CompanyID       int
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
+	ApprovedAt      *time.Time
 	ApprovalComment string
 }
 
@@ -105,7 +107,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	l := m.Listing("Name", "CompanyID", "Bool1", "Float1", "Int1", "ApprovalComment").SearchColumns("name", "job_title").PerPage(5)
 	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*User)
-		return h.Td(ui.Bind(h.A().Text(u.Name)).PushStateLink(fmt.Sprintf("/admin/users/%d/edit", u.ID)))
+		return h.Td(ui.Bind(h.A().Text(u.Name)).PushStateURL(fmt.Sprintf("/admin/users/%d/edit", u.ID)))
 	})
 
 	l.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
@@ -116,7 +118,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			panic(err)
 		}
 		return h.Td(ui.Bind(h.A().Text(comp.Name)).
-			PageURL("/admin/companies").EventFunc("formDrawerEdit", fmt.Sprint(comp.ID)))
+			PushStateURL("/admin/companies").EventFunc("formDrawerEdit", fmt.Sprint(comp.ID)))
 	})
 
 	l.BulkAction("Approve").Label("Approve").UpdateFunc(func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error) {
@@ -153,19 +155,63 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		return h.Div().Text(fmt.Sprintf("Are you sure you want to delete %s ?", selectedIds)).Class("title deep-orange--text")
 	})
 
-	l.Filter([]*FilterItem{
-		{
-			Key:          "created",
-			Label:        "Created",
-			ItemType:     ItemTypeDate,
-			SQLCondition: `extract(epoch from created_at) %s ?`,
-		},
-		{
-			Key:          "name",
-			Label:        "Name",
-			ItemType:     ItemTypeString,
-			SQLCondition: `name %s ?`,
-		},
+	l.FilterDataFunc(func(ctx *ui.EventContext) FilterData {
+		var companyOptions []*SelectItem
+		err := db.Model(&Company{}).Select("name as text, id as value").Scan(&companyOptions).Error
+		if err != nil {
+			panic(err)
+		}
+
+		return []*FilterItem{
+			{
+				Key:          "created",
+				Label:        "Created",
+				ItemType:     ItemTypeDate,
+				SQLCondition: `extract(epoch from created_at) %s ?`,
+			},
+			{
+				Key:          "approved",
+				Label:        "Approved",
+				ItemType:     ItemTypeDate,
+				SQLCondition: `extract(epoch from approved_at) %s ?`,
+			},
+			{
+				Key:          "name",
+				Label:        "Name",
+				ItemType:     ItemTypeString,
+				SQLCondition: `name %s ?`,
+			},
+			{
+				Key:          "company",
+				Label:        "Company",
+				ItemType:     ItemTypeSelect,
+				SQLCondition: `company_id %s ?`,
+				Options:      companyOptions,
+			},
+		}
+	})
+
+	l.FilterTabsFunc(func(ctx *ui.EventContext) []*presets.FilterTab {
+		var c Company
+		db.First(&c)
+		return []*presets.FilterTab{
+			{
+				Label: "Felix",
+				Query: url.Values{"name.ilike": []string{"felix"}},
+			},
+			{
+				Label: "The Plant",
+				Query: url.Values{"company": []string{fmt.Sprint(c.ID)}},
+			},
+			{
+				Label: "Approved",
+				Query: url.Values{"approved.gt": []string{fmt.Sprint(1)}},
+			},
+			{
+				Label: "All",
+				Query: url.Values{"all": []string{"1"}},
+			},
+		}
 	})
 
 	ef := m.Editing("Name", "CompanyID", "Bool1", "Int1")

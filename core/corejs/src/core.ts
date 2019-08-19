@@ -13,6 +13,7 @@ import {
 import {
 	EventFuncID,
 	EventResponse,
+	PushState,
 } from './types';
 
 // Vue.config.productionTip = true;
@@ -35,7 +36,7 @@ export class Core {
 		this.changeCurrent = changeCurrent;
 	}
 
-	public loadPage(pushState: any, pageURL?: string, popstate?: boolean) {
+	public loadPage(pushState: PushState, popstate?: boolean) {
 		for (const key of this.form.keys()) {
 			this.form.delete(key);
 		}
@@ -46,26 +47,23 @@ export class Core {
 				pushState,
 			},
 			{},
-			pageURL,
 			popstate,
 		);
 	}
 
 	public onpopstate(event: any) {
-		const { url, ...pushState } = event.state;
-		this.loadPage(pushState, url, true);
+		this.loadPage(event.state, true);
 	}
 
 	public fetchEvent(
 		eventFuncId: EventFuncID,
 		event: EventData,
-		pageURL?: string,
 		popstate?: boolean,
 	): Promise<EventResponse> {
 
 		const { newEventFuncId, eventURL } = setPushState(
 			eventFuncId,
-			pageURL || (window.location.pathname + '?' + window.location.search),
+			(window.location.pathname + '?' + window.location.search),
 			window.history,
 			popstate,
 		);
@@ -89,7 +87,7 @@ export class Core {
 
 			if (r.redirectURL) {
 				// window.location.replace(r.redirectURL);
-				this.loadPage(null, r.redirectURL);
+				this.loadPage({ url: r.redirectURL });
 			}
 
 			if (r.pushState) {
@@ -134,10 +132,9 @@ export class Core {
 	private fetchEventThenRefresh(
 		eventFuncId: EventFuncID,
 		event: EventData,
-		pageURL?: string,
 		popstate?: boolean,
 	) {
-		this.fetchEvent(eventFuncId, event, pageURL, popstate)
+		this.fetchEvent(eventFuncId, event, popstate)
 			.then((r: EventResponse) => {
 				if (r.reloadPortals && r.reloadPortals.length > 0) {
 					for (const portalName of r.reloadPortals) {
@@ -180,11 +177,11 @@ export class Core {
 	private newVueMethods(): any {
 		const self = this;
 		return {
-			topage(pushState: any, pageURL?: string) {
-				self.loadPage(pushState, pageURL);
+			topage(pushState: any) {
+				self.loadPage(pushState);
 			},
-			triggerEventFunc(eventFuncId: EventFuncID, evt: any, pageURL?: string) {
-				self.fetchEventThenRefresh(eventFuncId, jsonEvent(evt), pageURL);
+			triggerEventFunc(eventFuncId: EventFuncID, evt: any) {
+				self.fetchEventThenRefresh(eventFuncId, jsonEvent(evt));
 			},
 			oninput(eventFuncId?: EventFuncID, fieldName?: string, evt?: any) {
 				self.controlsOnInput(eventFuncId, fieldName, evt);

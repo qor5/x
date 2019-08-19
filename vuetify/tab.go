@@ -58,6 +58,11 @@ func (b *VTabBuilder) Light(v bool) (r *VTabBuilder) {
 	return b
 }
 
+func (b *VTabBuilder) Link(v bool) (r *VTabBuilder) {
+	b.tag.Attr(":link", fmt.Sprint(v))
+	return b
+}
+
 func (b *VTabBuilder) Nuxt(v bool) (r *VTabBuilder) {
 	b.tag.Attr(":nuxt", fmt.Sprint(v))
 	return b
@@ -85,6 +90,30 @@ func (b *VTabBuilder) Target(v string) (r *VTabBuilder) {
 
 func (b *VTabBuilder) To(v string) (r *VTabBuilder) {
 	b.tag.Attr("to", v)
+	return b
+}
+
+func (b *VTabBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VTabBuilder) Attr(vs ...interface{}) (r *VTabBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VTabBuilder) Children(children ...h.HTMLComponent) (r *VTabBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VTabBuilder) AppendChildren(children ...h.HTMLComponent) (r *VTabBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VTabBuilder) PrependChildren(children ...h.HTMLComponent) (r *VTabBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

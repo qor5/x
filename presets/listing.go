@@ -16,14 +16,15 @@ import (
 )
 
 type ListingBuilder struct {
-	mb            *ModelBuilder
-	fields        []*FieldBuilder
-	bulkActions   []*BulkActionBuilder
-	filterData    FilterData
-	pageFunc      ui.PageFunc
-	searcher      SearchOpFunc
-	searchColumns []string
-	perPage       int64
+	mb             *ModelBuilder
+	fields         []*FieldBuilder
+	bulkActions    []*BulkActionBuilder
+	filterDataFunc FilterDataFunc
+	filterTabsFunc FilterTabsFunc
+	pageFunc       ui.PageFunc
+	searcher       SearchOpFunc
+	searchColumns  []string
+	perPage        int64
 }
 
 func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
@@ -115,8 +116,8 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	}
 
 	var fd FilterData
-	if b.filterData != nil {
-		fd = b.filterData.Clone()
+	if b.filterDataFunc != nil {
+		fd = b.filterDataFunc(ctx)
 
 		cond, args := fd.SetByQueryString(ctx.R.URL.RawQuery)
 
@@ -193,7 +194,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 			tdbind := ui.Bind(std)
 			if b.mb.hasDetailing {
-				tdbind.On("click.self").PushStateLink(b.mb.Info().DetailingHref(id))
+				tdbind.On("click.self").PushStateURL(b.mb.Info().DetailingHref(id))
 			} else {
 				tdbind.On("click.self").EventFunc("formDrawerEdit", id)
 			}
@@ -252,6 +253,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	r.Schema = VContainer(
 
 		h.H2(title).Class("title pb-3"),
+		b.filterTabs(msgr, ctx),
 		bulkPanel,
 		VCard(
 			toolbar,
@@ -296,7 +298,7 @@ func (b *ListingBuilder) bulkPanel(bulk *BulkActionBuilder, selectedIds []string
 			VSpacer(),
 			ui.Bind(VBtn(msgr.Cancel).
 				Depressed(true).
-				Class("ml-2")).PushState(url.Values{bulkPanelOpenParamName: []string{""}}),
+				Class("ml-2")).PushStateQuery(url.Values{bulkPanelOpenParamName: []string{""}}).MergeQuery(true),
 
 			VBtn(msgr.OK).
 				Color(b.mb.p.primaryColor).
@@ -354,7 +356,7 @@ func (b *ListingBuilder) doBulkAction(ctx *ui.EventContext) (r ui.EventResponse,
 		return
 	}
 
-	r.PushState = url.Values{bulkPanelOpenParamName: []string{}, selectedParamName: []string{}}
+	r.PushState = ui.PushState(url.Values{bulkPanelOpenParamName: []string{}, selectedParamName: []string{}}).MergeQuery(true)
 
 	return
 }
@@ -370,10 +372,32 @@ func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *ui.EventContext
 				Color(b.mb.p.primaryColor).
 				Depressed(true).
 				Dark(true).
-				Class("ml-2")).PushState(url.Values{bulkPanelOpenParamName: []string{ba.name}}),
+				Class("ml-2")).PushStateQuery(url.Values{bulkPanelOpenParamName: []string{ba.name}}).MergeQuery(true),
 		)
 	}
 	return toolbar
+}
+
+func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *ui.EventContext) (r h.HTMLComponent) {
+	if b.filterTabsFunc == nil {
+		return
+	}
+
+	tabs := VTabs().Class("mb-3").Grow(true).Value(2)
+	tabsData := b.filterTabsFunc(ctx)
+	value := -1
+	rawQuery := ctx.R.URL.RawQuery
+	for i, td := range tabsData {
+		if strings.Index(rawQuery, td.Query.Encode()) >= 0 {
+			value = i
+		}
+		tabs.AppendChildren(
+			ui.Bind(
+				VTab(h.Text(td.Label)),
+			).PushStateQuery(td.Query),
+		)
+	}
+	return tabs.Value(value)
 }
 
 func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *ui.EventContext, fd FilterData) h.HTMLComponent {
@@ -385,7 +409,7 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *ui.EventContex
 			Dark(true).
 			OnClick("formDrawerNew", ""),
 	).Flat(true)
-	if b.filterData != nil {
+	if fd != nil {
 		toolbar.PrependChildren(Filter(fd))
 	}
 	return toolbar

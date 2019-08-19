@@ -2,7 +2,6 @@ package presets
 
 import (
 	"fmt"
-	"net/url"
 
 	"github.com/jinzhu/inflection"
 	"github.com/sunfmin/bran/ui"
@@ -184,7 +183,7 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 					ui.Bind(VBtn(buttonLabel).
 						Dark(true).
 						Color(b.mb.p.primaryColor)).
-						OnClick("update", id).PageURL(b.mb.Info().ListingHref()),
+						OnClick("update", id).PushStateURL(b.mb.Info().ListingHref()),
 				),
 			).Flat(true),
 		).Fluid(true)
@@ -203,7 +202,7 @@ func (b *EditingBuilder) doDelete(ctx *ui.EventContext) (r ui.EventResponse, err
 		}
 	}
 
-	r.PushState = url.Values{}
+	r.PushState = ui.PushState(nil)
 	return
 }
 
@@ -235,6 +234,6 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 	msgs := b.mb.p.messagesFunc(ctx)
 	ctx.Flash = msgs.SuccessfullyUpdated
 
-	r.PushState = url.Values{}
+	r.PushState = ui.PushState(nil)
 	return
 }

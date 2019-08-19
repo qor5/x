@@ -14,7 +14,6 @@ type VueEventTagBuilder struct {
 	onInputFuncID *EventFuncID
 	eventType     string
 	eventFunc     *EventFuncID
-	pageURL       string
 	toPage        bool
 }
 
@@ -37,9 +36,27 @@ func (b *VueEventTagBuilder) OnInput(eventFuncId string, params ...string) (r *V
 	return b
 }
 
-func (b *VueEventTagBuilder) PushStateLink(pageURL string) (r *VueEventTagBuilder) {
-	b.pageURL = pageURL
-	b.toPage = true
+func (b *VueEventTagBuilder) PushStateURL(pageURL string) (r *VueEventTagBuilder) {
+	if b.eventFunc.PushState == nil {
+		b.eventFunc.PushState = PushState(nil)
+	}
+	b.eventFunc.PushState.URL(pageURL)
+	return b
+}
+
+func (b *VueEventTagBuilder) PushStateQuery(q url.Values) (r *VueEventTagBuilder) {
+	if b.eventFunc.PushState == nil {
+		b.eventFunc.PushState = PushState(nil)
+	}
+	b.eventFunc.PushState.Query(q)
+	return b
+}
+
+func (b *VueEventTagBuilder) MergeQuery(mergeQuery bool) (r *VueEventTagBuilder) {
+	if b.eventFunc.PushState == nil {
+		b.eventFunc.PushState = PushState(nil)
+	}
+	b.eventFunc.PushState.MergeQuery(mergeQuery)
 	return b
 }
 
@@ -58,21 +75,13 @@ func (b *VueEventTagBuilder) EventFunc(eventFuncId string, params ...string) (r 
 	return b
 }
 
-func (b *VueEventTagBuilder) PageURL(pageURL string) (r *VueEventTagBuilder) {
-	b.pageURL = pageURL
-	return b
-}
-
 func (b *VueEventTagBuilder) FieldName(v string) (r *VueEventTagBuilder) {
 	b.fieldName = &v
 	return b
 }
 
-func (b *VueEventTagBuilder) PushState(v url.Values) (r *VueEventTagBuilder) {
-	if len(b.eventFunc.ID) == 0 {
-		b.eventFunc.ID = "__reload__"
-	}
-	b.eventFunc.PushState = v
+func (b *VueEventTagBuilder) PushState(ps *PushStateBuilder) (r *VueEventTagBuilder) {
+	b.eventFunc.PushState = ps
 	return b
 }
 
@@ -91,20 +100,11 @@ func (b *VueEventTagBuilder) Update() {
 	callFunc := ""
 
 	if len(b.eventFunc.ID) > 0 {
-		if len(b.pageURL) > 0 {
-			callFunc = fmt.Sprintf("triggerEventFunc(%s, $event, %s)",
-				h.JSONString(b.eventFunc),
-				h.JSONString(b.pageURL),
-			)
-		} else {
-			callFunc = fmt.Sprintf("triggerEventFunc(%s, $event)",
-				h.JSONString(b.eventFunc),
-			)
-		}
-	}
-
-	if b.toPage {
-		callFunc = fmt.Sprintf("topage(%s, %s)", h.JSONString(url.Values{}), h.JSONString(b.pageURL))
+		callFunc = fmt.Sprintf("triggerEventFunc(%s, $event)",
+			h.JSONString(b.eventFunc),
+		)
+	} else {
+		callFunc = fmt.Sprintf("topage(%s)", h.JSONString(b.eventFunc.PushState))
 	}
 
 	if len(callFunc) > 0 {

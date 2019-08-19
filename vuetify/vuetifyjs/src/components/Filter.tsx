@@ -651,13 +651,13 @@ export const Filter = Vue.extend({
 			};
 			this.$emit('input', event);
 			if (this.$props.replaceWindowLocation) {
-				this.replaceWindowLocation(event);
+				this.doReplaceWindowLocation(event);
 			}
 			// console.log('event', event);
 			this.visible = false;
 		},
 
-		replaceWindowLocation(event: any) {
+		doReplaceWindowLocation(event: any) {
 			const qs = event.encodedFilterData;
 			this.core.loadPage(qs);
 		},

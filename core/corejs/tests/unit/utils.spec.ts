@@ -4,6 +4,10 @@ import {
 	setFormValue,
 } from '@/utils';
 
+import {
+	EventFuncID,
+} from '@/types';
+
 
 describe('utils', () => {
 	it('newFormWithStates', () => {
@@ -24,7 +28,7 @@ describe('utils', () => {
 
 		interface MyTestCase {
 			desc: string;
-			eventFuncID: any;
+			eventFuncID: EventFuncID;
 			url: string;
 			popstate: boolean;
 			expectedEventURL: string;
@@ -38,44 +42,46 @@ describe('utils', () => {
 				desc: 'pushState with object will merge into url queries',
 				eventFuncID: {
 					id: 'hello',
-					pushState: { name: 'felix' },
+					pushState: { query: { name: 'felix' }, mergeQuery: true },
 				},
 				url: '/page1?hello=1&page=2',
 				popstate: false,
 				expectedEventURL: '/page1?__execute_event__=hello&hello=1&name=felix&page=2',
 				expectedPushedURL: '/page1?hello=1&name=felix&page=2',
 				expectedPushedState: { name: ['felix'], hello: ['1'], page: ['2'] },
+				expectedPushedData: { query: { hello: '1', name: 'felix', page: '2' }, url: '/page1?hello=1&name=felix&page=2' },
 			},
 			{
 				desc: 'pushState with string will replace url queries',
 				eventFuncID: {
 					id: 'hello',
-					pushState: 'name=felix',
+					pushState: { query: { name: 'felix' } },
 				},
 				url: '/page1?hello=1&page=2',
 				popstate: false,
 				expectedEventURL: '/page1?__execute_event__=hello&name=felix',
 				expectedPushedURL: '/page1?name=felix',
 				expectedPushedState: { name: ['felix'] },
-				expectedPushedData: { name: 'felix', url: '/page1?name=felix' },
+				expectedPushedData: { query: { name: 'felix' }, url: '/page1?name=felix' },
 			},
 			{
 				desc: 'add operator will add to current query values',
 				eventFuncID: {
 					id: 'hello',
-					pushState: { selectedIds: { value: '5', add: true } },
+					pushState: { query: { selectedIds: { value: '5', add: true } }, mergeQuery: true },
 				},
 				url: '/page1?selectedIds=1,2,3&page=2',
 				popstate: false,
 				expectedEventURL: '/page1?__execute_event__=hello&page=2&selectedIds=1,2,3,5',
 				expectedPushedURL: '/page1?page=2&selectedIds=1,2,3,5',
 				expectedPushedState: { page: ['2'], selectedIds: ['1', '2', '3', '5'] },
+				expectedPushedData: { query: { page: '2', selectedIds: ['1', '2', '3', '5'] }, url: '/page1?page=2&selectedIds=1,2,3,5' },
 			},
 			{
 				desc: 'remove operator will add to current query values',
 				eventFuncID: {
 					id: 'hello',
-					pushState: { selectedIds: { value: '5', remove: true } },
+					pushState: { query: { selectedIds: { value: '5', remove: true } }, mergeQuery: true },
 				},
 				url: '/page1?selectedIds=1,2,3,5&page=2',
 				popstate: false,
@@ -87,7 +93,7 @@ describe('utils', () => {
 				desc: 'array with comma',
 				eventFuncID: {
 					id: 'hello',
-					pushState: { names: ['Hello, Felix', 'How are you'] },
+					pushState: { query: { names: ['Hello, Felix', 'How are you'] }, mergeQuery: true },
 				},
 				url: '/page1?selectedIds=1,2,3,5&page=2',
 				popstate: false,
@@ -99,7 +105,7 @@ describe('utils', () => {
 				desc: 'first time add',
 				eventFuncID: {
 					id: 'hello',
-					pushState: { name: { value: '1', add: true } },
+					pushState: { query: { name: { value: '1', add: true } }, mergeQuery: true },
 				},
 				url: '/page1',
 				popstate: false,
@@ -111,7 +117,7 @@ describe('utils', () => {
 				desc: 'add operator with value array',
 				eventFuncID: {
 					id: 'hello',
-					pushState: { name: { value: ['1', '2'], add: true } },
+					pushState: { query: { name: { value: ['1', '2'], add: true } }, mergeQuery: true },
 				},
 				url: '/page1',
 				popstate: false,
@@ -123,13 +129,37 @@ describe('utils', () => {
 				desc: 'remove operator with value array',
 				eventFuncID: {
 					id: 'hello',
-					pushState: { name: { value: ['1', '2', '5', '8'], remove: true } },
+					pushState: { query: { name: { value: ['1', '2', '5', '8'], remove: true } }, mergeQuery: true },
 				},
 				url: '/page1?name=1,2,3,4,5,6,7,8,9',
 				popstate: false,
 				expectedEventURL: '/page1?__execute_event__=hello&name=3,4,6,7,9',
 				expectedPushedURL: '/page1?name=3,4,6,7,9',
 				expectedPushedState: { name: ['3', '4', '6', '7', '9'] },
+			},
+			{
+				desc: 'remove operator with url and value array',
+				eventFuncID: {
+					id: 'hello',
+					pushState: { url: '/page2?name=1,2,3,4,5,6,7,8,9', query: { name: { value: ['1', '2', '5', '8'], remove: true } }, mergeQuery: true },
+				},
+				url: '/page1?name=1,2,3,4,5,6,7,8,9',
+				popstate: false,
+				expectedEventURL: '/page2?__execute_event__=hello&name=3,4,6,7,9',
+				expectedPushedURL: '/page2?name=3,4,6,7,9',
+				expectedPushedState: { name: ['3', '4', '6', '7', '9'] },
+			},
+			{
+				desc: 'with url',
+				eventFuncID: {
+					id: 'hello',
+					pushState: { url: '/page2?name=2,3' },
+				},
+				url: '/page1?name=1,2',
+				popstate: false,
+				expectedEventURL: '/page2?__execute_event__=hello&name=2,3',
+				expectedPushedURL: '/page2?name=2,3',
+				expectedPushedState: { name: ['2', '3'] },
 			},
 		];
 

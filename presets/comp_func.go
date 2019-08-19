@@ -141,7 +141,7 @@ func cfTextTd(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTML
 		if len(id) > 0 {
 			a := ui.Bind(h.A().Text(id))
 			if field.ModelInfo.HasDetailing() {
-				a.PushStateLink(
+				a.PushStateURL(
 					field.ModelInfo.DetailingHref(id),
 				)
 			} else {

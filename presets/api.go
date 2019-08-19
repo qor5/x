@@ -2,14 +2,25 @@ package presets
 
 import (
 	"mime/multipart"
+	"net/url"
 
 	"github.com/sunfmin/bran/ui"
+	v "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"
 )
 
 // UI Layer
 
 type ComponentFunc func(ctx *ui.EventContext) h.HTMLComponent
+
+type FilterDataFunc func(ctx *ui.EventContext) v.FilterData
+
+type FilterTab struct {
+	Label string
+	Query url.Values
+}
+
+type FilterTabsFunc func(ctx *ui.EventContext) []*FilterTab
 
 type BulkComponentFunc func(selectedIds []string, ctx *ui.EventContext) h.HTMLComponent
 

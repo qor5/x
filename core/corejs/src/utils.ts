@@ -37,14 +37,20 @@ export function setPushState(
 	pusher: StatePusher,
 	popstate: boolean | undefined,
 ): any {
-	let pstate = eventFuncId.pushState;
+	const pstate = eventFuncId.pushState;
 
 	// If pushState is string, then replace query string to it
 	// If pushState it object, merge url query
-	let mergeURLQuery = true;
-	if (typeof pstate === 'string') {
-		pstate = { ...querystring.parse(pstate, { arrayFormat: 'comma' }) };
-		mergeURLQuery = false;
+	if (typeof pstate !== 'object') {
+		throw Error('pushState required to be object');
+	}
+
+	let mergeURLQuery = false;
+	if (pstate) {
+		if (pstate.url) {
+			url = pstate.url;
+		}
+		mergeURLQuery = pstate.mergeQuery || false;
 	}
 
 	const orig = querystring.parseUrl(url, { arrayFormat: 'comma' });
@@ -57,7 +63,7 @@ export function setPushState(
 
 	let serverPushState: any = null;
 	if (pstate) {
-		const st = pstate;
+		const st = pstate.query || orig.query;
 
 		let addressBarQuery = '';
 		if (Object.keys(st).length > 0) {
@@ -82,7 +88,7 @@ export function setPushState(
 
 		if (popstate !== true) {
 			const newUrl = orig.url + addressBarQuery;
-			const pushedState = { ...query, ...{ url: newUrl } };
+			const pushedState = { query, url: newUrl };
 			pusher.pushState(
 				pushedState,
 				'',

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/go-playground/form"
@@ -29,18 +28,18 @@ type PortalUpdate struct {
 }
 
 type EventResponse struct {
-	Alert         Component       `json:"alert,omitempty"`
-	Confirm       Component       `json:"confirm,omitempty"`
-	Dialog        Component       `json:"dialog,omitempty"`
-	CloseDialog   bool            `json:"closeDialog,omitempty"`
-	PageTitle     string          `json:"pageTitle,omitempty"`
-	Schema        Component       `json:"schema,omitempty"`
-	Reload        bool            `json:"reload,omitempty"`
-	PushState     url.Values      `json:"pushState"` // This we don't omitempty, So that {} can be keeped when use url.Values{}
-	ReloadPortals []string        `json:"reloadPortals,omitempty"`
-	UpdatePortals []*PortalUpdate `json:"updatePortals,omitempty"`
-	RedirectURL   string          `json:"redirectURL,omitempty"`
-	Data          interface{}     `json:"data,omitempty"` // used for return collection data like TagsInput data source
+	Alert         Component         `json:"alert,omitempty"`
+	Confirm       Component         `json:"confirm,omitempty"`
+	Dialog        Component         `json:"dialog,omitempty"`
+	CloseDialog   bool              `json:"closeDialog,omitempty"`
+	PageTitle     string            `json:"pageTitle,omitempty"`
+	Schema        Component         `json:"schema,omitempty"`
+	Reload        bool              `json:"reload,omitempty"`
+	PushState     *PushStateBuilder `json:"pushState"` // This we don't omitempty, So that {} can be keeped when use url.Values{}
+	ReloadPortals []string          `json:"reloadPortals,omitempty"`
+	UpdatePortals []*PortalUpdate   `json:"updatePortals,omitempty"`
+	RedirectURL   string            `json:"redirectURL,omitempty"`
+	Data          interface{}       `json:"data,omitempty"` // used for return collection data like TagsInput data source
 }
 
 type PageFunc func(ctx *EventContext) (r PageResponse, err error)
@@ -63,9 +62,9 @@ type EventFuncHub interface {
 	It is used in Pager (Pagination) component.
 */
 type EventFuncID struct {
-	ID        string     `json:"id,omitempty"`
-	Params    []string   `json:"params,omitempty"`
-	PushState url.Values `json:"pushState"` // This we don't omitempty, So that {} can be keeped when use url.Values{}
+	ID        string            `json:"id,omitempty"`
+	Params    []string          `json:"params,omitempty"`
+	PushState *PushStateBuilder `json:"pushState"` // This we don't omitempty, So that {} can be keeped when use url.Values{}
 }
 
 /*

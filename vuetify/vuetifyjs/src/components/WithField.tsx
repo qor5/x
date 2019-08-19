@@ -47,7 +47,7 @@ export const WithField = (
 								} else {
 									opValue.remove = true;
 								}
-								const pushState = { [fieldName]: opValue };
+								const pushState = { query: { [fieldName]: opValue }, mergeQuery: true };
 								self.core.loadPage(pushState);
 								return;
 							}

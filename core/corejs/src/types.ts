@@ -4,8 +4,14 @@ export interface ValueOp {
 	remove?: boolean;
 }
 
-interface PushState {
+interface PushStateQuery {
 	[key: string]: null | undefined | string | string[] | ValueOp;
+}
+
+export interface PushState {
+	mergeQuery?: boolean;
+	url?: string;
+	query?: PushStateQuery;
 }
 
 export interface EventFuncID {
