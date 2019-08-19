@@ -40,7 +40,6 @@ export class Core {
 		for (const key of this.form.keys()) {
 			this.form.delete(key);
 		}
-
 		this.fetchEventThenRefresh(
 			{
 				id: '__reload__',

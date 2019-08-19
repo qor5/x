@@ -37,12 +37,12 @@ export function setPushState(
 	pusher: StatePusher,
 	popstate: boolean | undefined,
 ): any {
-	const pstate = eventFuncId.pushState;
+	let pstate = eventFuncId.pushState;
 
 	// If pushState is string, then replace query string to it
 	// If pushState it object, merge url query
-	if (typeof pstate !== 'object') {
-		throw Error('pushState required to be object');
+	if (typeof pstate === 'string') {
+		pstate = { query: querystring.parse(pstate, { arrayFormat: 'comma' }), mergeQuery: true };
 	}
 
 	let mergeURLQuery = false;

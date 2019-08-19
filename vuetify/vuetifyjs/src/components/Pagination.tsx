@@ -21,7 +21,7 @@ export default Vue.extend({
 			on: {
 				...{
 					input: (val: any) => {
-						self.core.loadPage({ page: `${val}` });
+						self.core.loadPage({ query: { page: `${val}` }, mergeQuery: true });
 					},
 				},
 				...this.$listeners,
