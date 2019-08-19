@@ -147,7 +147,8 @@ func TestFileUpload(t *testing.T) {
 	"schema": {
 		"__text__": "Hello"
 	},
-	"reload": true
+	"reload": true,
+	"pushState": null
 }
 	`, w.Body.String())
 	if len(diff) > 0 {
@@ -195,7 +196,8 @@ var eventCases = []struct {
 		},
 		expectedEventResp: `{
 	"schema": "Felix1 Hangzhou",
-	"reload": true
+	"reload": true,
+	"pushState": null
 }
 `,
 	},
@@ -208,7 +210,8 @@ var eventCases = []struct {
 			return
 		},
 		expectedEventResp: `{
-	"schema": "\n\u003cdiv\u003e\n\u003ch1\u003ehello\u003c/h1\u003e\n\u003c/div\u003e\n"
+	"schema": "\n\u003cdiv\u003e\n\u003ch1\u003ehello\u003c/h1\u003e\n\u003c/div\u003e\n",
+	"pushState": null
 }`,
 	},
 
@@ -220,7 +223,8 @@ var eventCases = []struct {
 		expectedEventResp: `
 	{
 		"schema": "\u003ch1\u003eHello\u003c/h1\u003e",
-		"reload": true
+		"reload": true,
+		"pushState": null
 	}
 			`,
 	},
@@ -232,7 +236,8 @@ var eventCases = []struct {
 		},
 		expectedEventResp: `{
 	"schema": "\u003cdiv\u003ehello\u003c/div\u003e",
-	"reload": true
+	"reload": true,
+	"pushState": null
 }`,
 		expectedIndexResp: `<!DOCTYPE html>
 
@@ -287,7 +292,7 @@ var mountCases = []struct {
 		method:   "GET",
 		path:     "/home/topics/xgb123",
 		bodyFunc: nil,
-		expected: `<div><a href="#" v-on:click='triggerEventFunc({"id":"bookmark","pushState":null}, $event)'>xgb123</a></div>`,
+		expected: `<div><a href="#" v-on:click='triggerEventFunc({"id":"bookmark","pushState":null}, $event, null)'>xgb123</a></div>`,
 	},
 	{
 		name:   "with param post",
@@ -296,7 +301,7 @@ var mountCases = []struct {
 		bodyFunc: func(w *multipart.Writer) {
 			_ = w.WriteField("__event_data__", `{"eventFuncId":{"id":"bookmark","pushState":null},"event":{"value":""}}`)
 		},
-		expected: `{"schema":"\n\u003ch1\u003exgb123 bookmarked\u003c/h1\u003e\n"}`,
+		expected: `{"schema":"\n\u003ch1\u003exgb123 bookmarked\u003c/h1\u003e\n","pushState":null}`,
 	},
 }
 
