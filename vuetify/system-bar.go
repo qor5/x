@@ -11,9 +11,9 @@ type VSystemBarBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VSystemBar() (r *VSystemBarBuilder) {
+func VSystemBar(children ...h.HTMLComponent) (r *VSystemBarBuilder) {
 	r = &VSystemBarBuilder{
-		tag: h.Tag("v-system-bar"),
+		tag: h.Tag("v-system-bar").Children(children...),
 	}
 	return
 }

@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sunfmin/bran/examples/e19_stripeui_key_info"
+
 	"github.com/sunfmin/bran/examples/e18_filter_component"
 
 	"github.com/gobuffalo/packr"
@@ -278,6 +280,11 @@ func Setup(prefix string) http.Handler {
 		{
 			url:        "e18_filter_component",
 			renderFunc: e18_filter_component.FilterComponent,
+			vuetify:    true,
+		},
+		{
+			url:        "e19_stripeui_key_info",
+			renderFunc: e19_stripeui_key_info.KeyInfoDemo,
 			vuetify:    true,
 		},
 	}
