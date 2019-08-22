@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sunfmin/reflectutils"
+	s "github.com/sunfmin/bran/stripeui"
 
 	"github.com/qor/inflection"
 	"github.com/sunfmin/bran/ui"
@@ -127,6 +127,13 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		})
 	}
 
+	var objs interface{}
+	var totalCount int
+	objs, totalCount, err = b.searcher(b.mb.newModelArray(), searchParams)
+	if err != nil {
+		return
+	}
+
 	haveCheckboxes := len(b.bulkActions) > 0
 
 	selected := getSelectedIds(ctx)
@@ -145,111 +152,42 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		bulkPanel = ui.LazyPortal(b.bulkPanel(bulk, selected, ctx)).Name(bulkPanelPortalName)
 	}
 
-	var objs interface{}
-	var totalCount int
-	objs, totalCount, err = b.searcher(b.mb.newModelArray(), searchParams)
-	if err != nil {
-		return
-	}
-
 	pagesCount := int(int64(totalCount)/searchParams.PerPage + 1)
 	if int64(totalCount)%searchParams.PerPage == 0 {
 		pagesCount--
 	}
 
-	var rows []h.HTMLComponent
-
-	var idsOfPage []string
-	funk.ForEach(objs, func(obj interface{}) {
-		id := fmt.Sprint(reflectutils.MustGet(obj, "ID"))
-		idsOfPage = append(idsOfPage, id)
-		inputValue := ""
-		if funk.ContainsString(selected, id) {
-			inputValue = id
-		}
-		var tds []h.HTMLComponent
-		if haveCheckboxes {
-			tds = append(tds, h.Td(
-				VCheckbox().
-					Class("mt-0").
-					FieldName(selectedParamName).
-					LoadPageWithArrayOp(true).
-					InputValue(inputValue).
-					TrueValue(id).
-					FalseValue("").
-					HideDetails(true),
-			).Class("pr-0"))
-		}
-		for _, f := range b.fields {
-			tds = append(tds, f.compFunc(obj, b.mb.getComponentFuncField(f), ctx))
-		}
-
-		var bindTds []h.HTMLComponent
-		for _, td := range tds {
-			std, ok := td.(h.MutableAttrHTMLComponent)
-			if !ok {
-				bindTds = append(bindTds, td)
-				continue
-			}
-
-			tdbind := ui.Bind(std)
+	dataTable := s.DataTable(objs).
+		CellWrapperFunc(func(cell h.MutableAttrHTMLComponent, id string) h.HTMLComponent {
+			tdbind := ui.Bind(cell)
 			if b.mb.hasDetailing {
 				tdbind.On("click.self").PushStateURL(b.mb.Info().DetailingHref(id))
 			} else {
 				tdbind.On("click.self").EventFunc("formDrawerEdit", id)
 			}
-
-			bindTds = append(bindTds, tdbind)
-		}
-
-		bindTds = append(bindTds, h.Td(
-			VMenu(
-				ui.Slot(
-					VBtn("").Children(
-						VIcon("more_horiz"),
-					).Attr("v-on", "on").Text(true).Fab(true).Small(true),
-				).Name("activator").Scope("{ on }"),
-
-				VList(
-					ui.Bind(VListItem(
-						VListItemIcon(VIcon("edit")),
-						VListItemTitle(h.Text(msgr.Edit)),
-					)).OnClick("formDrawerEdit", id),
-					ui.Bind(VListItem(
-						VListItemIcon(VIcon("delete")),
-						VListItemTitle(h.Text(msgr.Delete)),
-					)).OnClick("deleteConfirmation", id),
-				).Dense(true),
-			),
-		).Class("pl-0"))
-
-		rows = append(rows, h.Tr(bindTds...))
-	})
-
-	var heads []h.HTMLComponent
-
-	if haveCheckboxes {
-		allInputValue := ""
-		idsOfPageComma := strings.Join(idsOfPage, ",")
-		if allSelected(selected, idsOfPage) {
-			allInputValue = idsOfPageComma
-		}
-		heads = append(heads, h.Th("").Children(
-			VCheckbox().
-				Class("mt-0").
-				TrueValue(idsOfPageComma).
-				InputValue(allInputValue).
-				FieldName(selectedParamName).
-				LoadPageWithArrayOp(true).
-				HideDetails(true),
-		).Style("width: 48px;").Class("pr-0"))
-	}
+			return tdbind
+		}).
+		RowMenuItemsFunc(func(obj interface{}, id string, ctx *ui.EventContext) []h.HTMLComponent {
+			return []h.HTMLComponent{
+				ui.Bind(VListItem(
+					VListItemIcon(VIcon("edit")),
+					VListItemTitle(h.Text(msgr.Edit)),
+				)).OnClick("formDrawerEdit", id),
+				ui.Bind(VListItem(
+					VListItemIcon(VIcon("delete")),
+					VListItemTitle(h.Text(msgr.Delete)),
+				)).OnClick("deleteConfirmation", id),
+			}
+		}).
+		Selectable(haveCheckboxes).
+		SelectionParamName(selectedParamName)
 
 	for _, f := range b.fields {
-		label := b.mb.getLabel(f.NameLabel)
-		heads = append(heads, h.Th(label))
+		dataTable.Column(f.name).
+			Title(b.mb.getLabel(f.NameLabel)).
+			CellComponentFunc(b.cellComponentFunc(f))
 	}
-	heads = append(heads, h.Th(" ").Style("width: 56px;")) // Edit, Delete menu
+
 	r.Schema = VContainer(
 
 		h.H2(title).Class("title pb-3"),
@@ -260,14 +198,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 			VDivider(),
 			VCardText(
 				ui.LazyPortal().Name(deleteConfirmPortalName),
-				VSimpleTable(
-					h.Thead(
-						h.Tr(heads...),
-					),
-					h.Tbody(
-						rows...,
-					),
-				),
+				dataTable,
 			).Class("pa-0"),
 		),
 
@@ -277,6 +208,12 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	).Fluid(true)
 
 	return
+}
+
+func (b *ListingBuilder) cellComponentFunc(f *FieldBuilder) s.CellComponentFunc {
+	return func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
+		return f.compFunc(obj, b.mb.getComponentFuncField(f), ctx)
+	}
 }
 
 func getSelectedIds(ctx *ui.EventContext) (selected []string) {
@@ -319,7 +256,6 @@ func (b *ListingBuilder) deleteConfirmation(ctx *ui.EventContext) (r ui.EventRes
 			VCard(
 				VCardTitle(h.Text(msgr.DeleteConfirmationText(id))),
 				VCardActions(
-					VSpacer(),
 					VSpacer(),
 					VBtn(msgr.Cancel).
 						Depressed(true).
