@@ -3,7 +3,6 @@ package stripeui
 import (
 	"context"
 
-	. "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -68,10 +67,7 @@ func (b *KeyInfoBuilder) AppendIcon(label string, icon h.HTMLComponent, comp h.H
 }
 
 func (b *KeyInfoBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	return h.Components(
-		VDivider(),
-		h.Div(b.children...).
-			Class("grey lighten-5 d-flex").
-			Style(""),
-	).MarshalHTML(ctx)
+	return h.Div(b.children...).
+		Class("grey lighten-5 d-flex").
+		MarshalHTML(ctx)
 }

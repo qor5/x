@@ -8,10 +8,11 @@ import (
 )
 
 type CardBuilder struct {
-	children  []h.HTMLComponent
-	systemBar []h.HTMLComponent
-	header    []h.HTMLComponent
-	actions   []h.HTMLComponent
+	children   []h.HTMLComponent
+	systemBar  []h.HTMLComponent
+	header     []h.HTMLComponent
+	actions    []h.HTMLComponent
+	classNames []string
 }
 
 func Card(children ...h.HTMLComponent) (r *CardBuilder) {
@@ -45,6 +46,11 @@ func (b *CardBuilder) SystemBar(systemBar ...h.HTMLComponent) (r *CardBuilder) {
 	return b
 }
 
+func (b *CardBuilder) Class(names ...string) (r *CardBuilder) {
+	b.classNames = names
+	return b
+}
+
 func (b *CardBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	var sb h.HTMLComponent
 	if len(b.systemBar) > 0 {
@@ -57,5 +63,6 @@ func (b *CardBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 			VToolbarTitle("").Children(b.header...),
 			VSpacer(),
 		).Flat(true).Dense(true).AppendChildren(b.actions...),
-	).AppendChildren(b.children...).MarshalHTML(ctx)
+		VDivider(),
+	).Class(b.classNames...).AppendChildren(b.children...).MarshalHTML(ctx)
 }

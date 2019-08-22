@@ -81,7 +81,8 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 	var idsOfPage []string
 
 	funk.ForEach(b.data, func(obj interface{}) {
-		id := fmt.Sprint(reflectutils.MustGet(obj, b.primaryField))
+		idRaw, _ := reflectutils.Get(obj, b.primaryField)
+		id := fmt.Sprint(idRaw)
 
 		idsOfPage = append(idsOfPage, id)
 		inputValue := ""
@@ -114,12 +115,12 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 				continue
 			}
 
-			var tdbind h.HTMLComponent = std
+			var tdWrapped h.HTMLComponent = std
 			if b.cellWrapper != nil {
-				tdbind = b.cellWrapper(std, id)
+				tdWrapped = b.cellWrapper(std, id)
 			}
 
-			bindTds = append(bindTds, tdbind)
+			bindTds = append(bindTds, tdWrapped)
 		}
 
 		if haveRowMenus {
@@ -174,7 +175,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 		}
 		thead = h.Thead(
 			h.Tr(heads...),
-		)
+		).Class("grey lighten-5")
 	}
 
 	return VSimpleTable(

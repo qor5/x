@@ -6,9 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	s "github.com/sunfmin/bran/stripeui"
-
 	"github.com/qor/inflection"
+	s "github.com/sunfmin/bran/stripeui"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"

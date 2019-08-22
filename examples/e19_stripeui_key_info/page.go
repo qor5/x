@@ -1,7 +1,10 @@
 package e19_stripeui_key_info
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/sunfmin/reflectutils"
 
 	s "github.com/sunfmin/bran/stripeui"
 	"github.com/sunfmin/bran/ui"
@@ -9,7 +12,48 @@ import (
 	h "github.com/theplant/htmlgo"
 )
 
+type Event struct {
+	Title     string
+	CreatedAt time.Time
+}
+
 func KeyInfoDemo(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+
+	dt := s.DataTable([]*Event{
+		{
+			"<span><strong>¥5,000</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
+			time.Now(),
+		},
+		{
+			"<span><strong>¥207,626</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
+			time.Now(),
+		},
+		{
+			"<span><strong>¥7,848</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
+			time.Now(),
+		},
+		{
+			"<span><strong>¥5,000</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
+			time.Now(),
+		},
+		{
+			"<span><strong>¥207,626</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
+			time.Now(),
+		},
+		{
+			"<span><strong>¥7,848</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
+			time.Now(),
+		},
+	}).WithoutHeaders(true)
+
+	dt.Column("Title").CellComponentFunc(func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
+		return h.Td(h.RawHTML(fmt.Sprint(reflectutils.MustGet(obj, fieldName))))
+	})
+
+	dt.Column("CreatedAt").CellComponentFunc(func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
+		t := reflectutils.MustGet(obj, fieldName).(time.Time)
+		return h.Td(h.Text(t.Format("01/02/06, 15:04:05 PM"))).Class("text-right")
+	})
 
 	pr.Schema = VApp(
 		VContent(
@@ -30,7 +74,9 @@ func KeyInfoDemo(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 				VChip(h.Text("Refunded"), VIcon("reply").Small(true)).Small(true),
 			).Actions(
 				VBtn("Edit").Depressed(true),
-			),
+			).Class("mb-4"),
+
+			s.Card(dt).HeaderTitle("Events"),
 		),
 	)
 	return
