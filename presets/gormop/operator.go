@@ -49,7 +49,12 @@ func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams
 		wh = wh.Offset(offset)
 	}
 
-	err = wh.Order("id DESC").Find(obj).Error
+	orderBy := params.OrderBy
+	if len(orderBy) > 0 {
+		wh = wh.Order(orderBy)
+	}
+
+	err = wh.Find(obj).Error
 	if err != nil {
 		return
 	}

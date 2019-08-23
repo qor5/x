@@ -60,4 +60,5 @@ type SearchParams struct {
 	SQLConditions  []*SQLCondition
 	PerPage        int64
 	Page           int64
+	OrderBy        string
 }

@@ -352,6 +352,35 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 					"Customer",
 					cusID,
 				).URL("/admin/notes"),
+			).Class("mb-4")
+	})
+
+	dp.Field("Details").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
+		cu := obj.(*Customer)
+		cusID := fmt.Sprint(cu.ID)
+
+		var lang Language
+		db.Where("language_code = ?", cu.LanguageCode).Find(&lang)
+
+		detail := s.DetailInfo(
+			s.DetailColumn(
+				s.DetailField(s.OptionalText(cu.Name).ZeroLabel("No Name")).Label("Name"),
+				s.DetailField(s.OptionalText(cu.Email).ZeroLabel("No Email")).Label("Email"),
+				s.DetailField(s.OptionalText(cu.Description).ZeroLabel("No Description")).Label("Description"),
+				s.DetailField(s.OptionalText(cusID).ZeroLabel("No ID")).Label("ID"),
+				s.DetailField(s.OptionalText(cu.CreatedAt.Format("Jan 02,15:04 PM")).ZeroLabel("")).Label("Created"),
+				s.DetailField(s.OptionalText(lang.Name).ZeroLabel("No Language")).Label("Language"),
+			).Header("ACCOUNT INFORMATION"),
+			s.DetailColumn().Header("BILLING INFORMATION"),
+		)
+
+		return s.Card(detail).HeaderTitle("Details").
+			Actions(
+				ui.Bind(VBtn("Update details").
+					Depressed(true)).OnClick(
+					"formDrawerEdit",
+					cusID,
+				).URL("/admin/customers"),
 			)
 	})
 
@@ -360,6 +389,8 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		note.SourceID = ctx.Event.ParamAsInt(2)
 		note.SourceType = ctx.Event.Params[1]
 	})
+
+	p.Model(&Language{}).PrimaryField("Code")
 
 	ie := dp.Field("Bool1").InplaceEdit()
 	ie.ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {

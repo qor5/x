@@ -24,6 +24,7 @@ type ListingBuilder struct {
 	searcher       SearchOpFunc
 	searchColumns  []string
 	perPage        int64
+	orderBy        string
 }
 
 func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
@@ -71,6 +72,11 @@ func (b *ListingBuilder) PerPage(v int64) (r *ListingBuilder) {
 	return b
 }
 
+func (b *ListingBuilder) OrderBy(v string) (r *ListingBuilder) {
+	b.orderBy = v
+	return b
+}
+
 func (b *ListingBuilder) GetPageFunc() ui.PageFunc {
 	if b.pageFunc != nil {
 		return b.pageFunc
@@ -100,12 +106,18 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		perPage = 50
 	}
 
+	orderBy := b.orderBy
+	if len(orderBy) == 0 {
+		orderBy = fmt.Sprintf("%s DESC", b.mb.primaryField)
+	}
+
 	//time.Sleep(1 * time.Second)
 	urlQuery := ctx.R.URL.Query()
 	searchParams := &SearchParams{
 		KeywordColumns: b.searchColumns,
 		Keyword:        urlQuery.Get("keyword"),
 		PerPage:        perPage,
+		OrderBy:        orderBy,
 	}
 
 	searchParams.Page, _ = strconv.ParseInt(urlQuery.Get("page"), 10, 64)
@@ -129,7 +141,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	var totalCount int
 	objs, totalCount, err = b.searcher(b.mb.newModelArray(), searchParams)
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	haveCheckboxes := len(b.bulkActions) > 0

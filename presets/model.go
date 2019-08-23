@@ -13,6 +13,7 @@ import (
 type ModelBuilder struct {
 	p            *Builder
 	model        interface{}
+	primaryField string
 	modelType    reflect.Type
 	inGroup      bool
 	notInMenu    bool
@@ -28,7 +29,7 @@ type ModelBuilder struct {
 }
 
 func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
-	r = &ModelBuilder{p: p, model: model}
+	r = &ModelBuilder{p: p, model: model, primaryField: "ID"}
 	r.modelType = reflect.TypeOf(model)
 	if r.modelType.Kind() != reflect.Ptr {
 		panic(fmt.Sprintf("model %#+v must be pointer", model))
@@ -138,6 +139,11 @@ func (b *ModelInfo) HasDetailing() bool {
 
 func (b *ModelBuilder) URIName(v string) (r *ModelBuilder) {
 	b.uriName = v
+	return b
+}
+
+func (b *ModelBuilder) PrimaryField(v string) (r *ModelBuilder) {
+	b.primaryField = v
 	return b
 }
 
