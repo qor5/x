@@ -91,14 +91,6 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespo
 		}, ctx))
 	}
 
-	r.Schema = VContainer(
-		notice,
-		//h.H2(title).Class("title pb-3"),
-		VCard(
-			VCardText(
-				comps...,
-			),
-		).Flat(true),
-	).Fluid(true)
+	r.Schema = VContainer(notice).AppendChildren(comps...).Fluid(true)
 	return
 }
