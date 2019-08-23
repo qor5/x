@@ -55,7 +55,7 @@ func (b *DataTableBuilder) PrimaryField(v string) (r *DataTableBuilder) {
 	return b
 }
 
-func (b *DataTableBuilder) WithoutHeaders(v bool) (r *DataTableBuilder) {
+func (b *DataTableBuilder) WithoutHeader(v bool) (r *DataTableBuilder) {
 	b.withoutHeaders = v
 	return b
 }
@@ -136,7 +136,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 						b.rowMenuItemsFunc(obj, id, ctx)...,
 					).Dense(true),
 				),
-			).Class("pl-0"))
+			).Style("width: 48px;").Class("pl-0"))
 		}
 
 		rows = append(rows, h.Tr(bindTds...))

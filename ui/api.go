@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/go-playground/form"
@@ -86,6 +87,16 @@ type EventContext struct {
 	Injector PageInjector
 	Event    *Event
 	Flash    interface{} // pass value from actions to index
+}
+
+func (e *Event) ParamAsInt(i int) (r int) {
+	if len(e.Params) <= i {
+		return
+	}
+	p1 := e.Params[i]
+	val, _ := strconv.ParseInt(p1, 10, 64)
+	r = int(val)
+	return
 }
 
 func (ctx *EventContext) MustUnmarshalForm(v interface{}) {

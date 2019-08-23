@@ -119,6 +119,9 @@ func (b *Builder) createMenus(ctx *ui.EventContext) (r h.HTMLComponent) {
 			).Slot("activator").Class("pa-0"),
 		}
 		for _, m := range mg.models {
+			if m.notInMenu {
+				continue
+			}
 			href := m.Info().ListingHref()
 			subMenus = append(subMenus,
 				ui.Bind(VListItem(
@@ -145,6 +148,10 @@ func (b *Builder) createMenus(ctx *ui.EventContext) (r h.HTMLComponent) {
 		if m.inGroup {
 			continue
 		}
+		if m.notInMenu {
+			continue
+		}
+
 		href := m.Info().ListingHref()
 		menus = append(menus,
 			ui.Bind(VListItem(

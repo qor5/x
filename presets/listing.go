@@ -46,8 +46,7 @@ func (b *ListingBuilder) Field(name string) (r *FieldBuilder) {
 			return f
 		}
 	}
-	r = &FieldBuilder{}
-	r.name = name
+	r = NewField(name)
 	b.fields = append(b.fields, r)
 	return
 }
@@ -189,7 +188,6 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 	r.Schema = VContainer(
 
-		h.H2(title).Class("title pb-3"),
 		b.filterTabs(msgr, ctx),
 		bulkPanel,
 		VCard(

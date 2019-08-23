@@ -1,10 +1,29 @@
 package presets
 
+import (
+	"log"
+
+	"github.com/sunfmin/bran/ui"
+	h "github.com/theplant/htmlgo"
+)
+
 type FieldBuilder struct {
 	NameLabel
 	compFunc    FieldComponentFunc
 	setterFunc  SetterFunc
 	inplaceEdit *InplaceEditBuilder
+}
+
+func NewField(name string) (r *FieldBuilder) {
+	r = &FieldBuilder{}
+	r.name = name
+	r.compFunc = emptyComponentFunc
+	return
+}
+
+func emptyComponentFunc(obj interface{}, field *FieldContext, ctx *ui.EventContext) (r h.HTMLComponent) {
+	log.Printf("No ComponentFunc for field %v\n", field.Name)
+	return
 }
 
 func (b *FieldBuilder) Label(v string) (r *FieldBuilder) {
@@ -13,6 +32,9 @@ func (b *FieldBuilder) Label(v string) (r *FieldBuilder) {
 }
 
 func (b *FieldBuilder) ComponentFunc(v FieldComponentFunc) (r *FieldBuilder) {
+	if v == nil {
+		panic("value required")
+	}
 	b.compFunc = v
 	return b
 }

@@ -60,7 +60,7 @@ Felix11
 			return r
 		},
 		eventResponseMatch: func(er *ui.EventResponse, db *gorm.DB, t *testing.T) {
-			var u = &examples.User{}
+			var u = &examples.Customer{}
 			err := db.Find(u, 11).Error
 			if err != nil {
 				t.Error(err)
@@ -102,7 +102,7 @@ Felix
 			return r
 		},
 		eventResponseMatch: func(er *ui.EventResponse, db *gorm.DB, t *testing.T) {
-			var u = &examples.User{}
+			var u = &examples.Customer{}
 			err := db.First(u).Error
 			if err != nil {
 				t.Error(err)

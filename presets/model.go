@@ -15,6 +15,7 @@ type ModelBuilder struct {
 	model        interface{}
 	modelType    reflect.Type
 	inGroup      bool
+	notInMenu    bool
 	menuIcon     string
 	uriName      string
 	label        string
@@ -67,13 +68,13 @@ func (b *ModelBuilder) inspectModel() {
 		f := t.Field(i)
 		//fmt.Println(f.Name, f.Type)
 		ft := b.p.fieldTypeByType(f.Type)
-		if !b.p.fieldNameExcluded(LISTING, f.Name) {
+		if !b.p.fieldNameExcluded(LISTING, f.Name) && ft.listingCompFunc != nil {
 			b.listing.Field(f.Name).ComponentFunc(ft.listingCompFunc)
 		}
-		if !b.p.fieldNameExcluded(DETAILING, f.Name) {
+		if !b.p.fieldNameExcluded(DETAILING, f.Name) && ft.detailingCompFunc != nil {
 			b.detailing.Field(f.Name).ComponentFunc(ft.detailingCompFunc)
 		}
-		if !b.p.fieldNameExcluded(EDITING, f.Name) {
+		if !b.p.fieldNameExcluded(EDITING, f.Name) && ft.editingCompFunc != nil {
 			b.editing.Field(f.Name).ComponentFunc(ft.editingCompFunc)
 		}
 		if f.Type == stringType {
@@ -94,9 +95,9 @@ func (b *ModelBuilder) newListing() (r *ListingBuilder) {
 func (b *ModelBuilder) newEditing() (r *EditingBuilder) {
 	b.editing = &EditingBuilder{mb: b}
 	if b.p.dataOperator != nil {
-		b.editing.Fetcher(b.p.dataOperator.Fetch)
-		b.editing.Saver(b.p.dataOperator.Save)
-		b.editing.Deleter(b.p.dataOperator.Delete)
+		b.editing.FetchFunc(b.p.dataOperator.Fetch)
+		b.editing.SaveFunc(b.p.dataOperator.Save)
+		b.editing.DeleteFunc(b.p.dataOperator.Delete)
 	}
 	return
 }
@@ -143,6 +144,11 @@ func (b *ModelBuilder) URIName(v string) (r *ModelBuilder) {
 func (b *ModelBuilder) MenuGroup(v string) (r *ModelBuilder) {
 	b.p.MenuGroup(v).AppendModels(b)
 	b.inGroup = true
+	return b
+}
+
+func (b *ModelBuilder) InMenu(v bool) (r *ModelBuilder) {
+	b.notInMenu = !v
 	return b
 }
 

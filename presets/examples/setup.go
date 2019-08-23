@@ -10,6 +10,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/sunfmin/bran/presets"
 	"github.com/sunfmin/bran/presets/gormop"
+	s "github.com/sunfmin/bran/stripeui"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 	"github.com/sunfmin/reflectutils"
@@ -20,20 +21,64 @@ type Thumb struct {
 	Name string
 }
 
-type User struct {
+type Customer struct {
 	ID              int
 	Name            string
-	JobTitle        string
-	Bool1           bool
-	Date1           *time.Time
-	Int1            int
-	Float1          float64
+	Email           string
+	Description     string
 	Thumb1          *Thumb
 	CompanyID       int
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	ApprovedAt      *time.Time
 	ApprovalComment string
+	LanguageCode    string
+}
+
+type Note struct {
+	ID         int
+	SourceType string
+	SourceID   int
+	Content    string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
+type CreditCard struct {
+	ID              int
+	CustomerID      int
+	Number          string
+	ExpireYearMonth string
+	Name            string
+	Type            string
+	Phone           string
+	Email           string
+}
+
+type Payment struct {
+	ID                   int
+	CustomerID           int
+	CurrencyCode         string
+	Amount               int
+	PaymentMethodID      int
+	StatementDescription string
+	Description          string
+	AuthorizeOnly        bool
+	CreatedAt            time.Time
+}
+
+type Event struct {
+	ID          int
+	SourceType  string // Payment, Customer
+	SourceID    int
+	CreatedAt   time.Time
+	Type        string
+	Description string
+}
+
+type Language struct {
+	Code string
+	Name string
 }
 
 type Company struct {
@@ -48,8 +93,16 @@ type Product struct {
 }
 
 func Preset1(db *gorm.DB) (r *presets.Builder) {
-
-	err := db.AutoMigrate(&User{}, &Product{}, &Company{}).Error
+	err := db.AutoMigrate(
+		&Customer{},
+		&Note{},
+		&CreditCard{},
+		&Payment{},
+		&Event{},
+		&Company{},
+		&Product{},
+		&Language{},
+	).Error
 	if err != nil {
 		panic(err)
 	}
@@ -89,12 +142,12 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 
 	p.DataOperator(gormop.DataOperator(db))
 
-	p.MenuGroup("User Management").Icon("group")
+	p.MenuGroup("Customer Management").Icon("group")
 	mp := p.Model(&Product{}).MenuIcon("laptop")
 	mp.Listing().PerPage(3)
 
-	m := p.Model(&User{}).URIName("user").MenuGroup("User Management")
-	p.Model(&Company{}).MenuGroup("User Management")
+	m := p.Model(&Customer{}).URIName("customer").MenuGroup("Customer Management")
+	p.Model(&Company{}).MenuGroup("Customer Management")
 	m.Labels(
 		"Name", "名字",
 		"Bool1", "性别",
@@ -104,14 +157,14 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		"Name", "请输入你的名字",
 	)
 
-	l := m.Listing("Name", "CompanyID", "Bool1", "Float1", "Int1", "ApprovalComment").SearchColumns("name", "job_title").PerPage(5)
+	l := m.Listing("Name", "CompanyID", "ApprovalComment").SearchColumns("name", "job_title").PerPage(5)
 	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-		u := obj.(*User)
+		u := obj.(*Customer)
 		return h.Td(ui.Bind(h.A().Text(u.Name)).PushStateURL(fmt.Sprintf("/admin/users/%d/edit", u.ID)))
 	})
 
 	l.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-		u := obj.(*User)
+		u := obj.(*Customer)
 		var comp Company
 		err := db.Find(&comp, u.CompanyID).Error
 		if err != nil && err != gorm.ErrRecordNotFound {
@@ -129,7 +182,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			ctx.Flash = "comment should larger than 10"
 			return
 		}
-		err = db.Model(&User{}).
+		err = db.Model(&Customer{}).
 			Where("id IN (?)", selectedIds).
 			Updates(map[string]interface{}{"approved_at": time.Now(), "approval_comment": comment}).Error
 		if err != nil {
@@ -151,7 +204,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	})
 
 	l.BulkAction("Delete").Label("Delete").UpdateFunc(func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error) {
-		err = db.Where("id IN (?)", selectedIds).Delete(&User{}).Error
+		err = db.Where("id IN (?)", selectedIds).Delete(&Customer{}).Error
 		return
 	}).ComponentFunc(func(selectedIds []string, ctx *ui.EventContext) h.HTMLComponent {
 		return h.Div().Text(fmt.Sprintf("Are you sure you want to delete %s ?", selectedIds)).Class("title deep-orange--text")
@@ -216,25 +269,26 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		}
 	})
 
-	ef := m.Editing("Name", "CompanyID", "Bool1", "Int1")
-	ef.Field("Name").Label("名字").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-		//u := obj.(*User)
-		return VAutocomplete().
-			FieldName("Name").
-			Label(field.Label).
-			Items([]string{"Felix", "Hello"}).
-			Multiple(false).
-			Value(reflectutils.MustGet(obj, field.Name))
-	}).SetterFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) {
-		u := obj.(*User)
-		ns := form.Value["Name"]
-		if len(ns) > 0 {
-			u.Name = ns[0]
+	ef := m.Editing("Name", "CompanyID", "LanguageCode")
+	ef.Field("LanguageCode").Label("语言").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
+		u := obj.(*Customer)
+		var langs []Language
+		err := db.Find(&langs).Error
+		if err != nil {
+			panic(err)
 		}
+		return VAutocomplete().
+			FieldName(field.Name).
+			Label(field.Label).
+			Items(langs).
+			ItemText("Name").
+			ItemValue("Code").
+			Multiple(false).
+			Value(u.LanguageCode)
 	})
 
 	ef.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-		u := obj.(*User)
+		u := obj.(*Customer)
 		var companies []*Company
 		err := db.Find(&companies).Error
 		if err != nil {
@@ -250,20 +304,76 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			Value(u.CompanyID)
 	})
 
-	dp := m.Detailing("Name", "Bool1", "Float1", "Int1", "Date1", "CreatedAt", "UpdatedAt")
+	dp := m.Detailing("MainInfo", "Details", "Cards", "Payments", "Events")
+
+	dp.Field("MainInfo").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
+
+		cu := obj.(*Customer)
+
+		title := cu.Name
+		if len(title) == 0 {
+			title = cu.Description
+		}
+
+		var notes []*Note
+		err := db.Where("source_type = 'Customer' AND source_id = ?", cu.ID).
+			Order("id DESC").
+			Find(&notes).Error
+		if err != nil {
+			panic(err)
+		}
+
+		dt := s.DataTable(notes).WithoutHeader(true)
+		dt.Column("Content")
+
+		cusID := fmt.Sprint(cu.ID)
+		dt.RowMenuItemsFunc(func(obj interface{}, id string, ctx *ui.EventContext) []h.HTMLComponent {
+			return []h.HTMLComponent{
+				ui.Bind(VListItem(
+					VListItemIcon(VIcon("edit")),
+					VListItemTitle(h.Text("Edit")),
+				)).OnClick("formDrawerEdit", id, "Customer", cusID).URL("/admin/notes"),
+
+				ui.Bind(VListItem(
+					VListItemIcon(VIcon("delete")),
+					VListItemTitle(h.Text("Delete")),
+				)).OnClick("deleteConfirmation", cusID).URL("/admin/notes"),
+			}
+		})
+
+		return s.Card(
+			dt,
+		).HeaderTitle(title).
+			Actions(
+				ui.Bind(VBtn("Add Note").
+					Depressed(true)).OnClick(
+					"formDrawerNew",
+					"",
+					"Customer",
+					cusID,
+				).URL("/admin/notes"),
+			)
+	})
+
+	p.Model(&Note{}).InMenu(false).Editing("Content").SetterFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) {
+		note := obj.(*Note)
+		note.SourceID = ctx.Event.ParamAsInt(2)
+		note.SourceType = ctx.Event.Params[1]
+	})
+
 	ie := dp.Field("Bool1").InplaceEdit()
 	ie.ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-		//u := obj.(*User)
+		//u := obj.(*Customer)
 		return VCheckbox().FieldName("Bool1")
 	}).UpdateFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) (err error) {
-		u := obj.(*User)
-		err = db.Model(&User{}).UpdateColumn("Name", u.Name).Error
+		u := obj.(*Customer)
+		err = db.Model(&Customer{}).UpdateColumn("Name", u.Name).Error
 		return
 	})
 
 	dp.Action("Approve").UpdateFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) (err error) {
-		u := obj.(*User)
-		err = db.Model(&User{}).Where("id = ?", u.ID).UpdateColumn("approved_at = ?", time.Now()).Error
+		u := obj.(*Customer)
+		err = db.Model(&Customer{}).Where("id = ?", u.ID).UpdateColumn("approved_at = ?", time.Now()).Error
 		return
 	}).ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		return VBtn("Approve")

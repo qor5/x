@@ -18,6 +18,7 @@ type EditingBuilder struct {
 	filters     []string
 	pageFunc    ui.PageFunc
 	fetcher     FetchOpFunc
+	setter      SetterFunc
 	saver       SaveOpFunc
 	deleter     DeleteOpFunc
 }
@@ -42,8 +43,7 @@ func (b *EditingBuilder) Field(name string) (r *FieldBuilder) {
 			return f
 		}
 	}
-	r = &FieldBuilder{}
-	r.name = name
+	r = NewField(name)
 	b.fields = append(b.fields, r)
 	return
 }
@@ -53,18 +53,23 @@ func (b *EditingBuilder) PageFunc(pf ui.PageFunc) (r *EditingBuilder) {
 	return b
 }
 
-func (b *EditingBuilder) Fetcher(v FetchOpFunc) (r *EditingBuilder) {
+func (b *EditingBuilder) FetchFunc(v FetchOpFunc) (r *EditingBuilder) {
 	b.fetcher = v
 	return b
 }
 
-func (b *EditingBuilder) Saver(v SaveOpFunc) (r *EditingBuilder) {
+func (b *EditingBuilder) SaveFunc(v SaveOpFunc) (r *EditingBuilder) {
 	b.saver = v
 	return b
 }
 
-func (b *EditingBuilder) Deleter(v DeleteOpFunc) (r *EditingBuilder) {
+func (b *EditingBuilder) DeleteFunc(v DeleteOpFunc) (r *EditingBuilder) {
 	b.deleter = v
+	return b
+}
+
+func (b *EditingBuilder) SetterFunc(v SetterFunc) (r *EditingBuilder) {
+	b.setter = v
 	return b
 }
 
@@ -183,7 +188,9 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 					ui.Bind(VBtn(buttonLabel).
 						Dark(true).
 						Color(b.mb.p.primaryColor)).
-						OnClick("update", id).URL(b.mb.Info().ListingHref()),
+						OnClick("update",
+							ctx.Event.Params...).
+						URL(b.mb.Info().ListingHref()),
 				),
 			).Flat(true),
 		).Fluid(true)
@@ -225,6 +232,10 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 		if err != nil {
 			panic(err)
 		}
+	}
+
+	if b.setter != nil {
+		b.setter(obj, ctx.R.MultipartForm, ctx)
 	}
 
 	err = b.saver(obj, id)

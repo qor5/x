@@ -44,7 +44,7 @@ func KeyInfoDemo(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 			"<span><strong>¥7,848</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
 			time.Now(),
 		},
-	}).WithoutHeaders(true)
+	}).WithoutHeader(true)
 
 	dt.Column("Title").CellComponentFunc(func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
 		return h.Td(h.RawHTML(fmt.Sprint(reflectutils.MustGet(obj, fieldName))))

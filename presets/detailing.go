@@ -38,8 +38,7 @@ func (b *DetailingBuilder) Field(name string) (r *FieldBuilder) {
 			return f
 		}
 	}
-	r = &FieldBuilder{}
-	r.name = name
+	r = NewField(name)
 	b.fields = append(b.fields, r)
 	return
 }
