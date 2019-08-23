@@ -76,6 +76,24 @@ func KeyInfoDemo(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 				VBtn("Edit").Depressed(true),
 			).Class("mb-4"),
 
+			s.Card(s.DetailInfo(
+				s.DetailColumn(
+					s.DetailField(s.OptionalText("cus_EnUK8WcwQkuKQP")).Label("ID"),
+					s.DetailField(s.OptionalText(time.Now().Format("2006/01/02 15:04"))).Label("Created"),
+					s.DetailField(s.OptionalText("hello@example.com")).Label("Email"),
+					s.DetailField(s.OptionalText("customer0077N52")).Label("Description"),
+					s.DetailField(s.OptionalText("B0E69DBD")).Label("Invoice prefix"),
+					s.DetailField(s.OptionalText("").ZeroLabel("No VAT number")).Label("VAT number"),
+					s.DetailField(s.OptionalText("Normal")).Label("Risk evaluation").Icon(VChip(h.Text("43")).Small(true)),
+				).Header("ACCOUNT INFORMATION"),
+				s.DetailColumn(
+					s.DetailField(s.OptionalText("").ZeroLabel("No address")).Label("Address"),
+					s.DetailField(s.OptionalText("").ZeroLabel("No phone number")).Label("Phone number"),
+				).Header("BILLING INFORMATION"),
+			)).HeaderTitle("Details").
+				Actions(VBtn("Update details").Depressed(true)).
+				Class("mb-4"),
+
 			s.Card(dt).HeaderTitle("Events"),
 		),
 	)
