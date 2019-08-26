@@ -56,7 +56,14 @@ func KeyInfoDemo(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 		return h.Td(h.Text(t.Format("01/02/06, 15:04:05 PM"))).Class("text-right")
 	})
 
-	logsDt := s.DataTable(data).WithoutHeader(true).LoadMoreAt(3, "Show More").LoadMoreURL("/e20_vuetify_expansion_panels")
+	logsDt := s.DataTable(data).
+		WithoutHeader(true).
+		LoadMoreAt(3, "Show More").
+		LoadMoreURL("/e20_vuetify_expansion_panels").
+		RowExpandFunc(func(obj interface{}, ctx *ui.EventContext) h.HTMLComponent {
+			return h.Div().Text(h.JSONString(obj)).Style("height: 200px; border: 1px solid red;")
+		})
+
 	logsDt.Column("Title").CellComponentFunc(func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
 		return h.Td(h.RawHTML(fmt.Sprint(reflectutils.MustGet(obj, fieldName))))
 	})

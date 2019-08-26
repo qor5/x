@@ -21,18 +21,31 @@
 	<div id="app" v-cloak>
 		<v-app>
 			<v-content>
-				<v-container>
+				<v-container v-init-context-vars='{expand: false}'>
 					<v-btn color="success">Success</v-btn>
 					<v-btn color="warning" :depressed="true">Warning</v-btn>
-					<v-btn color="warning" :flat="true">Warning</v-btn>
+					<v-btn color="warning" :text="true">Warning</v-btn>
 					<v-btn color="warning" href="https://google.com">Google</v-btn>
 					<v-btn color="info">Info</v-btn>
 					<v-btn color="info" :large="true">Info</v-btn>
-					<v-btn color="info" :round="true">Info</v-btn>
+					<v-btn color="info" :rounded="true">Info</v-btn>
 
 					<div v-ripple style="width: 100px; height: 100px; border: 1px solid red;">
 						Ripple
 					</div>
+
+
+					<v-btn @click="test = !test">show</v-btn>
+
+					<v-expand-transition>
+						<v-card
+						  v-show="test"
+						  height="100"
+						  width="100"
+						  class="mx-auto"
+						  key="123"
+						></v-card>
+					</v-expand-transition>
 
 
 					<v-card>
@@ -44,7 +57,7 @@
 						</v-card-title>
 
 
-						<v-data-table :headers="[
+						<v-data-table show-select show-expand item-key="name" :headers="[
 						{
 						  text: 'Dessert (100g serving)',
 						  align: 'left',
@@ -146,6 +159,11 @@
 								<td class="text-xs-right">{{ props.item.protein }}</td>
 								<td class="text-xs-right">{{ props.item.iron }}</td>
 							</template>
+
+							<template v-slot:expanded-item="{ headers }">
+								<td :colspan="headers.length">Peek-a-boo!</td>
+							  </template>
+
 						</v-data-table>
 
 					</v-card>

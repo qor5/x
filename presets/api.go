@@ -13,6 +13,10 @@ import (
 
 type ComponentFunc func(ctx *ui.EventContext) h.HTMLComponent
 
+type BulkComponentFunc func(selectedIds []string, ctx *ui.EventContext) h.HTMLComponent
+
+type FieldComponentFunc func(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent
+
 type FilterDataFunc func(ctx *ui.EventContext) v.FilterData
 
 type FilterTab struct {
@@ -21,10 +25,6 @@ type FilterTab struct {
 }
 
 type FilterTabsFunc func(ctx *ui.EventContext) []*FilterTab
-
-type BulkComponentFunc func(selectedIds []string, ctx *ui.EventContext) h.HTMLComponent
-
-type FieldComponentFunc func(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent
 
 type BulkActionUpdateFunc func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error)
 

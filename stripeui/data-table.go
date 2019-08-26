@@ -15,7 +15,10 @@ import (
 	h "github.com/theplant/htmlgo"
 )
 
+type CellComponentFunc func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent
 type CellWrapperFunc func(cell h.MutableAttrHTMLComponent, id string) h.HTMLComponent
+type RowMenuItemsFunc func(obj interface{}, id string, ctx *ui.EventContext) []h.HTMLComponent
+type RowComponentFunc func(obj interface{}, ctx *ui.EventContext) h.HTMLComponent
 
 type DataTableBuilder struct {
 	data               interface{}
@@ -24,6 +27,7 @@ type DataTableBuilder struct {
 	selectionParamName string
 	cellWrapper        CellWrapperFunc
 	rowMenuItemsFunc   RowMenuItemsFunc
+	rowExpandFunc      RowComponentFunc
 	columns            []*DataTableColumnBuilder
 	primaryField       string
 	loadMoreCount      int
@@ -86,12 +90,21 @@ func (b *DataTableBuilder) RowMenuItemsFunc(v RowMenuItemsFunc) (r *DataTableBui
 	return b
 }
 
+func (b *DataTableBuilder) RowExpandFunc(v RowComponentFunc) (r *DataTableBuilder) {
+	b.rowExpandFunc = v
+	return b
+}
+
 func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) {
 	ctx := ui.MustGetEventContext(c)
 
 	selected := getSelectedIds(ctx, b.selectionParamName)
 
-	loadMoreVarName := fmt.Sprintf("v_%s", xid.New().String())
+	dataTableId := xid.New().String()
+	loadMoreVarName := fmt.Sprintf("loadmore_%s", dataTableId)
+	expandVarName := fmt.Sprintf("expand_%s", dataTableId)
+
+	initContextVarsMap := map[string]bool{}
 
 	haveRowMenus := b.rowMenuItemsFunc != nil
 
@@ -99,6 +112,8 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 	var idsOfPage []string
 
 	inPlaceLoadMore := b.loadMoreCount > 0 && len(b.loadMoreURL) == 0
+
+	hasExpand := b.rowExpandFunc != nil
 
 	i := 0
 	tdCount := 0
@@ -113,6 +128,15 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			inputValue = id
 		}
 		var tds []h.HTMLComponent
+		if hasExpand {
+			initContextVarsMap[fmt.Sprintf("%s_%d", expandVarName, i)] = false
+			tds = append(tds, h.Td(
+				VIcon("$vuetify.icons.expand").
+					Attr(":class", fmt.Sprintf("{\"v-data-table__expand-icon--active\": vars.%s_%d, \"v-data-table__expand-icon\": true}", expandVarName, i)).
+					On("click", fmt.Sprintf("vars.%s_%d = !vars.%s_%d", expandVarName, i, expandVarName, i)),
+			).Class("pr-0").Style("width: 48px;"))
+		}
+
 		if b.selectable {
 			tds = append(tds, h.Td(
 				VCheckbox().
@@ -173,6 +197,12 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 		}
 
 		rows = append(rows, row)
+
+		if hasExpand {
+			rows = append(rows, VExpandTransition(h.Tr(
+				h.Td(b.rowExpandFunc(obj, ctx)).Attr("colspan", fmt.Sprint(tdCount)),
+			).Attr("v-show", fmt.Sprintf("vars.%s_%d", expandVarName, i))))
+		}
 		i++
 	})
 
@@ -181,6 +211,10 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 	if !b.withoutHeaders {
 
 		var heads []h.HTMLComponent
+
+		if hasExpand {
+			heads = append(heads, h.Th(" "))
+		}
 
 		if b.selectable {
 			allInputValue := ""
@@ -235,24 +269,27 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 		tfoot = h.Tfoot(
 			h.Tr(
 				h.Td(
-					VDivider(),
+					h.If(!hasExpand, VDivider()),
 					btn,
-				).Class("text-center px-0 pt-0").Attr("colspan", fmt.Sprint(tdCount)),
+				).Class("text-center pa-0").Attr("colspan", fmt.Sprint(tdCount)),
 			),
 		).Attr("v-if", fmt.Sprintf("!vars.%s", loadMoreVarName))
 	}
 
 	table := VSimpleTable(
 		thead,
-		h.Tbody(
-			rows...,
-		),
+		h.Tbody(rows...),
 		tfoot,
 	)
 
 	if inPlaceLoadMore {
-		table.Attr("v-init-context-vars", fmt.Sprintf(`{ %s : false }`, loadMoreVarName))
+		initContextVarsMap[loadMoreVarName] = false
 	}
+
+	if len(initContextVarsMap) > 0 {
+		table.Attr("v-init-context-vars", h.JSONString(initContextVarsMap))
+	}
+
 	return table.MarshalHTML(c)
 }
 
@@ -285,9 +322,6 @@ func (b *DataTableBuilder) Column(name string) (r *DataTableColumnBuilder) {
 	b.columns = append(b.columns, r)
 	return
 }
-
-type CellComponentFunc func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent
-type RowMenuItemsFunc func(obj interface{}, id string, ctx *ui.EventContext) []h.HTMLComponent
 
 func defaultCellComponentFunc(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
 	return h.Td(h.Text(fmt.Sprint(reflectutils.MustGet(obj, fieldName))))
