@@ -9,6 +9,7 @@ import (
 
 type DetailInfoBuilder struct {
 	columns []h.HTMLComponent
+	classes []string
 }
 
 func DetailInfo(columns ...h.HTMLComponent) (r *DetailInfoBuilder) {
@@ -23,7 +24,12 @@ func (b *DetailInfoBuilder) MarshalHTML(ctx context.Context) (r []byte, err erro
 		row.AppendChildren(VCol(col).Md(true))
 	}
 
-	return VContainer(row).MarshalHTML(ctx)
+	return VContainer(row).Class(b.classes...).MarshalHTML(ctx)
+}
+
+func (b *DetailInfoBuilder) Class(v ...string) (r *DetailInfoBuilder) {
+	b.classes = v
+	return b
 }
 
 type DetailFieldBuilder struct {

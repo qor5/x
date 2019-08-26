@@ -11,9 +11,9 @@ type VExpansionPanelsBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VExpansionPanels() (r *VExpansionPanelsBuilder) {
+func VExpansionPanels(children ...h.HTMLComponent) (r *VExpansionPanelsBuilder) {
 	r = &VExpansionPanelsBuilder{
-		tag: h.Tag("v-expansion-panels"),
+		tag: h.Tag("v-expansion-panels").Children(children...),
 	}
 	return
 }

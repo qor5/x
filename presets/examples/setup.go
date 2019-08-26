@@ -160,7 +160,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	l := m.Listing("Name", "CompanyID", "ApprovalComment").SearchColumns("name", "job_title").PerPage(5)
 	l.Field("Name").Label("列表的名字").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*Customer)
-		return h.Td(ui.Bind(h.A().Text(u.Name)).PushStateURL(fmt.Sprintf("/admin/users/%d/edit", u.ID)))
+		return h.Td(ui.Bind(h.A().Text(u.Name)).PushStateURL(fmt.Sprintf("/admin/customers/%d/edit", u.ID)))
 	})
 
 	l.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
@@ -323,8 +323,21 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			panic(err)
 		}
 
-		dt := s.DataTable(notes).WithoutHeader(true)
-		dt.Column("Content")
+		dt := s.DataTable(notes).WithoutHeader(true).LoadMoreAt(2, "Show More")
+
+		dt.Column("Content").CellComponentFunc(func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
+			n := obj.(*Note)
+			return h.Td(h.Div(
+				h.Div(
+					VIcon("comment").Color("blue").Small(true).Class("pr-2"),
+					h.Text(n.Content),
+				).Class("body-1"),
+				h.Div(
+					h.Text(n.CreatedAt.Format("Jan 02,15:04 PM")),
+					h.Text(" by Felix Sun"),
+				).Class("grey--text pl-7 body-2"),
+			).Class("my-3"))
+		})
 
 		cusID := fmt.Sprint(cu.ID)
 		dt.RowMenuItemsFunc(func(obj interface{}, id string, ctx *ui.EventContext) []h.HTMLComponent {

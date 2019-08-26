@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rs/xid"
+
 	"github.com/sunfmin/bran/ui"
 	"github.com/sunfmin/reflectutils"
 	"github.com/thoas/go-funk"
@@ -24,6 +26,8 @@ type DataTableBuilder struct {
 	rowMenuItemsFunc   RowMenuItemsFunc
 	columns            []*DataTableColumnBuilder
 	primaryField       string
+	loadMoreCount      int
+	loadMoreLabel      string
 }
 
 func DataTable(data interface{}) (r *DataTableBuilder) {
@@ -33,6 +37,12 @@ func DataTable(data interface{}) (r *DataTableBuilder) {
 		primaryField:       "ID",
 	}
 	return
+}
+
+func (b *DataTableBuilder) LoadMoreAt(count int, label string) (r *DataTableBuilder) {
+	b.loadMoreCount = count
+	b.loadMoreLabel = label
+	return b
 }
 
 func (b *DataTableBuilder) Selectable(v bool) (r *DataTableBuilder) {
@@ -75,12 +85,17 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 
 	selected := getSelectedIds(ctx, b.selectionParamName)
 
+	loadMoreVarName := fmt.Sprintf("v_%s", xid.New().String())
+
 	haveRowMenus := b.rowMenuItemsFunc != nil
 
 	var rows []h.HTMLComponent
 	var idsOfPage []string
 
+	i := 0
+	tdCount := 0
 	funk.ForEach(b.data, func(obj interface{}) {
+
 		idRaw, _ := reflectutils.Get(obj, b.primaryField)
 		id := fmt.Sprint(idRaw)
 
@@ -139,7 +154,14 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			).Style("width: 48px;").Class("pl-0"))
 		}
 
-		rows = append(rows, h.Tr(bindTds...))
+		tdCount = len(bindTds)
+		row := h.Tr(bindTds...)
+		if b.loadMoreCount > 0 && i >= b.loadMoreCount {
+			row.Attr("v-if", fmt.Sprintf("vars.%s", loadMoreVarName))
+		}
+
+		rows = append(rows, row)
+		i++
 	})
 
 	var thead h.HTMLComponent
@@ -178,12 +200,34 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 		).Class("grey lighten-5")
 	}
 
-	return VSimpleTable(
+	var tfoot h.HTMLComponent
+	if b.loadMoreCount > 0 {
+		tfoot = h.Tfoot(
+			h.Tr(
+				h.Td(
+					VDivider(),
+					VBtn(b.loadMoreLabel).
+						Text(true).
+						Class("mt-1").
+						On("click",
+							fmt.Sprintf("vars.%s = !vars.%s", loadMoreVarName, loadMoreVarName)),
+				).Class("text-center px-0 pt-0").Attr("colspan", fmt.Sprint(tdCount)),
+			),
+		).Attr("v-if", fmt.Sprintf("!vars.%s", loadMoreVarName))
+	}
+
+	table := VSimpleTable(
 		thead,
 		h.Tbody(
 			rows...,
 		),
-	).MarshalHTML(c)
+		tfoot,
+	)
+
+	if b.loadMoreCount > 0 {
+		table.Attr("v-init-context-vars", fmt.Sprintf(`{ %s : false }`, loadMoreVarName))
+	}
+	return table.MarshalHTML(c)
 }
 
 func getSelectedIds(ctx *ui.EventContext, selectedParamName string) (selected []string) {
