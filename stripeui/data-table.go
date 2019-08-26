@@ -134,7 +134,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 				VIcon("$vuetify.icons.expand").
 					Attr(":class", fmt.Sprintf("{\"v-data-table__expand-icon--active\": vars.%s_%d, \"v-data-table__expand-icon\": true}", expandVarName, i)).
 					On("click", fmt.Sprintf("vars.%s_%d = !vars.%s_%d", expandVarName, i, expandVarName, i)),
-			).Class("pr-0").Style("width: 48px;"))
+			).Class("pr-0").Style("width: 40px;"))
 		}
 
 		if b.selectable {
@@ -199,9 +199,18 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 		rows = append(rows, row)
 
 		if hasExpand {
-			rows = append(rows, VExpandTransition(h.Tr(
-				h.Td(b.rowExpandFunc(obj, ctx)).Attr("colspan", fmt.Sprint(tdCount)),
-			).Attr("v-show", fmt.Sprintf("vars.%s_%d", expandVarName, i))))
+			rows = append(rows,
+				h.Tr(
+					h.Td(
+						VExpandTransition(
+							h.Div(
+								b.rowExpandFunc(obj, ctx),
+								VDivider(),
+							).Attr("v-if", fmt.Sprintf("vars.%s_%d", expandVarName, i)),
+						),
+					).Attr("colspan", fmt.Sprint(tdCount)).Class("pa-0").Style("height: auto; border-bottom: none"),
+				).Class("v-data-table__expand-row"),
+			)
 		}
 		i++
 	})
