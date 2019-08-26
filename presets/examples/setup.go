@@ -373,7 +373,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		cusID := fmt.Sprint(cu.ID)
 
 		var lang Language
-		db.Where("language_code = ?", cu.LanguageCode).Find(&lang)
+		db.Where("code = ?", cu.LanguageCode).First(&lang)
 
 		detail := s.DetailInfo(
 			s.DetailColumn(
@@ -397,11 +397,14 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			)
 	})
 
-	p.Model(&Note{}).InMenu(false).Editing("Content").SetterFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) {
-		note := obj.(*Note)
-		note.SourceID = ctx.Event.ParamAsInt(2)
-		note.SourceType = ctx.Event.Params[1]
-	})
+	p.Model(&Note{}).
+		InMenu(false).
+		Editing("Content").
+		SetterFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) {
+			note := obj.(*Note)
+			note.SourceID = ctx.Event.ParamAsInt(2)
+			note.SourceType = ctx.Event.Params[1]
+		})
 
 	p.Model(&Language{}).PrimaryField("Code")
 

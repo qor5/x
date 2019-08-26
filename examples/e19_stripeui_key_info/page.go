@@ -18,39 +18,50 @@ type Event struct {
 }
 
 func KeyInfoDemo(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
+	data := []*Event{
+		{
+			"<span><strong>¥5,000</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
+			time.Now(),
+		},
+		{
+			"<span><strong>¥207,626</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
+			time.Now(),
+		},
+		{
+			"<span><strong>¥7,848</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
+			time.Now(),
+		},
+		{
+			"<span><strong>¥5,000</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
+			time.Now(),
+		},
+		{
+			"<span><strong>¥207,626</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
+			time.Now(),
+		},
+		{
+			"<span><strong>¥7,848</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
+			time.Now(),
+		},
+	}
 
-	dt := s.DataTable([]*Event{
-		{
-			"<span><strong>¥5,000</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
-			time.Now(),
-		},
-		{
-			"<span><strong>¥207,626</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
-			time.Now(),
-		},
-		{
-			"<span><strong>¥7,848</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
-			time.Now(),
-		},
-		{
-			"<span><strong>¥5,000</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
-			time.Now(),
-		},
-		{
-			"<span><strong>¥207,626</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
-			time.Now(),
-		},
-		{
-			"<span><strong>¥7,848</strong> was refunded from a <strong>¥236,170</strong> payment</span>",
-			time.Now(),
-		},
-	}).WithoutHeader(true)
+	dt := s.DataTable(data).WithoutHeader(true).LoadMoreAt(3, "Show More")
 
 	dt.Column("Title").CellComponentFunc(func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
 		return h.Td(h.RawHTML(fmt.Sprint(reflectutils.MustGet(obj, fieldName))))
 	})
 
 	dt.Column("CreatedAt").CellComponentFunc(func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
+		t := reflectutils.MustGet(obj, fieldName).(time.Time)
+		return h.Td(h.Text(t.Format("01/02/06, 15:04:05 PM"))).Class("text-right")
+	})
+
+	logsDt := s.DataTable(data).WithoutHeader(true).LoadMoreAt(3, "Show More").LoadMoreURL("/e20_vuetify_expansion_panels")
+	logsDt.Column("Title").CellComponentFunc(func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
+		return h.Td(h.RawHTML(fmt.Sprint(reflectutils.MustGet(obj, fieldName))))
+	})
+
+	logsDt.Column("CreatedAt").CellComponentFunc(func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent {
 		t := reflectutils.MustGet(obj, fieldName).(time.Time)
 		return h.Td(h.Text(t.Format("01/02/06, 15:04:05 PM"))).Class("text-right")
 	})
@@ -94,7 +105,9 @@ func KeyInfoDemo(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 				Actions(VBtn("Update details").Depressed(true)).
 				Class("mb-4"),
 
-			s.Card(dt).HeaderTitle("Events"),
+			s.Card(dt).HeaderTitle("Events").Class("mb-4"),
+
+			s.Card(logsDt).HeaderTitle("Logs").Class("mb-4"),
 		),
 	)
 	return

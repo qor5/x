@@ -28,6 +28,7 @@ type DataTableBuilder struct {
 	primaryField       string
 	loadMoreCount      int
 	loadMoreLabel      string
+	loadMoreURL        string
 }
 
 func DataTable(data interface{}) (r *DataTableBuilder) {
@@ -42,6 +43,11 @@ func DataTable(data interface{}) (r *DataTableBuilder) {
 func (b *DataTableBuilder) LoadMoreAt(count int, label string) (r *DataTableBuilder) {
 	b.loadMoreCount = count
 	b.loadMoreLabel = label
+	return b
+}
+
+func (b *DataTableBuilder) LoadMoreURL(url string) (r *DataTableBuilder) {
+	b.loadMoreURL = url
 	return b
 }
 
@@ -91,6 +97,8 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 
 	var rows []h.HTMLComponent
 	var idsOfPage []string
+
+	inPlaceLoadMore := b.loadMoreCount > 0 && len(b.loadMoreURL) == 0
 
 	i := 0
 	tdCount := 0
@@ -157,7 +165,11 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 		tdCount = len(bindTds)
 		row := h.Tr(bindTds...)
 		if b.loadMoreCount > 0 && i >= b.loadMoreCount {
-			row.Attr("v-if", fmt.Sprintf("vars.%s", loadMoreVarName))
+			if len(b.loadMoreURL) > 0 {
+				return
+			} else {
+				row.Attr("v-if", fmt.Sprintf("vars.%s", loadMoreVarName))
+			}
 		}
 
 		rows = append(rows, row)
@@ -202,16 +214,29 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 
 	var tfoot h.HTMLComponent
 	if b.loadMoreCount > 0 {
+		var btn h.HTMLComponent
+
+		if inPlaceLoadMore {
+			btn = VBtn(b.loadMoreLabel).
+				Text(true).
+				Small(true).
+				Class("mt-2").
+				On("click",
+					fmt.Sprintf("vars.%s = !vars.%s", loadMoreVarName, loadMoreVarName))
+		} else {
+			btn = VBtn(b.loadMoreLabel).
+				Text(true).
+				Small(true).
+				Link(true).
+				Class("mt-2").
+				Href(b.loadMoreURL)
+		}
+
 		tfoot = h.Tfoot(
 			h.Tr(
 				h.Td(
 					VDivider(),
-					VBtn(b.loadMoreLabel).
-						Text(true).
-						Small(true).
-						Class("mt-1").
-						On("click",
-							fmt.Sprintf("vars.%s = !vars.%s", loadMoreVarName, loadMoreVarName)),
+					btn,
 				).Class("text-center px-0 pt-0").Attr("colspan", fmt.Sprint(tdCount)),
 			),
 		).Attr("v-if", fmt.Sprintf("!vars.%s", loadMoreVarName))
@@ -225,7 +250,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 		tfoot,
 	)
 
-	if b.loadMoreCount > 0 {
+	if inPlaceLoadMore {
 		table.Attr("v-init-context-vars", fmt.Sprintf(`{ %s : false }`, loadMoreVarName))
 	}
 	return table.MarshalHTML(c)
