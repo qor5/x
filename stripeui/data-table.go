@@ -208,6 +208,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 					VDivider(),
 					VBtn(b.loadMoreLabel).
 						Text(true).
+						Small(true).
 						Class("mt-1").
 						On("click",
 							fmt.Sprintf("vars.%s = !vars.%s", loadMoreVarName, loadMoreVarName)),
