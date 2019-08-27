@@ -140,15 +140,17 @@ type PageInjector interface {
 	HeadString() string
 }
 
-const eventContextKey = iota
+type contextKey int
+
+const eventKey contextKey = iota
 
 func WrapEventContext(parent context.Context, ctx *EventContext) (r context.Context) {
-	r = context.WithValue(parent, eventContextKey, ctx)
+	r = context.WithValue(parent, eventKey, ctx)
 	return
 }
 
 func MustGetEventContext(c context.Context) (r *EventContext) {
-	r, _ = c.Value(eventContextKey).(*EventContext)
+	r, _ = c.Value(eventKey).(*EventContext)
 	if r == nil {
 		panic("EventContext required")
 	}
