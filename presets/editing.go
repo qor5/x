@@ -27,9 +27,17 @@ func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
 		return
 	}
 
+	var newFields []*FieldBuilder
 	for _, f := range vs {
-		r.fields = append(r.fields, b.writeFields.Field(f))
+		field := b.writeFields.GetField(f)
+		if field == nil {
+			newFields = append(newFields, NewField(f))
+		} else {
+			newFields = append(newFields, field.Clone())
+		}
 	}
+
+	r.fields = newFields
 	return r
 }
 
@@ -56,33 +64,24 @@ func (b *EditingBuilder) CloneForCreating(vs ...string) (r *EditingBuilder) {
 		vs = editingFields
 	}
 
-	for _, fname := range vs {
-		field := b.GetField(fname)
+	var newFields []*FieldBuilder
+
+	for _, name := range vs {
+		field := b.GetField(name)
 
 		if field == nil {
-			field = b.mb.writeFields.GetField(fname)
+			field = b.mb.writeFields.GetField(name)
 		}
 
 		if field == nil {
-			field = r.Field(fname)
+			newFields = append(newFields, NewField(name))
 		} else {
-			field = field.Clone()
-			r.fields = append(r.fields, field)
+			newFields = append(newFields, field.Clone())
 		}
 	}
 
+	r.fields = newFields
 	return r
-}
-
-func (b *EditingBuilder) Field(name string) (r *FieldBuilder) {
-	for _, f := range b.fields {
-		if f.name == name {
-			return f
-		}
-	}
-	r = NewField(name)
-	b.fields = append(b.fields, r)
-	return
 }
 
 func (b *EditingBuilder) PageFunc(pf ui.PageFunc) (r *EditingBuilder) {
@@ -208,7 +207,10 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 		}
 
 		var comps []h.HTMLComponent
-		for _, f := range b.fields {
+
+		fields := b.getFieldsWithDefaults()
+
+		for _, f := range fields {
 			if f.compFunc == nil {
 				continue
 			}
@@ -239,6 +241,14 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
 
 		return
 	}
+}
+
+func (b *EditingBuilder) getFieldsWithDefaults() []*FieldBuilder {
+	fields := b.fields
+	if len(fields) == 0 {
+		fields = b.mb.writeFields.fields
+	}
+	return fields
 }
 
 func (b *EditingBuilder) doDelete(ctx *ui.EventContext) (r ui.EventResponse, err error) {
@@ -274,7 +284,9 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 		}
 	}
 
-	for _, f := range usingB.fields {
+	fields := usingB.getFieldsWithDefaults()
+
+	for _, f := range fields {
 		err = reflectutils.Set(obj, f.name, reflectutils.MustGet(newObj, f.name))
 		if err != nil {
 			panic(err)

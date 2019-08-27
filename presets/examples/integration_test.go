@@ -1,4 +1,4 @@
-package presets_test
+package examples_test
 
 import (
 	"bytes"
@@ -9,18 +9,23 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sunfmin/bran/presets/examples"
+
 	"github.com/theplant/gofixtures"
 
 	"github.com/jinzhu/gorm"
 
 	"github.com/sunfmin/bran/ui"
-
-	"github.com/sunfmin/bran/presets/examples"
 )
 
 var customerData = gofixtures.Data(gofixtures.Sql(`
 				insert into customers (id, name) values (11, 'Felix1');
 			`, []string{"customers"}))
+
+var productData = gofixtures.Data(gofixtures.Sql(`
+				insert into products (id, name) values (12, 'Product 1');
+			`, []string{"products"}))
+
 var emptyCustomerData = gofixtures.Data(gofixtures.Sql(``, []string{"customers"}))
 var creditCardData = gofixtures.Data(customerData, gofixtures.Sql(``, []string{"credit_cards"}))
 
@@ -170,10 +175,66 @@ Content-Disposition: form-data; name="Number"
 			return
 		},
 	},
+
+	{
+		name: "Without Editing Config/Product Edit Form",
+		reqFunc: func(db *gorm.DB) *http.Request {
+			productData.TruncatePut(db)
+			r := httptest.NewRequest("POST", "/admin/products?__execute_event__=formDrawerEdit", strings.NewReader(`
+------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
+Content-Disposition: form-data; name="__event_data__"
+
+{"eventFuncId":{"id":"formDrawerEdit","params":["12"],"pushState":null},"event":{}}
+------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
+`))
+			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
+			return r
+		},
+		eventResponseMatch: func(er *ui.EventResponse, db *gorm.DB, t *testing.T) {
+			partial := er.UpdatePortals[0].Schema.(string)
+			if strings.Index(partial, "field-name='OwnerName'") < 0 {
+				t.Error("can't find field-name='OwnerName'", partial)
+			}
+			return
+		},
+	},
+
+	{
+		name: "Without Editing Config/Create Product",
+		reqFunc: func(db *gorm.DB) *http.Request {
+			productData.TruncatePut(db)
+			r := httptest.NewRequest("POST", "/admin/products?__execute_event__=update", strings.NewReader(`
+------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
+Content-Disposition: form-data; name="__event_data__"
+
+{"eventFuncId":{"id":"update","params":["12"],"pushState":null},"event":{}}
+------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
+Content-Disposition: form-data; name="OwnerName"
+
+owner1
+------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8--
+
+`))
+			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
+			return r
+		},
+		eventResponseMatch: func(er *ui.EventResponse, db *gorm.DB, t *testing.T) {
+			var u = &examples.Product{}
+			err := db.First(u).Error
+			if err != nil {
+				t.Error(err)
+			}
+			if u.OwnerName != "owner1" {
+				t.Error(u)
+			}
+
+			return
+		},
+	},
 }
 
-func TestPresets(t *testing.T) {
-	db, err := gorm.Open("postgres", os.Getenv("TEST_DB"))
+func TestAll(t *testing.T) {
+	db, err := gorm.Open("postgres", os.Getenv("DBString"))
 	if err != nil {
 		panic(err)
 	}

@@ -1,0 +1,1 @@
+export DBString="user=db password=123 dbname=db_test port=5434 sslmode=disable"

@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	db, err := gorm.Open("postgres", os.Getenv("TEST_DB"))
+	db, err := gorm.Open("postgres", os.Getenv("DBString"))
 	if err != nil {
 		panic(err)
 	}
