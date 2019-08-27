@@ -2,8 +2,7 @@ package presets
 
 import (
 	"fmt"
-
-	"github.com/sunfmin/bran/ui"
+	"net/http"
 )
 
 type Messages struct {
@@ -45,7 +44,7 @@ var Messages_en_US = Messages{
 	Create: "Create",
 }
 
-func defaultMessageFunc(ctx *ui.EventContext) *Messages {
+func defaultMessageFunc(r *http.Request) *Messages {
 	msg := Messages_en_US
 	return &msg
 }

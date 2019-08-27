@@ -10,10 +10,10 @@ import (
 type DetailingBuilder struct {
 	mb         *ModelBuilder
 	fieldNames []string
-	fields     []*FieldBuilder
 	actions    []*ActionBuilder
 	pageFunc   ui.PageFunc
 	fetcher    FetchOpFunc
+	FieldBuilders
 }
 
 func (b *ModelBuilder) Detailing(vs ...string) (r *DetailingBuilder) {
@@ -30,17 +30,6 @@ func (b *ModelBuilder) Detailing(vs ...string) (r *DetailingBuilder) {
 	}
 	r.fields = newfields
 	return r
-}
-
-func (b *DetailingBuilder) Field(name string) (r *FieldBuilder) {
-	for _, f := range b.fields {
-		if f.name == name {
-			return f
-		}
-	}
-	r = NewField(name)
-	b.fields = append(b.fields, r)
-	return
 }
 
 func (b *DetailingBuilder) PageFunc(pf ui.PageFunc) (r *DetailingBuilder) {
@@ -91,6 +80,9 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespo
 		}, ctx))
 	}
 
-	r.Schema = VContainer(notice).AppendChildren(comps...).Fluid(true)
+	r.Schema = VContainer(
+		notice,
+		ui.LazyPortal().Name(deleteConfirmPortalName),
+	).AppendChildren(comps...).Fluid(true)
 	return
 }

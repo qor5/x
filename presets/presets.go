@@ -1,7 +1,9 @@
 package presets
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -188,6 +190,21 @@ func (b *Builder) runBrandFunc(ctx *ui.EventContext) (r h.HTMLComponent) {
 	)
 }
 
+type contextKey int
+
+const messagesKey contextKey = iota
+
+func MustGetMessages(r *http.Request) *Messages {
+	return r.Context().Value(messagesKey).(*Messages)
+}
+
+func (b *Builder) putMessages(in http.Handler) (out http.Handler) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		msgr := b.messagesFunc(r)
+		in.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), messagesKey, msgr)))
+	})
+}
+
 func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
@@ -303,33 +320,48 @@ func (b *Builder) initMux() {
 
 	mux.Handle(
 		pat.New(b.prefix),
-		b.builder.Page(b.defaultLayout(b.getHomePageFunc())),
+		b.wrap(b.defaultLayout(b.getHomePageFunc())),
 	)
 
 	for _, m := range b.models {
 		muri := inflection.Plural(m.uriName)
 		info := m.Info()
+		routePath := info.ListingHref()
 		mux.Handle(
-			pat.New(info.ListingHref()),
-			b.builder.Page(b.defaultLayout(m.listing.GetPageFunc())),
+			pat.New(routePath),
+			b.wrap(b.defaultLayout(m.listing.GetPageFunc())),
 		)
+		log.Println("mounted url", routePath)
 		if m.hasDetailing {
+			routePath = fmt.Sprintf("%s/%s/:id", b.prefix, muri)
 			mux.Handle(
-				pat.New(fmt.Sprintf("%s/%s/:id", b.prefix, muri)),
-				b.builder.Page(b.defaultLayout(m.detailing.GetPageFunc())),
+				pat.New(routePath),
+				b.wrap(b.defaultLayout(m.detailing.GetPageFunc())),
 			)
+			log.Println("mounted url", routePath)
 		}
+
+		routePath = fmt.Sprintf("%s/%s/:id/edit", b.prefix, muri)
 		mux.Handle(
-			pat.New(fmt.Sprintf("%s/%s/:id/edit", b.prefix, muri)),
-			b.builder.Page(b.defaultLayout(m.editing.GetPageFunc())),
+			pat.New(routePath),
+			b.wrap(b.defaultLayout(m.editing.GetPageFunc())),
 		)
+		log.Println("mounted url", routePath)
+
+		routePath = fmt.Sprintf("%s/%s/new", b.prefix, muri)
 		mux.Handle(
 			pat.New(fmt.Sprintf("%s/%s/new", b.prefix, muri)),
-			b.builder.Page(b.defaultLayout(m.editing.GetPageFunc())),
+			b.wrap(b.defaultLayout(m.editing.GetPageFunc())),
 		)
+		log.Println("mounted url", routePath)
+
 	}
 
 	b.mux = mux
+}
+
+func (b *Builder) wrap(pf ui.PageFunc) http.Handler {
+	return b.putMessages(b.builder.Page(pf))
 }
 
 func (b *Builder) ServeHTTP(w http.ResponseWriter, r *http.Request) {

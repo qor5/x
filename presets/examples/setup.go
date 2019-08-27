@@ -340,19 +340,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		})
 
 		cusID := fmt.Sprint(cu.ID)
-		dt.RowMenuItemsFunc(func(obj interface{}, id string, ctx *ui.EventContext) []h.HTMLComponent {
-			return []h.HTMLComponent{
-				ui.Bind(VListItem(
-					VListItemIcon(VIcon("edit")),
-					VListItemTitle(h.Text("Edit")),
-				)).OnClick("formDrawerEdit", id, "Customer", cusID).URL("/admin/notes"),
-
-				ui.Bind(VListItem(
-					VListItemIcon(VIcon("delete")),
-					VListItemTitle(h.Text("Delete")),
-				)).OnClick("deleteConfirmation", cusID).URL("/admin/notes"),
-			}
-		})
+		dt.RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(ctx, "/admin/notes", "Customer", cusID))
 
 		return s.Card(
 			dt,
@@ -394,6 +382,47 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 					"formDrawerEdit",
 					cusID,
 				).URL("/admin/customers"),
+			).Class("mb-4")
+	})
+
+	dp.Field("Cards").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
+		cu := obj.(*Customer)
+		cusID := fmt.Sprint(cu.ID)
+
+		var cards []*CreditCard
+		err := db.Where("customer_id = ?", cu.ID).Order("id ASC").Find(&cards).Error
+		if err != nil {
+			panic(err)
+		}
+
+		dt := s.DataTable(cards).
+			WithoutHeader(true).
+			RowExpandFunc(func(obj interface{}, ctx *ui.EventContext) h.HTMLComponent {
+				card := obj.(*CreditCard)
+				return s.DetailInfo(
+					s.DetailColumn(
+						s.DetailField(s.OptionalText(card.Name).ZeroLabel("No Name")).Label("Name"),
+						s.DetailField(s.OptionalText(card.Number).ZeroLabel("No Number")).Label("Number"),
+						s.DetailField(s.OptionalText(card.ExpireYearMonth).ZeroLabel("No Expires")).Label("Expires"),
+						s.DetailField(s.OptionalText(card.Type).ZeroLabel("No Type")).Label("Type"),
+						s.DetailField(s.OptionalText(card.Phone).ZeroLabel("No phone provided")).Label("Phone"),
+						s.DetailField(s.OptionalText(card.Email).ZeroLabel("No email provided")).Label("Email"),
+					),
+				)
+			}).RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(ctx, "/admin/credit-cards", cusID))
+
+		dt.Column("Type")
+		dt.Column("Number")
+		dt.Column("ExpireYearMonth")
+
+		return s.Card(dt).HeaderTitle("Cards").
+			Actions(
+				ui.Bind(VBtn("Add Card").
+					Depressed(true)).OnClick(
+					"formDrawerNew",
+					"",
+					cusID,
+				).URL("/admin/credit-cards"),
 			)
 	})
 
@@ -405,6 +434,17 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			note.SourceID = ctx.Event.ParamAsInt(2)
 			note.SourceType = ctx.Event.Params[1]
 		})
+
+	cc := p.Model(&CreditCard{}).
+		InMenu(false)
+
+	ccedit := cc.Editing("ExpireYearMonth", "Phone", "Email").
+		SetterFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) {
+			card := obj.(*CreditCard)
+			card.CustomerID = ctx.Event.ParamAsInt(1)
+		})
+
+	ccedit.CloneForCreating("Number")
 
 	p.Model(&Language{}).PrimaryField("Code")
 

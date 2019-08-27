@@ -12,15 +12,13 @@ import (
 )
 
 type EditingBuilder struct {
-	mb          *ModelBuilder
-	fields      []*FieldBuilder
-	bulkActions []*BulkActionBuilder
-	filters     []string
-	pageFunc    ui.PageFunc
-	fetcher     FetchOpFunc
-	setter      SetterFunc
-	saver       SaveOpFunc
-	deleter     DeleteOpFunc
+	mb       *ModelBuilder
+	pageFunc ui.PageFunc
+	fetcher  FetchOpFunc
+	setter   SetterFunc
+	saver    SaveOpFunc
+	deleter  DeleteOpFunc
+	FieldBuilders
 }
 
 func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
@@ -29,11 +27,50 @@ func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
 		return
 	}
 
-	var newfields []*FieldBuilder
 	for _, f := range vs {
-		newfields = append(newfields, r.Field(f))
+		r.fields = append(r.fields, b.writeFields.Field(f))
 	}
-	r.fields = newfields
+	return r
+}
+
+func (b *EditingBuilder) CloneForCreating(vs ...string) (r *EditingBuilder) {
+
+	if b.mb.creating == nil {
+		b.mb.creating = &EditingBuilder{
+			mb:       b.mb,
+			pageFunc: b.pageFunc,
+			fetcher:  b.fetcher,
+			setter:   b.setter,
+			saver:    b.saver,
+			deleter:  b.deleter,
+		}
+	}
+	r = b.mb.creating
+
+	var editingFields []string
+	for _, f := range b.fields {
+		editingFields = append(editingFields, f.name)
+	}
+
+	if len(vs) == 0 {
+		vs = editingFields
+	}
+
+	for _, fname := range vs {
+		field := b.GetField(fname)
+
+		if field == nil {
+			field = b.mb.writeFields.GetField(fname)
+		}
+
+		if field == nil {
+			field = r.Field(fname)
+		} else {
+			field = field.Clone()
+			r.fields = append(r.fields, field)
+		}
+	}
+
 	return r
 }
 
@@ -81,7 +118,7 @@ func (b *EditingBuilder) GetPageFunc() ui.PageFunc {
 }
 
 func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
-	msgs := b.mb.p.messagesFunc(ctx)
+	msgs := MustGetMessages(ctx.R)
 	title := msgs.EditingObjectTitle(inflection.Singular(b.mb.label))
 	r.PageTitle = fmt.Sprintf("%s - %s", title, b.mb.p.brandTitle)
 
@@ -101,8 +138,13 @@ func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 func (b *EditingBuilder) formDrawerNew(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	var er ui.EventResponse
-	msgs := b.mb.p.messagesFunc(ctx)
-	er, err = b.editFormFor(msgs.CreatingObjectTitle(inflection.Singular(b.mb.label)), msgs.Create)(ctx)
+	msgs := MustGetMessages(ctx.R)
+	creatingB := b
+	if b.mb.creating != nil {
+		creatingB = b.mb.creating
+	}
+
+	er, err = creatingB.editFormFor(msgs.CreatingObjectTitle(inflection.Singular(b.mb.label)), msgs.Create)(ctx)
 	if err != nil {
 		return
 	}
@@ -125,7 +167,7 @@ func (b *EditingBuilder) formDrawerNew(ctx *ui.EventContext) (r ui.EventResponse
 
 func (b *EditingBuilder) formDrawerEdit(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 	var er ui.EventResponse
-	msgs := b.mb.p.messagesFunc(ctx)
+	msgs := MustGetMessages(ctx.R)
 	er, err = b.editFormFor(msgs.EditingObjectTitle(inflection.Singular(b.mb.label)), msgs.Update)(ctx)
 	if err != nil {
 		return
@@ -219,31 +261,37 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 	ctx.MustUnmarshalForm(newObj)
 
 	var obj = b.mb.newModel()
+
+	usingB := b
+	if b.mb.creating != nil && len(id) == 0 {
+		usingB = b.mb.creating
+	}
+
 	if len(id) > 0 {
-		obj, err = b.fetcher(obj, id)
+		obj, err = usingB.fetcher(obj, id)
 		if err != nil {
 			return
 		}
 	}
 
-	for _, f := range b.fields {
-
+	for _, f := range usingB.fields {
 		err = reflectutils.Set(obj, f.name, reflectutils.MustGet(newObj, f.name))
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	if b.setter != nil {
-		b.setter(obj, ctx.R.MultipartForm, ctx)
+	if usingB.setter != nil {
+		usingB.setter(obj, ctx.R.MultipartForm, ctx)
 	}
 
-	err = b.saver(obj, id)
+	err = usingB.saver(obj, id)
 	if err != nil {
 		panic(err)
 	}
-	msgs := b.mb.p.messagesFunc(ctx)
-	ctx.Flash = msgs.SuccessfullyUpdated
+
+	msgr := MustGetMessages(ctx.R)
+	ctx.Flash = msgr.SuccessfullyUpdated
 
 	r.PushState = ui.PushState(nil)
 	return

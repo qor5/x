@@ -2,6 +2,7 @@ package presets
 
 import (
 	"mime/multipart"
+	"net/http"
 	"net/url"
 
 	"github.com/sunfmin/bran/ui"
@@ -32,7 +33,7 @@ type UpdateFunc func(obj interface{}, form *multipart.Form, ctx *ui.EventContext
 
 type SetterFunc func(obj interface{}, form *multipart.Form, ctx *ui.EventContext)
 
-type MessagesFunc func(ctx *ui.EventContext) *Messages
+type MessagesFunc func(r *http.Request) *Messages
 
 // Data Layer
 type DataOperator interface {

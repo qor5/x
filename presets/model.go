@@ -23,8 +23,10 @@ type ModelBuilder struct {
 	fieldLabels  []string
 	placeholders []string
 	listing      *ListingBuilder
-	editing      *EditingBuilder
 	detailing    *DetailingBuilder
+	editing      *EditingBuilder
+	creating     *EditingBuilder
+	writeFields  *FieldBuilders
 	hasDetailing bool
 }
 
@@ -38,6 +40,7 @@ func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
 	modelName := modelstr[strings.LastIndex(modelstr, ".")+1:]
 	r.label = strcase.ToCamel(inflection.Plural(modelName))
 	r.uriName = strcase.ToKebab(modelName)
+	r.writeFields = &FieldBuilders{}
 	r.newListing()
 	r.newDetailing()
 	r.newEditing()
@@ -76,8 +79,9 @@ func (b *ModelBuilder) inspectModel() {
 			b.detailing.Field(f.Name).ComponentFunc(ft.detailingCompFunc)
 		}
 		if !b.p.fieldNameExcluded(EDITING, f.Name) && ft.editingCompFunc != nil {
-			b.editing.Field(f.Name).ComponentFunc(ft.editingCompFunc)
+			b.writeFields.Field(f.Name).ComponentFunc(ft.editingCompFunc)
 		}
+
 		if f.Type == stringType {
 			sc = append(sc, strcase.ToSnake(f.Name))
 		}

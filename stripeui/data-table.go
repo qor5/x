@@ -117,6 +117,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 
 	i := 0
 	tdCount := 0
+	haveMoreRecord := false
 	funk.ForEach(b.data, func(obj interface{}) {
 
 		idRaw, _ := reflectutils.Get(obj, b.primaryField)
@@ -194,6 +195,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			} else {
 				row.Attr("v-if", fmt.Sprintf("vars.%s", loadMoreVarName))
 			}
+			haveMoreRecord = true
 		}
 
 		rows = append(rows, row)
@@ -206,7 +208,8 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 							h.Div(
 								b.rowExpandFunc(obj, ctx),
 								VDivider(),
-							).Attr("v-if", fmt.Sprintf("vars.%s_%d", expandVarName, i)),
+							).Attr("v-if", fmt.Sprintf("vars.%s_%d", expandVarName, i)).
+								Class("grey lighten-5"),
 						),
 					).Attr("colspan", fmt.Sprint(tdCount)).Class("pa-0").Style("height: auto; border-bottom: none"),
 				).Class("v-data-table__expand-row"),
@@ -256,7 +259,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 	}
 
 	var tfoot h.HTMLComponent
-	if b.loadMoreCount > 0 {
+	if b.loadMoreCount > 0 && haveMoreRecord {
 		var btn h.HTMLComponent
 
 		if inPlaceLoadMore {

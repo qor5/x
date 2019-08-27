@@ -16,7 +16,6 @@ import (
 
 type ListingBuilder struct {
 	mb             *ModelBuilder
-	fields         []*FieldBuilder
 	bulkActions    []*BulkActionBuilder
 	filterDataFunc FilterDataFunc
 	filterTabsFunc FilterTabsFunc
@@ -25,6 +24,7 @@ type ListingBuilder struct {
 	searchColumns  []string
 	perPage        int64
 	orderBy        string
+	FieldBuilders
 }
 
 func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
@@ -39,17 +39,6 @@ func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
 	}
 	r.fields = newfields
 	return r
-}
-
-func (b *ListingBuilder) Field(name string) (r *FieldBuilder) {
-	for _, f := range b.fields {
-		if f.name == name {
-			return f
-		}
-	}
-	r = NewField(name)
-	b.fields = append(b.fields, r)
-	return
 }
 
 func (b *ListingBuilder) PageFunc(pf ui.PageFunc) (r *ListingBuilder) {
@@ -97,7 +86,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	ctx.Hub.RegisterEventFunc("doDelete", b.mb.editing.doDelete)
 	ctx.Hub.RegisterEventFunc("doBulkAction", b.doBulkAction)
 
-	msgr := b.mb.p.messagesFunc(ctx)
+	msgr := MustGetMessages(ctx.R)
 	title := msgr.ListingObjectTitle(inflection.Plural(b.mb.label))
 	r.PageTitle = fmt.Sprintf("%s - %s", title, b.mb.p.brandTitle)
 
@@ -177,18 +166,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 			}
 			return tdbind
 		}).
-		RowMenuItemsFunc(func(obj interface{}, id string, ctx *ui.EventContext) []h.HTMLComponent {
-			return []h.HTMLComponent{
-				ui.Bind(VListItem(
-					VListItemIcon(VIcon("edit")),
-					VListItemTitle(h.Text(msgr.Edit)),
-				)).OnClick("formDrawerEdit", id),
-				ui.Bind(VListItem(
-					VListItemIcon(VIcon("delete")),
-					VListItemTitle(h.Text(msgr.Delete)),
-				)).OnClick("deleteConfirmation", id),
-			}
-		}).
+		RowMenuItemsFunc(EditDeleteRowMenuItemsFunc(ctx, "")).
 		Selectable(haveCheckboxes).
 		SelectionParamName(selectedParamName)
 
@@ -234,7 +212,7 @@ func getSelectedIds(ctx *ui.EventContext) (selected []string) {
 }
 
 func (b *ListingBuilder) bulkPanel(bulk *BulkActionBuilder, selectedIds []string, ctx *ui.EventContext) (r h.HTMLComponent) {
-	msgr := b.mb.p.messagesFunc(ctx)
+	msgr := MustGetMessages(ctx.R)
 
 	return VCard(
 		VCardText(
@@ -256,7 +234,7 @@ func (b *ListingBuilder) bulkPanel(bulk *BulkActionBuilder, selectedIds []string
 }
 
 func (b *ListingBuilder) deleteConfirmation(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	msgr := b.mb.p.messagesFunc(ctx)
+	msgr := MustGetMessages(ctx.R)
 	id := ctx.Event.Params[0]
 
 	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
@@ -271,11 +249,11 @@ func (b *ListingBuilder) deleteConfirmation(ctx *ui.EventContext) (r ui.EventRes
 						Class("ml-2").
 						On("click", "vars.deleteConfirmation = false"),
 
-					VBtn(msgr.Delete).
+					ui.Bind(VBtn(msgr.Delete).
 						Color(b.mb.p.primaryColor).
 						Depressed(true).
-						Dark(true).
-						OnClick("doDelete", id),
+						Dark(true)).
+						OnClick("doDelete", id).URL(ctx.R.URL.Path),
 				),
 			),
 		).MaxWidth("600px").
