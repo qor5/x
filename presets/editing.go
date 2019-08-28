@@ -117,8 +117,8 @@ func (b *EditingBuilder) GetPageFunc() ui.PageFunc {
 }
 
 func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
-	msgs := MustGetMessages(ctx.R)
-	title := msgs.EditingObjectTitle(inflection.Singular(b.mb.label))
+	msgr := MustGetMessages(ctx.R)
+	title := msgr.EditingObjectTitle(inflection.Singular(b.mb.label))
 	r.PageTitle = fmt.Sprintf("%s - %s", title, b.mb.p.brandTitle)
 
 	id := pat.Param(ctx.R, "id")
@@ -126,32 +126,23 @@ func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		Params: []string{id},
 	}
 
-	var er ui.EventResponse
-	er, err = b.editFormFor(title, msgs.Update)(ctx)
-	if err != nil {
-		return
-	}
-	r.Schema = er.Schema
+	r.Schema = b.editFormFor(title, msgr.Update, ctx)
 	return
 }
 
 func (b *EditingBuilder) formDrawerNew(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	var er ui.EventResponse
-	msgs := MustGetMessages(ctx.R)
+	msgr := MustGetMessages(ctx.R)
 	creatingB := b
 	if b.mb.creating != nil {
 		creatingB = b.mb.creating
 	}
 
-	er, err = creatingB.editFormFor(msgs.CreatingObjectTitle(inflection.Singular(b.mb.label)), msgs.Create)(ctx)
-	if err != nil {
-		return
-	}
+	form := creatingB.editFormFor(msgr.CreatingObjectTitle(inflection.Singular(b.mb.label)), msgr.Create, ctx)
 
 	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
 		Name: "rightDrawer",
 		Schema: VNavigationDrawer(
-			er.Schema.(h.HTMLComponent),
+			form,
 		).Attr("v-model", "vars.formDrawerNew").
 			Bottom(true).
 			Right(true).
@@ -165,17 +156,13 @@ func (b *EditingBuilder) formDrawerNew(ctx *ui.EventContext) (r ui.EventResponse
 }
 
 func (b *EditingBuilder) formDrawerEdit(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	var er ui.EventResponse
-	msgs := MustGetMessages(ctx.R)
-	er, err = b.editFormFor(msgs.EditingObjectTitle(inflection.Singular(b.mb.label)), msgs.Update)(ctx)
-	if err != nil {
-		return
-	}
+	msgr := MustGetMessages(ctx.R)
+	form := b.editFormFor(msgr.EditingObjectTitle(inflection.Singular(b.mb.label)), msgr.Update, ctx)
 
 	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
 		Name: "rightDrawer",
 		Schema: VNavigationDrawer(
-			er.Schema.(h.HTMLComponent),
+			form,
 		).Attr("v-model", "vars.formDrawerEdit").
 			Bottom(true).
 			Right(true).
@@ -188,59 +175,56 @@ func (b *EditingBuilder) formDrawerEdit(ctx *ui.EventContext) (r ui.EventRespons
 	return
 }
 
-func (b *EditingBuilder) editFormFor(title, buttonLabel string) ui.EventFunc {
-	return func(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-		id := ctx.Event.Params[0]
-		ctx.Hub.RegisterEventFunc("update", b.defaultUpdate)
-		var obj = b.mb.newModel()
+func (b *EditingBuilder) editFormFor(title, buttonLabel string, ctx *ui.EventContext) h.HTMLComponent {
+	id := ctx.Event.Params[0]
+	ctx.Hub.RegisterEventFunc("update", b.defaultUpdate)
+	var obj = b.mb.newModel()
 
-		if len(id) > 0 {
-			obj, err = b.fetcher(obj, id)
-			if err != nil {
-				return
-			}
+	if len(id) > 0 {
+		var err error
+		obj, err = b.fetcher(obj, id)
+		if err != nil {
+			panic(err)
 		}
-
-		var notice h.HTMLComponent
-		if msg, ok := ctx.Flash.(string); ok {
-			notice = VSnackbar(h.Text(msg)).Value(true).Top(true).Color("success").Value(true)
-		}
-
-		var comps []h.HTMLComponent
-
-		fields := b.getFieldsWithDefaults()
-
-		for _, f := range fields {
-			if f.compFunc == nil {
-				continue
-			}
-			comps = append(comps, f.compFunc(obj, &FieldContext{
-				Name:  f.name,
-				Label: b.mb.getLabel(f.NameLabel),
-			}, ctx))
-		}
-
-		r.Schema = VContainer(
-			notice,
-			h.H2(title).Class("title px-4 py-2"),
-			VCard(
-				VCardText(
-					comps...,
-				),
-				VCardActions(
-					VSpacer(),
-					ui.Bind(VBtn(buttonLabel).
-						Dark(true).
-						Color(b.mb.p.primaryColor)).
-						OnClick("update",
-							ctx.Event.Params...).
-						URL(b.mb.Info().ListingHref()),
-				),
-			).Flat(true),
-		).Fluid(true)
-
-		return
 	}
+
+	var notice h.HTMLComponent
+	if msg, ok := ctx.Flash.(string); ok {
+		notice = VSnackbar(h.Text(msg)).Value(true).Top(true).Color("success").Value(true)
+	}
+
+	var comps []h.HTMLComponent
+
+	fields := b.getFieldsWithDefaults()
+
+	for _, f := range fields {
+		if f.compFunc == nil {
+			continue
+		}
+		comps = append(comps, f.compFunc(obj, &FieldContext{
+			Name:  f.name,
+			Label: b.mb.getLabel(f.NameLabel),
+		}, ctx))
+	}
+
+	return VContainer(
+		notice,
+		h.H2(title).Class("title px-4 py-2"),
+		VCard(
+			VCardText(
+				comps...,
+			),
+			VCardActions(
+				VSpacer(),
+				ui.Bind(VBtn(buttonLabel).
+					Dark(true).
+					Color(b.mb.p.primaryColor)).
+					OnClick("update",
+						ctx.Event.Params...).
+					URL(b.mb.Info().ListingHref()),
+			),
+		).Flat(true),
+	).Fluid(true)
 }
 
 func (b *EditingBuilder) getFieldsWithDefaults() []*FieldBuilder {

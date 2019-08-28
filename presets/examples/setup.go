@@ -111,7 +111,6 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 
 	p.BrandFunc(func(ctx *ui.EventContext) h.HTMLComponent {
 		return h.Components(
-			//h.Img("https://material.io/tools/icons/static/ic_material_192px_light.svg").Style("height: 32px"),
 			VIcon("directions_boat").Class("pr-2"),
 			VToolbarTitle("My Admin"),
 		)
@@ -199,7 +198,6 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			FieldName("ApprovalComment").
 			Value(comment).
 			Label("Comment").
-			Error(len(errorMessage) > 0).
 			ErrorMessages(errorMessage)
 	})
 
@@ -447,16 +445,6 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	ccedit.CloneForCreating("Number")
 
 	p.Model(&Language{}).PrimaryField("Code")
-
-	ie := dp.Field("Bool1").InplaceEdit()
-	ie.ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-		//u := obj.(*Customer)
-		return VCheckbox().FieldName("Bool1")
-	}).UpdateFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) (err error) {
-		u := obj.(*Customer)
-		err = db.Model(&Customer{}).UpdateColumn("Name", u.Name).Error
-		return
-	})
 
 	dp.Action("Approve").UpdateFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) (err error) {
 		u := obj.(*Customer)
