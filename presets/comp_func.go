@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"reflect"
 
+	"github.com/iancoleman/strcase"
+
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 	"github.com/sunfmin/reflectutils"
@@ -12,9 +14,9 @@ import (
 )
 
 type FieldContext struct {
-	Name      string
-	Label     string
-	ModelInfo *ModelInfo
+	Name   string
+	Label  string
+	Errors []string
 }
 
 func (fc *FieldContext) StringValue(obj interface{}) (r string) {
@@ -30,18 +32,16 @@ func (fc *FieldContext) StringValue(obj interface{}) (r string) {
 }
 
 type FieldTypeBuilder struct {
-	valType           reflect.Type
-	listingCompFunc   FieldComponentFunc
-	detailingCompFunc FieldComponentFunc
-	editingCompFunc   FieldComponentFunc
+	valType  reflect.Type
+	mode     FieldMode
+	compFunc FieldComponentFunc
 }
 
-type PageType string
+type FieldMode int
 
 const (
-	LISTING   PageType = "listing"
-	EDITING   PageType = "editing"
-	DETAILING PageType = "detailing"
+	WRITE FieldMode = iota
+	LIST
 )
 
 func NewFieldType(t reflect.Type) (r *FieldTypeBuilder) {
@@ -49,15 +49,8 @@ func NewFieldType(t reflect.Type) (r *FieldTypeBuilder) {
 	return
 }
 
-func (b *FieldTypeBuilder) ComponentFunc(t PageType, v FieldComponentFunc) (r *FieldTypeBuilder) {
-	switch t {
-	case LISTING:
-		b.listingCompFunc = v
-	case EDITING:
-		b.editingCompFunc = v
-	case DETAILING:
-		b.detailingCompFunc = v
-	}
+func (b *FieldTypeBuilder) ComponentFunc(v FieldComponentFunc) (r *FieldTypeBuilder) {
+	b.compFunc = v
 	return b
 }
 
@@ -74,25 +67,60 @@ var stringVals = []interface{}{
 }
 
 type FieldTypes struct {
-	fieldTypes                []*FieldTypeBuilder
-	excludesListingPatterns   []string
-	excludesEditingPatterns   []string
-	excludesDetailingPatterns []string
+	mode             FieldMode
+	fieldTypes       []*FieldTypeBuilder
+	excludesPatterns []string
+}
+
+func NewFieldTypes(t FieldMode) (r *FieldTypes) {
+	r = &FieldTypes{
+		mode: t,
+	}
+	r.builtInFieldTypes()
+	return
 }
 
 func (b *FieldTypes) FieldType(v interface{}) (r *FieldTypeBuilder) {
 	return b.fieldTypeByType(reflect.TypeOf(v))
 }
 
-func (b *FieldTypes) ExcludeFields(t PageType, patterns ...string) {
-	switch t {
-	case LISTING:
-		b.excludesListingPatterns = patterns
-	case EDITING:
-		b.excludesEditingPatterns = patterns
-	case DETAILING:
-		b.excludesDetailingPatterns = patterns
+func (b *FieldTypes) Exclude(patterns ...string) (r *FieldTypes) {
+	b.excludesPatterns = patterns
+	return b
+}
+
+func (b *FieldTypes) InspectFields(val interface{}) (r *FieldBuilders) {
+	r, _ = b.inspectFieldsAndCollectName(val, nil)
+	return
+}
+
+func (b *FieldTypes) inspectFieldsAndCollectName(val interface{}, collectType reflect.Type) (r *FieldBuilders, names []string) {
+	v := reflect.ValueOf(val)
+
+	for v.Elem().Kind() == reflect.Ptr {
+		v = v.Elem()
 	}
+	v = v.Elem()
+
+	t := v.Type()
+
+	r = &FieldBuilders{}
+
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
+
+		ft := b.fieldTypeByType(f.Type)
+
+		if !hasMatched(b.excludesPatterns, f.Name) && ft.compFunc != nil {
+			r.Field(f.Name).ComponentFunc(ft.compFunc)
+		}
+
+		if collectType != nil && f.Type == collectType {
+			names = append(names, strcase.ToSnake(f.Name))
+		}
+	}
+
+	return
 }
 
 func hasMatched(patterns []string, name string) bool {
@@ -108,18 +136,6 @@ func hasMatched(patterns []string, name string) bool {
 	return false
 }
 
-func (b *FieldTypes) fieldNameExcluded(t PageType, name string) bool {
-	switch t {
-	case LISTING:
-		return hasMatched(b.excludesListingPatterns, name)
-	case EDITING:
-		return hasMatched(b.excludesEditingPatterns, name)
-	case DETAILING:
-		return hasMatched(b.excludesDetailingPatterns, name)
-	}
-	return false
-}
-
 func (b *FieldTypes) fieldTypeByType(tv reflect.Type) (r *FieldTypeBuilder) {
 	for _, ft := range b.fieldTypes {
 		if ft.valType == tv {
@@ -131,18 +147,19 @@ func (b *FieldTypes) fieldTypeByType(tv reflect.Type) (r *FieldTypeBuilder) {
 	return
 }
 
-func cfText(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-	return h.Text(field.StringValue(obj))
-}
-
 func cfTextTd(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 	if field.Name == "ID" {
 		id := field.StringValue(obj)
 		if len(id) > 0 {
+			mi := GetModelInfo(ctx.R)
+			if mi == nil {
+				return h.Td().Text(id)
+			}
+
 			a := ui.Bind(h.A().Text(id))
-			if field.ModelInfo.HasDetailing() {
+			if mi.HasDetailing() {
 				a.PushStateURL(
-					field.ModelInfo.DetailingHref(id),
+					mi.DetailingHref(id),
 				)
 			} else {
 				a.OnClick("formDrawerEdit", id)
@@ -176,26 +193,37 @@ func cfTextField(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.H
 		Value(reflectutils.MustGet(obj, field.Name).(string))
 }
 
-func builtInFieldTypes() (r FieldTypes) {
-	r.FieldType(true).
-		ComponentFunc(LISTING, cfTextTd).
-		ComponentFunc(DETAILING, cfText).
-		ComponentFunc(EDITING, cfCheckbox)
+func (b *FieldTypes) builtInFieldTypes() {
+
+	if b.mode == LIST {
+		b.FieldType(true).
+			ComponentFunc(cfTextTd)
+
+		for _, v := range numberVals {
+			b.FieldType(v).
+				ComponentFunc(cfTextTd)
+		}
+
+		for _, v := range stringVals {
+			b.FieldType(v).
+				ComponentFunc(cfTextTd)
+		}
+		return
+	}
+
+	b.FieldType(true).
+		ComponentFunc(cfCheckbox)
 
 	for _, v := range numberVals {
-		r.FieldType(v).
-			ComponentFunc(LISTING, cfTextTd).
-			ComponentFunc(DETAILING, cfText).
-			ComponentFunc(EDITING, cfNumber)
+		b.FieldType(v).
+			ComponentFunc(cfNumber)
 	}
 
 	for _, v := range stringVals {
-		r.FieldType(v).
-			ComponentFunc(LISTING, cfTextTd).
-			ComponentFunc(DETAILING, cfText).
-			ComponentFunc(EDITING, cfTextField)
+		b.FieldType(v).
+			ComponentFunc(cfTextField)
 	}
 
-	r.ExcludeFields(EDITING, "ID")
+	b.Exclude("ID")
 	return
 }

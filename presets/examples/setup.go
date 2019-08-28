@@ -116,28 +116,22 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		)
 	}).BrandTitle("The Plant")
 
-	p.FieldType(&Thumb{}).
-		ComponentFunc(presets.LISTING, func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-			i, err := reflectutils.Get(obj, field.Name)
-			if err != nil {
-				panic(err)
-			}
-			return h.Text(i.(*Thumb).Name)
-		}).
-		ComponentFunc(presets.DETAILING, func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-			i, err := reflectutils.Get(obj, field.Name)
-			if err != nil {
-				panic(err)
-			}
-			return h.Text(i.(*Thumb).Name)
-		}).
-		ComponentFunc(presets.EDITING, func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-			i, err := reflectutils.Get(obj, field.Name)
-			if err != nil {
-				panic(err)
-			}
-			return h.Text(i.(*Thumb).Name)
-		})
+	writeFields := p.Mode(presets.WRITE)
+	writeFields.FieldType(&Thumb{}).ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
+		i, err := reflectutils.Get(obj, field.Name)
+		if err != nil {
+			panic(err)
+		}
+		return h.Text(i.(*Thumb).Name)
+	})
+
+	p.Mode(presets.LIST).FieldType(&Thumb{}).ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
+		i, err := reflectutils.Get(obj, field.Name)
+		if err != nil {
+			panic(err)
+		}
+		return h.Text(i.(*Thumb).Name)
+	})
 
 	p.DataOperator(gormop.DataOperator(db))
 

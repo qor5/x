@@ -33,11 +33,7 @@ func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
 		return
 	}
 
-	var newfields []*FieldBuilder
-	for _, f := range vs {
-		newfields = append(newfields, r.Field(f))
-	}
-	r.fields = newfields
+	r.FieldBuilders = *r.FieldBuilders.Only(vs...)
 	return r
 }
 

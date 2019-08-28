@@ -20,30 +20,32 @@ import (
 )
 
 type Builder struct {
-	prefix       string
-	models       []*ModelBuilder
-	mux          *goji.Mux
-	builder      *bran.Builder
-	logger       *zap.Logger
-	dataOperator DataOperator
-	messagesFunc MessagesFunc
-	homePageFunc ui.PageFunc
-	brandFunc    ComponentFunc
-	brandTitle   string
-	primaryColor string
-	FieldTypes
+	prefix          string
+	models          []*ModelBuilder
+	mux             *goji.Mux
+	builder         *bran.Builder
+	logger          *zap.Logger
+	dataOperator    DataOperator
+	messagesFunc    MessagesFunc
+	homePageFunc    ui.PageFunc
+	brandFunc       ComponentFunc
+	brandTitle      string
+	primaryColor    string
+	writeFieldTypes *FieldTypes
+	listFieldTypes  *FieldTypes
 	MenuGroups
 }
 
 func New() *Builder {
 	l, _ := zap.NewDevelopment()
 	return &Builder{
-		logger:       l,
-		builder:      bran.New(),
-		messagesFunc: defaultMessageFunc,
-		FieldTypes:   builtInFieldTypes(),
-		primaryColor: "indigo",
-		brandTitle:   "Admin",
+		logger:          l,
+		builder:         bran.New(),
+		messagesFunc:    defaultMessageFunc,
+		writeFieldTypes: NewFieldTypes(WRITE),
+		listFieldTypes:  NewFieldTypes(LIST),
+		primaryColor:    "indigo",
+		brandTitle:      "Admin",
 	}
 }
 
@@ -85,6 +87,18 @@ func (b *Builder) BrandTitle(v string) (r *Builder) {
 func (b *Builder) PrimaryColor(v string) (r *Builder) {
 	b.primaryColor = v
 	return b
+}
+
+func (b *Builder) Mode(v FieldMode) (r *FieldTypes) {
+	if v == WRITE {
+		return b.writeFieldTypes
+	}
+
+	if v == LIST {
+		return b.listFieldTypes
+	}
+
+	return r
 }
 
 func (b *Builder) Model(v interface{}) (r *ModelBuilder) {
@@ -192,16 +206,30 @@ func (b *Builder) runBrandFunc(ctx *ui.EventContext) (r h.HTMLComponent) {
 
 type contextKey int
 
-const messagesKey contextKey = iota
+const (
+	messagesKey contextKey = iota
+	modelInfoKey
+)
 
 func MustGetMessages(r *http.Request) *Messages {
 	return r.Context().Value(messagesKey).(*Messages)
+}
+
+func GetModelInfo(req *http.Request) (r *ModelInfo) {
+	r, _ = req.Context().Value(modelInfoKey).(*ModelInfo)
+	return
 }
 
 func (b *Builder) putMessages(in http.Handler) (out http.Handler) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		msgr := b.messagesFunc(r)
 		in.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), messagesKey, msgr)))
+	})
+}
+
+func putModelInfo(mi *ModelInfo, in http.Handler) (out http.Handler) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		in.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), modelInfoKey, mi)))
 	})
 }
 
@@ -320,7 +348,7 @@ func (b *Builder) initMux() {
 
 	mux.Handle(
 		pat.New(b.prefix),
-		b.wrap(b.defaultLayout(b.getHomePageFunc())),
+		b.wrap(nil, b.defaultLayout(b.getHomePageFunc())),
 	)
 
 	for _, m := range b.models {
@@ -329,14 +357,14 @@ func (b *Builder) initMux() {
 		routePath := info.ListingHref()
 		mux.Handle(
 			pat.New(routePath),
-			b.wrap(b.defaultLayout(m.listing.GetPageFunc())),
+			b.wrap(info, b.defaultLayout(m.listing.GetPageFunc())),
 		)
 		log.Println("mounted url", routePath)
 		if m.hasDetailing {
 			routePath = fmt.Sprintf("%s/%s/:id", b.prefix, muri)
 			mux.Handle(
 				pat.New(routePath),
-				b.wrap(b.defaultLayout(m.detailing.GetPageFunc())),
+				b.wrap(info, b.defaultLayout(m.detailing.GetPageFunc())),
 			)
 			log.Println("mounted url", routePath)
 		}
@@ -344,24 +372,28 @@ func (b *Builder) initMux() {
 		routePath = fmt.Sprintf("%s/%s/:id/edit", b.prefix, muri)
 		mux.Handle(
 			pat.New(routePath),
-			b.wrap(b.defaultLayout(m.editing.GetPageFunc())),
+			b.wrap(info, b.defaultLayout(m.editing.GetPageFunc())),
 		)
 		log.Println("mounted url", routePath)
 
 		routePath = fmt.Sprintf("%s/%s/new", b.prefix, muri)
 		mux.Handle(
 			pat.New(fmt.Sprintf("%s/%s/new", b.prefix, muri)),
-			b.wrap(b.defaultLayout(m.editing.GetPageFunc())),
+			b.wrap(info, b.defaultLayout(m.editing.GetPageFunc())),
 		)
 		log.Println("mounted url", routePath)
-
 	}
 
 	b.mux = mux
 }
 
-func (b *Builder) wrap(pf ui.PageFunc) http.Handler {
-	return b.putMessages(b.builder.Page(pf))
+func (b *Builder) wrap(mi *ModelInfo, pf ui.PageFunc) http.Handler {
+	return putModelInfo(
+		mi,
+		b.putMessages(
+			b.builder.Page(pf),
+		),
+	)
 }
 
 func (b *Builder) ServeHTTP(w http.ResponseWriter, r *http.Request) {

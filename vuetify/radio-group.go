@@ -62,8 +62,8 @@ func (b *VRadioGroupBuilder) ErrorCount(v int) (r *VRadioGroupBuilder) {
 	return b
 }
 
-func (b *VRadioGroupBuilder) ErrorMessages(v string) (r *VRadioGroupBuilder) {
-	b.tag.Attr("error-messages", v)
+func (b *VRadioGroupBuilder) ErrorMessages(v interface{}) (r *VRadioGroupBuilder) {
+	b.tag.Attr(":error-messages", h.JSONString(v))
 	return b
 }
 

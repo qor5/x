@@ -1,9 +1,13 @@
 package presets
 
 import (
+	"fmt"
 	"log"
 
+	"github.com/sunfmin/reflectutils"
+
 	"github.com/sunfmin/bran/ui"
+	v "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -58,7 +62,8 @@ type NameLabel struct {
 }
 
 type FieldBuilders struct {
-	fields []*FieldBuilder
+	fieldLabels []string
+	fields      []*FieldBuilder
 }
 
 func (b *FieldBuilders) Field(name string) (r *FieldBuilder) {
@@ -72,6 +77,25 @@ func (b *FieldBuilders) Field(name string) (r *FieldBuilder) {
 	return
 }
 
+func (b *FieldBuilders) Labels(vs ...string) (r *FieldBuilders) {
+	b.fieldLabels = append(b.fieldLabels, vs...)
+	return b
+}
+
+func (b *FieldBuilders) getLabel(field NameLabel) (r string) {
+	if len(field.label) > 0 {
+		return field.label
+	}
+
+	for i := 0; i < len(b.fieldLabels)-1; i = i + 2 {
+		if b.fieldLabels[i] == field.name {
+			return b.fieldLabels[i+1]
+		}
+	}
+
+	return field.name
+}
+
 func (b *FieldBuilders) GetField(name string) (r *FieldBuilder) {
 	for _, f := range b.fields {
 		if f.name == name {
@@ -79,4 +103,129 @@ func (b *FieldBuilders) GetField(name string) (r *FieldBuilder) {
 		}
 	}
 	return
+}
+
+func (b *FieldBuilders) Only(patterns ...string) (r *FieldBuilders) {
+	if len(patterns) == 0 {
+		return b
+	}
+
+	r = &FieldBuilders{fieldLabels: b.fieldLabels}
+
+	for _, f := range b.fields {
+		if hasMatched(patterns, f.name) {
+			r.fields = append(r.fields, f.Clone())
+		}
+	}
+
+	return
+}
+
+func (b *FieldBuilders) Except(patterns ...string) (r *FieldBuilders) {
+	if len(patterns) == 0 {
+		return
+	}
+
+	r = &FieldBuilders{fieldLabels: b.fieldLabels}
+	for _, f := range b.fields {
+		if hasMatched(patterns, f.name) {
+			continue
+		}
+		r.fields = append(r.fields, f.Clone())
+	}
+	return
+}
+
+func (b *FieldBuilders) MustSet(obj interface{}, newObj interface{}) {
+	for _, f := range b.fields {
+		err := reflectutils.Set(obj, f.name, reflectutils.MustGet(newObj, f.name))
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func (b *FieldBuilders) String() (r string) {
+	var names []string
+	for _, f := range b.fields {
+		names = append(names, f.name)
+	}
+	return fmt.Sprint(names)
+}
+
+func (b *FieldBuilders) ToComponent(obj interface{}, verr *ValidationErrors, ctx *ui.EventContext) h.HTMLComponent {
+
+	var comps []h.HTMLComponent
+
+	if verr == nil {
+		verr = &ValidationErrors{}
+	}
+
+	gErr := verr.GetGlobalError()
+	if len(gErr) > 0 {
+		comps = append(
+			comps,
+			v.VAlert(h.Text(gErr)).
+				Border("left").
+				Type("error").
+				Elevation(2).
+				ColoredBorder(true),
+		)
+	}
+
+	for _, f := range b.fields {
+		if f.compFunc == nil {
+			continue
+		}
+
+		comps = append(comps, f.compFunc(obj, &FieldContext{
+			Name:   f.name,
+			Label:  b.getLabel(f.NameLabel),
+			Errors: verr.GetFieldErrors(f.name),
+		}, ctx))
+	}
+
+	return h.Components(comps...)
+}
+
+type ValidationErrors struct {
+	globalErrors []string
+	fieldErrors  map[string][]string
+}
+
+func (b *ValidationErrors) FieldError(fieldName string, message string) (r *ValidationErrors) {
+	if b.fieldErrors == nil {
+		b.fieldErrors = make(map[string][]string)
+	}
+	b.fieldErrors[fieldName] = append(b.fieldErrors[fieldName], message)
+	return b
+}
+
+func (b *ValidationErrors) GlobalError(message string) (r *ValidationErrors) {
+	b.globalErrors = append(b.globalErrors, message)
+	return b
+}
+
+func (b *ValidationErrors) GetFieldErrors(fieldName string) (r []string) {
+	if b.fieldErrors == nil {
+		return
+	}
+
+	r = b.fieldErrors[fieldName]
+	return
+}
+
+func (b *ValidationErrors) GetGlobalError() (r string) {
+	if len(b.globalErrors) == 0 {
+		return
+	}
+	return b.globalErrors[0]
+}
+
+func (b *ValidationErrors) GetGlobalErrors() (r []string) {
+	return b.globalErrors
+}
+
+func (b *ValidationErrors) Error() string {
+	return fmt.Sprintf("validation error global: %+v, fields: %+v", b.globalErrors, b.fieldErrors)
 }

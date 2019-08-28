@@ -58,7 +58,7 @@ func (b *VSliderBuilder) ErrorCount(v int) (r *VSliderBuilder) {
 }
 
 func (b *VSliderBuilder) ErrorMessages(v string) (r *VSliderBuilder) {
-	b.tag.Attr("error-messages", v)
+	b.tag.Attr(":error-messages", h.JSONString(v))
 	return b
 }
 

@@ -131,8 +131,8 @@ func (b *VAutocompleteBuilder) ErrorCount(v int) (r *VAutocompleteBuilder) {
 	return b
 }
 
-func (b *VAutocompleteBuilder) ErrorMessages(v string) (r *VAutocompleteBuilder) {
-	b.tag.Attr("error-messages", v)
+func (b *VAutocompleteBuilder) ErrorMessages(v interface{}) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":error-messages", h.JSONString(v))
 	return b
 }
 

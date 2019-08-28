@@ -6,7 +6,6 @@ import (
 	"github.com/jinzhu/inflection"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
-	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 	"goji.io/pat"
 )
@@ -27,17 +26,7 @@ func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
 		return
 	}
 
-	var newFields []*FieldBuilder
-	for _, f := range vs {
-		field := b.writeFields.GetField(f)
-		if field == nil {
-			newFields = append(newFields, NewField(f))
-		} else {
-			newFields = append(newFields, field.Clone())
-		}
-	}
-
-	r.fields = newFields
+	r.FieldBuilders = *r.FieldBuilders.Only(vs...)
 	return r
 }
 
@@ -55,32 +44,8 @@ func (b *EditingBuilder) CloneForCreating(vs ...string) (r *EditingBuilder) {
 	}
 	r = b.mb.creating
 
-	var editingFields []string
-	for _, f := range b.fields {
-		editingFields = append(editingFields, f.name)
-	}
+	r.FieldBuilders = *b.mb.writeFields.Only(vs...)
 
-	if len(vs) == 0 {
-		vs = editingFields
-	}
-
-	var newFields []*FieldBuilder
-
-	for _, name := range vs {
-		field := b.GetField(name)
-
-		if field == nil {
-			field = b.mb.writeFields.GetField(name)
-		}
-
-		if field == nil {
-			newFields = append(newFields, NewField(name))
-		} else {
-			newFields = append(newFields, field.Clone())
-		}
-	}
-
-	r.fields = newFields
 	return r
 }
 
@@ -193,26 +158,14 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string, ctx *ui.EventCon
 		notice = VSnackbar(h.Text(msg)).Value(true).Top(true).Color("success").Value(true)
 	}
 
-	var comps []h.HTMLComponent
-
-	fields := b.getFieldsWithDefaults()
-
-	for _, f := range fields {
-		if f.compFunc == nil {
-			continue
-		}
-		comps = append(comps, f.compFunc(obj, &FieldContext{
-			Name:  f.name,
-			Label: b.mb.getLabel(f.NameLabel),
-		}, ctx))
-	}
+	vErr, _ := ctx.Flash.(*ValidationErrors)
 
 	return VContainer(
 		notice,
 		h.H2(title).Class("title px-4 py-2"),
 		VCard(
 			VCardText(
-				comps...,
+				b.ToComponent(obj, vErr, ctx),
 			),
 			VCardActions(
 				VSpacer(),
@@ -225,14 +178,6 @@ func (b *EditingBuilder) editFormFor(title, buttonLabel string, ctx *ui.EventCon
 			),
 		).Flat(true),
 	).Fluid(true)
-}
-
-func (b *EditingBuilder) getFieldsWithDefaults() []*FieldBuilder {
-	fields := b.fields
-	if len(fields) == 0 {
-		fields = b.mb.writeFields.fields
-	}
-	return fields
 }
 
 func (b *EditingBuilder) doDelete(ctx *ui.EventContext) (r ui.EventResponse, err error) {
@@ -268,14 +213,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 		}
 	}
 
-	fields := usingB.getFieldsWithDefaults()
-
-	for _, f := range fields {
-		err = reflectutils.Set(obj, f.name, reflectutils.MustGet(newObj, f.name))
-		if err != nil {
-			panic(err)
-		}
-	}
+	usingB.MustSet(obj, newObj)
 
 	if usingB.setter != nil {
 		usingB.setter(obj, ctx.R.MultipartForm, ctx)

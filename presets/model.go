@@ -40,11 +40,10 @@ func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
 	modelName := modelstr[strings.LastIndex(modelstr, ".")+1:]
 	r.label = strcase.ToCamel(inflection.Plural(modelName))
 	r.uriName = strcase.ToKebab(modelName)
-	r.writeFields = &FieldBuilders{}
+
 	r.newListing()
 	r.newDetailing()
 	r.newEditing()
-	r.inspectModel()
 	return
 }
 
@@ -56,41 +55,8 @@ func (b *ModelBuilder) newModelArray() (r interface{}) {
 	return reflect.New(reflect.SliceOf(b.modelType)).Interface()
 }
 
-func (b *ModelBuilder) inspectModel() {
-	v := reflect.ValueOf(b.model)
-
-	for v.Elem().Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	v = v.Elem()
-
-	t := v.Type()
-
-	var sc []string
-	var stringType = reflect.TypeOf("")
-	for i := 0; i < t.NumField(); i++ {
-		f := t.Field(i)
-		//fmt.Println(f.Name, f.Type)
-		ft := b.p.fieldTypeByType(f.Type)
-		if !b.p.fieldNameExcluded(LISTING, f.Name) && ft.listingCompFunc != nil {
-			b.listing.Field(f.Name).ComponentFunc(ft.listingCompFunc)
-		}
-		if !b.p.fieldNameExcluded(DETAILING, f.Name) && ft.detailingCompFunc != nil {
-			b.detailing.Field(f.Name).ComponentFunc(ft.detailingCompFunc)
-		}
-		if !b.p.fieldNameExcluded(EDITING, f.Name) && ft.editingCompFunc != nil {
-			b.writeFields.Field(f.Name).ComponentFunc(ft.editingCompFunc)
-		}
-
-		if f.Type == stringType {
-			sc = append(sc, strcase.ToSnake(f.Name))
-		}
-	}
-	b.listing.searchColumns = sc
-}
-
 func (b *ModelBuilder) newListing() (r *ListingBuilder) {
-	b.listing = &ListingBuilder{mb: b}
+	b.listing = &ListingBuilder{mb: b, FieldBuilders: *b.p.listFieldTypes.InspectFields(b.model)}
 	if b.p.dataOperator != nil {
 		b.listing.Searcher(b.p.dataOperator.Search)
 	}
@@ -98,7 +64,8 @@ func (b *ModelBuilder) newListing() (r *ListingBuilder) {
 }
 
 func (b *ModelBuilder) newEditing() (r *EditingBuilder) {
-	b.editing = &EditingBuilder{mb: b}
+	b.writeFields, b.listing.searchColumns = b.p.writeFieldTypes.inspectFieldsAndCollectName(b.model, reflect.TypeOf(""))
+	b.editing = &EditingBuilder{mb: b, FieldBuilders: *b.writeFields}
 	if b.p.dataOperator != nil {
 		b.editing.FetchFunc(b.p.dataOperator.Fetch)
 		b.editing.SaveFunc(b.p.dataOperator.Save)
@@ -184,9 +151,8 @@ func (b *ModelBuilder) Placeholders(vs ...string) (r *ModelBuilder) {
 
 func (b *ModelBuilder) getComponentFuncField(field *FieldBuilder) (r *FieldContext) {
 	r = &FieldContext{
-		Name:      field.name,
-		Label:     b.getLabel(field.NameLabel),
-		ModelInfo: b.Info(),
+		Name:  field.name,
+		Label: b.getLabel(field.NameLabel),
 	}
 	return
 }

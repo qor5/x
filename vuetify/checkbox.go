@@ -53,8 +53,8 @@ func (b *VCheckboxBuilder) ErrorCount(v int) (r *VCheckboxBuilder) {
 	return b
 }
 
-func (b *VCheckboxBuilder) ErrorMessages(v string) (r *VCheckboxBuilder) {
-	b.tag.Attr("error-messages", v)
+func (b *VCheckboxBuilder) ErrorMessages(v interface{}) (r *VCheckboxBuilder) {
+	b.tag.Attr(":error-messages", h.JSONString(v))
 	return b
 }
 

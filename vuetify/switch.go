@@ -53,8 +53,8 @@ func (b *VSwitchBuilder) ErrorCount(v int) (r *VSwitchBuilder) {
 	return b
 }
 
-func (b *VSwitchBuilder) ErrorMessages(v string) (r *VSwitchBuilder) {
-	b.tag.Attr("error-messages", v)
+func (b *VSwitchBuilder) ErrorMessages(v interface{}) (r *VSwitchBuilder) {
+	b.tag.Attr(":error-messages", h.JSONString(v))
 	return b
 }
 

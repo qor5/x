@@ -18,8 +18,33 @@ func VAlert(children ...h.HTMLComponent) (r *VAlertBuilder) {
 	return
 }
 
+func (b *VAlertBuilder) Border(v string) (r *VAlertBuilder) {
+	b.tag.Attr("border", v)
+	return b
+}
+
+func (b *VAlertBuilder) CloseLabel(v string) (r *VAlertBuilder) {
+	b.tag.Attr("close-label", v)
+	return b
+}
+
 func (b *VAlertBuilder) Color(v string) (r *VAlertBuilder) {
 	b.tag.Attr("color", v)
+	return b
+}
+
+func (b *VAlertBuilder) ColoredBorder(v bool) (r *VAlertBuilder) {
+	b.tag.Attr(":colored-border", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) Dark(v bool) (r *VAlertBuilder) {
+	b.tag.Attr(":dark", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) Dense(v bool) (r *VAlertBuilder) {
+	b.tag.Attr(":dense", fmt.Sprint(v))
 	return b
 }
 
@@ -28,8 +53,43 @@ func (b *VAlertBuilder) Dismissible(v bool) (r *VAlertBuilder) {
 	return b
 }
 
-func (b *VAlertBuilder) Icon(v string) (r *VAlertBuilder) {
-	b.tag.Attr("icon", v)
+func (b *VAlertBuilder) Elevation(v int) (r *VAlertBuilder) {
+	b.tag.Attr(":elevation", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) Height(v int) (r *VAlertBuilder) {
+	b.tag.Attr(":height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) Icon(v bool) (r *VAlertBuilder) {
+	b.tag.Attr(":icon", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) Light(v bool) (r *VAlertBuilder) {
+	b.tag.Attr(":light", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) MaxHeight(v int) (r *VAlertBuilder) {
+	b.tag.Attr(":max-height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) MaxWidth(v int) (r *VAlertBuilder) {
+	b.tag.Attr(":max-width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) MinHeight(v int) (r *VAlertBuilder) {
+	b.tag.Attr(":min-height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) MinWidth(v int) (r *VAlertBuilder) {
+	b.tag.Attr(":min-width", fmt.Sprint(v))
 	return b
 }
 
@@ -43,8 +103,28 @@ func (b *VAlertBuilder) Origin(v string) (r *VAlertBuilder) {
 	return b
 }
 
-func (b *VAlertBuilder) Outline(v bool) (r *VAlertBuilder) {
-	b.tag.Attr(":outline", fmt.Sprint(v))
+func (b *VAlertBuilder) Outlined(v bool) (r *VAlertBuilder) {
+	b.tag.Attr(":outlined", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) Prominent(v bool) (r *VAlertBuilder) {
+	b.tag.Attr(":prominent", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) Tag(v string) (r *VAlertBuilder) {
+	b.tag.Attr("tag", v)
+	return b
+}
+
+func (b *VAlertBuilder) Text(v bool) (r *VAlertBuilder) {
+	b.tag.Attr(":text", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) Tile(v bool) (r *VAlertBuilder) {
+	b.tag.Attr(":tile", fmt.Sprint(v))
 	return b
 }
 
@@ -60,6 +140,35 @@ func (b *VAlertBuilder) Type(v string) (r *VAlertBuilder) {
 
 func (b *VAlertBuilder) Value(v bool) (r *VAlertBuilder) {
 	b.tag.Attr(":value", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) Width(v int) (r *VAlertBuilder) {
+	b.tag.Attr(":width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VAlertBuilder) Attr(vs ...interface{}) (r *VAlertBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VAlertBuilder) Children(children ...h.HTMLComponent) (r *VAlertBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VAlertBuilder) AppendChildren(children ...h.HTMLComponent) (r *VAlertBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VAlertBuilder) PrependChildren(children ...h.HTMLComponent) (r *VAlertBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 
