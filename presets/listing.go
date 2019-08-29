@@ -20,7 +20,7 @@ type ListingBuilder struct {
 	filterDataFunc FilterDataFunc
 	filterTabsFunc FilterTabsFunc
 	pageFunc       ui.PageFunc
-	searcher       SearchOpFunc
+	searcher       SearchFunc
 	searchColumns  []string
 	perPage        int64
 	orderBy        string
@@ -42,7 +42,7 @@ func (b *ListingBuilder) PageFunc(pf ui.PageFunc) (r *ListingBuilder) {
 	return b
 }
 
-func (b *ListingBuilder) Searcher(v SearchOpFunc) (r *ListingBuilder) {
+func (b *ListingBuilder) Searcher(v SearchFunc) (r *ListingBuilder) {
 	b.searcher = v
 	return b
 }
@@ -75,8 +75,8 @@ const bulkPanelPortalName = "bulkPanel"
 const deleteConfirmPortalName = "deleteConfirm"
 
 func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("formDrawerNew", b.mb.editing.formDrawerNew)
-	ctx.Hub.RegisterEventFunc("formDrawerEdit", b.mb.editing.formDrawerEdit)
+	ctx.Hub.RegisterEventFunc(formDrawerNew, b.mb.editing.formDrawerNew)
+	ctx.Hub.RegisterEventFunc(formDrawerEdit, b.mb.editing.formDrawerEdit)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
 	ctx.Hub.RegisterEventFunc("deleteConfirmation", b.deleteConfirmation)
 	ctx.Hub.RegisterEventFunc("doDelete", b.mb.editing.doDelete)
@@ -124,7 +124,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 	var objs interface{}
 	var totalCount int
-	objs, totalCount, err = b.searcher(b.mb.newModelArray(), searchParams)
+	objs, totalCount, err = b.searcher(b.mb.newModelArray(), searchParams, ctx)
 	if err != nil {
 		panic(err)
 	}

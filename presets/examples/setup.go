@@ -261,7 +261,14 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		}
 	})
 
-	ef := m.Editing("Name", "CompanyID", "LanguageCode")
+	ef := m.Editing("Name", "CompanyID", "LanguageCode").
+		ValidateFunc(func(obj interface{}, ctx *ui.EventContext) (err presets.ValidationErrors) {
+			cu := obj.(*Customer)
+			if len(cu.Name) < 5 {
+				err.FieldError("Name", "input more than 5 chars")
+			}
+			return
+		})
 	ef.Field("LanguageCode").Label("语言").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		u := obj.(*Customer)
 		var langs []Language

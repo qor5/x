@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/sunfmin/bran/ui"
+
 	"github.com/jinzhu/gorm"
 	"github.com/sunfmin/bran/presets"
 )
@@ -18,7 +20,7 @@ type dataOperatorImpl struct {
 	db *gorm.DB
 }
 
-func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams) (r interface{}, totalCount int, err error) {
+func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams, ctx *ui.EventContext) (r interface{}, totalCount int, err error) {
 	wh := op.db.Model(obj)
 	if len(params.KeywordColumns) > 0 && len(params.Keyword) > 0 {
 		var segs []string
@@ -62,7 +64,7 @@ func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams
 	return
 }
 
-func (op *dataOperatorImpl) Fetch(obj interface{}, id string) (r interface{}, err error) {
+func (op *dataOperatorImpl) Fetch(obj interface{}, id string, ctx *ui.EventContext) (r interface{}, err error) {
 	err = op.db.Model(obj).Find(obj, "id = ?", id).Error
 	if err != nil {
 		return
@@ -71,17 +73,12 @@ func (op *dataOperatorImpl) Fetch(obj interface{}, id string) (r interface{}, er
 	return
 }
 
-func (op *dataOperatorImpl) UpdateField(obj interface{}, id string, fieldName string, value interface{}) (err error) {
-	err = op.db.Model(obj).UpdateColumn(fieldName, value).Error
-	return
-}
-
-func (op *dataOperatorImpl) Save(obj interface{}, id string) (err error) {
+func (op *dataOperatorImpl) Save(obj interface{}, id string, ctx *ui.EventContext) (err error) {
 	err = op.db.Save(obj).Error
 	return
 }
 
-func (op *dataOperatorImpl) Delete(obj interface{}, id string) (err error) {
+func (op *dataOperatorImpl) Delete(obj interface{}, id string, ctx *ui.EventContext) (err error) {
 	err = op.db.Delete(obj, id).Error
 	return
 }

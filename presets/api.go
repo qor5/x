@@ -37,18 +37,17 @@ type MessagesFunc func(r *http.Request) *Messages
 
 // Data Layer
 type DataOperator interface {
-	Search(obj interface{}, params *SearchParams) (r interface{}, totalCount int, err error)
-	Fetch(obj interface{}, id string) (r interface{}, err error)
-	UpdateField(obj interface{}, id string, fieldName string, value interface{}) (err error)
-	Save(obj interface{}, id string) (err error)
-	Delete(obj interface{}, id string) (err error)
+	Search(obj interface{}, params *SearchParams, ctx *ui.EventContext) (r interface{}, totalCount int, err error)
+	Fetch(obj interface{}, id string, ctx *ui.EventContext) (r interface{}, err error)
+	Save(obj interface{}, id string, ctx *ui.EventContext) (err error)
+	Delete(obj interface{}, id string, ctx *ui.EventContext) (err error)
 }
 
-type SearchOpFunc func(model interface{}, params *SearchParams) (r interface{}, totalCount int, err error)
-type FetchOpFunc func(obj interface{}, id string) (r interface{}, err error)
-type UpdateFieldOpFunc func(obj interface{}, id string, fieldName string, value interface{}) (err error)
-type SaveOpFunc func(obj interface{}, id string) (err error)
-type DeleteOpFunc func(obj interface{}, id string) (err error)
+type SearchFunc func(model interface{}, params *SearchParams, ctx *ui.EventContext) (r interface{}, totalCount int, err error)
+type FetchFunc func(obj interface{}, id string, ctx *ui.EventContext) (r interface{}, err error)
+type SaveFunc func(obj interface{}, id string, ctx *ui.EventContext) (err error)
+type DeleteFunc func(obj interface{}, id string, ctx *ui.EventContext) (err error)
+type ValidateFunc func(obj interface{}, ctx *ui.EventContext) (err ValidationErrors)
 
 type SQLCondition struct {
 	Query string

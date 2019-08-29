@@ -240,6 +240,16 @@ func (b *ValidationErrors) GetGlobalErrors() (r []string) {
 	return b.globalErrors
 }
 
+func (b *ValidationErrors) HaveErrors() bool {
+	if len(b.globalErrors) > 0 {
+		return true
+	}
+	if len(b.fieldErrors) > 0 {
+		return true
+	}
+	return false
+}
+
 func (b *ValidationErrors) Error() string {
 	return fmt.Sprintf("validation error global: %+v, fields: %+v", b.globalErrors, b.fieldErrors)
 }

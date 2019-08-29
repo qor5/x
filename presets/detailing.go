@@ -12,7 +12,7 @@ type DetailingBuilder struct {
 	fieldNames []string
 	actions    []*ActionBuilder
 	pageFunc   ui.PageFunc
-	fetcher    FetchOpFunc
+	fetcher    FetchFunc
 	FieldBuilders
 }
 
@@ -37,7 +37,7 @@ func (b *DetailingBuilder) PageFunc(pf ui.PageFunc) (r *DetailingBuilder) {
 	return b
 }
 
-func (b *DetailingBuilder) Fetcher(v FetchOpFunc) (r *DetailingBuilder) {
+func (b *DetailingBuilder) Fetcher(v FetchFunc) (r *DetailingBuilder) {
 	b.fetcher = v
 	return b
 }
@@ -59,7 +59,7 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespo
 		panic("not found")
 	}
 
-	obj, err = b.fetcher(obj, id)
+	obj, err = b.fetcher(obj, id, ctx)
 	if err != nil {
 		return
 	}

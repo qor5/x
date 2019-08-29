@@ -11,12 +11,13 @@ import (
 )
 
 type EditingBuilder struct {
-	mb       *ModelBuilder
-	pageFunc ui.PageFunc
-	fetcher  FetchOpFunc
-	setter   SetterFunc
-	saver    SaveOpFunc
-	deleter  DeleteOpFunc
+	mb        *ModelBuilder
+	pageFunc  ui.PageFunc
+	fetcher   FetchFunc
+	setter    SetterFunc
+	saver     SaveFunc
+	deleter   DeleteFunc
+	validator ValidateFunc
 	FieldBuilders
 }
 
@@ -34,12 +35,13 @@ func (b *EditingBuilder) CloneForCreating(vs ...string) (r *EditingBuilder) {
 
 	if b.mb.creating == nil {
 		b.mb.creating = &EditingBuilder{
-			mb:       b.mb,
-			pageFunc: b.pageFunc,
-			fetcher:  b.fetcher,
-			setter:   b.setter,
-			saver:    b.saver,
-			deleter:  b.deleter,
+			mb:        b.mb,
+			pageFunc:  b.pageFunc,
+			fetcher:   b.fetcher,
+			setter:    b.setter,
+			saver:     b.saver,
+			deleter:   b.deleter,
+			validator: b.validator,
 		}
 	}
 	r = b.mb.creating
@@ -54,18 +56,23 @@ func (b *EditingBuilder) PageFunc(pf ui.PageFunc) (r *EditingBuilder) {
 	return b
 }
 
-func (b *EditingBuilder) FetchFunc(v FetchOpFunc) (r *EditingBuilder) {
+func (b *EditingBuilder) FetchFunc(v FetchFunc) (r *EditingBuilder) {
 	b.fetcher = v
 	return b
 }
 
-func (b *EditingBuilder) SaveFunc(v SaveOpFunc) (r *EditingBuilder) {
+func (b *EditingBuilder) SaveFunc(v SaveFunc) (r *EditingBuilder) {
 	b.saver = v
 	return b
 }
 
-func (b *EditingBuilder) DeleteFunc(v DeleteOpFunc) (r *EditingBuilder) {
+func (b *EditingBuilder) DeleteFunc(v DeleteFunc) (r *EditingBuilder) {
 	b.deleter = v
+	return b
+}
+
+func (b *EditingBuilder) ValidateFunc(v ValidateFunc) (r *EditingBuilder) {
+	b.validator = v
 	return b
 }
 
@@ -91,23 +98,23 @@ func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 		Params: []string{id},
 	}
 
-	r.Schema = b.editFormFor(title, msgr.Update, ctx)
+	r.Schema = b.editFormFor(nil, ctx)
 	return
 }
 
+const formPortalName = "formPortalName"
+const formDrawerNew = "formDrawerNew"
+
 func (b *EditingBuilder) formDrawerNew(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	msgr := MustGetMessages(ctx.R)
 	creatingB := b
 	if b.mb.creating != nil {
 		creatingB = b.mb.creating
 	}
 
-	form := creatingB.editFormFor(msgr.CreatingObjectTitle(inflection.Singular(b.mb.label)), msgr.Create, ctx)
-
 	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
 		Name: "rightDrawer",
 		Schema: VNavigationDrawer(
-			form,
+			ui.LazyPortal(creatingB.editFormFor(nil, ctx)).Name(formPortalName),
 		).Attr("v-model", "vars.formDrawerNew").
 			Bottom(true).
 			Right(true).
@@ -120,14 +127,14 @@ func (b *EditingBuilder) formDrawerNew(ctx *ui.EventContext) (r ui.EventResponse
 	return
 }
 
+const formDrawerEdit = "formDrawerEdit"
+
 func (b *EditingBuilder) formDrawerEdit(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	msgr := MustGetMessages(ctx.R)
-	form := b.editFormFor(msgr.EditingObjectTitle(inflection.Singular(b.mb.label)), msgr.Update, ctx)
 
 	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
 		Name: "rightDrawer",
 		Schema: VNavigationDrawer(
-			form,
+			ui.LazyPortal(b.editFormFor(nil, ctx)).Name(formPortalName),
 		).Attr("v-model", "vars.formDrawerEdit").
 			Bottom(true).
 			Right(true).
@@ -140,17 +147,28 @@ func (b *EditingBuilder) formDrawerEdit(ctx *ui.EventContext) (r ui.EventRespons
 	return
 }
 
-func (b *EditingBuilder) editFormFor(title, buttonLabel string, ctx *ui.EventContext) h.HTMLComponent {
+func (b *EditingBuilder) editFormFor(obj interface{}, ctx *ui.EventContext) h.HTMLComponent {
+	msgr := MustGetMessages(ctx.R)
+
 	id := ctx.Event.Params[0]
 	ctx.Hub.RegisterEventFunc("update", b.defaultUpdate)
-	var obj = b.mb.newModel()
 
+	var buttonLabel = msgr.Create
+	var title = msgr.CreatingObjectTitle(inflection.Singular(b.mb.label))
 	if len(id) > 0 {
-		var err error
-		obj, err = b.fetcher(obj, id)
-		if err != nil {
-			panic(err)
+		if obj == nil {
+			var err error
+			obj, err = b.fetcher(b.mb.newModel(), id, ctx)
+			if err != nil {
+				panic(err)
+			}
 		}
+		buttonLabel = msgr.Update
+		title = msgr.EditingObjectTitle(inflection.Singular(b.mb.label))
+	}
+
+	if obj == nil {
+		obj = b.mb.newModel()
 	}
 
 	var notice h.HTMLComponent
@@ -184,7 +202,7 @@ func (b *EditingBuilder) doDelete(ctx *ui.EventContext) (r ui.EventResponse, err
 	id := ctx.Event.Params[0]
 	var obj = b.mb.newModel()
 	if len(id) > 0 {
-		err = b.deleter(obj, id)
+		err = b.deleter(obj, id, ctx)
 		if err != nil {
 			return
 		}
@@ -207,7 +225,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 	}
 
 	if len(id) > 0 {
-		obj, err = usingB.fetcher(obj, id)
+		obj, err = usingB.fetcher(obj, id, ctx)
 		if err != nil {
 			return
 		}
@@ -219,7 +237,18 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 		usingB.setter(obj, ctx.R.MultipartForm, ctx)
 	}
 
-	err = usingB.saver(obj, id)
+	if usingB.validator != nil {
+		if vErr := usingB.validator(obj, ctx); vErr.HaveErrors() {
+			ctx.Flash = &vErr
+			r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
+				Name:   formPortalName,
+				Schema: b.editFormFor(obj, ctx),
+			})
+			return
+		}
+	}
+
+	err = usingB.saver(obj, id, ctx)
 	if err != nil {
 		panic(err)
 	}
