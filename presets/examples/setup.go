@@ -265,7 +265,8 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		ValidateFunc(func(obj interface{}, ctx *ui.EventContext) (err presets.ValidationErrors) {
 			cu := obj.(*Customer)
 			if len(cu.Name) < 5 {
-				err.FieldError("Name", "input more than 5 chars")
+				_ = err.FieldError("Name", "input more than 5 chars")
+				_ = err.GlobalError("there are some errors")
 			}
 			return
 		})
