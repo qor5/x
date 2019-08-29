@@ -20,8 +20,7 @@ type FieldContext struct {
 }
 
 func (fc *FieldContext) StringValue(obj interface{}) (r string) {
-	fieldName := fc.Name
-	val := reflectutils.MustGet(obj, fieldName)
+	val := fc.Value(obj)
 	switch vt := val.(type) {
 	case []rune:
 		return string(vt)
@@ -31,7 +30,12 @@ func (fc *FieldContext) StringValue(obj interface{}) (r string) {
 	return fmt.Sprint(val)
 }
 
-type FieldTypeBuilder struct {
+func (fc *FieldContext) Value(obj interface{}) (r interface{}) {
+	fieldName := fc.Name
+	return reflectutils.MustGet(obj, fieldName)
+}
+
+type FieldDefaultBuilder struct {
 	valType  reflect.Type
 	mode     FieldMode
 	compFunc FieldComponentFunc
@@ -44,12 +48,12 @@ const (
 	LIST
 )
 
-func NewFieldType(t reflect.Type) (r *FieldTypeBuilder) {
-	r = &FieldTypeBuilder{valType: t}
+func NewFieldDefault(t reflect.Type) (r *FieldDefaultBuilder) {
+	r = &FieldDefaultBuilder{valType: t}
 	return
 }
 
-func (b *FieldTypeBuilder) ComponentFunc(v FieldComponentFunc) (r *FieldTypeBuilder) {
+func (b *FieldDefaultBuilder) ComponentFunc(v FieldComponentFunc) (r *FieldDefaultBuilder) {
 	b.compFunc = v
 	return b
 }
@@ -66,35 +70,35 @@ var stringVals = []interface{}{
 	[]byte(""),
 }
 
-type FieldTypes struct {
+type FieldDefaults struct {
 	mode             FieldMode
-	fieldTypes       []*FieldTypeBuilder
+	fieldTypes       []*FieldDefaultBuilder
 	excludesPatterns []string
 }
 
-func NewFieldTypes(t FieldMode) (r *FieldTypes) {
-	r = &FieldTypes{
+func NewFieldDefaults(t FieldMode) (r *FieldDefaults) {
+	r = &FieldDefaults{
 		mode: t,
 	}
 	r.builtInFieldTypes()
 	return
 }
 
-func (b *FieldTypes) FieldType(v interface{}) (r *FieldTypeBuilder) {
+func (b *FieldDefaults) FieldType(v interface{}) (r *FieldDefaultBuilder) {
 	return b.fieldTypeByType(reflect.TypeOf(v))
 }
 
-func (b *FieldTypes) Exclude(patterns ...string) (r *FieldTypes) {
+func (b *FieldDefaults) Exclude(patterns ...string) (r *FieldDefaults) {
 	b.excludesPatterns = patterns
 	return b
 }
 
-func (b *FieldTypes) InspectFields(val interface{}) (r *FieldBuilders) {
+func (b *FieldDefaults) InspectFields(val interface{}) (r *FieldBuilders) {
 	r, _ = b.inspectFieldsAndCollectName(val, nil)
 	return
 }
 
-func (b *FieldTypes) inspectFieldsAndCollectName(val interface{}, collectType reflect.Type) (r *FieldBuilders, names []string) {
+func (b *FieldDefaults) inspectFieldsAndCollectName(val interface{}, collectType reflect.Type) (r *FieldBuilders, names []string) {
 	v := reflect.ValueOf(val)
 
 	for v.Elem().Kind() == reflect.Ptr {
@@ -136,13 +140,13 @@ func hasMatched(patterns []string, name string) bool {
 	return false
 }
 
-func (b *FieldTypes) fieldTypeByType(tv reflect.Type) (r *FieldTypeBuilder) {
+func (b *FieldDefaults) fieldTypeByType(tv reflect.Type) (r *FieldDefaultBuilder) {
 	for _, ft := range b.fieldTypes {
 		if ft.valType == tv {
 			return ft
 		}
 	}
-	r = NewFieldType(tv)
+	r = NewFieldDefault(tv)
 	b.fieldTypes = append(b.fieldTypes, r)
 	return
 }
@@ -193,7 +197,7 @@ func cfTextField(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.H
 		Value(reflectutils.MustGet(obj, field.Name).(string))
 }
 
-func (b *FieldTypes) builtInFieldTypes() {
+func (b *FieldDefaults) builtInFieldTypes() {
 
 	if b.mode == LIST {
 		b.FieldType(true).

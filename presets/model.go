@@ -56,7 +56,7 @@ func (b *ModelBuilder) newModelArray() (r interface{}) {
 }
 
 func (b *ModelBuilder) newListing() (r *ListingBuilder) {
-	b.listing = &ListingBuilder{mb: b, FieldBuilders: *b.p.listFieldTypes.InspectFields(b.model)}
+	b.listing = &ListingBuilder{mb: b, FieldBuilders: *b.p.listFieldDefaults.InspectFields(b.model)}
 	if b.p.dataOperator != nil {
 		b.listing.Searcher(b.p.dataOperator.Search)
 	}
@@ -64,7 +64,7 @@ func (b *ModelBuilder) newListing() (r *ListingBuilder) {
 }
 
 func (b *ModelBuilder) newEditing() (r *EditingBuilder) {
-	b.writeFields, b.listing.searchColumns = b.p.writeFieldTypes.inspectFieldsAndCollectName(b.model, reflect.TypeOf(""))
+	b.writeFields, b.listing.searchColumns = b.p.writeFieldDefaults.inspectFieldsAndCollectName(b.model, reflect.TypeOf(""))
 	b.editing = &EditingBuilder{mb: b, FieldBuilders: *b.writeFields}
 	if b.p.dataOperator != nil {
 		b.editing.FetchFunc(b.p.dataOperator.Fetch)

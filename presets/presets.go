@@ -20,32 +20,32 @@ import (
 )
 
 type Builder struct {
-	prefix          string
-	models          []*ModelBuilder
-	mux             *goji.Mux
-	builder         *bran.Builder
-	logger          *zap.Logger
-	dataOperator    DataOperator
-	messagesFunc    MessagesFunc
-	homePageFunc    ui.PageFunc
-	brandFunc       ComponentFunc
-	brandTitle      string
-	primaryColor    string
-	writeFieldTypes *FieldTypes
-	listFieldTypes  *FieldTypes
+	prefix             string
+	models             []*ModelBuilder
+	mux                *goji.Mux
+	builder            *bran.Builder
+	logger             *zap.Logger
+	dataOperator       DataOperator
+	messagesFunc       MessagesFunc
+	homePageFunc       ui.PageFunc
+	brandFunc          ComponentFunc
+	brandTitle         string
+	primaryColor       string
+	writeFieldDefaults *FieldDefaults
+	listFieldDefaults  *FieldDefaults
 	MenuGroups
 }
 
 func New() *Builder {
 	l, _ := zap.NewDevelopment()
 	return &Builder{
-		logger:          l,
-		builder:         bran.New(),
-		messagesFunc:    defaultMessageFunc,
-		writeFieldTypes: NewFieldTypes(WRITE),
-		listFieldTypes:  NewFieldTypes(LIST),
-		primaryColor:    "indigo",
-		brandTitle:      "Admin",
+		logger:             l,
+		builder:            bran.New(),
+		messagesFunc:       defaultMessageFunc,
+		writeFieldDefaults: NewFieldDefaults(WRITE),
+		listFieldDefaults:  NewFieldDefaults(LIST),
+		primaryColor:       "indigo",
+		brandTitle:         "Admin",
 	}
 }
 
@@ -89,13 +89,13 @@ func (b *Builder) PrimaryColor(v string) (r *Builder) {
 	return b
 }
 
-func (b *Builder) Mode(v FieldMode) (r *FieldTypes) {
+func (b *Builder) FieldDefaults(v FieldMode) (r *FieldDefaults) {
 	if v == WRITE {
-		return b.writeFieldTypes
+		return b.writeFieldDefaults
 	}
 
 	if v == LIST {
-		return b.listFieldTypes
+		return b.listFieldDefaults
 	}
 
 	return r

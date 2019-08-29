@@ -116,8 +116,8 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		)
 	}).BrandTitle("The Plant")
 
-	writeFields := p.Mode(presets.WRITE)
-	writeFields.FieldType(&Thumb{}).ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
+	writeFieldDefaults := p.FieldDefaults(presets.WRITE)
+	writeFieldDefaults.FieldType(&Thumb{}).ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		i, err := reflectutils.Get(obj, field.Name)
 		if err != nil {
 			panic(err)
@@ -125,7 +125,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		return h.Text(i.(*Thumb).Name)
 	})
 
-	p.Mode(presets.LIST).FieldType(&Thumb{}).ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
+	p.FieldDefaults(presets.LIST).FieldType(&Thumb{}).ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 		i, err := reflectutils.Get(obj, field.Name)
 		if err != nil {
 			panic(err)
