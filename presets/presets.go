@@ -237,9 +237,9 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
 		ctx.Injector.PutHeadHTML(`
-			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono" async>
-			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" async>
-			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" async>
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 			<link rel="stylesheet" href="/assets/main.css">
 			<script src='/assets/vue.js'></script>
 			<style>

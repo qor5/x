@@ -178,7 +178,6 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	//body.WriteString(head.MainScripts(true))
 	body.WriteString(head.TailHTML())
 	body.WriteString("\n")
 
@@ -281,17 +280,8 @@ func reload(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 }
 
 func eventResponseWithContext(ctx *ui.EventContext, c context.Context, er *ui.EventResponse) {
-	if comp, ok := er.Alert.(ui.SchemaComponent); ok {
-		er.Alert = ui.WithContext(ctx, comp)
-	}
-	if comp, ok := er.Confirm.(ui.SchemaComponent); ok {
-		er.Confirm = ui.WithContext(ctx, comp)
-	}
 	if comp, ok := er.Schema.(ui.SchemaComponent); ok {
 		er.Schema = ui.WithContext(ctx, comp)
-	}
-	if comp, ok := er.Dialog.(ui.SchemaComponent); ok {
-		er.Dialog = ui.WithContext(ctx, comp)
 	}
 
 	if comp, ok := er.Schema.(h.HTMLComponent); ok {
