@@ -108,7 +108,10 @@ func (b *FieldDefaults) inspectFieldsAndCollectName(val interface{}, collectType
 
 	t := v.Type()
 
-	r = &FieldBuilders{}
+	r = &FieldBuilders{
+		defaults: b,
+		obj:      val,
+	}
 
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
@@ -178,7 +181,8 @@ func cfCheckbox(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HT
 	return VCheckbox().
 		FieldName(field.Name).
 		Label(field.Label).
-		InputValue(reflectutils.MustGet(obj, field.Name).(bool))
+		InputValue(reflectutils.MustGet(obj, field.Name).(bool)).
+		ErrorMessages(field.Errors...)
 }
 
 func cfNumber(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent {
@@ -186,7 +190,8 @@ func cfNumber(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTML
 		Type("number").
 		FieldName(field.Name).
 		Label(field.Label).
-		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name)))
+		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name))).
+		ErrorMessages(field.Errors...)
 }
 
 func cfTextField(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent {
@@ -194,7 +199,8 @@ func cfTextField(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.H
 		Type("text").
 		FieldName(field.Name).
 		Label(field.Label).
-		Value(reflectutils.MustGet(obj, field.Name).(string))
+		Value(reflectutils.MustGet(obj, field.Name).(string)).
+		ErrorMessages(field.Errors...)
 }
 
 func (b *FieldDefaults) builtInFieldTypes() {

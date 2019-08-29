@@ -83,7 +83,11 @@ func (b *VTextareaBuilder) ErrorCount(v int) (r *VTextareaBuilder) {
 	return b
 }
 
-func (b *VTextareaBuilder) ErrorMessages(v interface{}) (r *VTextareaBuilder) {
+func (b *VTextareaBuilder) ErrorMessages(v ...string) (r *VTextareaBuilder) {
+	if len(v) == 0 {
+		return b
+	}
+
 	b.tag.Attr(":error-messages", h.JSONString(v))
 	return b
 }

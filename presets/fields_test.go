@@ -2,10 +2,11 @@ package presets_test
 
 import (
 	"context"
-	"fmt"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/theplant/testingutils"
 
 	"github.com/sunfmin/bran/presets"
 	"github.com/sunfmin/bran/ui"
@@ -34,7 +35,7 @@ func TestFields(t *testing.T) {
 
 	ft := presets.NewFieldDefaults(presets.WRITE).Exclude("ID")
 	ft.FieldType(time.Time{}).ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-		return h.Div().Class("time-control").Text(field.Value(obj).(time.Time).Format("2006-01-02"))
+		return h.Div().Class("time-control").Text(field.Value(obj).(time.Time).Format("2006-01-02")).Attr("field-name", field.Name)
 	})
 
 	r := httptest.NewRequest("GET", "/hello", nil)
@@ -54,35 +55,85 @@ func TestFields(t *testing.T) {
 		},
 	}
 
-	output := h.MustString(
-		ft.InspectFields(&User{}).
-			Labels("Int1", "整数1", "Company.Name", "公司名").
-			Only("Int1", "Float1", "String1", "Bool1", "Time1", "Company.Name", "Company.FoundedAt").
-			ToComponent(
-				user,
-				vd,
-				ctx),
-		context.TODO(),
-	)
-
-	fmt.Println(output)
-
-	output = h.MustString(
-		ft.InspectFields(&User{}).
-			Except("Company*").
-			ToComponent(user, vd, ctx),
-		context.TODO(),
-	)
-
-	fmt.Println(output)
-
 	ftRead := presets.NewFieldDefaults(presets.LIST)
 
-	output = h.MustString(
-		ftRead.InspectFields(&User{}).
-			Except("Company*").ToComponent(user, vd, ctx),
-		ui.WrapEventContext(context.TODO(), ctx),
-	)
+	var cases = []struct {
+		name           string
+		toComponentFun func() h.HTMLComponent
+		expect         string
+	}{
+		{
+			name: "Only with additional nested object",
+			toComponentFun: func() h.HTMLComponent {
+				return ft.InspectFields(&User{}).
+					Labels("Int1", "整数1", "Company.Name", "公司名").
+					Only("Int1", "Float1", "String1", "Bool1", "Time1", "Company.Name", "Company.FoundedAt").
+					ToComponent(
+						user,
+						vd,
+						ctx)
+			},
+			expect: `
+<vw-text-field type='number' field-name='Int1' label='整数1' value='2'></vw-text-field>
 
-	fmt.Println(output)
+<vw-text-field type='number' field-name='Float1' label='Float1' value='23.1'></vw-text-field>
+
+<vw-text-field type='text' field-name='String1' label='String1' value='hello' :error-messages='["too small"]'></vw-text-field>
+
+<vw-checkbox field-name='Bool1' label='Bool1' :input-value='true'></vw-checkbox>
+
+<div field-name='Time1' class='time-control'>2019-08-29</div>
+
+<vw-text-field type='text' field-name='Company.Name' label='公司名' value='Company1'></vw-text-field>
+
+<div field-name='Company.FoundedAt' class='time-control'>2019-08-29</div>
+`,
+		},
+
+		{
+			name: "Except with file glob pattern",
+			toComponentFun: func() h.HTMLComponent {
+				return ft.InspectFields(&User{}).
+					Except("Bool*").
+					ToComponent(user, vd, ctx)
+			},
+			expect: `
+<vw-text-field type='number' field-name='Int1' label='Int1' value='2'></vw-text-field>
+
+<vw-text-field type='number' field-name='Float1' label='Float1' value='23.1'></vw-text-field>
+
+<vw-text-field type='text' field-name='String1' label='String1' value='hello' :error-messages='["too small"]'></vw-text-field>
+
+<div field-name='Time1' class='time-control'>2019-08-29</div>
+`,
+		},
+
+		{
+			name: "Read Except with file glob pattern",
+			toComponentFun: func() h.HTMLComponent {
+				return ftRead.InspectFields(&User{}).
+					Except("Float*").ToComponent(user, vd, ctx)
+			},
+			expect: `
+<td>1</td>
+
+<td>2</td>
+
+<td>hello</td>
+
+<td>true</td>
+`,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			output := h.MustString(c.toComponentFun(), ui.WrapEventContext(context.TODO(), ctx))
+			diff := testingutils.PrettyJsonDiff(c.expect, output)
+			if len(diff) > 0 {
+				t.Error(c.name, diff)
+			}
+		})
+	}
+
 }

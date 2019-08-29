@@ -13,8 +13,8 @@ import (
 
 type FieldBuilder struct {
 	NameLabel
-	compFunc   FieldComponentFunc
-	setterFunc SetterFunc
+	compFunc FieldComponentFunc
+	//setterFunc SetterFunc
 }
 
 func NewField(name string) (r *FieldBuilder) {
@@ -39,7 +39,7 @@ func (b *FieldBuilder) Clone() (r *FieldBuilder) {
 	r.name = b.name
 	r.label = b.label
 	r.compFunc = b.compFunc
-	r.setterFunc = b.setterFunc
+	//r.setterFunc = b.setterFunc
 	return r
 }
 
@@ -51,10 +51,11 @@ func (b *FieldBuilder) ComponentFunc(v FieldComponentFunc) (r *FieldBuilder) {
 	return b
 }
 
-func (b *FieldBuilder) SetterFunc(v SetterFunc) (r *FieldBuilder) {
-	b.setterFunc = v
-	return b
-}
+//
+//func (b *FieldBuilder) SetterFunc(v SetterFunc) (r *FieldBuilder) {
+//	b.setterFunc = v
+//	return b
+//}
 
 type NameLabel struct {
 	name  string
@@ -62,6 +63,8 @@ type NameLabel struct {
 }
 
 type FieldBuilders struct {
+	obj         interface{}
+	defaults    *FieldDefaults
 	fieldLabels []string
 	fields      []*FieldBuilder
 }
@@ -105,17 +108,28 @@ func (b *FieldBuilders) GetField(name string) (r *FieldBuilder) {
 	return
 }
 
-func (b *FieldBuilders) Only(patterns ...string) (r *FieldBuilders) {
-	if len(patterns) == 0 {
+func (b *FieldBuilders) Only(names ...string) (r *FieldBuilders) {
+	if len(names) == 0 {
 		return b
 	}
 
 	r = &FieldBuilders{fieldLabels: b.fieldLabels}
 
-	for _, f := range b.fields {
-		if hasMatched(patterns, f.name) {
-			r.fields = append(r.fields, f.Clone())
+	for _, n := range names {
+		f := b.GetField(n)
+		if f == nil {
+			fType := reflectutils.GetType(b.obj, n)
+			if fType == nil {
+				continue
+			}
+
+			compFunc := b.defaults.fieldTypeByType(fType).compFunc
+			if compFunc != nil {
+				r.Field(n).ComponentFunc(compFunc)
+				continue
+			}
 		}
+		r.fields = append(r.fields, f.Clone())
 	}
 
 	return
