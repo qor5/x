@@ -110,7 +110,7 @@ func (b *VueEventTagBuilder) Update() {
 			h.JSONString(b.eventFunc),
 			h.JSONString(b.url),
 		)
-	} else {
+	} else if b.eventFunc.PushState != nil {
 		callFunc = fmt.Sprintf("topage(%s)", h.JSONString(b.eventFunc.PushState))
 	}
 
