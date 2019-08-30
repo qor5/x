@@ -1,24 +1,24 @@
 package presets
 
-type BulkActionBuilder struct {
+type ActionBuilder struct {
 	NameLabel
-	updateFunc BulkActionUpdateFunc
-	compFunc   BulkComponentFunc
+	updateFunc ActionUpdateFunc
+	compFunc   ActionComponentFunc
 }
 
-func (b *ListingBuilder) BulkAction(name string) (r *BulkActionBuilder) {
-	builder := b.getBulkAction(name)
+func (b *ListingBuilder) BulkAction(name string) (r *ActionBuilder) {
+	builder := getAction(b.bulkActions, name)
 	if builder != nil {
 		return builder
 	}
-	r = &BulkActionBuilder{}
+	r = &ActionBuilder{}
 	r.name = name
 	b.bulkActions = append(b.bulkActions, r)
 	return
 }
 
-func (b *ListingBuilder) getBulkAction(name string) *BulkActionBuilder {
-	for _, f := range b.bulkActions {
+func getAction(actions []*ActionBuilder, name string) *ActionBuilder {
+	for _, f := range actions {
 		if f.name == name {
 			return f
 		}
@@ -26,44 +26,29 @@ func (b *ListingBuilder) getBulkAction(name string) *BulkActionBuilder {
 	return nil
 }
 
-func (b *BulkActionBuilder) UpdateFunc(v BulkActionUpdateFunc) (r *BulkActionBuilder) {
+func (b *ActionBuilder) UpdateFunc(v ActionUpdateFunc) (r *ActionBuilder) {
 	b.updateFunc = v
 	return b
 }
 
-func (b *BulkActionBuilder) Label(v string) (r *BulkActionBuilder) {
+func (b *ActionBuilder) Label(v string) (r *ActionBuilder) {
 	b.label = v
 	return b
 }
 
-func (b *BulkActionBuilder) ComponentFunc(v BulkComponentFunc) (r *BulkActionBuilder) {
+func (b *ActionBuilder) ComponentFunc(v ActionComponentFunc) (r *ActionBuilder) {
 	b.compFunc = v
 	return b
-}
-
-type ActionBuilder struct {
-	name       string
-	updateFunc UpdateFunc
-	compFunc   FieldComponentFunc
 }
 
 func (b *DetailingBuilder) Action(name string) (r *ActionBuilder) {
-	for _, f := range b.actions {
-		if f.name == name {
-			return f
-		}
+	builder := getAction(b.actions, name)
+	if builder != nil {
+		return builder
 	}
-	r = &ActionBuilder{name: name}
+
+	r = &ActionBuilder{}
+	r.name = name
 	b.actions = append(b.actions, r)
 	return
-}
-
-func (b *ActionBuilder) UpdateFunc(v UpdateFunc) (r *ActionBuilder) {
-	b.updateFunc = v
-	return b
-}
-
-func (b *ActionBuilder) ComponentFunc(v FieldComponentFunc) (r *ActionBuilder) {
-	b.compFunc = v
-	return b
 }

@@ -102,7 +102,6 @@ func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	return
 }
 
-const formPortalName = "formPortalName"
 const formDrawerNew = "formDrawerNew"
 
 func (b *EditingBuilder) formDrawerNew(ctx *ui.EventContext) (r ui.EventResponse, err error) {
@@ -111,39 +110,14 @@ func (b *EditingBuilder) formDrawerNew(ctx *ui.EventContext) (r ui.EventResponse
 		creatingB = b.mb.creating
 	}
 
-	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
-		Name: "rightDrawer",
-		Schema: VNavigationDrawer(
-			ui.LazyPortal(creatingB.editFormFor(nil, ctx)).Name(formPortalName),
-		).Attr("v-model", "vars.formDrawerNew").
-			Bottom(true).
-			Right(true).
-			Absolute(true).
-			Width(600).
-			Temporary(true).
-			Attr("v-init-context-vars", `{formDrawerNew: false}`),
-		AfterLoaded: `setTimeout(function(){ comp.vars.formDrawerNew = true }, 100)`,
-	})
+	rightDrawer(&r, creatingB.editFormFor(nil, ctx))
 	return
 }
 
 const formDrawerEdit = "formDrawerEdit"
 
 func (b *EditingBuilder) formDrawerEdit(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-
-	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
-		Name: "rightDrawer",
-		Schema: VNavigationDrawer(
-			ui.LazyPortal(b.editFormFor(nil, ctx)).Name(formPortalName),
-		).Attr("v-model", "vars.formDrawerEdit").
-			Bottom(true).
-			Right(true).
-			Absolute(true).
-			Width(600).
-			Temporary(true).
-			Attr("v-init-context-vars", `{formDrawerEdit: false}`),
-		AfterLoaded: `setTimeout(function(){ comp.vars.formDrawerEdit = true }, 100)`,
-	})
+	rightDrawer(&r, b.editFormFor(nil, ctx))
 	return
 }
 
@@ -235,7 +209,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 	usingB.MustSet(obj, newObj)
 
 	if usingB.setter != nil {
-		usingB.setter(obj, ctx.R.MultipartForm, ctx)
+		usingB.setter(obj, ctx)
 	}
 
 	if usingB.validator != nil {
@@ -267,7 +241,7 @@ func (b *EditingBuilder) renderFormWithError(r *ui.EventResponse, err error, obj
 	}
 
 	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
-		Name:   formPortalName,
+		Name:   rightDrawerPortalName,
 		Schema: b.editFormFor(obj, ctx),
 	})
 

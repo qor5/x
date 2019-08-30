@@ -233,6 +233,25 @@ func putModelInfo(mi *ModelInfo, in http.Handler) (out http.Handler) {
 	})
 }
 
+const rightDrawerName = "rightDrawer"
+const rightDrawerPortalName = "rightDrawerPortalName"
+
+func rightDrawer(r *ui.EventResponse, comp h.HTMLComponent) {
+	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
+		Name: rightDrawerName,
+		Schema: VNavigationDrawer(
+			ui.LazyPortal(comp).Name(rightDrawerPortalName),
+		).Attr("v-model", "vars.rightDrawer").
+			Bottom(true).
+			Right(true).
+			Absolute(true).
+			Width(600).
+			Temporary(true).
+			Attr("v-init-context-vars", `{rightDrawer: false}`),
+		AfterLoaded: `setTimeout(function(){ comp.vars.rightDrawer = true }, 100)`,
+	})
+}
+
 func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
@@ -277,7 +296,7 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 				Attr("v-model", "vars.navDrawer").
 				Attr("v-init-context-vars", `{navDrawer: null}`),
 
-			ui.LazyPortal().EventFunc("").Name("rightDrawer"),
+			ui.LazyPortal().EventFunc("").Name(rightDrawerName),
 
 			VAppBar(
 				VAppBarNavIcon().On("click.stop", "vars.navDrawer = !vars.navDrawer"),

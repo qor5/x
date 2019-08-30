@@ -3,6 +3,7 @@ package integration_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -228,6 +229,60 @@ owner1
 				t.Error(u)
 			}
 
+			return
+		},
+	},
+
+	{
+		name: "formDrawerAction AgreeTerms",
+		reqFunc: func(db *gorm.DB) *http.Request {
+			customerData.TruncatePut(db)
+			r := httptest.NewRequest("POST", "/admin/customers/11?__execute_event__=formDrawerAction", strings.NewReader(`
+------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
+Content-Disposition: form-data; name="__event_data__"
+
+{"eventFuncId":{"id":"formDrawerAction","params":["AgreeTerms", "11"],"pushState":null},"event":{}}
+------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
+`))
+			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
+			return r
+		},
+		eventResponseMatch: func(er *ui.EventResponse, db *gorm.DB, t *testing.T) {
+			partial := er.UpdatePortals[0].Schema.(string)
+			if strings.Index(partial, "field-name='Agree'") < 0 {
+				t.Error("can't find field-name='Agree'", partial)
+			}
+			return
+		},
+	},
+
+	{
+		name: "doAction AgreeTerms",
+		reqFunc: func(db *gorm.DB) *http.Request {
+			customerData.TruncatePut(db)
+			r := httptest.NewRequest("POST", "/admin/customers/11?__execute_event__=doAction", strings.NewReader(`
+------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
+Content-Disposition: form-data; name="__event_data__"
+
+{"eventFuncId":{"id":"doAction","params":["AgreeTerms", "11"],"pushState":null},"event":{}}
+------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
+Content-Disposition: form-data; name="Agree"
+
+true
+------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
+`))
+			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
+			return r
+		},
+		eventResponseMatch: func(er *ui.EventResponse, db *gorm.DB, t *testing.T) {
+			var u = &examples.Customer{}
+			err := db.First(u).Error
+			if err != nil {
+				t.Error(err)
+			}
+			if u.TermAgreedAt == nil {
+				t.Error(fmt.Sprintf("%#+v", u))
+			}
 			return
 		},
 	},

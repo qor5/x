@@ -1,7 +1,6 @@
 package presets
 
 import (
-	"mime/multipart"
 	"net/http"
 	"net/url"
 
@@ -10,28 +9,11 @@ import (
 	h "github.com/theplant/htmlgo"
 )
 
-// UI Layer
-
 type ComponentFunc func(ctx *ui.EventContext) h.HTMLComponent
-
-type BulkComponentFunc func(selectedIds []string, ctx *ui.EventContext) h.HTMLComponent
-
 type FieldComponentFunc func(obj interface{}, field *FieldContext, ctx *ui.EventContext) h.HTMLComponent
 
-type FilterDataFunc func(ctx *ui.EventContext) v.FilterData
-
-type FilterTab struct {
-	Label string
-	Query url.Values
-}
-
-type FilterTabsFunc func(ctx *ui.EventContext) []*FilterTab
-
-type BulkActionUpdateFunc func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error)
-
-type UpdateFunc func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) (err error)
-
-type SetterFunc func(obj interface{}, form *multipart.Form, ctx *ui.EventContext)
+type ActionComponentFunc func(selectedIds []string, ctx *ui.EventContext) h.HTMLComponent
+type ActionUpdateFunc func(selectedIds []string, ctx *ui.EventContext) (err error)
 
 type MessagesFunc func(r *http.Request) *Messages
 
@@ -43,11 +25,22 @@ type DataOperator interface {
 	Delete(obj interface{}, id string, ctx *ui.EventContext) (err error)
 }
 
+type SetterFunc func(obj interface{}, ctx *ui.EventContext)
+type ValidateFunc func(obj interface{}, ctx *ui.EventContext) (err ValidationErrors)
+
 type SearchFunc func(model interface{}, params *SearchParams, ctx *ui.EventContext) (r interface{}, totalCount int, err error)
 type FetchFunc func(obj interface{}, id string, ctx *ui.EventContext) (r interface{}, err error)
 type SaveFunc func(obj interface{}, id string, ctx *ui.EventContext) (err error)
 type DeleteFunc func(obj interface{}, id string, ctx *ui.EventContext) (err error)
-type ValidateFunc func(obj interface{}, ctx *ui.EventContext) (err ValidationErrors)
+
+type FilterDataFunc func(ctx *ui.EventContext) v.FilterData
+
+type FilterTab struct {
+	Label string
+	Query url.Values
+}
+
+type FilterTabsFunc func(ctx *ui.EventContext) []*FilterTab
 
 type SQLCondition struct {
 	Query string

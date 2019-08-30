@@ -16,7 +16,7 @@ import (
 
 type ListingBuilder struct {
 	mb             *ModelBuilder
-	bulkActions    []*BulkActionBuilder
+	bulkActions    []*ActionBuilder
 	filterDataFunc FilterDataFunc
 	filterTabsFunc FilterTabsFunc
 	pageFunc       ui.PageFunc
@@ -136,7 +136,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 	var toolbar h.HTMLComponent
 	var bulkPanel h.HTMLComponent
 	bulkName := ctx.R.URL.Query().Get(bulkPanelOpenParamName)
-	bulk := b.getBulkAction(bulkName)
+	bulk := getAction(b.bulkActions, bulkName)
 	if bulk == nil {
 		if haveCheckboxes && len(selected) > 0 {
 			toolbar = b.bulkActionsToolbar(msgr, ctx)
@@ -207,7 +207,7 @@ func getSelectedIds(ctx *ui.EventContext) (selected []string) {
 	return selected
 }
 
-func (b *ListingBuilder) bulkPanel(bulk *BulkActionBuilder, selectedIds []string, ctx *ui.EventContext) (r h.HTMLComponent) {
+func (b *ListingBuilder) bulkPanel(bulk *ActionBuilder, selectedIds []string, ctx *ui.EventContext) (r h.HTMLComponent) {
 	msgr := MustGetMessages(ctx.R)
 
 	return VCard(
@@ -261,12 +261,12 @@ func (b *ListingBuilder) deleteConfirmation(ctx *ui.EventContext) (r ui.EventRes
 }
 
 func (b *ListingBuilder) doBulkAction(ctx *ui.EventContext) (r ui.EventResponse, err error) {
-	bulk := b.getBulkAction(ctx.Event.Params[0])
+	bulk := getAction(b.bulkActions, ctx.Event.Params[0])
 	if bulk == nil {
 		panic("bulk required")
 	}
 	selectedIds := strings.Split(ctx.Event.Params[1], ",")
-	err1 := bulk.updateFunc(selectedIds, ctx.R.MultipartForm, ctx)
+	err1 := bulk.updateFunc(selectedIds, ctx)
 	if err1 != nil || ctx.Flash != nil {
 		r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
 			Name:   bulkPanelPortalName,

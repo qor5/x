@@ -6,12 +6,9 @@ import (
 	"testing"
 
 	"github.com/jinzhu/gorm"
-
-	"github.com/theplant/gofixtures"
-
-	"github.com/sunfmin/bran/ui"
-
 	"github.com/sunfmin/bran/presets/gormop"
+	"github.com/sunfmin/bran/ui"
+	"github.com/theplant/gofixtures"
 )
 
 type TestVariant struct {

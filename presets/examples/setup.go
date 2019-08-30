@@ -2,7 +2,6 @@ package examples
 
 import (
 	"fmt"
-	"mime/multipart"
 	"net/url"
 	"time"
 
@@ -31,6 +30,7 @@ type Customer struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	ApprovedAt      *time.Time
+	TermAgreedAt    *time.Time
 	ApprovalComment string
 	LanguageCode    string
 }
@@ -179,7 +179,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			EventFunc("formDrawerEdit", fmt.Sprint(comp.ID)))
 	})
 
-	l.BulkAction("Approve").Label("Approve").UpdateFunc(func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error) {
+	l.BulkAction("Approve").Label("Approve").UpdateFunc(func(selectedIds []string, ctx *ui.EventContext) (err error) {
 		comment := ctx.R.FormValue("ApprovalComment")
 		if len(comment) < 10 {
 			ctx.Flash = "comment should larger than 10"
@@ -205,7 +205,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			ErrorMessages(errorMessage)
 	})
 
-	l.BulkAction("Delete").Label("Delete").UpdateFunc(func(selectedIds []string, form *multipart.Form, ctx *ui.EventContext) (err error) {
+	l.BulkAction("Delete").Label("Delete").UpdateFunc(func(selectedIds []string, ctx *ui.EventContext) (err error) {
 		err = db.Where("id IN (?)", selectedIds).Delete(&Customer{}).Error
 		return
 	}).ComponentFunc(func(selectedIds []string, ctx *ui.EventContext) h.HTMLComponent {
@@ -373,6 +373,11 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		var lang Language
 		db.Where("code = ?", cu.LanguageCode).First(&lang)
 
+		var termAgreed string
+		if cu.TermAgreedAt != nil {
+			termAgreed = cu.TermAgreedAt.Format("Jan 02,15:04 PM")
+		}
+
 		detail := s.DetailInfo(
 			s.DetailColumn(
 				s.DetailField(s.OptionalText(cu.Name).ZeroLabel("No Name")).Label("Name"),
@@ -380,6 +385,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 				s.DetailField(s.OptionalText(cu.Description).ZeroLabel("No Description")).Label("Description"),
 				s.DetailField(s.OptionalText(cusID).ZeroLabel("No ID")).Label("ID"),
 				s.DetailField(s.OptionalText(cu.CreatedAt.Format("Jan 02,15:04 PM")).ZeroLabel("")).Label("Created"),
+				s.DetailField(s.OptionalText(termAgreed).ZeroLabel("Not Agreed Yet")).Label("Terms Agreed"),
 				s.DetailField(s.OptionalText(lang.Name).ZeroLabel("No Language")).Label("Language"),
 			).Header("ACCOUNT INFORMATION"),
 			s.DetailColumn().Header("BILLING INFORMATION"),
@@ -387,6 +393,10 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 
 		return s.Card(detail).HeaderTitle("Details").
 			Actions(
+				ui.Bind(VBtn("Agree Terms").
+					Depressed(true).Class("mr-2")).
+					OnClick("formDrawerAction", "AgreeTerms", cusID),
+
 				ui.Bind(VBtn("Update details").
 					Depressed(true)).OnClick(
 					"formDrawerEdit",
@@ -436,10 +446,38 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			)
 	})
 
+	dp.Action("AgreeTerms").UpdateFunc(func(selectedIds []string, ctx *ui.EventContext) (err error) {
+		if ctx.R.FormValue("Agree") != "true" {
+			ve := &presets.ValidationErrors{}
+			_ = ve.GlobalError("You must agree the terms")
+			err = ve
+			return
+		}
+
+		err = db.Model(&Customer{}).Where("id = ?", selectedIds[0]).
+			Updates(map[string]interface{}{"term_agreed_at": time.Now()}).Error
+
+		return
+	}).ComponentFunc(func(selectedIds []string, ctx *ui.EventContext) h.HTMLComponent {
+		var alert h.HTMLComponent
+
+		if ve, ok := ctx.Flash.(*presets.ValidationErrors); ok {
+			alert = VAlert(h.Text(ve.GetGlobalError())).Border("left").
+				Type("error").
+				Elevation(2).
+				ColoredBorder(true)
+		}
+
+		return h.Components(
+			alert,
+			VCheckbox().FieldName("Agree").Value(ctx.R.FormValue("Agree")).Label("Agree the terms"),
+		)
+	})
+
 	p.Model(&Note{}).
 		InMenu(false).
 		Editing("Content").
-		SetterFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) {
+		SetterFunc(func(obj interface{}, ctx *ui.EventContext) {
 			note := obj.(*Note)
 			note.SourceID = ctx.Event.ParamAsInt(2)
 			note.SourceType = ctx.Event.Params[1]
@@ -449,7 +487,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		InMenu(false)
 
 	ccedit := cc.Editing("ExpireYearMonth", "Phone", "Email").
-		SetterFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) {
+		SetterFunc(func(obj interface{}, ctx *ui.EventContext) {
 			card := obj.(*CreditCard)
 			card.CustomerID = ctx.Event.ParamAsInt(1)
 		})
@@ -458,12 +496,5 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 
 	p.Model(&Language{}).PrimaryField("Code")
 
-	dp.Action("Approve").UpdateFunc(func(obj interface{}, form *multipart.Form, ctx *ui.EventContext) (err error) {
-		u := obj.(*Customer)
-		err = db.Model(&Customer{}).Where("id = ?", u.ID).UpdateColumn("approved_at = ?", time.Now()).Error
-		return
-	}).ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
-		return VBtn("Approve")
-	})
 	return p
 }
