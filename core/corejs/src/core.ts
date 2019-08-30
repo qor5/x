@@ -51,6 +51,10 @@ export class Core {
 	}
 
 	public onpopstate(event: any) {
+		if (!event.state) {
+			// hashtag changes will trigger popstate, when this happen, event.state is null.
+			return;
+		}
 		this.loadPage(event.state, true);
 	}
 

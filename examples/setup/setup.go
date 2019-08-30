@@ -74,7 +74,10 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 		tailScript := `<script src='/assets/main.js'></script>`
 		if len(os.Getenv("DEV")) > 0 {
 			fmt.Println("Using Dev environment, make sure you did: yarn start")
-			tailScript = `<script src='http://localhost:3100/app.js'></script>`
+			tailScript = `
+				<script src='http://localhost:3050/app.js'></script>
+				<script src='http://localhost:3100/app.js'></script>
+			`
 		}
 
 		ctx.Injector.Title(cp.Title())
@@ -91,11 +94,11 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 				<link rel="stylesheet" href="/assets/vuetify.css">
 			`)
 
-			tailScript := `<script src='/assets/vuetify.js'></script>`
+			vuetifyjs := `<script src='/assets/vuetify.js'></script>`
 			if len(os.Getenv("DEV")) > 0 {
-				tailScript = `<script src='http://localhost:3080/app.js'></script>`
+				vuetifyjs = `<script src='http://localhost:3080/app.js'></script>`
 			}
-			ctx.Injector.PutHeadHTML(tailScript)
+			ctx.Injector.PutHeadHTML(vuetifyjs)
 		}
 
 		ctx.Injector.PutTailHTML(tailScript)
