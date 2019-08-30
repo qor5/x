@@ -6,13 +6,11 @@ import (
 	"strings"
 
 	"github.com/rs/xid"
-
 	"github.com/sunfmin/bran/ui"
-	"github.com/sunfmin/reflectutils"
-	"github.com/thoas/go-funk"
-
 	. "github.com/sunfmin/bran/vuetify"
+	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
+	"github.com/thoas/go-funk"
 )
 
 type CellComponentFunc func(obj interface{}, fieldName string, ctx *ui.EventContext) h.HTMLComponent
@@ -29,7 +27,6 @@ type DataTableBuilder struct {
 	rowMenuItemsFunc   RowMenuItemsFunc
 	rowExpandFunc      RowComponentFunc
 	columns            []*DataTableColumnBuilder
-	primaryField       string
 	loadMoreCount      int
 	loadMoreLabel      string
 	loadMoreURL        string
@@ -39,7 +36,6 @@ func DataTable(data interface{}) (r *DataTableBuilder) {
 	r = &DataTableBuilder{
 		data:               data,
 		selectionParamName: "selected",
-		primaryField:       "ID",
 	}
 	return
 }
@@ -70,11 +66,6 @@ func (b *DataTableBuilder) SelectionParamName(v string) (r *DataTableBuilder) {
 	return b
 }
 
-func (b *DataTableBuilder) PrimaryField(v string) (r *DataTableBuilder) {
-	b.primaryField = v
-	return b
-}
-
 func (b *DataTableBuilder) WithoutHeader(v bool) (r *DataTableBuilder) {
 	b.withoutHeaders = v
 	return b
@@ -93,6 +84,10 @@ func (b *DataTableBuilder) RowMenuItemsFunc(v RowMenuItemsFunc) (r *DataTableBui
 func (b *DataTableBuilder) RowExpandFunc(v RowComponentFunc) (r *DataTableBuilder) {
 	b.rowExpandFunc = v
 	return b
+}
+
+type primarySlugger interface {
+	PrimarySlug() string
 }
 
 func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) {
@@ -120,8 +115,12 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 	haveMoreRecord := false
 	funk.ForEach(b.data, func(obj interface{}) {
 
-		idRaw, _ := reflectutils.Get(obj, b.primaryField)
-		id := fmt.Sprint(idRaw)
+		var id string
+		if slugger, ok := obj.(primarySlugger); ok {
+			id = slugger.PrimarySlug()
+		} else {
+			id = fmt.Sprint(reflectutils.MustGet(obj, "ID"))
+		}
 
 		idsOfPage = append(idsOfPage, id)
 		inputValue := ""

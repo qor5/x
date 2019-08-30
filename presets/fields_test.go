@@ -48,10 +48,10 @@ func TestFields(t *testing.T) {
 		Float1:  23.1,
 		String1: "hello",
 		Bool1:   true,
-		Time1:   time.Now(),
+		Time1:   time.Unix(1567048169, 0),
 		Company: &Company{
 			Name:      "Company1",
-			FoundedAt: time.Now(),
+			FoundedAt: time.Unix(1567048169, 0),
 		},
 	}
 

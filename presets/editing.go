@@ -225,8 +225,9 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 	}
 
 	if len(id) > 0 {
-		obj, err = usingB.fetcher(obj, id, ctx)
-		if err != nil {
+		obj, err1 := usingB.fetcher(obj, id, ctx)
+		if err1 != nil {
+			b.renderFormWithError(&r, err1, obj, ctx)
 			return
 		}
 	}
@@ -239,18 +240,15 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 
 	if usingB.validator != nil {
 		if vErr := usingB.validator(obj, ctx); vErr.HaveErrors() {
-			ctx.Flash = &vErr
-			r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
-				Name:   formPortalName,
-				Schema: b.editFormFor(obj, ctx),
-			})
+			b.renderFormWithError(&r, &vErr, obj, ctx)
 			return
 		}
 	}
 
-	err = usingB.saver(obj, id, ctx)
-	if err != nil {
-		panic(err)
+	err1 := usingB.saver(obj, id, ctx)
+	if err1 != nil {
+		b.renderFormWithError(&r, err1, obj, ctx)
+		return
 	}
 
 	msgr := MustGetMessages(ctx.R)
@@ -258,4 +256,19 @@ func (b *EditingBuilder) defaultUpdate(ctx *ui.EventContext) (r ui.EventResponse
 
 	r.PushState = ui.PushState(nil)
 	return
+}
+
+func (b *EditingBuilder) renderFormWithError(r *ui.EventResponse, err error, obj interface{}, ctx *ui.EventContext) {
+	ctx.Flash = err
+
+	if _, ok := err.(*ValidationErrors); !ok {
+		vErr := &ValidationErrors{}
+		ctx.Flash = vErr.GlobalError(err.Error())
+	}
+
+	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
+		Name:   formPortalName,
+		Schema: b.editFormFor(obj, ctx),
+	})
+
 }

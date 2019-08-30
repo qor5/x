@@ -77,8 +77,18 @@ type Event struct {
 }
 
 type Language struct {
-	Code string
+	Code string `gorm:"unique;not null"`
 	Name string
+}
+
+func (l *Language) PrimarySlug() string {
+	return l.Code
+}
+
+func (l *Language) PrimaryColumnValuesBySlug(slug string) [][]string {
+	return [][]string{
+		{"code", slug},
+	}
 }
 
 type Company struct {

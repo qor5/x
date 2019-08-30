@@ -5,15 +5,18 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/sunfmin/bran/ui"
-
 	"github.com/jinzhu/gorm"
 	"github.com/sunfmin/bran/presets"
+	"github.com/sunfmin/bran/ui"
 )
 
 func DataOperator(db *gorm.DB) (r presets.DataOperator) {
 	r = &dataOperatorImpl{db: db}
 	return
+}
+
+type primarySluggerValues interface {
+	PrimaryColumnValuesBySlug(slug string) [][]string
 }
 
 type dataOperatorImpl struct {
@@ -64,8 +67,27 @@ func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams
 	return
 }
 
+func (op *dataOperatorImpl) primarySluggerWhere(obj interface{}, id string) *gorm.DB {
+	wh := op.db.Model(obj)
+
+	if len(id) == 0 {
+		return wh
+	}
+
+	if slugger, ok := obj.(primarySluggerValues); ok {
+		cs := slugger.PrimaryColumnValuesBySlug(id)
+		for _, cond := range cs {
+			wh = wh.Where(fmt.Sprintf("%s = ?", cond[0]), cond[1])
+		}
+	} else {
+		wh = wh.Where("id =  ?", id)
+	}
+
+	return wh
+}
+
 func (op *dataOperatorImpl) Fetch(obj interface{}, id string, ctx *ui.EventContext) (r interface{}, err error) {
-	err = op.db.Model(obj).Find(obj, "id = ?", id).Error
+	err = op.primarySluggerWhere(obj, id).Find(obj).Error
 	if err != nil {
 		return
 	}
@@ -74,11 +96,15 @@ func (op *dataOperatorImpl) Fetch(obj interface{}, id string, ctx *ui.EventConte
 }
 
 func (op *dataOperatorImpl) Save(obj interface{}, id string, ctx *ui.EventContext) (err error) {
-	err = op.db.Save(obj).Error
+	if len(id) == 0 {
+		err = op.db.Create(obj).Error
+		return
+	}
+	err = op.primarySluggerWhere(obj, id).Update(obj).Error
 	return
 }
 
 func (op *dataOperatorImpl) Delete(obj interface{}, id string, ctx *ui.EventContext) (err error) {
-	err = op.db.Delete(obj, id).Error
+	err = op.primarySluggerWhere(obj, id).Delete(obj).Error
 	return
 }

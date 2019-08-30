@@ -1,4 +1,4 @@
-package examples_test
+package integration_test
 
 import (
 	"bytes"
@@ -233,13 +233,17 @@ owner1
 	},
 }
 
-func TestAll(t *testing.T) {
+func ConnectDB() *gorm.DB {
 	db, err := gorm.Open("postgres", os.Getenv("DBString"))
 	if err != nil {
 		panic(err)
 	}
 	db.LogMode(true)
+	return db
+}
 
+func TestAll(t *testing.T) {
+	db := ConnectDB()
 	p := examples.Preset1(db)
 
 	for _, c := range cases {
