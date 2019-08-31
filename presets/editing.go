@@ -1,8 +1,6 @@
 package presets
 
 import (
-	"fmt"
-
 	"github.com/jinzhu/inflection"
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
@@ -91,7 +89,7 @@ func (b *EditingBuilder) GetPageFunc() ui.PageFunc {
 func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
 	msgr := MustGetMessages(ctx.R)
 	title := msgr.EditingObjectTitle(inflection.Singular(b.mb.label))
-	r.PageTitle = fmt.Sprintf("%s - %s", title, b.mb.p.brandTitle)
+	r.PageTitle = title
 
 	id := pat.Param(ctx.R, "id")
 	ctx.Event = &ui.Event{

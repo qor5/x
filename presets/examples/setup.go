@@ -35,6 +35,10 @@ type Customer struct {
 	LanguageCode    string
 }
 
+func (c *Customer) PageTitle() string {
+	return c.Name
+}
+
 type Note struct {
 	ID         int
 	SourceType string
@@ -124,7 +128,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			VIcon("directions_boat").Class("pr-2"),
 			VToolbarTitle("My Admin"),
 		)
-	}).BrandTitle("The Plant")
+	}).BrandTitle("My Admin")
 
 	writeFieldDefaults := p.FieldDefaults(presets.WRITE)
 	writeFieldDefaults.FieldType(&Thumb{}).ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {

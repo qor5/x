@@ -285,7 +285,8 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 		if err != nil {
 			panic(err)
 		}
-		pr.PageTitle = innerPr.PageTitle
+
+		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, b.brandTitle)
 		pr.Schema = VApp(
 
 			VNavigationDrawer(

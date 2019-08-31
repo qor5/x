@@ -18,6 +18,7 @@ type Messages struct {
 	EditingObjectTitle     func(label string) string
 	CreatingObjectTitle    func(label string) string
 	ListingObjectTitle     func(label string) string
+	DetailingObjectTitle   func(label string, name string) string
 }
 
 var Messages_en_US = Messages{
@@ -30,6 +31,9 @@ var Messages_en_US = Messages{
 	},
 	ListingObjectTitle: func(label string) string {
 		return fmt.Sprintf("Listing %s", label)
+	},
+	DetailingObjectTitle: func(label string, name string) string {
+		return fmt.Sprintf("%s %s", label, name)
 	},
 	DeleteConfirmationText: func(id string) string {
 		return fmt.Sprintf("Are you sure you want to delete object with id: %s?", id)

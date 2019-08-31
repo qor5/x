@@ -3,6 +3,8 @@ package presets
 import (
 	"net/url"
 
+	"github.com/jinzhu/inflection"
+
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"
@@ -16,6 +18,10 @@ type DetailingBuilder struct {
 	pageFunc   ui.PageFunc
 	fetcher    FetchFunc
 	FieldBuilders
+}
+
+type pageTitle interface {
+	PageTitle() string
 }
 
 func (b *ModelBuilder) Detailing(vs ...string) (r *DetailingBuilder) {
@@ -68,6 +74,13 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespo
 	if err != nil {
 		return
 	}
+	msgr := MustGetMessages(ctx.R)
+	title := id
+	if pt, ok := obj.(pageTitle); ok {
+		title = pt.PageTitle()
+	}
+
+	r.PageTitle = msgr.DetailingObjectTitle(inflection.Singular(b.mb.label), title)
 
 	var notice h.HTMLComponent
 	if msg, ok := ctx.Flash.(string); ok {
