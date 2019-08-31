@@ -74,13 +74,9 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespo
 	if err != nil {
 		return
 	}
-	msgr := MustGetMessages(ctx.R)
-	title := id
-	if pt, ok := obj.(pageTitle); ok {
-		title = pt.PageTitle()
-	}
 
-	r.PageTitle = msgr.DetailingObjectTitle(inflection.Singular(b.mb.label), title)
+	msgr := MustGetMessages(ctx.R)
+	r.PageTitle = msgr.DetailingObjectTitle(inflection.Singular(b.mb.label), getPageTitle(obj, id))
 
 	var notice h.HTMLComponent
 	if msg, ok := ctx.Flash.(string); ok {
@@ -103,6 +99,14 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespo
 		ui.LazyPortal().Name(deleteConfirmPortalName),
 	).AppendChildren(comps...).Fluid(true)
 	return
+}
+
+func getPageTitle(obj interface{}, id string) string {
+	title := id
+	if pt, ok := obj.(pageTitle); ok {
+		title = pt.PageTitle()
+	}
+	return title
 }
 
 func (b *DetailingBuilder) doAction(ctx *ui.EventContext) (r ui.EventResponse, err error) {

@@ -372,7 +372,7 @@ func (b *Builder) initMux() {
 	)
 
 	for _, m := range b.models {
-		muri := inflection.Plural(m.uriName)
+		pluralUri := inflection.Plural(m.uriName)
 		info := m.Info()
 		routePath := info.ListingHref()
 		mux.Handle(
@@ -381,27 +381,13 @@ func (b *Builder) initMux() {
 		)
 		log.Println("mounted url", routePath)
 		if m.hasDetailing {
-			routePath = fmt.Sprintf("%s/%s/:id", b.prefix, muri)
+			routePath = fmt.Sprintf("%s/%s/:id", b.prefix, pluralUri)
 			mux.Handle(
 				pat.New(routePath),
 				b.wrap(info, b.defaultLayout(m.detailing.GetPageFunc())),
 			)
 			log.Println("mounted url", routePath)
 		}
-
-		routePath = fmt.Sprintf("%s/%s/:id/edit", b.prefix, muri)
-		mux.Handle(
-			pat.New(routePath),
-			b.wrap(info, b.defaultLayout(m.editing.GetPageFunc())),
-		)
-		log.Println("mounted url", routePath)
-
-		routePath = fmt.Sprintf("%s/%s/new", b.prefix, muri)
-		mux.Handle(
-			pat.New(fmt.Sprintf("%s/%s/new", b.prefix, muri)),
-			b.wrap(info, b.defaultLayout(m.editing.GetPageFunc())),
-		)
-		log.Println("mounted url", routePath)
 	}
 
 	b.mux = mux

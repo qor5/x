@@ -5,12 +5,10 @@ import (
 	"github.com/sunfmin/bran/ui"
 	. "github.com/sunfmin/bran/vuetify"
 	h "github.com/theplant/htmlgo"
-	"goji.io/pat"
 )
 
 type EditingBuilder struct {
 	mb        *ModelBuilder
-	pageFunc  ui.PageFunc
 	fetcher   FetchFunc
 	setter    SetterFunc
 	saver     SaveFunc
@@ -34,7 +32,6 @@ func (b *EditingBuilder) CloneForCreating(vs ...string) (r *EditingBuilder) {
 	if b.mb.creating == nil {
 		b.mb.creating = &EditingBuilder{
 			mb:        b.mb,
-			pageFunc:  b.pageFunc,
 			fetcher:   b.fetcher,
 			setter:    b.setter,
 			saver:     b.saver,
@@ -47,11 +44,6 @@ func (b *EditingBuilder) CloneForCreating(vs ...string) (r *EditingBuilder) {
 	r.FieldBuilders = *b.mb.writeFields.Only(vs...)
 
 	return r
-}
-
-func (b *EditingBuilder) PageFunc(pf ui.PageFunc) (r *EditingBuilder) {
-	b.pageFunc = pf
-	return b
 }
 
 func (b *EditingBuilder) FetchFunc(v FetchFunc) (r *EditingBuilder) {
@@ -77,27 +69,6 @@ func (b *EditingBuilder) ValidateFunc(v ValidateFunc) (r *EditingBuilder) {
 func (b *EditingBuilder) SetterFunc(v SetterFunc) (r *EditingBuilder) {
 	b.setter = v
 	return b
-}
-
-func (b *EditingBuilder) GetPageFunc() ui.PageFunc {
-	if b.pageFunc != nil {
-		return b.pageFunc
-	}
-	return b.defaultPageFunc
-}
-
-func (b *EditingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageResponse, err error) {
-	msgr := MustGetMessages(ctx.R)
-	title := msgr.EditingObjectTitle(inflection.Singular(b.mb.label))
-	r.PageTitle = title
-
-	id := pat.Param(ctx.R, "id")
-	ctx.Event = &ui.Event{
-		Params: []string{id},
-	}
-
-	r.Schema = b.editFormFor(nil, ctx)
-	return
 }
 
 const formDrawerNew = "formDrawerNew"
@@ -136,7 +107,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *ui.EventContext) h.HT
 			}
 		}
 		buttonLabel = msgr.Update
-		title = msgr.EditingObjectTitle(inflection.Singular(b.mb.label))
+		title = msgr.EditingObjectTitle(inflection.Singular(b.mb.label), getPageTitle(obj, id))
 	}
 
 	if obj == nil {

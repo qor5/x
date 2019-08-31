@@ -15,16 +15,16 @@ type Messages struct {
 	Cancel                 string
 	Create                 string
 	DeleteConfirmationText func(id string) string
-	EditingObjectTitle     func(label string) string
 	CreatingObjectTitle    func(label string) string
+	EditingObjectTitle     func(label string, name string) string
 	ListingObjectTitle     func(label string) string
 	DetailingObjectTitle   func(label string, name string) string
 }
 
 var Messages_en_US = Messages{
 	SuccessfullyUpdated: "Successfully Updated",
-	EditingObjectTitle: func(label string) string {
-		return fmt.Sprintf("Editing %s", label)
+	EditingObjectTitle: func(label string, name string) string {
+		return fmt.Sprintf("Editing %s %s", label, name)
 	},
 	CreatingObjectTitle: func(label string) string {
 		return fmt.Sprintf("New %s", label)
