@@ -46,6 +46,7 @@ type FieldMode int
 const (
 	WRITE FieldMode = iota
 	LIST
+	DETAIL
 )
 
 func NewFieldDefault(t reflect.Type) (r *FieldDefaultBuilder) {

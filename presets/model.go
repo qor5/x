@@ -75,7 +75,7 @@ func (b *ModelBuilder) newEditing() (r *EditingBuilder) {
 }
 
 func (b *ModelBuilder) newDetailing() (r *DetailingBuilder) {
-	b.detailing = &DetailingBuilder{mb: b}
+	b.detailing = &DetailingBuilder{mb: b, FieldBuilders: *b.p.detailFieldDefaults.InspectFields(b.model)}
 	if b.p.dataOperator != nil {
 		b.detailing.Fetcher(b.p.dataOperator.Fetch)
 	}

@@ -3,6 +3,7 @@ package examples
 import (
 	"fmt"
 	"net/url"
+	"reflect"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -33,6 +34,8 @@ type Customer struct {
 	TermAgreedAt    *time.Time
 	ApprovalComment string
 	LanguageCode    string
+
+	Events []*Event
 }
 
 func (c *Customer) PageTitle() string {
@@ -145,6 +148,32 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			panic(err)
 		}
 		return h.Text(i.(*Thumb).Name)
+	})
+
+	p.FieldDefaults(presets.DETAIL).FieldType([]*Event{}).ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
+		events := reflectutils.MustGet(obj, field.Name).([]*Event)
+		typeName := reflect.ValueOf(obj).Elem().Type().Name()
+		objId := fmt.Sprint(reflectutils.MustGet(obj, "ID"))
+
+		dt := s.DataTable(events).WithoutHeader(true).LoadMoreAt(20, "Show More").LoadMoreURL(fmt.Sprintf("/admin/events?sourceType=%s&sourceId=%s", typeName, objId))
+
+		dt.Column("Type")
+		dt.Column("Description")
+
+		dt.RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(ctx, "/admin/events", typeName, objId))
+
+		return s.Card(
+			dt,
+		).HeaderTitle(field.Label).
+			Actions(
+				ui.Bind(VBtn("Add Event").
+					Depressed(true)).OnClick(
+					"formDrawerNew",
+					"",
+					typeName,
+					objId,
+				).URL("/admin/events"),
+			).Class("mb-4")
 	})
 
 	p.DataOperator(gormop.DataOperator(db))
@@ -316,6 +345,23 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 
 	dp := m.Detailing("MainInfo", "Details", "Cards", "Payments", "Events")
 
+	dp.Fetcher(func(obj interface{}, id string, ctx *ui.EventContext) (r interface{}, err error) {
+		var cus = &Customer{}
+		err = db.Find(cus, id).Error
+		if err != nil {
+			return
+		}
+
+		var events []*Event
+		err = db.Where("source_type = ? AND source_id = ?", "Customer", id).Find(&events).Error
+		if err != nil {
+			return
+		}
+		cus.Events = events
+		r = cus
+		return
+	})
+
 	dp.Field("MainInfo").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *ui.EventContext) h.HTMLComponent {
 
 		cu := obj.(*Customer)
@@ -443,7 +489,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 					"",
 					cusID,
 				).URL("/admin/credit-cards"),
-			)
+			).Class("mb-4")
 	})
 
 	dp.Action("AgreeTerms").UpdateFunc(func(selectedIds []string, ctx *ui.EventContext) (err error) {
@@ -479,6 +525,15 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		Editing("Content").
 		SetterFunc(func(obj interface{}, ctx *ui.EventContext) {
 			note := obj.(*Note)
+			note.SourceID = ctx.Event.ParamAsInt(2)
+			note.SourceType = ctx.Event.Params[1]
+		})
+
+	p.Model(&Event{}).
+		InMenu(false).
+		Editing("Type", "Description").
+		SetterFunc(func(obj interface{}, ctx *ui.EventContext) {
+			note := obj.(*Event)
 			note.SourceID = ctx.Event.ParamAsInt(2)
 			note.SourceType = ctx.Event.Params[1]
 		})
