@@ -3,15 +3,39 @@ package material
 import (
 	"context"
 	"fmt"
+	"strings"
 
-	"github.com/sunfmin/bran/ui"
 	h "github.com/theplant/htmlgo"
 )
+
+type Styles struct {
+	pairs [][]string
+}
+
+func (s *Styles) String() string {
+	segs := []string{}
+	for _, v := range s.pairs {
+		segs = append(segs, fmt.Sprintf("%s:%s;", v[0], v[1]))
+	}
+	return strings.Join(segs, " ")
+}
+
+func (s *Styles) Put(name, value string) (r *Styles) {
+	for _, el := range s.pairs {
+		if el[0] == name {
+			el[1] = value
+			return s
+		}
+	}
+
+	s.pairs = append(s.pairs, []string{name, value})
+	return s
+}
 
 type GridBuilder struct {
 	classNames     []string
 	children       []h.HTMLComponent
-	styles         *ui.Styles
+	styles         *Styles
 	align          string
 	fixColumnWidth string
 	innerOnly      bool
@@ -20,7 +44,7 @@ type GridBuilder struct {
 func Grid(cells ...h.HTMLComponent) (r *GridBuilder) {
 	r = &GridBuilder{}
 	r.Children(cells...)
-	r.styles = &ui.Styles{}
+	r.styles = &Styles{}
 	return
 }
 

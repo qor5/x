@@ -114,7 +114,7 @@ func reload(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 }
 
 func styles(ctx *ui.EventContext) {
-	ctx.Injector.PutHeadHTML(`
+	ctx.Injector.HeadHTML(`
     <style>
       .presets-example-main-grid {
         background-color: #DDDDDD;

@@ -31,29 +31,29 @@ func HelloLazyPortalsAndReload(ctx *ui.EventContext) (pr ui.PageResponse, err er
 					ui.Slot(
 						VBtn("Select").Color("primary").Attr("v-on", "on"),
 					).Name("activator").Scope("{ on }"),
-					ui.LazyPortal().EventFunc("menuItems").Name("menuContent"),
+					ui.Portal().EventFunc("menuItems").Name("menuContent"),
 				),
 
 				h.Div(
 					h.H1("Portal A"),
-					ui.LazyPortal().EventFunc("portal1").Name("portalA"),
+					ui.Portal().EventFunc("portal1").Name("portalA"),
 				).Style("border: 2px solid blue;"),
 
 				h.Div(
 					h.H1("Portal B"),
-					ui.LazyPortal().EventFunc("portal1").Name("portalB"),
+					ui.Portal().EventFunc("portal1").Name("portalB"),
 				).Style("border: 2px solid red;"),
 
 				VBtn("Reload Portal A and B").OnClick("reloadAB").Color("orange").Dark(true),
 
 				h.Div(
 					h.H1("Portal C"),
-					ui.LazyPortal().EventFunc("").Name("portalC"),
+					ui.Portal().EventFunc("").Name("portalC"),
 				).Style("border: 2px solid blue;"),
 
 				h.Div(
 					h.H1("Portal D"),
-					ui.LazyPortal().EventFunc("").Name("portalD"),
+					ui.Portal().EventFunc("").Name("portalD"),
 				).Style("border: 2px solid red;"),
 
 				VBtn("Update Portal C and D").OnClick("updateCD").Color("primary").Dark(true),
@@ -81,7 +81,7 @@ func menuItems(ctx *ui.EventContext) (r ui.EventResponse, err error) {
 					VBtn("Create New").Text(true).Attr("v-on", "on"),
 				),
 			).Name("activator").Scope("{ on }"),
-			ui.LazyPortal().EventFunc("addItemForm").Name("addItemForm").Visible("true"),
+			ui.Portal().EventFunc("addItemForm").Name("addItemForm").Visible("true"),
 		).Width("500"),
 	)
 

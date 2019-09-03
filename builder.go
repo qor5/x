@@ -46,15 +46,16 @@ func (b *Builder) PacksHandler(contentType string, packs ...ComponentsPack) http
 	}))
 }
 
-func (b *Builder) defaultLayoutMiddleFunc(in ui.LayoutFunc, head ui.PageInjector) (out ui.LayoutFunc) {
+func (b *Builder) defaultLayoutMiddleFunc(head *ui.PageInjector) (out ui.LayoutFunc) {
 	return func(r *http.Request, body string) (output string, err error) {
 
 		root := h.HTML(
 			h.Head(
-				h.RawHTML(head.HeadString()),
+				h.RawHTML(head.GetHeadString()),
 			),
 			h.Body(
 				h.RawHTML(body),
+				h.RawHTML(head.GetTailString()),
 			).Class("front"),
 		)
 

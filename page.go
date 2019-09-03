@@ -63,7 +63,6 @@ type idEventFunc struct {
 type eventBody struct {
 	EventFuncID ui.EventFuncID `json:"eventFuncId,omitempty"`
 	Event       ui.Event       `json:"event,omitempty"`
-	PageState   ui.PageState   `json:"pageState,omitempty"`
 }
 
 type serverSideData struct {
@@ -75,7 +74,7 @@ func (p *PageBuilder) render(
 	w http.ResponseWriter,
 	r *http.Request,
 	c context.Context,
-	head *DefaultPageInjector,
+	head *ui.PageInjector,
 ) (pager *ui.PageResponse, isRenderHTML bool) {
 
 	if p.pageRenderFunc == nil {
@@ -122,7 +121,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	var ssd = &serverSideData{}
-	var head = &DefaultPageInjector{}
+	var head = &ui.PageInjector{}
 
 	ctx := new(ui.EventContext)
 	c := ui.WrapEventContext(r.Context(), ctx)
@@ -167,22 +166,19 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
+	} else {
+		err = h.Fprint(
+			body,
+			h.Script(fmt.Sprintf("window.__serverSideData__=%s\n", string(serverSideDataJSON))),
+			c,
+		)
+		if err != nil {
+			panic(err)
+		}
 	}
-
-	err = h.Fprint(
-		body,
-		h.Script(fmt.Sprintf("window.__serverSideData__=%s\n", string(serverSideDataJSON))),
-		c,
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	body.WriteString(head.TailHTML())
-	body.WriteString("\n")
 
 	var resp string
-	resp, err = p.b.getLayoutMiddleFunc()(nil, head)(r, body.String())
+	resp, err = p.b.getLayoutMiddleFunc()(head)(r, body.String())
 	if err != nil {
 		panic(err)
 	}
@@ -226,7 +222,7 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	ctx.R = r
 	ctx.W = w
 	ctx.Hub = p
-	ctx.Injector = &DefaultPageInjector{}
+	ctx.Injector = &ui.PageInjector{}
 
 	c := ui.WrapEventContext(r.Context(), ctx)
 
@@ -236,7 +232,7 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	if len(p.eventFuncs) <= 1 && p.eventFuncById(eb.EventFuncID.ID) == nil {
 		log.Println("Re-render because eventFuncs gone, might server restarted")
 		ssd := &serverSideData{}
-		head := &DefaultPageInjector{}
+		head := &ui.PageInjector{}
 		p.render(ssd, w, r, c, head)
 		_, err := json.Marshal(ssd) // to fill in event funcs that setup inside a component
 		if err != nil {
@@ -258,7 +254,7 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 
 	if er.Reload {
 		ssd := &serverSideData{}
-		head := &DefaultPageInjector{}
+		head := &ui.PageInjector{}
 		pr, _ := p.render(ssd, w, r, c, head)
 		er.Schema = ssd.Schema
 		if len(er.PageTitle) == 0 {

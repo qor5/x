@@ -2,10 +2,8 @@ package ui
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/go-playground/form"
 	"github.com/sunfmin/reflectutils"
@@ -13,8 +11,6 @@ import (
 
 type Component interface {
 }
-
-type PageState interface{}
 
 type PageResponse struct {
 	Schema    Component
@@ -45,7 +41,7 @@ type EventFunc func(ctx *EventContext) (r EventResponse, err error)
 
 type LayoutFunc func(r *http.Request, body string) (output string, err error)
 
-type LayoutMiddleFunc func(in LayoutFunc, injector PageInjector) (out LayoutFunc)
+type LayoutMiddleFunc func(injector *PageInjector) (out LayoutFunc)
 
 type EventFuncHub interface {
 	RegisterEventFunc(eventFuncId string, ef EventFunc) (key string)
@@ -80,7 +76,7 @@ type EventContext struct {
 	R        *http.Request
 	W        http.ResponseWriter
 	Hub      EventFuncHub
-	Injector PageInjector
+	Injector *PageInjector
 	Event    *Event
 	Flash    interface{} // pass value from actions to index
 }
@@ -126,16 +122,6 @@ func (ctx *EventContext) UnmarshalForm(v interface{}) (err error) {
 	return
 }
 
-type PageInjector interface {
-	Title(title string)
-	Meta(attrs ...string)
-	MetaNameContent(name, content string)
-	PutHeadHTML(v string)
-	PutTailHTML(v string)
-
-	HeadString() string
-}
-
 type contextKey int
 
 const eventKey contextKey = iota
@@ -153,32 +139,8 @@ func MustGetEventContext(c context.Context) (r *EventContext) {
 	return
 }
 
-func Injector(c context.Context) (r PageInjector) {
+func Injector(c context.Context) (r *PageInjector) {
 	ctx := MustGetEventContext(c)
 	r = ctx.Injector
 	return
-}
-
-type Styles struct {
-	pairs [][]string
-}
-
-func (s *Styles) String() string {
-	segs := []string{}
-	for _, v := range s.pairs {
-		segs = append(segs, fmt.Sprintf("%s:%s;", v[0], v[1]))
-	}
-	return strings.Join(segs, " ")
-}
-
-func (s *Styles) Put(name, value string) (r *Styles) {
-	for _, el := range s.pairs {
-		if el[0] == name {
-			el[1] = value
-			return s
-		}
-	}
-
-	s.pairs = append(s.pairs, []string{name, value})
-	return s
 }

@@ -1,4 +1,4 @@
-package bran
+package ui
 
 import (
 	"bytes"
@@ -9,17 +9,17 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-type DefaultPageInjector struct {
+type PageInjector struct {
 	headNodes []*html.Node
 	tailHtmls []string
 }
 
-func (b *DefaultPageInjector) Title(title string) {
+func (b *PageInjector) Title(title string) {
 	b.addNode(atom.Title, title)
 	return
 }
 
-func (b *DefaultPageInjector) HasTitle() (r bool) {
+func (b *PageInjector) HasTitle() (r bool) {
 	for _, n := range b.headNodes {
 		if n.Type == html.ElementNode && n.Data == "title" {
 			return true
@@ -28,17 +28,17 @@ func (b *DefaultPageInjector) HasTitle() (r bool) {
 	return
 }
 
-func (b *DefaultPageInjector) MetaNameContent(name, content string) {
+func (b *PageInjector) MetaNameContent(name, content string) {
 	b.Meta("name", name, "content", content)
 	return
 }
 
-func (b *DefaultPageInjector) Meta(attrs ...string) {
+func (b *PageInjector) Meta(attrs ...string) {
 	b.addNode(atom.Meta, "", attrs...)
 	return
 }
 
-func (b *DefaultPageInjector) PutTailHTML(v string) {
+func (b *PageInjector) TailHTML(v string) {
 	for _, s := range b.tailHtmls {
 		if s == v {
 			return
@@ -49,16 +49,12 @@ func (b *DefaultPageInjector) PutTailHTML(v string) {
 	return
 }
 
-func (b *DefaultPageInjector) TailHTML() (r string) {
-	return strings.Join(b.tailHtmls, "\n")
-}
-
-func (b *DefaultPageInjector) Clear() (r *DefaultPageInjector) {
+func (b *PageInjector) Clear() (r *PageInjector) {
 	b.headNodes = []*html.Node{}
 	return b
 }
 
-func (b *DefaultPageInjector) PutHeadHTML(v string) {
+func (b *PageInjector) HeadHTML(v string) {
 	n, err := html.Parse(strings.NewReader(v))
 	if err != nil {
 		panic(err)
@@ -70,6 +66,23 @@ func (b *DefaultPageInjector) PutHeadHTML(v string) {
 		n = n.NextSibling
 	}
 	return
+}
+
+func (b *PageInjector) GetHeadString() string {
+	b.addCharsetViewPortIfMissing()
+	buf := bytes.NewBuffer(nil)
+	for _, n := range b.headNodes {
+		err := html.Render(buf, n)
+		if err != nil {
+			panic(err)
+		}
+		buf.WriteString("\n")
+	}
+	return buf.String()
+}
+
+func (b *PageInjector) GetTailString() (r string) {
+	return strings.Join(b.tailHtmls, "\n")
 }
 
 func haveAttr(key, val string, attrs []html.Attribute) (keyExists bool, keyValBothExists bool) {
@@ -84,7 +97,7 @@ func haveAttr(key, val string, attrs []html.Attribute) (keyExists bool, keyValBo
 	return
 }
 
-func (b *DefaultPageInjector) addCharsetViewPortIfMissing() {
+func (b *PageInjector) addCharsetViewPortIfMissing() {
 	var foundCharset, foundViewPort bool
 	for _, n := range b.headNodes {
 		if ok, _ := haveAttr("charset", "", n.Attr); ok {
@@ -102,20 +115,7 @@ func (b *DefaultPageInjector) addCharsetViewPortIfMissing() {
 	}
 }
 
-func (b *DefaultPageInjector) HeadString() string {
-	b.addCharsetViewPortIfMissing()
-	buf := bytes.NewBuffer(nil)
-	for _, n := range b.headNodes {
-		err := html.Render(buf, n)
-		if err != nil {
-			panic(err)
-		}
-		buf.WriteString("\n")
-	}
-	return buf.String()
-}
-
-func (b *DefaultPageInjector) addNode(atom atom.Atom, body string, attrs ...string) {
+func (b *PageInjector) addNode(atom atom.Atom, body string, attrs ...string) {
 	l := len(attrs)
 	if l%2 != 0 {
 		panic(fmt.Sprintf("attrs should be pairs: %+v, length: %d", attrs, l))

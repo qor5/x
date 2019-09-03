@@ -81,7 +81,7 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 		}
 
 		ctx.Injector.Title(cp.Title())
-		ctx.Injector.PutHeadHTML(`
+		ctx.Injector.HeadHTML(`
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono" async>
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" async>
 			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" async>
@@ -90,7 +90,7 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 			<script src='/assets/codehighlight.js'></script>
 		`)
 		if cp.vuetify {
-			ctx.Injector.PutHeadHTML(`
+			ctx.Injector.HeadHTML(`
 				<link rel="stylesheet" href="/assets/vuetify.css">
 			`)
 
@@ -98,10 +98,10 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 			if len(os.Getenv("DEV")) > 0 {
 				vuetifyjs = `<script src='http://localhost:3080/app.js'></script>`
 			}
-			ctx.Injector.PutHeadHTML(vuetifyjs)
+			ctx.Injector.HeadHTML(vuetifyjs)
 		}
 
-		ctx.Injector.PutTailHTML(tailScript)
+		ctx.Injector.TailHTML(tailScript)
 
 		var innerPr ui.PageResponse
 		innerPr, err = in(ctx)
@@ -125,7 +125,7 @@ func layout(in ui.PageFunc, pages []pageItem, prefix string, cp pageItem) (out u
 				).Class("exampleCode"),
 			)
 		}
-		ctx.Injector.PutHeadHTML(`
+		ctx.Injector.HeadHTML(`
 		<style>
 			body {
 				margin: 0;

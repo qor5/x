@@ -231,7 +231,7 @@ var eventCases = []struct {
 	{
 		name: "case 2",
 		renderChanger: func(ctx *ui.EventContext, pr *ui.PageResponse) {
-			ctx.Injector.PutTailHTML("<script src='/assets/main.js'></script>")
+			ctx.Injector.TailHTML("<script src='/assets/main.js'></script>")
 			pr.Schema = &DummyComp{}
 		},
 		expectedEventResp: `{
@@ -248,11 +248,7 @@ var eventCases = []struct {
 
 <body class='front'>
 <div id='app' v-cloak><div>hello</div></div>
-
-<script type='text/javascript'>window.__serverSideData__={}
-</script>
-<script src='/assets/main.js'></script>
-</body>
+<script src='/assets/main.js'></script></body>
 </html>
 
 `,

@@ -84,7 +84,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 
 	msgr := MustGetMessages(ctx.R)
 	title := msgr.ListingObjectTitle(inflection.Plural(b.mb.label))
-	r.PageTitle = fmt.Sprintf("%s - %s", title, b.mb.p.brandTitle)
+	r.PageTitle = title
 
 	perPage := b.perPage
 	if perPage == 0 {
@@ -144,7 +144,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 			toolbar = b.newAndFilterToolbar(msgr, ctx, fd)
 		}
 	} else {
-		bulkPanel = ui.LazyPortal(b.bulkPanel(bulk, selected, ctx)).Name(bulkPanelPortalName)
+		bulkPanel = ui.Portal(b.bulkPanel(bulk, selected, ctx)).Name(bulkPanelPortalName)
 	}
 
 	pagesCount := int(int64(totalCount)/searchParams.PerPage + 1)
@@ -180,7 +180,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespons
 			toolbar,
 			VDivider(),
 			VCardText(
-				ui.LazyPortal().Name(deleteConfirmPortalName),
+				ui.Portal().Name(deleteConfirmPortalName),
 				dataTable,
 			).Class("pa-0"),
 		),

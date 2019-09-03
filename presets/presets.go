@@ -240,7 +240,7 @@ func rightDrawer(r *ui.EventResponse, comp h.HTMLComponent) {
 	r.UpdatePortals = append(r.UpdatePortals, &ui.PortalUpdate{
 		Name: rightDrawerName,
 		Schema: VNavigationDrawer(
-			ui.LazyPortal(comp).Name(rightDrawerPortalName),
+			ui.Portal(comp).Name(rightDrawerPortalName),
 		).Attr("v-model", "vars.rightDrawer").
 			Bottom(true).
 			Right(true).
@@ -255,7 +255,7 @@ func rightDrawer(r *ui.EventResponse, comp h.HTMLComponent) {
 func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 	return func(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 
-		ctx.Injector.PutHeadHTML(`
+		ctx.Injector.HeadHTML(`
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -269,13 +269,13 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 		`)
 
 		if len(os.Getenv("DEV")) > 0 {
-			ctx.Injector.PutTailHTML(`
+			ctx.Injector.TailHTML(`
 			<script src='http://localhost:3080/app.js'></script>
 			<script src='http://localhost:3100/app.js'></script>
 			`)
 
 		} else {
-			ctx.Injector.PutTailHTML(`
+			ctx.Injector.TailHTML(`
 			<script src='/assets/main.js'></script>
 			`)
 		}
@@ -297,7 +297,7 @@ func (b *Builder) defaultLayout(in ui.PageFunc) (out ui.PageFunc) {
 				Attr("v-model", "vars.navDrawer").
 				Attr("v-init-context-vars", `{navDrawer: null}`),
 
-			ui.LazyPortal().EventFunc("").Name(rightDrawerName),
+			ui.Portal().EventFunc("").Name(rightDrawerName),
 
 			VAppBar(
 				VAppBarNavIcon().On("click.stop", "vars.navDrawer = !vars.navDrawer"),

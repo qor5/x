@@ -96,7 +96,7 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *ui.EventContext) (r ui.PageRespo
 
 	r.Schema = VContainer(
 		notice,
-		ui.LazyPortal().Name(deleteConfirmPortalName),
+		ui.Portal().Name(deleteConfirmPortalName),
 	).AppendChildren(comps...).Fluid(true)
 	return
 }

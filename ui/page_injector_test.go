@@ -1,20 +1,19 @@
-package bran_test
+package ui_test
 
 import (
 	"strings"
 	"testing"
 
+	. "github.com/sunfmin/bran/ui"
 	"github.com/theplant/testingutils"
-
-	"github.com/sunfmin/bran"
 )
 
 var cases = []struct {
-	operation func(b *bran.DefaultPageInjector)
+	operation func(b *PageInjector)
 	expected  string
 }{
 	{
-		operation: func(b *bran.DefaultPageInjector) {
+		operation: func(b *PageInjector) {
 			b.Title("Hello")
 		},
 		expected: `<title>Hello</title>
@@ -23,7 +22,7 @@ var cases = []struct {
 		`,
 	},
 	{
-		operation: func(b *bran.DefaultPageInjector) {
+		operation: func(b *PageInjector) {
 			b.Title("Hello")
 			b.Meta("charset", "shiftjis")
 		},
@@ -33,7 +32,7 @@ var cases = []struct {
 `,
 	},
 	{
-		operation: func(b *bran.DefaultPageInjector) {
+		operation: func(b *PageInjector) {
 			b.Title("Hello")
 			b.Meta("charset", "shiftjis")
 		},
@@ -43,7 +42,7 @@ var cases = []struct {
 `,
 	},
 	{
-		operation: func(b *bran.DefaultPageInjector) {
+		operation: func(b *PageInjector) {
 			b.Title("Hello")
 			b.Meta("charset", "shiftjis")
 			b.Meta("charset", "utf8")
@@ -60,9 +59,9 @@ var cases = []struct {
 
 func TestDefaultPageInjector(t *testing.T) {
 	for _, c := range cases {
-		var b bran.DefaultPageInjector
+		var b PageInjector
 		c.operation(&b)
-		diff := testingutils.PrettyJsonDiff(strings.TrimSpace(c.expected), strings.TrimSpace(b.HeadString()))
+		diff := testingutils.PrettyJsonDiff(strings.TrimSpace(c.expected), strings.TrimSpace(b.GetHeadString()))
 		if len(diff) > 0 {
 			t.Error(diff)
 		}
