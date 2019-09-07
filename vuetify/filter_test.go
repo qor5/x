@@ -35,8 +35,8 @@ var setByQueryCases = []struct {
 				ValueTo:   "2019-04-10",
 			},
 		}),
-		expectedSQLConds: "created_at < ? AND created_at >= ?",
-		expectedSQLArgs:  []interface{}{"1554912000", "1554825600"},
+		expectedSQLConds: "created_at >= ? AND created_at < ?",
+		expectedSQLArgs:  []interface{}{"1554825600", "1554912000"},
 	},
 	{
 		name: "between2",
@@ -72,8 +72,8 @@ var setByQueryCases = []struct {
 				SQLCondition: `name %s ?`,
 			},
 		}),
-		expectedSQLConds: "extract(epoch from created_at) < ? AND extract(epoch from created_at) >= ?",
-		expectedSQLArgs:  []interface{}{"1565280000", "1565107200"},
+		expectedSQLConds: "extract(epoch from created_at) >= ? AND extract(epoch from created_at) < ?",
+		expectedSQLArgs:  []interface{}{"1565107200", "1565280000"},
 	},
 	{
 		name: "equals",

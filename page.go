@@ -178,7 +178,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var resp string
-	resp, err = p.b.getLayoutMiddleFunc()(head)(r, body.String())
+	resp, err = p.b.layoutFunc(r, head, body.String())
 	if err != nil {
 		panic(err)
 	}

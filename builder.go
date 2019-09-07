@@ -12,16 +12,20 @@ import (
 )
 
 type Builder struct {
-	layoutMiddleFunc ui.LayoutMiddleFunc
+	layoutFunc ui.LayoutFunc
 }
 
 func New() (b *Builder) {
 	b = new(Builder)
+	b.layoutFunc = defaultLayoutFunc
 	return
 }
 
-func (b *Builder) LayoutMiddleFunc(mf ui.LayoutMiddleFunc) (r *Builder) {
-	b.layoutMiddleFunc = mf
+func (b *Builder) LayoutFunc(mf ui.LayoutFunc) (r *Builder) {
+	if mf == nil {
+		panic("layout func is nil")
+	}
+	b.layoutFunc = mf
 	return b
 }
 
@@ -46,36 +50,27 @@ func (b *Builder) PacksHandler(contentType string, packs ...ComponentsPack) http
 	}))
 }
 
-func (b *Builder) defaultLayoutMiddleFunc(head *ui.PageInjector) (out ui.LayoutFunc) {
-	return func(r *http.Request, body string) (output string, err error) {
+func defaultLayoutFunc(r *http.Request, injector *ui.PageInjector, body string) (output string, err error) {
 
-		root := h.HTML(
-			h.Head(
-				h.RawHTML(head.GetHeadString()),
-			),
-			h.Body(
-				h.RawHTML(body),
-				h.RawHTML(head.GetTailString()),
-			).Class("front"),
-		)
+	root := h.HTML(
+		h.Head(
+			h.RawHTML(injector.GetHeadString()),
+		),
+		h.Body(
+			h.RawHTML(body),
+			h.RawHTML(injector.GetTailString()),
+		).Class("front"),
+	)
 
-		buf := bytes.NewBuffer(nil)
-		ctx := new(ui.EventContext)
-		ctx.R = r
+	buf := bytes.NewBuffer(nil)
+	ctx := new(ui.EventContext)
+	ctx.R = r
 
-		err = h.Fprint(buf, root, ui.WrapEventContext(context.TODO(), ctx))
-		if err != nil {
-			return
-		}
-
-		output = buf.String()
+	err = h.Fprint(buf, root, ui.WrapEventContext(context.TODO(), ctx))
+	if err != nil {
 		return
 	}
-}
 
-func (b *Builder) getLayoutMiddleFunc() (lm ui.LayoutMiddleFunc) {
-	if b.layoutMiddleFunc != nil {
-		return b.layoutMiddleFunc
-	}
-	return b.defaultLayoutMiddleFunc
+	output = buf.String()
+	return
 }

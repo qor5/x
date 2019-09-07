@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -144,10 +145,19 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 		panic(err)
 	}
 
-	conds := []string{}
+	var conds []string
+
+	var keys = make([]string, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
 
 	var keyModValueMap = map[string]map[string]string{}
-	for k, v := range m {
+	for _, k := range keys {
+		v := m[k]
 		segs := strings.Split(k, ".")
 		var mod = ""
 		key := k

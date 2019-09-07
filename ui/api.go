@@ -39,9 +39,7 @@ type PageFunc func(ctx *EventContext) (r PageResponse, err error)
 
 type EventFunc func(ctx *EventContext) (r EventResponse, err error)
 
-type LayoutFunc func(r *http.Request, body string) (output string, err error)
-
-type LayoutMiddleFunc func(injector *PageInjector) (out LayoutFunc)
+type LayoutFunc func(r *http.Request, injector *PageInjector, body string) (output string, err error)
 
 type EventFuncHub interface {
 	RegisterEventFunc(eventFuncId string, ef EventFunc) (key string)
