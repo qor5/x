@@ -51,7 +51,6 @@ func runEvent(
 			renderChanger(ctx, &pr)
 		} else {
 			pr.Schema = ui.RawSchema("{}")
-			pr.JSONOnly = true
 		}
 		return
 	})
@@ -122,7 +121,6 @@ func TestFileUpload(t *testing.T) {
 		ctx.Hub.RegisterEventFunc("uploadFile", uploadFile)
 
 		pr.Schema = ui.RawSchema(fmt.Sprintf(`{"__text__": "%s"}`, string(data)))
-		pr.JSONOnly = true
 		return
 	})
 

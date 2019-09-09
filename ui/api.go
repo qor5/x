@@ -13,9 +13,8 @@ type Component interface {
 }
 
 type PageResponse struct {
-	Schema    Component
 	PageTitle string
-	JSONOnly  bool
+	Schema    Component
 }
 
 type PortalUpdate struct {
@@ -31,7 +30,6 @@ type EventResponse struct {
 	PushState     *PushStateBuilder `json:"pushState"` // This we don't omitempty, So that {} can be keeped when use url.Values{}
 	ReloadPortals []string          `json:"reloadPortals,omitempty"`
 	UpdatePortals []*PortalUpdate   `json:"updatePortals,omitempty"`
-	RedirectURL   string            `json:"redirectURL,omitempty"`
 	Data          interface{}       `json:"data,omitempty"` // used for return collection data like TagsInput data source
 }
 

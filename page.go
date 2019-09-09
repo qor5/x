@@ -132,28 +132,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var schema = ssd.Schema
-
-	if isRenderHTML && !pr.JSONOnly {
-		ssd.Schema = nil
-	}
-
-	var serverSideDataJSON []byte
-	serverSideDataJSON, err = json.MarshalIndent(ssd, "", "\t")
-	if err != nil {
-		panic(err)
-	}
-
-	if pr.JSONOnly {
-		_, err = fmt.Fprintln(w, string(serverSideDataJSON))
-		if err != nil {
-			panic(err)
-		}
-		return
-	}
-
 	body := bytes.NewBuffer(nil)
-
-	//body.WriteString(head.MainStyles(true))
 
 	if isRenderHTML {
 		err = h.Fprint(
@@ -167,6 +146,11 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 	} else {
+		var serverSideDataJSON []byte
+		serverSideDataJSON, err = json.MarshalIndent(ssd, "", "\t")
+		if err != nil {
+			panic(err)
+		}
 		err = h.Fprint(
 			body,
 			h.Script(fmt.Sprintf("window.__serverSideData__=%s\n", string(serverSideDataJSON))),
