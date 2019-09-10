@@ -50,6 +50,11 @@ func (b *Builder) PacksHandler(contentType string, packs ...ComponentsPack) http
 	}))
 }
 
+func NoopLayoutFunc(r *http.Request, injector *ui.PageInjector, body string) (output string, err error) {
+	output = body
+	return
+}
+
 func defaultLayoutFunc(r *http.Request, injector *ui.PageInjector, body string) (output string, err error) {
 
 	root := h.HTML(
@@ -57,7 +62,9 @@ func defaultLayoutFunc(r *http.Request, injector *ui.PageInjector, body string) 
 			h.RawHTML(injector.GetHeadString()),
 		),
 		h.Body(
-			h.RawHTML(body),
+			h.Div(
+				h.RawHTML(body),
+			).Id("app").Attr("v-cloak", true),
 			h.RawHTML(injector.GetTailString()),
 		).Class("front"),
 	)

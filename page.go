@@ -135,16 +135,7 @@ func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	body := bytes.NewBuffer(nil)
 
 	if isRenderHTML {
-		err = h.Fprint(
-			body,
-			h.Div(
-				h.RawHTML(schema.(string)),
-			).Id("app").Attr("v-cloak", true),
-			c,
-		)
-		if err != nil {
-			panic(err)
-		}
+		body.WriteString(schema.(string))
 	} else {
 		var serverSideDataJSON []byte
 		serverSideDataJSON, err = json.MarshalIndent(ssd, "", "\t")
