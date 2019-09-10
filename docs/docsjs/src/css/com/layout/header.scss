@@ -1,0 +1,67 @@
+@import '../../_config';
+@import '../../_utils';
+@import '../_icon/_icon';
+@import '../_bits/_button';
+@import 'slides';
+
+.global-header {
+  @include clearfix;
+  background-color: #393939;
+  background-size: cover;
+  min-width: 960px;
+
+  .g-layout {
+    position: relative;
+  }
+
+  .banner-main {
+    background-color: rgb(241, 241, 241);
+  }
+
+  .banner-header {
+    font-family: $font-family-serif;
+    text-align: center;
+    padding-top: 50px;
+    color: white;
+    font-size: 35px;
+  }
+
+}
+
+.page_index .global-header {
+  box-sizing: border-box;
+  height: 650px;
+
+  .get-kotlin-button {
+    @extend %button_call-to-action;
+    @extend %button_call-to-action%size_big;
+    text-transform: uppercase;
+  }
+}
+
+.global-header-panel {
+  @include clearfix;
+  box-sizing: border-box;
+  padding: $unit 0;
+  height: 60px;
+  .page_index & {
+    background-color: #393939;
+  }
+}
+
+.global-header-logo {
+  @include transition(0.3s all);
+  position: relative;
+  top: 12px;
+  float: left;
+  width: 103px;
+  height: 22px;
+//   background: url('/css/layout/images/logos-sprite.png') no-repeat;
+  font-size: 0;
+  text-decoration: none;
+
+  @include adapt_retina {
+    // background-image: url('/css/layout/images/logos-sprite@2x.png');
+    background-size: 200px 100px;
+  }
+}
