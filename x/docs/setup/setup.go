@@ -244,8 +244,8 @@ func Setup(prefix string) http.Handler {
 					renderFunc: rf(getting_started.TheGoHTMLBuilder),
 				},
 				{
-					title:      "Layout Function to setup common things",
-					slug:       "layout-function-to-setup-common-things.html",
+					title:      "Layout Function and Page Injector",
+					slug:       "layout-function-and-page-injector.html",
 					renderFunc: rf(getting_started.TheGoHTMLBuilder),
 				},
 				{
@@ -271,11 +271,6 @@ func Setup(prefix string) http.Handler {
 				{
 					title:      "Event Flash Object",
 					slug:       "event-flash-object.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
-				},
-				{
-					title:      "Page Injector",
-					slug:       "page-injector.html",
 					renderFunc: rf(getting_started.TheGoHTMLBuilder),
 				},
 			},
