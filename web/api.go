@@ -33,15 +33,20 @@ type EventResponse struct {
 	Data          interface{}       `json:"data,omitempty"` // used for return collection data like TagsInput data source
 }
 
+// @snippet_begin(PageFuncAndEventFuncDefinition)
 type PageFunc func(ctx *EventContext) (r PageResponse, err error)
-
 type EventFunc func(ctx *EventContext) (r EventResponse, err error)
+
+// @snippet_end
 
 type LayoutFunc func(r *http.Request, injector *PageInjector, body string) (output string, err error)
 
+// @snippet_begin(EventFuncHubDefinition)
 type EventFuncHub interface {
 	RegisterEventFunc(eventFuncId string, ef EventFunc) (key string)
 }
+
+// @snippet_end
 
 /*
 	PushState: Whatever put into this, will do window.history.pushState to the current page url with

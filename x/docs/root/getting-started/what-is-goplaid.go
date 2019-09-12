@@ -9,7 +9,6 @@ import (
 )
 
 var WhatIsGoPlaid = Components(
-	utils.Anchor(H1(""), "What is GoPlaid?"),
 	md.Markdown(`
 GoPlaid is yet another Go library to build web applications. 
 different from other MVC frameworks. the concepts in GoPlaid is **Page**, **Event**, **Component**.
@@ -38,8 +37,7 @@ The above is the code you mostly writing. the following is the boilerplate code 
 	ch.Code(samples.HelloWorldMuxSample1),
 	ch.Code(samples.HelloWorldMuxSample2),
 	ch.Code(samples.HelloWorldMainSample),
-	utils.Demo("Check the demo", samples.HelloWorldPath),
+	utils.Demo("", samples.HelloWorldPath),
 
 	md.Markdown("If you wondering why `H1(\"Hello World\")` and how this worked, Please go ahead and checkout next page"),
-
 )

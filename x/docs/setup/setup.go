@@ -7,8 +7,12 @@ import (
 	_ "net/http/pprof"
 	"os"
 
+	"github.com/goplaid/x/docs/utils"
+
+	"github.com/goplaid/x/docs/root/basics"
+
 	"github.com/goplaid/x/docs"
-	"github.com/goplaid/x/docs/root/getting-started"
+	getting_started "github.com/goplaid/x/docs/root/getting-started"
 	"github.com/goplaid/x/docs/samples"
 
 	"github.com/goplaid/web"
@@ -25,10 +29,10 @@ type section struct {
 }
 
 type pageItem struct {
-	section    string
-	slug       string
-	title      string
-	renderFunc web.PageFunc
+	section string
+	slug    string
+	title   string
+	doc     HTMLComponent
 }
 
 func menuLinks(prefix string, secs []*section) (comp HTMLComponent) {
@@ -146,6 +150,7 @@ func layout(in web.PageFunc, secs []*section, prefix string, cp *pageItem) (out 
 	}
 }
 
+// @snippet_begin(DemoLayoutSample)
 func demoLayout(in web.PageFunc) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
@@ -174,9 +179,14 @@ func demoLayout(in web.PageFunc) (out web.PageFunc) {
 	}
 }
 
-func rf(comp HTMLComponent) web.PageFunc {
+// @snippet_end
+
+func rf(comp HTMLComponent, p *pageItem) web.PageFunc {
 	return func(ctx *web.EventContext) (r web.PageResponse, err error) {
-		r.Schema = comp
+		r.Schema = Components(
+			utils.Anchor(H1(""), p.title),
+			comp,
+		)
 		return
 	}
 }
@@ -222,14 +232,14 @@ func Setup(prefix string) http.Handler {
 			slug:  "getting-started",
 			items: []*pageItem{
 				{
-					title:      "What is GoPlaid?",
-					slug:       "what-is-goplaid.html",
-					renderFunc: rf(getting_started.WhatIsGoPlaid),
+					title: "What is GoPlaid?",
+					slug:  "what-is-goplaid.html",
+					doc:   getting_started.WhatIsGoPlaid,
 				},
 				{
-					title:      "The Go HTML builder",
-					slug:       "the-go-html-builder.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "The Go HTML builder",
+					slug:  "the-go-html-builder.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 			},
 		},
@@ -239,39 +249,39 @@ func Setup(prefix string) http.Handler {
 			slug:  "basics",
 			items: []*pageItem{
 				{
-					title:      "Page Func and Event Func",
-					slug:       "page-func-and-event-func.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Page Func and Event Func",
+					slug:  "page-func-and-event-func.html",
+					doc:   basics.PageFuncAndEventFunc,
 				},
 				{
-					title:      "Layout Function and Page Injector",
-					slug:       "layout-function-and-page-injector.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Layout Function and Page Injector",
+					slug:  "layout-function-and-page-injector.html",
+					doc:   basics.LayoutFunctionAndPageInjector,
 				},
 				{
-					title:      "Switch Pages with Push State",
-					slug:       "switch-pages-with-push-state.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Switch Pages with Push State",
+					slug:  "switch-pages-with-push-state.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Form Handling",
-					slug:       "form-handling.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Form Handling",
+					slug:  "form-handling.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "File Uploads",
-					slug:       "file-uploads.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "File Uploads",
+					slug:  "file-uploads.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Partial Refresh with Portal",
-					slug:       "partial-refresh-with-portal.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Partial Refresh with Portal",
+					slug:  "partial-refresh-with-portal.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Event Flash Object",
-					slug:       "event-flash-object.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Event Flash Object",
+					slug:  "event-flash-object.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 			},
 		},
@@ -280,19 +290,19 @@ func Setup(prefix string) http.Handler {
 			slug:  "components-guide",
 			items: []*pageItem{
 				{
-					title:      "Composite With Go",
-					slug:       "composite-with-go.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Composite With Go",
+					slug:  "composite-with-go.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Integrate My First Vue Component",
-					slug:       "integrate-my-first-vue-component.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Integrate My First Vue Component",
+					slug:  "integrate-my-first-vue-component.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Update Form Values",
-					slug:       "update-form-values.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Update Form Values",
+					slug:  "update-form-values.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 			},
 		},
@@ -301,24 +311,24 @@ func Setup(prefix string) http.Handler {
 			slug:  "vuetify-components",
 			items: []*pageItem{
 				{
-					title:      "A Taste of using Vuetify in Go",
-					slug:       "a-taste-of-using-vuetify-in-go.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "A Taste of using Vuetify in Go",
+					slug:  "a-taste-of-using-vuetify-in-go.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Basic Inputs",
-					slug:       "basic-inputs.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Basic Inputs",
+					slug:  "basic-inputs.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Auto Complete",
-					slug:       "auto-complete.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Auto Complete",
+					slug:  "auto-complete.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Navigation Drawer",
-					slug:       "navigation-drawer.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Navigation Drawer",
+					slug:  "navigation-drawer.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 			},
 		},
@@ -327,69 +337,69 @@ func Setup(prefix string) http.Handler {
 			slug:  "presets",
 			items: []*pageItem{
 				{
-					title:      "Not just scaffolding, it's the whole house",
-					slug:       "its-the-whole-house.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Not just scaffolding, it's the whole house",
+					slug:  "its-the-whole-house.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Listing fields and their Component Func",
-					slug:       "listing-fields-and-their-component-func.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Listing fields and their Component Func",
+					slug:  "listing-fields-and-their-component-func.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Listing Filters",
-					slug:       "listing-filters.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Listing Filters",
+					slug:  "listing-filters.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Listing Filter Tabs",
-					slug:       "listing-filter-tabs.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Listing Filter Tabs",
+					slug:  "listing-filter-tabs.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Bulk Actions",
-					slug:       "bulk-actions.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Bulk Actions",
+					slug:  "bulk-actions.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Global Search Box",
-					slug:       "global-search-tabs.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Global Search Box",
+					slug:  "global-search-tabs.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Edit simple object side by side",
-					slug:       "edit-simple-object-side-by-side.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Edit simple object side by side",
+					slug:  "edit-simple-object-side-by-side.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Editing Field Component Func",
-					slug:       "editing-field-component-func.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Editing Field Component Func",
+					slug:  "editing-field-component-func.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Validations",
-					slug:       "validations.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Validations",
+					slug:  "validations.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Complex Object with a detail page",
-					slug:       "complex-object-with-detail-page.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Complex Object with a detail page",
+					slug:  "complex-object-with-detail-page.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Card and Data Table Component",
-					slug:       "card-and-data-table-component.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Card and Data Table Component",
+					slug:  "card-and-data-table-component.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Key Info and Detail Info Component",
-					slug:       "key-info-and-detail-info-component.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Key Info and Detail Info Component",
+					slug:  "key-info-and-detail-info-component.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 				{
-					title:      "Files and Images",
-					slug:       "files-and-images.html",
-					renderFunc: rf(getting_started.TheGoHTMLBuilder),
+					title: "Files and Images",
+					slug:  "files-and-images.html",
+					doc:   getting_started.TheGoHTMLBuilder,
 				},
 			},
 		},
@@ -407,7 +417,7 @@ func Setup(prefix string) http.Handler {
 			log.Println(url)
 			mux.Handle(
 				url,
-				mw(ub.Page(layout(p.renderFunc, secs, prefix, p))),
+				mw(ub.Page(layout(rf(p.doc, p), secs, prefix, p))),
 			)
 		}
 	}
@@ -421,6 +431,18 @@ func Setup(prefix string) http.Handler {
 	mux.Handle(samples.HelloWorldPath, wb.Page(samples.HelloWorld))
 	// @snippet_end
 
-	mux.Handle("/", mw(ub.Page(layout(rf(getting_started.TheGoHTMLBuilder), secs, prefix, secs[0].items[0]))))
+	// @snippet_begin(HelloWorldReloadMuxSample1)
+	mux.Handle(
+		samples.HelloWorldReloadPath,
+		wb.Page(
+			demoLayout(
+				samples.HelloWorldReload,
+			),
+		),
+	)
+	// @snippet_end
+
+	home := secs[0].items[0]
+	mux.Handle("/", mw(ub.Page(layout(rf(getting_started.TheGoHTMLBuilder, home), secs, prefix, home))))
 	return mux
 }

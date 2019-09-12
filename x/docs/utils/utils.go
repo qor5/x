@@ -16,6 +16,9 @@ func Anchor(h *HTMLTagBuilder, text string) HTMLComponent {
 }
 
 func Demo(title string, path string) HTMLComponent {
+	if len(title) == 0 {
+		title = "Check the demo"
+	}
 	return Div(
 		A().Text(title).Href(path).Target("_blank"),
 	).Class("demo")
