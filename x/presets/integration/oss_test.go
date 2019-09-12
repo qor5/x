@@ -7,9 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/qor/media"
-
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
+	"github.com/qor/media"
 	"github.com/qor/media/oss"
 	"github.com/qor/oss/s3"
 )

@@ -4,15 +4,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sunfmin/bran/web"
 	"github.com/theplant/testingutils"
 )
 
 var cases = []struct {
-	operation func(b *PageInjector)
+	operation func(b *web.PageInjector)
 	expected  string
 }{
 	{
-		operation: func(b *PageInjector) {
+		operation: func(b *web.PageInjector) {
 			b.Title("Hello")
 		},
 		expected: `<title>Hello</title>
@@ -21,7 +22,7 @@ var cases = []struct {
 		`,
 	},
 	{
-		operation: func(b *PageInjector) {
+		operation: func(b *web.PageInjector) {
 			b.Title("Hello")
 			b.Meta("charset", "shiftjis")
 		},
@@ -31,7 +32,7 @@ var cases = []struct {
 `,
 	},
 	{
-		operation: func(b *PageInjector) {
+		operation: func(b *web.PageInjector) {
 			b.Title("Hello")
 			b.Meta("charset", "shiftjis")
 		},
@@ -41,7 +42,7 @@ var cases = []struct {
 `,
 	},
 	{
-		operation: func(b *PageInjector) {
+		operation: func(b *web.PageInjector) {
 			b.Title("Hello")
 			b.Meta("charset", "shiftjis")
 			b.Meta("charset", "utf8")
@@ -58,7 +59,7 @@ var cases = []struct {
 
 func TestDefaultPageInjector(t *testing.T) {
 	for _, c := range cases {
-		var b PageInjector
+		var b web.PageInjector
 		c.operation(&b)
 		diff := testingutils.PrettyJsonDiff(strings.TrimSpace(c.expected), strings.TrimSpace(b.GetHeadString()))
 		if len(diff) > 0 {

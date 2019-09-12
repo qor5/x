@@ -5,10 +5,9 @@ import (
 	"net/http"
 	"os"
 
-	examples2 "github.com/sunfmin/bran/x/presets/examples"
-
 	"github.com/go-chi/chi/middleware"
 	"github.com/jinzhu/gorm"
+	examples2 "github.com/sunfmin/bran/x/presets/examples"
 )
 
 func main() {

@@ -7,10 +7,9 @@ import (
 	"time"
 
 	"github.com/sunfmin/bran/web"
-
-	"github.com/theplant/testingutils"
-
+	. "github.com/sunfmin/bran/x/presets"
 	h "github.com/theplant/htmlgo"
+	"github.com/theplant/testingutils"
 )
 
 type Company struct {

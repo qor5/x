@@ -3,6 +3,7 @@ package vuetify_test
 import (
 	"testing"
 
+	. "github.com/sunfmin/bran/x/vuetify"
 	"github.com/theplant/testingutils"
 )
 

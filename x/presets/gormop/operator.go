@@ -5,11 +5,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/sunfmin/bran/x/presets"
-
-	"github.com/sunfmin/bran/web"
-
 	"github.com/jinzhu/gorm"
+	"github.com/sunfmin/bran/web"
+	"github.com/sunfmin/bran/x/presets"
 )
 
 func DataOperator(db *gorm.DB) (r presets.DataOperator) {

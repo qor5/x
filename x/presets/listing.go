@@ -169,7 +169,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 
 	for _, f := range b.fields {
 		dataTable.Column(f.name).
-			Title(b.mb.getLabel(NameLabel)).
+			Title(b.mb.getLabel(f.NameLabel)).
 			CellComponentFunc(b.cellComponentFunc(f))
 	}
 
@@ -288,7 +288,7 @@ func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *web.EventContex
 
 	for _, ba := range b.bulkActions {
 		toolbar.AppendChildren(
-			web.Bind(VBtn(b.mb.getLabel(NameLabel)).
+			web.Bind(VBtn(b.mb.getLabel(ba.NameLabel)).
 				Color(b.mb.p.primaryColor).
 				Depressed(true).
 				Dark(true).

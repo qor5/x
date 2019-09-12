@@ -10,13 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	examples2 "github.com/sunfmin/bran/x/presets/examples"
-
-	"github.com/sunfmin/bran/web"
-
-	"github.com/theplant/gofixtures"
-
 	"github.com/jinzhu/gorm"
+	"github.com/sunfmin/bran/web"
+	examples2 "github.com/sunfmin/bran/x/presets/examples"
+	"github.com/theplant/gofixtures"
 )
 
 var customerData = gofixtures.Data(gofixtures.Sql(`

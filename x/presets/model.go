@@ -58,7 +58,7 @@ func (b *ModelBuilder) newModelArray() (r interface{}) {
 func (b *ModelBuilder) newListing() (r *ListingBuilder) {
 	b.listing = &ListingBuilder{mb: b, FieldBuilders: *b.p.listFieldDefaults.InspectFields(b.model)}
 	if b.p.dataOperator != nil {
-		b.listing.Searcher(Search)
+		b.listing.Searcher(b.p.dataOperator.Search)
 	}
 	return
 }
@@ -67,9 +67,9 @@ func (b *ModelBuilder) newEditing() (r *EditingBuilder) {
 	b.writeFields, b.listing.searchColumns = b.p.writeFieldDefaults.inspectFieldsAndCollectName(b.model, reflect.TypeOf(""))
 	b.editing = &EditingBuilder{mb: b, FieldBuilders: *b.writeFields}
 	if b.p.dataOperator != nil {
-		b.editing.FetchFunc(Fetch)
-		b.editing.SaveFunc(Save)
-		b.editing.DeleteFunc(Delete)
+		b.editing.FetchFunc(b.p.dataOperator.Fetch)
+		b.editing.SaveFunc(b.p.dataOperator.Save)
+		b.editing.DeleteFunc(b.p.dataOperator.Delete)
 	}
 	return
 }
@@ -77,7 +77,7 @@ func (b *ModelBuilder) newEditing() (r *EditingBuilder) {
 func (b *ModelBuilder) newDetailing() (r *DetailingBuilder) {
 	b.detailing = &DetailingBuilder{mb: b, FieldBuilders: *b.p.detailFieldDefaults.InspectFields(b.model)}
 	if b.p.dataOperator != nil {
-		b.detailing.Fetcher(Fetch)
+		b.detailing.Fetcher(b.p.dataOperator.Fetch)
 	}
 	return
 }
@@ -152,7 +152,7 @@ func (b *ModelBuilder) Placeholders(vs ...string) (r *ModelBuilder) {
 func (b *ModelBuilder) getComponentFuncField(field *FieldBuilder) (r *FieldContext) {
 	r = &FieldContext{
 		Name:  field.name,
-		Label: b.getLabel(NameLabel),
+		Label: b.getLabel(field.NameLabel),
 	}
 	return
 }
