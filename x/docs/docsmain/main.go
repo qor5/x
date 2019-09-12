@@ -5,15 +5,17 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	setup2 "github.com/goplaid/x/docs/setup"
+	"github.com/goplaid/x/docs/setup"
 )
 
 func main() {
-	h := setup2.Setup("")
+	mux := setup.Setup("")
+	// @snippet_begin(HelloWorldMainSample)
 	fmt.Println("Starting docs at :9000")
-	http.Handle("/", h)
+	http.Handle("/", mux)
 	err := http.ListenAndServe(":9000", nil)
 	if err != nil {
 		panic(err)
 	}
+	// @snippet_end
 }
