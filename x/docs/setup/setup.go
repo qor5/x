@@ -443,6 +443,6 @@ func Setup(prefix string) http.Handler {
 	// @snippet_end
 
 	home := secs[0].items[0]
-	mux.Handle("/", mw(ub.Page(layout(rf(getting_started.TheGoHTMLBuilder, home), secs, prefix, home))))
+	mux.Handle("/", mw(ub.Page(layout(rf(home.doc, home), secs, prefix, home))))
 	return mux
 }
