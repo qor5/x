@@ -7,12 +7,12 @@ import (
 	_ "net/http/pprof"
 	"os"
 
-	"github.com/sunfmin/bran/x/docs"
-	overview2 "github.com/sunfmin/bran/x/docs/root/overview"
-	samples2 "github.com/sunfmin/bran/x/docs/samples"
+	"github.com/goplaid/x/docs"
+	overview2 "github.com/goplaid/x/docs/root/overview"
+	samples2 "github.com/goplaid/x/docs/samples"
 
-	"github.com/sunfmin/bran/web"
-	"github.com/sunfmin/bran/x/codehighlight"
+	"github.com/goplaid/web"
+	"github.com/goplaid/x/codehighlight"
 	"github.com/theplant/appkit/contexts"
 	"github.com/theplant/appkit/server"
 	. "github.com/theplant/htmlgo"

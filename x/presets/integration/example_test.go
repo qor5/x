@@ -11,8 +11,8 @@ import (
 	"testing"
 
 	"github.com/jinzhu/gorm"
-	"github.com/sunfmin/bran/web"
-	examples2 "github.com/sunfmin/bran/x/presets/examples"
+	"github.com/goplaid/web"
+	examples2 "github.com/goplaid/x/presets/examples"
 	"github.com/theplant/gofixtures"
 )
 

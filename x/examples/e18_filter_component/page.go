@@ -1,8 +1,8 @@
 package e18_filter_component
 
 import (
-	"github.com/sunfmin/bran/web"
-	. "github.com/sunfmin/bran/x/vuetify"
+	"github.com/goplaid/web"
+	. "github.com/goplaid/x/vuetify"
 )
 
 func FilterComponent(ctx *web.EventContext) (pr web.PageResponse, err error) {

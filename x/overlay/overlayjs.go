@@ -2,7 +2,7 @@ package overlay
 
 import (
 	"github.com/gobuffalo/packr"
-	"github.com/sunfmin/bran/web"
+	"github.com/goplaid/web"
 )
 
 var overlayjsassetsbox = packr.NewBox("./overlayjs/dist/")

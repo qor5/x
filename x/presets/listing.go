@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sunfmin/bran/web"
+	"github.com/goplaid/web"
 
 	"github.com/qor/inflection"
-	s "github.com/sunfmin/bran/x/stripeui"
-	. "github.com/sunfmin/bran/x/vuetify"
+	s "github.com/goplaid/x/stripeui"
+	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 	"github.com/thoas/go-funk"
 )

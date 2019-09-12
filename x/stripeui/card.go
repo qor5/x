@@ -3,7 +3,7 @@ package stripeui
 import (
 	"context"
 
-	. "github.com/sunfmin/bran/x/vuetify"
+	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 )
 

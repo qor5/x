@@ -1,11 +1,11 @@
 package overview
 
 import (
-	"github.com/sunfmin/bran/web"
-	ch "github.com/sunfmin/bran/x/codehighlight"
-	samples2 "github.com/sunfmin/bran/x/docs/samples"
-	utils2 "github.com/sunfmin/bran/x/docs/utils"
-	"github.com/sunfmin/bran/x/md"
+	"github.com/goplaid/web"
+	ch "github.com/goplaid/x/codehighlight"
+	samples2 "github.com/goplaid/x/docs/samples"
+	utils2 "github.com/goplaid/x/docs/utils"
+	"github.com/goplaid/x/md"
 	. "github.com/theplant/htmlgo"
 )
 
@@ -13,7 +13,7 @@ func Index(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	pr.Schema = Components(
 		utils2.Anchor(H1(""), "The Type-safe HTML Builder in Go"),
 		md.Markdown(`
-Although Go can't do flexible builder syntax like [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html) does, 
+Although Go can't do flexible builder syntax like [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html) does,
 But it can also do quite well.
 
 Consider the following code:

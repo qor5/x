@@ -3,11 +3,11 @@ package presets
 import (
 	"net/url"
 
-	"github.com/sunfmin/bran/web"
+	"github.com/goplaid/web"
 
 	"github.com/jinzhu/inflection"
 
-	. "github.com/sunfmin/bran/x/vuetify"
+	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 	"goji.io/pat"
 )

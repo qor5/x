@@ -2,7 +2,7 @@ package codehighlight
 
 import (
 	"github.com/gobuffalo/packr"
-	"github.com/sunfmin/bran/web"
+	"github.com/goplaid/web"
 )
 
 var assetsbox = packr.NewBox("./codehighlightjs/dist/")

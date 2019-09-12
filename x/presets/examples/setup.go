@@ -8,11 +8,11 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/sunfmin/bran/web"
-	"github.com/sunfmin/bran/x/presets"
-	gormop2 "github.com/sunfmin/bran/x/presets/gormop"
-	s "github.com/sunfmin/bran/x/stripeui"
-	. "github.com/sunfmin/bran/x/vuetify"
+	"github.com/goplaid/web"
+	"github.com/goplaid/x/presets"
+	gormop2 "github.com/goplaid/x/presets/gormop"
+	s "github.com/goplaid/x/stripeui"
+	. "github.com/goplaid/x/vuetify"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 )

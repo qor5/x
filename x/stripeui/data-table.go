@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/rs/xid"
-	"github.com/sunfmin/bran/web"
-	. "github.com/sunfmin/bran/x/vuetify"
+	"github.com/goplaid/web"
+	. "github.com/goplaid/x/vuetify"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 	"github.com/thoas/go-funk"

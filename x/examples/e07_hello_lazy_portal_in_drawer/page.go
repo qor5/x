@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/sunfmin/bran/web"
-	bo "github.com/sunfmin/bran/x/overlay"
+	"github.com/goplaid/web"
+	bo "github.com/goplaid/x/overlay"
 	. "github.com/theplant/htmlgo"
 )
 

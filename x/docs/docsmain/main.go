@@ -5,7 +5,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	setup2 "github.com/sunfmin/bran/x/docs/setup"
+	setup2 "github.com/goplaid/x/docs/setup"
 )
 
 func main() {

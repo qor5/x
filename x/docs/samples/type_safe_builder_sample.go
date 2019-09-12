@@ -2,7 +2,7 @@ package samples
 
 // @snippet_begin(TypeSafeBuilderSample)
 import (
-	"github.com/sunfmin/bran/web"
+	"github.com/goplaid/web"
 	. "github.com/theplant/htmlgo"
 )
 

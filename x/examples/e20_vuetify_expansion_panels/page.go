@@ -3,9 +3,9 @@ package e20_vuetify_expansion_panels
 import (
 	"time"
 
-	"github.com/sunfmin/bran/web"
-	s "github.com/sunfmin/bran/x/stripeui"
-	. "github.com/sunfmin/bran/x/vuetify"
+	"github.com/goplaid/web"
+	s "github.com/goplaid/x/stripeui"
+	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 )
 

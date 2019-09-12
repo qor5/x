@@ -3,7 +3,7 @@ package vuetify
 import (
 	"fmt"
 
-	"github.com/sunfmin/bran/web"
+	"github.com/goplaid/web"
 )
 
 type DType string

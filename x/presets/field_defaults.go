@@ -5,11 +5,11 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"github.com/sunfmin/bran/web"
+	"github.com/goplaid/web"
 
 	"github.com/iancoleman/strcase"
 
-	. "github.com/sunfmin/bran/x/vuetify"
+	. "github.com/goplaid/x/vuetify"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 )

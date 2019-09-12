@@ -1,8 +1,8 @@
 package e13_hello_vuetify_list
 
 import (
-	"github.com/sunfmin/bran/web"
-	. "github.com/sunfmin/bran/x/vuetify"
+	"github.com/goplaid/web"
+	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 )
 

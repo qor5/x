@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/jinzhu/gorm"
-	"github.com/sunfmin/bran/web"
-	"github.com/sunfmin/bran/x/presets"
+	"github.com/goplaid/web"
+	"github.com/goplaid/x/presets"
 )
 
 func DataOperator(db *gorm.DB) (r presets.DataOperator) {

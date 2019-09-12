@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/jinzhu/gorm"
-	examples2 "github.com/sunfmin/bran/x/presets/examples"
+	examples2 "github.com/goplaid/x/presets/examples"
 )
 
 func main() {

@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/jinzhu/gorm"
-	"github.com/sunfmin/bran/web"
-	gormop2 "github.com/sunfmin/bran/x/presets/gormop"
+	"github.com/goplaid/web"
+	gormop2 "github.com/goplaid/x/presets/gormop"
 	"github.com/theplant/gofixtures"
 )
 

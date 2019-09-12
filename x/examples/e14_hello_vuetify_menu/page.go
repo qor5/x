@@ -1,8 +1,8 @@
 package e14_hello_vuetify_menu
 
 import (
-	"github.com/sunfmin/bran/web"
-	. "github.com/sunfmin/bran/x/vuetify"
+	"github.com/goplaid/web"
+	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 )
 

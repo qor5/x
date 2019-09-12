@@ -2,8 +2,8 @@ package e10_hello_vuetify_autocomplete
 
 import (
 	"github.com/Pallinder/go-randomdata"
-	"github.com/sunfmin/bran/web"
-	vt "github.com/sunfmin/bran/x/vuetify"
+	"github.com/goplaid/web"
+	vt "github.com/goplaid/x/vuetify"
 	. "github.com/theplant/htmlgo"
 )
 

@@ -2,7 +2,7 @@ package docs
 
 import (
 	"github.com/gobuffalo/packr"
-	"github.com/sunfmin/bran/web"
+	"github.com/goplaid/web"
 )
 
 var box = packr.NewBox("./docsjs/dist/")

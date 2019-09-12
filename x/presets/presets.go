@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/qor/inflection"
-	"github.com/sunfmin/bran/web"
-	. "github.com/sunfmin/bran/x/vuetify"
+	"github.com/goplaid/web"
+	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 	"go.uber.org/zap"
 	goji "goji.io"

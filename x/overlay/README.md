@@ -1,7 +1,7 @@
 # How to develop overlayjs
 
 
-Go to project: github.com/sunfmin/bran/corejs and do
+Go to project: github.com/goplaid/corejs and do
 ```
 yarn serve
 ```

@@ -1,8 +1,8 @@
 package e03_hello_card
 
 import (
-	"github.com/sunfmin/bran/web"
-	. "github.com/sunfmin/bran/x/material"
+	"github.com/goplaid/web"
+	. "github.com/goplaid/x/material"
 	h "github.com/theplant/htmlgo"
 )
 

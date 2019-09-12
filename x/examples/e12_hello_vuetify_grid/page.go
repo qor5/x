@@ -3,8 +3,8 @@ package e12_hello_vuetify_grid
 import (
 	"fmt"
 
-	"github.com/sunfmin/bran/web"
-	. "github.com/sunfmin/bran/x/vuetify"
+	"github.com/goplaid/web"
+	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 )
 

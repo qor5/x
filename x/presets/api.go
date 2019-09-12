@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/sunfmin/bran/web"
+	"github.com/goplaid/web"
 
-	v "github.com/sunfmin/bran/x/vuetify"
+	v "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 )
 
