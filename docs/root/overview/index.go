@@ -13,7 +13,8 @@ func Index(ctx *ui.EventContext) (pr ui.PageResponse, err error) {
 	pr.Schema = Components(
 		utils.Anchor(H1(""), "The Type-safe HTML Builder in Go"),
 		md.Markdown(`
-Although Go can't do flexible builder syntax like [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html) does, But it can also do quite well.
+Although Go can't do flexible builder syntax like [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html) does, 
+But it can also do quite well.
 
 Consider the following code:
 `),

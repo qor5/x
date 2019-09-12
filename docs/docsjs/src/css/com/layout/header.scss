@@ -50,16 +50,20 @@
 }
 
 .global-header-logo {
-  @include transition(0.3s all);
+//   @include transition(0.3s all);
   position: relative;
   top: 12px;
   float: left;
   width: 103px;
   height: 22px;
 //   background: url('/css/layout/images/logos-sprite.png') no-repeat;
-  font-size: 0;
+//   font-size: 0;
   text-decoration: none;
-
+  font-weight: bold;
+  color: white;
+  font-family: "Lucida Grande", "Lucida Sans", sans-serif;
+  font-style: italic;
+  font-size: 24px;
   @include adapt_retina {
     // background-image: url('/css/layout/images/logos-sprite@2x.png');
     background-size: 200px 100px;
