@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"serve": "vue-cli-service serve",
-		"build": "vue-cli-service build --target lib --name bran --formats umd-min src/main.ts",
+		"build": "vue-cli-service build --target lib --name core --formats umd-min src/main.ts",
 		"lint": "vue-cli-service lint",
 		"test": "vue-cli-service test:unit"
 	},

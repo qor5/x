@@ -1,5 +1,6 @@
 package web
 
+// @snippet_begin(PackrSample)
 import (
 	"github.com/gobuffalo/packr"
 )
@@ -7,7 +8,7 @@ import (
 var box = packr.NewBox("./corejs/dist/")
 
 func JSComponentsPack() ComponentsPack {
-	v, err := box.FindString("bran.umd.min.js")
+	v, err := box.FindString("core.umd.min.js")
 	if err != nil {
 		panic(err)
 	}
@@ -23,3 +24,5 @@ func JSVueComponentsPack() ComponentsPack {
 
 	return ComponentsPack(v)
 }
+
+// @snippet_end

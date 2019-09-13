@@ -90,7 +90,7 @@ func footer() HTMLComponent {
 
 func layout(in web.PageFunc, secs []*section, prefix string, cp *pageItem) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
-
+		pr.PageTitle = cp.title + " - " + "GoPlaid"
 		tailScript := `<script src='/assets/main.js'></script>`
 		if len(os.Getenv("DEV")) > 0 {
 			fmt.Println("Using Dev environment, make sure you did: yarn start")
@@ -187,12 +187,13 @@ func rf(comp HTMLComponent, p *pageItem) web.PageFunc {
 }
 
 func Setup(prefix string) http.Handler {
-	ub := web.New()
 
 	// @snippet_begin(HelloWorldMuxSample1)
 	mux := http.NewServeMux()
 	// @snippet_end
 
+	// @snippet_begin(ComponentsPackSample)
+	ub := web.New()
 	mux.Handle("/assets/main.js",
 		ub.PacksHandler("text/javascript",
 			docs.JSComponentsPack(),
@@ -218,6 +219,7 @@ func Setup(prefix string) http.Handler {
 			docs.CSSComponentsPack(),
 		),
 	)
+	// @snippet_end
 
 	mux.Handle("/favicon.ico", http.NotFoundHandler())
 
