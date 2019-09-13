@@ -3,17 +3,21 @@ package main
 import (
 	"fmt"
 	"net/http"
-	_ "net/http/pprof"
+	"os"
 
 	"github.com/goplaid/x/docs/setup"
 )
 
 func main() {
 	mux := setup.Setup("")
+	port := os.Getenv("PORT")
+	if len(port) == 0 {
+		port = "9000"
+	}
 	// @snippet_begin(HelloWorldMainSample)
-	fmt.Println("Starting docs at :9000")
+	fmt.Println("Starting docs at :" + port)
 	http.Handle("/", mux)
-	err := http.ListenAndServe(":9000", nil)
+	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		panic(err)
 	}

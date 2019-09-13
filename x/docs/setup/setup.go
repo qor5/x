@@ -7,18 +7,13 @@ import (
 	_ "net/http/pprof"
 	"os"
 
-	"github.com/goplaid/x/docs/utils"
-
-	"github.com/goplaid/x/docs/root/basics"
-
-	"github.com/goplaid/x/docs"
-	getting_started "github.com/goplaid/x/docs/root/getting-started"
-	"github.com/goplaid/x/docs/samples"
-
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/codehighlight"
-	"github.com/theplant/appkit/contexts"
-	"github.com/theplant/appkit/server"
+	"github.com/goplaid/x/docs"
+	"github.com/goplaid/x/docs/root/basics"
+	getting_started "github.com/goplaid/x/docs/root/getting-started"
+	"github.com/goplaid/x/docs/samples"
+	"github.com/goplaid/x/docs/utils"
 	. "github.com/theplant/htmlgo"
 )
 
@@ -405,26 +400,20 @@ func Setup(prefix string) http.Handler {
 		},
 	}
 
-	mw := server.Compose(
-		// server.LogRequest,
-		// log.WithLogger(l),
-		contexts.WithHTTPStatus,
-	)
-
 	for _, sec := range secs {
 		for _, p := range sec.items {
 			url := fmt.Sprintf("/%s/%s", sec.slug, p.slug)
 			log.Println(url)
 			mux.Handle(
 				url,
-				mw(ub.Page(layout(rf(p.doc, p), secs, prefix, p))),
+				ub.Page(layout(rf(p.doc, p), secs, prefix, p)),
 			)
 		}
 	}
 
 	emptyUb := web.New().LayoutFunc(web.NoopLayoutFunc)
 
-	mux.Handle(samples.TypeSafeBuilderSamplePath, mw(emptyUb.Page(samples.TypeSafeBuilderSamplePF)))
+	mux.Handle(samples.TypeSafeBuilderSamplePath, emptyUb.Page(samples.TypeSafeBuilderSamplePF))
 
 	// @snippet_begin(HelloWorldMuxSample2)
 	wb := web.New()
@@ -443,6 +432,6 @@ func Setup(prefix string) http.Handler {
 	// @snippet_end
 
 	home := secs[0].items[0]
-	mux.Handle("/", mw(ub.Page(layout(rf(home.doc, home), secs, prefix, home))))
+	mux.Handle("/", ub.Page(layout(rf(home.doc, home), secs, prefix, home)))
 	return mux
 }
