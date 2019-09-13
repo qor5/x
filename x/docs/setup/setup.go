@@ -186,6 +186,8 @@ func rf(comp HTMLComponent, p *pageItem) web.PageFunc {
 	}
 }
 
+var tbd = Text("TBD")
+
 func Setup(prefix string) http.Handler {
 
 	// @snippet_begin(HelloWorldMuxSample1)
@@ -258,27 +260,22 @@ func Setup(prefix string) http.Handler {
 				{
 					title: "Switch Pages with Push State",
 					slug:  "switch-pages-with-push-state.html",
-					doc:   getting_started.TheGoHTMLBuilder,
-				},
-				{
-					title: "Form Handling",
-					slug:  "form-handling.html",
-					doc:   getting_started.TheGoHTMLBuilder,
-				},
-				{
-					title: "File Uploads",
-					slug:  "file-uploads.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   basics.SwitchPagesWithPushState,
 				},
 				{
 					title: "Partial Refresh with Portal",
 					slug:  "partial-refresh-with-portal.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
-					title: "Event Flash Object",
-					slug:  "event-flash-object.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					title: "Form Handling",
+					slug:  "form-handling.html",
+					doc:   tbd,
+				},
+				{
+					title: "File Uploads",
+					slug:  "file-uploads.html",
+					doc:   tbd,
 				},
 			},
 		},
@@ -289,17 +286,17 @@ func Setup(prefix string) http.Handler {
 				{
 					title: "Composite With Go",
 					slug:  "composite-with-go.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Integrate My First Vue Component",
 					slug:  "integrate-my-first-vue-component.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Update Form Values",
 					slug:  "update-form-values.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 			},
 		},
@@ -310,22 +307,22 @@ func Setup(prefix string) http.Handler {
 				{
 					title: "A Taste of using Vuetify in Go",
 					slug:  "a-taste-of-using-vuetify-in-go.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Basic Inputs",
 					slug:  "basic-inputs.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Auto Complete",
 					slug:  "auto-complete.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Navigation Drawer",
 					slug:  "navigation-drawer.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 			},
 		},
@@ -336,67 +333,67 @@ func Setup(prefix string) http.Handler {
 				{
 					title: "Not just scaffolding, it's the whole house",
 					slug:  "its-the-whole-house.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Listing fields and their Component Func",
 					slug:  "listing-fields-and-their-component-func.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Listing Filters",
 					slug:  "listing-filters.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Listing Filter Tabs",
 					slug:  "listing-filter-tabs.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Bulk Actions",
 					slug:  "bulk-actions.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Global Search Box",
 					slug:  "global-search-tabs.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Edit simple object side by side",
 					slug:  "edit-simple-object-side-by-side.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Editing Field Component Func",
 					slug:  "editing-field-component-func.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Validations",
 					slug:  "validations.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Complex Object with a detail page",
 					slug:  "complex-object-with-detail-page.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Card and Data Table Component",
 					slug:  "card-and-data-table-component.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Key Info and Detail Info Component",
 					slug:  "key-info-and-detail-info-component.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 				{
 					title: "Files and Images",
 					slug:  "files-and-images.html",
-					doc:   getting_started.TheGoHTMLBuilder,
+					doc:   tbd,
 				},
 			},
 		},
@@ -432,6 +429,23 @@ func Setup(prefix string) http.Handler {
 		),
 	)
 	// @snippet_end
+
+	mux.Handle(
+		samples.Page1Path,
+		wb.Page(
+			demoLayout(
+				samples.Page1,
+			),
+		),
+	)
+	mux.Handle(
+		samples.Page2Path,
+		wb.Page(
+			demoLayout(
+				samples.Page2,
+			),
+		),
+	)
 
 	home := secs[0].items[0]
 	mux.Handle("/", ub.Page(layout(rf(home.doc, home), secs, prefix, home)))

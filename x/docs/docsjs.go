@@ -24,12 +24,3 @@ func CSSComponentsPack() web.ComponentsPack {
 
 	return web.ComponentsPack(v)
 }
-
-func JSVueComponentsPack() web.ComponentsPack {
-	v, err := box.FindString("vue.min.js")
-	if err != nil {
-		panic(err)
-	}
-
-	return web.ComponentsPack(v)
-}
