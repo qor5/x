@@ -101,7 +101,7 @@ func (ctx *EventContext) MustUnmarshalForm(v interface{}) {
 func (ctx *EventContext) UnmarshalForm(v interface{}) (err error) {
 	mf := ctx.R.MultipartForm
 	if ctx.R.MultipartForm == nil {
-		panic("POST request with form required, can't use UnmarshalForm in PageFunc")
+		return
 	}
 
 	dec := form.NewDecoder()

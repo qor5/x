@@ -280,12 +280,7 @@ func Setup(prefix string) http.Handler {
 				{
 					title: "Form Handling",
 					slug:  "form-handling.html",
-					doc:   tbd,
-				},
-				{
-					title: "File Uploads",
-					slug:  "file-uploads.html",
-					doc:   tbd,
+					doc:   basics.FormHandling,
 				},
 			},
 		},
@@ -489,6 +484,15 @@ func Setup(prefix string) http.Handler {
 		wb.Page(
 			demoLayout(
 				samples.MultiStatePage,
+			),
+		),
+	)
+
+	mux.Handle(
+		samples.FormHandlingPagePath,
+		wb.Page(
+			demoLayout(
+				samples.FormHandlingPage,
 			),
 		),
 	)
