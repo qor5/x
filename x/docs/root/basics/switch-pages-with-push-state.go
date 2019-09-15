@@ -45,10 +45,10 @@ other pages in the same web app that can do push state link.
 - EventFunc is always called with AJAX request, and you can return to a different page, or rerender the current page, 
 - EventFunc is not wrapped with layout function.
 - EventFunc is used to do data operations, triggered by page's html element. and it's result can be:
-	1. Reload the whole current page with new updated data
-	2. Update partial of the current page
-	3. Go to a different page after data updated
+	1. Go to a new page
+	2. Reload the whole current page
+	3. Update partial of the current page
 
-Next we will talk about how to update partial of the current page.
+Next we will talk about how to reload the whole current page, and update partial of the current page.
 `),
 )

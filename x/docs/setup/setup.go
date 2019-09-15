@@ -263,9 +263,14 @@ func Setup(prefix string) http.Handler {
 					doc:   basics.SwitchPagesWithPushState,
 				},
 				{
+					title: "Reload Page with a Flash",
+					slug:  "reload-page-with-a-flash.html",
+					doc:   basics.ReloadPageWithAFlash,
+				},
+				{
 					title: "Partial Refresh with Portal",
 					slug:  "partial-refresh-with-portal.html",
-					doc:   tbd,
+					doc:   basics.PartialRefreshWithPortal,
 				},
 				{
 					title: "Form Handling",
@@ -443,6 +448,15 @@ func Setup(prefix string) http.Handler {
 		wb.Page(
 			demoLayout(
 				samples.Page2,
+			),
+		),
+	)
+
+	mux.Handle(
+		samples.ReloadWithFlashPath,
+		wb.Page(
+			demoLayout(
+				samples.ReloadWithFlash,
 			),
 		),
 	)
