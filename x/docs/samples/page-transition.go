@@ -36,6 +36,7 @@ func Page1(ctx *web.EventContext) (pr web.PageResponse, err error) {
 }
 
 func Page2(ctx *web.EventContext) (pr web.PageResponse, err error) {
+	ctx.Hub.RegisterEventFunc("doAction1", doAction1)
 	ctx.Hub.RegisterEventFunc("doAction2", doAction2)
 
 	pr.Body = Div(
@@ -55,6 +56,11 @@ func Page2(ctx *web.EventContext) (pr web.PageResponse, err error) {
 					Button("Do an action then go to Page 1 with push state and parameters"),
 				).OnClick("doAction2", "42"),
 			),
+			Li(
+				web.Bind(
+					Button("Do an action then go to Page 1 with redirect url"),
+				).OnClick("doAction1", "41"),
+			),
 		),
 	).Style("color: orange; font-size: 24px;")
 	return
@@ -70,6 +76,12 @@ func fromParam(ctx *web.EventContext) HTMLComponent {
 		)
 	}
 	return from
+}
+
+func doAction1(ctx *web.EventContext) (er web.EventResponse, err error) {
+	updateDatabase(ctx.Event.ParamAsInt(0))
+	er.RedirectURL = Page1Path + "?" + url.Values{"from": []string{"page2 with redirect"}}.Encode()
+	return
 }
 
 func doAction2(ctx *web.EventContext) (er web.EventResponse, err error) {

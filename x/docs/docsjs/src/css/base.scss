@@ -13,8 +13,11 @@ code,
 var,
 kbd,
 samp {
-	font-family: $font-family-mono;
-	font-size: 14px;
+    font-family: $font-family-mono;
+    font-size: 14px;
+    -moz-tab-size:    4; /* Firefox 4+ */
+    -o-tab-size:      4; /* Opera 11.5 & 12.1 only */
+    tab-size:         4; /* Chrome 21+, Safari 6.1+, Opera 15+ */
 }
 
 html {

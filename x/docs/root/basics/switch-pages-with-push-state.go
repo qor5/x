@@ -11,12 +11,16 @@ import (
 var SwitchPagesWithPushState = Components(
 	md.Markdown(`Ways that page transition (between ~web.PageFunc~) in GoPlaid web app:
 
-- Use a link to a new page by url
+- Use a traditional link to a new page by url
+- Use a push state link to a new page that only change the current page body to new page body and browser url
 - Use a button etc to trigger post to an ~web.EventFunc~ that do some logic, then go to a new page
 
-These transitions can use traditional link, Or more modern ajax with [push state](https://developer.mozilla.org/en-US/docs/Web/API/History_API#Examples)
+Inside ~web.EventFunc~, two ways go to a new page:
 
-Let's check this example:
+- Use [push state](https://developer.mozilla.org/en-US/docs/Web/API/History_API#Examples) to only reload the body of the new page, This won't reload javascript and css assets. 
+- Use redirect url to reload the whole new page, This will reload target new page's javascript and css assets.
+
+This example demonstrated the above:
 `),
 	ch.Code(samples.PageTransitionSample),
 	utils.Demo("", samples.Page1Path),
