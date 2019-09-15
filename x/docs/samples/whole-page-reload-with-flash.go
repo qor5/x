@@ -23,7 +23,7 @@ func ReloadWithFlash(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	}
 
 	pr.Body = Div(
-		H1("Hello World"),
+		H1("Whole Page Reload With a Flash"),
 		msg,
 		Div().Text(time.Now().Format(time.RFC3339Nano)),
 		web.Bind(

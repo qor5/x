@@ -461,6 +461,24 @@ func Setup(prefix string) http.Handler {
 		),
 	)
 
+	mux.Handle(
+		samples.PartialUpdatePagePath,
+		wb.Page(
+			demoLayout(
+				samples.PartialUpdatePage,
+			),
+		),
+	)
+
+	mux.Handle(
+		samples.PartialReloadPagePath,
+		wb.Page(
+			demoLayout(
+				samples.PartialReloadPage,
+			),
+		),
+	)
+
 	home := secs[0].items[0]
 	mux.Handle("/", ub.Page(layout(rf(home.doc, home), secs, prefix, home)))
 	return mux
