@@ -273,6 +273,11 @@ func Setup(prefix string) http.Handler {
 					doc:   basics.PartialRefreshWithPortal,
 				},
 				{
+					title: "Manipulate Page URL in Event Func",
+					slug:  "manipulate-page-url-in-event-func.html",
+					doc:   basics.ManipulatePageURLInEventFunc,
+				},
+				{
 					title: "Form Handling",
 					slug:  "form-handling.html",
 					doc:   tbd,
@@ -475,6 +480,15 @@ func Setup(prefix string) http.Handler {
 		wb.Page(
 			demoLayout(
 				samples.PartialReloadPage,
+			),
+		),
+	)
+
+	mux.Handle(
+		samples.MultiStatePagePath,
+		wb.Page(
+			demoLayout(
+				samples.MultiStatePage,
 			),
 		),
 	)

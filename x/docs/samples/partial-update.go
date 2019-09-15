@@ -17,7 +17,9 @@ func PartialUpdatePage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		web.Bind(
 			A().Text("Edit").Href("javascript:;"),
 		).OnClick("edit1"),
-		web.Portal().Name("part1"),
+		web.Portal(
+			Text("original portal content here"),
+		).Name("part1"),
 		Div().Text(time.Now().Format(time.RFC3339Nano)),
 	)
 	return

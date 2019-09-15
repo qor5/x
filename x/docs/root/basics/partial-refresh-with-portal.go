@@ -32,4 +32,7 @@ quite heavy. Like related products of a product detail page of a ECommerce site.
 `),
 	ch.Code(samples.PartialReloadSample),
 	utils.Demo("", samples.PartialReloadPagePath),
+	md.Markdown(`
+It is not only load the portal in separate AJAX request, Also you can reload it with ease ~er.ReloadPortals = []string{"related_products"}~ in an event func.
+`),
 )

@@ -24,15 +24,12 @@ func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 `,
 	)
 	pr.Body = Div(
-		Style(`
-`,
-		),
 		H1("Partial Load and Reload"),
 		Div(
 			H2("Product 1"),
 		).Style("height: 200px; background-color: grey;"),
 		H2("Related Products"),
-		web.Portal().Name("related_products").EventFunc("related"),
+		web.Portal().Name("related_products").EventFunc("related", "AH123"),
 		web.Bind(
 			A().Href("javascript:;").Text("Reload Related Products"),
 		).OnClick("reload3"),
@@ -41,10 +38,11 @@ func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 }
 
 func related(ctx *web.EventContext) (er web.EventResponse, err error) {
+	code := ctx.Event.Params[0]
 	er.Body = Div(
 
 		Div(
-			H3("Product A"),
+			H3("Product A (related products of "+code+")"),
 			Div().Text(time.Now().Format(time.RFC3339Nano)),
 		).Class("rp"),
 		Div(
