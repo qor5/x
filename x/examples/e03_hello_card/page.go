@@ -7,7 +7,7 @@ import (
 )
 
 func HelloCard(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	pr.Schema = Card(
+	pr.Body = Card(
 		h.RawHTML(`Text`),
 	).ActionButtons(
 		Button("Read").InCard(),

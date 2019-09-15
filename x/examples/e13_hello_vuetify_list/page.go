@@ -21,7 +21,7 @@ func HelloVuetifyList(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		).Id("mainapp")
 	}
 
-	pr.Schema = wrapper(
+	pr.Body = wrapper(
 		VToolbar(
 			VToolbarSideIcon(),
 			VToolbarTitle("Inbox"),

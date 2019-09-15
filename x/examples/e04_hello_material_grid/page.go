@@ -8,7 +8,7 @@ import (
 
 func HelloGrid(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
-	pr.Schema = h.Div(
+	pr.Body = h.Div(
 		h.Div().Text("Grid of default wide (4 columns) items").
 			Class("presets-example-main-grid-legend"),
 		Grid(

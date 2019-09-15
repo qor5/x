@@ -22,13 +22,13 @@ export interface EventFuncID {
 
 export interface PortalUpdate {
 	name: string;
-	schema: string;
+	body: string;
 	afterLoaded?: string;
 }
 
 export interface EventResponse {
 	states?: any;
-	schema?: any;
+	body?: any;
 	data?: any;
 	redirectURL?: string;
 	pageTitle?: string;

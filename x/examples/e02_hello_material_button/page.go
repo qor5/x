@@ -20,7 +20,7 @@ func randText() string {
 func HelloButton(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("reload", reload)
 
-	pr.Schema = h.Div(
+	pr.Body = h.Div(
 		web.Bind(Button(randText()).Variant(ButtonVariantRaised)).
 			OnClick("reload"),
 		web.Bind(Button(randText()).Variant(ButtonVariantRaised).Disabled(true)).

@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/qor/inflection"
 	"github.com/goplaid/web"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/qor/inflection"
 	h "github.com/theplant/htmlgo"
 	"go.uber.org/zap"
 	goji "goji.io"
@@ -243,7 +243,7 @@ const rightDrawerPortalName = "rightDrawerPortalName"
 func rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 		Name: rightDrawerName,
-		Schema: VNavigationDrawer(
+		Body: VNavigationDrawer(
 			web.Portal(comp).Name(rightDrawerPortalName),
 		).Attr("v-model", "vars.rightDrawer").
 			Bottom(true).
@@ -291,7 +291,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 		}
 
 		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, b.brandTitle)
-		pr.Schema = VApp(
+		pr.Body = VApp(
 
 			VNavigationDrawer(
 				b.createMenus(ctx),
@@ -326,7 +326,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 				ClippedLeft(true),
 
 			VContent(
-				innerPr.Schema.(h.HTMLComponent),
+				innerPr.Body.(h.HTMLComponent),
 			),
 		).Id("vt-app")
 
@@ -335,7 +335,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 }
 
 func (b *Builder) defaultHomePageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
-	r.Schema = h.Div().Text("home")
+	r.Body = h.Div().Text("home")
 	return
 }
 

@@ -29,7 +29,7 @@ var s = &mystate{
 func HelloVuetifyTextField(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("update", update)
 
-	pr.Schema = vt.VApp(
+	pr.Body = vt.VApp(
 		vt.VContent(
 			vt.VContainer(
 				vt.VTextField().Label("Default"),

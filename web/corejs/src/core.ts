@@ -91,7 +91,7 @@ export class Core {
 			}
 
 			if (r.redirectURL) {
-				this.loadPage({ url: r.redirectURL });
+				document.location.replace(r.redirectURL);
 			}
 
 			if (r.pushState) {
@@ -159,19 +159,19 @@ export class Core {
 							if (pu.afterLoaded) {
 								afterLoaded = new Function('comp', pu.afterLoaded);
 							}
-							portal.changeCurrent(this.componentByTemplate(pu.schema, afterLoaded));
+							portal.changeCurrent(this.componentByTemplate(pu.body, afterLoaded));
 						}
 					}
 					return r;
 				}
 
-				if (r.schema && r.reload) {
-					this.rootChangeCurrent(this.componentByTemplate(r.schema));
+				if (r.body && r.reload) {
+					this.rootChangeCurrent(this.componentByTemplate(r.body));
 					return r;
 				}
 
-				if (r.schema) {
-					this.changeCurrent(this.componentByTemplate(r.schema));
+				if (r.body) {
+					this.changeCurrent(this.componentByTemplate(r.body));
 					return r;
 				}
 

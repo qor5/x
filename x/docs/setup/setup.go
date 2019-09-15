@@ -118,7 +118,7 @@ func layout(in web.PageFunc, secs []*section, prefix string, cp *pageItem) (out 
 			panic(err)
 		}
 
-		demo := innerPr.Schema
+		demo := innerPr.Body
 
 		ctx.Injector.HeadHTML(`
 		<style>
@@ -128,7 +128,7 @@ func layout(in web.PageFunc, secs []*section, prefix string, cp *pageItem) (out 
 		</style>
 		`)
 
-		pr.Schema = Components(
+		pr.Body = Components(
 			Div(
 				header(),
 				Div(
@@ -168,7 +168,7 @@ func demoLayout(in web.PageFunc) (out web.PageFunc) {
 			panic(err)
 		}
 
-		pr.Schema = innerPr.Schema
+		pr.Body = innerPr.Body
 
 		return
 	}
@@ -178,7 +178,7 @@ func demoLayout(in web.PageFunc) (out web.PageFunc) {
 
 func rf(comp HTMLComponent, p *pageItem) web.PageFunc {
 	return func(ctx *web.EventContext) (r web.PageResponse, err error) {
-		r.Schema = Components(
+		r.Body = Components(
 			utils.Anchor(H1(""), p.title),
 			comp,
 		)

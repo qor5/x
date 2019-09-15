@@ -1,7 +1,6 @@
 package web
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -64,17 +63,12 @@ type eventBody struct {
 	Event       Event       `json:"event,omitempty"`
 }
 
-type serverSideData struct {
-	Schema interface{} `json:"schema,omitempty"`
-}
-
 func (p *PageBuilder) render(
-	ssd *serverSideData,
 	w http.ResponseWriter,
 	r *http.Request,
 	c context.Context,
 	head *PageInjector,
-) (pager *PageResponse, isRenderHTML bool) {
+) (pager *PageResponse, body string) {
 
 	if p.pageRenderFunc == nil {
 		return
@@ -93,25 +87,16 @@ func (p *PageBuilder) render(
 	}
 	pager = &pr
 
-	if pager.Schema == nil {
-		panic("page's RenderFunc returns nil schema, use pr.Schema = root to set it")
+	if pager.Body == nil {
+		panic("page's RenderFunc returns nil body, use pr.Body = root to set it")
 	}
 
 	// fmt.Println("eventFuncs count: ", len(p.eventFuncs))
-	if comp, ok := pager.Schema.(SchemaComponent); ok {
-		b, err := comp.MarshalSchema(ctx)
-		if err != nil {
-			panic(err)
-		}
-		ssd.Schema = json.RawMessage(b)
-	} else if comp, ok := pager.Schema.(h.HTMLComponent); ok {
-		b, err := comp.MarshalHTML(c)
-		if err != nil {
-			panic(err)
-		}
-		isRenderHTML = true
-		ssd.Schema = string(b)
+	b, err := pager.Body.MarshalHTML(c)
+	if err != nil {
+		panic(err)
 	}
+	body = string(b)
 
 	return
 }
@@ -119,40 +104,18 @@ func (p *PageBuilder) render(
 func (p *PageBuilder) index(w http.ResponseWriter, r *http.Request) {
 	var err error
 
-	var ssd = &serverSideData{}
 	var head = &PageInjector{}
 
 	ctx := new(EventContext)
 	c := WrapEventContext(r.Context(), ctx)
-	pr, isRenderHTML := p.render(ssd, w, r, c, head)
+	pr, body := p.render(w, r, c, head)
 
 	if len(pr.PageTitle) > 0 {
 		head.Title(pr.PageTitle)
 	}
 
-	var schema = ssd.Schema
-	body := bytes.NewBuffer(nil)
-
-	if isRenderHTML {
-		body.WriteString(schema.(string))
-	} else {
-		var serverSideDataJSON []byte
-		serverSideDataJSON, err = json.MarshalIndent(ssd, "", "\t")
-		if err != nil {
-			panic(err)
-		}
-		err = h.Fprint(
-			body,
-			h.Script(fmt.Sprintf("window.__serverSideData__=%s\n", string(serverSideDataJSON))),
-			c,
-		)
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	var resp string
-	resp, err = p.b.layoutFunc(r, head, body.String())
+	resp, err = p.b.layoutFunc(r, head, body)
 	if err != nil {
 		panic(err)
 	}
@@ -204,14 +167,9 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	ctx.Event = &eb.Event
 	// because default added reload
 	if len(p.eventFuncs) <= 1 && p.eventFuncById(eb.EventFuncID.ID) == nil {
-		log.Println("Re-render because eventFuncs gone, might server restarted")
-		ssd := &serverSideData{}
+		log.Println("Re-render because event funcs gone, might server restarted")
 		head := &PageInjector{}
-		p.render(ssd, w, r, c, head)
-		_, err := json.Marshal(ssd) // to fill in event funcs that setup inside a component
-		if err != nil {
-			panic(err)
-		}
+		p.render(w, r, c, head)
 	}
 
 	ef := p.eventFuncById(eb.EventFuncID.ID)
@@ -227,10 +185,9 @@ func (p *PageBuilder) executeEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if er.Reload {
-		ssd := &serverSideData{}
 		head := &PageInjector{}
-		pr, _ := p.render(ssd, w, r, c, head)
-		er.Schema = ssd.Schema
+		pr, body := p.render(w, r, c, head)
+		er.Body = h.RawHTML(body)
 		if len(er.PageTitle) == 0 {
 			er.PageTitle = pr.PageTitle
 		}
@@ -250,18 +207,10 @@ func reload(ctx *EventContext) (r EventResponse, err error) {
 }
 
 func eventResponseWithContext(ctx *EventContext, c context.Context, er *EventResponse) {
-	if comp, ok := er.Schema.(SchemaComponent); ok {
-		er.Schema = WithContext(ctx, comp)
-	}
-
-	if comp, ok := er.Schema.(h.HTMLComponent); ok {
-		er.Schema = h.MustString(comp, c)
-	}
+	er.Body = h.RawHTML(h.MustString(er.Body, c))
 
 	for _, up := range er.UpdatePortals {
-		if comp, ok := up.Schema.(h.HTMLComponent); ok {
-			up.Schema = h.MustString(comp, c)
-		}
+		up.Body = h.RawHTML(h.MustString(up.Body, c))
 	}
 }
 

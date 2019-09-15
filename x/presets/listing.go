@@ -8,9 +8,9 @@ import (
 
 	"github.com/goplaid/web"
 
-	"github.com/qor/inflection"
 	s "github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/qor/inflection"
 	h "github.com/theplant/htmlgo"
 	"github.com/thoas/go-funk"
 )
@@ -173,7 +173,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			CellComponentFunc(b.cellComponentFunc(f))
 	}
 
-	r.Schema = VContainer(
+	r.Body = VContainer(
 
 		b.filterTabs(msgr, ctx),
 		bulkPanel,
@@ -236,7 +236,7 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 		Name: deleteConfirmPortalName,
-		Schema: VDialog(
+		Body: VDialog(
 			VCard(
 				VCardTitle(h.Text(msgr.DeleteConfirmationText(id))),
 				VCardActions(
@@ -270,8 +270,8 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 	err1 := bulk.updateFunc(selectedIds, ctx)
 	if err1 != nil || ctx.Flash != nil {
 		r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-			Name:   bulkPanelPortalName,
-			Schema: b.bulkPanel(bulk, selectedIds, ctx),
+			Name: bulkPanelPortalName,
+			Body: b.bulkPanel(bulk, selectedIds, ctx),
 		})
 		return
 	}

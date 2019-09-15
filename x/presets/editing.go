@@ -1,9 +1,9 @@
 package presets
 
 import (
-	"github.com/jinzhu/inflection"
 	"github.com/goplaid/web"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -210,8 +210,8 @@ func (b *EditingBuilder) renderFormWithError(r *web.EventResponse, err error, ob
 	}
 
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-		Name:   rightDrawerPortalName,
-		Schema: b.editFormFor(obj, ctx),
+		Name: rightDrawerPortalName,
+		Body: b.editFormFor(obj, ctx),
 	})
 
 }

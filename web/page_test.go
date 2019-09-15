@@ -49,7 +49,7 @@ func runEvent(
 		if renderChanger != nil {
 			renderChanger(ctx, &pr)
 		} else {
-			pr.Schema = RawSchema("{}")
+			pr.Body = h.H1("Hello")
 		}
 		return
 	})
@@ -119,7 +119,7 @@ func TestFileUpload(t *testing.T) {
 
 		ctx.Hub.RegisterEventFunc("uploadFile", uploadFile)
 
-		pr.Schema = RawSchema(fmt.Sprintf(`{"__text__": "%s"}`, string(data)))
+		pr.Body = h.H1(string(data))
 		return
 	})
 
@@ -141,9 +141,7 @@ func TestFileUpload(t *testing.T) {
 
 	diff := testingutils.PrettyJsonDiff(`
 {
-	"schema": {
-		"__text__": "Hello"
-	},
+	"body": "\n\u003ch1\u003eHello\u003c/h1\u003e\n",
 	"reload": true,
 	"pushState": null
 }
@@ -178,7 +176,7 @@ var eventCases = []struct {
 			if ctx.Flash != nil {
 				s = ctx.Flash.(*User)
 			}
-			pr.Schema = h.Text(s.Name + " " + s.Address.City)
+			pr.Body = h.Text(s.Name + " " + s.Address.City)
 			s.Name = "Felix"
 		},
 		eventFunc: func(ctx *EventContext) (r EventResponse, err error) {
@@ -192,22 +190,22 @@ var eventCases = []struct {
 			return
 		},
 		expectedEventResp: `{
-	"schema": "Felix1 Hangzhou",
+	"body": "Felix1 Hangzhou",
 	"reload": true,
 	"pushState": null
 }
 `,
 	},
 	{
-		name: "render schema in event func",
+		name: "render body in event func",
 		eventFunc: func(ctx *EventContext) (r EventResponse, err error) {
-			r.Schema = h.Div(
+			r.Body = h.Div(
 				h.H1("hello"),
 			)
 			return
 		},
 		expectedEventResp: `{
-	"schema": "\n\u003cdiv\u003e\n\u003ch1\u003ehello\u003c/h1\u003e\n\u003c/div\u003e\n",
+	"body": "\n\u003cdiv\u003e\n\u003ch1\u003ehello\u003c/h1\u003e\n\u003c/div\u003e\n",
 	"pushState": null
 }`,
 	},
@@ -215,11 +213,11 @@ var eventCases = []struct {
 	{
 		name: "case 1",
 		renderChanger: func(ctx *EventContext, pr *PageResponse) {
-			pr.Schema = h.RawHTML("<h1>Hello</h1>")
+			pr.Body = h.RawHTML("<h1>Hello</h1>")
 		},
 		expectedEventResp: `
 	{
-		"schema": "\u003ch1\u003eHello\u003c/h1\u003e",
+		"body": "\u003ch1\u003eHello\u003c/h1\u003e",
 		"reload": true,
 		"pushState": null
 	}
@@ -229,10 +227,10 @@ var eventCases = []struct {
 		name: "case 2",
 		renderChanger: func(ctx *EventContext, pr *PageResponse) {
 			ctx.Injector.TailHTML("<script src='/assets/main.js'></script>")
-			pr.Schema = &DummyComp{}
+			pr.Body = &DummyComp{}
 		},
 		expectedEventResp: `{
-	"schema": "\u003cdiv\u003ehello\u003c/div\u003e",
+	"body": "\u003cdiv\u003ehello\u003c/div\u003e",
 	"reload": true,
 	"pushState": null
 }`,
@@ -294,19 +292,19 @@ var mountCases = []struct {
 		bodyFunc: func(w *multipart.Writer) {
 			_ = w.WriteField("__event_data__", `{"eventFuncId":{"id":"bookmark","pushState":null},"event":{"value":""}}`)
 		},
-		expected: `{"schema":"\n\u003ch1\u003exgb123 bookmarked\u003c/h1\u003e\n","pushState":null}`,
+		expected: `{"body":"\n\u003ch1\u003exgb123 bookmarked\u003c/h1\u003e\n","pushState":null}`,
 	},
 }
 
 func TestMultiplePagesAndEvents(t *testing.T) {
 	var topicIndex = func(ctx *EventContext) (r PageResponse, err error) {
-		r.Schema = h.H1("Hello Topic List")
+		r.Body = h.H1("Hello Topic List")
 		return
 	}
 
 	var bookmark = func(ctx *EventContext) (r EventResponse, err error) {
 		topicId := pat.Param(ctx.R, "topicID")
-		r.Schema = h.H1(topicId + " bookmarked")
+		r.Body = h.H1(topicId + " bookmarked")
 		return
 	}
 
@@ -314,7 +312,7 @@ func TestMultiplePagesAndEvents(t *testing.T) {
 		ctx.Hub.RegisterEventFunc("bookmark", bookmark)
 
 		topicId := pat.Param(ctx.R, "topicID")
-		r.Schema = h.Div(
+		r.Body = h.Div(
 			Bind(h.A().Href("#").Text(topicId)).
 				OnClick("bookmark"),
 		)

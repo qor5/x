@@ -18,7 +18,7 @@ func randStr(prefix string) string {
 func HelloLazyLoaderInDrawer(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("editPage", editPage)
 
-	pr.Schema = Div(
+	pr.Body = Div(
 		bo.Drawer(
 			web.Portal().EventFunc("editPage", "param1").LoadWhenParentVisible(),
 			bo.Drawer(
@@ -35,7 +35,7 @@ func HelloLazyLoaderInDrawer(ctx *web.EventContext) (pr web.PageResponse, err er
 
 func editPage(ctx *web.EventContext) (r web.EventResponse, err error) {
 
-	r.Schema = bo.Drawer(
+	r.Body = bo.Drawer(
 		Button("Close").Attr("@click", "parent.close"),
 		H1(ctx.Event.Params[0]),
 		Div(Text(randStr("in editPage Drawer"))),

@@ -16,7 +16,7 @@ const Page1Path = "/samples/page_1"
 const Page2Path = "/samples/page_2"
 
 func Page1(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	pr.Schema = Div(
+	pr.Body = Div(
 		H1(page1Title),
 		Ul(
 			Li(
@@ -38,7 +38,7 @@ func Page1(ctx *web.EventContext) (pr web.PageResponse, err error) {
 func Page2(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("doAction2", doAction2)
 
-	pr.Schema = Div(
+	pr.Body = Div(
 		H1("Page 2"),
 		Ul(
 			Li(

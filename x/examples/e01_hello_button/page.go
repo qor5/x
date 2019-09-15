@@ -17,7 +17,7 @@ func HelloButton(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		s = ctx.Flash.(*mystate)
 	}
 
-	pr.Schema = Div(
+	pr.Body = Div(
 		web.Bind(Button("Hello")).
 			OnClick("reload"),
 		web.Bind(Tag("input").

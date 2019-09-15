@@ -66,7 +66,7 @@ func HelloVuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err e
 		result.AppendChildren(Li().Text(v))
 	}
 
-	pr.Schema = vt.VApp(
+	pr.Body = vt.VApp(
 		vt.VContent(
 			vt.VContainer(
 				H1("VAutocomplete"),

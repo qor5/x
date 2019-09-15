@@ -29,7 +29,7 @@ func HelloPopover(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("remoteOverlay", remoteOverlay)
 	ctx.Hub.RegisterEventFunc("update", update)
 
-	pr.Schema = Div(
+	pr.Body = Div(
 		H1(globalName),
 
 		H2("Default"),
@@ -65,7 +65,7 @@ func HelloPopover(ctx *web.EventContext) (pr web.PageResponse, err error) {
 func remoteOverlay(ctx *web.EventContext) (r web.EventResponse, err error) {
 	ctx.MustUnmarshalForm(&globalState)
 
-	r.Schema = overlay(globalState.Popover2, ctx)
+	r.Body = overlay(globalState.Popover2, ctx)
 	return
 }
 
@@ -83,7 +83,7 @@ func update(ctx *web.EventContext) (r web.EventResponse, err error) {
 
 	if len(s.EditingName) < 10 {
 		s.NameError = "name is too short"
-		r.Schema = overlay(s, ctx)
+		r.Body = overlay(s, ctx)
 		return
 	} else {
 		globalName = s.EditingName

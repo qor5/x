@@ -7,27 +7,26 @@ import (
 
 	"github.com/go-playground/form"
 	"github.com/sunfmin/reflectutils"
+	h "github.com/theplant/htmlgo"
 )
-
-type Component interface {
-}
 
 type PageResponse struct {
 	PageTitle string
-	Schema    Component
+	Body      h.HTMLComponent
 }
 
 type PortalUpdate struct {
-	Name        string    `json:"name,omitempty"`
-	Schema      Component `json:"schema,omitempty"`
-	AfterLoaded string    `json:"afterLoaded,omitempty"`
+	Name        string          `json:"name,omitempty"`
+	Body        h.HTMLComponent `json:"body,omitempty"`
+	AfterLoaded string          `json:"afterLoaded,omitempty"`
 }
 
 type EventResponse struct {
 	PageTitle     string            `json:"pageTitle,omitempty"`
-	Schema        Component         `json:"schema,omitempty"`
+	Body          h.HTMLComponent   `json:"body,omitempty"`
 	Reload        bool              `json:"reload,omitempty"`
-	PushState     *PushStateBuilder `json:"pushState"` // This we don't omitempty, So that {} can be keeped when use url.Values{}
+	PushState     *PushStateBuilder `json:"pushState"`             // This we don't omitempty, So that {} can be keeped when use url.Values{}
+	RedirectURL   string            `json:"redirectURL,omitempty"` // change window url without push state
 	ReloadPortals []string          `json:"reloadPortals,omitempty"`
 	UpdatePortals []*PortalUpdate   `json:"updatePortals,omitempty"`
 	Data          interface{}       `json:"data,omitempty"` // used for return collection data like TagsInput data source

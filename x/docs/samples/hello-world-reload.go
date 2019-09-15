@@ -10,7 +10,7 @@ import (
 
 func HelloWorldReload(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("reload", update)
-	pr.Schema = Div(
+	pr.Body = Div(
 		H1("Hello World"),
 		Text(time.Now().Format(time.RFC3339Nano)),
 		web.Bind(

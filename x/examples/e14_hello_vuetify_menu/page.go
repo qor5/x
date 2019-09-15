@@ -17,7 +17,7 @@ func HelloVuetifyMenu(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		).Id("mainapp")
 	}
 
-	pr.Schema = wrapper(
+	pr.Body = wrapper(
 		VMenu(
 			web.Slot(
 				VBtn("Menu as Popover").

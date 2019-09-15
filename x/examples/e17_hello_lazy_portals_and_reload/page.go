@@ -24,7 +24,7 @@ func HelloLazyPortalsAndReload(ctx *web.EventContext) (pr web.PageResponse, err 
 	ctx.Hub.RegisterEventFunc("reloadAB", reloadAB)
 	ctx.Hub.RegisterEventFunc("updateCD", updateCD)
 
-	pr.Schema = VApp(
+	pr.Body = VApp(
 		VContent(
 			VContainer(
 				VDialog(
@@ -85,7 +85,7 @@ func menuItems(ctx *web.EventContext) (r web.EventResponse, err error) {
 		).Width("500"),
 	)
 
-	r.Schema = VList(items...)
+	r.Body = VList(items...)
 	return
 }
 
@@ -99,7 +99,7 @@ func addItemForm(ctx *web.EventContext) (r web.EventResponse, err error) {
 		textField.Error(true).ErrorMessages(s.Error)
 	}
 
-	r.Schema = VCard(
+	r.Body = VCard(
 		VCardText(
 			textField,
 		),
@@ -128,7 +128,7 @@ func addItem(ctx *web.EventContext) (r web.EventResponse, err error) {
 }
 
 func portal1(ctx *web.EventContext) (r web.EventResponse, err error) {
-	r.Schema = h.Text(fmt.Sprint(time.Now().UnixNano()))
+	r.Body = h.Text(fmt.Sprint(time.Now().UnixNano()))
 	return
 }
 
@@ -140,12 +140,12 @@ func reloadAB(ctx *web.EventContext) (r web.EventResponse, err error) {
 func updateCD(ctx *web.EventContext) (r web.EventResponse, err error) {
 	r.UpdatePortals = append(r.UpdatePortals,
 		&web.PortalUpdate{
-			Name:   "portalC",
-			Schema: h.Text(fmt.Sprint(time.Now().UnixNano())),
+			Name: "portalC",
+			Body: h.Text(fmt.Sprint(time.Now().UnixNano())),
 		},
 		&web.PortalUpdate{
-			Name:   "portalD",
-			Schema: h.Text(fmt.Sprint(time.Now().UnixNano())),
+			Name: "portalD",
+			Body: h.Text(fmt.Sprint(time.Now().UnixNano())),
 		},
 	)
 	return

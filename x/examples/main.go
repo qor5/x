@@ -5,11 +5,11 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	setup2 "github.com/goplaid/x/examples/setup"
+	"github.com/goplaid/x/examples/setup"
 )
 
 func main() {
-	h := setup2.Setup("")
+	h := setup.Setup("")
 	fmt.Println("Starting examples at :8080")
 	http.Handle("/", h)
 	err := http.ListenAndServe(":8080", nil)

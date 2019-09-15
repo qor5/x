@@ -18,7 +18,7 @@ func HelloVuetifyNavigationDrawer(ctx *web.EventContext) (pr web.PageResponse, e
 		).Id("mainapp").Class("overflow-hidden")
 	}
 
-	pr.Schema = wrapper(
+	pr.Body = wrapper(
 		VNavigationDrawer(
 			VToolbar(
 				VList(
@@ -69,7 +69,7 @@ func showDrawer(ctx *web.EventContext) (er web.EventResponse, err error) {
 	er.UpdatePortals = append(er.UpdatePortals,
 		&web.PortalUpdate{
 			Name: "drawer2",
-			Schema: VNavigationDrawer(
+			Body: VNavigationDrawer(
 				h.Text("Drawer 2"),
 			).Right(true).
 				Attr("v-model", "vars.drawer2").

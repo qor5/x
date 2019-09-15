@@ -73,7 +73,7 @@ func KeyInfoDemo(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		return h.Td(h.Text(t.Format("01/02/06, 15:04:05 PM"))).Class("text-right")
 	})
 
-	pr.Schema = VApp(
+	pr.Body = VApp(
 		VContent(
 			s.Card(
 				s.KeyInfo(

@@ -63,7 +63,7 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRes
 	ctx.Hub.RegisterEventFunc("doAction", b.doAction)
 
 	id := pat.Param(ctx.R, "id")
-	r.Schema = VContainer(h.Text(id))
+	r.Body = VContainer(h.Text(id))
 
 	var obj = b.mb.newModel()
 
@@ -95,7 +95,7 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRes
 		}, ctx))
 	}
 
-	r.Schema = VContainer(
+	r.Body = VContainer(
 		notice,
 		web.Portal().Name(deleteConfirmPortalName),
 	).AppendChildren(comps...).Fluid(true)
@@ -123,8 +123,8 @@ func (b *DetailingBuilder) doAction(ctx *web.EventContext) (r web.EventResponse,
 		}
 
 		r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-			Name:   rightDrawerPortalName,
-			Schema: b.actionForm(action, ctx),
+			Name: rightDrawerPortalName,
+			Body: b.actionForm(action, ctx),
 		})
 		return
 	}

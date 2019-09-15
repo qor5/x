@@ -105,7 +105,7 @@ func layout(in web.PageFunc, pages []pageItem, prefix string, cp pageItem) (out 
 			panic(err)
 		}
 
-		demo := innerPr.Schema
+		demo := innerPr.Body
 
 		var dacComps = []HTMLComponent{demo.(HTMLComponent)}
 
@@ -139,7 +139,7 @@ func layout(in web.PageFunc, pages []pageItem, prefix string, cp pageItem) (out 
 		</style>
 		`)
 
-		pr.Schema = m.Grid(
+		pr.Body = m.Grid(
 			m.Cell(exampleLinks(prefix, pages)).Span(3, m.ScreenAll),
 			m.Cell(dacComps...).Span(9, m.ScreenAll),
 		)

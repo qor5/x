@@ -17,7 +17,7 @@ func HelloVuetifySimpleComponents(ctx *web.EventContext) (pr web.PageResponse, e
 		).Id("mainapp")
 	}
 
-	pr.Schema = wrapper(
+	pr.Body = wrapper(
 		h.Div(
 			VAvatar(
 				h.Img("https://vuetifyjs.com/apple-touch-icon-180x180.png"),

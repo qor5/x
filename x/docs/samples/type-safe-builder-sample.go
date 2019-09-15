@@ -36,7 +36,7 @@ func result(args ...HTMLComponent) HTMLComponent {
 }
 
 func TypeSafeBuilderSamplePF(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	pr.Schema = result(H5("1"), B("2"), Strong("3"))
+	pr.Body = result(H5("1"), B("2"), Strong("3"))
 	return
 }
 

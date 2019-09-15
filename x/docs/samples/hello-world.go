@@ -7,9 +7,10 @@ import (
 )
 
 func HelloWorld(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	pr.Schema = H1("Hello World")
+	pr.Body = H1("Hello World")
 	return
 }
+
 //@snippet_end
 
 const HelloWorldPath = "/samples/hello_world"

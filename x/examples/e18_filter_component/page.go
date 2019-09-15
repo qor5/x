@@ -41,7 +41,7 @@ func FilterComponent(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
 	fd.SetByQueryString(ctx.R.URL.RawQuery)
 
-	pr.Schema = VApp(
+	pr.Body = VApp(
 		VContent(
 			Filter(fd),
 		),

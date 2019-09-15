@@ -10,9 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jinzhu/gorm"
-	"github.com/goplaid/web"
 	examples2 "github.com/goplaid/x/presets/examples"
+	"github.com/jinzhu/gorm"
 	"github.com/theplant/gofixtures"
 )
 
@@ -30,7 +29,7 @@ var creditCardData = gofixtures.Data(customerData, gofixtures.Sql(``, []string{"
 var cases = []struct {
 	name               string
 	reqFunc            func(db *gorm.DB) *http.Request
-	eventResponseMatch func(er *web.EventResponse, db *gorm.DB, t *testing.T)
+	eventResponseMatch func(er *testEventResponse, db *gorm.DB, t *testing.T)
 	pageMatch          func(body *bytes.Buffer, db *gorm.DB, t *testing.T)
 }{
 	{
@@ -63,7 +62,7 @@ Felix11
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
 			return r
 		},
-		eventResponseMatch: func(er *web.EventResponse, db *gorm.DB, t *testing.T) {
+		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			var u = &examples2.Customer{}
 			err := db.Find(u, 11).Error
 			if err != nil {
@@ -105,7 +104,7 @@ Felix
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
 			return r
 		},
-		eventResponseMatch: func(er *web.EventResponse, db *gorm.DB, t *testing.T) {
+		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			var u = &examples2.Customer{}
 			err := db.First(u).Error
 			if err != nil {
@@ -132,8 +131,8 @@ Content-Disposition: form-data; name="__event_data__"
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
 			return r
 		},
-		eventResponseMatch: func(er *web.EventResponse, db *gorm.DB, t *testing.T) {
-			partial := er.UpdatePortals[0].Schema.(string)
+		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
+			partial := er.UpdatePortals[0].Body
 			if strings.Index(partial, "field-name='Number'") < 0 {
 				t.Error("can't find field-name='Number'", partial)
 			}
@@ -160,7 +159,7 @@ Content-Disposition: form-data; name="Number"
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
 			return r
 		},
-		eventResponseMatch: func(er *web.EventResponse, db *gorm.DB, t *testing.T) {
+		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			var u = &examples2.CreditCard{}
 			err := db.First(u).Error
 			if err != nil {
@@ -188,8 +187,8 @@ Content-Disposition: form-data; name="__event_data__"
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
 			return r
 		},
-		eventResponseMatch: func(er *web.EventResponse, db *gorm.DB, t *testing.T) {
-			partial := er.UpdatePortals[0].Schema.(string)
+		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
+			partial := er.UpdatePortals[0].Body
 			if strings.Index(partial, "field-name='OwnerName'") < 0 {
 				t.Error("can't find field-name='OwnerName'", partial)
 			}
@@ -216,7 +215,7 @@ owner1
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
 			return r
 		},
-		eventResponseMatch: func(er *web.EventResponse, db *gorm.DB, t *testing.T) {
+		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			var u = &examples2.Product{}
 			err := db.First(u).Error
 			if err != nil {
@@ -244,8 +243,8 @@ Content-Disposition: form-data; name="__event_data__"
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
 			return r
 		},
-		eventResponseMatch: func(er *web.EventResponse, db *gorm.DB, t *testing.T) {
-			partial := er.UpdatePortals[0].Schema.(string)
+		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
+			partial := er.UpdatePortals[0].Body
 			if strings.Index(partial, "field-name='Agree'") < 0 {
 				t.Error("can't find field-name='Agree'", partial)
 			}
@@ -271,7 +270,7 @@ true
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
 			return r
 		},
-		eventResponseMatch: func(er *web.EventResponse, db *gorm.DB, t *testing.T) {
+		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			var u = &examples2.Customer{}
 			err := db.First(u).Error
 			if err != nil {
@@ -294,6 +293,21 @@ func ConnectDB() *gorm.DB {
 	return db
 }
 
+type testPortalUpdate struct {
+	Name        string `json:"name,omitempty"`
+	Body        string `json:"body,omitempty"`
+	AfterLoaded string `json:"afterLoaded,omitempty"`
+}
+
+type testEventResponse struct {
+	PageTitle     string              `json:"pageTitle,omitempty"`
+	Body          string              `json:"body,omitempty"`
+	Reload        bool                `json:"reload,omitempty"`
+	ReloadPortals []string            `json:"reloadPortals,omitempty"`
+	UpdatePortals []*testPortalUpdate `json:"updatePortals,omitempty"`
+	Data          interface{}         `json:"data,omitempty"`
+}
+
 func TestAll(t *testing.T) {
 	db := ConnectDB()
 	p := examples2.Preset1(db)
@@ -305,7 +319,7 @@ func TestAll(t *testing.T) {
 			p.ServeHTTP(w, r)
 
 			if c.eventResponseMatch != nil {
-				var er web.EventResponse
+				var er testEventResponse
 				err := json.NewDecoder(w.Body).Decode(&er)
 				if err != nil {
 					panic(err)

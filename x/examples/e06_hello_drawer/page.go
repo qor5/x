@@ -25,7 +25,7 @@ func HelloDrawer(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		s = ctx.Flash.(*mystate)
 	}
 
-	pr.Schema = Div(
+	pr.Body = Div(
 		H1(globalName),
 		bo.Drawer(
 			web.Portal().EventFunc("form", "param1").LoadWhenParentVisible(),
@@ -54,7 +54,7 @@ func form(ctx *web.EventContext) (r web.EventResponse, err error) {
 		s = ctx.Flash.(*mystate)
 	}
 
-	r.Schema = Div(
+	r.Body = Div(
 		web.Bind(Button("Close")).OnClick("close"),
 		web.Bind(Input("").Type("text").Value(s.InputName)).FieldName("InputName"),
 		Label(s.NameError).Style("color:red"),

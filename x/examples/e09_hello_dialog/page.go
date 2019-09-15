@@ -23,7 +23,7 @@ func HelloDialog(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
 	var s = &mystate{}
 
-	pr.Schema = Div(
+	pr.Body = Div(
 		H1(globalState.Name),
 		bo.Dialog(
 			web.Portal().EventFunc("remoteOverlay").Visible("true"),
@@ -59,7 +59,7 @@ func remoteOverlay(ctx *web.EventContext) (r web.EventResponse, err error) {
 	var s = &mystate{}
 	ctx.MustUnmarshalForm(s)
 
-	r.Schema = overlay(s, ctx)
+	r.Body = overlay(s, ctx)
 	return
 }
 
@@ -69,7 +69,7 @@ func update(ctx *web.EventContext) (r web.EventResponse, err error) {
 
 	if len(s.EditingName) < 10 {
 		s.NameError = "name is too short"
-		r.Schema = overlay(s, ctx)
+		r.Body = overlay(s, ctx)
 	} else {
 		globalState.Name = s.EditingName
 		s.NameError = ""

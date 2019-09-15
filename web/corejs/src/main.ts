@@ -63,7 +63,7 @@ Vue.component('BranLazyPortal', {
 			const self = this;
 			core.fetchEvent(ef, {})
 				.then((r) => {
-					self.current = core.componentByTemplate(r.schema, afterLoaded);
+					self.current = core.componentByTemplate(r.body, afterLoaded);
 				});
 		},
 		changeCurrent(newView: any) {
