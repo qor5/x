@@ -4,7 +4,7 @@ package samples
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 
 	"github.com/goplaid/web"
@@ -27,22 +27,6 @@ type MyData struct {
 	File1          []*multipart.FileHeader
 }
 
-func (m *MyData) File1Bytes() string {
-	fmt.Println("m.File1", m.File1)
-	if m.File1 == nil || len(m.File1) == 0 {
-		return ""
-	}
-	f, err := m.File1[0].Open()
-	if err != nil {
-		panic(err)
-	}
-	b, err := ioutil.ReadAll(f)
-	if err != nil {
-		panic(err)
-	}
-	return fmt.Sprintf("%+v", b)
-}
-
 func FormHandlingPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("checkvalue", checkvalue)
 
@@ -62,7 +46,7 @@ func FormHandlingPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		H3("Form Content"),
 		Pre(string(formData)),
 		H3("File1 Content"),
-		Pre(fv.File1Bytes()),
+		Pre(fv.File1Bytes()).Style("width: 400px; white-space: pre-wrap;"),
 		Div(
 			Label("Text1"),
 			web.Bind(Input("").Type("text").Value(fv.Text1)).FieldName("Text1"),
@@ -134,6 +118,22 @@ func FormHandlingPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 func checkvalue(ctx *web.EventContext) (er web.EventResponse, err error) {
 	er.Reload = true
 	return
+}
+
+func (m *MyData) File1Bytes() string {
+	if m.File1 == nil || len(m.File1) == 0 {
+		return ""
+	}
+	f, err := m.File1[0].Open()
+	if err != nil {
+		panic(err)
+	}
+	var b = make([]byte, 200)
+	_, err = io.ReadFull(f, b)
+	if err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf("%+v ...", b)
 }
 
 //@snippet_end

@@ -7,6 +7,8 @@ import (
 	_ "net/http/pprof"
 	"os"
 
+	components_guide "github.com/goplaid/x/docs/root/components-guide"
+
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs"
@@ -176,6 +178,44 @@ func demoLayout(in web.PageFunc) (out web.PageFunc) {
 
 // @snippet_end
 
+// @snippet_begin(DemoBootstrapLayoutSample)
+func demoBootstrapLayout(in web.PageFunc) (out web.PageFunc) {
+	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
+
+		ctx.Injector.HeadHTML(`
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src='/assets/vue.js'></script>
+		`)
+
+		ctx.Injector.TailHTML(`
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src='/assets/main.js'></script>
+
+`)
+		ctx.Injector.HeadHTML(`
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+		</style>
+		`)
+
+		var innerPr web.PageResponse
+		innerPr, err = in(ctx)
+		if err != nil {
+			panic(err)
+		}
+
+		pr.Body = innerPr.Body
+
+		return
+	}
+}
+
+// @snippet_end
+
 func rf(comp HTMLComponent, p *pageItem) web.PageFunc {
 	return func(ctx *web.EventContext) (r web.PageResponse, err error) {
 		r.Body = Components(
@@ -289,9 +329,9 @@ func Setup(prefix string) http.Handler {
 			slug:  "components-guide",
 			items: []*pageItem{
 				{
-					title: "Composite With Go",
-					slug:  "composite-with-go.html",
-					doc:   tbd,
+					title: "Composite new Component With Go",
+					slug:  "composite-new-component-with-go.html",
+					doc:   components_guide.CompositeNewComponentWithGo,
 				},
 				{
 					title: "Integrate My First Vue Component",
@@ -299,8 +339,8 @@ func Setup(prefix string) http.Handler {
 					doc:   tbd,
 				},
 				{
-					title: "Update Form Values",
-					slug:  "update-form-values.html",
+					title: "Update Form Values in Vue Component",
+					slug:  "update-form-values-in-vue-component.html",
 					doc:   tbd,
 				},
 			},
@@ -493,6 +533,15 @@ func Setup(prefix string) http.Handler {
 		wb.Page(
 			demoLayout(
 				samples.FormHandlingPage,
+			),
+		),
+	)
+
+	mux.Handle(
+		samples.CompositeComponentSample1PagePath,
+		wb.Page(
+			demoBootstrapLayout(
+				samples.CompositeComponentSample1Page,
 			),
 		),
 	)
