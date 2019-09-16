@@ -38,6 +38,7 @@ By writing html in Go you get:
 - Loop and variable replacing is just like in Go
 - Invoke helper functions is just like in Go
 - Almost as readable as normal HTML
+- Not possible to have html tag not closed, Or not matched.
 
 Once you have these, Why generate html in any interpreted template language!
 
