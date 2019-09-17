@@ -1,0 +1,6 @@
+./web/corejs/*
+./x/codehighlight/codehighlightjs/*
+./x/docs/docsjs/*
+./x/overlay/overlayjs/*
+./x/vuetify/vuetifyjs/*
+.git/*

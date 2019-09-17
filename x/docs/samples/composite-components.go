@@ -2,6 +2,8 @@ package samples
 
 //@snippet_begin(CompositeComponentSample1)
 import (
+	"fmt"
+
 	"github.com/goplaid/web"
 	. "github.com/theplant/htmlgo"
 )
@@ -47,6 +49,53 @@ func Navbar(title string, activeIndex int, items ...HTMLComponent) HTMLComponent
 	).Class("navbar navbar-expand-lg navbar-dark bg-primary")
 }
 
+type CarouselItem struct {
+	ImageSrc string
+	ImageAlt string
+}
+
+func Carousel(carouselId string, activeIndex int, items []*CarouselItem) HTMLComponent {
+	var indicators = Ol().Class("carousel-indicators")
+	var carouselInners = Div().Class("carousel-inner")
+
+	for i, item := range items {
+		indicators.AppendChildren(
+			Li().Attr("data-target", "#"+carouselId).
+				Attr("data-slide-to", fmt.Sprint(i)).
+				ClassIf("active", activeIndex == i),
+		)
+
+		carouselInners.AppendChildren(
+			Div(
+				fakeImage(item.ImageAlt),
+			).Class("carousel-item").ClassIf("active", activeIndex == i).Style("font-size: 3.5rem;"),
+		)
+	}
+
+	return Div(
+		indicators,
+		carouselInners,
+		A(
+			Span("").Class("carousel-control-prev-icon").
+				Attr("aria-hidden", "true"),
+			Span("Previous").Class("sr-only"),
+		).Class("carousel-control-prev").
+			Href("#"+carouselId).
+			Role("button").
+			Attr("data-slide", "prev"),
+		A(
+			Span("").Class("carousel-control-next-icon").
+				Attr("aria-hidden", "true"),
+			Span("Next").Class("sr-only"),
+		).Class("carousel-control-next").
+			Href("#"+carouselId).
+			Role("button").
+			Attr("data-slide", "next"),
+	).Id(carouselId).
+		Class("carousel slide").
+		Attr("data-ride", "carousel")
+}
+
 func CompositeComponentSample1Page(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	pr.Body = Div(
 		Navbar(
@@ -75,6 +124,24 @@ func CompositeComponentSample1Page(ctx *web.EventContext) (pr web.PageResponse, 
 				TabIndex(-1).
 				Attr("aria-disabled", "true"),
 		),
+
+		Div(
+			Div(
+				Div(
+					Carousel("hello1", 1, []*CarouselItem{
+						{
+							ImageAlt: "First slide",
+						},
+						{
+							ImageAlt: "Second slide",
+						},
+						{
+							ImageAlt: "Third slide",
+						},
+					}),
+				).Class("col-12 py-md-3 pl-md-3"),
+			).Class("row"),
+		).Class("container-fluid"),
 	)
 	return
 }
@@ -82,3 +149,9 @@ func CompositeComponentSample1Page(ctx *web.EventContext) (pr web.PageResponse, 
 //@snippet_end
 
 const CompositeComponentSample1PagePath = "/samples/composite-component-sample1"
+
+func fakeImage(title string) HTMLComponent {
+	return RawHTML(fmt.Sprintf(`
+<svg class="bd-placeholder-img bd-placeholder-img-lg d-block w-100" width="800" height="400" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: %s"><title>Placeholder</title><rect width="100%%" height="100%%" fill="#666"></rect><text x="40%%" y="50%%" fill="#444" dy=".3em">%s</text></svg>
+`, title, title))
+}

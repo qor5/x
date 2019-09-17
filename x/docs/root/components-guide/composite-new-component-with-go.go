@@ -19,10 +19,12 @@ This example is ported from [Bootstrap4 Navbar](https://getbootstrap.com/docs/4.
 	ch.Code(samples.CompositeComponentSample1),
 	utils.Demo("", samples.CompositeComponentSample1PagePath),
 	md.Markdown(`
-You can see from the example, It is easy to pass in components as parameter, and wrap components.
-By utilizing the power of flexible Go language, Any component can be abstracted and reused with enough parameters. 
+You can see from the example, We have created ~Navbar~ and ~Carousel~ components by 
+simply create Go func that returns ~htmlgo.HTMLComponent~. 
+It is easy to pass in components as parameter, and wrap components.
+By utilizing the power of Go language, Any component can be abstracted and reused with enough parameters. 
 
-It is a responsive navigation header, Resizing your window, the nav bar will react to device window size and change to nav bar popup and hide search form.
+The ~Navbar~ is a responsive navigation header, Resizing your window, the nav bar will react to device window size and change to nav bar popup and hide search form.
 
 For this ~Navbar~ component to work, I have to import Bootstrap assets in this new layout function:
 `),
