@@ -34,5 +34,8 @@ quite heavy. Like related products of a product detail page of a ECommerce site.
 	utils.Demo("", samples.PartialReloadPagePath),
 	md.Markdown(`
 It is not only load the portal in separate AJAX request, Also you can reload it with ease ~er.ReloadPortals = []string{"related_products"}~ in an event func.
+
+Under the hood, We use Vue's [Dynamic & Async Components](https://vuejs.org/v2/guide/components-dynamic-async.html), to load Go generated html (vue runtime templates) 
+from the server and mount those vue components into the page. It works the same way for reload the whole page, push state page switch, and refresh part of the current page.
 `),
 )

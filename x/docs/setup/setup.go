@@ -44,11 +44,11 @@ func menuLinks(prefix string, secs []*section) (comp HTMLComponent) {
 		for _, p := range sec.items {
 			secdiv.AppendChildren(
 				Div(
-					web.Bind(A(
+					A(
 						Span("").Class("marker"),
 						Span(p.title).Class("text"),
-					).Class("tree-item-title tree-leaf-title js-item-title js-leaf-title").Href("javascript:;")).
-						PushStateURL(fmt.Sprintf("%s/%s/%s", prefix, sec.slug, p.slug)),
+					).Class("tree-item-title tree-leaf-title js-item-title js-leaf-title").
+						Href(fmt.Sprintf("%s/%s/%s", prefix, sec.slug, p.slug)),
 				).Class("tree-item tree-leaf js-item js-leaf"),
 			)
 		}
