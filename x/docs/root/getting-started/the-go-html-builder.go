@@ -10,8 +10,15 @@ import (
 
 var TheGoHTMLBuilder = Components(
 	md.Markdown(`
-Like at the beginning we said, That we don't use interpretation template language to generate html page.
-We think they are error prone, hard to refactor, and difficult to abstract out to component.
+Like at the beginning we said, That we don't use interpreted template language (eg go html/template)
+to generate html page. We think they are:
+
+- error prone without static type enforcing
+- hard to refactor
+- difficult to abstract out to component
+- yet another tedious syntax to learn
+- not flexible to use helper functions
+
 We like to use standard Go code. the library [htmlgo](https://github.com/theplant/htmlgo) is just for that.
 
 Although Go can't do flexible builder syntax like [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html) does,
