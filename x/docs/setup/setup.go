@@ -322,6 +322,11 @@ func Setup(prefix string) http.Handler {
 					slug:  "form-handling.html",
 					doc:   basics.FormHandling,
 				},
+				{
+					title: "Summary of Event Response",
+					slug:  "summary-of-event-response.html",
+					doc:   basics.SummaryOfEventResponse,
+				},
 			},
 		},
 		{

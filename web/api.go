@@ -21,6 +21,7 @@ type PortalUpdate struct {
 	AfterLoaded string          `json:"afterLoaded,omitempty"`
 }
 
+// @snippet_begin(EventResponseDefinition)
 type EventResponse struct {
 	PageTitle     string            `json:"pageTitle,omitempty"`
 	Body          h.HTMLComponent   `json:"body,omitempty"`
@@ -31,6 +32,8 @@ type EventResponse struct {
 	UpdatePortals []*PortalUpdate   `json:"updatePortals,omitempty"`
 	Data          interface{}       `json:"data,omitempty"` // used for return collection data like TagsInput data source
 }
+
+// @snippet_end
 
 // @snippet_begin(PageFuncAndEventFuncDefinition)
 type PageFunc func(ctx *EventContext) (r PageResponse, err error)
