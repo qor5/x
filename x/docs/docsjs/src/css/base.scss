@@ -20,6 +20,12 @@ samp {
     tab-size:         4; /* Chrome 21+, Safari 6.1+, Opera 15+ */
 }
 
+pre code {
+    background-color: #f8f8f8;
+    padding: 10px;
+    display: block;
+}
+
 html {
     height: 100%;
     margin: 0 auto;

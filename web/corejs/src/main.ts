@@ -9,7 +9,7 @@ if (!app) {
 declare var window: any;
 
 const vueOptions = {};
-for (const registerComp of (window.__branVueComponentRegisters || [])) {
+for (const registerComp of (window.__goplaidVueComponentRegisters || [])) {
 	registerComp(Vue, vueOptions);
 }
 

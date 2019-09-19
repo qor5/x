@@ -2,12 +2,14 @@
   "name": "tiptapjs",
   "version": "0.1.0",
   "private": true,
+  "@snippet_begin(TipTapPackageJSON)": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build --target lib --name tiptap --formats umd-min src/main.js",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit"
   },
+  "@snippet_end": true,
   "dependencies": {
     "core-js": "^2.6.5",
     "tiptap": "^1.25.0",

@@ -81,7 +81,7 @@ func (b *TagsInputBuilder) MarshalHTML(ctx context.Context) (r []byte, err error
 }
 
 //const tagsInputScript = `
-//	(window.__branVueComponentRegisters = (window.__branVueComponentRegisters || [])).push(function(Vue){
+//	(window.__goplaidVueComponentRegisters = (window.__goplaidVueComponentRegisters || [])).push(function(Vue){
 //		Vue.component("tags-input", {
 //			data: function() {
 //				return {

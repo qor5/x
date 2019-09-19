@@ -7,6 +7,8 @@ import (
 	_ "net/http/pprof"
 	"os"
 
+	"github.com/goplaid/x/tiptap"
+
 	components_guide "github.com/goplaid/x/docs/root/components-guide"
 
 	"github.com/goplaid/web"
@@ -178,6 +180,41 @@ func demoLayout(in web.PageFunc) (out web.PageFunc) {
 
 // @snippet_end
 
+// @snippet_begin(TipTapLayoutSample)
+func tiptapLayout(in web.PageFunc) (out web.PageFunc) {
+	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
+
+		ctx.Injector.HeadHTML(`
+			<link rel="stylesheet" href="/assets/tiptap.css">
+			<script src='/assets/vue.js'></script>
+		`)
+
+		ctx.Injector.TailHTML(`
+<script src='/assets/tiptap.js'></script>
+<script src='/assets/main.js'></script>
+`)
+		ctx.Injector.HeadHTML(`
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+		</style>
+		`)
+
+		var innerPr web.PageResponse
+		innerPr, err = in(ctx)
+		if err != nil {
+			panic(err)
+		}
+
+		pr.Body = innerPr.Body
+
+		return
+	}
+}
+
+// @snippet_end
+
 // @snippet_begin(DemoBootstrapLayoutSample)
 func demoBootstrapLayout(in web.PageFunc) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
@@ -263,6 +300,20 @@ func Setup(prefix string) http.Handler {
 	)
 	// @snippet_end
 
+	// @snippet_begin(TipTapComponentsPackSample)
+	mux.Handle("/assets/tiptap.js",
+		ub.PacksHandler("text/javascript",
+			tiptap.JSComponentsPack(),
+		),
+	)
+
+	mux.Handle("/assets/tiptap.css",
+		ub.PacksHandler("text/css",
+			tiptap.CSSComponentsPack(),
+		),
+	)
+	// @snippet_end
+
 	mux.Handle("/favicon.ico", http.NotFoundHandler())
 
 	var secs = []*section{
@@ -339,14 +390,9 @@ func Setup(prefix string) http.Handler {
 					doc:   components_guide.CompositeNewComponentWithGo,
 				},
 				{
-					title: "Integrate My First Vue Component",
-					slug:  "integrate-my-first-vue-component.html",
-					doc:   tbd,
-				},
-				{
-					title: "Update Form Values in Vue Component",
-					slug:  "update-form-values-in-vue-component.html",
-					doc:   tbd,
+					title: "Integrate a heavy Vue Component",
+					slug:  "integrate-a-heavy-vue-component.html",
+					doc:   components_guide.IntegrateAHeavyVueComponent,
 				},
 			},
 		},
@@ -547,6 +593,15 @@ func Setup(prefix string) http.Handler {
 		wb.Page(
 			demoBootstrapLayout(
 				samples.CompositeComponentSample1Page,
+			),
+		),
+	)
+
+	mux.Handle(
+		samples.HelloWorldTipTapPath,
+		wb.Page(
+			tiptapLayout(
+				samples.HelloWorldTipTap,
 			),
 		),
 	)

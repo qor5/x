@@ -156,6 +156,34 @@ import {
 	History,
 } from 'tiptap-extensions'
 
+function extensions() {
+	return [
+		new Blockquote(),
+		new BulletList(),
+		new CodeBlock(),
+		new HardBreak(),
+		new Heading(),
+		new ListItem(),
+		new OrderedList(),
+		new TodoItem(),
+		new TodoList(),
+		new Link(),
+		new Table({
+			resizable: true,
+		}),
+		new TableHeader(),
+		new TableCell(),
+		new TableRow(),
+		new Bold(),
+		new Code(),
+		new Italic(),
+		new Strike(),
+		new Underline(),
+		new History(),
+	]
+}
+
+// @snippet_begin(TipTapEditorVueComponent)
 export default {
 	inject: ['core'],
 
@@ -171,8 +199,8 @@ export default {
 	},
 
 	mounted() {
-		const val = this.$props.value;
-		this.core.setFormValue(this.$props.fieldName, val);
+		const {value, fieldName} = this.$props;
+		this.core.setFormValue(fieldName, value);
 	},
 
 	data() {
@@ -182,30 +210,7 @@ export default {
 		return {
 			editor: new Editor({
 				content: this.$props.value,
-				extensions: [
-					new Blockquote(),
-					new BulletList(),
-					new CodeBlock(),
-					new HardBreak(),
-					new Heading(),
-					new ListItem(),
-					new OrderedList(),
-					new TodoItem(),
-					new TodoList(),
-					new Link(),
-					new Table({
-						resizable: true,
-					}),
-					new TableHeader(),
-					new TableCell(),
-					new TableRow(),
-					new Bold(),
-					new Code(),
-					new Italic(),
-					new Strike(),
-					new Underline(),
-					new History(),
-				],
+				extensions: extensions(),
 				onUpdate: ({ getHTML }) => {
 					const html = getHTML();
 					if (!fieldName || fieldName.length == 0) {
@@ -221,5 +226,6 @@ export default {
 		this.editor.destroy()
 	}
 }
+// @snippet_end
 
 </script>

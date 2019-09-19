@@ -1,3 +1,4 @@
+// @snippet_begin(TipTapVueConfig)
 module.exports = {
 	runtimeCompiler: true,
 	productionSourceMap: false,
@@ -18,3 +19,4 @@ module.exports = {
 			.loader('vue-svg-loader')
 	}
 }
+// @snippet_end

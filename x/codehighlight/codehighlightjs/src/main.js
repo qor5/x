@@ -4,8 +4,8 @@ import 'highlight.js/styles/github.css'
 
 Vue.use(VueHighlightJS);
 
-(window.__branVueComponentRegisters =
-	window.__branVueComponentRegisters || []).push(function (Vue) {
+(window.__goplaidVueComponentRegisters =
+	window.__goplaidVueComponentRegisters || []).push(function (Vue) {
 		Vue.component("BranCode", {
 			name: "BranCode",
 			props: ['language'],

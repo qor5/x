@@ -7,8 +7,8 @@ if (!window.Vue) {
 	window.Vue = Vue;
 }
 
-(window.__branVueComponentRegisters =
-	window.__branVueComponentRegisters || []).push(function(Vue) {
+(window.__goplaidVueComponentRegisters =
+	window.__goplaidVueComponentRegisters || []).push(function(Vue) {
 	Vue.component("BranDrawer", BranDrawer);
 	Vue.component("BranPopover", BranPopover);
 	Vue.component("BranDialog", BranDialog);
