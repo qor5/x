@@ -1,4 +1,4 @@
-package setup
+package docs
 
 import (
 	"fmt"
@@ -7,17 +7,20 @@ import (
 	_ "net/http/pprof"
 	"os"
 
-	"github.com/goplaid/x/tiptap"
+	"github.com/goplaid/x/docs/examples/e14_hello_vuetify_menu"
 
-	components_guide "github.com/goplaid/x/docs/root/components-guide"
+	"github.com/goplaid/x/docs/examples/e13_hello_vuetify_list"
 
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/codehighlight"
-	"github.com/goplaid/x/docs"
+	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/root/basics"
+	components_guide "github.com/goplaid/x/docs/root/components-guide"
 	getting_started "github.com/goplaid/x/docs/root/getting-started"
-	"github.com/goplaid/x/docs/samples"
+	vuetify_components "github.com/goplaid/x/docs/root/vuetify-components"
 	"github.com/goplaid/x/docs/utils"
+	"github.com/goplaid/x/tiptap"
+	v "github.com/goplaid/x/vuetify"
 	. "github.com/theplant/htmlgo"
 )
 
@@ -253,6 +256,49 @@ func demoBootstrapLayout(in web.PageFunc) (out web.PageFunc) {
 
 // @snippet_end
 
+// @snippet_begin(DemoVuetifyLayoutSample)
+func demoVuetifyLayout(in web.PageFunc) (out web.PageFunc) {
+	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
+
+		ctx.Injector.HeadHTML(`
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono" async>
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" async>
+			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" async>
+			<link rel="stylesheet" href="/assets/vuetify.css">
+			<script src='/assets/vue.js'></script>
+		`)
+
+		ctx.Injector.TailHTML(`
+<script src='/assets/vuetify.js'></script>
+<script src='/assets/main.js'></script>
+
+`)
+		ctx.Injector.HeadHTML(`
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+		</style>
+		`)
+
+		var innerPr web.PageResponse
+		innerPr, err = in(ctx)
+		if err != nil {
+			panic(err)
+		}
+
+		pr.Body = v.VApp(
+			v.VContent(
+				innerPr.Body,
+			),
+		)
+
+		return
+	}
+}
+
+// @snippet_end
+
 func rf(comp HTMLComponent, p *pageItem) web.PageFunc {
 	return func(ctx *web.EventContext) (r web.PageResponse, err error) {
 		r.Body = Components(
@@ -265,7 +311,7 @@ func rf(comp HTMLComponent, p *pageItem) web.PageFunc {
 
 var tbd = Text("TBD")
 
-func Setup(prefix string) http.Handler {
+func Mux(prefix string) http.Handler {
 
 	// @snippet_begin(HelloWorldMuxSample1)
 	mux := http.NewServeMux()
@@ -275,7 +321,7 @@ func Setup(prefix string) http.Handler {
 	ub := web.New()
 	mux.Handle("/assets/main.js",
 		ub.PacksHandler("text/javascript",
-			docs.JSComponentsPack(),
+			JSComponentsPack(),
 			web.JSComponentsPack(),
 		),
 	)
@@ -295,7 +341,7 @@ func Setup(prefix string) http.Handler {
 	mux.Handle("/assets/main.css",
 		ub.PacksHandler("text/css",
 			codehighlight.CSSComponentsPack(),
-			docs.CSSComponentsPack(),
+			CSSComponentsPack(),
 		),
 	)
 	// @snippet_end
@@ -310,6 +356,20 @@ func Setup(prefix string) http.Handler {
 	mux.Handle("/assets/tiptap.css",
 		ub.PacksHandler("text/css",
 			tiptap.CSSComponentsPack(),
+		),
+	)
+	// @snippet_end
+
+	// @snippet_begin(VuetifyComponentsPackSample)
+	mux.Handle("/assets/vuetify.js",
+		ub.PacksHandler("text/javascript",
+			v.JSComponentsPack(),
+		),
+	)
+
+	mux.Handle("/assets/vuetify.css",
+		ub.PacksHandler("text/css",
+			v.CSSComponentsPack(),
 		),
 	)
 	// @snippet_end
@@ -403,7 +463,7 @@ func Setup(prefix string) http.Handler {
 				{
 					title: "A Taste of using Vuetify in Go",
 					slug:  "a-taste-of-using-vuetify-in-go.html",
-					doc:   tbd,
+					doc:   vuetify_components.ATasteOfUsingVuetifyInGo,
 				},
 				{
 					title: "Basic Inputs",
@@ -508,100 +568,118 @@ func Setup(prefix string) http.Handler {
 
 	emptyUb := web.New().LayoutFunc(web.NoopLayoutFunc)
 
-	mux.Handle(samples.TypeSafeBuilderSamplePath, emptyUb.Page(samples.TypeSafeBuilderSamplePF))
+	mux.Handle(e00_basics.TypeSafeBuilderSamplePath, emptyUb.Page(e00_basics.TypeSafeBuilderSamplePF))
 
 	// @snippet_begin(HelloWorldMuxSample2)
 	wb := web.New()
-	mux.Handle(samples.HelloWorldPath, wb.Page(samples.HelloWorld))
+	mux.Handle(e00_basics.HelloWorldPath, wb.Page(e00_basics.HelloWorld))
 	// @snippet_end
 
 	// @snippet_begin(HelloWorldReloadMuxSample1)
 	mux.Handle(
-		samples.HelloWorldReloadPath,
+		e00_basics.HelloWorldReloadPath,
 		wb.Page(
 			demoLayout(
-				samples.HelloWorldReload,
+				e00_basics.HelloWorldReload,
 			),
 		),
 	)
 	// @snippet_end
 
 	mux.Handle(
-		samples.Page1Path,
+		e00_basics.Page1Path,
 		wb.Page(
 			demoLayout(
-				samples.Page1,
+				e00_basics.Page1,
 			),
 		),
 	)
 	mux.Handle(
-		samples.Page2Path,
+		e00_basics.Page2Path,
 		wb.Page(
 			demoLayout(
-				samples.Page2,
-			),
-		),
-	)
-
-	mux.Handle(
-		samples.ReloadWithFlashPath,
-		wb.Page(
-			demoLayout(
-				samples.ReloadWithFlash,
+				e00_basics.Page2,
 			),
 		),
 	)
 
 	mux.Handle(
-		samples.PartialUpdatePagePath,
+		e00_basics.ReloadWithFlashPath,
 		wb.Page(
 			demoLayout(
-				samples.PartialUpdatePage,
+				e00_basics.ReloadWithFlash,
 			),
 		),
 	)
 
 	mux.Handle(
-		samples.PartialReloadPagePath,
+		e00_basics.PartialUpdatePagePath,
 		wb.Page(
 			demoLayout(
-				samples.PartialReloadPage,
+				e00_basics.PartialUpdatePage,
 			),
 		),
 	)
 
 	mux.Handle(
-		samples.MultiStatePagePath,
+		e00_basics.PartialReloadPagePath,
 		wb.Page(
 			demoLayout(
-				samples.MultiStatePage,
+				e00_basics.PartialReloadPage,
 			),
 		),
 	)
 
 	mux.Handle(
-		samples.FormHandlingPagePath,
+		e00_basics.MultiStatePagePath,
 		wb.Page(
 			demoLayout(
-				samples.FormHandlingPage,
+				e00_basics.MultiStatePage,
 			),
 		),
 	)
 
 	mux.Handle(
-		samples.CompositeComponentSample1PagePath,
+		e00_basics.FormHandlingPagePath,
+		wb.Page(
+			demoLayout(
+				e00_basics.FormHandlingPage,
+			),
+		),
+	)
+
+	mux.Handle(
+		e00_basics.CompositeComponentSample1PagePath,
 		wb.Page(
 			demoBootstrapLayout(
-				samples.CompositeComponentSample1Page,
+				e00_basics.CompositeComponentSample1Page,
 			),
 		),
 	)
 
 	mux.Handle(
-		samples.HelloWorldTipTapPath,
+		e00_basics.HelloWorldTipTapPath,
 		wb.Page(
 			tiptapLayout(
-				samples.HelloWorldTipTap,
+				e00_basics.HelloWorldTipTap,
+			),
+		),
+	)
+
+	mux.Handle(
+		e13_hello_vuetify_list.HelloVuetifyListPath,
+		wb.Page(
+			demoVuetifyLayout(
+				e13_hello_vuetify_list.HelloVuetifyList,
+			),
+		),
+	)
+
+	mux.Handle(
+		e14_hello_vuetify_menu.HelloVuetifyMenuPath,
+		wb.Page(
+			demoVuetifyLayout(
+				e14_hello_vuetify_menu.HelloVuetifyMenu,
 			),
 		),
 	)

@@ -2,7 +2,8 @@ package components_guide
 
 import (
 	ch "github.com/goplaid/x/codehighlight"
-	"github.com/goplaid/x/docs/samples"
+	"github.com/goplaid/x/docs/examples"
+	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/md"
 	. "github.com/theplant/htmlgo"
@@ -27,7 +28,7 @@ $ vue create tiptapjs
 Modify or add a separate ~vue.config.js~ config file, 
 
 `),
-	ch.Code(samples.TipTapVueConfig).Language("javascript"),
+	ch.Code(examples.TipTapVueConfig).Language("javascript"),
 
 	md.Markdown(`
 - Enable ~runtimeCompiler~ so that vue can parse template html generate from server.
@@ -45,7 +46,7 @@ $ yarn add tiptap tiptap-extensions
 And write the ~editor.vue~ something like this, We omitted the template at here. 
 
 `),
-	ch.Code(samples.TipTapEditorVueComponent).Language("javascript"),
+	ch.Code(examples.TipTapEditorVueComponent).Language("javascript"),
 	md.Markdown(`
 We injected the core dependencies. that is from ~web/corejs~, Which you will need to use
 For every Go Plaid web applications. Here we uses one function ~setFormValue~ from it.
@@ -57,14 +58,14 @@ server.
 **Step 3**: At ~main.js~, Use a special hook to register the component to ~web/corejs~
 
 `),
-	ch.Code(samples.GoPlaidRegisterVueComponentSample),
+	ch.Code(examples.GoPlaidRegisterVueComponentSample).Language("go"),
 	md.Markdown(`
 **Step 4**: Test the component in a simple html
 
 We edited the ~index.html~ inside public to be the following:
 
 `),
-	ch.Code(samples.TipTapDemoHTML).Language("html"),
+	ch.Code(examples.TipTapDemoHTML).Language("html"),
 	md.Markdown(`
 - For ~http://localhost:3500/app.js~ to be able to serve. you have to run ~yarn serve~ in 
 tiptapjs directory. 
@@ -77,36 +78,36 @@ tiptapjs directory.
 
 We write a packr box inside ~tiptapjs.go~ along side the tiptapjs folder.
 `),
-	ch.Code(samples.TipTapPackrSample),
+	ch.Code(examples.TipTapPackrSample).Language("go"),
 	md.Markdown(`
 And write a ~build.sh~ to build the javascript to production version, and run packr to pack
 them into ~a_tiptap-packr.go~ file.
 `),
-	ch.Code(samples.TiptapBuilderSH).Language("bash"),
+	ch.Code(examples.TiptapBuilderSH).Language("bash"),
 
 	md.Markdown(`
 **Step 6**: Write a Go wrapper to wrap it to be a ~HTMLComponent~ 
 `),
-	ch.Code(samples.TipTapEditorHTMLComponent),
+	ch.Code(examples.TipTapEditorHTMLComponent).Language("go"),
 
 	md.Markdown(`
 **Step 7**: Use it in your web app
 
 To use it, first we have to mount the assets into our app
 `),
-	ch.Code(samples.TipTapComponentsPackSample),
+	ch.Code(examples.TipTapComponentsPackSample).Language("go"),
 	md.Markdown(`
 And reference them in our layout function.
 `),
-	ch.Code(samples.TipTapLayoutSample),
+	ch.Code(examples.TipTapLayoutSample).Language("go"),
 
 	md.Markdown(`
 And we write a page func to use it like any other component:
 `),
-	ch.Code(samples.HelloWorldTipTapSample),
+	ch.Code(examples.HelloWorldTipTapSample).Language("go"),
 
 	md.Markdown(`
 And now let's check out our fruits:
 `),
-	utils.Demo("", samples.HelloWorldTipTapPath),
+	utils.Demo("", e00_basics.HelloWorldTipTapPath),
 )

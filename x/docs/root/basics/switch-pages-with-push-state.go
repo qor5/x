@@ -2,7 +2,8 @@ package basics
 
 import (
 	ch "github.com/goplaid/x/codehighlight"
-	"github.com/goplaid/x/docs/samples"
+	"github.com/goplaid/x/docs/examples"
+	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/md"
 	. "github.com/theplant/htmlgo"
@@ -22,8 +23,8 @@ Inside ~web.EventFunc~, two ways go to a new page:
 
 This example demonstrated the above:
 `),
-	ch.Code(samples.PageTransitionSample),
-	utils.Demo("", samples.Page1Path),
+	ch.Code(examples.PageTransitionSample).Language("go"),
+	utils.Demo("", e00_basics.Page1Path),
 	md.Markdown(`
 When running the above demo, If you check Chrome Developer Tools about Network requests, 
 You will see that the PushState link and the Button is actually doing an AJAX request to the other page.

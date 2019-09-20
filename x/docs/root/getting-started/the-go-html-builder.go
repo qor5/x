@@ -2,7 +2,8 @@ package getting_started
 
 import (
 	ch "github.com/goplaid/x/codehighlight"
-	"github.com/goplaid/x/docs/samples"
+	"github.com/goplaid/x/docs/examples"
+	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/md"
 	. "github.com/theplant/htmlgo"
@@ -26,9 +27,9 @@ But it can also do quite well.
 
 Consider the following code:
 `),
-	ch.Code(samples.TypeSafeBuilderSample),
+	ch.Code(examples.TypeSafeBuilderSample).Language("go"),
 	md.Markdown(`
 It's basically assembled what Kotlin can do, Also is legitimate Go code.
 `),
-	utils.Demo("", samples.TypeSafeBuilderSamplePath),
+	utils.Demo("", e00_basics.TypeSafeBuilderSamplePath),
 )

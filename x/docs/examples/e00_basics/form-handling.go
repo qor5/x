@@ -1,11 +1,12 @@
-package samples
+package e00_basics
 
 //@snippet_begin(FormHandlingSample)
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"mime/multipart"
+
+	"github.com/goplaid/x/docs/utils"
 
 	"github.com/goplaid/web"
 	. "github.com/theplant/htmlgo"
@@ -36,15 +37,10 @@ func FormHandlingPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		panic(err)
 	}
 
-	formData, err := json.MarshalIndent(ctx.R.Form, "", "\t")
-	if err != nil {
-		panic(err)
-	}
-
 	pr.Body = Div(
 		H1("Form Handling"),
 		H3("Form Content"),
-		Pre(string(formData)),
+		utils.PrettyFormAsJSON(ctx),
 		H3("File1 Content"),
 		Pre(fv.File1Bytes()).Style("width: 400px; white-space: pre-wrap;"),
 		Div(

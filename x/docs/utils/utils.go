@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
+
+	"github.com/goplaid/web"
 
 	"github.com/shurcooL/sanitized_anchor_name"
 	. "github.com/theplant/htmlgo"
@@ -22,4 +25,19 @@ func Demo(title string, path string) HTMLComponent {
 	return Div(
 		A().Text(title).Href(path).Target("_blank"),
 	).Class("demo")
+}
+
+func PrettyFormAsJSON(ctx *web.EventContext) HTMLComponent {
+	if ctx.R.Form == nil {
+		return nil
+	}
+
+	formData, err := json.MarshalIndent(ctx.R.Form, "", "\t")
+	if err != nil {
+		panic(err)
+	}
+
+	return Pre(
+		string(formData),
+	)
 }

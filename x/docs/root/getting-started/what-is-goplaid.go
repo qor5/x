@@ -2,7 +2,8 @@ package getting_started
 
 import (
 	ch "github.com/goplaid/x/codehighlight"
-	"github.com/goplaid/x/docs/samples"
+	"github.com/goplaid/x/docs/examples"
+	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/md"
 	. "github.com/theplant/htmlgo"
@@ -31,16 +32,16 @@ GoPlaid is opinionated in several ways:
 	md.Markdown(`
 Here is the most sample hello world, that show the header with Hello World.
 `),
-	ch.Code(samples.HelloWorldSample),
+	ch.Code(examples.HelloWorldSample).Language("go"),
 	md.Markdown(`
 ~H1("Hello World")~ is actually a simple component. it renders h1 html tag. and been set to page body.
 
 The above is the code you mostly writing. the following is the boilerplate code that needs to write one time.
 `),
-	ch.Code(samples.HelloWorldMuxSample1),
-	ch.Code(samples.HelloWorldMuxSample2),
-	ch.Code(samples.HelloWorldMainSample),
-	utils.Demo("", samples.HelloWorldPath),
+	ch.Code(examples.HelloWorldMuxSample1).Language("go"),
+	ch.Code(examples.HelloWorldMuxSample2).Language("go"),
+	ch.Code(examples.HelloWorldMainSample).Language("go"),
+	utils.Demo("", e00_basics.HelloWorldPath),
 
 	md.Markdown(`
 If you wondering why ~H1("Hello World")~ and how this worked, Please go ahead and checkout next page

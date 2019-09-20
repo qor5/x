@@ -2,7 +2,8 @@ package components_guide
 
 import (
 	ch "github.com/goplaid/x/codehighlight"
-	"github.com/goplaid/x/docs/samples"
+	"github.com/goplaid/x/docs/examples"
+	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/md"
 	. "github.com/theplant/htmlgo"
@@ -16,8 +17,8 @@ They can be composite into a new component very easy.
 
 This example is ported from [Bootstrap4 Navbar](https://getbootstrap.com/docs/4.3/components/navbar/):
 `),
-	ch.Code(samples.CompositeComponentSample1),
-	utils.Demo("", samples.CompositeComponentSample1PagePath),
+	ch.Code(examples.CompositeComponentSample1).Language("go"),
+	utils.Demo("", e00_basics.CompositeComponentSample1PagePath),
 	md.Markdown(`
 You can see from the example, We have created ~Navbar~ and ~Carousel~ components by 
 simply create Go func that returns ~htmlgo.HTMLComponent~. 
@@ -28,7 +29,7 @@ The ~Navbar~ is a responsive navigation header, Resizing your window, the nav ba
 
 For this ~Navbar~ component to work, I have to import Bootstrap assets in this new layout function:
 `),
-	ch.Code(samples.DemoBootstrapLayoutSample),
+	ch.Code(examples.DemoBootstrapLayoutSample).Language("go"),
 
 	md.Markdown(`
 You can utilize the command line tool [html2go](https://github.com/sunfmin/html2go) to convert existing html code to htmlgo code.

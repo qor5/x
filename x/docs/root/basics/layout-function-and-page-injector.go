@@ -2,7 +2,7 @@ package basics
 
 import (
 	ch "github.com/goplaid/x/codehighlight"
-	"github.com/goplaid/x/docs/samples"
+	"github.com/goplaid/x/docs/examples"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/md"
 	. "github.com/theplant/htmlgo"
@@ -10,7 +10,7 @@ import (
 
 var LayoutFunctionAndPageInjector = Components(
 	md.Markdown("Read this code first, Guess what it does."),
-	ch.Code(samples.DemoLayoutSample),
+	ch.Code(examples.DemoLayoutSample).Language("go"),
 	md.Markdown(`
 ~ctx.Injector~ is for inject html into default layout's html head, and bottom of body.
 html head normally for page title, keywords etc all kinds meta data, and css styles,
@@ -18,7 +18,7 @@ javascript libraries etc. You can see we put vue.js into head, but put main.js i
 
 Next part describe about these asset references:
 `),
-	ch.Code(samples.ComponentsPackSample),
+	ch.Code(examples.ComponentsPackSample).Language("go"),
 
 	md.Markdown(`
 ~web.JSComponentsPack~ is the production version of GoPlaid core javascript code. 
@@ -29,7 +29,7 @@ Provide basic event functions that call to server, and manage push state
 
 the javascript or css code are packed by using the wonderful [packr](github.com/gobuffalo/packr).
 `),
-	ch.Code(samples.PackrSample),
+	ch.Code(examples.PackrSample).Language("go"),
 	md.Markdown(`
 And with ~ub.PacksHandler~, You can merge multiple javascript or css assets together into one url.
 So that browser only need to request them one time. and cache them. The cache is set to the start

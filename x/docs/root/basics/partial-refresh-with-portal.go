@@ -2,7 +2,8 @@ package basics
 
 import (
 	ch "github.com/goplaid/x/codehighlight"
-	"github.com/goplaid/x/docs/samples"
+	"github.com/goplaid/x/docs/examples"
+	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/md"
 	. "github.com/theplant/htmlgo"
@@ -18,8 +19,8 @@ As said before, The results of an ~web.EventFunc~ could be:
 
 We have covered two. Now let's demonstrate refresh part of the current page: 
 `),
-	ch.Code(samples.PartialUpdateSample),
-	utils.Demo("", samples.PartialUpdatePagePath),
+	ch.Code(examples.PartialUpdateSample).Language("go"),
+	utils.Demo("", e00_basics.PartialUpdatePagePath),
 	md.Markdown(`
 ~web.Portal().Name("part1")~ Place a placeholder inside you page, and append ~web.PortalUpdate~ to ~er.UpdatePortals~ to update the portal with that name.
 Multiple portal can be updated at the same time.
@@ -30,8 +31,8 @@ With ~web.Portal~, We can also load the portal with a separate AJAX request afte
 It is useful for the type of the content is not that important to the page, But load them are
 quite heavy. Like related products of a product detail page of a ECommerce site.
 `),
-	ch.Code(samples.PartialReloadSample),
-	utils.Demo("", samples.PartialReloadPagePath),
+	ch.Code(examples.PartialReloadSample).Language("go"),
+	utils.Demo("", e00_basics.PartialReloadPagePath),
 	md.Markdown(`
 It is not only load the portal in separate AJAX request, Also you can reload it with ease ~er.ReloadPortals = []string{"related_products"}~ in an event func.
 

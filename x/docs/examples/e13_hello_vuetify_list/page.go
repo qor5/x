@@ -1,5 +1,6 @@
 package e13_hello_vuetify_list
 
+// @snippet_begin(VuetifyListSample)
 import (
 	"github.com/goplaid/web"
 	. "github.com/goplaid/x/vuetify"
@@ -8,17 +9,13 @@ import (
 
 func HelloVuetifyList(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	wrapper := func(children ...h.HTMLComponent) h.HTMLComponent {
-		return VApp(
-			VContent(
-				VContainer(
-					VLayout(
-						VFlex(
-							VCard(children...),
-						).Col(Xs, 6).Offset(Sm, 3),
-					).Row(true),
-				).GridList(Md).TextAlign(Xs, Center),
-			),
-		).Id("mainapp")
+		return VContainer(
+			VLayout(
+				VFlex(
+					VCard(children...),
+				).Col(Xs, 6).Offset(Sm, 3),
+			).Row(true),
+		).GridList(Md).TextAlign(Xs, Center)
 	}
 
 	pr.Body = wrapper(
@@ -69,3 +66,7 @@ func HelloVuetifyList(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
 	return
 }
+
+// @snippet_end
+
+const HelloVuetifyListPath = "/samples/hello-vuetify-list"

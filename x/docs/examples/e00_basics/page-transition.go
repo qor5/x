@@ -1,4 +1,4 @@
-package samples
+package e00_basics
 
 import (
 	"fmt"

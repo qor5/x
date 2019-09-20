@@ -2,7 +2,8 @@ package basics
 
 import (
 	ch "github.com/goplaid/x/codehighlight"
-	"github.com/goplaid/x/docs/samples"
+	"github.com/goplaid/x/docs/examples"
+	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/md"
 	. "github.com/theplant/htmlgo"
@@ -15,8 +16,8 @@ That can open the page to the exact state of the page being sent, Not the initia
 
 For example:
 `),
-	ch.Code(samples.MultiStatePageSample),
-	utils.Demo("", samples.MultiStatePagePath),
+	ch.Code(examples.MultiStatePageSample).Language("go"),
+	utils.Demo("", e00_basics.MultiStatePagePath),
 	md.Markdown(`
 This page have several state that encoded in the url:
 

@@ -2,7 +2,7 @@ package basics
 
 import (
 	ch "github.com/goplaid/x/codehighlight"
-	"github.com/goplaid/x/docs/samples"
+	"github.com/goplaid/x/docs/examples"
 	"github.com/goplaid/x/md"
 	. "github.com/theplant/htmlgo"
 )
@@ -11,7 +11,7 @@ var SummaryOfEventResponse = Components(
 	md.Markdown(`
 The behaviour of ~web.EventFunc~ is controlled by it's return type ~web.EventResponse~
 `),
-	ch.Code(samples.EventResponseDefinition),
+	ch.Code(examples.EventResponseDefinition).Language("go"),
 	md.Markdown(`
 - ~PageTitle~ set the html head title, It not only set when render html page directly which is
   request the url directly from the browser. Also use javascript to set the page title when you do
