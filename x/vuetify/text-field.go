@@ -79,11 +79,7 @@ func (b *VTextFieldBuilder) ErrorCount(v int) (r *VTextFieldBuilder) {
 }
 
 func (b *VTextFieldBuilder) ErrorMessages(v ...string) (r *VTextFieldBuilder) {
-	if len(v) == 0 {
-		return b
-	}
-
-	b.tag.Attr(":error-messages", h.JSONString(v))
+	setErrorMessages(b.tag, v)
 	return b
 }
 

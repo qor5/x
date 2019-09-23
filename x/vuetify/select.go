@@ -120,7 +120,7 @@ func (b *VSelectBuilder) ErrorCount(v int) (r *VSelectBuilder) {
 }
 
 func (b *VSelectBuilder) ErrorMessages(v ...string) (r *VSelectBuilder) {
-	b.tag.Attr(":error-messages", h.JSONString(v))
+	setErrorMessages(b.tag, v)
 	return b
 }
 

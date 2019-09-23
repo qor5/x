@@ -132,11 +132,7 @@ func (b *VAutocompleteBuilder) ErrorCount(v int) (r *VAutocompleteBuilder) {
 }
 
 func (b *VAutocompleteBuilder) ErrorMessages(v ...string) (r *VAutocompleteBuilder) {
-	if len(v) == 0 {
-		return b
-	}
-
-	b.tag.Attr(":error-messages", h.JSONString(v))
+	setErrorMessages(b.tag, v)
 	return b
 }
 

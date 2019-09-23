@@ -2,8 +2,10 @@ package vuetify
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/goplaid/web"
+	h "github.com/theplant/htmlgo"
 )
 
 type DType string
@@ -129,4 +131,21 @@ func (b *VBtnBuilder) OnClick(eventFuncId string, params ...string) (r *VBtnBuil
 func (b *VListItemBuilder) Slot(v string) (r *VListItemBuilder) {
 	b.tag.Attr("slot", v)
 	return b
+}
+
+func stringsTrim(vs ...string) (r []string) {
+	for _, v := range vs {
+		if cv := strings.TrimSpace(v); len(cv) > 0 {
+			r = append(r, cv)
+		}
+	}
+	return
+}
+
+func setErrorMessages(t h.MutableAttrHTMLComponent, vs []string) {
+	cvs := stringsTrim(vs...)
+	if len(cvs) == 0 {
+		return
+	}
+	t.SetAttr(":error-messages", h.JSONString(cvs))
 }

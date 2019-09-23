@@ -54,10 +54,7 @@ func (b *VCheckboxBuilder) ErrorCount(v int) (r *VCheckboxBuilder) {
 }
 
 func (b *VCheckboxBuilder) ErrorMessages(v ...string) (r *VCheckboxBuilder) {
-	if len(v) == 0 {
-		return b
-	}
-	b.tag.Attr(":error-messages", h.JSONString(v))
+	setErrorMessages(b.tag, v)
 	return b
 }
 
