@@ -251,7 +251,7 @@ func rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 			Absolute(true).
 			Width(600).
 			Temporary(true).
-			Attr("v-init-context-vars", `{rightDrawer: false}`),
+			Attr(web.InitContextVars, `{rightDrawer: false}`),
 		AfterLoaded: `setTimeout(function(){ comp.vars.rightDrawer = true }, 100)`,
 	})
 }
@@ -299,7 +299,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 				Clipped(true).
 				Value(true).
 				Attr("v-model", "vars.navDrawer").
-				Attr("v-init-context-vars", `{navDrawer: null}`),
+				Attr(web.InitContextVars, `{navDrawer: null}`),
 
 			web.Portal().EventFunc("").Name(rightDrawerName),
 

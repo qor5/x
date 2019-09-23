@@ -123,3 +123,5 @@ func (b *VueEventTagBuilder) MarshalHTML(ctx context.Context) (r []byte, err err
 	b.Update()
 	return b.tag.MarshalHTML(ctx)
 }
+
+const InitContextVars = "v-init-context-vars"

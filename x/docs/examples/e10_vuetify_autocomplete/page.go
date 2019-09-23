@@ -5,8 +5,8 @@ package e10_vuetify_autocomplete
 import (
 	"github.com/Pallinder/go-randomdata"
 	"github.com/goplaid/web"
-	vt "github.com/goplaid/x/vuetify"
-	. "github.com/theplant/htmlgo"
+	. "github.com/goplaid/x/vuetify"
+	h "github.com/theplant/htmlgo"
 )
 
 type myFormValue struct {
@@ -59,51 +59,47 @@ var globalState = &myFormValue{
 func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("update", update)
 
-	result := Ul()
+	result := h.Ul()
 	for _, v := range globalState.Values1 {
-		result.AppendChildren(Li().Text(v))
+		result.AppendChildren(h.Li().Text(v))
 	}
-	result.AppendChildren(Li().Text("======"))
+	result.AppendChildren(h.Li().Text("======"))
 	for _, v := range globalState.Values2 {
-		result.AppendChildren(Li().Text(v))
+		result.AppendChildren(h.Li().Text(v))
 	}
 
-	pr.Body = vt.VApp(
-		vt.VContent(
-			vt.VContainer(
-				H1("VAutocomplete"),
-				vt.VAutocomplete().
-					Items(options1).
-					FieldName("Values1").
-					ItemText("Name").
-					ItemValue("Login").
-					Label("Static Options").
-					Value(globalState.Values1),
+	pr.Body = VContainer(
+		h.H1("VAutocomplete"),
+		VAutocomplete().
+			Items(options1).
+			FieldName("Values1").
+			ItemText("Name").
+			ItemValue("Login").
+			Label("Static Options").
+			Value(globalState.Values1),
 
-				vt.VAutocomplete().
-					ItemsEventFunc(ctx.Hub, "users", users).
-					ItemText("Name").
-					ItemValue("Login").
-					SelectedItems(selectedItems2).
-					FieldName("Values2").
-					Label("Load Options from Remote").
-					Value(globalState.Values2),
+		VAutocomplete().
+			ItemsEventFunc(ctx.Hub, "users", users).
+			ItemText("Name").
+			ItemValue("Login").
+			SelectedItems(selectedItems2).
+			FieldName("Values2").
+			Label("Load Options from Remote").
+			Value(globalState.Values2),
 
-				result,
-				H1("VSelect"),
-				vt.VSelect().
-					Items(options1).
-					ItemText("Name").
-					ItemValue("Login").
-					FieldName("Value3").
-					Solo(true).
-					Value(globalState.Value3),
-				Pre(globalState.Value3),
-				vt.VBtn("Update").
-					Color("success").
-					OnClick("update"),
-			),
-		),
+		result,
+		h.H1("VSelect"),
+		VSelect().
+			Items(options1).
+			ItemText("Name").
+			ItemValue("Login").
+			FieldName("Value3").
+			Solo(true).
+			Value(globalState.Value3),
+		h.Pre(globalState.Value3),
+		VBtn("Update").
+			Color("success").
+			OnClick("update"),
 	)
 	return
 }

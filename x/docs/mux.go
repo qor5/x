@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/goplaid/x/docs/examples/e15_vuetify_navigation_drawer"
+
 	"github.com/goplaid/x/docs/examples/e10_vuetify_autocomplete"
 
 	"github.com/goplaid/web"
@@ -478,7 +480,7 @@ func Mux(prefix string) http.Handler {
 				{
 					title: "Navigation Drawer",
 					slug:  "navigation-drawer.html",
-					doc:   tbd,
+					doc:   vuetify_components.NavigationDrawer,
 				},
 			},
 		},
@@ -698,6 +700,15 @@ func Mux(prefix string) http.Handler {
 		wb.Page(
 			demoVuetifyLayout(
 				e10_vuetify_autocomplete.VuetifyAutocomplete,
+			),
+		),
+	)
+
+	mux.Handle(
+		e15_vuetify_navigation_drawer.VuetifyNavigationDrawerPath,
+		wb.Page(
+			demoVuetifyLayout(
+				e15_vuetify_navigation_drawer.VuetifyNavigationDrawer,
 			),
 		),
 	)

@@ -88,7 +88,7 @@ func HelloVuetifyMenu(ctx *web.EventContext) (pr web.PageResponse, err error) {
 			NudgeWidth(200).
 			OffsetY(true).
 			Attr("v-model", "vars.myMenuShow"),
-	).Attr("v-init-context-vars", `{myMenuShow: false}`)
+	).Attr(web.InitContextVars, `{myMenuShow: false}`)
 
 	return
 }

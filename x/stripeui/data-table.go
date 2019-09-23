@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/rs/xid"
 	"github.com/goplaid/web"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/rs/xid"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 	"github.com/thoas/go-funk"
@@ -298,7 +298,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 	}
 
 	if len(initContextVarsMap) > 0 {
-		table.Attr("v-init-context-vars", h.JSONString(initContextVarsMap))
+		table.Attr(web.InitContextVars, h.JSONString(initContextVarsMap))
 	}
 
 	return table.MarshalHTML(c)
