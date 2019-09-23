@@ -119,7 +119,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		notice = VSnackbar(h.Text(msg)).Value(true).Top(true).Color("success").Value(true)
 	}
 
-	vErr, _ := ctx.Flash.(*ValidationErrors)
+	vErr, _ := ctx.Flash.(*web.ValidationErrors)
 
 	return VContainer(
 		notice,
@@ -204,9 +204,10 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 func (b *EditingBuilder) renderFormWithError(r *web.EventResponse, err error, obj interface{}, ctx *web.EventContext) {
 	ctx.Flash = err
 
-	if _, ok := err.(*ValidationErrors); !ok {
-		vErr := &ValidationErrors{}
-		ctx.Flash = vErr.GlobalError(err.Error())
+	if _, ok := err.(*web.ValidationErrors); !ok {
+		vErr := &web.ValidationErrors{}
+		vErr.GlobalError(err.Error())
+		ctx.Flash = vErr
 	}
 
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{

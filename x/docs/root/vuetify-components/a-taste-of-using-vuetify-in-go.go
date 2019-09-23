@@ -3,8 +3,8 @@ package vuetify_components
 import (
 	ch "github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples"
-	"github.com/goplaid/x/docs/examples/e13_hello_vuetify_list"
-	"github.com/goplaid/x/docs/examples/e14_hello_vuetify_menu"
+	"github.com/goplaid/x/docs/examples/e13_vuetify_list"
+	"github.com/goplaid/x/docs/examples/e14_vuetify_menu"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/md"
 	. "github.com/theplant/htmlgo"
@@ -22,7 +22,7 @@ other go package.
 This example is purely render, we didn't integrate any interaction (event func) to it.
 `),
 	ch.Code(examples.VuetifyListSample).Language("go"),
-	utils.Demo("", e13_hello_vuetify_list.HelloVuetifyListPath),
+	utils.Demo("", e13_vuetify_list.HelloVuetifyListPath),
 
 	utils.Anchor(H2(""), "Use menu, card, list, etc"),
 	md.Markdown(`
@@ -41,5 +41,5 @@ requesting server backend.
 ~toggleFavored~ event func did an partial update only to the favorite icon button. So that it won't close the 
 menu popup, but updated the button to toggle the favorite icon.
 `),
-	utils.Demo("", e14_hello_vuetify_menu.HelloVuetifyMenuPath),
+	utils.Demo("", e14_vuetify_menu.HelloVuetifyMenuPath),
 )

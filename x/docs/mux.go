@@ -4,16 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	_ "net/http/pprof"
 	"os"
-
-	"github.com/goplaid/x/docs/examples/e14_hello_vuetify_menu"
-
-	"github.com/goplaid/x/docs/examples/e13_hello_vuetify_list"
 
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples/e00_basics"
+	"github.com/goplaid/x/docs/examples/e11_vuetify_basic_inputs"
+	"github.com/goplaid/x/docs/examples/e13_vuetify_list"
+	"github.com/goplaid/x/docs/examples/e14_vuetify_menu"
 	"github.com/goplaid/x/docs/root/basics"
 	components_guide "github.com/goplaid/x/docs/root/components-guide"
 	getting_started "github.com/goplaid/x/docs/root/getting-started"
@@ -468,7 +466,7 @@ func Mux(prefix string) http.Handler {
 				{
 					title: "Basic Inputs",
 					slug:  "basic-inputs.html",
-					doc:   tbd,
+					doc:   vuetify_components.BasicInputs,
 				},
 				{
 					title: "Auto Complete",
@@ -667,19 +665,28 @@ func Mux(prefix string) http.Handler {
 	)
 
 	mux.Handle(
-		e13_hello_vuetify_list.HelloVuetifyListPath,
+		e13_vuetify_list.HelloVuetifyListPath,
 		wb.Page(
 			demoVuetifyLayout(
-				e13_hello_vuetify_list.HelloVuetifyList,
+				e13_vuetify_list.HelloVuetifyList,
 			),
 		),
 	)
 
 	mux.Handle(
-		e14_hello_vuetify_menu.HelloVuetifyMenuPath,
+		e14_vuetify_menu.HelloVuetifyMenuPath,
 		wb.Page(
 			demoVuetifyLayout(
-				e14_hello_vuetify_menu.HelloVuetifyMenu,
+				e14_vuetify_menu.HelloVuetifyMenu,
+			),
+		),
+	)
+
+	mux.Handle(
+		e11_vuetify_basic_inputs.VuetifyBasicInputsPath,
+		wb.Page(
+			demoVuetifyLayout(
+				e11_vuetify_basic_inputs.VuetifyBasicInputs,
 			),
 		),
 	)

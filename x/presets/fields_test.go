@@ -29,8 +29,8 @@ type User struct {
 
 func TestFields(t *testing.T) {
 
-	vd := &ValidationErrors{}
-	_ = vd.FieldError("String1", "too small")
+	vd := &web.ValidationErrors{}
+	vd.FieldError("String1", "too small")
 
 	ft := NewFieldDefaults(WRITE).Exclude("ID")
 	ft.FieldType(time.Time{}).ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {

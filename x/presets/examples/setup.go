@@ -6,13 +6,13 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets"
-	gormop2 "github.com/goplaid/x/presets/gormop"
+	"github.com/goplaid/x/presets/gormop"
 	s "github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 )
@@ -176,7 +176,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			).Class("mb-4")
 	})
 
-	p.DataOperator(gormop2.DataOperator(db))
+	p.DataOperator(gormop.DataOperator(db))
 
 	p.MenuGroup("Customer Management").Icon("group")
 	mp := p.Model(&Product{}).MenuIcon("laptop")
@@ -301,11 +301,11 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	})
 
 	ef := m.Editing("Name", "CompanyID", "LanguageCode").
-		ValidateFunc(func(obj interface{}, ctx *web.EventContext) (err presets.ValidationErrors) {
+		ValidateFunc(func(obj interface{}, ctx *web.EventContext) (err web.ValidationErrors) {
 			cu := obj.(*Customer)
 			if len(cu.Name) < 5 {
-				_ = err.FieldError("Name", "input more than 5 chars")
-				_ = err.GlobalError("there are some errors")
+				err.FieldError("Name", "input more than 5 chars")
+				err.GlobalError("there are some errors")
 			}
 			return
 		})
@@ -494,8 +494,8 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 
 	dp.Action("AgreeTerms").UpdateFunc(func(selectedIds []string, ctx *web.EventContext) (err error) {
 		if ctx.R.FormValue("Agree") != "true" {
-			ve := &presets.ValidationErrors{}
-			_ = ve.GlobalError("You must agree the terms")
+			ve := &web.ValidationErrors{}
+			ve.GlobalError("You must agree the terms")
 			err = ve
 			return
 		}
@@ -507,7 +507,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	}).ComponentFunc(func(selectedIds []string, ctx *web.EventContext) h.HTMLComponent {
 		var alert h.HTMLComponent
 
-		if ve, ok := ctx.Flash.(*presets.ValidationErrors); ok {
+		if ve, ok := ctx.Flash.(*web.ValidationErrors); ok {
 			alert = VAlert(h.Text(ve.GetGlobalError())).Border("left").
 				Type("error").
 				Elevation(2).

@@ -1,4 +1,4 @@
-package e14_hello_vuetify_menu
+package e14_vuetify_menu
 
 // @snippet_begin(VuetifyMenuSample)
 

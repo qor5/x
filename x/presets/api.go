@@ -27,7 +27,7 @@ type DataOperator interface {
 }
 
 type SetterFunc func(obj interface{}, ctx *web.EventContext)
-type ValidateFunc func(obj interface{}, ctx *web.EventContext) (err ValidationErrors)
+type ValidateFunc func(obj interface{}, ctx *web.EventContext) (err web.ValidationErrors)
 
 type SearchFunc func(model interface{}, params *SearchParams, ctx *web.EventContext) (r interface{}, totalCount int, err error)
 type FetchFunc func(obj interface{}, id string, ctx *web.EventContext) (r interface{}, err error)

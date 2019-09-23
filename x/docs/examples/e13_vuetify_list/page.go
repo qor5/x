@@ -1,4 +1,4 @@
-package e13_hello_vuetify_list
+package e13_vuetify_list
 
 // @snippet_begin(VuetifyListSample)
 import (

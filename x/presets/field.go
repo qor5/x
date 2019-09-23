@@ -168,12 +168,12 @@ func (b *FieldBuilders) String() (r string) {
 	return fmt.Sprint(names)
 }
 
-func (b *FieldBuilders) ToComponent(obj interface{}, verr *ValidationErrors, ctx *web.EventContext) h.HTMLComponent {
+func (b *FieldBuilders) ToComponent(obj interface{}, verr *web.ValidationErrors, ctx *web.EventContext) h.HTMLComponent {
 
 	var comps []h.HTMLComponent
 
 	if verr == nil {
-		verr = &ValidationErrors{}
+		verr = &web.ValidationErrors{}
 	}
 
 	gErr := verr.GetGlobalError()
@@ -201,56 +201,4 @@ func (b *FieldBuilders) ToComponent(obj interface{}, verr *ValidationErrors, ctx
 	}
 
 	return h.Components(comps...)
-}
-
-type ValidationErrors struct {
-	globalErrors []string
-	fieldErrors  map[string][]string
-}
-
-func (b *ValidationErrors) FieldError(fieldName string, message string) (r *ValidationErrors) {
-	if b.fieldErrors == nil {
-		b.fieldErrors = make(map[string][]string)
-	}
-	b.fieldErrors[fieldName] = append(b.fieldErrors[fieldName], message)
-	return b
-}
-
-func (b *ValidationErrors) GlobalError(message string) (r *ValidationErrors) {
-	b.globalErrors = append(b.globalErrors, message)
-	return b
-}
-
-func (b *ValidationErrors) GetFieldErrors(fieldName string) (r []string) {
-	if b.fieldErrors == nil {
-		return
-	}
-
-	r = b.fieldErrors[fieldName]
-	return
-}
-
-func (b *ValidationErrors) GetGlobalError() (r string) {
-	if len(b.globalErrors) == 0 {
-		return
-	}
-	return b.globalErrors[0]
-}
-
-func (b *ValidationErrors) GetGlobalErrors() (r []string) {
-	return b.globalErrors
-}
-
-func (b *ValidationErrors) HaveErrors() bool {
-	if len(b.globalErrors) > 0 {
-		return true
-	}
-	if len(b.fieldErrors) > 0 {
-		return true
-	}
-	return false
-}
-
-func (b *ValidationErrors) Error() string {
-	return fmt.Sprintf("validation error global: %+v, fields: %+v", b.globalErrors, b.fieldErrors)
 }
