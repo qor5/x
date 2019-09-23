@@ -5,13 +5,13 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/jinzhu/gorm"
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets"
+	"github.com/jinzhu/gorm"
 )
 
-func DataOperator(db *gorm.DB) (r presets.DataOperator) {
-	r = &dataOperatorImpl{db: db}
+func DataOperator(db *gorm.DB) (r *DataOperatorBuilder) {
+	r = &DataOperatorBuilder{db: db}
 	return
 }
 
@@ -19,17 +19,22 @@ type primarySluggerValues interface {
 	PrimaryColumnValuesBySlug(slug string) [][]string
 }
 
-type dataOperatorImpl struct {
+type DataOperatorBuilder struct {
 	db *gorm.DB
 }
 
-func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams, ctx *web.EventContext) (r interface{}, totalCount int, err error) {
+func (op *DataOperatorBuilder) Search(obj interface{}, params *presets.SearchParams, ctx *web.EventContext) (r interface{}, totalCount int, err error) {
+	ilike := "ilike"
+	if op.db.Dialect().GetName() == "sqlite3" {
+		ilike = "like"
+	}
+
 	wh := op.db.Model(obj)
 	if len(params.KeywordColumns) > 0 && len(params.Keyword) > 0 {
 		var segs []string
 		var args []interface{}
 		for _, c := range params.KeywordColumns {
-			segs = append(segs, fmt.Sprintf("%s ilike ?", c))
+			segs = append(segs, fmt.Sprintf("%s %s ?", c, ilike))
 			args = append(args, fmt.Sprintf("%%%s%%", params.Keyword))
 		}
 		wh = wh.Where(strings.Join(segs, " OR "), args...)
@@ -67,7 +72,7 @@ func (op *dataOperatorImpl) Search(obj interface{}, params *presets.SearchParams
 	return
 }
 
-func (op *dataOperatorImpl) primarySluggerWhere(obj interface{}, id string) *gorm.DB {
+func (op *DataOperatorBuilder) primarySluggerWhere(obj interface{}, id string) *gorm.DB {
 	wh := op.db.Model(obj)
 
 	if len(id) == 0 {
@@ -86,7 +91,7 @@ func (op *dataOperatorImpl) primarySluggerWhere(obj interface{}, id string) *gor
 	return wh
 }
 
-func (op *dataOperatorImpl) Fetch(obj interface{}, id string, ctx *web.EventContext) (r interface{}, err error) {
+func (op *DataOperatorBuilder) Fetch(obj interface{}, id string, ctx *web.EventContext) (r interface{}, err error) {
 	err = op.primarySluggerWhere(obj, id).Find(obj).Error
 	if err != nil {
 		return
@@ -95,7 +100,7 @@ func (op *dataOperatorImpl) Fetch(obj interface{}, id string, ctx *web.EventCont
 	return
 }
 
-func (op *dataOperatorImpl) Save(obj interface{}, id string, ctx *web.EventContext) (err error) {
+func (op *DataOperatorBuilder) Save(obj interface{}, id string, ctx *web.EventContext) (err error) {
 	if len(id) == 0 {
 		err = op.db.Create(obj).Error
 		return
@@ -104,7 +109,7 @@ func (op *dataOperatorImpl) Save(obj interface{}, id string, ctx *web.EventConte
 	return
 }
 
-func (op *dataOperatorImpl) Delete(obj interface{}, id string, ctx *web.EventContext) (err error) {
+func (op *DataOperatorBuilder) Delete(obj interface{}, id string, ctx *web.EventContext) (err error) {
 	err = op.primarySluggerWhere(obj, id).Delete(obj).Error
 	return
 }

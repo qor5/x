@@ -50,7 +50,8 @@ func New() *Builder {
 }
 
 func (b *Builder) URIPrefix(v string) (r *Builder) {
-	b.prefix = v
+	b.prefix = strings.TrimRight(v, "/")
+	fmt.Println("b.prefix", v, b.prefix)
 	return b
 }
 
@@ -111,9 +112,9 @@ func (b *Builder) Model(v interface{}) (r *ModelBuilder) {
 	return r
 }
 
-func (b *Builder) DataOperator(v DataOperator) (r *ModelBuilder) {
+func (b *Builder) DataOperator(v DataOperator) (r *Builder) {
 	b.dataOperator = v
-	return r
+	return b
 }
 
 func modelNames(ms []*ModelBuilder) (r []string) {
@@ -203,9 +204,7 @@ func (b *Builder) runBrandFunc(ctx *web.EventContext) (r h.HTMLComponent) {
 		return b.brandFunc(ctx)
 	}
 
-	return VAppBar(
-		VToolbarTitle("Admin"),
-	)
+	return VToolbarTitle("Admin")
 }
 
 type contextKey int
@@ -259,18 +258,18 @@ func rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
-		ctx.Injector.HeadHTML(`
+		ctx.Injector.HeadHTML(strings.Replace(`
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
 			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-			<link rel="stylesheet" href="/assets/main.css">
-			<script src='/assets/vue.js'></script>
+			<link rel="stylesheet" href="{{prefix}}/assets/main.css">
+			<script src='{{prefix}}/assets/vue.js'></script>
 			<style>
 				[v-cloak] {
 					display: none;
 				}
 			</style>
-		`)
+		`, "{{prefix}}", b.prefix, -1))
 
 		if len(os.Getenv("DEV")) > 0 {
 			ctx.Injector.TailHTML(`
@@ -279,9 +278,9 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 			`)
 
 		} else {
-			ctx.Injector.TailHTML(`
-			<script src='/assets/main.js'></script>
-			`)
+			ctx.Injector.TailHTML(strings.Replace(`
+			<script src='{{prefix}}/assets/main.js'></script>
+			`, "{{prefix}}", b.prefix, -1))
 		}
 
 		var innerPr web.PageResponse
@@ -351,24 +350,30 @@ func (b *Builder) initMux() {
 	mux := goji.NewMux()
 	ub := b.builder
 
-	mux.Handle(pat.Get("/assets/main.js"),
+	mainJSPath := b.prefix + "/assets/main.js"
+	mux.Handle(pat.Get(mainJSPath),
 		ub.PacksHandler("text/javascript",
 			JSComponentsPack(),
 			web.JSComponentsPack(),
 		),
 	)
+	log.Println("mounted url", mainJSPath)
 
-	mux.Handle(pat.Get("/assets/vue.js"),
+	vueJSPath := b.prefix + "/assets/vue.js"
+	mux.Handle(pat.Get(vueJSPath),
 		ub.PacksHandler("text/javascript",
 			web.JSVueComponentsPack(),
 		),
 	)
+	log.Println("mounted url", vueJSPath)
 
-	mux.Handle(pat.Get("/assets/main.css"),
+	mainCSSPath := b.prefix + "/assets/main.css"
+	mux.Handle(pat.Get(mainCSSPath),
 		ub.PacksHandler("text/css",
 			CSSComponentsPack(),
 		),
 	)
+	log.Println("mounted url", mainCSSPath)
 
 	mux.Handle(
 		pat.New(b.prefix),

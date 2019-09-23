@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/goplaid/x/docs/examples/e21_present_hello_world"
+
 	"github.com/goplaid/x/docs/examples/e15_vuetify_navigation_drawer"
 
 	"github.com/goplaid/x/docs/examples/e10_vuetify_autocomplete"
@@ -19,6 +21,7 @@ import (
 	"github.com/goplaid/x/docs/root/basics"
 	components_guide "github.com/goplaid/x/docs/root/components-guide"
 	getting_started "github.com/goplaid/x/docs/root/getting-started"
+	"github.com/goplaid/x/docs/root/presets"
 	vuetify_components "github.com/goplaid/x/docs/root/vuetify-components"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/tiptap"
@@ -491,7 +494,7 @@ func Mux(prefix string) http.Handler {
 				{
 					title: "Not just scaffolding, it's the whole house",
 					slug:  "its-the-whole-house.html",
-					doc:   tbd,
+					doc:   presets.ItsTheWholeHouse,
 				},
 				{
 					title: "Listing fields and their Component Func",
@@ -712,6 +715,13 @@ func Mux(prefix string) http.Handler {
 			),
 		),
 	)
+
+	// @snippet_begin(MountPresetHelloWorldSample)
+	mux.Handle(
+		e21_present_hello_world.PresetHelloWorldPath+"/",
+		e21_present_hello_world.PresetHelloWorld01(),
+	)
+	// @snippet_end
 
 	home := secs[0].items[0]
 	mux.Handle("/", ub.Page(layout(rf(home.doc, home), secs, prefix, home)))

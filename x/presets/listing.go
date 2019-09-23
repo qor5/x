@@ -123,6 +123,10 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 		})
 	}
 
+	if b.searcher == nil || b.mb.p.dataOperator == nil {
+		panic("presets.New().DataOperator(...) required")
+	}
+
 	var objs interface{}
 	var totalCount int
 	objs, totalCount, err = b.searcher(b.mb.newModelArray(), searchParams, ctx)
