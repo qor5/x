@@ -1,4 +1,6 @@
-package e10_hello_vuetify_autocomplete
+package e10_vuetify_autocomplete
+
+// @snippet_begin(VuetifyAutoCompleteSample)
 
 import (
 	"github.com/Pallinder/go-randomdata"
@@ -7,7 +9,7 @@ import (
 	. "github.com/theplant/htmlgo"
 )
 
-type mystate struct {
+type myFormValue struct {
 	Values1 []string
 	Values2 []string
 	Value3  string
@@ -43,7 +45,7 @@ var options2 = []*User{
 	{Login: "charles", Name: "Charles"},
 }
 
-var globalState = &mystate{
+var globalState = &myFormValue{
 	Values1: []string{
 		"sam",
 		"charles",
@@ -54,7 +56,7 @@ var globalState = &mystate{
 	Value3: "charles",
 }
 
-func HelloVuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error) {
+func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("update", update)
 
 	result := Ul()
@@ -126,7 +128,7 @@ func users(ctx *web.EventContext) (r web.EventResponse, err error) {
 }
 
 func update(ctx *web.EventContext) (r web.EventResponse, err error) {
-	globalState = &mystate{}
+	globalState = &myFormValue{}
 	ctx.MustUnmarshalForm(globalState)
 
 	selectedItems1 = []*User{}
@@ -157,3 +159,7 @@ func update(ctx *web.EventContext) (r web.EventResponse, err error) {
 
 	return
 }
+
+// @snippet_end
+
+const VuetifyAutoCompletePath = "/samples/vuetify-auto-complete"

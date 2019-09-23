@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/goplaid/x/docs/examples/e10_vuetify_autocomplete"
+
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples/e00_basics"
@@ -471,7 +473,7 @@ func Mux(prefix string) http.Handler {
 				{
 					title: "Auto Complete",
 					slug:  "auto-complete.html",
-					doc:   tbd,
+					doc:   vuetify_components.AutoComplete,
 				},
 				{
 					title: "Navigation Drawer",
@@ -687,6 +689,15 @@ func Mux(prefix string) http.Handler {
 		wb.Page(
 			demoVuetifyLayout(
 				e11_vuetify_basic_inputs.VuetifyBasicInputs,
+			),
+		),
+	)
+
+	mux.Handle(
+		e10_vuetify_autocomplete.VuetifyAutoCompletePath,
+		wb.Page(
+			demoVuetifyLayout(
+				e10_vuetify_autocomplete.VuetifyAutocomplete,
 			),
 		),
 	)
