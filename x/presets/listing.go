@@ -10,7 +10,7 @@ import (
 
 	s "github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
-	"github.com/qor/inflection"
+	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"
 	"github.com/thoas/go-funk"
 )

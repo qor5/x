@@ -10,7 +10,7 @@ import (
 
 	"github.com/goplaid/web"
 	. "github.com/goplaid/x/vuetify"
-	"github.com/qor/inflection"
+	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"
 	"go.uber.org/zap"
 	goji "goji.io"
