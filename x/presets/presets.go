@@ -29,6 +29,7 @@ type Builder struct {
 	brandFunc           ComponentFunc
 	brandTitle          string
 	primaryColor        string
+	progressBarColor    string
 	writeFieldDefaults  *FieldDefaults
 	listFieldDefaults   *FieldDefaults
 	detailFieldDefaults *FieldDefaults
@@ -45,6 +46,7 @@ func New() *Builder {
 		listFieldDefaults:   NewFieldDefaults(LIST),
 		detailFieldDefaults: NewFieldDefaults(DETAIL),
 		primaryColor:        "indigo",
+		progressBarColor:    "amber",
 		brandTitle:          "Admin",
 	}
 }
@@ -87,6 +89,11 @@ func (b *Builder) BrandTitle(v string) (r *Builder) {
 
 func (b *Builder) PrimaryColor(v string) (r *Builder) {
 	b.primaryColor = v
+	return b
+}
+
+func (b *Builder) ProgressBarColor(v string) (r *Builder) {
+	b.progressBarColor = v
 	return b
 }
 
@@ -323,6 +330,13 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 				Color(b.primaryColor).
 				App(true).
 				ClippedLeft(true),
+
+			VProgressLinear().
+				Attr(":active", "isFetching").
+				Attr("style", "position: fixed; z-index: 99").
+				Indeterminate(true).
+				Height(2).
+				Color(b.progressBarColor),
 
 			VContent(
 				innerPr.Body.(h.HTMLComponent),

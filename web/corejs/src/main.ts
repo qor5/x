@@ -13,7 +13,8 @@ for (const registerComp of (window.__goplaidVueComponentRegisters || [])) {
 	registerComp(Vue, vueOptions);
 }
 
-window.branLazyPortals = {};
+window.__goplaid = {};
+window.__goplaid.portals = {};
 
 const form = new FormData();
 
@@ -21,11 +22,11 @@ interface DynaCompData {
 	current: VueConstructor | null;
 }
 
-Vue.component('BranLazyPortal', {
-	name: 'BranLazyPortal',
+Vue.component('GoPlaidPortal', {
+	name: 'GoPlaidPortal',
 	props: ['loaderFunc', 'visible', 'afterLoaded', 'portalName'],
 	template: `
-		<div class="bran-lazy-portal" v-if="visible">
+		<div class="go-plaid-portal" v-if="visible">
 			<component :is="current"><slot></slot></component>
 		</div>
 	`,
@@ -33,7 +34,7 @@ Vue.component('BranLazyPortal', {
 	mounted() {
 		const pn = this.$props.portalName;
 		if (pn) {
-			window.branLazyPortals[pn] = this;
+			window.__goplaid.portals[pn] = this;
 		}
 
 		this.reload();

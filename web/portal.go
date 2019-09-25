@@ -13,7 +13,7 @@ type PortalBuilder struct {
 
 func Portal(children ...h.HTMLComponent) (r *PortalBuilder) {
 	r = &PortalBuilder{
-		tag: h.Tag("bran-lazy-portal").Children(children...),
+		tag: h.Tag("go-plaid-portal").Children(children...),
 	}
 	r.Visible("true")
 	return

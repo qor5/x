@@ -18,18 +18,18 @@
 
 
 			<div style="border: 3px solid blue; min-height: 60px;" >
-				<bran-lazy-portal v-init-context-vars='{name: "ABC", age: 1}' :visible='true' :loader-func='{"id": "hello", "params": ["1", "2"]}'>
-					<bran-lazy-portal v-init-context-vars='{name: "CDE", company: "the plant"}' :visible='true' :loader-func='{"id": "hello", "params": ["1", "2"]}'>
+				<go-plaid-portal v-init-context-vars='{name: "ABC", age: 1}' :visible='true' :loader-func='{"id": "hello", "params": ["1", "2"]}'>
+					<go-plaid-portal v-init-context-vars='{name: "CDE", company: "the plant"}' :visible='true' :loader-func='{"id": "hello", "params": ["1", "2"]}'>
 					{{vars.name}} - {{vars.age}} - {{vars.company}} - {{vars.school}}
-					</bran-lazy-portal>
-				</bran-lazy-portal>
+					</go-plaid-portal>
+				</go-plaid-portal>
 			</div>
 
 			<div style="border: 3px solid blue; min-height: 60px;">
-				<bran-lazy-portal :visible='true'>
+				<go-plaid-portal :visible='true'>
 					<h1>Hello</h1>
 					<button v-on:click='triggerEventFunc({"id": "hello"}, $event)' >Click</button>
-				</bran-lazy-portal>
+				</go-plaid-portal>
 			</div>
 		</main>
 	</div>

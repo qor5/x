@@ -53,6 +53,30 @@ func (b *VProgressCircularBuilder) Width(v int) (r *VProgressCircularBuilder) {
 	return b
 }
 
+func (b *VProgressCircularBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VProgressCircularBuilder) Attr(vs ...interface{}) (r *VProgressCircularBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VProgressCircularBuilder) Children(children ...h.HTMLComponent) (r *VProgressCircularBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VProgressCircularBuilder) AppendChildren(children ...h.HTMLComponent) (r *VProgressCircularBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VProgressCircularBuilder) PrependChildren(children ...h.HTMLComponent) (r *VProgressCircularBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
 func (b *VProgressCircularBuilder) Class(names ...string) (r *VProgressCircularBuilder) {
 	b.tag.Class(names...)
 	return b

@@ -79,9 +79,12 @@ export class Core {
 		});
 
 		this.form.set('__event_data__', eventData);
+		window.dispatchEvent(new Event('fetchStart'));
 		return fetch(eventURL, {
 			method: 'POST',
 			body: this.form,
+		}).finally(() => {
+			window.dispatchEvent(new Event('fetchEnd'));
 		}).then((r) => {
 			return r.json();
 		}).then((r: EventResponse) => {
@@ -112,10 +115,17 @@ export class Core {
 						afterLoaded(this);
 					}
 				});
+				window.addEventListener('fetchStart', (e: Event) => {
+					this.isFetching = true;
+				});
+				window.addEventListener('fetchEnd', (e: Event) => {
+					this.isFetching = false;
+				});
 			},
 			data() {
 				return {
 					vars: {},
+					isFetching: false,
 				};
 			},
 		});
@@ -143,7 +153,7 @@ export class Core {
 			.then((r: EventResponse) => {
 				if (r.reloadPortals && r.reloadPortals.length > 0) {
 					for (const portalName of r.reloadPortals) {
-						const portal = window.branLazyPortals[portalName];
+						const portal = window.__goplaid.portals[portalName];
 						if (portal) {
 							portal.reload();
 						}
@@ -153,7 +163,7 @@ export class Core {
 
 				if (r.updatePortals && r.updatePortals.length > 0) {
 					for (const pu of r.updatePortals) {
-						const portal = window.branLazyPortals[pu.name];
+						const portal = window.__goplaid.portals[pu.name];
 						if (portal) {
 							let afterLoaded;
 							if (pu.afterLoaded) {

@@ -21,8 +21,16 @@
 		}
 	</script>
 	<div id="app">
+
 		<v-app>
 			<v-content>
+				<v-progress-linear
+					:active="isFetching"
+					indeterminate
+					fixed
+					height="2"
+				></v-progress-linear>
+
 				<v-container>
 					<h2>Multiple Remote</h2>
 					<vw-autocomplete
@@ -67,7 +75,7 @@
 						label="Single"
 					></vw-autocomplete>
 
-					<v-btn color="info" v-on:click='onclick({"id": "update"}, $event)' >Post</v-btn>
+					<v-btn color="info" v-on:click='triggerEventFunc({"id": "update"}, $event)' >Post</v-btn>
 
 				</v-container>
 			</v-content>
