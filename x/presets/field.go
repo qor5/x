@@ -3,6 +3,7 @@ package presets
 import (
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/goplaid/web"
 
@@ -121,7 +122,7 @@ func (b *FieldBuilders) Only(names ...string) (r *FieldBuilders) {
 		if f == nil {
 			fType := reflectutils.GetType(b.obj, n)
 			if fType == nil {
-				continue
+				fType = reflect.TypeOf("")
 			}
 
 			compFunc := b.defaults.fieldTypeByType(fType).compFunc

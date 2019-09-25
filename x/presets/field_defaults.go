@@ -171,7 +171,7 @@ func cfTextTd(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTM
 					mi.DetailingHref(id),
 				)
 			} else {
-				a.OnClick("formDrawerEdit", id)
+				a.OnClick("DrawerEdit", id)
 			}
 			return h.Td(a)
 		}

@@ -75,11 +75,13 @@ const bulkPanelOpenParamName = "bulkOpen"
 const bulkPanelPortalName = "bulkPanel"
 const deleteConfirmPortalName = "deleteConfirm"
 
+const DeleteConfirmation = "DeleteConfirmation"
+
 func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc(formDrawerNew, b.mb.editing.formDrawerNew)
-	ctx.Hub.RegisterEventFunc(formDrawerEdit, b.mb.editing.formDrawerEdit)
+	ctx.Hub.RegisterEventFunc(DrawerNew, b.mb.editing.formDrawerNew)
+	ctx.Hub.RegisterEventFunc(DrawerEdit, b.mb.editing.formDrawerEdit)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
-	ctx.Hub.RegisterEventFunc("deleteConfirmation", b.deleteConfirmation)
+	ctx.Hub.RegisterEventFunc(DeleteConfirmation, b.deleteConfirmation)
 	ctx.Hub.RegisterEventFunc("doDelete", b.mb.editing.doDelete)
 	ctx.Hub.RegisterEventFunc("doBulkAction", b.doBulkAction)
 
@@ -163,7 +165,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			if b.mb.hasDetailing {
 				tdbind.On("click.self").PushStateURL(b.mb.Info().DetailingHref(id))
 			} else {
-				tdbind.On("click.self").EventFunc("formDrawerEdit", id)
+				tdbind.On("click.self").EventFunc(DrawerEdit, id)
 			}
 			return tdbind
 		}).
@@ -331,7 +333,7 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 			Color(b.mb.p.primaryColor).
 			Depressed(true).
 			Dark(true).
-			OnClick("formDrawerNew", ""),
+			OnClick("DrawerNew", ""),
 	).Flat(true)
 	if fd != nil {
 		toolbar.PrependChildren(Filter(fd))

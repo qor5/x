@@ -205,7 +205,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		return h.Td(web.Bind(
 			h.A().Text(comp.Name)).
 			URL("/admin/companies").
-			EventFunc("formDrawerEdit", fmt.Sprint(comp.ID)))
+			EventFunc(presets.DrawerEdit, fmt.Sprint(comp.ID)))
 	})
 
 	l.BulkAction("Approve").Label("Approve").UpdateFunc(func(selectedIds []string, ctx *web.EventContext) (err error) {
@@ -445,7 +445,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 
 				web.Bind(VBtn("Update details").
 					Depressed(true)).OnClick(
-					"formDrawerEdit",
+					presets.DrawerEdit,
 					cusID,
 				).URL("/admin/customers"),
 			).Class("mb-4")

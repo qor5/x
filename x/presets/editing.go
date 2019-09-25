@@ -71,7 +71,7 @@ func (b *EditingBuilder) SetterFunc(v SetterFunc) (r *EditingBuilder) {
 	return b
 }
 
-const formDrawerNew = "formDrawerNew"
+const DrawerNew = "DrawerNew"
 
 func (b *EditingBuilder) formDrawerNew(ctx *web.EventContext) (r web.EventResponse, err error) {
 	creatingB := b
@@ -83,7 +83,7 @@ func (b *EditingBuilder) formDrawerNew(ctx *web.EventContext) (r web.EventRespon
 	return
 }
 
-const formDrawerEdit = "formDrawerEdit"
+const DrawerEdit = "DrawerEdit"
 
 func (b *EditingBuilder) formDrawerEdit(ctx *web.EventContext) (r web.EventResponse, err error) {
 	rightDrawer(&r, b.editFormFor(nil, ctx))

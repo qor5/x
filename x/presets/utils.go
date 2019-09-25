@@ -13,12 +13,12 @@ func EditDeleteMenuItems(ctx *web.EventContext, url string, id string, editExtra
 		web.Bind(VListItem(
 			VListItemIcon(VIcon("edit")),
 			VListItemTitle(h.Text(msgr.Edit)),
-		)).OnClick("formDrawerEdit", append([]string{id}, editExtraParams...)...).URL(url),
+		)).OnClick(DrawerEdit, append([]string{id}, editExtraParams...)...).URL(url),
 
 		web.Bind(VListItem(
 			VListItemIcon(VIcon("delete")),
 			VListItemTitle(h.Text(msgr.Delete)),
-		)).OnClick("deleteConfirmation", id).URL(url),
+		)).OnClick(DeleteConfirmation, id).URL(url),
 	}
 }
 

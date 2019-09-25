@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/goplaid/x/docs/examples/e21_present_hello_world"
+	"github.com/goplaid/x/docs/examples/e21_presents"
 
 	"github.com/goplaid/x/docs/examples/e15_vuetify_navigation_drawer"
 
@@ -497,9 +497,9 @@ func Mux(prefix string) http.Handler {
 					doc:   presets.ItsTheWholeHouse,
 				},
 				{
-					title: "Listing fields and their Component Func",
-					slug:  "listing-fields-and-their-component-func.html",
-					doc:   tbd,
+					title: "Listing Customizations",
+					slug:  "listing-customizations.html",
+					doc:   presets.ListingCustomizations,
 				},
 				{
 					title: "Listing Filters",
@@ -718,10 +718,15 @@ func Mux(prefix string) http.Handler {
 
 	// @snippet_begin(MountPresetHelloWorldSample)
 	mux.Handle(
-		e21_present_hello_world.PresetHelloWorldPath+"/",
-		e21_present_hello_world.PresetHelloWorld01(),
+		e21_presents.PresetsHelloWorldPath+"/",
+		e21_presents.PresetsHelloWorld(),
 	)
 	// @snippet_end
+
+	mux.Handle(
+		e21_presents.PresetsListingCustomization01PATH+"/",
+		e21_presents.PresetsListingCustomization01(),
+	)
 
 	home := secs[0].items[0]
 	mux.Handle("/", ub.Page(layout(rf(home.doc, home), secs, prefix, home)))

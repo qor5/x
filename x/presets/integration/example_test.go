@@ -177,11 +177,11 @@ Content-Disposition: form-data; name="Number"
 		name: "Without Editing Config/Product Edit Form",
 		reqFunc: func(db *gorm.DB) *http.Request {
 			productData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/products?__execute_event__=formDrawerEdit", strings.NewReader(`
+			r := httptest.NewRequest("POST", "/admin/products?__execute_event__=DrawerEdit", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
-{"eventFuncId":{"id":"formDrawerEdit","params":["12"],"pushState":null},"event":{}}
+{"eventFuncId":{"id":"DrawerEdit","params":["12"],"pushState":null},"event":{}}
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 `))
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)

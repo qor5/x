@@ -3,7 +3,7 @@ package presets
 import (
 	ch "github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples"
-	"github.com/goplaid/x/docs/examples/e21_present_hello_world"
+	"github.com/goplaid/x/docs/examples/e21_presents"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/md"
 	. "github.com/theplant/htmlgo"
@@ -22,7 +22,7 @@ And this ~*presets.Builder~ instance is actually also a ~http.Handler~, So that 
 to the http serve mux directly like this:
 `),
 	ch.Code(examples.MountPresetHelloWorldSample).Language("go"),
-	utils.Demo("", e21_present_hello_world.PresetHelloWorldPath+"/customers"),
+	utils.Demo("", e21_presents.PresetsHelloWorldPath+"/customers"),
 	md.Markdown(`
 With ~r.Model(&Customer{})~:
 
