@@ -24,9 +24,9 @@ type DataOperatorBuilder struct {
 }
 
 func (op *DataOperatorBuilder) Search(obj interface{}, params *presets.SearchParams, ctx *web.EventContext) (r interface{}, totalCount int, err error) {
-	ilike := "ilike"
+	ilike := "ILIKE"
 	if op.db.Dialect().GetName() == "sqlite3" {
-		ilike = "like"
+		ilike = "LIKE"
 	}
 
 	wh := op.db.Model(obj)
@@ -41,7 +41,7 @@ func (op *DataOperatorBuilder) Search(obj interface{}, params *presets.SearchPar
 	}
 
 	for _, cond := range params.SQLConditions {
-		wh = wh.Where(cond.Query, cond.Args...)
+		wh = wh.Where(strings.Replace(cond.Query, " ILIKE ", " "+ilike+" ", -1), cond.Args...)
 	}
 
 	err = wh.Count(&totalCount).Error

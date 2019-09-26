@@ -1,4 +1,4 @@
-package presets
+package presets_guide
 
 import (
 	ch "github.com/goplaid/x/codehighlight"

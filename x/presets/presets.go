@@ -53,7 +53,6 @@ func New() *Builder {
 
 func (b *Builder) URIPrefix(v string) (r *Builder) {
 	b.prefix = strings.TrimRight(v, "/")
-	fmt.Println("b.prefix", v, b.prefix)
 	return b
 }
 
@@ -360,7 +359,7 @@ func (b *Builder) getHomePageFunc() web.PageFunc {
 }
 
 func (b *Builder) initMux() {
-	b.logger.Info("initializing mux for", zap.Reflect("models", modelNames(b.models)))
+	b.logger.Info("initializing mux for", zap.Reflect("models", modelNames(b.models)), zap.String("prefix", b.prefix))
 	mux := goji.NewMux()
 	ub := b.builder
 

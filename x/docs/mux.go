@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/goplaid/x/presets"
+
 	"github.com/goplaid/x/docs/examples/e21_presents"
 
 	"github.com/goplaid/x/docs/examples/e15_vuetify_navigation_drawer"
@@ -21,7 +23,7 @@ import (
 	"github.com/goplaid/x/docs/root/basics"
 	components_guide "github.com/goplaid/x/docs/root/components-guide"
 	getting_started "github.com/goplaid/x/docs/root/getting-started"
-	"github.com/goplaid/x/docs/root/presets"
+	presets_guide "github.com/goplaid/x/docs/root/presets-guide"
 	vuetify_components "github.com/goplaid/x/docs/root/vuetify-components"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/tiptap"
@@ -488,18 +490,18 @@ func Mux(prefix string) http.Handler {
 			},
 		},
 		{
-			title: "Presets",
-			slug:  "presets",
+			title: "Presets Guide",
+			slug:  "presets-guide",
 			items: []*pageItem{
 				{
 					title: "Not just scaffolding, it's the whole house",
 					slug:  "its-the-whole-house.html",
-					doc:   presets.ItsTheWholeHouse,
+					doc:   presets_guide.ItsTheWholeHouse,
 				},
 				{
 					title: "Listing Customizations",
 					slug:  "listing-customizations.html",
-					doc:   presets.ListingCustomizations,
+					doc:   presets_guide.ListingCustomizations,
 				},
 				{
 					title: "Listing Filters",
@@ -723,9 +725,18 @@ func Mux(prefix string) http.Handler {
 	)
 	// @snippet_end
 
+	c01 := presets.New()
+	e21_presents.PresetsListingCustomizationFields(c01)
 	mux.Handle(
-		e21_presents.PresetsListingCustomization01PATH+"/",
-		e21_presents.PresetsListingCustomization01(),
+		e21_presents.PresetsListingCustomizationFieldsPath+"/",
+		c01,
+	)
+
+	c02 := presets.New()
+	e21_presents.PresetsListingCustomizationFilters(c02)
+	mux.Handle(
+		e21_presents.PresetsListingCustomizationFiltersPath+"/",
+		c02,
 	)
 
 	home := secs[0].items[0]
