@@ -3,6 +3,7 @@ package e21_presents
 
 import (
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/goplaid/web"
@@ -43,12 +44,12 @@ func setupDB() (db *gorm.DB) {
 	return
 }
 
-func PresetsHelloWorld() (r *presets.Builder) {
-	db := setupDB()
-	r = presets.New().
-		URIPrefix(PresetsHelloWorldPath).
+func PresetsHelloWorld(b *presets.Builder) (m *presets.ModelBuilder, db *gorm.DB) {
+	db = setupDB()
+	b.URIPrefix(PresetsHelloWorldPath).
 		DataOperator(gormop.DataOperator(db))
-	r.Model(&Customer{})
+	m = b.Model(&Customer{})
+
 	return
 }
 
@@ -68,14 +69,13 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 	ce *presets.EditingBuilder,
 	db *gorm.DB,
 ) {
-	db = setupDB()
+	var cust *presets.ModelBuilder
+	cust, db = PresetsHelloWorld(b)
 
-	b.URIPrefix(PresetsListingCustomizationFieldsPath).
-		DataOperator(gormop.DataOperator(db))
+	b.URIPrefix(PresetsListingCustomizationFieldsPath)
 
-	cust := b.Model(&Customer{})
-
-	cl = cust.Listing("ID", "Name", "Company", "Email")
+	cl = cust.Listing("ID", "Name", "Company", "Email").
+		SearchColumns("name", "email")
 	cl.Field("Company").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) HTMLComponent {
 		c := obj.(*Customer)
 		var comp Company
@@ -162,5 +162,98 @@ func PresetsListingCustomizationFilters(b *presets.Builder) (
 }
 
 const PresetsListingCustomizationFiltersPath = "/samples/presets-listing-customization-filters"
+
+// @snippet_end
+
+// @snippet_begin(PresetsListingCustomizationTabsSample)
+
+func PresetsListingCustomizationTabs(b *presets.Builder) (
+	cl *presets.ListingBuilder,
+	ce *presets.EditingBuilder,
+	db *gorm.DB,
+) {
+	cl, ce, db = PresetsListingCustomizationFilters(b)
+	b.URIPrefix(PresetsListingCustomizationTabsPath)
+
+	cl.FilterTabsFunc(func(ctx *web.EventContext) []*presets.FilterTab {
+		var c Company
+		db.First(&c)
+		return []*presets.FilterTab{
+			{
+				Label: "Felix",
+				Query: url.Values{"name.ilike": []string{"felix"}},
+			},
+			{
+				Label: "The Plant",
+				Query: url.Values{"company": []string{fmt.Sprint(c.ID)}},
+			},
+			{
+				Label: "Approved",
+				Query: url.Values{"approved.gt": []string{fmt.Sprint(1)}},
+			},
+			{
+				Label: "All",
+				Query: url.Values{"all": []string{"1"}},
+			},
+		}
+	})
+	return
+}
+
+const PresetsListingCustomizationTabsPath = "/samples/presets-listing-customization-tabs"
+
+// @snippet_end
+
+// @snippet_begin(PresetsListingCustomizationBulkActionsSample)
+
+func PresetsListingCustomizationBulkActions(b *presets.Builder) (
+	cl *presets.ListingBuilder,
+	ce *presets.EditingBuilder,
+	db *gorm.DB,
+) {
+	cl, ce, db = PresetsListingCustomizationTabs(b)
+	b.URIPrefix(PresetsListingCustomizationBulkActionsPath)
+
+	cl.BulkAction("Approve").Label("Approve").
+		UpdateFunc(func(selectedIds []string, ctx *web.EventContext) (err error) {
+			comment := ctx.R.FormValue("ApprovalComment")
+			if len(comment) < 10 {
+				ctx.Flash = "comment should larger than 10"
+				return
+			}
+			err = db.Model(&Customer{}).
+				Where("id IN (?)", selectedIds).
+				Updates(map[string]interface{}{"approved_at": time.Now(), "approval_comment": comment}).Error
+			if err != nil {
+				ctx.Flash = err.Error()
+			}
+			return
+		}).
+		ComponentFunc(func(selectedIds []string, ctx *web.EventContext) HTMLComponent {
+			comment := ctx.R.FormValue("ApprovalComment")
+			errorMessage := ""
+			if ctx.Flash != nil {
+				errorMessage = ctx.Flash.(string)
+			}
+			return v.VTextField().
+				FieldName("ApprovalComment").
+				Value(comment).
+				Label("Comment").
+				ErrorMessages(errorMessage)
+		})
+
+	cl.BulkAction("Delete").Label("Delete").
+		UpdateFunc(func(selectedIds []string, ctx *web.EventContext) (err error) {
+			err = db.Where("id IN (?)", selectedIds).Delete(&Customer{}).Error
+			return
+		}).
+		ComponentFunc(func(selectedIds []string, ctx *web.EventContext) HTMLComponent {
+			return Div().Text(fmt.Sprintf("Are you sure you want to delete %s ?", selectedIds)).Class("title deep-orange--text")
+		})
+
+	return
+}
+
+const PresetsListingCustomizationBulkActionsPath = "/samples/presets-listing-customization-bulk-actions"
 
 // @snippet_end

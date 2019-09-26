@@ -504,33 +504,8 @@ func Mux(prefix string) http.Handler {
 					doc:   presets_guide.ListingCustomizations,
 				},
 				{
-					title: "Listing Filters",
-					slug:  "listing-filters.html",
-					doc:   tbd,
-				},
-				{
-					title: "Listing Filter Tabs",
-					slug:  "listing-filter-tabs.html",
-					doc:   tbd,
-				},
-				{
-					title: "Bulk Actions",
-					slug:  "bulk-actions.html",
-					doc:   tbd,
-				},
-				{
-					title: "Global Search Box",
-					slug:  "global-search-tabs.html",
-					doc:   tbd,
-				},
-				{
-					title: "Edit simple object side by side",
-					slug:  "edit-simple-object-side-by-side.html",
-					doc:   tbd,
-				},
-				{
-					title: "Editing Field Component Func",
-					slug:  "editing-field-component-func.html",
+					title: "Editing Data",
+					slug:  "editing-data.html",
 					doc:   tbd,
 				},
 				{
@@ -719,9 +694,11 @@ func Mux(prefix string) http.Handler {
 	)
 
 	// @snippet_begin(MountPresetHelloWorldSample)
+	c00 := presets.New()
+	e21_presents.PresetsHelloWorld(c00)
 	mux.Handle(
 		e21_presents.PresetsHelloWorldPath+"/",
-		e21_presents.PresetsHelloWorld(),
+		c00,
 	)
 	// @snippet_end
 
@@ -737,6 +714,20 @@ func Mux(prefix string) http.Handler {
 	mux.Handle(
 		e21_presents.PresetsListingCustomizationFiltersPath+"/",
 		c02,
+	)
+
+	c03 := presets.New()
+	e21_presents.PresetsListingCustomizationTabs(c03)
+	mux.Handle(
+		e21_presents.PresetsListingCustomizationTabsPath+"/",
+		c03,
+	)
+
+	c04 := presets.New()
+	e21_presents.PresetsListingCustomizationBulkActions(c04)
+	mux.Handle(
+		e21_presents.PresetsListingCustomizationBulkActionsPath+"/",
+		c04,
 	)
 
 	home := secs[0].items[0]
