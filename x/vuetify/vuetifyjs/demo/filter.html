@@ -56,7 +56,6 @@
 					  key: "refund",
 					  label: "Refund",
 					  itemType: "SelectItem",
-					  selected: true,
 					  options: [
 						{ value: "true", text: "is fully refunded" },
 						{ value: "false", text: "is not refunded" },
@@ -64,7 +63,7 @@
 					  ],
 					  valueIs: "partial",
 					},
-				  ]'></vw-filter>
+				  ]' :replace-window-location='true'></vw-filter>
 				</v-container>
 			</v-content>
 		</v-app>

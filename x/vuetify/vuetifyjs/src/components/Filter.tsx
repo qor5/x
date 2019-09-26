@@ -577,6 +577,17 @@ function getSelectedIndexes(value: FilterItem[]): number[] {
 	}).filter((i: number) => i !== -1);
 }
 
+function initInternalValue(items: FilterItem[]): FilterItem[] {
+	for (const item of items) {
+		if (item.itemType === 'SelectItem') {
+			if (!item.valueIs && item.options) {
+				item.valueIs = item.options[0].value;
+			}
+		}
+	}
+	return items;
+}
+
 export const Filter = Vue.extend({
 	inject: ['core'],
 	components: {
@@ -636,14 +647,13 @@ export const Filter = Vue.extend({
 
 	data() {
 		return {
-			internalValue: this.$props.value as FilterItem[],
+			internalValue: initInternalValue(this.$props.value as FilterItem[]),
 			visible: false,
 			selectedIndexs: getSelectedIndexes(this.$props.value),
 		};
 	},
 
 	methods: {
-
 		clickDone(e: any) {
 			const event = {
 				filterData: filterData(this.internalValue),
@@ -653,7 +663,6 @@ export const Filter = Vue.extend({
 			if (this.$props.replaceWindowLocation) {
 				this.doReplaceWindowLocation(event);
 			}
-			// console.log('event', event);
 			this.visible = false;
 		},
 

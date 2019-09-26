@@ -42,7 +42,8 @@ export function setPushState(
 	// If pushState is string, then replace query string to it
 	// If pushState it object, merge url query
 	if (typeof pstate === 'string') {
-		pstate = { query: querystring.parse(pstate, { arrayFormat: 'comma' }), mergeQuery: true };
+		// mergeQuery: false, so that filter remove filter item checkbox could clear the query item
+		pstate = { query: querystring.parse(pstate, { arrayFormat: 'comma' }), mergeQuery: false };
 	}
 
 	let mergeURLQuery = false;
