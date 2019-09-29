@@ -27,7 +27,7 @@ func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
 	return r
 }
 
-func (b *EditingBuilder) CloneForCreating(vs ...string) (r *EditingBuilder) {
+func (b *EditingBuilder) Creating(vs ...string) (r *EditingBuilder) {
 
 	if b.mb.creating == nil {
 		b.mb.creating = &EditingBuilder{
@@ -71,8 +71,6 @@ func (b *EditingBuilder) SetterFunc(v SetterFunc) (r *EditingBuilder) {
 	return b
 }
 
-const DrawerNew = "DrawerNew"
-
 func (b *EditingBuilder) formDrawerNew(ctx *web.EventContext) (r web.EventResponse, err error) {
 	creatingB := b
 	if b.mb.creating != nil {
@@ -82,8 +80,6 @@ func (b *EditingBuilder) formDrawerNew(ctx *web.EventContext) (r web.EventRespon
 	rightDrawer(&r, creatingB.editFormFor(nil, ctx))
 	return
 }
-
-const DrawerEdit = "DrawerEdit"
 
 func (b *EditingBuilder) formDrawerEdit(ctx *web.EventContext) (r web.EventResponse, err error) {
 	rightDrawer(&r, b.editFormFor(nil, ctx))

@@ -8,6 +8,7 @@ import (
 
 	"github.com/goplaid/web"
 
+	"github.com/goplaid/x/presets/actions"
 	s "github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/inflection"
@@ -75,13 +76,11 @@ const bulkPanelOpenParamName = "bulkOpen"
 const bulkPanelPortalName = "bulkPanel"
 const deleteConfirmPortalName = "deleteConfirm"
 
-const DeleteConfirmation = "DeleteConfirmation"
-
 func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc(DrawerNew, b.mb.editing.formDrawerNew)
-	ctx.Hub.RegisterEventFunc(DrawerEdit, b.mb.editing.formDrawerEdit)
+	ctx.Hub.RegisterEventFunc(actions.DrawerNew, b.mb.editing.formDrawerNew)
+	ctx.Hub.RegisterEventFunc(actions.DrawerEdit, b.mb.editing.formDrawerEdit)
+	ctx.Hub.RegisterEventFunc(actions.DeleteConfirmation, b.deleteConfirmation)
 	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
-	ctx.Hub.RegisterEventFunc(DeleteConfirmation, b.deleteConfirmation)
 	ctx.Hub.RegisterEventFunc("doDelete", b.mb.editing.doDelete)
 	ctx.Hub.RegisterEventFunc("doBulkAction", b.doBulkAction)
 
@@ -165,7 +164,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			if b.mb.hasDetailing {
 				tdbind.On("click.self").PushStateURL(b.mb.Info().DetailingHref(id))
 			} else {
-				tdbind.On("click.self").EventFunc(DrawerEdit, id)
+				tdbind.On("click.self").EventFunc(actions.DrawerEdit, id)
 			}
 			return tdbind
 		}).

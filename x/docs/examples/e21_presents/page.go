@@ -8,6 +8,7 @@ import (
 
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets"
+	"github.com/goplaid/x/presets/actions"
 	"github.com/goplaid/x/presets/gormop"
 	v "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/gorm"
@@ -86,7 +87,7 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 			web.Bind(
 				A().Text(comp.Name)).
 				URL(PresetsListingCustomizationFieldsPath+"/companies").
-				EventFunc(presets.DrawerEdit, fmt.Sprint(comp.ID)),
+				EventFunc(actions.DrawerEdit, fmt.Sprint(comp.ID)),
 		)
 	})
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/jinzhu/inflection"
 
+	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 	"goji.io/pat"
@@ -59,7 +60,7 @@ func (b *DetailingBuilder) GetPageFunc() web.PageFunc {
 }
 
 func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc(formDrawerAction, b.formDrawerAction)
+	ctx.Hub.RegisterEventFunc(actions.DrawerAction, b.formDrawerAction)
 	ctx.Hub.RegisterEventFunc("doAction", b.doAction)
 
 	id := pat.Param(ctx.R, "id")
@@ -133,8 +134,6 @@ func (b *DetailingBuilder) doAction(ctx *web.EventContext) (r web.EventResponse,
 
 	return
 }
-
-const formDrawerAction = "formDrawerAction"
 
 func (b *DetailingBuilder) formDrawerAction(ctx *web.EventContext) (r web.EventResponse, err error) {
 	action := getAction(b.actions, ctx.Event.Params[0])

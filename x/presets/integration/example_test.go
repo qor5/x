@@ -118,14 +118,14 @@ Felix
 	},
 
 	{
-		name: "New Form For CloneForCreating",
+		name: "New Form For Creating",
 		reqFunc: func(db *gorm.DB) *http.Request {
 			emptyCustomerData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/credit-cards?__execute_event__=formDrawerNew", strings.NewReader(`
+			r := httptest.NewRequest("POST", "/admin/credit-cards?__execute_event__=DrawerNew", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
-{"eventFuncId":{"id":"formDrawerNew","params":[""],"pushState":null},"event":{}}
+{"eventFuncId":{"id":"DrawerNew","params":[""],"pushState":null},"event":{}}
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 `))
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
@@ -233,11 +233,11 @@ owner1
 		name: "formDrawerAction AgreeTerms",
 		reqFunc: func(db *gorm.DB) *http.Request {
 			customerData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/customers/11?__execute_event__=formDrawerAction", strings.NewReader(`
+			r := httptest.NewRequest("POST", "/admin/customers/11?__execute_event__=DrawerAction", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
-{"eventFuncId":{"id":"formDrawerAction","params":["AgreeTerms", "11"],"pushState":null},"event":{}}
+{"eventFuncId":{"id":"DrawerAction","params":["AgreeTerms", "11"],"pushState":null},"event":{}}
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 `))
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)

@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/goplaid/x/presets/actions"
+
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/presets/gormop"
@@ -168,7 +170,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			Actions(
 				web.Bind(VBtn("Add Event").
 					Depressed(true)).OnClick(
-					"formDrawerNew",
+					actions.DrawerNew,
 					"",
 					typeName,
 					objId,
@@ -205,7 +207,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		return h.Td(web.Bind(
 			h.A().Text(comp.Name)).
 			URL("/admin/companies").
-			EventFunc(presets.DrawerEdit, fmt.Sprint(comp.ID)))
+			EventFunc(actions.DrawerEdit, fmt.Sprint(comp.ID)))
 	})
 
 	l.BulkAction("Approve").Label("Approve").UpdateFunc(func(selectedIds []string, ctx *web.EventContext) (err error) {
@@ -404,7 +406,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			Actions(
 				web.Bind(VBtn("Add Note").
 					Depressed(true)).OnClick(
-					"formDrawerNew",
+					actions.DrawerNew,
 					"",
 					"Customer",
 					cusID,
@@ -441,13 +443,14 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			Actions(
 				web.Bind(VBtn("Agree Terms").
 					Depressed(true).Class("mr-2")).
-					OnClick("formDrawerAction", "AgreeTerms", cusID),
+					OnClick(actions.DrawerAction, "AgreeTerms", cusID),
 
 				web.Bind(VBtn("Update details").
-					Depressed(true)).OnClick(
-					presets.DrawerEdit,
-					cusID,
-				).URL("/admin/customers"),
+					Depressed(true)).
+					OnClick(
+						actions.DrawerEdit,
+						cusID,
+					).URL("/admin/customers"),
 			).Class("mb-4")
 	})
 
@@ -485,7 +488,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			Actions(
 				web.Bind(VBtn("Add Card").
 					Depressed(true)).OnClick(
-					"formDrawerNew",
+					actions.DrawerNew,
 					"",
 					cusID,
 				).URL("/admin/credit-cards"),
@@ -547,7 +550,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			card.CustomerID = ctx.Event.ParamAsInt(1)
 		})
 
-	ccedit.CloneForCreating("Number")
+	ccedit.Creating("Number")
 
 	p.Model(&Language{}).PrimaryField("Code")
 

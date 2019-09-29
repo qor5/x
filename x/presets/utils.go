@@ -2,6 +2,7 @@ package presets
 
 import (
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/presets/actions"
 	"github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
@@ -13,12 +14,12 @@ func EditDeleteMenuItems(ctx *web.EventContext, url string, id string, editExtra
 		web.Bind(VListItem(
 			VListItemIcon(VIcon("edit")),
 			VListItemTitle(h.Text(msgr.Edit)),
-		)).OnClick(DrawerEdit, append([]string{id}, editExtraParams...)...).URL(url),
+		)).OnClick(actions.DrawerEdit, append([]string{id}, editExtraParams...)...).URL(url),
 
 		web.Bind(VListItem(
 			VListItemIcon(VIcon("delete")),
 			VListItemTitle(h.Text(msgr.Delete)),
-		)).OnClick(DeleteConfirmation, id).URL(url),
+		)).OnClick(actions.DeleteConfirmation, id).URL(url),
 	}
 }
 
