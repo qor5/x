@@ -6,10 +6,8 @@ import (
 	"reflect"
 
 	"github.com/goplaid/web"
-
-	"github.com/iancoleman/strcase"
-
 	. "github.com/goplaid/x/vuetify"
+	"github.com/iancoleman/strcase"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 )
@@ -37,9 +35,10 @@ func (fc *FieldContext) Value(obj interface{}) (r interface{}) {
 }
 
 type FieldDefaultBuilder struct {
-	valType  reflect.Type
-	mode     FieldMode
-	compFunc FieldComponentFunc
+	valType    reflect.Type
+	mode       FieldMode
+	compFunc   FieldComponentFunc
+	setterFunc FieldSetterFunc
 }
 
 type FieldMode int
@@ -57,6 +56,11 @@ func NewFieldDefault(t reflect.Type) (r *FieldDefaultBuilder) {
 
 func (b *FieldDefaultBuilder) ComponentFunc(v FieldComponentFunc) (r *FieldDefaultBuilder) {
 	b.compFunc = v
+	return b
+}
+
+func (b *FieldDefaultBuilder) SetterFunc(v FieldSetterFunc) (r *FieldDefaultBuilder) {
+	b.setterFunc = v
 	return b
 }
 
@@ -121,7 +125,9 @@ func (b *FieldDefaults) inspectFieldsAndCollectName(val interface{}, collectType
 		ft := b.fieldTypeByType(f.Type)
 
 		if !hasMatched(b.excludesPatterns, f.Name) && ft.compFunc != nil {
-			r.Field(f.Name).ComponentFunc(ft.compFunc)
+			r.Field(f.Name).
+				ComponentFunc(ft.compFunc).
+				SetterFunc(ft.setterFunc)
 		}
 
 		if collectType != nil && f.Type == collectType {

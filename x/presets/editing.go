@@ -183,6 +183,26 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 		usingB.setter(obj, ctx)
 	}
 
+	var vErr web.ValidationErrors
+	for _, f := range usingB.fields {
+		if f.setterFunc == nil {
+			continue
+		}
+
+		err1 := f.setterFunc(obj, &FieldContext{
+			Name:  f.name,
+			Label: b.getLabel(f.NameLabel),
+		}, ctx)
+		if err1 != nil {
+			vErr.FieldError(f.name, err1.Error())
+		}
+	}
+
+	if vErr.HaveErrors() {
+		b.renderFormWithError(&r, &vErr, obj, ctx)
+		return
+	}
+
 	if usingB.validator != nil {
 		if vErr := usingB.validator(obj, ctx); vErr.HaveErrors() {
 			b.renderFormWithError(&r, &vErr, obj, ctx)

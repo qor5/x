@@ -743,5 +743,12 @@ func SamplesHandler(prefix string) http.Handler {
 		c05,
 	)
 
+	c06 := presets.New()
+	e21_presents.PresetsEditingCustomizationFileType(c06)
+	mux.Handle(
+		e21_presents.PresetsEditingCustomizationFileTypePath+"/",
+		c06,
+	)
+
 	return mux
 }

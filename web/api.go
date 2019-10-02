@@ -116,10 +116,7 @@ func (ctx *EventContext) UnmarshalForm(v interface{}) (err error) {
 
 	if len(mf.File) > 0 {
 		for k, vs := range mf.File {
-			err = reflectutils.Set(v, k, vs)
-			if err != nil {
-				return
-			}
+			_ = reflectutils.Set(v, k, vs)
 		}
 	}
 	return

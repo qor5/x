@@ -29,4 +29,21 @@ And configure the component func on the field:
 - Set the field name and value of the component
 `),
 	utils.Anchor(H2(""), "Configure field type for all models"),
+	md.Markdown(`
+Set a global field type to component func like the following:
+`),
+	ch.Code(examples.PresetsEditingCustomizationFileTypeSample).Language("go"),
+	utils.Demo("", e21_presents.PresetsEditingCustomizationFileTypePath+"/products"),
+	md.Markdown(`
+- We define ~MyFile~ to actually be a string
+- We set ~FieldDefaults~ for writing, which is the editing drawer popup to be a customized component
+- The component show an img tag with the string as src if it's not empty
+- The component add a file input for user to upload new file
+- The ~SetterFunc~ is called before save the object, it uploads the file to transfer.sh, and get the url back,
+  then set the value to ~MainImage~ field
+
+With ~FieldDefaults~ we can write libraries that add customized type for different models to reuse. It can take care
+of how to display the edit controls, and How to save the object.
+
+`),
 )

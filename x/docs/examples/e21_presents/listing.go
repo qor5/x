@@ -28,6 +28,12 @@ type Customer struct {
 	ApprovalComment string
 }
 
+var DB *gorm.DB
+
+func init() {
+	DB = setupDB()
+}
+
 func setupDB() (db *gorm.DB) {
 	var err error
 	db, err = gorm.Open("sqlite3", "/tmp/my.db")
@@ -46,7 +52,7 @@ func setupDB() (db *gorm.DB) {
 }
 
 func PresetsHelloWorld(b *presets.Builder) (m *presets.ModelBuilder, db *gorm.DB) {
-	db = setupDB()
+	db = DB
 	b.URIPrefix(PresetsHelloWorldPath).
 		DataOperator(gormop.DataOperator(db))
 	m = b.Model(&Customer{})

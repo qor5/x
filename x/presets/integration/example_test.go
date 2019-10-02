@@ -26,12 +26,14 @@ var productData = gofixtures.Data(gofixtures.Sql(`
 var emptyCustomerData = gofixtures.Data(gofixtures.Sql(``, []string{"customers"}))
 var creditCardData = gofixtures.Data(customerData, gofixtures.Sql(``, []string{"credit_cards"}))
 
-var cases = []struct {
+type reqCase struct {
 	name               string
 	reqFunc            func(db *gorm.DB) *http.Request
 	eventResponseMatch func(er *testEventResponse, db *gorm.DB, t *testing.T)
 	pageMatch          func(body *bytes.Buffer, db *gorm.DB, t *testing.T)
-}{
+}
+
+var cases = []reqCase{
 	{
 		name: "Update",
 		reqFunc: func(db *gorm.DB) *http.Request {

@@ -15,8 +15,8 @@ import (
 
 type FieldBuilder struct {
 	NameLabel
-	compFunc FieldComponentFunc
-	//setterFunc SetterFunc
+	compFunc   FieldComponentFunc
+	setterFunc FieldSetterFunc
 }
 
 func NewField(name string) (r *FieldBuilder) {
@@ -41,7 +41,7 @@ func (b *FieldBuilder) Clone() (r *FieldBuilder) {
 	r.name = b.name
 	r.label = b.label
 	r.compFunc = b.compFunc
-	//r.setterFunc = b.setterFunc
+	r.setterFunc = b.setterFunc
 	return r
 }
 
@@ -53,11 +53,10 @@ func (b *FieldBuilder) ComponentFunc(v FieldComponentFunc) (r *FieldBuilder) {
 	return b
 }
 
-//
-//func (b *FieldBuilder) SetterFunc(v SetterFunc) (r *FieldBuilder) {
-//	b.setterFunc = v
-//	return b
-//}
+func (b *FieldBuilder) SetterFunc(v FieldSetterFunc) (r *FieldBuilder) {
+	b.setterFunc = v
+	return b
+}
 
 type NameLabel struct {
 	name  string
@@ -134,9 +133,11 @@ func (b *FieldBuilders) Only(names ...string) (r *FieldBuilders) {
 				fType = reflect.TypeOf("")
 			}
 
-			compFunc := b.defaults.fieldTypeByType(fType).compFunc
-			if compFunc != nil {
-				r.Field(n).ComponentFunc(compFunc)
+			ft := b.defaults.fieldTypeByType(fType)
+			if ft != nil && ft.compFunc != nil {
+				r.Field(n).
+					ComponentFunc(ft.compFunc).
+					SetterFunc(ft.setterFunc)
 				continue
 			}
 		}
