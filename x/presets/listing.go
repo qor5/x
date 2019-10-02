@@ -35,8 +35,14 @@ func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
 		return
 	}
 
-	r.FieldBuilders = *r.FieldBuilders.Only(vs...)
+	r.Only(vs...)
 	return r
+}
+
+func (b *ListingBuilder) Only(vs ...string) (r *ListingBuilder) {
+	r = b
+	r.FieldBuilders = *r.FieldBuilders.Only(vs...)
+	return
 }
 
 func (b *ListingBuilder) PageFunc(pf web.PageFunc) (r *ListingBuilder) {

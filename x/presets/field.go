@@ -71,6 +71,15 @@ type FieldBuilders struct {
 	fields      []*FieldBuilder
 }
 
+func (b *FieldBuilders) Clone() (r *FieldBuilders) {
+	r = &FieldBuilders{
+		obj:         b.obj,
+		defaults:    b.defaults,
+		fieldLabels: b.fieldLabels,
+	}
+	return
+}
+
 func (b *FieldBuilders) Field(name string) (r *FieldBuilder) {
 	r = b.GetField(name)
 	if r != nil {
@@ -115,7 +124,7 @@ func (b *FieldBuilders) Only(names ...string) (r *FieldBuilders) {
 		return b
 	}
 
-	r = &FieldBuilders{fieldLabels: b.fieldLabels}
+	r = b.Clone()
 
 	for _, n := range names {
 		f := b.GetField(n)

@@ -6,26 +6,22 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/goplaid/x/presets"
-
-	"github.com/goplaid/x/docs/examples/e21_presents"
-
-	"github.com/goplaid/x/docs/examples/e15_vuetify_navigation_drawer"
-
-	"github.com/goplaid/x/docs/examples/e10_vuetify_autocomplete"
-
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples/e00_basics"
+	"github.com/goplaid/x/docs/examples/e10_vuetify_autocomplete"
 	"github.com/goplaid/x/docs/examples/e11_vuetify_basic_inputs"
 	"github.com/goplaid/x/docs/examples/e13_vuetify_list"
 	"github.com/goplaid/x/docs/examples/e14_vuetify_menu"
+	"github.com/goplaid/x/docs/examples/e15_vuetify_navigation_drawer"
+	"github.com/goplaid/x/docs/examples/e21_presents"
 	"github.com/goplaid/x/docs/root/basics"
 	components_guide "github.com/goplaid/x/docs/root/components-guide"
 	getting_started "github.com/goplaid/x/docs/root/getting-started"
 	presets_guide "github.com/goplaid/x/docs/root/presets-guide"
 	vuetify_components "github.com/goplaid/x/docs/root/vuetify-components"
 	"github.com/goplaid/x/docs/utils"
+	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/tiptap"
 	v "github.com/goplaid/x/vuetify"
 	. "github.com/theplant/htmlgo"
@@ -504,9 +500,9 @@ func Mux(prefix string) http.Handler {
 					doc:   presets_guide.ListingCustomizations,
 				},
 				{
-					title: "Editing Data",
-					slug:  "editing-data.html",
-					doc:   tbd,
+					title: "Editing Customizations",
+					slug:  "editing-customizations.html",
+					doc:   presets_guide.EditingCustomizations,
 				},
 				{
 					title: "Validations",
@@ -548,6 +544,16 @@ func Mux(prefix string) http.Handler {
 		}
 	}
 
+	samplesMux := SamplesHandler(prefix)
+	mux.Handle("/samples/", samplesMux)
+
+	home := secs[0].items[0]
+	mux.Handle("/", ub.Page(layout(rf(home.doc, home), secs, prefix, home)))
+	return mux
+}
+
+func SamplesHandler(prefix string) http.Handler {
+	mux := http.NewServeMux()
 	emptyUb := web.New().LayoutFunc(web.NoopLayoutFunc)
 
 	mux.Handle(e00_basics.TypeSafeBuilderSamplePath, emptyUb.Page(e00_basics.TypeSafeBuilderSamplePF))
@@ -730,7 +736,12 @@ func Mux(prefix string) http.Handler {
 		c04,
 	)
 
-	home := secs[0].items[0]
-	mux.Handle("/", ub.Page(layout(rf(home.doc, home), secs, prefix, home)))
+	c05 := presets.New()
+	e21_presents.PresetsEditingCustomizationDescription(c05)
+	mux.Handle(
+		e21_presents.PresetsEditingCustomizationDescriptionPath+"/",
+		c05,
+	)
+
 	return mux
 }

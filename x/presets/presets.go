@@ -33,7 +33,15 @@ type Builder struct {
 	writeFieldDefaults  *FieldDefaults
 	listFieldDefaults   *FieldDefaults
 	detailFieldDefaults *FieldDefaults
+	extraAssets         []*extraAsset
 	MenuGroups
+}
+
+type extraAsset struct {
+	path        string
+	contentType string
+	body        web.ComponentsPack
+	refTag      string
 }
 
 func New() *Builder {
@@ -93,6 +101,34 @@ func (b *Builder) PrimaryColor(v string) (r *Builder) {
 
 func (b *Builder) ProgressBarColor(v string) (r *Builder) {
 	b.progressBarColor = v
+	return b
+}
+
+func (b *Builder) ExtraAsset(path string, contentType string, body web.ComponentsPack, refTag ...string) (r *Builder) {
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+
+	var theOne *extraAsset
+	for _, ea := range b.extraAssets {
+		if ea.path == path {
+			theOne = ea
+			break
+		}
+	}
+
+	if theOne == nil {
+		theOne = &extraAsset{path: path, contentType: contentType, body: body}
+		b.extraAssets = append(b.extraAssets, theOne)
+	} else {
+		theOne.contentType = contentType
+		theOne.body = body
+	}
+
+	if len(refTag) > 0 {
+		theOne.refTag = refTag[0]
+	}
+
 	return b
 }
 
@@ -277,6 +313,20 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 			</style>
 		`, "{{prefix}}", b.prefix, -1))
 
+		for _, ea := range b.extraAssets {
+			if len(ea.refTag) > 0 {
+				ctx.Injector.HeadHTML(ea.refTag)
+				continue
+			}
+
+			if strings.HasSuffix(ea.path, "css") {
+				ctx.Injector.HeadHTML(fmt.Sprintf("<link rel=\"stylesheet\" href=\"%s\">", b.extraFullPath(ea)))
+				continue
+			}
+
+			ctx.Injector.HeadHTML(fmt.Sprintf("<script src=\"%s\"></script>", b.extraFullPath(ea)))
+		}
+
 		if len(os.Getenv("DEV")) > 0 {
 			ctx.Injector.TailHTML(`
 			<script src='http://localhost:3080/app.js'></script>
@@ -358,6 +408,10 @@ func (b *Builder) getHomePageFunc() web.PageFunc {
 	return b.defaultHomePageFunc
 }
 
+func (b *Builder) extraFullPath(ea *extraAsset) string {
+	return b.prefix + "/extra" + ea.path
+}
+
 func (b *Builder) initMux() {
 	b.logger.Info("initializing mux for", zap.Reflect("models", modelNames(b.models)), zap.String("prefix", b.prefix))
 	mux := goji.NewMux()
@@ -387,6 +441,15 @@ func (b *Builder) initMux() {
 		),
 	)
 	log.Println("mounted url", mainCSSPath)
+
+	for _, ea := range b.extraAssets {
+		fullPath := b.extraFullPath(ea)
+		mux.Handle(pat.Get(fullPath), ub.PacksHandler(
+			ea.contentType,
+			ea.body,
+		))
+		log.Println("mounted url", fullPath)
+	}
 
 	mux.Handle(
 		pat.New(b.prefix),

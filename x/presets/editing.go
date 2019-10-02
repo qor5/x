@@ -23,8 +23,14 @@ func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
 		return
 	}
 
-	r.FieldBuilders = *r.FieldBuilders.Only(vs...)
+	r.Only(vs...)
 	return r
+}
+
+func (b *EditingBuilder) Only(vs ...string) (r *EditingBuilder) {
+	r = b
+	r.FieldBuilders = *r.FieldBuilders.Only(vs...)
+	return
 }
 
 func (b *EditingBuilder) Creating(vs ...string) (r *EditingBuilder) {
