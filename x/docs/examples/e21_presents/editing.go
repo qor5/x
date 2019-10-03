@@ -70,8 +70,13 @@ func PresetsEditingCustomizationFileType(b *presets.Builder) (
 			if len(string(val)) > 0 {
 				img = h.Img(string(val))
 			}
+			var er h.HTMLComponent
+			if len(field.Errors) > 0 {
+				er = h.Div().Text(field.Errors[0]).Style("color:red")
+			}
 			return h.Div(
 				img,
+				er,
 				web.Bind(
 					h.Input("").Type("file"),
 				).FieldName(fmt.Sprintf("%s_NewFile", field.Name)),
@@ -96,6 +101,10 @@ func PresetsEditingCustomizationFileType(b *presets.Builder) (
 			var b []byte
 			b, err = ioutil.ReadAll(res.Body)
 			if err != nil {
+				return
+			}
+			if res.StatusCode == 500 {
+				err = fmt.Errorf("%s", string(b))
 				return
 			}
 			err = reflectutils.Set(obj, field.Name, MyFile(b))
