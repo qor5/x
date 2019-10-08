@@ -54,16 +54,19 @@ func (b *PageInjector) Clear() (r *PageInjector) {
 	return b
 }
 
+var head = &html.Node{
+	Type:     html.ElementNode,
+	DataAtom: atom.Head,
+	Data:     "head",
+}
+
 func (b *PageInjector) HeadHTML(v string) {
-	n, err := html.Parse(strings.NewReader(v))
+	ns, err := html.ParseFragment(strings.NewReader(v), head)
 	if err != nil {
 		panic(err)
 	}
-	// _ = n
-	n = n.FirstChild.FirstChild.FirstChild
-	for n != nil {
+	for _, n := range ns {
 		b.headNodes = append(b.headNodes, n)
-		n = n.NextSibling
 	}
 	return
 }

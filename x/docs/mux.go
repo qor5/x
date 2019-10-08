@@ -100,8 +100,23 @@ func footer() HTMLComponent {
 	).Role("contentinfo").Class("global-footer")
 }
 
+func addGA(ctx *web.EventContext) {
+	ctx.Injector.HeadHTML(`
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-149605708-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-149605708-1');
+</script>
+`)
+}
+
 func layout(in web.PageFunc, secs []*section, prefix string, cp *pageItem) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
+		addGA(ctx)
 		pr.PageTitle = cp.title + " - " + "GoPlaid"
 		tailScript := `<script src='/assets/main.js'></script>`
 		if len(os.Getenv("DEV")) > 0 {
@@ -160,6 +175,7 @@ func layout(in web.PageFunc, secs []*section, prefix string, cp *pageItem) (out 
 // @snippet_begin(DemoLayoutSample)
 func demoLayout(in web.PageFunc) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
+		addGA(ctx)
 
 		ctx.Injector.HeadHTML(`
 			<script src='/assets/vue.js'></script>
@@ -191,6 +207,7 @@ func demoLayout(in web.PageFunc) (out web.PageFunc) {
 // @snippet_begin(TipTapLayoutSample)
 func tiptapLayout(in web.PageFunc) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
+		addGA(ctx)
 
 		ctx.Injector.HeadHTML(`
 			<link rel="stylesheet" href="/assets/tiptap.css">
@@ -226,6 +243,7 @@ func tiptapLayout(in web.PageFunc) (out web.PageFunc) {
 // @snippet_begin(DemoBootstrapLayoutSample)
 func demoBootstrapLayout(in web.PageFunc) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
+		addGA(ctx)
 
 		ctx.Injector.HeadHTML(`
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -264,6 +282,7 @@ func demoBootstrapLayout(in web.PageFunc) (out web.PageFunc) {
 // @snippet_begin(DemoVuetifyLayoutSample)
 func demoVuetifyLayout(in web.PageFunc) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
+		addGA(ctx)
 
 		ctx.Injector.HeadHTML(`
 			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono" async>
@@ -694,7 +713,7 @@ func SamplesHandler(prefix string) http.Handler {
 	)
 
 	// @snippet_begin(MountPresetHelloWorldSample)
-	c00 := presets.New()
+	c00 := presets.New().AssetFunc(addGA)
 	e21_presents.PresetsHelloWorld(c00)
 	mux.Handle(
 		e21_presents.PresetsHelloWorldPath+"/",
@@ -702,70 +721,70 @@ func SamplesHandler(prefix string) http.Handler {
 	)
 	// @snippet_end
 
-	c01 := presets.New()
+	c01 := presets.New().AssetFunc(addGA)
 	e21_presents.PresetsListingCustomizationFields(c01)
 	mux.Handle(
 		e21_presents.PresetsListingCustomizationFieldsPath+"/",
 		c01,
 	)
 
-	c02 := presets.New()
+	c02 := presets.New().AssetFunc(addGA)
 	e21_presents.PresetsListingCustomizationFilters(c02)
 	mux.Handle(
 		e21_presents.PresetsListingCustomizationFiltersPath+"/",
 		c02,
 	)
 
-	c03 := presets.New()
+	c03 := presets.New().AssetFunc(addGA)
 	e21_presents.PresetsListingCustomizationTabs(c03)
 	mux.Handle(
 		e21_presents.PresetsListingCustomizationTabsPath+"/",
 		c03,
 	)
 
-	c04 := presets.New()
+	c04 := presets.New().AssetFunc(addGA)
 	e21_presents.PresetsListingCustomizationBulkActions(c04)
 	mux.Handle(
 		e21_presents.PresetsListingCustomizationBulkActionsPath+"/",
 		c04,
 	)
 
-	c05 := presets.New()
+	c05 := presets.New().AssetFunc(addGA)
 	e21_presents.PresetsEditingCustomizationDescription(c05)
 	mux.Handle(
 		e21_presents.PresetsEditingCustomizationDescriptionPath+"/",
 		c05,
 	)
 
-	c06 := presets.New()
+	c06 := presets.New().AssetFunc(addGA)
 	e21_presents.PresetsEditingCustomizationFileType(c06)
 	mux.Handle(
 		e21_presents.PresetsEditingCustomizationFileTypePath+"/",
 		c06,
 	)
 
-	c07 := presets.New()
+	c07 := presets.New().AssetFunc(addGA)
 	e21_presents.PresetsEditingCustomizationValidation(c07)
 	mux.Handle(
 		e21_presents.PresetsEditingCustomizationValidationPath+"/",
 		c07,
 	)
 
-	c08 := presets.New()
+	c08 := presets.New().AssetFunc(addGA)
 	e21_presents.PresetsDetailPageTopNotes(c08)
 	mux.Handle(
 		e21_presents.PresetsDetailPageTopNotesPath+"/",
 		c08,
 	)
 
-	c09 := presets.New()
+	c09 := presets.New().AssetFunc(addGA)
 	e21_presents.PresetsDetailPageDetails(c09)
 	mux.Handle(
 		e21_presents.PresetsDetailPageDetailsPath+"/",
 		c09,
 	)
 
-	c10 := presets.New()
+	c10 := presets.New().AssetFunc(addGA)
 	e21_presents.PresetsDetailPageCards(c10)
 	mux.Handle(
 		e21_presents.PresetsDetailPageCardsPath+"/",

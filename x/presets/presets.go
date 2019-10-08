@@ -34,8 +34,11 @@ type Builder struct {
 	listFieldDefaults   *FieldDefaults
 	detailFieldDefaults *FieldDefaults
 	extraAssets         []*extraAsset
+	assetFunc           AssetFunc
 	MenuGroups
 }
+
+type AssetFunc func(ctx *web.EventContext)
 
 type extraAsset struct {
 	path        string
@@ -101,6 +104,11 @@ func (b *Builder) PrimaryColor(v string) (r *Builder) {
 
 func (b *Builder) ProgressBarColor(v string) (r *Builder) {
 	b.progressBarColor = v
+	return b
+}
+
+func (b *Builder) AssetFunc(v AssetFunc) (r *Builder) {
+	b.assetFunc = v
 	return b
 }
 
@@ -337,6 +345,10 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 			ctx.Injector.TailHTML(strings.Replace(`
 			<script src='{{prefix}}/assets/main.js'></script>
 			`, "{{prefix}}", b.prefix, -1))
+		}
+
+		if b.assetFunc != nil {
+			b.assetFunc(ctx)
 		}
 
 		var innerPr web.PageResponse
