@@ -11,9 +11,9 @@
   },
   "@snippet_end": true,
   "dependencies": {
-    "core-js": "^2.6.5",
-    "tiptap": "^1.25.0",
-    "tiptap-extensions": "^1.27.0",
+    "core-js": "^2.6.9",
+    "tiptap": "^1.26.3",
+    "tiptap-extensions": "^1.28.3",
     "vue": "^2.6.10"
   },
   "devDependencies": {
@@ -23,12 +23,12 @@
     "@vue/cli-service": "^3.11.0",
     "@vue/test-utils": "1.0.0-beta.29",
     "babel-core": "7.0.0-bridge.0",
-    "babel-eslint": "^10.0.1",
-    "babel-jest": "^23.6.0",
-    "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.0.0",
-    "node-sass": "^4.9.0",
-    "sass-loader": "^7.1.0",
+    "babel-eslint": "^10.0.3",
+    "babel-jest": "^24.9.0",
+    "eslint": "^6.5.1",
+    "eslint-plugin-vue": "^5.2.3",
+    "node-sass": "^4.12.0",
+    "sass-loader": "^8.0.0",
     "vue-svg-loader": "^0.12.0",
     "vue-template-compiler": "^2.6.10"
   }
