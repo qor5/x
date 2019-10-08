@@ -108,6 +108,10 @@ func (b *ModelInfo) HasDetailing() bool {
 	return b.hasDetailing
 }
 
+func (b *ModelInfo) PresetsPrefix() string {
+	return b.p.prefix
+}
+
 func (b *ModelBuilder) URIName(v string) (r *ModelBuilder) {
 	b.uriName = v
 	return b

@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-chi/chi/middleware"
+
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples/e00_basics"
@@ -505,29 +507,9 @@ func Mux(prefix string) http.Handler {
 					doc:   presets_guide.EditingCustomizations,
 				},
 				{
-					title: "Validations",
-					slug:  "validations.html",
-					doc:   tbd,
-				},
-				{
-					title: "Complex Object with a detail page",
-					slug:  "complex-object-with-detail-page.html",
-					doc:   tbd,
-				},
-				{
-					title: "Card and Data Table Component",
-					slug:  "card-and-data-table-component.html",
-					doc:   tbd,
-				},
-				{
-					title: "Key Info and Detail Info Component",
-					slug:  "key-info-and-detail-info-component.html",
-					doc:   tbd,
-				},
-				{
-					title: "Files and Images",
-					slug:  "files-and-images.html",
-					doc:   tbd,
+					title: "Detail page for complex object",
+					slug:  "detail-page-for-complex-object.html",
+					doc:   presets_guide.DetailPageForComplexObject,
 				},
 			},
 		},
@@ -545,10 +527,22 @@ func Mux(prefix string) http.Handler {
 	}
 
 	samplesMux := SamplesHandler(prefix)
-	mux.Handle("/samples/", samplesMux)
+	mux.Handle("/samples/",
+		middleware.Logger(
+			middleware.RequestID(
+				samplesMux,
+			),
+		),
+	)
 
 	home := secs[0].items[0]
-	mux.Handle("/", ub.Page(layout(rf(home.doc, home), secs, prefix, home)))
+	mux.Handle("/",
+		middleware.Logger(
+			middleware.RequestID(
+				ub.Page(layout(rf(home.doc, home), secs, prefix, home)),
+			),
+		),
+	)
 	return mux
 }
 
@@ -748,6 +742,34 @@ func SamplesHandler(prefix string) http.Handler {
 	mux.Handle(
 		e21_presents.PresetsEditingCustomizationFileTypePath+"/",
 		c06,
+	)
+
+	c07 := presets.New()
+	e21_presents.PresetsEditingCustomizationValidation(c07)
+	mux.Handle(
+		e21_presents.PresetsEditingCustomizationValidationPath+"/",
+		c07,
+	)
+
+	c08 := presets.New()
+	e21_presents.PresetsDetailPageTopNotes(c08)
+	mux.Handle(
+		e21_presents.PresetsDetailPageTopNotesPath+"/",
+		c08,
+	)
+
+	c09 := presets.New()
+	e21_presents.PresetsDetailPageDetails(c09)
+	mux.Handle(
+		e21_presents.PresetsDetailPageDetailsPath+"/",
+		c09,
+	)
+
+	c10 := presets.New()
+	e21_presents.PresetsDetailPageCards(c10)
+	mux.Handle(
+		e21_presents.PresetsDetailPageCardsPath+"/",
+		c10,
 	)
 
 	return mux

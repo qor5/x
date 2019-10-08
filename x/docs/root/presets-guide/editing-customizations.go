@@ -46,4 +46,16 @@ With ~FieldDefaults~ we can write libraries that add customized type for differe
 of how to display the edit controls, and How to save the object.
 
 `),
+	utils.Anchor(H2(""), "Validation"),
+	md.Markdown(`
+Field level validation and display on field can be added by implement ~ValidateFunc~,
+and set the ~web.ValidationErrors~ result:
+`),
+	ch.Code(examples.PresetsEditingCustomizationValidationSample).Language("go"),
+	utils.Demo("", e21_presents.PresetsEditingCustomizationValidationPath+"/customers"),
+	md.Markdown(`
+- We validate the ~Name~ of the customer must be longer than 10
+- If the error happens, If will show below the field
+
+`),
 )

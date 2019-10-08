@@ -25,6 +25,7 @@ type Customer struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	ApprovedAt      *time.Time
+	TermAgreedAt    *time.Time
 	ApprovalComment string
 }
 
@@ -72,13 +73,12 @@ type Company struct {
 }
 
 func PresetsListingCustomizationFields(b *presets.Builder) (
+	cust *presets.ModelBuilder,
 	cl *presets.ListingBuilder,
 	ce *presets.EditingBuilder,
 	db *gorm.DB,
 ) {
-	var cust *presets.ModelBuilder
 	cust, db = PresetsHelloWorld(b)
-
 	b.URIPrefix(PresetsListingCustomizationFieldsPath)
 
 	cl = cust.Listing("ID", "Name", "Company", "Email").
@@ -123,11 +123,12 @@ const PresetsListingCustomizationFieldsPath = "/samples/presets-listing-customiz
 // @snippet_begin(PresetsListingCustomizationFiltersSample)
 
 func PresetsListingCustomizationFilters(b *presets.Builder) (
+	cust *presets.ModelBuilder,
 	cl *presets.ListingBuilder,
 	ce *presets.EditingBuilder,
 	db *gorm.DB,
 ) {
-	cl, ce, db = PresetsListingCustomizationFields(b)
+	cust, cl, ce, db = PresetsListingCustomizationFields(b)
 	b.URIPrefix(PresetsListingCustomizationFiltersPath)
 
 	cl.FilterDataFunc(func(ctx *web.EventContext) v.FilterData {
@@ -175,11 +176,12 @@ const PresetsListingCustomizationFiltersPath = "/samples/presets-listing-customi
 // @snippet_begin(PresetsListingCustomizationTabsSample)
 
 func PresetsListingCustomizationTabs(b *presets.Builder) (
+	cust *presets.ModelBuilder,
 	cl *presets.ListingBuilder,
 	ce *presets.EditingBuilder,
 	db *gorm.DB,
 ) {
-	cl, ce, db = PresetsListingCustomizationFilters(b)
+	cust, cl, ce, db = PresetsListingCustomizationFilters(b)
 	b.URIPrefix(PresetsListingCustomizationTabsPath)
 
 	cl.FilterTabsFunc(func(ctx *web.EventContext) []*presets.FilterTab {
@@ -214,11 +216,12 @@ const PresetsListingCustomizationTabsPath = "/samples/presets-listing-customizat
 // @snippet_begin(PresetsListingCustomizationBulkActionsSample)
 
 func PresetsListingCustomizationBulkActions(b *presets.Builder) (
+	cust *presets.ModelBuilder,
 	cl *presets.ListingBuilder,
 	ce *presets.EditingBuilder,
 	db *gorm.DB,
 ) {
-	cl, ce, db = PresetsListingCustomizationTabs(b)
+	cust, cl, ce, db = PresetsListingCustomizationTabs(b)
 	b.URIPrefix(PresetsListingCustomizationBulkActionsPath)
 
 	cl.BulkAction("Approve").Label("Approve").
