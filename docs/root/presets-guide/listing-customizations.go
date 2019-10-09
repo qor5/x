@@ -20,7 +20,7 @@ columns rarely fit the needs for any real application.
 Here is how do we change the columns of the list and how to we change the content display of a columns.
 `),
 	ch.Code(examples.PresetsListingCustomizationFieldsSample).Language("go"),
-	utils.Demo("", e21_presents.PresetsListingCustomizationFieldsPath+"/customers"),
+	utils.Demo("Presets Listing Customization Fields", e21_presents.PresetsListingCustomizationFieldsPath+"/customers", "e21_presents/listing.go"),
 	md.Markdown(`
 What we did with above code:
 
@@ -38,7 +38,7 @@ What we did with above code:
 Here we continue to add filters for the list
 `),
 	ch.Code(examples.PresetsListingCustomizationFiltersSample).Language("go"),
-	utils.Demo("", e21_presents.PresetsListingCustomizationFiltersPath+"/customers"),
+	utils.Demo("Presets Listing Filters", e21_presents.PresetsListingCustomizationFiltersPath+"/customers", "e21_presents/listing.go"),
 	md.Markdown(`
 ~FilterDataFunc~ of ~presets.ListingBuilder~ setup to have the filter menu or not.
 And how it will combine the sql conditions when doing query. the filter menu will 
@@ -61,7 +61,7 @@ You can think it as a short cut that used very frequently to filter something in
 use the pop up panel of filter.
 `),
 	ch.Code(examples.PresetsListingCustomizationTabsSample).Language("go"),
-	utils.Demo("", e21_presents.PresetsListingCustomizationTabsPath+"/customers"),
+	utils.Demo("Presets Listing Filter Tabs", e21_presents.PresetsListingCustomizationTabsPath+"/customers", "e21_presents/listing.go"),
 	md.Markdown(`
 ~Query~ string name must be from the Filter's item configuration key field.
 `),
@@ -74,7 +74,7 @@ Later do an bulk update data for all of them.
 Here is how to use it:
 `),
 	ch.Code(examples.PresetsListingCustomizationBulkActionsSample).Language("go"),
-	utils.Demo("", e21_presents.PresetsListingCustomizationBulkActionsPath+"/customers"),
+	utils.Demo("Presets Listing Bulk Actions", e21_presents.PresetsListingCustomizationBulkActionsPath+"/customers", "e21_presents/listing.go"),
 	md.Markdown(`
 - ~ComponentFunc~ of the bulk action configure the component that will show to user to input after user clicked the bulk action button
 - ~UpdateFunc~ configure the logic that the bulk action execute

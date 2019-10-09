@@ -22,7 +22,7 @@ And this ~*presets.Builder~ instance is actually also a ~http.Handler~, So that 
 to the http serve mux directly like this:
 `),
 	ch.Code(examples.MountPresetHelloWorldSample).Language("go"),
-	utils.Demo("", e21_presents.PresetsHelloWorldPath+"/customers"),
+	utils.Demo("Presets Hello World", e21_presents.PresetsHelloWorldPath+"/customers", "e21_presents/listing.go"),
 	md.Markdown(`
 With ~r.Model(&Customer{})~:
 

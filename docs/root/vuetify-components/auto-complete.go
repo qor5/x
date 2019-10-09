@@ -20,5 +20,5 @@ So that it can fetch remote options from an event func. here we show these examp
 
 `),
 	ch.Code(examples.VuetifyAutoCompleteSample).Language("go"),
-	utils.Demo("", e10_vuetify_autocomplete.VuetifyAutoCompletePath),
+	utils.Demo("Vuetify AutoComplete", e10_vuetify_autocomplete.VuetifyAutoCompletePath, "e10_vuetify_autocomplete/page.go"),
 )

@@ -22,7 +22,7 @@ other go package.
 This example is purely render, we didn't integrate any interaction (event func) to it.
 `),
 	ch.Code(examples.VuetifyListSample).Language("go"),
-	utils.Demo("", e13_vuetify_list.HelloVuetifyListPath),
+	utils.Demo("Vuetify List", e13_vuetify_list.HelloVuetifyListPath, "e13_vuetify_list/page.go"),
 
 	utils.Anchor(H2(""), "Use menu, card, list, etc"),
 	md.Markdown(`
@@ -41,5 +41,5 @@ requesting server backend.
 ~toggleFavored~ event func did an partial update only to the favorite icon button. So that it won't close the 
 menu popup, but updated the button to toggle the favorite icon.
 `),
-	utils.Demo("", e14_vuetify_menu.HelloVuetifyMenuPath),
+	utils.Demo("Vuetify Menu", e14_vuetify_menu.HelloVuetifyMenuPath, "e14_vuetify_menu/page.go"),
 )

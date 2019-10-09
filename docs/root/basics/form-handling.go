@@ -18,7 +18,7 @@ is just to give an input a name.
 For example:
 `),
 	ch.Code(examples.FormHandlingSample).Language("go"),
-	utils.Demo("", e00_basics.FormHandlingPagePath),
+	utils.Demo("Form Handling", e00_basics.FormHandlingPagePath, "e00_basics/form-handling.go"),
 	md.Markdown(`
 Use ~web.Bind(...).FieldName("Abc")~ to set the field name, make the name matches your data struct field name.
 So that you can ~ctx.UnmarshalForm(&fv)~ to set the values to data object. value of input must be set manually to set the initial value of form field.

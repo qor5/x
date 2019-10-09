@@ -41,7 +41,7 @@ The above is the code you mostly writing. the following is the boilerplate code 
 	ch.Code(examples.HelloWorldMuxSample1).Language("go"),
 	ch.Code(examples.HelloWorldMuxSample2).Language("go"),
 	ch.Code(examples.HelloWorldMainSample).Language("go"),
-	utils.Demo("", e00_basics.HelloWorldPath),
+	utils.Demo("Hello World", e00_basics.HelloWorldPath, "e00_basics/hello-world.go"),
 
 	md.Markdown(`
 If you wondering why ~H1("Hello World")~ and how this worked, Please go ahead and checkout next page

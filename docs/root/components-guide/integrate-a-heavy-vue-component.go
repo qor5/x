@@ -109,5 +109,5 @@ And we write a page func to use it like any other component:
 	md.Markdown(`
 And now let's check out our fruits:
 `),
-	utils.Demo("", e00_basics.HelloWorldTipTapPath),
+	utils.Demo("Integrate a Heavy Vue Component", e00_basics.HelloWorldTipTapPath, "e00_basics/use-tiptap-editor.go"),
 )

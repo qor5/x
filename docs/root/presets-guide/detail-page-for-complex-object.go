@@ -17,7 +17,7 @@ and as the main data model of your system, It's better to have detail page for t
 You can add all kinds of operations conveniently.
 `),
 	ch.Code(examples.PresetsDetailPageTopNotesSample).Language("go"),
-	utils.Demo("", e21_presents.PresetsDetailPageTopNotesPath+"/customers"),
+	utils.Demo("Presets Detail Page Top Notes", e21_presents.PresetsDetailPageTopNotesPath+"/customers", "e21_presents/detailing.go"),
 	md.Markdown(`
 - The name of detailing fields are just a place holder for decide ordering
 - ~CellComponentFunc~ customize how the cell display
@@ -33,7 +33,7 @@ A ~stripeui.DetailInfo~ component is used for display main detail field of the m
 And you can add any actions to the detail page with ease:
 `),
 	ch.Code(examples.PresetsDetailPageDetailsSample).Language("go"),
-	utils.Demo("", e21_presents.PresetsDetailPageDetailsPath+"/customers"),
+	utils.Demo("Presets Detail Page Details", e21_presents.PresetsDetailPageDetailsPath+"/customers", "e21_presents/detailing.go"),
 	md.Markdown(`
 - The ~stripui.Card~ Actions links to two event functions: Agree Terms, and Update Details
 - Agree Terms show a drawer popup that edit the ~term_agreed_at~ field
@@ -45,7 +45,7 @@ And you can add any actions to the detail page with ease:
 A ~stripeui.DataTable~ component is very featured rich, Here check out the row expandable example: 
 `),
 	ch.Code(examples.PresetsDetailPageCardsSample).Language("go"),
-	utils.Demo("", e21_presents.PresetsDetailPageCardsPath+"/customers"),
+	utils.Demo("Presets Detail Page Credit Cards", e21_presents.PresetsDetailPageCardsPath+"/customers", "e21_presents/detailing.go"),
 	md.Markdown(`
 - ~RowExpandFunc~ config the content when data table row expand
 - ~cc.Editing~ setup the fields when edit

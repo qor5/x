@@ -17,7 +17,7 @@ That can open the page to the exact state of the page being sent, Not the initia
 For example:
 `),
 	ch.Code(examples.MultiStatePageSample).Language("go"),
-	utils.Demo("", e00_basics.MultiStatePagePath),
+	utils.Demo("Manipulate Page URL In Event Func", e00_basics.MultiStatePagePath, "e00_basics/manipulate-page-url.go"),
 	md.Markdown(`
 This page have several state that encoded in the url:
 

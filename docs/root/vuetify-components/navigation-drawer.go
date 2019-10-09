@@ -16,5 +16,5 @@ Vuetify navigation drawer provide a popup layer that show on the side of the win
 Here is one example:
 `),
 	ch.Code(examples.VuetifyNavigationDrawerSample).Language("go"),
-	utils.Demo("", e15_vuetify_navigation_drawer.VuetifyNavigationDrawerPath),
+	utils.Demo("Vuetify Navigation Drawer", e15_vuetify_navigation_drawer.VuetifyNavigationDrawerPath, "e15_vuetify_navigation_drawer/page.go"),
 )

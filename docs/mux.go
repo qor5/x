@@ -532,6 +532,17 @@ func Mux(prefix string) http.Handler {
 				},
 			},
 		},
+		{
+			title: "Appendix",
+			slug:  "appendix",
+			items: []*pageItem{
+				{
+					title: "All Demo Examples",
+					slug:  "all-demo-examples",
+					doc:   utils.ExamplesDoc(),
+				},
+			},
+		},
 	}
 
 	for _, sec := range secs {

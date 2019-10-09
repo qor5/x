@@ -20,7 +20,7 @@ The results of an ~web.EventFunc~ could be:
 Let's demonstrate reload the whole current page: 
 `),
 	ch.Code(examples.ReloadWithFlashSample).Language("go"),
-	utils.Demo("", e00_basics.ReloadWithFlashPath),
+	utils.Demo("Reload Page With a Flash", e00_basics.ReloadWithFlashPath, "e00_basics/reload-with-a-flash.go"),
 	md.Markdown(`
 ~ctx.Flash~ Object is used to pass data between ~web.EventFunc~ to ~web.PageFunc~ just after the event func is executed. quite similar to [Rails's Flash](https://api.rubyonrails.org/classes/ActionDispatch/Flash.html).
 Different is here you can pass in any complicated struct. as long as the page func to use that flash properly.

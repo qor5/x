@@ -31,5 +31,5 @@ Consider the following code:
 	md.Markdown(`
 It's basically assembled what Kotlin can do, Also is legitimate Go code.
 `),
-	utils.Demo("", e00_basics.TypeSafeBuilderSamplePath),
+	utils.Demo("The Go HTML Builder", e00_basics.TypeSafeBuilderSamplePath, "e00_basics/type-safe-builder-sample.go"),
 )

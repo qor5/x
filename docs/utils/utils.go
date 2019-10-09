@@ -18,13 +18,46 @@ func Anchor(h *HTMLTagBuilder, text string) HTMLComponent {
 	).Id(anchorName)
 }
 
-func Demo(title string, path string) HTMLComponent {
-	if len(title) == 0 {
-		title = "Check the demo"
+type Example struct {
+	Title      string
+	DemoPath   string
+	SourcePath string
+}
+
+var LiveExamples []*Example
+
+func Demo(title string, demoPath string, sourcePath string) HTMLComponent {
+	ex := &Example{
+		Title:      title,
+		DemoPath:   demoPath,
+		SourcePath: fmt.Sprintf("https://github.com/goplaid/x/tree/master/docs/examples/%s", sourcePath),
 	}
+
+	LiveExamples = append(LiveExamples, ex)
+
 	return Div(
-		A().Text(title).Href(path).Target("_blank"),
-	).Class("demo")
+		Div(
+			A().Text("Check the demo").Href(ex.DemoPath).Target("_blank"),
+			Text(" | "),
+			A().Text("Source on GitHub").
+				Href(ex.SourcePath).
+				Target("_blank"),
+		).Class("demo"),
+	)
+}
+
+func ExamplesDoc() HTMLComponent {
+	u := Ul()
+	for _, le := range LiveExamples {
+		u.AppendChildren(
+			Li(
+				A().Href(le.DemoPath).Text(le.Title).Target("_blank"),
+				Text(" | "),
+				A().Href(le.SourcePath).Text("Source").Target("_blank"),
+			),
+		)
+	}
+	return u
 }
 
 func PrettyFormAsJSON(ctx *web.EventContext) HTMLComponent {

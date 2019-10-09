@@ -16,5 +16,5 @@ Vuetify provides many form basic inputs, and also with error messages display on
 Here is one example:
 `),
 	ch.Code(examples.VuetifyBasicInputsSample).Language("go"),
-	utils.Demo("", e11_vuetify_basic_inputs.VuetifyBasicInputsPath),
+	utils.Demo("Vuetify Basic Inputs", e11_vuetify_basic_inputs.VuetifyBasicInputsPath, "e11_vuetify_basic_inputs/page.go"),
 )

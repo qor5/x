@@ -22,7 +22,7 @@ Use a customized component is as simple as add the extra asset to the preset ins
 And configure the component func on the field:
 `),
 	ch.Code(examples.PresetsEditingCustomizationDescriptionSample).Language("go"),
-	utils.Demo("", e21_presents.PresetsEditingCustomizationDescriptionPath+"/customers"),
+	utils.Demo("Presets Editing Customization Description Field", e21_presents.PresetsEditingCustomizationDescriptionPath+"/customers", "e21_presents/editing.go"),
 	md.Markdown(`
 - Added the tiptap javascript and css component pack as an extra asset
 - Configure the description field to use the component func that returns the ~tiptap.TipTapEditor()~ component
@@ -33,7 +33,7 @@ And configure the component func on the field:
 Set a global field type to component func like the following:
 `),
 	ch.Code(examples.PresetsEditingCustomizationFileTypeSample).Language("go"),
-	utils.Demo("", e21_presents.PresetsEditingCustomizationFileTypePath+"/products"),
+	utils.Demo("Presets Editing Customization File Type", e21_presents.PresetsEditingCustomizationFileTypePath+"/products", "e21_presents/editing.go"),
 	md.Markdown(`
 - We define ~MyFile~ to actually be a string
 - We set ~FieldDefaults~ for writing, which is the editing drawer popup to be a customized component
@@ -52,7 +52,7 @@ Field level validation and display on field can be added by implement ~ValidateF
 and set the ~web.ValidationErrors~ result:
 `),
 	ch.Code(examples.PresetsEditingCustomizationValidationSample).Language("go"),
-	utils.Demo("", e21_presents.PresetsEditingCustomizationValidationPath+"/customers"),
+	utils.Demo("Presets Editing Customization Validation", e21_presents.PresetsEditingCustomizationValidationPath+"/customers", "e21_presents/editing.go"),
 	md.Markdown(`
 - We validate the ~Name~ of the customer must be longer than 10
 - If the error happens, If will show below the field

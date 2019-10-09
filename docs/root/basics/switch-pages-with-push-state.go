@@ -24,7 +24,7 @@ Inside ~web.EventFunc~, two ways go to a new page:
 This example demonstrated the above:
 `),
 	ch.Code(examples.PageTransitionSample).Language("go"),
-	utils.Demo("", e00_basics.Page1Path),
+	utils.Demo("Switch Pages With Push State", e00_basics.Page1Path, "e00_basics/page-transition.go"),
 	md.Markdown(`
 When running the above demo, If you check Chrome Developer Tools about Network requests, 
 You will see that the PushState link and the Button is actually doing an AJAX request to the other page.
