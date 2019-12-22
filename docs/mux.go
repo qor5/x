@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/middleware"
-
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples/e00_basics"
