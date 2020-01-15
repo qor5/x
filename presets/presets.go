@@ -254,7 +254,7 @@ func (b *Builder) runBrandFunc(ctx *web.EventContext) (r h.HTMLComponent) {
 		return b.brandFunc(ctx)
 	}
 
-	return VToolbarTitle("Admin")
+	return VToolbarTitle(b.brandTitle)
 }
 
 type contextKey int
