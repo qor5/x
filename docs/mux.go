@@ -405,6 +405,11 @@ func Mux(prefix string) http.Handler {
 			slug:  "getting-started",
 			items: []*pageItem{
 				{
+					title: "1 Minute Quick Start",
+					slug:  "one-minute-quick-start.html",
+					doc:   getting_started.OneMinuteQuickStart,
+				},
+				{
 					title: "What is GoPlaid?",
 					slug:  "what-is-goplaid.html",
 					doc:   getting_started.WhatIsGoPlaid,
