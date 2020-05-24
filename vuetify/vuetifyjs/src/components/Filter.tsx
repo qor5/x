@@ -642,7 +642,7 @@ export const Filter = Vue.extend({
 					done: 'Done',
 				};
 			},
-		},
+		} as any,
 	},
 
 	data() {
