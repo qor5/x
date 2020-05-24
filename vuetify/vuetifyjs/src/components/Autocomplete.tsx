@@ -1,6 +1,6 @@
 import { VAutocomplete } from 'vuetify/lib';
 
-import Vue, { CreateElement, VNode, VNodeData, Component } from 'vue';
+import Vue, { CreateElement, VNode, VNodeData, Component, PropType } from 'vue';
 import { Core, SelectedItems, slotTemplates } from './Helpers';
 
 export default Vue.extend({
@@ -9,8 +9,8 @@ export default Vue.extend({
 		itemsEventFuncId: Object,
 		items: {
 			type: Array,
-			default: () => [],
-		},
+			default: () => ([]),
+		} as any,
 	},
 
 	data() {

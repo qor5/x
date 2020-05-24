@@ -9,18 +9,18 @@
 	},
 	"dependencies": {
 		"ant-design-vue": "^1.4.10",
-		"core-js": "^3.6.0",
+		"core-js": "^3.6.5",
 		"vue": "^2.6.11"
 	},
 	"devDependencies": {
-		"@vue/cli-plugin-babel": "^4.1.1",
-		"@vue/cli-plugin-eslint": "^4.1.1",
-		"@vue/cli-service": "^4.1.1",
-		"babel-eslint": "^10.0.3",
-		"eslint": "^6.8.0",
-		"eslint-plugin-vue": "^6.0.1",
-		"less": "^3.10.3",
-		"less-loader": "^5.0.0",
+		"@vue/cli-plugin-babel": "^4.3.1",
+		"@vue/cli-plugin-eslint": "^4.3.1",
+		"@vue/cli-service": "^4.3.1",
+		"babel-eslint": "^10.1.0",
+		"eslint": "^7.1.0",
+		"eslint-plugin-vue": "^6.2.2",
+		"less": "^3.11.1",
+		"less-loader": "^6.1.0",
 		"vue-template-compiler": "^2.6.11"
 	}
 }

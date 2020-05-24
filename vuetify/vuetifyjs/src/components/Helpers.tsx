@@ -13,7 +13,7 @@ export const SelectedItems = Vue.extend({
 		selectedItems: {
 			type: Array,
 			default: () => [],
-		},
+		} as any,
 		multiple: Boolean,
 	},
 });
