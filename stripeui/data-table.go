@@ -183,7 +183,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 						b.rowMenuItemsFunc(obj, id, ctx)...,
 					).Dense(true),
 				),
-			).Style("width: 48px;").Class("pl-0"))
+			).Style("width: 64px;").Class("pl-0"))
 		}
 
 		tdCount = len(bindTds)
