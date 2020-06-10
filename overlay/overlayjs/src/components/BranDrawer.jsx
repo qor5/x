@@ -1,5 +1,5 @@
 import Drawer from "ant-design-vue/lib/vc-drawer/src/Drawer";
-import drawerProps from "ant-design-vue/lib/vc-drawer/src/drawerProps";
+import drawerProps from "ant-design-vue/lib/vc-drawer/src/IDrawerPropTypes";
 import "ant-design-vue/lib/vc-drawer/assets/index.less";
 import { getOptionProps } from 'ant-design-vue/lib/_util/props-util';
 
