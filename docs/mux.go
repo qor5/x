@@ -311,7 +311,7 @@ func demoVuetifyLayout(in web.PageFunc) (out web.PageFunc) {
 		}
 
 		pr.Body = v.VApp(
-			v.VContent(
+			v.VMain(
 				innerPr.Body,
 			),
 		)

@@ -399,7 +399,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 				Height(2).
 				Color(b.progressBarColor),
 
-			VContent(
+			VMain(
 				innerPr.Body.(h.HTMLComponent),
 			),
 		).Id("vt-app")

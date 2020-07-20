@@ -30,7 +30,7 @@ func HelloVuetifyGrid(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	lc = append(lc, row(1, 12, "secondary")...)
 
 	pr.Body = VApp(
-		VContent(
+		VMain(
 			VContainer(
 				VLayout(
 					lc...,

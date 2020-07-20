@@ -17,7 +17,7 @@ type Event struct {
 func ExpansionPanelDemo(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
 	pr.Body = VApp(
-		VContent(
+		VMain(
 			VExpansionPanels(
 				VExpansionPanel(
 					VExpansionPanelHeader(

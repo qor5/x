@@ -74,7 +74,7 @@ func KeyInfoDemo(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	})
 
 	pr.Body = VApp(
-		VContent(
+		VMain(
 			s.Card(
 				s.KeyInfo(
 					s.KeyField(h.Text(time.Now().Format("Jan _2, 15:04 PM"))).Label("Date"),

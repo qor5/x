@@ -9,7 +9,7 @@ import (
 func HelloVuetifySimpleComponents(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	wrapper := func(children ...h.HTMLComponent) h.HTMLComponent {
 		return VApp(
-			VContent(
+			VMain(
 				VContainer(
 					children...,
 				),

@@ -25,7 +25,7 @@ func HelloLazyPortalsAndReload(ctx *web.EventContext) (pr web.PageResponse, err 
 	ctx.Hub.RegisterEventFunc("updateCD", updateCD)
 
 	pr.Body = VApp(
-		VContent(
+		VMain(
 			VContainer(
 				VDialog(
 					web.Slot(
