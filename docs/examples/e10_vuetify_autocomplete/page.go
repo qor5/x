@@ -58,6 +58,7 @@ var globalState = &myFormValue{
 
 func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("update", update)
+	ctx.Hub.RegisterEventFunc("users", users)
 
 	result := h.Ul()
 	for _, v := range globalState.Values1 {
@@ -79,7 +80,7 @@ func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error)
 			Value(globalState.Values1),
 
 		VAutocomplete().
-			ItemsEventFunc(ctx.Hub, "users", users).
+			ItemsEventFunc("users").
 			ItemText("Name").
 			ItemValue("Login").
 			SelectedItems(selectedItems2).

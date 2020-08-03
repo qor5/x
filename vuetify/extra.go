@@ -110,14 +110,10 @@ func (b *VAutocompleteBuilder) SelectedItems(v interface{}) (r *VAutocompleteBui
 	return b
 }
 
-func (b *VAutocompleteBuilder) ItemsEventFunc(hub web.EventFuncHub, eventFuncId string, ef web.EventFunc, params ...string) (r *VAutocompleteBuilder) {
-
-	if ef == nil {
-		return b
-	}
+func (b *VAutocompleteBuilder) ItemsEventFunc(eventFuncId string, params ...string) (r *VAutocompleteBuilder) {
 
 	b.tag.Attr(":items-event-func-id", &web.EventFuncID{
-		ID:     hub.RegisterEventFunc(eventFuncId, ef),
+		ID:     eventFuncId,
 		Params: params,
 	})
 	return b

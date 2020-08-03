@@ -9,7 +9,7 @@ var OneMinuteQuickStart = Components(
 	md.Markdown(`
 This article try to let you use the shortest time to get a taste of how powerful GoPlaid is.
 
-One of the GoPlaid module called presents that can quickly create admin interface like [these](/samples/presets-detail-page-cards/customers):
+One of the GoPlaid module called ~presets~ that can quickly create admin interface like [these](/samples/presets-detail-page-cards/customers):
 
 Install the command line tool with:
 

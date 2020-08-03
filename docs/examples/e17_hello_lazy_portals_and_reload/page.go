@@ -1,5 +1,7 @@
 package e17_hello_lazy_portals_and_reload
 
+// @snippet_begin(LazyPortalsAndReloadSample)
+
 import (
 	"fmt"
 	"time"
@@ -16,7 +18,7 @@ type mystate struct {
 
 var listItems = []string{"Apple", "Microsoft", "Google"}
 
-func HelloLazyPortalsAndReload(ctx *web.EventContext) (pr web.PageResponse, err error) {
+func LazyPortalsAndReload(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("addItem", addItem)
 	ctx.Hub.RegisterEventFunc("menuItems", menuItems)
 	ctx.Hub.RegisterEventFunc("addItemForm", addItemForm)
@@ -150,3 +152,7 @@ func updateCD(ctx *web.EventContext) (r web.EventResponse, err error) {
 	)
 	return
 }
+
+// @snippet_end
+
+const LazyPortalsAndReloadPath = "/samples/lazy-portals-and-reload"

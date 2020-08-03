@@ -15,6 +15,7 @@ import (
 	"github.com/goplaid/x/docs/examples/e13_vuetify_list"
 	"github.com/goplaid/x/docs/examples/e14_vuetify_menu"
 	"github.com/goplaid/x/docs/examples/e15_vuetify_navigation_drawer"
+	"github.com/goplaid/x/docs/examples/e17_hello_lazy_portals_and_reload"
 	"github.com/goplaid/x/docs/examples/e21_presents"
 	"github.com/goplaid/x/docs/root/basics"
 	components_guide "github.com/goplaid/x/docs/root/components-guide"
@@ -508,6 +509,11 @@ func Mux(prefix string) http.Handler {
 					slug:  "navigation-drawer.html",
 					doc:   vuetify_components.NavigationDrawer,
 				},
+				{
+					title: "Lazy Portals",
+					slug:  "lazy-portals.html",
+					doc:   vuetify_components.LazyPortalsAndReload,
+				},
 			},
 		},
 		{
@@ -723,6 +729,15 @@ func SamplesHandler(prefix string) http.Handler {
 		wb.Page(
 			demoVuetifyLayout(
 				e15_vuetify_navigation_drawer.VuetifyNavigationDrawer,
+			),
+		),
+	)
+
+	mux.Handle(
+		e17_hello_lazy_portals_and_reload.LazyPortalsAndReloadPath,
+		wb.Page(
+			demoVuetifyLayout(
+				e17_hello_lazy_portals_and_reload.LazyPortalsAndReload,
 			),
 		),
 	)
