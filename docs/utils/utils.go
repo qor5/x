@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/goplaid/web"
-
 	"github.com/shurcooL/sanitized_anchor_name"
 	. "github.com/theplant/htmlgo"
 )

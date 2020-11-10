@@ -8,19 +8,19 @@
 		"lint": "vue-cli-service lint"
 	},
 	"dependencies": {
-		"ant-design-vue": "^1.6.3",
-		"core-js": "^3.6.5",
-		"vue": "^2.6.11"
+		"ant-design-vue": "^1.7.2",
+		"core-js": "^3.7.0",
+		"vue": "^2.6.12"
 	},
 	"devDependencies": {
-		"@vue/cli-plugin-babel": "^4.4.6",
-		"@vue/cli-plugin-eslint": "^4.4.6",
-		"@vue/cli-service": "^4.4.6",
+		"@vue/cli-plugin-babel": "^4.5.8",
+		"@vue/cli-plugin-eslint": "^4.5.8",
+		"@vue/cli-service": "^4.5.8",
 		"babel-eslint": "^10.1.0",
-		"eslint": "^7.5.0",
-		"eslint-plugin-vue": "^6.2.2",
+		"eslint": "^7.13.0",
+		"eslint-plugin-vue": "^7.1.0",
 		"less": "^3.12.2",
-		"less-loader": "^6.2.0",
-		"vue-template-compiler": "^2.6.11"
+		"less-loader": "^7.0.2",
+		"vue-template-compiler": "^2.6.12"
 	}
 }
