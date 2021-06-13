@@ -60,15 +60,6 @@
         padding-right: 30px;
         padding-left: 30px;
     }
-    .beam {
-        position: absolute;
-        z-index: -1;
-        top: -150%;
-        left: -150%;
-        width: 1000px;
-        height: 1050px;
-        background: url("/css/layout/images/icon_error_beam.svg") no-repeat 0 0;
-    }
 
     .g-row {
         display: flex;
@@ -99,9 +90,4 @@
         background-size: 100%;
     }
 
-    ._error-404 {
-        width: 250px;
-        height: 250px;
-        background-image: url("/css/layout/images/icon_404.svg");
-    }
 }

@@ -30,18 +30,6 @@
         margin-top: 23px;
     }
 
-    .icon {
-        position: absolute;
-        left: 0;
-        width: 23px;
-        height: 19px;
-        background: url('/css/layout/images/main-sprite.png') no-repeat 0 -450px;
-
-        @include adapt_retina {
-            background-image: url('/css/layout/images/main-sprite@2x.png');
-            background-size: 150px auto;
-        }
-    }
 
     &:hover .icon {
         background-position: -50px -450px;
