@@ -36,7 +36,6 @@ func (fc *FieldContext) Value(obj interface{}) (r interface{}) {
 
 type FieldDefaultBuilder struct {
 	valType    reflect.Type
-	mode       FieldMode
 	compFunc   FieldComponentFunc
 	setterFunc FieldSetterFunc
 }
@@ -91,7 +90,7 @@ func NewFieldDefaults(t FieldMode) (r *FieldDefaults) {
 }
 
 func (b *FieldDefaults) FieldType(v interface{}) (r *FieldDefaultBuilder) {
-	return b.fieldTypeByType(reflect.TypeOf(v))
+	return b.fieldTypeByTypeOrCreate(reflect.TypeOf(v))
 }
 
 func (b *FieldDefaults) Exclude(patterns ...string) (r *FieldDefaults) {
@@ -124,7 +123,7 @@ func (b *FieldDefaults) inspectFieldsAndCollectName(val interface{}, collectType
 
 		ft := b.fieldTypeByType(f.Type)
 
-		if !hasMatched(b.excludesPatterns, f.Name) && ft.compFunc != nil {
+		if !hasMatched(b.excludesPatterns, f.Name) && ft != nil {
 			r.Field(f.Name).
 				ComponentFunc(ft.compFunc).
 				SetterFunc(ft.setterFunc)
@@ -157,7 +156,21 @@ func (b *FieldDefaults) fieldTypeByType(tv reflect.Type) (r *FieldDefaultBuilder
 			return ft
 		}
 	}
+	return nil
+}
+
+func (b *FieldDefaults) fieldTypeByTypeOrCreate(tv reflect.Type) (r *FieldDefaultBuilder) {
+	if r = b.fieldTypeByType(tv); r != nil {
+		return
+	}
+
 	r = NewFieldDefault(tv)
+
+	if b.mode == LIST {
+		r.ComponentFunc(cfTextTd)
+	} else {
+		r.ComponentFunc(cfTextField)
+	}
 	b.fieldTypes = append(b.fieldTypes, r)
 	return
 }

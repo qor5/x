@@ -123,6 +123,19 @@ func TestFields(t *testing.T) {
 <td>true</td>
 `,
 		},
+
+		{
+			name: "Read for a time field",
+			toComponentFun: func() h.HTMLComponent {
+				return ftRead.InspectFields(&User{}).
+					Only("Time1", "Int1").ToComponent(user, vd, ctx)
+			},
+			expect: `
+<td>2019-08-29 11:09:29 +0800 CST</td>
+
+<td>2</td>
+`,
+		},
 	}
 
 	for _, c := range cases {

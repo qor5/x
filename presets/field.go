@@ -6,10 +6,8 @@ import (
 	"reflect"
 
 	"github.com/goplaid/web"
-
-	"github.com/sunfmin/reflectutils"
-
 	v "github.com/goplaid/x/vuetify"
+	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -133,15 +131,13 @@ func (b *FieldBuilders) Only(names ...string) (r *FieldBuilders) {
 				fType = reflect.TypeOf("")
 			}
 
-			ft := b.defaults.fieldTypeByType(fType)
-			if ft != nil && ft.compFunc != nil {
-				r.Field(n).
-					ComponentFunc(ft.compFunc).
-					SetterFunc(ft.setterFunc)
-				continue
-			}
+			ft := b.defaults.fieldTypeByTypeOrCreate(fType)
+			r.Field(n).
+				ComponentFunc(ft.compFunc).
+				SetterFunc(ft.setterFunc)
+		} else {
+			r.fields = append(r.fields, f.Clone())
 		}
-		r.fields = append(r.fields, f.Clone())
 	}
 
 	return
