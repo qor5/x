@@ -100,6 +100,11 @@ func (b *VSelectBuilder) SelectedItems(v interface{}) (r *VSelectBuilder) {
 	return b
 }
 
+func (b *VSelectBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+	return
+}
+
 func (b *VAutocompleteBuilder) FieldName(v string) (r *VAutocompleteBuilder) {
 	b.tag.Attr("field-name", v)
 	return b

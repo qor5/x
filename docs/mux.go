@@ -2,6 +2,7 @@ package docs
 
 import (
 	"fmt"
+	"github.com/goplaid/x/docs/examples/e22_vuetify_variant_sub_form"
 	"log"
 	"net/http"
 	"os"
@@ -505,6 +506,11 @@ func Mux(prefix string) http.Handler {
 					doc:   vuetify_components.AutoComplete,
 				},
 				{
+					title: "Variant Sub Form",
+					slug:  "variant-sub-form.html",
+					doc:   vuetify_components.VariantSubForm,
+				},
+				{
 					title: "Navigation Drawer",
 					slug:  "navigation-drawer.html",
 					doc:   vuetify_components.NavigationDrawer,
@@ -720,6 +726,15 @@ func SamplesHandler(prefix string) http.Handler {
 		wb.Page(
 			demoVuetifyLayout(
 				e10_vuetify_autocomplete.VuetifyAutocomplete,
+			),
+		),
+	)
+
+	mux.Handle(
+		e22_vuetify_variant_sub_form.VuetifyVariantSubFormPath,
+		wb.Page(
+			demoVuetifyLayout(
+				e22_vuetify_variant_sub_form.VuetifyVariantSubForm,
 			),
 		),
 	)
