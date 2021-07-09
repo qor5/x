@@ -13,7 +13,7 @@ var VariantSubForm = Components(
 	md.Markdown(`
 VSelect changes, the form below it will change to a new form accordingly.
 
-Here is one example:
+By use of ~web.Portal()~ and ~VSelect~'s ~OnInput~
 `),
 	ch.Code(examples.VuetifyVariantSubForm).Language("go"),
 	utils.Demo("Vuetify Variant Sub Form", e22_vuetify_variant_sub_form.VuetifyVariantSubFormPath, "e22_vuetify_variant_sub_form/page.go"),
