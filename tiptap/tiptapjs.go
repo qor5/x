@@ -2,14 +2,15 @@ package tiptap
 
 // @snippet_begin(TipTapPackrSample)
 import (
-	"github.com/gobuffalo/packr"
+	"embed"
 	"github.com/goplaid/web"
 )
 
-var box = packr.NewBox("./tiptapjs/dist/")
+//go:embed tiptapjs/dist
+var box embed.FS
 
 func JSComponentsPack() web.ComponentsPack {
-	v, err := box.FindString("tiptap.umd.min.js")
+	v, err := box.ReadFile("tiptapjs/dist/tiptap.umd.min.js")
 	if err != nil {
 		panic(err)
 	}
@@ -18,7 +19,7 @@ func JSComponentsPack() web.ComponentsPack {
 }
 
 func CSSComponentsPack() web.ComponentsPack {
-	v, err := box.FindString("tiptap.css")
+	v, err := box.ReadFile("tiptapjs/dist/tiptap.css")
 	if err != nil {
 		panic(err)
 	}

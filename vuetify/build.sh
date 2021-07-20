@@ -8,4 +8,3 @@ fi
 rm -r $CUR/vuetifyjs/dist
 echo "Building vuetifyjs"
 cd $CUR/vuetifyjs && yarn && yarn build
-cd $CUR && packr

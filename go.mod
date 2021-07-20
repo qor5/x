@@ -3,14 +3,10 @@ module github.com/goplaid/x
 go 1.16
 
 require (
-	github.com/NYTimes/gziphandler v1.1.1 // indirect
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/aws/aws-sdk-go v1.38.62
 	github.com/go-chi/chi v1.5.4
-	github.com/go-playground/form v3.1.4+incompatible // indirect
-	github.com/gobuffalo/packd v1.0.0
-	github.com/gobuffalo/packr v1.30.1
-	github.com/goplaid/web v1.0.1
+	github.com/goplaid/web v1.0.2
 	github.com/iancoleman/strcase v0.1.3
 	github.com/jinzhu/configor v1.2.1 // indirect
 	github.com/jinzhu/gorm v1.9.16

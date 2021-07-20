@@ -1,20 +1,20 @@
 package main
 
 import (
+	"embed"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
-	"github.com/gobuffalo/packd"
-
-	"github.com/gobuffalo/packr"
 	"github.com/manifoldco/promptui"
 )
 
-var box = packr.NewBox("./template/")
+//go:embed template
+var box embed.FS
 
 func main() {
 
@@ -60,8 +60,12 @@ func main() {
 		panic(err)
 	}
 
-	box.Walk(func(path string, content packd.File) error {
-		fp := filepath.Join(dir, path)
+	fs.WalkDir(box, "template", func(path string, d fs.DirEntry, err1 error) error {
+		if d != nil && d.IsDir() {
+			return nil
+		}
+		newPath := strings.ReplaceAll(path, "template/", "")
+		fp := filepath.Join(dir, newPath)
 		err := os.MkdirAll(filepath.Dir(fp), 0755)
 		if err != nil {
 			panic(err)
@@ -73,13 +77,19 @@ func main() {
 		}
 		defer f.Close()
 
-		err = ioutil.WriteFile(fp, []byte(content.String()), 0644)
+		content, err := box.ReadFile(path)
+		if err != nil {
+			panic(err)
+		}
+
+		err = ioutil.WriteFile(fp, []byte(content), 0644)
 		if err != nil {
 			panic(err)
 		}
 		fmt.Println(fp, "generated")
 		return err
 	})
+
 	fmt.Println("Done")
 
 	replaceInFiles(dir, "github.com/goplaid/x/goplaid/template", pkg)

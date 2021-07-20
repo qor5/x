@@ -10,6 +10,4 @@ rm -r $CUR/tiptapjs/dist
 echo "Building tiptapjs"
 cd $CUR/tiptapjs && yarn && yarn build
 
-cd $CUR && packr
-
 # @snippet_end

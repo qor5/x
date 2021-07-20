@@ -8,5 +8,3 @@ fi
 rm -r $CUR/docsjs/dist
 echo "Building docsjs"
 cd $CUR/docsjs && yarn && yarn build
-
-cd $CUR && packr

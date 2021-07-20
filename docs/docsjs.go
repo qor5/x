@@ -1,14 +1,15 @@
 package docs
 
 import (
-	"github.com/gobuffalo/packr"
+	"embed"
 	"github.com/goplaid/web"
 )
 
-var box = packr.NewBox("./docsjs/dist/")
+//go:embed docsjs/dist
+var box embed.FS
 
 func JSComponentsPack() web.ComponentsPack {
-	v, err := box.FindString("docs.umd.min.js")
+	v, err := box.ReadFile("docsjs/dist/docs.umd.min.js")
 	if err != nil {
 		panic(err)
 	}
@@ -17,7 +18,7 @@ func JSComponentsPack() web.ComponentsPack {
 }
 
 func CSSComponentsPack() web.ComponentsPack {
-	v, err := box.FindString("docs.css")
+	v, err := box.ReadFile("docsjs/dist/docs.css")
 	if err != nil {
 		panic(err)
 	}

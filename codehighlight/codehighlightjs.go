@@ -1,14 +1,15 @@
 package codehighlight
 
 import (
-	"github.com/gobuffalo/packr"
+	"embed"
 	"github.com/goplaid/web"
 )
 
-var assetsbox = packr.NewBox("./codehighlightjs/dist/")
+//go:embed codehighlightjs/dist
+var assetsbox embed.FS
 
 func JSComponentsPack() web.ComponentsPack {
-	v, err := assetsbox.FindString("codehighlight.umd.min.js")
+	v, err := assetsbox.ReadFile("codehighlightjs/dist/codehighlight.umd.min.js")
 	if err != nil {
 		panic(err)
 	}
@@ -17,7 +18,7 @@ func JSComponentsPack() web.ComponentsPack {
 }
 
 func CSSComponentsPack() web.ComponentsPack {
-	v, err := assetsbox.FindString("codehighlight.css")
+	v, err := assetsbox.ReadFile("codehighlightjs/dist/codehighlight.css")
 	if err != nil {
 		panic(err)
 	}

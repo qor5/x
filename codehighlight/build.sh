@@ -8,4 +8,3 @@ fi
 rm -r $CUR/codehighlightjs/dist
 echo "Building codehighlightjs"
 cd $CUR/codehighlightjs && yarn && yarn build
-cd $CUR && packr

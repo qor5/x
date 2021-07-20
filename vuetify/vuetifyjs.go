@@ -1,14 +1,15 @@
 package vuetify
 
 import (
-	"github.com/gobuffalo/packr"
+	"embed"
 	"github.com/goplaid/web"
 )
 
-var assetsbox = packr.NewBox("./vuetifyjs/dist/")
+//go:embed vuetifyjs/dist
+var assetsbox embed.FS
 
 func JSComponentsPack() web.ComponentsPack {
-	v, err := assetsbox.FindString("vuetifyjs.umd.min.js")
+	v, err := assetsbox.ReadFile("vuetifyjs/dist/vuetifyjs.umd.min.js")
 	if err != nil {
 		panic(err)
 	}
@@ -17,7 +18,7 @@ func JSComponentsPack() web.ComponentsPack {
 }
 
 func CSSComponentsPack() web.ComponentsPack {
-	v, err := assetsbox.FindString("vuetifyjs.css")
+	v, err := assetsbox.ReadFile("vuetifyjs/dist/vuetifyjs.css")
 	if err != nil {
 		panic(err)
 	}
