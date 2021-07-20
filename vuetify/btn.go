@@ -78,6 +78,11 @@ func (b *VBtnBuilder) ExactActiveClass(v string) (r *VBtnBuilder) {
 	return b
 }
 
+func (b *VBtnBuilder) ExactPath(v bool) (r *VBtnBuilder) {
+	b.tag.Attr(":exact-path", fmt.Sprint(v))
+	return b
+}
+
 func (b *VBtnBuilder) Fab(v bool) (r *VBtnBuilder) {
 	b.tag.Attr(":fab", fmt.Sprint(v))
 	return b
@@ -163,8 +168,18 @@ func (b *VBtnBuilder) Outlined(v bool) (r *VBtnBuilder) {
 	return b
 }
 
+func (b *VBtnBuilder) Plain(v bool) (r *VBtnBuilder) {
+	b.tag.Attr(":plain", fmt.Sprint(v))
+	return b
+}
+
 func (b *VBtnBuilder) Replace(v bool) (r *VBtnBuilder) {
 	b.tag.Attr(":replace", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBtnBuilder) RetainFocusOnClick(v bool) (r *VBtnBuilder) {
+	b.tag.Attr(":retain-focus-on-click", fmt.Sprint(v))
 	return b
 }
 
@@ -180,6 +195,11 @@ func (b *VBtnBuilder) Ripple(v bool) (r *VBtnBuilder) {
 
 func (b *VBtnBuilder) Rounded(v bool) (r *VBtnBuilder) {
 	b.tag.Attr(":rounded", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBtnBuilder) Shaped(v bool) (r *VBtnBuilder) {
+	b.tag.Attr(":shaped", fmt.Sprint(v))
 	return b
 }
 
