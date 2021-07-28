@@ -48,8 +48,37 @@ func (b *VItemGroupBuilder) Multiple(v bool) (r *VItemGroupBuilder) {
 	return b
 }
 
+func (b *VItemGroupBuilder) Tag(v string) (r *VItemGroupBuilder) {
+	b.tag.Attr("tag", v)
+	return b
+}
+
 func (b *VItemGroupBuilder) Value(v interface{}) (r *VItemGroupBuilder) {
 	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VItemGroupBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VItemGroupBuilder) Attr(vs ...interface{}) (r *VItemGroupBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VItemGroupBuilder) Children(children ...h.HTMLComponent) (r *VItemGroupBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VItemGroupBuilder) AppendChildren(children ...h.HTMLComponent) (r *VItemGroupBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VItemGroupBuilder) PrependChildren(children ...h.HTMLComponent) (r *VItemGroupBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

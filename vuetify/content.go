@@ -7,66 +7,66 @@ import (
 	h "github.com/theplant/htmlgo"
 )
 
-type VMainBuilder struct {
+type VContentBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VMain(children ...h.HTMLComponent) (r *VMainBuilder) {
-	r = &VMainBuilder{
-		tag: h.Tag("v-main").Children(children...),
+func VContent() (r *VContentBuilder) {
+	r = &VContentBuilder{
+		tag: h.Tag("v-content"),
 	}
 	return
 }
 
-func (b *VMainBuilder) Tag(v string) (r *VMainBuilder) {
+func (b *VContentBuilder) Tag(v string) (r *VContentBuilder) {
 	b.tag.Attr("tag", v)
 	return b
 }
 
-func (b *VMainBuilder) SetAttr(k string, v interface{}) {
+func (b *VContentBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
 }
 
-func (b *VMainBuilder) Attr(vs ...interface{}) (r *VMainBuilder) {
+func (b *VContentBuilder) Attr(vs ...interface{}) (r *VContentBuilder) {
 	b.tag.Attr(vs...)
 	return b
 }
 
-func (b *VMainBuilder) Children(children ...h.HTMLComponent) (r *VMainBuilder) {
+func (b *VContentBuilder) Children(children ...h.HTMLComponent) (r *VContentBuilder) {
 	b.tag.Children(children...)
 	return b
 }
 
-func (b *VMainBuilder) AppendChildren(children ...h.HTMLComponent) (r *VMainBuilder) {
+func (b *VContentBuilder) AppendChildren(children ...h.HTMLComponent) (r *VContentBuilder) {
 	b.tag.AppendChildren(children...)
 	return b
 }
 
-func (b *VMainBuilder) PrependChildren(children ...h.HTMLComponent) (r *VMainBuilder) {
+func (b *VContentBuilder) PrependChildren(children ...h.HTMLComponent) (r *VContentBuilder) {
 	b.tag.PrependChildren(children...)
 	return b
 }
 
-func (b *VMainBuilder) Class(names ...string) (r *VMainBuilder) {
+func (b *VContentBuilder) Class(names ...string) (r *VContentBuilder) {
 	b.tag.Class(names...)
 	return b
 }
 
-func (b *VMainBuilder) ClassIf(name string, add bool) (r *VMainBuilder) {
+func (b *VContentBuilder) ClassIf(name string, add bool) (r *VContentBuilder) {
 	b.tag.ClassIf(name, add)
 	return b
 }
 
-func (b *VMainBuilder) On(name string, value string) (r *VMainBuilder) {
+func (b *VContentBuilder) On(name string, value string) (r *VContentBuilder) {
 	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
 	return b
 }
 
-func (b *VMainBuilder) Bind(name string, value string) (r *VMainBuilder) {
+func (b *VContentBuilder) Bind(name string, value string) (r *VContentBuilder) {
 	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 
-func (b *VMainBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+func (b *VContentBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }

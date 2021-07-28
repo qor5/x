@@ -18,6 +18,11 @@ func VExpansionPanelHeader(children ...h.HTMLComponent) (r *VExpansionPanelHeade
 	return
 }
 
+func (b *VExpansionPanelHeaderBuilder) Color(v string) (r *VExpansionPanelHeaderBuilder) {
+	b.tag.Attr("color", v)
+	return b
+}
+
 func (b *VExpansionPanelHeaderBuilder) DisableIconRotate(v bool) (r *VExpansionPanelHeaderBuilder) {
 	b.tag.Attr(":disable-icon-rotate", fmt.Sprint(v))
 	return b

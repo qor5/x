@@ -11,9 +11,9 @@ type VTreeviewBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VTreeview() (r *VTreeviewBuilder) {
+func VTreeview(children ...h.HTMLComponent) (r *VTreeviewBuilder) {
 	r = &VTreeviewBuilder{
-		tag: h.Tag("v-treeview"),
+		tag: h.Tag("v-treeview").Children(children...),
 	}
 	return
 }
@@ -33,8 +33,18 @@ func (b *VTreeviewBuilder) ActiveClass(v string) (r *VTreeviewBuilder) {
 	return b
 }
 
+func (b *VTreeviewBuilder) Color(v string) (r *VTreeviewBuilder) {
+	b.tag.Attr("color", v)
+	return b
+}
+
 func (b *VTreeviewBuilder) Dark(v bool) (r *VTreeviewBuilder) {
 	b.tag.Attr(":dark", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTreeviewBuilder) Dense(v bool) (r *VTreeviewBuilder) {
+	b.tag.Attr(":dense", fmt.Sprint(v))
 	return b
 }
 
@@ -55,6 +65,11 @@ func (b *VTreeviewBuilder) IndeterminateIcon(v string) (r *VTreeviewBuilder) {
 
 func (b *VTreeviewBuilder) ItemChildren(v string) (r *VTreeviewBuilder) {
 	b.tag.Attr("item-children", v)
+	return b
+}
+
+func (b *VTreeviewBuilder) ItemDisabled(v string) (r *VTreeviewBuilder) {
+	b.tag.Attr("item-disabled", v)
 	return b
 }
 
@@ -118,6 +133,11 @@ func (b *VTreeviewBuilder) ReturnObject(v bool) (r *VTreeviewBuilder) {
 	return b
 }
 
+func (b *VTreeviewBuilder) Rounded(v bool) (r *VTreeviewBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
+	return b
+}
+
 func (b *VTreeviewBuilder) Search(v string) (r *VTreeviewBuilder) {
 	b.tag.Attr("search", v)
 	return b
@@ -133,6 +153,16 @@ func (b *VTreeviewBuilder) SelectedColor(v string) (r *VTreeviewBuilder) {
 	return b
 }
 
+func (b *VTreeviewBuilder) SelectionType(v string) (r *VTreeviewBuilder) {
+	b.tag.Attr("selection-type", v)
+	return b
+}
+
+func (b *VTreeviewBuilder) Shaped(v bool) (r *VTreeviewBuilder) {
+	b.tag.Attr(":shaped", fmt.Sprint(v))
+	return b
+}
+
 func (b *VTreeviewBuilder) Transition(v bool) (r *VTreeviewBuilder) {
 	b.tag.Attr(":transition", fmt.Sprint(v))
 	return b
@@ -140,6 +170,30 @@ func (b *VTreeviewBuilder) Transition(v bool) (r *VTreeviewBuilder) {
 
 func (b *VTreeviewBuilder) Value(v []string) (r *VTreeviewBuilder) {
 	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VTreeviewBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VTreeviewBuilder) Attr(vs ...interface{}) (r *VTreeviewBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VTreeviewBuilder) Children(children ...h.HTMLComponent) (r *VTreeviewBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VTreeviewBuilder) AppendChildren(children ...h.HTMLComponent) (r *VTreeviewBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VTreeviewBuilder) PrependChildren(children ...h.HTMLComponent) (r *VTreeviewBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

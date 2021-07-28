@@ -83,6 +83,11 @@ func (b *VProgressLinearBuilder) Query(v bool) (r *VProgressLinearBuilder) {
 	return b
 }
 
+func (b *VProgressLinearBuilder) Reverse(v bool) (r *VProgressLinearBuilder) {
+	b.tag.Attr(":reverse", fmt.Sprint(v))
+	return b
+}
+
 func (b *VProgressLinearBuilder) Rounded(v bool) (r *VProgressLinearBuilder) {
 	b.tag.Attr(":rounded", fmt.Sprint(v))
 	return b

@@ -19,6 +19,7 @@ func VSelect(children ...h.HTMLComponent) (r *VSelectBuilder) {
 	}
 	return
 }
+
 func (b *VSelectBuilder) AppendIcon(v string) (r *VSelectBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b
@@ -41,16 +42,6 @@ func (b *VSelectBuilder) Autofocus(v bool) (r *VSelectBuilder) {
 
 func (b *VSelectBuilder) BackgroundColor(v string) (r *VSelectBuilder) {
 	b.tag.Attr("background-color", v)
-	return b
-}
-
-func (b *VSelectBuilder) Box(v bool) (r *VSelectBuilder) {
-	b.tag.Attr(":box", fmt.Sprint(v))
-	return b
-}
-
-func (b *VSelectBuilder) BrowserAutocomplete(v string) (r *VSelectBuilder) {
-	b.tag.Attr("browser-autocomplete", v)
 	return b
 }
 
@@ -99,13 +90,18 @@ func (b *VSelectBuilder) Dense(v bool) (r *VSelectBuilder) {
 	return b
 }
 
+func (b *VSelectBuilder) DisableLookup(v bool) (r *VSelectBuilder) {
+	b.tag.Attr(":disable-lookup", fmt.Sprint(v))
+	return b
+}
+
 func (b *VSelectBuilder) Disabled(v bool) (r *VSelectBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
 	return b
 }
 
-func (b *VSelectBuilder) DontFillMaskBlanks(v bool) (r *VSelectBuilder) {
-	b.tag.Attr(":dont-fill-mask-blanks", fmt.Sprint(v))
+func (b *VSelectBuilder) Eager(v bool) (r *VSelectBuilder) {
+	b.tag.Attr(":eager", fmt.Sprint(v))
 	return b
 }
 
@@ -124,8 +120,8 @@ func (b *VSelectBuilder) ErrorMessages(v ...string) (r *VSelectBuilder) {
 	return b
 }
 
-func (b *VSelectBuilder) Filter(v string) (r *VSelectBuilder) {
-	b.tag.Attr("filter", v)
+func (b *VSelectBuilder) Filled(v bool) (r *VSelectBuilder) {
+	b.tag.Attr(":filled", fmt.Sprint(v))
 	return b
 }
 
@@ -159,8 +155,13 @@ func (b *VSelectBuilder) Hint(v string) (r *VSelectBuilder) {
 	return b
 }
 
-func (b *VSelectBuilder) ItemAvatar(v string) (r *VSelectBuilder) {
-	b.tag.Attr("item-avatar", v)
+func (b *VSelectBuilder) Id(v string) (r *VSelectBuilder) {
+	b.tag.Attr("id", v)
+	return b
+}
+
+func (b *VSelectBuilder) ItemColor(v string) (r *VSelectBuilder) {
+	b.tag.Attr("item-color", v)
 	return b
 }
 
@@ -194,13 +195,13 @@ func (b *VSelectBuilder) Light(v bool) (r *VSelectBuilder) {
 	return b
 }
 
-func (b *VSelectBuilder) Loading(v bool) (r *VSelectBuilder) {
-	b.tag.Attr(":loading", fmt.Sprint(v))
+func (b *VSelectBuilder) LoaderHeight(v int) (r *VSelectBuilder) {
+	b.tag.Attr(":loader-height", fmt.Sprint(v))
 	return b
 }
 
-func (b *VSelectBuilder) Mask(v string) (r *VSelectBuilder) {
-	b.tag.Attr("mask", v)
+func (b *VSelectBuilder) Loading(v bool) (r *VSelectBuilder) {
+	b.tag.Attr(":loading", fmt.Sprint(v))
 	return b
 }
 
@@ -229,13 +230,18 @@ func (b *VSelectBuilder) OpenOnClear(v bool) (r *VSelectBuilder) {
 	return b
 }
 
-func (b *VSelectBuilder) Outline(v bool) (r *VSelectBuilder) {
-	b.tag.Attr(":outline", fmt.Sprint(v))
+func (b *VSelectBuilder) Outlined(v bool) (r *VSelectBuilder) {
+	b.tag.Attr(":outlined", fmt.Sprint(v))
 	return b
 }
 
 func (b *VSelectBuilder) PersistentHint(v bool) (r *VSelectBuilder) {
 	b.tag.Attr(":persistent-hint", fmt.Sprint(v))
+	return b
+}
+
+func (b *VSelectBuilder) PersistentPlaceholder(v bool) (r *VSelectBuilder) {
+	b.tag.Attr(":persistent-placeholder", fmt.Sprint(v))
 	return b
 }
 
@@ -264,11 +270,6 @@ func (b *VSelectBuilder) Readonly(v bool) (r *VSelectBuilder) {
 	return b
 }
 
-func (b *VSelectBuilder) ReturnMaskedValue(v bool) (r *VSelectBuilder) {
-	b.tag.Attr(":return-masked-value", fmt.Sprint(v))
-	return b
-}
-
 func (b *VSelectBuilder) ReturnObject(v bool) (r *VSelectBuilder) {
 	b.tag.Attr(":return-object", fmt.Sprint(v))
 	return b
@@ -279,13 +280,18 @@ func (b *VSelectBuilder) Reverse(v bool) (r *VSelectBuilder) {
 	return b
 }
 
+func (b *VSelectBuilder) Rounded(v bool) (r *VSelectBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
+	return b
+}
+
 func (b *VSelectBuilder) Rules(v []string) (r *VSelectBuilder) {
 	b.tag.Attr(":rules", v)
 	return b
 }
 
-func (b *VSelectBuilder) SearchInput(v interface{}) (r *VSelectBuilder) {
-	b.tag.Attr(":search-input", v)
+func (b *VSelectBuilder) Shaped(v bool) (r *VSelectBuilder) {
+	b.tag.Attr(":shaped", fmt.Sprint(v))
 	return b
 }
 
@@ -336,6 +342,50 @@ func (b *VSelectBuilder) ValidateOnBlur(v bool) (r *VSelectBuilder) {
 
 func (b *VSelectBuilder) Value(v interface{}) (r *VSelectBuilder) {
 	b.tag.Attr(":value", h.JSONString(v))
+	return b
+}
+
+func (b *VSelectBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VSelectBuilder) Attr(vs ...interface{}) (r *VSelectBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VSelectBuilder) Children(children ...h.HTMLComponent) (r *VSelectBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VSelectBuilder) AppendChildren(children ...h.HTMLComponent) (r *VSelectBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VSelectBuilder) PrependChildren(children ...h.HTMLComponent) (r *VSelectBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VSelectBuilder) Class(names ...string) (r *VSelectBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VSelectBuilder) ClassIf(name string, add bool) (r *VSelectBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VSelectBuilder) On(name string, value string) (r *VSelectBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VSelectBuilder) Bind(name string, value string) (r *VSelectBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

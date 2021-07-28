@@ -17,6 +17,7 @@ func VRadioGroup(children ...h.HTMLComponent) (r *VRadioGroupBuilder) {
 	}
 	return
 }
+
 func (b *VRadioGroupBuilder) ActiveClass(v string) (r *VRadioGroupBuilder) {
 	b.tag.Attr("active-class", v)
 	return b
@@ -32,11 +33,6 @@ func (b *VRadioGroupBuilder) BackgroundColor(v string) (r *VRadioGroupBuilder) {
 	return b
 }
 
-func (b *VRadioGroupBuilder) Color(v string) (r *VRadioGroupBuilder) {
-	b.tag.Attr("color", v)
-	return b
-}
-
 func (b *VRadioGroupBuilder) Column(v bool) (r *VRadioGroupBuilder) {
 	b.tag.Attr(":column", fmt.Sprint(v))
 	return b
@@ -44,6 +40,11 @@ func (b *VRadioGroupBuilder) Column(v bool) (r *VRadioGroupBuilder) {
 
 func (b *VRadioGroupBuilder) Dark(v bool) (r *VRadioGroupBuilder) {
 	b.tag.Attr(":dark", fmt.Sprint(v))
+	return b
+}
+
+func (b *VRadioGroupBuilder) Dense(v bool) (r *VRadioGroupBuilder) {
+	b.tag.Attr(":dense", fmt.Sprint(v))
 	return b
 }
 
@@ -94,11 +95,6 @@ func (b *VRadioGroupBuilder) Label(v string) (r *VRadioGroupBuilder) {
 
 func (b *VRadioGroupBuilder) Light(v bool) (r *VRadioGroupBuilder) {
 	b.tag.Attr(":light", fmt.Sprint(v))
-	return b
-}
-
-func (b *VRadioGroupBuilder) Loading(v bool) (r *VRadioGroupBuilder) {
-	b.tag.Attr(":loading", fmt.Sprint(v))
 	return b
 }
 
@@ -162,13 +158,27 @@ func (b *VRadioGroupBuilder) SuccessMessages(v string) (r *VRadioGroupBuilder) {
 	return b
 }
 
+func (b *VRadioGroupBuilder) Tag(v string) (r *VRadioGroupBuilder) {
+	b.tag.Attr("tag", v)
+	return b
+}
+
 func (b *VRadioGroupBuilder) ValidateOnBlur(v bool) (r *VRadioGroupBuilder) {
 	b.tag.Attr(":validate-on-blur", fmt.Sprint(v))
 	return b
 }
 
 func (b *VRadioGroupBuilder) Value(v interface{}) (r *VRadioGroupBuilder) {
-	b.tag.Attr(":value", h.JSONString(v))
+	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VRadioGroupBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VRadioGroupBuilder) Attr(vs ...interface{}) (r *VRadioGroupBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 

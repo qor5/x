@@ -48,6 +48,11 @@ func (b *VTabBuilder) ExactActiveClass(v string) (r *VTabBuilder) {
 	return b
 }
 
+func (b *VTabBuilder) ExactPath(v bool) (r *VTabBuilder) {
+	b.tag.Attr(":exact-path", fmt.Sprint(v))
+	return b
+}
+
 func (b *VTabBuilder) Href(v string) (r *VTabBuilder) {
 	b.tag.Attr("href", v)
 	return b

@@ -11,9 +11,9 @@ type VImgBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VImg() (r *VImgBuilder) {
+func VImg(children ...h.HTMLComponent) (r *VImgBuilder) {
 	r = &VImgBuilder{
-		tag: h.Tag("v-img"),
+		tag: h.Tag("v-img").Children(children...),
 	}
 	return
 }
@@ -33,6 +33,21 @@ func (b *VImgBuilder) Contain(v bool) (r *VImgBuilder) {
 	return b
 }
 
+func (b *VImgBuilder) ContentClass(v string) (r *VImgBuilder) {
+	b.tag.Attr("content-class", v)
+	return b
+}
+
+func (b *VImgBuilder) Dark(v bool) (r *VImgBuilder) {
+	b.tag.Attr(":dark", fmt.Sprint(v))
+	return b
+}
+
+func (b *VImgBuilder) Eager(v bool) (r *VImgBuilder) {
+	b.tag.Attr(":eager", fmt.Sprint(v))
+	return b
+}
+
 func (b *VImgBuilder) Gradient(v string) (r *VImgBuilder) {
 	b.tag.Attr("gradient", v)
 	return b
@@ -45,6 +60,11 @@ func (b *VImgBuilder) Height(v int) (r *VImgBuilder) {
 
 func (b *VImgBuilder) LazySrc(v string) (r *VImgBuilder) {
 	b.tag.Attr("lazy-src", v)
+	return b
+}
+
+func (b *VImgBuilder) Light(v bool) (r *VImgBuilder) {
+	b.tag.Attr(":light", fmt.Sprint(v))
 	return b
 }
 
@@ -65,6 +85,11 @@ func (b *VImgBuilder) MinHeight(v int) (r *VImgBuilder) {
 
 func (b *VImgBuilder) MinWidth(v int) (r *VImgBuilder) {
 	b.tag.Attr(":min-width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VImgBuilder) Options(v interface{}) (r *VImgBuilder) {
+	b.tag.Attr(":options", v)
 	return b
 }
 
@@ -95,6 +120,30 @@ func (b *VImgBuilder) Transition(v bool) (r *VImgBuilder) {
 
 func (b *VImgBuilder) Width(v int) (r *VImgBuilder) {
 	b.tag.Attr(":width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VImgBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VImgBuilder) Attr(vs ...interface{}) (r *VImgBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VImgBuilder) Children(children ...h.HTMLComponent) (r *VImgBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VImgBuilder) AppendChildren(children ...h.HTMLComponent) (r *VImgBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VImgBuilder) PrependChildren(children ...h.HTMLComponent) (r *VImgBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

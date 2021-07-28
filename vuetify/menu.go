@@ -93,11 +93,6 @@ func (b *VMenuBuilder) Fixed(v bool) (r *VMenuBuilder) {
 	return b
 }
 
-func (b *VMenuBuilder) FullWidth(v bool) (r *VMenuBuilder) {
-	b.tag.Attr(":full-width", fmt.Sprint(v))
-	return b
-}
-
 func (b *VMenuBuilder) InternalActivator(v bool) (r *VMenuBuilder) {
 	b.tag.Attr(":internal-activator", fmt.Sprint(v))
 	return b
@@ -178,6 +173,11 @@ func (b *VMenuBuilder) OpenOnClick(v bool) (r *VMenuBuilder) {
 	return b
 }
 
+func (b *VMenuBuilder) OpenOnFocus(v bool) (r *VMenuBuilder) {
+	b.tag.Attr(":open-on-focus", fmt.Sprint(v))
+	return b
+}
+
 func (b *VMenuBuilder) OpenOnHover(v bool) (r *VMenuBuilder) {
 	b.tag.Attr(":open-on-hover", fmt.Sprint(v))
 	return b
@@ -205,6 +205,16 @@ func (b *VMenuBuilder) ReturnValue(v interface{}) (r *VMenuBuilder) {
 
 func (b *VMenuBuilder) Right(v bool) (r *VMenuBuilder) {
 	b.tag.Attr(":right", fmt.Sprint(v))
+	return b
+}
+
+func (b *VMenuBuilder) Rounded(v bool) (r *VMenuBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
+	return b
+}
+
+func (b *VMenuBuilder) Tile(v bool) (r *VMenuBuilder) {
+	b.tag.Attr(":tile", fmt.Sprint(v))
 	return b
 }
 

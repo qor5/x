@@ -33,6 +33,35 @@ func (b *VParallaxBuilder) Src(v string) (r *VParallaxBuilder) {
 	return b
 }
 
+func (b *VParallaxBuilder) Srcset(v string) (r *VParallaxBuilder) {
+	b.tag.Attr("srcset", v)
+	return b
+}
+
+func (b *VParallaxBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VParallaxBuilder) Attr(vs ...interface{}) (r *VParallaxBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VParallaxBuilder) Children(children ...h.HTMLComponent) (r *VParallaxBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VParallaxBuilder) AppendChildren(children ...h.HTMLComponent) (r *VParallaxBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VParallaxBuilder) PrependChildren(children ...h.HTMLComponent) (r *VParallaxBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
 func (b *VParallaxBuilder) Class(names ...string) (r *VParallaxBuilder) {
 	b.tag.Class(names...)
 	return b

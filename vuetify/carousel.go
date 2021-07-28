@@ -23,6 +23,11 @@ func (b *VCarouselBuilder) ActiveClass(v string) (r *VCarouselBuilder) {
 	return b
 }
 
+func (b *VCarouselBuilder) Continuous(v bool) (r *VCarouselBuilder) {
+	b.tag.Attr(":continuous", fmt.Sprint(v))
+	return b
+}
+
 func (b *VCarouselBuilder) Cycle(v bool) (r *VCarouselBuilder) {
 	b.tag.Attr(":cycle", fmt.Sprint(v))
 	return b
@@ -43,8 +48,8 @@ func (b *VCarouselBuilder) Height(v int) (r *VCarouselBuilder) {
 	return b
 }
 
-func (b *VCarouselBuilder) HideControls(v bool) (r *VCarouselBuilder) {
-	b.tag.Attr(":hide-controls", fmt.Sprint(v))
+func (b *VCarouselBuilder) HideDelimiterBackground(v bool) (r *VCarouselBuilder) {
+	b.tag.Attr(":hide-delimiter-background", fmt.Sprint(v))
 	return b
 }
 
@@ -88,13 +93,38 @@ func (b *VCarouselBuilder) PrevIcon(v bool) (r *VCarouselBuilder) {
 	return b
 }
 
+func (b *VCarouselBuilder) Progress(v bool) (r *VCarouselBuilder) {
+	b.tag.Attr(":progress", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCarouselBuilder) ProgressColor(v string) (r *VCarouselBuilder) {
+	b.tag.Attr("progress-color", v)
+	return b
+}
+
 func (b *VCarouselBuilder) Reverse(v bool) (r *VCarouselBuilder) {
 	b.tag.Attr(":reverse", fmt.Sprint(v))
 	return b
 }
 
+func (b *VCarouselBuilder) ShowArrows(v bool) (r *VCarouselBuilder) {
+	b.tag.Attr(":show-arrows", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCarouselBuilder) ShowArrowsOnHover(v bool) (r *VCarouselBuilder) {
+	b.tag.Attr(":show-arrows-on-hover", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCarouselBuilder) Tag(v string) (r *VCarouselBuilder) {
+	b.tag.Attr("tag", v)
+	return b
+}
+
 func (b *VCarouselBuilder) Touch(v interface{}) (r *VCarouselBuilder) {
-	b.tag.Attr("touch", v)
+	b.tag.Attr(":touch", v)
 	return b
 }
 
@@ -110,6 +140,35 @@ func (b *VCarouselBuilder) Value(v interface{}) (r *VCarouselBuilder) {
 
 func (b *VCarouselBuilder) Vertical(v bool) (r *VCarouselBuilder) {
 	b.tag.Attr(":vertical", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCarouselBuilder) VerticalDelimiters(v string) (r *VCarouselBuilder) {
+	b.tag.Attr("vertical-delimiters", v)
+	return b
+}
+
+func (b *VCarouselBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VCarouselBuilder) Attr(vs ...interface{}) (r *VCarouselBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VCarouselBuilder) Children(children ...h.HTMLComponent) (r *VCarouselBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VCarouselBuilder) AppendChildren(children ...h.HTMLComponent) (r *VCarouselBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VCarouselBuilder) PrependChildren(children ...h.HTMLComponent) (r *VCarouselBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

@@ -53,6 +53,11 @@ func (b *VListItemGroupBuilder) Multiple(v bool) (r *VListItemGroupBuilder) {
 	return b
 }
 
+func (b *VListItemGroupBuilder) Tag(v string) (r *VListItemGroupBuilder) {
+	b.tag.Attr("tag", v)
+	return b
+}
+
 func (b *VListItemGroupBuilder) Value(v interface{}) (r *VListItemGroupBuilder) {
 	b.tag.Attr(":value", v)
 	return b

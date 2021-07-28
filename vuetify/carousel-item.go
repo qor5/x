@@ -23,18 +23,78 @@ func (b *VCarouselItemBuilder) ActiveClass(v string) (r *VCarouselItemBuilder) {
 	return b
 }
 
+func (b *VCarouselItemBuilder) Append(v bool) (r *VCarouselItemBuilder) {
+	b.tag.Attr(":append", fmt.Sprint(v))
+	return b
+}
+
 func (b *VCarouselItemBuilder) Disabled(v bool) (r *VCarouselItemBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
 	return b
 }
 
-func (b *VCarouselItemBuilder) Lazy(v bool) (r *VCarouselItemBuilder) {
-	b.tag.Attr(":lazy", fmt.Sprint(v))
+func (b *VCarouselItemBuilder) Eager(v bool) (r *VCarouselItemBuilder) {
+	b.tag.Attr(":eager", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCarouselItemBuilder) Exact(v bool) (r *VCarouselItemBuilder) {
+	b.tag.Attr(":exact", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCarouselItemBuilder) ExactActiveClass(v string) (r *VCarouselItemBuilder) {
+	b.tag.Attr("exact-active-class", v)
+	return b
+}
+
+func (b *VCarouselItemBuilder) ExactPath(v bool) (r *VCarouselItemBuilder) {
+	b.tag.Attr(":exact-path", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCarouselItemBuilder) Href(v string) (r *VCarouselItemBuilder) {
+	b.tag.Attr("href", v)
+	return b
+}
+
+func (b *VCarouselItemBuilder) Link(v bool) (r *VCarouselItemBuilder) {
+	b.tag.Attr(":link", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCarouselItemBuilder) Nuxt(v bool) (r *VCarouselItemBuilder) {
+	b.tag.Attr(":nuxt", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCarouselItemBuilder) Replace(v bool) (r *VCarouselItemBuilder) {
+	b.tag.Attr(":replace", fmt.Sprint(v))
 	return b
 }
 
 func (b *VCarouselItemBuilder) ReverseTransition(v bool) (r *VCarouselItemBuilder) {
 	b.tag.Attr(":reverse-transition", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCarouselItemBuilder) Ripple(v bool) (r *VCarouselItemBuilder) {
+	b.tag.Attr(":ripple", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCarouselItemBuilder) Tag(v string) (r *VCarouselItemBuilder) {
+	b.tag.Attr("tag", v)
+	return b
+}
+
+func (b *VCarouselItemBuilder) Target(v string) (r *VCarouselItemBuilder) {
+	b.tag.Attr("target", v)
+	return b
+}
+
+func (b *VCarouselItemBuilder) To(v string) (r *VCarouselItemBuilder) {
+	b.tag.Attr("to", v)
 	return b
 }
 
@@ -45,6 +105,30 @@ func (b *VCarouselItemBuilder) Transition(v bool) (r *VCarouselItemBuilder) {
 
 func (b *VCarouselItemBuilder) Value(v interface{}) (r *VCarouselItemBuilder) {
 	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VCarouselItemBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VCarouselItemBuilder) Attr(vs ...interface{}) (r *VCarouselItemBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VCarouselItemBuilder) Children(children ...h.HTMLComponent) (r *VCarouselItemBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VCarouselItemBuilder) AppendChildren(children ...h.HTMLComponent) (r *VCarouselItemBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VCarouselItemBuilder) PrependChildren(children ...h.HTMLComponent) (r *VCarouselItemBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

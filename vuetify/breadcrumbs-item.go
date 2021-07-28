@@ -43,8 +43,18 @@ func (b *VBreadcrumbsItemBuilder) ExactActiveClass(v string) (r *VBreadcrumbsIte
 	return b
 }
 
+func (b *VBreadcrumbsItemBuilder) ExactPath(v bool) (r *VBreadcrumbsItemBuilder) {
+	b.tag.Attr(":exact-path", fmt.Sprint(v))
+	return b
+}
+
 func (b *VBreadcrumbsItemBuilder) Href(v string) (r *VBreadcrumbsItemBuilder) {
 	b.tag.Attr("href", v)
+	return b
+}
+
+func (b *VBreadcrumbsItemBuilder) Link(v bool) (r *VBreadcrumbsItemBuilder) {
+	b.tag.Attr(":link", fmt.Sprint(v))
 	return b
 }
 
@@ -75,6 +85,30 @@ func (b *VBreadcrumbsItemBuilder) Target(v string) (r *VBreadcrumbsItemBuilder) 
 
 func (b *VBreadcrumbsItemBuilder) To(v string) (r *VBreadcrumbsItemBuilder) {
 	b.tag.Attr("to", v)
+	return b
+}
+
+func (b *VBreadcrumbsItemBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VBreadcrumbsItemBuilder) Attr(vs ...interface{}) (r *VBreadcrumbsItemBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VBreadcrumbsItemBuilder) Children(children ...h.HTMLComponent) (r *VBreadcrumbsItemBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VBreadcrumbsItemBuilder) AppendChildren(children ...h.HTMLComponent) (r *VBreadcrumbsItemBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VBreadcrumbsItemBuilder) PrependChildren(children ...h.HTMLComponent) (r *VBreadcrumbsItemBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

@@ -58,6 +58,11 @@ func (b *VListItemBuilder) ExactActiveClass(v string) (r *VListItemBuilder) {
 	return b
 }
 
+func (b *VListItemBuilder) ExactPath(v bool) (r *VListItemBuilder) {
+	b.tag.Attr(":exact-path", fmt.Sprint(v))
+	return b
+}
+
 func (b *VListItemBuilder) Href(v string) (r *VListItemBuilder) {
 	b.tag.Attr("href", v)
 	return b
@@ -95,6 +100,11 @@ func (b *VListItemBuilder) Replace(v bool) (r *VListItemBuilder) {
 
 func (b *VListItemBuilder) Ripple(v bool) (r *VListItemBuilder) {
 	b.tag.Attr(":ripple", fmt.Sprint(v))
+	return b
+}
+
+func (b *VListItemBuilder) Selectable(v bool) (r *VListItemBuilder) {
+	b.tag.Attr(":selectable", fmt.Sprint(v))
 	return b
 }
 

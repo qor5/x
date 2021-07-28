@@ -78,6 +78,11 @@ func (b *VTabsItemsBuilder) ShowArrowsOnHover(v bool) (r *VTabsItemsBuilder) {
 	return b
 }
 
+func (b *VTabsItemsBuilder) Tag(v string) (r *VTabsItemsBuilder) {
+	b.tag.Attr("tag", v)
+	return b
+}
+
 func (b *VTabsItemsBuilder) Touch(v interface{}) (r *VTabsItemsBuilder) {
 	b.tag.Attr(":touch", v)
 	return b

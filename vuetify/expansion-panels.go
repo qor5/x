@@ -38,8 +38,18 @@ func (b *VExpansionPanelsBuilder) Disabled(v bool) (r *VExpansionPanelsBuilder) 
 	return b
 }
 
+func (b *VExpansionPanelsBuilder) Flat(v bool) (r *VExpansionPanelsBuilder) {
+	b.tag.Attr(":flat", fmt.Sprint(v))
+	return b
+}
+
 func (b *VExpansionPanelsBuilder) Focusable(v bool) (r *VExpansionPanelsBuilder) {
 	b.tag.Attr(":focusable", fmt.Sprint(v))
+	return b
+}
+
+func (b *VExpansionPanelsBuilder) Hover(v bool) (r *VExpansionPanelsBuilder) {
+	b.tag.Attr(":hover", fmt.Sprint(v))
 	return b
 }
 
@@ -75,6 +85,16 @@ func (b *VExpansionPanelsBuilder) Popout(v bool) (r *VExpansionPanelsBuilder) {
 
 func (b *VExpansionPanelsBuilder) Readonly(v bool) (r *VExpansionPanelsBuilder) {
 	b.tag.Attr(":readonly", fmt.Sprint(v))
+	return b
+}
+
+func (b *VExpansionPanelsBuilder) Tag(v string) (r *VExpansionPanelsBuilder) {
+	b.tag.Attr("tag", v)
+	return b
+}
+
+func (b *VExpansionPanelsBuilder) Tile(v bool) (r *VExpansionPanelsBuilder) {
+	b.tag.Attr(":tile", fmt.Sprint(v))
 	return b
 }
 

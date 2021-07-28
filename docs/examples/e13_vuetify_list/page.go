@@ -20,7 +20,7 @@ func HelloVuetifyList(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
 	pr.Body = wrapper(
 		VToolbar(
-			VToolbarSideIcon(),
+			//VToolbarSideIcon(),
 			VToolbarTitle("Inbox"),
 			VSpacer(),
 			VBtn("").Icon(true).Children(

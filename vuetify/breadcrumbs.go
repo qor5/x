@@ -33,16 +33,6 @@ func (b *VBreadcrumbsBuilder) Items(v []string) (r *VBreadcrumbsBuilder) {
 	return b
 }
 
-func (b *VBreadcrumbsBuilder) JustifyCenter(v bool) (r *VBreadcrumbsBuilder) {
-	b.tag.Attr(":justify-center", fmt.Sprint(v))
-	return b
-}
-
-func (b *VBreadcrumbsBuilder) JustifyEnd(v bool) (r *VBreadcrumbsBuilder) {
-	b.tag.Attr(":justify-end", fmt.Sprint(v))
-	return b
-}
-
 func (b *VBreadcrumbsBuilder) Large(v bool) (r *VBreadcrumbsBuilder) {
 	b.tag.Attr(":large", fmt.Sprint(v))
 	return b
@@ -50,6 +40,30 @@ func (b *VBreadcrumbsBuilder) Large(v bool) (r *VBreadcrumbsBuilder) {
 
 func (b *VBreadcrumbsBuilder) Light(v bool) (r *VBreadcrumbsBuilder) {
 	b.tag.Attr(":light", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBreadcrumbsBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VBreadcrumbsBuilder) Attr(vs ...interface{}) (r *VBreadcrumbsBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VBreadcrumbsBuilder) Children(children ...h.HTMLComponent) (r *VBreadcrumbsBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VBreadcrumbsBuilder) AppendChildren(children ...h.HTMLComponent) (r *VBreadcrumbsBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VBreadcrumbsBuilder) PrependChildren(children ...h.HTMLComponent) (r *VBreadcrumbsBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

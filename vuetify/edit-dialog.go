@@ -28,13 +28,13 @@ func (b *VEditDialogBuilder) Dark(v bool) (r *VEditDialogBuilder) {
 	return b
 }
 
-func (b *VEditDialogBuilder) Large(v bool) (r *VEditDialogBuilder) {
-	b.tag.Attr(":large", fmt.Sprint(v))
+func (b *VEditDialogBuilder) Eager(v bool) (r *VEditDialogBuilder) {
+	b.tag.Attr(":eager", fmt.Sprint(v))
 	return b
 }
 
-func (b *VEditDialogBuilder) Lazy(v bool) (r *VEditDialogBuilder) {
-	b.tag.Attr(":lazy", fmt.Sprint(v))
+func (b *VEditDialogBuilder) Large(v bool) (r *VEditDialogBuilder) {
+	b.tag.Attr(":large", fmt.Sprint(v))
 	return b
 }
 
@@ -60,6 +60,30 @@ func (b *VEditDialogBuilder) SaveText(v interface{}) (r *VEditDialogBuilder) {
 
 func (b *VEditDialogBuilder) Transition(v string) (r *VEditDialogBuilder) {
 	b.tag.Attr("transition", v)
+	return b
+}
+
+func (b *VEditDialogBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VEditDialogBuilder) Attr(vs ...interface{}) (r *VEditDialogBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VEditDialogBuilder) Children(children ...h.HTMLComponent) (r *VEditDialogBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VEditDialogBuilder) AppendChildren(children ...h.HTMLComponent) (r *VEditDialogBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VEditDialogBuilder) PrependChildren(children ...h.HTMLComponent) (r *VEditDialogBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

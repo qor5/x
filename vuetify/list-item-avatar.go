@@ -63,6 +63,11 @@ func (b *VListItemAvatarBuilder) Right(v bool) (r *VListItemAvatarBuilder) {
 	return b
 }
 
+func (b *VListItemAvatarBuilder) Rounded(v bool) (r *VListItemAvatarBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
+	return b
+}
+
 func (b *VListItemAvatarBuilder) Size(v int) (r *VListItemAvatarBuilder) {
 	b.tag.Attr(":size", fmt.Sprint(v))
 	return b

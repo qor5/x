@@ -23,6 +23,11 @@ func (b *VAlertBuilder) Border(v string) (r *VAlertBuilder) {
 	return b
 }
 
+func (b *VAlertBuilder) CloseIcon(v string) (r *VAlertBuilder) {
+	b.tag.Attr("close-icon", v)
+	return b
+}
+
 func (b *VAlertBuilder) CloseLabel(v string) (r *VAlertBuilder) {
 	b.tag.Attr("close-label", v)
 	return b
@@ -110,6 +115,16 @@ func (b *VAlertBuilder) Outlined(v bool) (r *VAlertBuilder) {
 
 func (b *VAlertBuilder) Prominent(v bool) (r *VAlertBuilder) {
 	b.tag.Attr(":prominent", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) Rounded(v bool) (r *VAlertBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAlertBuilder) Shaped(v bool) (r *VAlertBuilder) {
+	b.tag.Attr(":shaped", fmt.Sprint(v))
 	return b
 }
 

@@ -33,6 +33,30 @@ func (b *VItemBuilder) Value(v interface{}) (r *VItemBuilder) {
 	return b
 }
 
+func (b *VItemBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VItemBuilder) Attr(vs ...interface{}) (r *VItemBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VItemBuilder) Children(children ...h.HTMLComponent) (r *VItemBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VItemBuilder) AppendChildren(children ...h.HTMLComponent) (r *VItemBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VItemBuilder) PrependChildren(children ...h.HTMLComponent) (r *VItemBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
 func (b *VItemBuilder) Class(names ...string) (r *VItemBuilder) {
 	b.tag.Class(names...)
 	return b

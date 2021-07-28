@@ -11,12 +11,13 @@ type VRadioBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VRadio() (r *VRadioBuilder) {
+func VRadio(children ...h.HTMLComponent) (r *VRadioBuilder) {
 	r = &VRadioBuilder{
-		tag: h.Tag("v-radio"),
+		tag: h.Tag("v-radio").Children(children...),
 	}
 	return
 }
+
 func (b *VRadioBuilder) ActiveClass(v string) (r *VRadioBuilder) {
 	b.tag.Attr("active-class", v)
 	return b
@@ -77,8 +78,17 @@ func (b *VRadioBuilder) Ripple(v bool) (r *VRadioBuilder) {
 	return b
 }
 
-func (b *VRadioBuilder) Value(v string) (r *VRadioBuilder) {
-	b.tag.Attr("value", v)
+func (b *VRadioBuilder) Value(v interface{}) (r *VRadioBuilder) {
+	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VRadioBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VRadioBuilder) Attr(vs ...interface{}) (r *VRadioBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 

@@ -11,9 +11,9 @@ type VTimelineBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VTimeline() (r *VTimelineBuilder) {
+func VTimeline(children ...h.HTMLComponent) (r *VTimelineBuilder) {
 	r = &VTimelineBuilder{
-		tag: h.Tag("v-timeline"),
+		tag: h.Tag("v-timeline").Children(children...),
 	}
 	return
 }
@@ -35,6 +35,35 @@ func (b *VTimelineBuilder) Dense(v bool) (r *VTimelineBuilder) {
 
 func (b *VTimelineBuilder) Light(v bool) (r *VTimelineBuilder) {
 	b.tag.Attr(":light", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTimelineBuilder) Reverse(v bool) (r *VTimelineBuilder) {
+	b.tag.Attr(":reverse", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTimelineBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VTimelineBuilder) Attr(vs ...interface{}) (r *VTimelineBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VTimelineBuilder) Children(children ...h.HTMLComponent) (r *VTimelineBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VTimelineBuilder) AppendChildren(children ...h.HTMLComponent) (r *VTimelineBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VTimelineBuilder) PrependChildren(children ...h.HTMLComponent) (r *VTimelineBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

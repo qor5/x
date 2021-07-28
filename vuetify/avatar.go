@@ -23,6 +23,46 @@ func (b *VAvatarBuilder) Color(v string) (r *VAvatarBuilder) {
 	return b
 }
 
+func (b *VAvatarBuilder) Height(v int) (r *VAvatarBuilder) {
+	b.tag.Attr(":height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAvatarBuilder) Left(v bool) (r *VAvatarBuilder) {
+	b.tag.Attr(":left", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAvatarBuilder) MaxHeight(v int) (r *VAvatarBuilder) {
+	b.tag.Attr(":max-height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAvatarBuilder) MaxWidth(v int) (r *VAvatarBuilder) {
+	b.tag.Attr(":max-width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAvatarBuilder) MinHeight(v int) (r *VAvatarBuilder) {
+	b.tag.Attr(":min-height", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAvatarBuilder) MinWidth(v int) (r *VAvatarBuilder) {
+	b.tag.Attr(":min-width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAvatarBuilder) Right(v bool) (r *VAvatarBuilder) {
+	b.tag.Attr(":right", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAvatarBuilder) Rounded(v bool) (r *VAvatarBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
+	return b
+}
+
 func (b *VAvatarBuilder) Size(v int) (r *VAvatarBuilder) {
 	b.tag.Attr(":size", fmt.Sprint(v))
 	return b
@@ -30,6 +70,35 @@ func (b *VAvatarBuilder) Size(v int) (r *VAvatarBuilder) {
 
 func (b *VAvatarBuilder) Tile(v bool) (r *VAvatarBuilder) {
 	b.tag.Attr(":tile", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAvatarBuilder) Width(v int) (r *VAvatarBuilder) {
+	b.tag.Attr(":width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAvatarBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VAvatarBuilder) Attr(vs ...interface{}) (r *VAvatarBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VAvatarBuilder) Children(children ...h.HTMLComponent) (r *VAvatarBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VAvatarBuilder) AppendChildren(children ...h.HTMLComponent) (r *VAvatarBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VAvatarBuilder) PrependChildren(children ...h.HTMLComponent) (r *VAvatarBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

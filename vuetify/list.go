@@ -88,6 +88,11 @@ func (b *VListBuilder) Nav(v bool) (r *VListBuilder) {
 	return b
 }
 
+func (b *VListBuilder) Outlined(v bool) (r *VListBuilder) {
+	b.tag.Attr(":outlined", fmt.Sprint(v))
+	return b
+}
+
 func (b *VListBuilder) Rounded(v bool) (r *VListBuilder) {
 	b.tag.Attr(":rounded", fmt.Sprint(v))
 	return b

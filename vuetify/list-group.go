@@ -68,8 +68,8 @@ func (b *VListGroupBuilder) SubGroup(v bool) (r *VListGroupBuilder) {
 	return b
 }
 
-func (b *VListGroupBuilder) Value(v bool) (r *VListGroupBuilder) {
-	b.tag.Attr(":value", fmt.Sprint(v))
+func (b *VListGroupBuilder) Value(v interface{}) (r *VListGroupBuilder) {
+	b.tag.Attr(":value", v)
 	return b
 }
 

@@ -18,6 +18,11 @@ func VExpansionPanelContent(children ...h.HTMLComponent) (r *VExpansionPanelCont
 	return
 }
 
+func (b *VExpansionPanelContentBuilder) Color(v string) (r *VExpansionPanelContentBuilder) {
+	b.tag.Attr("color", v)
+	return b
+}
+
 func (b *VExpansionPanelContentBuilder) Eager(v bool) (r *VExpansionPanelContentBuilder) {
 	b.tag.Attr(":eager", fmt.Sprint(v))
 	return b

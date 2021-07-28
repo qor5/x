@@ -38,6 +38,11 @@ func (b *VColorPickerBuilder) DotSize(v int) (r *VColorPickerBuilder) {
 	return b
 }
 
+func (b *VColorPickerBuilder) Elevation(v int) (r *VColorPickerBuilder) {
+	b.tag.Attr(":elevation", fmt.Sprint(v))
+	return b
+}
+
 func (b *VColorPickerBuilder) Flat(v bool) (r *VColorPickerBuilder) {
 	b.tag.Attr(":flat", fmt.Sprint(v))
 	return b
@@ -55,6 +60,11 @@ func (b *VColorPickerBuilder) HideInputs(v bool) (r *VColorPickerBuilder) {
 
 func (b *VColorPickerBuilder) HideModeSwitch(v bool) (r *VColorPickerBuilder) {
 	b.tag.Attr(":hide-mode-switch", fmt.Sprint(v))
+	return b
+}
+
+func (b *VColorPickerBuilder) HideSliders(v bool) (r *VColorPickerBuilder) {
+	b.tag.Attr(":hide-sliders", fmt.Sprint(v))
 	return b
 }
 

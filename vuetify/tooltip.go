@@ -53,18 +53,8 @@ func (b *VTooltipBuilder) Color(v string) (r *VTooltipBuilder) {
 	return b
 }
 
-func (b *VTooltipBuilder) ContentClass(v interface{}) (r *VTooltipBuilder) {
-	b.tag.Attr(":content-class", v)
-	return b
-}
-
-func (b *VTooltipBuilder) Dark(v bool) (r *VTooltipBuilder) {
-	b.tag.Attr(":dark", fmt.Sprint(v))
-	return b
-}
-
-func (b *VTooltipBuilder) Debounce(v int) (r *VTooltipBuilder) {
-	b.tag.Attr(":debounce", fmt.Sprint(v))
+func (b *VTooltipBuilder) ContentClass(v string) (r *VTooltipBuilder) {
+	b.tag.Attr("content-class", v)
 	return b
 }
 
@@ -73,28 +63,23 @@ func (b *VTooltipBuilder) Disabled(v bool) (r *VTooltipBuilder) {
 	return b
 }
 
+func (b *VTooltipBuilder) Eager(v bool) (r *VTooltipBuilder) {
+	b.tag.Attr(":eager", fmt.Sprint(v))
+	return b
+}
+
 func (b *VTooltipBuilder) Fixed(v bool) (r *VTooltipBuilder) {
 	b.tag.Attr(":fixed", fmt.Sprint(v))
 	return b
 }
 
-func (b *VTooltipBuilder) InputActivator(v bool) (r *VTooltipBuilder) {
-	b.tag.Attr(":input-activator", fmt.Sprint(v))
-	return b
-}
-
-func (b *VTooltipBuilder) Lazy(v bool) (r *VTooltipBuilder) {
-	b.tag.Attr(":lazy", fmt.Sprint(v))
+func (b *VTooltipBuilder) InternalActivator(v bool) (r *VTooltipBuilder) {
+	b.tag.Attr(":internal-activator", fmt.Sprint(v))
 	return b
 }
 
 func (b *VTooltipBuilder) Left(v bool) (r *VTooltipBuilder) {
 	b.tag.Attr(":left", fmt.Sprint(v))
-	return b
-}
-
-func (b *VTooltipBuilder) Light(v bool) (r *VTooltipBuilder) {
-	b.tag.Attr(":light", fmt.Sprint(v))
 	return b
 }
 
@@ -143,6 +128,21 @@ func (b *VTooltipBuilder) OpenDelay(v int) (r *VTooltipBuilder) {
 	return b
 }
 
+func (b *VTooltipBuilder) OpenOnClick(v bool) (r *VTooltipBuilder) {
+	b.tag.Attr(":open-on-click", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTooltipBuilder) OpenOnFocus(v bool) (r *VTooltipBuilder) {
+	b.tag.Attr(":open-on-focus", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTooltipBuilder) OpenOnHover(v bool) (r *VTooltipBuilder) {
+	b.tag.Attr(":open-on-hover", fmt.Sprint(v))
+	return b
+}
+
 func (b *VTooltipBuilder) PositionX(v int) (r *VTooltipBuilder) {
 	b.tag.Attr(":position-x", fmt.Sprint(v))
 	return b
@@ -178,8 +178,32 @@ func (b *VTooltipBuilder) Value(v interface{}) (r *VTooltipBuilder) {
 	return b
 }
 
-func (b *VTooltipBuilder) ZIndex(v interface{}) (r *VTooltipBuilder) {
-	b.tag.Attr(":z-index", v)
+func (b *VTooltipBuilder) ZIndex(v int) (r *VTooltipBuilder) {
+	b.tag.Attr(":z-index", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTooltipBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VTooltipBuilder) Attr(vs ...interface{}) (r *VTooltipBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VTooltipBuilder) Children(children ...h.HTMLComponent) (r *VTooltipBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VTooltipBuilder) AppendChildren(children ...h.HTMLComponent) (r *VTooltipBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VTooltipBuilder) PrependChildren(children ...h.HTMLComponent) (r *VTooltipBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

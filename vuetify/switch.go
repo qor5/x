@@ -38,6 +38,11 @@ func (b *VSwitchBuilder) Dark(v bool) (r *VSwitchBuilder) {
 	return b
 }
 
+func (b *VSwitchBuilder) Dense(v bool) (r *VSwitchBuilder) {
+	b.tag.Attr(":dense", fmt.Sprint(v))
+	return b
+}
+
 func (b *VSwitchBuilder) Disabled(v bool) (r *VSwitchBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
 	return b
@@ -63,8 +68,8 @@ func (b *VSwitchBuilder) FalseValue(v string) (r *VSwitchBuilder) {
 	return b
 }
 
-func (b *VSwitchBuilder) Height(v int) (r *VSwitchBuilder) {
-	b.tag.Attr(":height", fmt.Sprint(v))
+func (b *VSwitchBuilder) Flat(v bool) (r *VSwitchBuilder) {
+	b.tag.Attr(":flat", fmt.Sprint(v))
 	return b
 }
 
@@ -83,8 +88,13 @@ func (b *VSwitchBuilder) Id(v string) (r *VSwitchBuilder) {
 	return b
 }
 
-func (b *VSwitchBuilder) InputValue(v bool) (r *VSwitchBuilder) {
-	b.tag.Attr(":input-value", fmt.Sprint(v))
+func (b *VSwitchBuilder) InputValue(v interface{}) (r *VSwitchBuilder) {
+	b.tag.Attr(":input-value", v)
+	return b
+}
+
+func (b *VSwitchBuilder) Inset(v bool) (r *VSwitchBuilder) {
+	b.tag.Attr(":inset", fmt.Sprint(v))
 	return b
 }
 
@@ -133,7 +143,7 @@ func (b *VSwitchBuilder) Ripple(v bool) (r *VSwitchBuilder) {
 	return b
 }
 
-func (b *VSwitchBuilder) Rules(v interface{}) (r *VSwitchBuilder) {
+func (b *VSwitchBuilder) Rules(v []string) (r *VSwitchBuilder) {
 	b.tag.Attr("rules", v)
 	return b
 }
@@ -158,8 +168,52 @@ func (b *VSwitchBuilder) ValidateOnBlur(v bool) (r *VSwitchBuilder) {
 	return b
 }
 
-func (b *VSwitchBuilder) Value(v bool) (r *VSwitchBuilder) {
-	b.tag.Attr("value", fmt.Sprint(v))
+func (b *VSwitchBuilder) Value(v interface{}) (r *VSwitchBuilder) {
+	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VSwitchBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VSwitchBuilder) Attr(vs ...interface{}) (r *VSwitchBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VSwitchBuilder) Children(children ...h.HTMLComponent) (r *VSwitchBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VSwitchBuilder) AppendChildren(children ...h.HTMLComponent) (r *VSwitchBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VSwitchBuilder) PrependChildren(children ...h.HTMLComponent) (r *VSwitchBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VSwitchBuilder) Class(names ...string) (r *VSwitchBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VSwitchBuilder) ClassIf(name string, add bool) (r *VSwitchBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VSwitchBuilder) On(name string, value string) (r *VSwitchBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VSwitchBuilder) Bind(name string, value string) (r *VSwitchBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

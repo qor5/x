@@ -18,18 +18,8 @@ func VApp(children ...h.HTMLComponent) (r *VAppBuilder) {
 	return
 }
 
-func (b *VAppBuilder) Dark(v bool) (r *VAppBuilder) {
-	b.tag.Attr(":dark", fmt.Sprint(v))
-	return b
-}
-
 func (b *VAppBuilder) Id(v string) (r *VAppBuilder) {
 	b.tag.Attr("id", v)
-	return b
-}
-
-func (b *VAppBuilder) Light(v bool) (r *VAppBuilder) {
-	b.tag.Attr(":light", fmt.Sprint(v))
 	return b
 }
 

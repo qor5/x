@@ -13,7 +13,7 @@ type VSimpleTableBuilder struct {
 
 func VSimpleTable(children ...h.HTMLComponent) (r *VSimpleTableBuilder) {
 	r = &VSimpleTableBuilder{
-		tag: h.Tag("table").Children(children...).Attr("is", "v-simple-table"),
+		tag: h.Tag("v-simple-table").Children(children...),
 	}
 	return
 }

@@ -58,6 +58,11 @@ func (b *VCardBuilder) ExactActiveClass(v string) (r *VCardBuilder) {
 	return b
 }
 
+func (b *VCardBuilder) ExactPath(v bool) (r *VCardBuilder) {
+	b.tag.Attr(":exact-path", fmt.Sprint(v))
+	return b
+}
+
 func (b *VCardBuilder) Flat(v bool) (r *VCardBuilder) {
 	b.tag.Attr(":flat", fmt.Sprint(v))
 	return b
@@ -145,6 +150,16 @@ func (b *VCardBuilder) Replace(v bool) (r *VCardBuilder) {
 
 func (b *VCardBuilder) Ripple(v bool) (r *VCardBuilder) {
 	b.tag.Attr(":ripple", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCardBuilder) Rounded(v bool) (r *VCardBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCardBuilder) Shaped(v bool) (r *VCardBuilder) {
+	b.tag.Attr(":shaped", fmt.Sprint(v))
 	return b
 }
 

@@ -18,6 +18,16 @@ func VBadge(children ...h.HTMLComponent) (r *VBadgeBuilder) {
 	return
 }
 
+func (b *VBadgeBuilder) Avatar(v bool) (r *VBadgeBuilder) {
+	b.tag.Attr(":avatar", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBadgeBuilder) Bordered(v bool) (r *VBadgeBuilder) {
+	b.tag.Attr(":bordered", fmt.Sprint(v))
+	return b
+}
+
 func (b *VBadgeBuilder) Bottom(v bool) (r *VBadgeBuilder) {
 	b.tag.Attr(":bottom", fmt.Sprint(v))
 	return b
@@ -28,13 +38,58 @@ func (b *VBadgeBuilder) Color(v string) (r *VBadgeBuilder) {
 	return b
 }
 
+func (b *VBadgeBuilder) Content(v interface{}) (r *VBadgeBuilder) {
+	b.tag.Attr(":content", v)
+	return b
+}
+
+func (b *VBadgeBuilder) Dark(v bool) (r *VBadgeBuilder) {
+	b.tag.Attr(":dark", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBadgeBuilder) Dot(v bool) (r *VBadgeBuilder) {
+	b.tag.Attr(":dot", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBadgeBuilder) Icon(v string) (r *VBadgeBuilder) {
+	b.tag.Attr("icon", v)
+	return b
+}
+
+func (b *VBadgeBuilder) Inline(v bool) (r *VBadgeBuilder) {
+	b.tag.Attr(":inline", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBadgeBuilder) Label(v string) (r *VBadgeBuilder) {
+	b.tag.Attr("label", v)
+	return b
+}
+
 func (b *VBadgeBuilder) Left(v bool) (r *VBadgeBuilder) {
 	b.tag.Attr(":left", fmt.Sprint(v))
 	return b
 }
 
+func (b *VBadgeBuilder) Light(v bool) (r *VBadgeBuilder) {
+	b.tag.Attr(":light", fmt.Sprint(v))
+	return b
+}
+
 func (b *VBadgeBuilder) Mode(v string) (r *VBadgeBuilder) {
 	b.tag.Attr("mode", v)
+	return b
+}
+
+func (b *VBadgeBuilder) OffsetX(v int) (r *VBadgeBuilder) {
+	b.tag.Attr(":offset-x", fmt.Sprint(v))
+	return b
+}
+
+func (b *VBadgeBuilder) OffsetY(v int) (r *VBadgeBuilder) {
+	b.tag.Attr(":offset-y", fmt.Sprint(v))
 	return b
 }
 
@@ -48,6 +103,11 @@ func (b *VBadgeBuilder) Overlap(v bool) (r *VBadgeBuilder) {
 	return b
 }
 
+func (b *VBadgeBuilder) Tile(v bool) (r *VBadgeBuilder) {
+	b.tag.Attr(":tile", fmt.Sprint(v))
+	return b
+}
+
 func (b *VBadgeBuilder) Transition(v string) (r *VBadgeBuilder) {
 	b.tag.Attr("transition", v)
 	return b
@@ -55,6 +115,30 @@ func (b *VBadgeBuilder) Transition(v string) (r *VBadgeBuilder) {
 
 func (b *VBadgeBuilder) Value(v interface{}) (r *VBadgeBuilder) {
 	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VBadgeBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VBadgeBuilder) Attr(vs ...interface{}) (r *VBadgeBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VBadgeBuilder) Children(children ...h.HTMLComponent) (r *VBadgeBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VBadgeBuilder) AppendChildren(children ...h.HTMLComponent) (r *VBadgeBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VBadgeBuilder) PrependChildren(children ...h.HTMLComponent) (r *VBadgeBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

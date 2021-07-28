@@ -18,6 +18,30 @@ func VStepperHeader(children ...h.HTMLComponent) (r *VStepperHeaderBuilder) {
 	return
 }
 
+func (b *VStepperHeaderBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VStepperHeaderBuilder) Attr(vs ...interface{}) (r *VStepperHeaderBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VStepperHeaderBuilder) Children(children ...h.HTMLComponent) (r *VStepperHeaderBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VStepperHeaderBuilder) AppendChildren(children ...h.HTMLComponent) (r *VStepperHeaderBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VStepperHeaderBuilder) PrependChildren(children ...h.HTMLComponent) (r *VStepperHeaderBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
 func (b *VStepperHeaderBuilder) Class(names ...string) (r *VStepperHeaderBuilder) {
 	b.tag.Class(names...)
 	return b

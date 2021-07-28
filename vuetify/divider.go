@@ -38,6 +38,50 @@ func (b *VDividerBuilder) Vertical(v bool) (r *VDividerBuilder) {
 	return b
 }
 
+func (b *VDividerBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VDividerBuilder) Attr(vs ...interface{}) (r *VDividerBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VDividerBuilder) Children(children ...h.HTMLComponent) (r *VDividerBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VDividerBuilder) AppendChildren(children ...h.HTMLComponent) (r *VDividerBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VDividerBuilder) PrependChildren(children ...h.HTMLComponent) (r *VDividerBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VDividerBuilder) Class(names ...string) (r *VDividerBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VDividerBuilder) ClassIf(name string, add bool) (r *VDividerBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VDividerBuilder) On(name string, value string) (r *VDividerBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VDividerBuilder) Bind(name string, value string) (r *VDividerBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
+	return b
+}
+
 func (b *VDividerBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }

@@ -103,8 +103,23 @@ func (b *VToolbarBuilder) MinWidth(v int) (r *VToolbarBuilder) {
 	return b
 }
 
+func (b *VToolbarBuilder) Outlined(v bool) (r *VToolbarBuilder) {
+	b.tag.Attr(":outlined", fmt.Sprint(v))
+	return b
+}
+
 func (b *VToolbarBuilder) Prominent(v bool) (r *VToolbarBuilder) {
 	b.tag.Attr(":prominent", fmt.Sprint(v))
+	return b
+}
+
+func (b *VToolbarBuilder) Rounded(v bool) (r *VToolbarBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
+	return b
+}
+
+func (b *VToolbarBuilder) Shaped(v bool) (r *VToolbarBuilder) {
+	b.tag.Attr(":shaped", fmt.Sprint(v))
 	return b
 }
 

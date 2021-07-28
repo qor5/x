@@ -53,11 +53,6 @@ func (b *VDialogBuilder) Eager(v bool) (r *VDialogBuilder) {
 	return b
 }
 
-func (b *VDialogBuilder) FullWidth(v bool) (r *VDialogBuilder) {
-	b.tag.Attr(":full-width", fmt.Sprint(v))
-	return b
-}
-
 func (b *VDialogBuilder) Fullscreen(v bool) (r *VDialogBuilder) {
 	b.tag.Attr(":fullscreen", fmt.Sprint(v))
 	return b
@@ -93,6 +88,11 @@ func (b *VDialogBuilder) OpenDelay(v int) (r *VDialogBuilder) {
 	return b
 }
 
+func (b *VDialogBuilder) OpenOnFocus(v bool) (r *VDialogBuilder) {
+	b.tag.Attr(":open-on-focus", fmt.Sprint(v))
+	return b
+}
+
 func (b *VDialogBuilder) OpenOnHover(v bool) (r *VDialogBuilder) {
 	b.tag.Attr(":open-on-hover", fmt.Sprint(v))
 	return b
@@ -100,6 +100,16 @@ func (b *VDialogBuilder) OpenOnHover(v bool) (r *VDialogBuilder) {
 
 func (b *VDialogBuilder) Origin(v string) (r *VDialogBuilder) {
 	b.tag.Attr("origin", v)
+	return b
+}
+
+func (b *VDialogBuilder) OverlayColor(v string) (r *VDialogBuilder) {
+	b.tag.Attr("overlay-color", v)
+	return b
+}
+
+func (b *VDialogBuilder) OverlayOpacity(v int) (r *VDialogBuilder) {
+	b.tag.Attr(":overlay-opacity", fmt.Sprint(v))
 	return b
 }
 
@@ -128,8 +138,8 @@ func (b *VDialogBuilder) Transition(v string) (r *VDialogBuilder) {
 	return b
 }
 
-func (b *VDialogBuilder) Value(v bool) (r *VDialogBuilder) {
-	b.tag.Attr(":value", fmt.Sprint(v))
+func (b *VDialogBuilder) Value(v interface{}) (r *VDialogBuilder) {
+	b.tag.Attr(":value", v)
 	return b
 }
 

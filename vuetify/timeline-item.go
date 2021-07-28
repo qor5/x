@@ -11,9 +11,9 @@ type VTimelineItemBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VTimelineItem() (r *VTimelineItemBuilder) {
+func VTimelineItem(children ...h.HTMLComponent) (r *VTimelineItemBuilder) {
 	r = &VTimelineItemBuilder{
-		tag: h.Tag("v-timeline-item"),
+		tag: h.Tag("v-timeline-item").Children(children...),
 	}
 	return
 }
@@ -70,6 +70,30 @@ func (b *VTimelineItemBuilder) Right(v bool) (r *VTimelineItemBuilder) {
 
 func (b *VTimelineItemBuilder) Small(v bool) (r *VTimelineItemBuilder) {
 	b.tag.Attr(":small", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTimelineItemBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VTimelineItemBuilder) Attr(vs ...interface{}) (r *VTimelineItemBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VTimelineItemBuilder) Children(children ...h.HTMLComponent) (r *VTimelineItemBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VTimelineItemBuilder) AppendChildren(children ...h.HTMLComponent) (r *VTimelineItemBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VTimelineItemBuilder) PrependChildren(children ...h.HTMLComponent) (r *VTimelineItemBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

@@ -38,6 +38,11 @@ func (b *VCalendarDailyBuilder) FirstInterval(v int) (r *VCalendarDailyBuilder) 
 	return b
 }
 
+func (b *VCalendarDailyBuilder) FirstTime(v int) (r *VCalendarDailyBuilder) {
+	b.tag.Attr(":first-time", fmt.Sprint(v))
+	return b
+}
+
 func (b *VCalendarDailyBuilder) HideHeader(v bool) (r *VCalendarDailyBuilder) {
 	b.tag.Attr(":hide-header", fmt.Sprint(v))
 	return b
@@ -55,6 +60,11 @@ func (b *VCalendarDailyBuilder) IntervalHeight(v int) (r *VCalendarDailyBuilder)
 
 func (b *VCalendarDailyBuilder) IntervalMinutes(v int) (r *VCalendarDailyBuilder) {
 	b.tag.Attr(":interval-minutes", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCalendarDailyBuilder) IntervalWidth(v int) (r *VCalendarDailyBuilder) {
+	b.tag.Attr(":interval-width", fmt.Sprint(v))
 	return b
 }
 
@@ -95,6 +105,30 @@ func (b *VCalendarDailyBuilder) Start(v string) (r *VCalendarDailyBuilder) {
 
 func (b *VCalendarDailyBuilder) Weekdays(v []string) (r *VCalendarDailyBuilder) {
 	b.tag.Attr(":weekdays", v)
+	return b
+}
+
+func (b *VCalendarDailyBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VCalendarDailyBuilder) Attr(vs ...interface{}) (r *VCalendarDailyBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VCalendarDailyBuilder) Children(children ...h.HTMLComponent) (r *VCalendarDailyBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VCalendarDailyBuilder) AppendChildren(children ...h.HTMLComponent) (r *VCalendarDailyBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VCalendarDailyBuilder) PrependChildren(children ...h.HTMLComponent) (r *VCalendarDailyBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

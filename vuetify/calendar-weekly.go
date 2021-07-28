@@ -48,6 +48,11 @@ func (b *VCalendarWeeklyBuilder) Locale(v string) (r *VCalendarWeeklyBuilder) {
 	return b
 }
 
+func (b *VCalendarWeeklyBuilder) LocaleFirstDayOfYear(v string) (r *VCalendarWeeklyBuilder) {
+	b.tag.Attr("locale-first-day-of-year", v)
+	return b
+}
+
 func (b *VCalendarWeeklyBuilder) MinWeeks(v interface{}) (r *VCalendarWeeklyBuilder) {
 	b.tag.Attr(":min-weeks", v)
 	return b
@@ -73,6 +78,11 @@ func (b *VCalendarWeeklyBuilder) ShowMonthOnFirst(v bool) (r *VCalendarWeeklyBui
 	return b
 }
 
+func (b *VCalendarWeeklyBuilder) ShowWeek(v bool) (r *VCalendarWeeklyBuilder) {
+	b.tag.Attr(":show-week", fmt.Sprint(v))
+	return b
+}
+
 func (b *VCalendarWeeklyBuilder) Start(v string) (r *VCalendarWeeklyBuilder) {
 	b.tag.Attr("start", v)
 	return b
@@ -80,6 +90,30 @@ func (b *VCalendarWeeklyBuilder) Start(v string) (r *VCalendarWeeklyBuilder) {
 
 func (b *VCalendarWeeklyBuilder) Weekdays(v []string) (r *VCalendarWeeklyBuilder) {
 	b.tag.Attr(":weekdays", v)
+	return b
+}
+
+func (b *VCalendarWeeklyBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VCalendarWeeklyBuilder) Attr(vs ...interface{}) (r *VCalendarWeeklyBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VCalendarWeeklyBuilder) Children(children ...h.HTMLComponent) (r *VCalendarWeeklyBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VCalendarWeeklyBuilder) AppendChildren(children ...h.HTMLComponent) (r *VCalendarWeeklyBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VCalendarWeeklyBuilder) PrependChildren(children ...h.HTMLComponent) (r *VCalendarWeeklyBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

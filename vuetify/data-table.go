@@ -28,6 +28,11 @@ func (b *VDataTableBuilder) Caption(v string) (r *VDataTableBuilder) {
 	return b
 }
 
+func (b *VDataTableBuilder) CheckboxColor(v string) (r *VDataTableBuilder) {
+	b.tag.Attr("checkbox-color", v)
+	return b
+}
+
 func (b *VDataTableBuilder) Dark(v bool) (r *VDataTableBuilder) {
 	b.tag.Attr(":dark", fmt.Sprint(v))
 	return b
@@ -113,6 +118,11 @@ func (b *VDataTableBuilder) HideDefaultHeader(v bool) (r *VDataTableBuilder) {
 	return b
 }
 
+func (b *VDataTableBuilder) ItemClass(v string) (r *VDataTableBuilder) {
+	b.tag.Attr("item-class", v)
+	return b
+}
+
 func (b *VDataTableBuilder) ItemKey(v string) (r *VDataTableBuilder) {
 	b.tag.Attr("item-key", v)
 	return b
@@ -130,6 +140,11 @@ func (b *VDataTableBuilder) ItemsPerPage(v int) (r *VDataTableBuilder) {
 
 func (b *VDataTableBuilder) Light(v bool) (r *VDataTableBuilder) {
 	b.tag.Attr(":light", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDataTableBuilder) LoaderHeight(v int) (r *VDataTableBuilder) {
+	b.tag.Attr(":loader-height", fmt.Sprint(v))
 	return b
 }
 
@@ -174,7 +189,7 @@ func (b *VDataTableBuilder) NoResultsText(v string) (r *VDataTableBuilder) {
 }
 
 func (b *VDataTableBuilder) Options(v interface{}) (r *VDataTableBuilder) {
-	b.tag.Attr(":options", v)
+	b.tag.Attr("options", v)
 	return b
 }
 
@@ -185,6 +200,11 @@ func (b *VDataTableBuilder) Page(v int) (r *VDataTableBuilder) {
 
 func (b *VDataTableBuilder) Search(v string) (r *VDataTableBuilder) {
 	b.tag.Attr("search", v)
+	return b
+}
+
+func (b *VDataTableBuilder) SelectableKey(v string) (r *VDataTableBuilder) {
+	b.tag.Attr("selectable-key", v)
 	return b
 }
 

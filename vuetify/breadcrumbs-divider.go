@@ -18,6 +18,30 @@ func VBreadcrumbsDivider() (r *VBreadcrumbsDividerBuilder) {
 	return
 }
 
+func (b *VBreadcrumbsDividerBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VBreadcrumbsDividerBuilder) Attr(vs ...interface{}) (r *VBreadcrumbsDividerBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VBreadcrumbsDividerBuilder) Children(children ...h.HTMLComponent) (r *VBreadcrumbsDividerBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VBreadcrumbsDividerBuilder) AppendChildren(children ...h.HTMLComponent) (r *VBreadcrumbsDividerBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VBreadcrumbsDividerBuilder) PrependChildren(children ...h.HTMLComponent) (r *VBreadcrumbsDividerBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
 func (b *VBreadcrumbsDividerBuilder) Class(names ...string) (r *VBreadcrumbsDividerBuilder) {
 	b.tag.Class(names...)
 	return b

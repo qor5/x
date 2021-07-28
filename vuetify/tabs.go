@@ -83,8 +83,8 @@ func (b *VTabsBuilder) Light(v bool) (r *VTabsBuilder) {
 	return b
 }
 
-func (b *VTabsBuilder) MobileBreakPoint(v int) (r *VTabsBuilder) {
-	b.tag.Attr(":mobile-break-point", fmt.Sprint(v))
+func (b *VTabsBuilder) MobileBreakpoint(v string) (r *VTabsBuilder) {
+	b.tag.Attr("mobile-breakpoint", v)
 	return b
 }
 
@@ -115,6 +115,11 @@ func (b *VTabsBuilder) ShowArrows(v bool) (r *VTabsBuilder) {
 
 func (b *VTabsBuilder) SliderColor(v string) (r *VTabsBuilder) {
 	b.tag.Attr("slider-color", v)
+	return b
+}
+
+func (b *VTabsBuilder) SliderSize(v int) (r *VTabsBuilder) {
+	b.tag.Attr(":slider-size", fmt.Sprint(v))
 	return b
 }
 

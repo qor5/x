@@ -68,6 +68,11 @@ func (b *VTextareaBuilder) Dark(v bool) (r *VTextareaBuilder) {
 	return b
 }
 
+func (b *VTextareaBuilder) Dense(v bool) (r *VTextareaBuilder) {
+	b.tag.Attr(":dense", fmt.Sprint(v))
+	return b
+}
+
 func (b *VTextareaBuilder) Disabled(v bool) (r *VTextareaBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
 	return b
@@ -160,6 +165,11 @@ func (b *VTextareaBuilder) Outlined(v bool) (r *VTextareaBuilder) {
 
 func (b *VTextareaBuilder) PersistentHint(v bool) (r *VTextareaBuilder) {
 	b.tag.Attr(":persistent-hint", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTextareaBuilder) PersistentPlaceholder(v bool) (r *VTextareaBuilder) {
+	b.tag.Attr(":persistent-placeholder", fmt.Sprint(v))
 	return b
 }
 
@@ -259,7 +269,7 @@ func (b *VTextareaBuilder) ValidateOnBlur(v bool) (r *VTextareaBuilder) {
 }
 
 func (b *VTextareaBuilder) Value(v interface{}) (r *VTextareaBuilder) {
-	b.tag.Attr(":value", h.JSONString(v))
+	b.tag.Attr(":value", v)
 	return b
 }
 

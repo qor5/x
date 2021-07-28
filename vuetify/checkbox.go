@@ -18,6 +18,7 @@ func VCheckbox(children ...h.HTMLComponent) (r *VCheckboxBuilder) {
 	//r.FalseValue("false").TrueValue("true")
 	return
 }
+
 func (b *VCheckboxBuilder) AppendIcon(v string) (r *VCheckboxBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b
@@ -35,6 +36,11 @@ func (b *VCheckboxBuilder) Color(v string) (r *VCheckboxBuilder) {
 
 func (b *VCheckboxBuilder) Dark(v bool) (r *VCheckboxBuilder) {
 	b.tag.Attr(":dark", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCheckboxBuilder) Dense(v bool) (r *VCheckboxBuilder) {
+	b.tag.Attr(":dense", fmt.Sprint(v))
 	return b
 }
 
@@ -60,11 +66,6 @@ func (b *VCheckboxBuilder) ErrorMessages(v ...string) (r *VCheckboxBuilder) {
 
 func (b *VCheckboxBuilder) FalseValue(v string) (r *VCheckboxBuilder) {
 	b.tag.Attr("false-value", v)
-	return b
-}
-
-func (b *VCheckboxBuilder) Height(v int) (r *VCheckboxBuilder) {
-	b.tag.Attr(":height", fmt.Sprint(v))
 	return b
 }
 
@@ -94,7 +95,7 @@ func (b *VCheckboxBuilder) IndeterminateIcon(v string) (r *VCheckboxBuilder) {
 }
 
 func (b *VCheckboxBuilder) InputValue(v interface{}) (r *VCheckboxBuilder) {
-	b.tag.Attr(":input-value", h.JSONString(v))
+	b.tag.Attr(":input-value", v)
 	return b
 }
 
@@ -105,11 +106,6 @@ func (b *VCheckboxBuilder) Label(v string) (r *VCheckboxBuilder) {
 
 func (b *VCheckboxBuilder) Light(v bool) (r *VCheckboxBuilder) {
 	b.tag.Attr(":light", fmt.Sprint(v))
-	return b
-}
-
-func (b *VCheckboxBuilder) Loading(v bool) (r *VCheckboxBuilder) {
-	b.tag.Attr(":loading", fmt.Sprint(v))
 	return b
 }
 
@@ -153,7 +149,7 @@ func (b *VCheckboxBuilder) Ripple(v bool) (r *VCheckboxBuilder) {
 	return b
 }
 
-func (b *VCheckboxBuilder) Rules(v interface{}) (r *VCheckboxBuilder) {
+func (b *VCheckboxBuilder) Rules(v []string) (r *VCheckboxBuilder) {
 	b.tag.Attr("rules", v)
 	return b
 }
@@ -179,7 +175,16 @@ func (b *VCheckboxBuilder) ValidateOnBlur(v bool) (r *VCheckboxBuilder) {
 }
 
 func (b *VCheckboxBuilder) Value(v interface{}) (r *VCheckboxBuilder) {
-	b.tag.Attr(":value", fmt.Sprint(v))
+	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VCheckboxBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VCheckboxBuilder) Attr(vs ...interface{}) (r *VCheckboxBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 

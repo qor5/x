@@ -21,6 +21,7 @@ func VAutocomplete(children ...h.HTMLComponent) (r *VAutocompleteBuilder) {
 
 	return
 }
+
 func (b *VAutocompleteBuilder) AllowOverflow(v bool) (r *VAutocompleteBuilder) {
 	b.tag.Attr(":allow-overflow", fmt.Sprint(v))
 	return b
@@ -53,16 +54,6 @@ func (b *VAutocompleteBuilder) Autofocus(v bool) (r *VAutocompleteBuilder) {
 
 func (b *VAutocompleteBuilder) BackgroundColor(v string) (r *VAutocompleteBuilder) {
 	b.tag.Attr("background-color", v)
-	return b
-}
-
-func (b *VAutocompleteBuilder) Box(v bool) (r *VAutocompleteBuilder) {
-	b.tag.Attr(":box", fmt.Sprint(v))
-	return b
-}
-
-func (b *VAutocompleteBuilder) BrowserAutocomplete(v string) (r *VAutocompleteBuilder) {
-	b.tag.Attr("browser-autocomplete", v)
 	return b
 }
 
@@ -111,13 +102,18 @@ func (b *VAutocompleteBuilder) Dense(v bool) (r *VAutocompleteBuilder) {
 	return b
 }
 
+func (b *VAutocompleteBuilder) DisableLookup(v bool) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":disable-lookup", fmt.Sprint(v))
+	return b
+}
+
 func (b *VAutocompleteBuilder) Disabled(v bool) (r *VAutocompleteBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
 	return b
 }
 
-func (b *VAutocompleteBuilder) DontFillMaskBlanks(v bool) (r *VAutocompleteBuilder) {
-	b.tag.Attr(":dont-fill-mask-blanks", fmt.Sprint(v))
+func (b *VAutocompleteBuilder) Eager(v bool) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":eager", fmt.Sprint(v))
 	return b
 }
 
@@ -171,8 +167,13 @@ func (b *VAutocompleteBuilder) Hint(v string) (r *VAutocompleteBuilder) {
 	return b
 }
 
-func (b *VAutocompleteBuilder) ItemAvatar(v string) (r *VAutocompleteBuilder) {
-	b.tag.Attr("item-avatar", v)
+func (b *VAutocompleteBuilder) Id(v string) (r *VAutocompleteBuilder) {
+	b.tag.Attr("id", v)
+	return b
+}
+
+func (b *VAutocompleteBuilder) ItemColor(v string) (r *VAutocompleteBuilder) {
+	b.tag.Attr("item-color", v)
 	return b
 }
 
@@ -206,13 +207,13 @@ func (b *VAutocompleteBuilder) Light(v bool) (r *VAutocompleteBuilder) {
 	return b
 }
 
-func (b *VAutocompleteBuilder) Loading(v bool) (r *VAutocompleteBuilder) {
-	b.tag.Attr(":loading", fmt.Sprint(v))
+func (b *VAutocompleteBuilder) LoaderHeight(v int) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":loader-height", fmt.Sprint(v))
 	return b
 }
 
-func (b *VAutocompleteBuilder) Mask(v string) (r *VAutocompleteBuilder) {
-	b.tag.Attr("mask", v)
+func (b *VAutocompleteBuilder) Loading(v bool) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":loading", fmt.Sprint(v))
 	return b
 }
 
@@ -246,13 +247,18 @@ func (b *VAutocompleteBuilder) OpenOnClear(v bool) (r *VAutocompleteBuilder) {
 	return b
 }
 
-func (b *VAutocompleteBuilder) Outline(v bool) (r *VAutocompleteBuilder) {
-	b.tag.Attr(":outline", fmt.Sprint(v))
+func (b *VAutocompleteBuilder) Outlined(v bool) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":outlined", fmt.Sprint(v))
 	return b
 }
 
 func (b *VAutocompleteBuilder) PersistentHint(v bool) (r *VAutocompleteBuilder) {
 	b.tag.Attr(":persistent-hint", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAutocompleteBuilder) PersistentPlaceholder(v bool) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":persistent-placeholder", fmt.Sprint(v))
 	return b
 }
 
@@ -281,11 +287,6 @@ func (b *VAutocompleteBuilder) Readonly(v bool) (r *VAutocompleteBuilder) {
 	return b
 }
 
-func (b *VAutocompleteBuilder) ReturnMaskedValue(v bool) (r *VAutocompleteBuilder) {
-	b.tag.Attr(":return-masked-value", fmt.Sprint(v))
-	return b
-}
-
 func (b *VAutocompleteBuilder) ReturnObject(v bool) (r *VAutocompleteBuilder) {
 	b.tag.Attr(":return-object", fmt.Sprint(v))
 	return b
@@ -296,13 +297,23 @@ func (b *VAutocompleteBuilder) Reverse(v bool) (r *VAutocompleteBuilder) {
 	return b
 }
 
+func (b *VAutocompleteBuilder) Rounded(v bool) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
+	return b
+}
+
 func (b *VAutocompleteBuilder) Rules(v []string) (r *VAutocompleteBuilder) {
 	b.tag.Attr(":rules", v)
 	return b
 }
 
-func (b *VAutocompleteBuilder) SearchInput(v interface{}) (r *VAutocompleteBuilder) {
-	b.tag.Attr(":search-input", v)
+func (b *VAutocompleteBuilder) SearchInput(v string) (r *VAutocompleteBuilder) {
+	b.tag.Attr("search-input", v)
+	return b
+}
+
+func (b *VAutocompleteBuilder) Shaped(v bool) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":shaped", fmt.Sprint(v))
 	return b
 }
 
@@ -352,7 +363,51 @@ func (b *VAutocompleteBuilder) ValidateOnBlur(v bool) (r *VAutocompleteBuilder) 
 }
 
 func (b *VAutocompleteBuilder) Value(v interface{}) (r *VAutocompleteBuilder) {
-	b.tag.Attr(":value", h.JSONString(v))
+	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VAutocompleteBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VAutocompleteBuilder) Attr(vs ...interface{}) (r *VAutocompleteBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VAutocompleteBuilder) Children(children ...h.HTMLComponent) (r *VAutocompleteBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VAutocompleteBuilder) AppendChildren(children ...h.HTMLComponent) (r *VAutocompleteBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VAutocompleteBuilder) PrependChildren(children ...h.HTMLComponent) (r *VAutocompleteBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VAutocompleteBuilder) Class(names ...string) (r *VAutocompleteBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VAutocompleteBuilder) ClassIf(name string, add bool) (r *VAutocompleteBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VAutocompleteBuilder) On(name string, value string) (r *VAutocompleteBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VAutocompleteBuilder) Bind(name string, value string) (r *VAutocompleteBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

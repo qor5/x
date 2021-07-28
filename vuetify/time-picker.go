@@ -11,11 +11,31 @@ type VTimePickerBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VTimePicker() (r *VTimePickerBuilder) {
+func VTimePicker(children ...h.HTMLComponent) (r *VTimePickerBuilder) {
 	r = &VTimePickerBuilder{
-		tag: h.Tag("v-time-picker"),
+		tag: h.Tag("v-time-picker").Children(children...),
 	}
 	return
+}
+
+func (b *VTimePickerBuilder) AllowedHours(v []string) (r *VTimePickerBuilder) {
+	b.tag.Attr(":allowed-hours", v)
+	return b
+}
+
+func (b *VTimePickerBuilder) AllowedMinutes(v []string) (r *VTimePickerBuilder) {
+	b.tag.Attr(":allowed-minutes", v)
+	return b
+}
+
+func (b *VTimePickerBuilder) AllowedSeconds(v []string) (r *VTimePickerBuilder) {
+	b.tag.Attr(":allowed-seconds", v)
+	return b
+}
+
+func (b *VTimePickerBuilder) AmpmInTitle(v bool) (r *VTimePickerBuilder) {
+	b.tag.Attr(":ampm-in-title", fmt.Sprint(v))
+	return b
 }
 
 func (b *VTimePickerBuilder) Color(v string) (r *VTimePickerBuilder) {
@@ -30,6 +50,16 @@ func (b *VTimePickerBuilder) Dark(v bool) (r *VTimePickerBuilder) {
 
 func (b *VTimePickerBuilder) Disabled(v bool) (r *VTimePickerBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTimePickerBuilder) Elevation(v int) (r *VTimePickerBuilder) {
+	b.tag.Attr(":elevation", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTimePickerBuilder) Flat(v bool) (r *VTimePickerBuilder) {
+	b.tag.Attr(":flat", fmt.Sprint(v))
 	return b
 }
 
@@ -95,6 +125,30 @@ func (b *VTimePickerBuilder) Value(v interface{}) (r *VTimePickerBuilder) {
 
 func (b *VTimePickerBuilder) Width(v int) (r *VTimePickerBuilder) {
 	b.tag.Attr(":width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTimePickerBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VTimePickerBuilder) Attr(vs ...interface{}) (r *VTimePickerBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VTimePickerBuilder) Children(children ...h.HTMLComponent) (r *VTimePickerBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VTimePickerBuilder) AppendChildren(children ...h.HTMLComponent) (r *VTimePickerBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VTimePickerBuilder) PrependChildren(children ...h.HTMLComponent) (r *VTimePickerBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

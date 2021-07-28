@@ -148,8 +148,18 @@ func (b *VAppBarBuilder) MinWidth(v int) (r *VAppBarBuilder) {
 	return b
 }
 
+func (b *VAppBarBuilder) Outlined(v bool) (r *VAppBarBuilder) {
+	b.tag.Attr(":outlined", fmt.Sprint(v))
+	return b
+}
+
 func (b *VAppBarBuilder) Prominent(v bool) (r *VAppBarBuilder) {
 	b.tag.Attr(":prominent", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAppBarBuilder) Rounded(v bool) (r *VAppBarBuilder) {
+	b.tag.Attr(":rounded", fmt.Sprint(v))
 	return b
 }
 
@@ -165,6 +175,11 @@ func (b *VAppBarBuilder) ScrollTarget(v string) (r *VAppBarBuilder) {
 
 func (b *VAppBarBuilder) ScrollThreshold(v string) (r *VAppBarBuilder) {
 	b.tag.Attr("scroll-threshold", v)
+	return b
+}
+
+func (b *VAppBarBuilder) Shaped(v bool) (r *VAppBarBuilder) {
+	b.tag.Attr(":shaped", fmt.Sprint(v))
 	return b
 }
 

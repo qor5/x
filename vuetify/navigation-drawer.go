@@ -98,8 +98,18 @@ func (b *VNavigationDrawerBuilder) MiniVariantWidth(v int) (r *VNavigationDrawer
 	return b
 }
 
-func (b *VNavigationDrawerBuilder) MobileBreakPoint(v int) (r *VNavigationDrawerBuilder) {
-	b.tag.Attr(":mobile-break-point", fmt.Sprint(v))
+func (b *VNavigationDrawerBuilder) MobileBreakpoint(v int) (r *VNavigationDrawerBuilder) {
+	b.tag.Attr(":mobile-breakpoint", fmt.Sprint(v))
+	return b
+}
+
+func (b *VNavigationDrawerBuilder) OverlayColor(v string) (r *VNavigationDrawerBuilder) {
+	b.tag.Attr("overlay-color", v)
+	return b
+}
+
+func (b *VNavigationDrawerBuilder) OverlayOpacity(v int) (r *VNavigationDrawerBuilder) {
+	b.tag.Attr(":overlay-opacity", fmt.Sprint(v))
 	return b
 }
 

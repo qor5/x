@@ -28,6 +28,11 @@ func (b *VPaginationBuilder) Color(v string) (r *VPaginationBuilder) {
 	return b
 }
 
+func (b *VPaginationBuilder) CurrentPageAriaLabel(v string) (r *VPaginationBuilder) {
+	b.tag.Attr("current-page-aria-label", v)
+	return b
+}
+
 func (b *VPaginationBuilder) Dark(v bool) (r *VPaginationBuilder) {
 	b.tag.Attr(":dark", fmt.Sprint(v))
 	return b
@@ -48,13 +53,28 @@ func (b *VPaginationBuilder) Light(v bool) (r *VPaginationBuilder) {
 	return b
 }
 
+func (b *VPaginationBuilder) NextAriaLabel(v string) (r *VPaginationBuilder) {
+	b.tag.Attr("next-aria-label", v)
+	return b
+}
+
 func (b *VPaginationBuilder) NextIcon(v string) (r *VPaginationBuilder) {
 	b.tag.Attr("next-icon", v)
 	return b
 }
 
+func (b *VPaginationBuilder) PageAriaLabel(v string) (r *VPaginationBuilder) {
+	b.tag.Attr("page-aria-label", v)
+	return b
+}
+
 func (b *VPaginationBuilder) PrevIcon(v string) (r *VPaginationBuilder) {
 	b.tag.Attr("prev-icon", v)
+	return b
+}
+
+func (b *VPaginationBuilder) PreviousAriaLabel(v string) (r *VPaginationBuilder) {
+	b.tag.Attr("previous-aria-label", v)
 	return b
 }
 
@@ -65,6 +85,11 @@ func (b *VPaginationBuilder) TotalVisible(v int) (r *VPaginationBuilder) {
 
 func (b *VPaginationBuilder) Value(v int) (r *VPaginationBuilder) {
 	b.tag.Attr(":value", fmt.Sprint(v))
+	return b
+}
+
+func (b *VPaginationBuilder) WrapperAriaLabel(v string) (r *VPaginationBuilder) {
+	b.tag.Attr("wrapper-aria-label", v)
 	return b
 }
 

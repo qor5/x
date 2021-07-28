@@ -18,8 +18,58 @@ func VDataTableHeader() (r *VDataTableHeaderBuilder) {
 	return
 }
 
+func (b *VDataTableHeaderBuilder) CheckboxColor(v string) (r *VDataTableHeaderBuilder) {
+	b.tag.Attr("checkbox-color", v)
+	return b
+}
+
+func (b *VDataTableHeaderBuilder) DisableSort(v bool) (r *VDataTableHeaderBuilder) {
+	b.tag.Attr(":disable-sort", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDataTableHeaderBuilder) EveryItem(v bool) (r *VDataTableHeaderBuilder) {
+	b.tag.Attr(":every-item", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDataTableHeaderBuilder) Headers(v []string) (r *VDataTableHeaderBuilder) {
+	b.tag.Attr(":headers", v)
+	return b
+}
+
 func (b *VDataTableHeaderBuilder) Mobile(v bool) (r *VDataTableHeaderBuilder) {
 	b.tag.Attr(":mobile", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDataTableHeaderBuilder) Options(v interface{}) (r *VDataTableHeaderBuilder) {
+	b.tag.Attr(":options", v)
+	return b
+}
+
+func (b *VDataTableHeaderBuilder) ShowGroupBy(v bool) (r *VDataTableHeaderBuilder) {
+	b.tag.Attr(":show-group-by", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDataTableHeaderBuilder) SingleSelect(v bool) (r *VDataTableHeaderBuilder) {
+	b.tag.Attr(":single-select", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDataTableHeaderBuilder) SomeItems(v bool) (r *VDataTableHeaderBuilder) {
+	b.tag.Attr(":some-items", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDataTableHeaderBuilder) SortByText(v string) (r *VDataTableHeaderBuilder) {
+	b.tag.Attr("sort-by-text", v)
+	return b
+}
+
+func (b *VDataTableHeaderBuilder) SortIcon(v string) (r *VDataTableHeaderBuilder) {
+	b.tag.Attr("sort-icon", v)
 	return b
 }
 

@@ -58,13 +58,32 @@ func (b *VSystemBarBuilder) LightsOut(v bool) (r *VSystemBarBuilder) {
 	return b
 }
 
-func (b *VSystemBarBuilder) Status(v bool) (r *VSystemBarBuilder) {
-	b.tag.Attr(":status", fmt.Sprint(v))
+func (b *VSystemBarBuilder) Window(v bool) (r *VSystemBarBuilder) {
+	b.tag.Attr(":window", fmt.Sprint(v))
 	return b
 }
 
-func (b *VSystemBarBuilder) Window(v bool) (r *VSystemBarBuilder) {
-	b.tag.Attr(":window", fmt.Sprint(v))
+func (b *VSystemBarBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VSystemBarBuilder) Attr(vs ...interface{}) (r *VSystemBarBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VSystemBarBuilder) Children(children ...h.HTMLComponent) (r *VSystemBarBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VSystemBarBuilder) AppendChildren(children ...h.HTMLComponent) (r *VSystemBarBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VSystemBarBuilder) PrependChildren(children ...h.HTMLComponent) (r *VSystemBarBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

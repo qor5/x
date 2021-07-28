@@ -11,15 +11,11 @@ type VSliderBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VSlider() (r *VSliderBuilder) {
+func VSlider(children ...h.HTMLComponent) (r *VSliderBuilder) {
 	r = &VSliderBuilder{
-		tag: h.Tag("vw-slider"),
+		tag: h.Tag("vw-slider").Children(children...),
 	}
 	return
-}
-func (b *VSliderBuilder) AlwaysDirty(v bool) (r *VSliderBuilder) {
-	b.tag.Attr(":always-dirty", fmt.Sprint(v))
-	return b
 }
 
 func (b *VSliderBuilder) AppendIcon(v string) (r *VSliderBuilder) {
@@ -39,6 +35,11 @@ func (b *VSliderBuilder) Color(v string) (r *VSliderBuilder) {
 
 func (b *VSliderBuilder) Dark(v bool) (r *VSliderBuilder) {
 	b.tag.Attr(":dark", fmt.Sprint(v))
+	return b
+}
+
+func (b *VSliderBuilder) Dense(v bool) (r *VSliderBuilder) {
+	b.tag.Attr(":dense", fmt.Sprint(v))
 	return b
 }
 
@@ -77,6 +78,11 @@ func (b *VSliderBuilder) Hint(v string) (r *VSliderBuilder) {
 	return b
 }
 
+func (b *VSliderBuilder) Id(v string) (r *VSliderBuilder) {
+	b.tag.Attr("id", v)
+	return b
+}
+
 func (b *VSliderBuilder) InverseLabel(v bool) (r *VSliderBuilder) {
 	b.tag.Attr(":inverse-label", fmt.Sprint(v))
 	return b
@@ -89,6 +95,11 @@ func (b *VSliderBuilder) Label(v string) (r *VSliderBuilder) {
 
 func (b *VSliderBuilder) Light(v bool) (r *VSliderBuilder) {
 	b.tag.Attr(":light", fmt.Sprint(v))
+	return b
+}
+
+func (b *VSliderBuilder) LoaderHeight(v int) (r *VSliderBuilder) {
+	b.tag.Attr(":loader-height", fmt.Sprint(v))
 	return b
 }
 
@@ -182,13 +193,67 @@ func (b *VSliderBuilder) TrackColor(v string) (r *VSliderBuilder) {
 	return b
 }
 
+func (b *VSliderBuilder) TrackFillColor(v string) (r *VSliderBuilder) {
+	b.tag.Attr("track-fill-color", v)
+	return b
+}
+
 func (b *VSliderBuilder) ValidateOnBlur(v bool) (r *VSliderBuilder) {
 	b.tag.Attr(":validate-on-blur", fmt.Sprint(v))
 	return b
 }
 
-func (b *VSliderBuilder) Value(v int) (r *VSliderBuilder) {
-	b.tag.Attr(":value", fmt.Sprint(v))
+func (b *VSliderBuilder) Value(v interface{}) (r *VSliderBuilder) {
+	b.tag.Attr(":value", v)
+	return b
+}
+
+func (b *VSliderBuilder) Vertical(v bool) (r *VSliderBuilder) {
+	b.tag.Attr(":vertical", fmt.Sprint(v))
+	return b
+}
+
+func (b *VSliderBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VSliderBuilder) Attr(vs ...interface{}) (r *VSliderBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VSliderBuilder) Children(children ...h.HTMLComponent) (r *VSliderBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VSliderBuilder) AppendChildren(children ...h.HTMLComponent) (r *VSliderBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VSliderBuilder) PrependChildren(children ...h.HTMLComponent) (r *VSliderBuilder) {
+	b.tag.PrependChildren(children...)
+	return b
+}
+
+func (b *VSliderBuilder) Class(names ...string) (r *VSliderBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
+func (b *VSliderBuilder) ClassIf(name string, add bool) (r *VSliderBuilder) {
+	b.tag.ClassIf(name, add)
+	return b
+}
+
+func (b *VSliderBuilder) On(name string, value string) (r *VSliderBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
+	return b
+}
+
+func (b *VSliderBuilder) Bind(name string, value string) (r *VSliderBuilder) {
+	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
 }
 

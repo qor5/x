@@ -11,9 +11,9 @@ type VRatingBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VRating() (r *VRatingBuilder) {
+func VRating(children ...h.HTMLComponent) (r *VRatingBuilder) {
 	r = &VRatingBuilder{
-		tag: h.Tag("v-rating"),
+		tag: h.Tag("v-rating").Children(children...),
 	}
 	return
 }
@@ -73,6 +73,11 @@ func (b *VRatingBuilder) Hover(v bool) (r *VRatingBuilder) {
 	return b
 }
 
+func (b *VRatingBuilder) IconLabel(v string) (r *VRatingBuilder) {
+	b.tag.Attr("icon-label", v)
+	return b
+}
+
 func (b *VRatingBuilder) Large(v bool) (r *VRatingBuilder) {
 	b.tag.Attr(":large", fmt.Sprint(v))
 	return b
@@ -85,11 +90,6 @@ func (b *VRatingBuilder) Length(v int) (r *VRatingBuilder) {
 
 func (b *VRatingBuilder) Light(v bool) (r *VRatingBuilder) {
 	b.tag.Attr(":light", fmt.Sprint(v))
-	return b
-}
-
-func (b *VRatingBuilder) Medium(v bool) (r *VRatingBuilder) {
-	b.tag.Attr(":medium", fmt.Sprint(v))
 	return b
 }
 
@@ -125,6 +125,35 @@ func (b *VRatingBuilder) Value(v int) (r *VRatingBuilder) {
 
 func (b *VRatingBuilder) XLarge(v bool) (r *VRatingBuilder) {
 	b.tag.Attr(":x-large", fmt.Sprint(v))
+	return b
+}
+
+func (b *VRatingBuilder) XSmall(v bool) (r *VRatingBuilder) {
+	b.tag.Attr(":x-small", fmt.Sprint(v))
+	return b
+}
+
+func (b *VRatingBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+}
+
+func (b *VRatingBuilder) Attr(vs ...interface{}) (r *VRatingBuilder) {
+	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VRatingBuilder) Children(children ...h.HTMLComponent) (r *VRatingBuilder) {
+	b.tag.Children(children...)
+	return b
+}
+
+func (b *VRatingBuilder) AppendChildren(children ...h.HTMLComponent) (r *VRatingBuilder) {
+	b.tag.AppendChildren(children...)
+	return b
+}
+
+func (b *VRatingBuilder) PrependChildren(children ...h.HTMLComponent) (r *VRatingBuilder) {
+	b.tag.PrependChildren(children...)
 	return b
 }
 

@@ -11,9 +11,9 @@ type VTextFieldBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VTextField() (r *VTextFieldBuilder) {
+func VTextField(children ...h.HTMLComponent) (r *VTextFieldBuilder) {
 	r = &VTextFieldBuilder{
-		tag: h.Tag("vw-text-field"),
+		tag: h.Tag("vw-text-field").Children(children...),
 	}
 	return
 }
@@ -60,6 +60,11 @@ func (b *VTextFieldBuilder) Counter(v bool) (r *VTextFieldBuilder) {
 
 func (b *VTextFieldBuilder) Dark(v bool) (r *VTextFieldBuilder) {
 	b.tag.Attr(":dark", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTextFieldBuilder) Dense(v bool) (r *VTextFieldBuilder) {
+	b.tag.Attr(":dense", fmt.Sprint(v))
 	return b
 }
 
@@ -153,6 +158,11 @@ func (b *VTextFieldBuilder) PersistentHint(v bool) (r *VTextFieldBuilder) {
 	return b
 }
 
+func (b *VTextFieldBuilder) PersistentPlaceholder(v bool) (r *VTextFieldBuilder) {
+	b.tag.Attr(":persistent-placeholder", fmt.Sprint(v))
+	return b
+}
+
 func (b *VTextFieldBuilder) Placeholder(v string) (r *VTextFieldBuilder) {
 	b.tag.Attr("placeholder", v)
 	return b
@@ -238,8 +248,8 @@ func (b *VTextFieldBuilder) ValidateOnBlur(v bool) (r *VTextFieldBuilder) {
 	return b
 }
 
-func (b *VTextFieldBuilder) Value(v string) (r *VTextFieldBuilder) {
-	b.tag.Attr("value", v)
+func (b *VTextFieldBuilder) Value(v interface{}) (r *VTextFieldBuilder) {
+	b.tag.Attr(":value", v)
 	return b
 }
 
