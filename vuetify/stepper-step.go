@@ -49,7 +49,7 @@ func (b *VStepperStepBuilder) ErrorIcon(v string) (r *VStepperStepBuilder) {
 }
 
 func (b *VStepperStepBuilder) Rules(v []string) (r *VStepperStepBuilder) {
-	b.tag.Attr(":rules", v)
+	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
 

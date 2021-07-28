@@ -39,7 +39,7 @@ func (b *VBadgeBuilder) Color(v string) (r *VBadgeBuilder) {
 }
 
 func (b *VBadgeBuilder) Content(v interface{}) (r *VBadgeBuilder) {
-	b.tag.Attr(":content", v)
+	b.tag.Attr(":content", h.JSONString(v))
 	return b
 }
 

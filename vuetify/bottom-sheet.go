@@ -19,12 +19,12 @@ func VBottomSheet(children ...h.HTMLComponent) (r *VBottomSheetBuilder) {
 }
 
 func (b *VBottomSheetBuilder) Activator(v interface{}) (r *VBottomSheetBuilder) {
-	b.tag.Attr(":activator", v)
+	b.tag.Attr(":activator", h.JSONString(v))
 	return b
 }
 
 func (b *VBottomSheetBuilder) Attach(v interface{}) (r *VBottomSheetBuilder) {
-	b.tag.Attr(":attach", v)
+	b.tag.Attr(":attach", h.JSONString(v))
 	return b
 }
 
@@ -129,7 +129,7 @@ func (b *VBottomSheetBuilder) RetainFocus(v bool) (r *VBottomSheetBuilder) {
 }
 
 func (b *VBottomSheetBuilder) ReturnValue(v interface{}) (r *VBottomSheetBuilder) {
-	b.tag.Attr(":return-value", v)
+	b.tag.Attr(":return-value", h.JSONString(v))
 	return b
 }
 

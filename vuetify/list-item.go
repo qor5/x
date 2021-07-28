@@ -74,7 +74,7 @@ func (b *VListItemBuilder) Inactive(v bool) (r *VListItemBuilder) {
 }
 
 func (b *VListItemBuilder) InputValue(v interface{}) (r *VListItemBuilder) {
-	b.tag.Attr(":input-value", v)
+	b.tag.Attr(":input-value", h.JSONString(v))
 	return b
 }
 

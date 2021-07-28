@@ -19,7 +19,7 @@ func VEditDialog(children ...h.HTMLComponent) (r *VEditDialogBuilder) {
 }
 
 func (b *VEditDialogBuilder) CancelText(v interface{}) (r *VEditDialogBuilder) {
-	b.tag.Attr(":cancel-text", v)
+	b.tag.Attr(":cancel-text", h.JSONString(v))
 	return b
 }
 
@@ -49,12 +49,12 @@ func (b *VEditDialogBuilder) Persistent(v bool) (r *VEditDialogBuilder) {
 }
 
 func (b *VEditDialogBuilder) ReturnValue(v interface{}) (r *VEditDialogBuilder) {
-	b.tag.Attr(":return-value", v)
+	b.tag.Attr(":return-value", h.JSONString(v))
 	return b
 }
 
 func (b *VEditDialogBuilder) SaveText(v interface{}) (r *VEditDialogBuilder) {
-	b.tag.Attr(":save-text", v)
+	b.tag.Attr(":save-text", h.JSONString(v))
 	return b
 }
 

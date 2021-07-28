@@ -219,7 +219,7 @@ func (b *VFileInputBuilder) Rounded(v bool) (r *VFileInputBuilder) {
 }
 
 func (b *VFileInputBuilder) Rules(v []string) (r *VFileInputBuilder) {
-	b.tag.Attr(":rules", v)
+	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
 

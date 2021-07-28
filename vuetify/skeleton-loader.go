@@ -84,7 +84,7 @@ func (b *VSkeletonLoaderBuilder) Type(v string) (r *VSkeletonLoaderBuilder) {
 }
 
 func (b *VSkeletonLoaderBuilder) Types(v interface{}) (r *VSkeletonLoaderBuilder) {
-	b.tag.Attr(":types", v)
+	b.tag.Attr(":types", h.JSONString(v))
 	return b
 }
 

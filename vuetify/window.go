@@ -69,7 +69,7 @@ func (b *VWindowBuilder) Tag(v string) (r *VWindowBuilder) {
 }
 
 func (b *VWindowBuilder) Touch(v interface{}) (r *VWindowBuilder) {
-	b.tag.Attr(":touch", v)
+	b.tag.Attr(":touch", h.JSONString(v))
 	return b
 }
 

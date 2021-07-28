@@ -89,7 +89,7 @@ func (b *VImgBuilder) MinWidth(v int) (r *VImgBuilder) {
 }
 
 func (b *VImgBuilder) Options(v interface{}) (r *VImgBuilder) {
-	b.tag.Attr(":options", v)
+	b.tag.Attr(":options", h.JSONString(v))
 	return b
 }
 

@@ -109,7 +109,7 @@ func (b *VBtnBuilder) Icon(v bool) (r *VBtnBuilder) {
 }
 
 func (b *VBtnBuilder) InputValue(v interface{}) (r *VBtnBuilder) {
-	b.tag.Attr(":input-value", v)
+	b.tag.Attr(":input-value", h.JSONString(v))
 	return b
 }
 

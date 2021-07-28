@@ -24,7 +24,7 @@ func (b *VTreeviewBuilder) Activatable(v bool) (r *VTreeviewBuilder) {
 }
 
 func (b *VTreeviewBuilder) Active(v []string) (r *VTreeviewBuilder) {
-	b.tag.Attr(":active", v)
+	b.tag.Attr(":active", h.JSONString(v))
 	return b
 }
 
@@ -84,7 +84,7 @@ func (b *VTreeviewBuilder) ItemText(v string) (r *VTreeviewBuilder) {
 }
 
 func (b *VTreeviewBuilder) Items(v []string) (r *VTreeviewBuilder) {
-	b.tag.Attr(":items", v)
+	b.tag.Attr(":items", h.JSONString(v))
 	return b
 }
 
@@ -114,7 +114,7 @@ func (b *VTreeviewBuilder) OnIcon(v string) (r *VTreeviewBuilder) {
 }
 
 func (b *VTreeviewBuilder) Open(v []string) (r *VTreeviewBuilder) {
-	b.tag.Attr(":open", v)
+	b.tag.Attr(":open", h.JSONString(v))
 	return b
 }
 

@@ -84,7 +84,7 @@ func (b *VColorPickerBuilder) ShowSwatches(v bool) (r *VColorPickerBuilder) {
 }
 
 func (b *VColorPickerBuilder) Swatches(v []string) (r *VColorPickerBuilder) {
-	b.tag.Attr(":swatches", v)
+	b.tag.Attr(":swatches", h.JSONString(v))
 	return b
 }
 

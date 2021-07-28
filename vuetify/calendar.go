@@ -19,7 +19,7 @@ func VCalendar(children ...h.HTMLComponent) (r *VCalendarBuilder) {
 }
 
 func (b *VCalendarBuilder) Categories(v []string) (r *VCalendarBuilder) {
-	b.tag.Attr(":categories", v)
+	b.tag.Attr(":categories", h.JSONString(v))
 	return b
 }
 
@@ -134,7 +134,7 @@ func (b *VCalendarBuilder) EventTimed(v string) (r *VCalendarBuilder) {
 }
 
 func (b *VCalendarBuilder) Events(v []string) (r *VCalendarBuilder) {
-	b.tag.Attr(":events", v)
+	b.tag.Attr(":events", h.JSONString(v))
 	return b
 }
 
@@ -194,7 +194,7 @@ func (b *VCalendarBuilder) MaxDays(v int) (r *VCalendarBuilder) {
 }
 
 func (b *VCalendarBuilder) MinWeeks(v interface{}) (r *VCalendarBuilder) {
-	b.tag.Attr(":min-weeks", v)
+	b.tag.Attr(":min-weeks", h.JSONString(v))
 	return b
 }
 
@@ -244,7 +244,7 @@ func (b *VCalendarBuilder) Value(v string) (r *VCalendarBuilder) {
 }
 
 func (b *VCalendarBuilder) Weekdays(v []string) (r *VCalendarBuilder) {
-	b.tag.Attr(":weekdays", v)
+	b.tag.Attr(":weekdays", h.JSONString(v))
 	return b
 }
 

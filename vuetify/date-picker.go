@@ -44,12 +44,12 @@ func (b *VDatePickerBuilder) Elevation(v int) (r *VDatePickerBuilder) {
 }
 
 func (b *VDatePickerBuilder) EventColor(v []string) (r *VDatePickerBuilder) {
-	b.tag.Attr(":event-color", v)
+	b.tag.Attr(":event-color", h.JSONString(v))
 	return b
 }
 
 func (b *VDatePickerBuilder) Events(v []string) (r *VDatePickerBuilder) {
-	b.tag.Attr(":events", v)
+	b.tag.Attr(":events", h.JSONString(v))
 	return b
 }
 

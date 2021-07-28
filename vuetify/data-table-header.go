@@ -34,7 +34,7 @@ func (b *VDataTableHeaderBuilder) EveryItem(v bool) (r *VDataTableHeaderBuilder)
 }
 
 func (b *VDataTableHeaderBuilder) Headers(v []string) (r *VDataTableHeaderBuilder) {
-	b.tag.Attr(":headers", v)
+	b.tag.Attr(":headers", h.JSONString(v))
 	return b
 }
 
@@ -44,7 +44,7 @@ func (b *VDataTableHeaderBuilder) Mobile(v bool) (r *VDataTableHeaderBuilder) {
 }
 
 func (b *VDataTableHeaderBuilder) Options(v interface{}) (r *VDataTableHeaderBuilder) {
-	b.tag.Attr(":options", v)
+	b.tag.Attr(":options", h.JSONString(v))
 	return b
 }
 

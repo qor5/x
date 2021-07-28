@@ -78,8 +78,8 @@ func (b *VRadioBuilder) Ripple(v bool) (r *VRadioBuilder) {
 	return b
 }
 
-func (b *VRadioBuilder) Value(v string) (r *VRadioBuilder) {
-	b.tag.Attr("value", v)
+func (b *VRadioBuilder) Value(v interface{}) (r *VRadioBuilder) {
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

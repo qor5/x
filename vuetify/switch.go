@@ -63,8 +63,8 @@ func (b *VSwitchBuilder) ErrorMessages(v ...string) (r *VSwitchBuilder) {
 	return b
 }
 
-func (b *VSwitchBuilder) FalseValue(v string) (r *VSwitchBuilder) {
-	b.tag.Attr("false-value", v)
+func (b *VSwitchBuilder) FalseValue(v interface{}) (r *VSwitchBuilder) {
+	b.tag.Attr(":false-value", h.JSONString(v))
 	return b
 }
 
@@ -144,7 +144,7 @@ func (b *VSwitchBuilder) Ripple(v bool) (r *VSwitchBuilder) {
 }
 
 func (b *VSwitchBuilder) Rules(v []string) (r *VSwitchBuilder) {
-	b.tag.Attr("rules", v)
+	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
 
@@ -158,8 +158,8 @@ func (b *VSwitchBuilder) SuccessMessages(v string) (r *VSwitchBuilder) {
 	return b
 }
 
-func (b *VSwitchBuilder) TrueValue(v string) (r *VSwitchBuilder) {
-	b.tag.Attr("true-value", v)
+func (b *VSwitchBuilder) TrueValue(v interface{}) (r *VSwitchBuilder) {
+	b.tag.Attr(":true-value", h.JSONString(v))
 	return b
 }
 
@@ -168,8 +168,8 @@ func (b *VSwitchBuilder) ValidateOnBlur(v bool) (r *VSwitchBuilder) {
 	return b
 }
 
-func (b *VSwitchBuilder) Value(v bool) (r *VSwitchBuilder) {
-	b.tag.Attr("value", fmt.Sprint(v))
+func (b *VSwitchBuilder) Value(v interface{}) (r *VSwitchBuilder) {
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

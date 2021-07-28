@@ -84,7 +84,7 @@ func (b *VTabsItemsBuilder) Tag(v string) (r *VTabsItemsBuilder) {
 }
 
 func (b *VTabsItemsBuilder) Touch(v interface{}) (r *VTabsItemsBuilder) {
-	b.tag.Attr(":touch", v)
+	b.tag.Attr(":touch", h.JSONString(v))
 	return b
 }
 

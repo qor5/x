@@ -99,7 +99,7 @@ func (b *VChipBuilder) Href(v string) (r *VChipBuilder) {
 }
 
 func (b *VChipBuilder) InputValue(v interface{}) (r *VChipBuilder) {
-	b.tag.Attr(":input-value", v)
+	b.tag.Attr(":input-value", h.JSONString(v))
 	return b
 }
 

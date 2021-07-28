@@ -199,7 +199,7 @@ func (b *VTextFieldBuilder) Rounded(v bool) (r *VTextFieldBuilder) {
 }
 
 func (b *VTextFieldBuilder) Rules(v []string) (r *VTextFieldBuilder) {
-	b.tag.Attr(":rules", v)
+	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
 

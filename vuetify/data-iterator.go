@@ -44,12 +44,12 @@ func (b *VDataIteratorBuilder) DisableSort(v bool) (r *VDataIteratorBuilder) {
 }
 
 func (b *VDataIteratorBuilder) Expanded(v []string) (r *VDataIteratorBuilder) {
-	b.tag.Attr(":expanded", v)
+	b.tag.Attr(":expanded", h.JSONString(v))
 	return b
 }
 
 func (b *VDataIteratorBuilder) FooterProps(v interface{}) (r *VDataIteratorBuilder) {
-	b.tag.Attr(":footer-props", v)
+	b.tag.Attr(":footer-props", h.JSONString(v))
 	return b
 }
 
@@ -74,7 +74,7 @@ func (b *VDataIteratorBuilder) ItemKey(v string) (r *VDataIteratorBuilder) {
 }
 
 func (b *VDataIteratorBuilder) Items(v []string) (r *VDataIteratorBuilder) {
-	b.tag.Attr(":items", v)
+	b.tag.Attr(":items", h.JSONString(v))
 	return b
 }
 
@@ -129,7 +129,7 @@ func (b *VDataIteratorBuilder) NoResultsText(v string) (r *VDataIteratorBuilder)
 }
 
 func (b *VDataIteratorBuilder) Options(v interface{}) (r *VDataIteratorBuilder) {
-	b.tag.Attr("options", v)
+	b.tag.Attr(":options", h.JSONString(v))
 	return b
 }
 

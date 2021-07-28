@@ -39,7 +39,7 @@ func (b *VDataFooterBuilder) ItemsPerPageAllText(v string) (r *VDataFooterBuilde
 }
 
 func (b *VDataFooterBuilder) ItemsPerPageOptions(v []string) (r *VDataFooterBuilder) {
-	b.tag.Attr(":items-per-page-options", v)
+	b.tag.Attr(":items-per-page-options", h.JSONString(v))
 	return b
 }
 
@@ -59,7 +59,7 @@ func (b *VDataFooterBuilder) NextIcon(v string) (r *VDataFooterBuilder) {
 }
 
 func (b *VDataFooterBuilder) Options(v interface{}) (r *VDataFooterBuilder) {
-	b.tag.Attr(":options", v)
+	b.tag.Attr(":options", h.JSONString(v))
 	return b
 }
 
@@ -69,7 +69,7 @@ func (b *VDataFooterBuilder) PageText(v string) (r *VDataFooterBuilder) {
 }
 
 func (b *VDataFooterBuilder) Pagination(v interface{}) (r *VDataFooterBuilder) {
-	b.tag.Attr(":pagination", v)
+	b.tag.Attr(":pagination", h.JSONString(v))
 	return b
 }
 

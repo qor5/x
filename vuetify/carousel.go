@@ -124,7 +124,7 @@ func (b *VCarouselBuilder) Tag(v string) (r *VCarouselBuilder) {
 }
 
 func (b *VCarouselBuilder) Touch(v interface{}) (r *VCarouselBuilder) {
-	b.tag.Attr(":touch", v)
+	b.tag.Attr(":touch", h.JSONString(v))
 	return b
 }
 

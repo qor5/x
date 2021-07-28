@@ -144,7 +144,7 @@ func (b *VRadioGroupBuilder) Row(v bool) (r *VRadioGroupBuilder) {
 }
 
 func (b *VRadioGroupBuilder) Rules(v []string) (r *VRadioGroupBuilder) {
-	b.tag.Attr(":rules", v)
+	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
 

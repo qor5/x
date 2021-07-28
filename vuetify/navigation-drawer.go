@@ -148,8 +148,8 @@ func (b *VNavigationDrawerBuilder) Touchless(v bool) (r *VNavigationDrawerBuilde
 	return b
 }
 
-func (b *VNavigationDrawerBuilder) Value(v bool) (r *VNavigationDrawerBuilder) {
-	b.tag.Attr(":value", fmt.Sprint(v))
+func (b *VNavigationDrawerBuilder) Value(v interface{}) (r *VNavigationDrawerBuilder) {
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

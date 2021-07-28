@@ -44,7 +44,7 @@ func (b *VLazyBuilder) MinWidth(v int) (r *VLazyBuilder) {
 }
 
 func (b *VLazyBuilder) Options(v interface{}) (r *VLazyBuilder) {
-	b.tag.Attr(":options", v)
+	b.tag.Attr(":options", h.JSONString(v))
 	return b
 }
 

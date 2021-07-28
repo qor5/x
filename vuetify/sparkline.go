@@ -49,7 +49,7 @@ func (b *VSparklineBuilder) Fill(v bool) (r *VSparklineBuilder) {
 }
 
 func (b *VSparklineBuilder) Gradient(v []string) (r *VSparklineBuilder) {
-	b.tag.Attr(":gradient", v)
+	b.tag.Attr(":gradient", h.JSONString(v))
 	return b
 }
 
@@ -69,7 +69,7 @@ func (b *VSparklineBuilder) LabelSize(v int) (r *VSparklineBuilder) {
 }
 
 func (b *VSparklineBuilder) Labels(v []string) (r *VSparklineBuilder) {
-	b.tag.Attr(":labels", v)
+	b.tag.Attr(":labels", h.JSONString(v))
 	return b
 }
 

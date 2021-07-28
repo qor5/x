@@ -38,7 +38,7 @@ func (b *VAutocompleteBuilder) AppendOuterIcon(v string) (r *VAutocompleteBuilde
 }
 
 func (b *VAutocompleteBuilder) Attach(v interface{}) (r *VAutocompleteBuilder) {
-	b.tag.Attr(":attach", v)
+	b.tag.Attr(":attach", h.JSONString(v))
 	return b
 }
 
@@ -129,6 +129,11 @@ func (b *VAutocompleteBuilder) ErrorCount(v int) (r *VAutocompleteBuilder) {
 
 func (b *VAutocompleteBuilder) ErrorMessages(v ...string) (r *VAutocompleteBuilder) {
 	setErrorMessages(b.tag, v)
+	return b
+}
+
+func (b *VAutocompleteBuilder) Filled(v bool) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":filled", fmt.Sprint(v))
 	return b
 }
 
@@ -303,7 +308,7 @@ func (b *VAutocompleteBuilder) Rounded(v bool) (r *VAutocompleteBuilder) {
 }
 
 func (b *VAutocompleteBuilder) Rules(v []string) (r *VAutocompleteBuilder) {
-	b.tag.Attr(":rules", v)
+	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
 

@@ -19,12 +19,12 @@ func VDialog(children ...h.HTMLComponent) (r *VDialogBuilder) {
 }
 
 func (b *VDialogBuilder) Activator(v interface{}) (r *VDialogBuilder) {
-	b.tag.Attr(":activator", v)
+	b.tag.Attr(":activator", h.JSONString(v))
 	return b
 }
 
 func (b *VDialogBuilder) Attach(v interface{}) (r *VDialogBuilder) {
-	b.tag.Attr(":attach", v)
+	b.tag.Attr(":attach", h.JSONString(v))
 	return b
 }
 
@@ -124,7 +124,7 @@ func (b *VDialogBuilder) RetainFocus(v bool) (r *VDialogBuilder) {
 }
 
 func (b *VDialogBuilder) ReturnValue(v interface{}) (r *VDialogBuilder) {
-	b.tag.Attr(":return-value", v)
+	b.tag.Attr(":return-value", h.JSONString(v))
 	return b
 }
 

@@ -64,8 +64,8 @@ func (b *VCheckboxBuilder) ErrorMessages(v ...string) (r *VCheckboxBuilder) {
 	return b
 }
 
-func (b *VCheckboxBuilder) FalseValue(v string) (r *VCheckboxBuilder) {
-	b.tag.Attr("false-value", v)
+func (b *VCheckboxBuilder) FalseValue(v interface{}) (r *VCheckboxBuilder) {
+	b.tag.Attr(":false-value", h.JSONString(v))
 	return b
 }
 
@@ -95,7 +95,7 @@ func (b *VCheckboxBuilder) IndeterminateIcon(v string) (r *VCheckboxBuilder) {
 }
 
 func (b *VCheckboxBuilder) InputValue(v interface{}) (r *VCheckboxBuilder) {
-	b.tag.Attr(":input-value", v)
+	b.tag.Attr(":input-value", h.JSONString(v))
 	return b
 }
 
@@ -150,7 +150,7 @@ func (b *VCheckboxBuilder) Ripple(v bool) (r *VCheckboxBuilder) {
 }
 
 func (b *VCheckboxBuilder) Rules(v []string) (r *VCheckboxBuilder) {
-	b.tag.Attr("rules", v)
+	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
 
@@ -164,8 +164,8 @@ func (b *VCheckboxBuilder) SuccessMessages(v string) (r *VCheckboxBuilder) {
 	return b
 }
 
-func (b *VCheckboxBuilder) TrueValue(v string) (r *VCheckboxBuilder) {
-	b.tag.Attr("true-value", v)
+func (b *VCheckboxBuilder) TrueValue(v interface{}) (r *VCheckboxBuilder) {
+	b.tag.Attr(":true-value", h.JSONString(v))
 	return b
 }
 

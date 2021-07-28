@@ -139,7 +139,7 @@ func (b *VSliderBuilder) Readonly(v bool) (r *VSliderBuilder) {
 }
 
 func (b *VSliderBuilder) Rules(v []string) (r *VSliderBuilder) {
-	b.tag.Attr(":rules", v)
+	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
 
@@ -174,7 +174,7 @@ func (b *VSliderBuilder) ThumbSize(v int) (r *VSliderBuilder) {
 }
 
 func (b *VSliderBuilder) TickLabels(v []string) (r *VSliderBuilder) {
-	b.tag.Attr(":tick-labels", v)
+	b.tag.Attr(":tick-labels", h.JSONString(v))
 	return b
 }
 

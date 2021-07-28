@@ -119,7 +119,7 @@ func (b *VInputBuilder) Readonly(v bool) (r *VInputBuilder) {
 }
 
 func (b *VInputBuilder) Rules(v []string) (r *VInputBuilder) {
-	b.tag.Attr(":rules", v)
+	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
 

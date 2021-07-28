@@ -24,7 +24,7 @@ func (b *VMenuBuilder) Absolute(v bool) (r *VMenuBuilder) {
 }
 
 func (b *VMenuBuilder) Activator(v interface{}) (r *VMenuBuilder) {
-	b.tag.Attr(":activator", v)
+	b.tag.Attr(":activator", h.JSONString(v))
 	return b
 }
 
@@ -34,7 +34,7 @@ func (b *VMenuBuilder) AllowOverflow(v bool) (r *VMenuBuilder) {
 }
 
 func (b *VMenuBuilder) Attach(v interface{}) (r *VMenuBuilder) {
-	b.tag.Attr(":attach", v)
+	b.tag.Attr(":attach", h.JSONString(v))
 	return b
 }
 
@@ -199,7 +199,7 @@ func (b *VMenuBuilder) PositionY(v int) (r *VMenuBuilder) {
 }
 
 func (b *VMenuBuilder) ReturnValue(v interface{}) (r *VMenuBuilder) {
-	b.tag.Attr(":return-value", v)
+	b.tag.Attr(":return-value", h.JSONString(v))
 	return b
 }
 

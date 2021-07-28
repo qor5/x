@@ -104,7 +104,7 @@ func (b *VCalendarDailyBuilder) Start(v string) (r *VCalendarDailyBuilder) {
 }
 
 func (b *VCalendarDailyBuilder) Weekdays(v []string) (r *VCalendarDailyBuilder) {
-	b.tag.Attr(":weekdays", v)
+	b.tag.Attr(":weekdays", h.JSONString(v))
 	return b
 }
 

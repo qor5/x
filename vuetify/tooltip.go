@@ -24,7 +24,7 @@ func (b *VTooltipBuilder) Absolute(v bool) (r *VTooltipBuilder) {
 }
 
 func (b *VTooltipBuilder) Activator(v interface{}) (r *VTooltipBuilder) {
-	b.tag.Attr(":activator", v)
+	b.tag.Attr(":activator", h.JSONString(v))
 	return b
 }
 
@@ -34,7 +34,7 @@ func (b *VTooltipBuilder) AllowOverflow(v bool) (r *VTooltipBuilder) {
 }
 
 func (b *VTooltipBuilder) Attach(v interface{}) (r *VTooltipBuilder) {
-	b.tag.Attr(":attach", v)
+	b.tag.Attr(":attach", h.JSONString(v))
 	return b
 }
 

@@ -34,7 +34,7 @@ func (b *VOverflowBtnBuilder) AppendOuterIcon(v string) (r *VOverflowBtnBuilder)
 }
 
 func (b *VOverflowBtnBuilder) Attach(v interface{}) (r *VOverflowBtnBuilder) {
-	b.tag.Attr(":attach", v)
+	b.tag.Attr(":attach", h.JSONString(v))
 	return b
 }
 
@@ -199,7 +199,7 @@ func (b *VOverflowBtnBuilder) ItemValue(v string) (r *VOverflowBtnBuilder) {
 }
 
 func (b *VOverflowBtnBuilder) Items(v []string) (r *VOverflowBtnBuilder) {
-	b.tag.Attr(":items", v)
+	b.tag.Attr(":items", h.JSONString(v))
 	return b
 }
 
@@ -309,7 +309,7 @@ func (b *VOverflowBtnBuilder) Rounded(v bool) (r *VOverflowBtnBuilder) {
 }
 
 func (b *VOverflowBtnBuilder) Rules(v []string) (r *VOverflowBtnBuilder) {
-	b.tag.Attr(":rules", v)
+	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
 

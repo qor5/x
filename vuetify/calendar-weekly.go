@@ -54,7 +54,7 @@ func (b *VCalendarWeeklyBuilder) LocaleFirstDayOfYear(v string) (r *VCalendarWee
 }
 
 func (b *VCalendarWeeklyBuilder) MinWeeks(v interface{}) (r *VCalendarWeeklyBuilder) {
-	b.tag.Attr(":min-weeks", v)
+	b.tag.Attr(":min-weeks", h.JSONString(v))
 	return b
 }
 
@@ -89,7 +89,7 @@ func (b *VCalendarWeeklyBuilder) Start(v string) (r *VCalendarWeeklyBuilder) {
 }
 
 func (b *VCalendarWeeklyBuilder) Weekdays(v []string) (r *VCalendarWeeklyBuilder) {
-	b.tag.Attr(":weekdays", v)
+	b.tag.Attr(":weekdays", h.JSONString(v))
 	return b
 }
 

@@ -31,7 +31,7 @@ func (b *VSelectBuilder) AppendOuterIcon(v string) (r *VSelectBuilder) {
 }
 
 func (b *VSelectBuilder) Attach(v interface{}) (r *VSelectBuilder) {
-	b.tag.Attr(":attach", v)
+	b.tag.Attr(":attach", h.JSONString(v))
 	return b
 }
 
@@ -286,7 +286,7 @@ func (b *VSelectBuilder) Rounded(v bool) (r *VSelectBuilder) {
 }
 
 func (b *VSelectBuilder) Rules(v []string) (r *VSelectBuilder) {
-	b.tag.Attr(":rules", v)
+	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
 

@@ -219,7 +219,7 @@ func (b *VTextareaBuilder) Rows(v int) (r *VTextareaBuilder) {
 }
 
 func (b *VTextareaBuilder) Rules(v []string) (r *VTextareaBuilder) {
-	b.tag.Attr(":rules", v)
+	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
 

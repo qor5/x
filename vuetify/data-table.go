@@ -64,7 +64,7 @@ func (b *VDataTableBuilder) ExpandIcon(v string) (r *VDataTableBuilder) {
 }
 
 func (b *VDataTableBuilder) Expanded(v []string) (r *VDataTableBuilder) {
-	b.tag.Attr(":expanded", v)
+	b.tag.Attr(":expanded", h.JSONString(v))
 	return b
 }
 
@@ -74,7 +74,7 @@ func (b *VDataTableBuilder) FixedHeader(v bool) (r *VDataTableBuilder) {
 }
 
 func (b *VDataTableBuilder) FooterProps(v interface{}) (r *VDataTableBuilder) {
-	b.tag.Attr(":footer-props", v)
+	b.tag.Attr(":footer-props", h.JSONString(v))
 	return b
 }
 
@@ -89,12 +89,12 @@ func (b *VDataTableBuilder) GroupDesc(v bool) (r *VDataTableBuilder) {
 }
 
 func (b *VDataTableBuilder) HeaderProps(v interface{}) (r *VDataTableBuilder) {
-	b.tag.Attr(":header-props", v)
+	b.tag.Attr(":header-props", h.JSONString(v))
 	return b
 }
 
 func (b *VDataTableBuilder) Headers(v interface{}) (r *VDataTableBuilder) {
-	b.tag.Attr(":headers", v)
+	b.tag.Attr(":headers", h.JSONString(v))
 	return b
 }
 
@@ -129,7 +129,7 @@ func (b *VDataTableBuilder) ItemKey(v string) (r *VDataTableBuilder) {
 }
 
 func (b *VDataTableBuilder) Items(v []string) (r *VDataTableBuilder) {
-	b.tag.Attr(":items", v)
+	b.tag.Attr(":items", h.JSONString(v))
 	return b
 }
 
@@ -189,7 +189,7 @@ func (b *VDataTableBuilder) NoResultsText(v string) (r *VDataTableBuilder) {
 }
 
 func (b *VDataTableBuilder) Options(v interface{}) (r *VDataTableBuilder) {
-	b.tag.Attr("options", v)
+	b.tag.Attr(":options", h.JSONString(v))
 	return b
 }
 
