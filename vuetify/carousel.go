@@ -134,7 +134,7 @@ func (b *VCarouselBuilder) Touchless(v bool) (r *VCarouselBuilder) {
 }
 
 func (b *VCarouselBuilder) Value(v interface{}) (r *VCarouselBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

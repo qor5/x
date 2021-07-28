@@ -94,7 +94,7 @@ func (b *VTabsItemsBuilder) Touchless(v bool) (r *VTabsItemsBuilder) {
 }
 
 func (b *VTabsItemsBuilder) Value(v interface{}) (r *VTabsItemsBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

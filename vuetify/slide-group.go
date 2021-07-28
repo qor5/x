@@ -79,7 +79,7 @@ func (b *VSlideGroupBuilder) Tag(v string) (r *VSlideGroupBuilder) {
 }
 
 func (b *VSlideGroupBuilder) Value(v interface{}) (r *VSlideGroupBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

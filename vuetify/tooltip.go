@@ -174,7 +174,7 @@ func (b *VTooltipBuilder) Transition(v string) (r *VTooltipBuilder) {
 }
 
 func (b *VTooltipBuilder) Value(v interface{}) (r *VTooltipBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

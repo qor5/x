@@ -119,7 +119,7 @@ func (b *VTimePickerBuilder) UseSeconds(v bool) (r *VTimePickerBuilder) {
 }
 
 func (b *VTimePickerBuilder) Value(v interface{}) (r *VTimePickerBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

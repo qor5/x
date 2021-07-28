@@ -29,7 +29,7 @@ func (b *VSlideItemBuilder) Disabled(v bool) (r *VSlideItemBuilder) {
 }
 
 func (b *VSlideItemBuilder) Value(v interface{}) (r *VSlideItemBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

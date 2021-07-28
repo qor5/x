@@ -244,7 +244,7 @@ func (b *VBtnBuilder) Type(v string) (r *VBtnBuilder) {
 }
 
 func (b *VBtnBuilder) Value(v interface{}) (r *VBtnBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

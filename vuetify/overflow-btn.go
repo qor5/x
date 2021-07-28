@@ -374,7 +374,7 @@ func (b *VOverflowBtnBuilder) ValidateOnBlur(v bool) (r *VOverflowBtnBuilder) {
 }
 
 func (b *VOverflowBtnBuilder) Value(v interface{}) (r *VOverflowBtnBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

@@ -94,7 +94,7 @@ func (b *VColorPickerBuilder) SwatchesMaxHeight(v int) (r *VColorPickerBuilder) 
 }
 
 func (b *VColorPickerBuilder) Value(v interface{}) (r *VColorPickerBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

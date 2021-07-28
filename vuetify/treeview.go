@@ -169,7 +169,7 @@ func (b *VTreeviewBuilder) Transition(v bool) (r *VTreeviewBuilder) {
 }
 
 func (b *VTreeviewBuilder) Value(v []string) (r *VTreeviewBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

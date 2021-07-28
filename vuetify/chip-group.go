@@ -89,7 +89,7 @@ func (b *VChipGroupBuilder) Tag(v string) (r *VChipGroupBuilder) {
 }
 
 func (b *VChipGroupBuilder) Value(v interface{}) (r *VChipGroupBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

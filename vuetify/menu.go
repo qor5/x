@@ -229,7 +229,7 @@ func (b *VMenuBuilder) Transition(v bool) (r *VMenuBuilder) {
 }
 
 func (b *VMenuBuilder) Value(v interface{}) (r *VMenuBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

@@ -114,7 +114,7 @@ func (b *VBadgeBuilder) Transition(v string) (r *VBadgeBuilder) {
 }
 
 func (b *VBadgeBuilder) Value(v interface{}) (r *VBadgeBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

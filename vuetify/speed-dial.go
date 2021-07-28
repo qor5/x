@@ -74,7 +74,7 @@ func (b *VSpeedDialBuilder) Transition(v string) (r *VSpeedDialBuilder) {
 }
 
 func (b *VSpeedDialBuilder) Value(v interface{}) (r *VSpeedDialBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

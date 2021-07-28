@@ -129,7 +129,7 @@ func (b *VBottomNavigationBuilder) Tag(v string) (r *VBottomNavigationBuilder) {
 }
 
 func (b *VBottomNavigationBuilder) Value(v interface{}) (r *VBottomNavigationBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

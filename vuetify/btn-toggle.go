@@ -94,7 +94,7 @@ func (b *VBtnToggleBuilder) Tile(v bool) (r *VBtnToggleBuilder) {
 }
 
 func (b *VBtnToggleBuilder) Value(v interface{}) (r *VBtnToggleBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

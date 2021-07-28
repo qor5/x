@@ -29,7 +29,7 @@ func (b *VItemBuilder) Disabled(v bool) (r *VItemBuilder) {
 }
 
 func (b *VItemBuilder) Value(v interface{}) (r *VItemBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

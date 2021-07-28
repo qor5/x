@@ -124,7 +124,7 @@ func (b *VTabsBuilder) SliderSize(v int) (r *VTabsBuilder) {
 }
 
 func (b *VTabsBuilder) Value(v interface{}) (r *VTabsBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

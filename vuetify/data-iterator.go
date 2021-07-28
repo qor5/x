@@ -174,7 +174,7 @@ func (b *VDataIteratorBuilder) SortDesc(v bool) (r *VDataIteratorBuilder) {
 }
 
 func (b *VDataIteratorBuilder) Value(v []string) (r *VDataIteratorBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

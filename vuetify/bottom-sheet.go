@@ -144,7 +144,7 @@ func (b *VBottomSheetBuilder) Transition(v string) (r *VBottomSheetBuilder) {
 }
 
 func (b *VBottomSheetBuilder) Value(v interface{}) (r *VBottomSheetBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

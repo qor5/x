@@ -249,7 +249,7 @@ func (b *VTextFieldBuilder) ValidateOnBlur(v bool) (r *VTextFieldBuilder) {
 }
 
 func (b *VTextFieldBuilder) Value(v interface{}) (r *VTextFieldBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

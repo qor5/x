@@ -149,7 +149,7 @@ func (b *VSnackbarBuilder) Transition(v bool) (r *VSnackbarBuilder) {
 }
 
 func (b *VSnackbarBuilder) Value(v interface{}) (r *VSnackbarBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

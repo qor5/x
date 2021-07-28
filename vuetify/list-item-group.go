@@ -59,7 +59,7 @@ func (b *VListItemGroupBuilder) Tag(v string) (r *VListItemGroupBuilder) {
 }
 
 func (b *VListItemGroupBuilder) Value(v interface{}) (r *VListItemGroupBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

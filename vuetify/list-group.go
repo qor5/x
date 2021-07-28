@@ -69,7 +69,7 @@ func (b *VListGroupBuilder) SubGroup(v bool) (r *VListGroupBuilder) {
 }
 
 func (b *VListGroupBuilder) Value(v interface{}) (r *VListGroupBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

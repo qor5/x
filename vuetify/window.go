@@ -79,7 +79,7 @@ func (b *VWindowBuilder) Touchless(v bool) (r *VWindowBuilder) {
 }
 
 func (b *VWindowBuilder) Value(v interface{}) (r *VWindowBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

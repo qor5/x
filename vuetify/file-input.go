@@ -284,7 +284,7 @@ func (b *VFileInputBuilder) ValidateOnBlur(v bool) (r *VFileInputBuilder) {
 }
 
 func (b *VFileInputBuilder) Value(v interface{}) (r *VFileInputBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

@@ -44,7 +44,7 @@ func (b *VWindowItemBuilder) Transition(v bool) (r *VWindowItemBuilder) {
 }
 
 func (b *VWindowItemBuilder) Value(v interface{}) (r *VWindowItemBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

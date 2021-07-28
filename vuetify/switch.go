@@ -89,7 +89,7 @@ func (b *VSwitchBuilder) Id(v string) (r *VSwitchBuilder) {
 }
 
 func (b *VSwitchBuilder) InputValue(v interface{}) (r *VSwitchBuilder) {
-	b.tag.Attr(":input-value", v)
+	b.tag.Attr(":input-value", h.JSONString(v))
 	return b
 }
 
@@ -168,8 +168,8 @@ func (b *VSwitchBuilder) ValidateOnBlur(v bool) (r *VSwitchBuilder) {
 	return b
 }
 
-func (b *VSwitchBuilder) Value(v interface{}) (r *VSwitchBuilder) {
-	b.tag.Attr(":value", v)
+func (b *VSwitchBuilder) Value(v bool) (r *VSwitchBuilder) {
+	b.tag.Attr("value", fmt.Sprint(v))
 	return b
 }
 

@@ -169,7 +169,7 @@ func (b *VRadioGroupBuilder) ValidateOnBlur(v bool) (r *VRadioGroupBuilder) {
 }
 
 func (b *VRadioGroupBuilder) Value(v interface{}) (r *VRadioGroupBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

@@ -139,7 +139,7 @@ func (b *VInputBuilder) ValidateOnBlur(v bool) (r *VInputBuilder) {
 }
 
 func (b *VInputBuilder) Value(v interface{}) (r *VInputBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

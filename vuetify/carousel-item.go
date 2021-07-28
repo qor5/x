@@ -104,7 +104,7 @@ func (b *VCarouselItemBuilder) Transition(v bool) (r *VCarouselItemBuilder) {
 }
 
 func (b *VCarouselItemBuilder) Value(v interface{}) (r *VCarouselItemBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

@@ -249,7 +249,7 @@ func (b *VDataTableBuilder) SortDesc(v bool) (r *VDataTableBuilder) {
 }
 
 func (b *VDataTableBuilder) Value(v []string) (r *VDataTableBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

@@ -175,7 +175,7 @@ func (b *VCheckboxBuilder) ValidateOnBlur(v bool) (r *VCheckboxBuilder) {
 }
 
 func (b *VCheckboxBuilder) Value(v interface{}) (r *VCheckboxBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

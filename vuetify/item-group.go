@@ -54,7 +54,7 @@ func (b *VItemGroupBuilder) Tag(v string) (r *VItemGroupBuilder) {
 }
 
 func (b *VItemGroupBuilder) Value(v interface{}) (r *VItemGroupBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

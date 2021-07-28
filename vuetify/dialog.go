@@ -139,7 +139,7 @@ func (b *VDialogBuilder) Transition(v string) (r *VDialogBuilder) {
 }
 
 func (b *VDialogBuilder) Value(v interface{}) (r *VDialogBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

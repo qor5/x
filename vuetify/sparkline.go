@@ -99,7 +99,7 @@ func (b *VSparklineBuilder) Type(v string) (r *VSparklineBuilder) {
 }
 
 func (b *VSparklineBuilder) Value(v []string) (r *VSparklineBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

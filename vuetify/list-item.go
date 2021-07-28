@@ -134,7 +134,7 @@ func (b *VListItemBuilder) TwoLine(v bool) (r *VListItemBuilder) {
 }
 
 func (b *VListItemBuilder) Value(v interface{}) (r *VListItemBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

@@ -59,7 +59,7 @@ func (b *VLazyBuilder) Transition(v string) (r *VLazyBuilder) {
 }
 
 func (b *VLazyBuilder) Value(v interface{}) (r *VLazyBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

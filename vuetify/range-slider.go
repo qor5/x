@@ -204,7 +204,7 @@ func (b *VRangeSliderBuilder) ValidateOnBlur(v bool) (r *VRangeSliderBuilder) {
 }
 
 func (b *VRangeSliderBuilder) Value(v interface{}) (r *VRangeSliderBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

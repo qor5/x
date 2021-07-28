@@ -174,7 +174,7 @@ func (b *VChipBuilder) To(v string) (r *VChipBuilder) {
 }
 
 func (b *VChipBuilder) Value(v interface{}) (r *VChipBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

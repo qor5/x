@@ -194,7 +194,7 @@ func (b *VDatePickerBuilder) Type(v string) (r *VDatePickerBuilder) {
 }
 
 func (b *VDatePickerBuilder) Value(v []string) (r *VDatePickerBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

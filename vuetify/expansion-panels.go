@@ -99,7 +99,7 @@ func (b *VExpansionPanelsBuilder) Tile(v bool) (r *VExpansionPanelsBuilder) {
 }
 
 func (b *VExpansionPanelsBuilder) Value(v interface{}) (r *VExpansionPanelsBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

@@ -104,7 +104,7 @@ func (b *VStepperBuilder) Tile(v bool) (r *VStepperBuilder) {
 }
 
 func (b *VStepperBuilder) Value(v interface{}) (r *VStepperBuilder) {
-	b.tag.Attr(":value", v)
+	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 
