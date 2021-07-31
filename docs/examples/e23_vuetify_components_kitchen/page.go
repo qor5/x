@@ -12,16 +12,25 @@ import (
 var globalCities = []string{"Tokyo", "Hangzhou", "Shanghai"}
 
 type formVals struct {
-	BigCities []string
+	Cities1 []string
+	Cities2 []string
 }
 
-var fv = formVals{BigCities: []string{"LD", "TK"}}
+var fv = formVals{
+	Cities1: []string{
+		"TK",
+		"LD",
+	},
+
+	Cities2: []string{
+		"Hangzhou",
+		"Shanghai",
+	},
+}
 
 func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("removeCity", removeCity)
 	ctx.Hub.RegisterEventFunc("submit", submit)
-
-	ctx.MustUnmarshalForm(&fv)
 
 	var chips h.HTMLComponents
 	for _, city := range globalCities {
@@ -38,6 +47,7 @@ func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err e
 	pr.Body = VContainer(
 		h.H1("Chips delete"),
 		chips,
+
 		h.H1("Chips group"),
 		utils.PrettyFormAsJSON(ctx),
 		VChipGroup(
@@ -48,16 +58,24 @@ func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err e
 			VChip(h.Text("London")).Value("LD"),
 		).ActiveClass("indigo darken-3 white--text").
 			//Mandatory(true).
-			FieldName("BigCities").
-			Value(fv.BigCities).
+			FieldName("Cities1").
+			Value(fv.Cities1).
 			Multiple(true),
 		VBtn("Submit").
 			OnClick("submit"),
+
+		VAutocomplete().
+			Items(globalCities).
+			FieldName("Cities2").
+			Value(fv.Cities2),
 	)
 	return
 }
 
 func submit(ctx *web.EventContext) (r web.EventResponse, err error) {
+	fv = formVals{}
+	ctx.MustUnmarshalForm(&fv)
+
 	r.Reload = true
 	return
 }
