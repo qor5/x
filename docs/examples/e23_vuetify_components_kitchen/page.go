@@ -51,8 +51,11 @@ func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err e
 		h.H1("Chips group"),
 		utils.PrettyFormAsJSON(ctx),
 		VChipGroup(
-			VChip(h.Text("Hangzhou")).Value("HZ"),
-			VChip(h.Text("Shanghai")).Value("SH").Filter(true),
+			VChip(
+				h.Text("Hangzhou"),
+				VIcon("star").Right(true),
+			).Value("HZ"),
+			VChip(h.Text("Shanghai")).Value("SH").Filter(true).Label(true),
 			VChip(h.Text("Tokyo")).Value("TK").Filter(true),
 			VChip(h.Text("New York")).Value("NY"),
 			VChip(h.Text("London")).Value("LD"),
