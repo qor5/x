@@ -13,7 +13,7 @@ type VChipGroupBuilder struct {
 
 func VChipGroup(children ...h.HTMLComponent) (r *VChipGroupBuilder) {
 	r = &VChipGroupBuilder{
-		tag: h.Tag("v-chip-group").Children(children...),
+		tag: h.Tag("vw-chip-group").Children(children...),
 	}
 	return
 }

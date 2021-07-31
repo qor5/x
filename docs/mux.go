@@ -291,6 +291,16 @@ var coreJSTags = func() string {
 	return `<script src='/assets/main.js'></script>`
 }()
 
+var vuetifyJSTags = func() string {
+	if len(os.Getenv("DEV_VUETIFY_JS")) > 0 {
+		return `
+<script src='http://localhost:3080/js/chunk-vendors.js'></script>
+<script src='http://localhost:3080/js/app.js'></script>
+`
+	}
+	return `<script src='/assets/vuetify.js'></script>`
+}()
+
 // @snippet_begin(DemoVuetifyLayoutSample)
 func demoVuetifyLayout(in web.PageFunc) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
@@ -304,10 +314,7 @@ func demoVuetifyLayout(in web.PageFunc) (out web.PageFunc) {
 			<script src='/assets/vue.js'></script>
 		`)
 
-		ctx.Injector.TailHTML(fmt.Sprintf(`
-<script src='/assets/vuetify.js'></script>
-%s
-`, coreJSTags))
+		ctx.Injector.TailHTML(fmt.Sprintf("%s %s", vuetifyJSTags, coreJSTags))
 		ctx.Injector.HeadHTML(`
 		<style>
 			[v-cloak] {

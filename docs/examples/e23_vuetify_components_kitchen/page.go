@@ -4,14 +4,24 @@ package e23_vuetify_components_kitchen
 
 import (
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/docs/utils"
 	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 )
 
 var globalCities = []string{"Tokyo", "Hangzhou", "Shanghai"}
 
+type formVals struct {
+	BigCities []string
+}
+
+var fv = formVals{BigCities: []string{"LD", "TK"}}
+
 func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("removeCity", removeCity)
+	ctx.Hub.RegisterEventFunc("submit", submit)
+
+	ctx.MustUnmarshalForm(&fv)
 
 	var chips h.HTMLComponents
 	for _, city := range globalCities {
@@ -26,8 +36,29 @@ func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err e
 	}
 
 	pr.Body = VContainer(
+		h.H1("Chips delete"),
 		chips,
+		h.H1("Chips group"),
+		utils.PrettyFormAsJSON(ctx),
+		VChipGroup(
+			VChip(h.Text("Hangzhou")).Value("HZ"),
+			VChip(h.Text("Shanghai")).Value("SH").Filter(true),
+			VChip(h.Text("Tokyo")).Value("TK").Filter(true),
+			VChip(h.Text("New York")).Value("NY"),
+			VChip(h.Text("London")).Value("LD"),
+		).ActiveClass("indigo darken-3 white--text").
+			//Mandatory(true).
+			FieldName("BigCities").
+			Value(fv.BigCities).
+			Multiple(true),
+		VBtn("Submit").
+			OnClick("submit"),
 	)
+	return
+}
+
+func submit(ctx *web.EventContext) (r web.EventResponse, err error) {
+	r.Reload = true
 	return
 }
 

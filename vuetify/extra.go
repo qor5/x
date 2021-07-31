@@ -90,6 +90,11 @@ func (b *VSliderBuilder) FieldName(v string) (r *VSliderBuilder) {
 	return b
 }
 
+func (b *VChipGroupBuilder) FieldName(v string) (r *VChipGroupBuilder) {
+	b.tag.Attr("field-name", v)
+	return b
+}
+
 func (b *VSelectBuilder) FieldName(v string) (r *VSelectBuilder) {
 	b.tag.Attr("field-name", v)
 	return b
