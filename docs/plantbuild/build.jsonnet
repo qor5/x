@@ -4,5 +4,5 @@ local dc = c {
 };
 
 dc.build_apps_image('sunfmin/sunfmin', [
-  {name: 'goplaid-docs', dockerfile: './x/docs/Dockerfile', context: '../../'},
+  {name: 'goplaid-docs', dockerfile: './docs/Dockerfile', context: '../'},
 ])

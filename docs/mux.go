@@ -2,7 +2,6 @@ package docs
 
 import (
 	"fmt"
-	"github.com/goplaid/x/docs/examples/e22_vuetify_variant_sub_form"
 	"log"
 	"net/http"
 	"os"
@@ -18,6 +17,8 @@ import (
 	"github.com/goplaid/x/docs/examples/e15_vuetify_navigation_drawer"
 	"github.com/goplaid/x/docs/examples/e17_hello_lazy_portals_and_reload"
 	"github.com/goplaid/x/docs/examples/e21_presents"
+	"github.com/goplaid/x/docs/examples/e22_vuetify_variant_sub_form"
+	"github.com/goplaid/x/docs/examples/e23_vuetify_components_kitchen"
 	"github.com/goplaid/x/docs/root/basics"
 	components_guide "github.com/goplaid/x/docs/root/components-guide"
 	getting_started "github.com/goplaid/x/docs/root/getting-started"
@@ -280,6 +281,26 @@ func demoBootstrapLayout(in web.PageFunc) (out web.PageFunc) {
 
 // @snippet_end
 
+var coreJSTags = func() string {
+	if len(os.Getenv("DEV_CORE_JS")) > 0 {
+		return `
+<script src='http://localhost:3100/js/chunk-vendors.js'></script>
+<script src='http://localhost:3100/js/app.js'></script>
+`
+	}
+	return `<script src='/assets/main.js'></script>`
+}()
+
+var vuetifyJSTags = func() string {
+	if len(os.Getenv("DEV_VUETIFY_JS")) > 0 {
+		return `
+<script src='http://localhost:3080/js/chunk-vendors.js'></script>
+<script src='http://localhost:3080/js/app.js'></script>
+`
+	}
+	return `<script src='/assets/vuetify.js'></script>`
+}()
+
 // @snippet_begin(DemoVuetifyLayoutSample)
 func demoVuetifyLayout(in web.PageFunc) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
@@ -293,11 +314,7 @@ func demoVuetifyLayout(in web.PageFunc) (out web.PageFunc) {
 			<script src='/assets/vue.js'></script>
 		`)
 
-		ctx.Injector.TailHTML(`
-<script src='/assets/vuetify.js'></script>
-<script src='/assets/main.js'></script>
-
-`)
+		ctx.Injector.TailHTML(fmt.Sprintf("%s %s", vuetifyJSTags, coreJSTags))
 		ctx.Injector.HeadHTML(`
 		<style>
 			[v-cloak] {
@@ -735,6 +752,15 @@ func SamplesHandler(prefix string) http.Handler {
 		wb.Page(
 			demoVuetifyLayout(
 				e22_vuetify_variant_sub_form.VuetifyVariantSubForm,
+			),
+		),
+	)
+
+	mux.Handle(
+		e23_vuetify_components_kitchen.VuetifyComponentsKitchenPath,
+		wb.Page(
+			demoVuetifyLayout(
+				e23_vuetify_components_kitchen.VuetifyComponentsKitchen,
 			),
 		),
 	)
