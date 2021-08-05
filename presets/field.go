@@ -1,6 +1,7 @@
 package presets
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"reflect"
@@ -15,6 +16,7 @@ type FieldBuilder struct {
 	NameLabel
 	compFunc   FieldComponentFunc
 	setterFunc FieldSetterFunc
+	context    context.Context
 }
 
 func NewField(name string) (r *FieldBuilder) {
@@ -53,6 +55,14 @@ func (b *FieldBuilder) ComponentFunc(v FieldComponentFunc) (r *FieldBuilder) {
 
 func (b *FieldBuilder) SetterFunc(v FieldSetterFunc) (r *FieldBuilder) {
 	b.setterFunc = v
+	return b
+}
+
+func (b *FieldBuilder) WithContextValue(key interface{}, val interface{}) (r *FieldBuilder) {
+	if b.context == nil {
+		b.context = context.Background()
+	}
+	b.context = context.WithValue(b.context, key, val)
 	return b
 }
 
@@ -201,9 +211,10 @@ func (b *FieldBuilders) ToComponent(obj interface{}, verr *web.ValidationErrors,
 		}
 
 		comps = append(comps, f.compFunc(obj, &FieldContext{
-			Name:   f.name,
-			Label:  b.getLabel(f.NameLabel),
-			Errors: verr.GetFieldErrors(f.name),
+			Name:    f.name,
+			Label:   b.getLabel(f.NameLabel),
+			Errors:  verr.GetFieldErrors(f.name),
+			Context: f.context,
 		}, ctx))
 	}
 

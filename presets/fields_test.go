@@ -17,6 +17,8 @@ type Company struct {
 	FoundedAt time.Time
 }
 
+type Media string
+
 type User struct {
 	ID      int
 	Int1    int
@@ -25,6 +27,7 @@ type User struct {
 	Bool1   bool
 	Time1   time.Time
 	Company *Company
+	Media1  Media
 }
 
 func TestFields(t *testing.T) {
@@ -35,6 +38,13 @@ func TestFields(t *testing.T) {
 	ft := NewFieldDefaults(WRITE).Exclude("ID")
 	ft.FieldType(time.Time{}).ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		return h.Div().Class("time-control").Text(field.Value(obj).(time.Time).Format("2006-01-02")).Attr("field-name", field.Name)
+	})
+
+	ft.FieldType(Media("")).ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
+		if field.ContextValue("a") == nil {
+			return h.Text("")
+		}
+		return h.Text(field.ContextValue("a").(string) + ", " + field.ContextValue("b").(string))
 	})
 
 	r := httptest.NewRequest("GET", "/hello", nil)
@@ -73,17 +83,17 @@ func TestFields(t *testing.T) {
 						ctx)
 			},
 			expect: `
-<vw-text-field type='number' field-name='Int1' label='整数1' value='2'></vw-text-field>
+<vw-text-field type='number' field-name='Int1' label='整数1' :value='"2"'></vw-text-field>
 
-<vw-text-field type='number' field-name='Float1' label='Float1' value='23.1'></vw-text-field>
+<vw-text-field type='number' field-name='Float1' label='Float1' :value='"23.1"'></vw-text-field>
 
-<vw-text-field type='text' field-name='String1' label='String1' value='hello' :error-messages='["too small"]'></vw-text-field>
+<vw-text-field type='text' field-name='String1' label='String1' :value='"hello"' :error-messages='["too small"]'></vw-text-field>
 
 <vw-checkbox field-name='Bool1' label='Bool1' :input-value='true'></vw-checkbox>
 
 <div field-name='Time1' class='time-control'>2019-08-29</div>
 
-<vw-text-field type='text' field-name='Company.Name' label='公司名' value='Company1'></vw-text-field>
+<vw-text-field type='text' field-name='Company.Name' label='公司名' :value='"Company1"'></vw-text-field>
 
 <div field-name='Company.FoundedAt' class='time-control'>2019-08-29</div>
 `,
@@ -97,11 +107,11 @@ func TestFields(t *testing.T) {
 					ToComponent(user, vd, ctx)
 			},
 			expect: `
-<vw-text-field type='number' field-name='Int1' label='Int1' value='2'></vw-text-field>
+<vw-text-field type='number' field-name='Int1' label='Int1' :value='"2"'></vw-text-field>
 
-<vw-text-field type='number' field-name='Float1' label='Float1' value='23.1'></vw-text-field>
+<vw-text-field type='number' field-name='Float1' label='Float1' :value='"23.1"'></vw-text-field>
 
-<vw-text-field type='text' field-name='String1' label='String1' value='hello' :error-messages='["too small"]'></vw-text-field>
+<vw-text-field type='text' field-name='String1' label='String1' :value='"hello"' :error-messages='["too small"]'></vw-text-field>
 
 <div field-name='Time1' class='time-control'>2019-08-29</div>
 `,
@@ -135,6 +145,19 @@ func TestFields(t *testing.T) {
 
 <td>2</td>
 `,
+		},
+
+		{
+			name: "pass in context",
+			toComponentFun: func() h.HTMLComponent {
+				fb := ft.InspectFields(&User{}).
+					Only("Media1")
+				fb.Field("Media1").
+					WithContextValue("a", "context value1").
+					WithContextValue("b", "context value2")
+				return fb.ToComponent(user, vd, ctx)
+			},
+			expect: `context value1, context value2`,
 		},
 	}
 

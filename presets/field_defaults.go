@@ -1,6 +1,7 @@
 package presets
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -16,6 +17,7 @@ type FieldContext struct {
 	Name   string
 	Label  string
 	Errors []string
+	Context context.Context
 }
 
 func (fc *FieldContext) StringValue(obj interface{}) (r string) {
@@ -32,6 +34,13 @@ func (fc *FieldContext) StringValue(obj interface{}) (r string) {
 func (fc *FieldContext) Value(obj interface{}) (r interface{}) {
 	fieldName := fc.Name
 	return reflectutils.MustGet(obj, fieldName)
+}
+
+func (fc *FieldContext) ContextValue(key interface{}) (r interface{}) {
+	if fc.Context == nil {
+		return
+	}
+	return fc.Context.Value(key)
 }
 
 type FieldDefaultBuilder struct {
