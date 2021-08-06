@@ -13,7 +13,7 @@ type VFileInputBuilder struct {
 
 func VFileInput(children ...h.HTMLComponent) (r *VFileInputBuilder) {
 	r = &VFileInputBuilder{
-		tag: h.Tag("v-file-input").Children(children...),
+		tag: h.Tag("vw-file-input").Children(children...),
 	}
 	return
 }

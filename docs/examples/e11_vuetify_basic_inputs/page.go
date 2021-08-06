@@ -2,6 +2,8 @@ package e11_vuetify_basic_inputs
 
 // @snippet_begin(VuetifyBasicInputsSample)
 import (
+	"mime/multipart"
+
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/docs/utils"
 	. "github.com/goplaid/x/vuetify"
@@ -14,6 +16,7 @@ type myFormValue struct {
 	Agreed        bool
 	Feature1      bool
 	Slider1       int
+	Files1        []*multipart.FileHeader
 }
 
 var s = &myFormValue{
@@ -58,7 +61,7 @@ func VuetifyBasicInputs(ctx *web.EventContext) (pr web.PageResponse, err error) 
 			ErrorMessages(verr.GetFieldErrors("Slider1")...).
 			Value(s.Slider1),
 
-		VSlider().Step(10).Ticks(true).ThumbLabel("always").FieldName("Slider2").Value(s.Slider1),
+		VFileInput().FieldName("Files1"),
 
 		VBtn("Update").OnClick("update"),
 	)

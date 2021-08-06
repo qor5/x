@@ -14,6 +14,8 @@ var globalCities = []string{"Tokyo", "Hangzhou", "Shanghai"}
 type formVals struct {
 	Cities1 []string
 	Cities2 []string
+
+	MyItems []string
 }
 
 var fv = formVals{
@@ -25,6 +27,10 @@ var fv = formVals{
 	Cities2: []string{
 		"Hangzhou",
 		"Shanghai",
+	},
+
+	MyItems: []string{
+		"VItem2",
 	},
 }
 
@@ -45,11 +51,12 @@ func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err e
 	}
 
 	pr.Body = VContainer(
+		utils.PrettyFormAsJSON(ctx),
+
 		h.H1("Chips delete"),
 		chips,
 
 		h.H1("Chips group"),
-		utils.PrettyFormAsJSON(ctx),
 		VChipGroup(
 			VChip(
 				h.Text("Hangzhou"),
@@ -64,13 +71,39 @@ func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err e
 			FieldName("Cities1").
 			Value(fv.Cities1).
 			Multiple(true),
-		VBtn("Submit").
-			OnClick("submit"),
-
 		VAutocomplete().
 			Items(globalCities).
 			FieldName("Cities2").
 			Value(fv.Cities2),
+
+		h.H1("Items Group"),
+
+		VItemGroup(
+			VContainer(
+				VRow(
+					VCol(
+						VItem(
+							VCard(
+								VCardTitle(h.Text("Item1")),
+							).Attr(":color", "active ? \"primary\" : \"\"").
+								Attr("@click", "toggle"),
+						).Value("VItem1").Attr("v-slot", "{active, toggle}"),
+					),
+
+					VCol(
+						VItem(
+							VCard(
+								VCardTitle(h.Text("Item2")),
+							).Attr(":color", "active ? \"primary\" : \"\"").
+								Attr("@click", "toggle"),
+						).Value("VItem2").Attr("v-slot", "{active, toggle}"),
+					),
+				),
+			),
+		).FieldName("MyItems").Value(fv.MyItems),
+
+		VBtn("Submit").
+			OnClick("submit"),
 	)
 	return
 }

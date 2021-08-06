@@ -9,6 +9,8 @@ import {
 	VSlider,
 	VSelect,
 	VChipGroup,
+	VItemGroup,
+	VFileInput,
 } from 'vuetify/lib';
 
 import 'vuetify/dist/vuetify.min.css';
@@ -40,7 +42,9 @@ declare var window: any;
 		Vue.component('vw-switch', WithField(VSwitch, 'input-value'));
 		Vue.component('vw-radio-group', WithField(VRadioGroup));
 		Vue.component('vw-slider', WithField(VSlider));
+		Vue.component('vw-file-input', WithField(VFileInput));
 		Vue.component('vw-chip-group', WithField(VChipGroup));
+		Vue.component('vw-item-group', WithField(VItemGroup));
 		Vue.component('vw-select', WithField(VSelect, undefined, [Core, SelectedItems]));
 		Vue.component('vw-filter', Filter);
 		Vue.component('vw-pagination', Pagination);

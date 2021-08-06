@@ -60,11 +60,11 @@ func ExamplesDoc() HTMLComponent {
 }
 
 func PrettyFormAsJSON(ctx *web.EventContext) HTMLComponent {
-	if ctx.R.Form == nil {
+	if ctx.R.MultipartForm == nil {
 		return nil
 	}
 
-	formData, err := json.MarshalIndent(ctx.R.Form, "", "\t")
+	formData, err := json.MarshalIndent(ctx.R.MultipartForm, "", "\t")
 	if err != nil {
 		panic(err)
 	}

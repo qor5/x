@@ -6,9 +6,8 @@ import (
 	"io"
 	"mime/multipart"
 
-	"github.com/goplaid/x/docs/utils"
-
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/docs/utils"
 	. "github.com/theplant/htmlgo"
 )
 

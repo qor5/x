@@ -95,6 +95,16 @@ func (b *VChipGroupBuilder) FieldName(v string) (r *VChipGroupBuilder) {
 	return b
 }
 
+func (b *VItemGroupBuilder) FieldName(v string) (r *VItemGroupBuilder) {
+	b.tag.Attr("field-name", v)
+	return b
+}
+
+func (b *VFileInputBuilder) FieldName(v string) (r *VFileInputBuilder) {
+	b.tag.Attr("field-name", v)
+	return b
+}
+
 func (b *VSelectBuilder) FieldName(v string) (r *VSelectBuilder) {
 	b.tag.Attr("field-name", v)
 	return b

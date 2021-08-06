@@ -13,7 +13,7 @@ type VItemGroupBuilder struct {
 
 func VItemGroup(children ...h.HTMLComponent) (r *VItemGroupBuilder) {
 	r = &VItemGroupBuilder{
-		tag: h.Tag("v-item-group").Children(children...),
+		tag: h.Tag("vw-item-group").Children(children...),
 	}
 	return
 }
