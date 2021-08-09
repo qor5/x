@@ -15,7 +15,7 @@ type formVals struct {
 	Cities1 []string
 	Cities2 []string
 
-	MyItems []string
+	MyItem string
 }
 
 var fv = formVals{
@@ -29,9 +29,7 @@ var fv = formVals{
 		"Shanghai",
 	},
 
-	MyItems: []string{
-		"VItem2",
-	},
+	MyItem: "VItem2",
 }
 
 func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err error) {
@@ -100,7 +98,8 @@ func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err e
 					),
 				),
 			),
-		).FieldName("MyItems").Value(fv.MyItems),
+		).FieldName("MyItem").
+			Value(fv.MyItem),
 
 		VBtn("Submit").
 			OnClick("submit"),
