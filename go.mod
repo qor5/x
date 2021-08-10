@@ -6,7 +6,7 @@ require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/aws/aws-sdk-go v1.38.62
 	github.com/go-chi/chi v1.5.4
-	github.com/goplaid/web v1.0.3
+	github.com/goplaid/web v1.1.0
 	github.com/iancoleman/strcase v0.1.3
 	github.com/jinzhu/configor v1.2.1 // indirect
 	github.com/jinzhu/gorm v1.9.16
@@ -30,7 +30,7 @@ require (
 	github.com/sourcegraph/syntaxhighlight v0.0.0-20170531221838-bd320f5d308e // indirect
 	github.com/sunfmin/reflectutils v0.0.0-20190925073614-f129c4f8ea2e
 	github.com/theplant/gofixtures v0.0.0-20190621102946-4b4cf9d8dabb
-	github.com/theplant/htmlgo v0.0.0-20200211033127-af3d4eb33a61
+	github.com/theplant/htmlgo v1.0.0
 	github.com/theplant/testingutils v0.0.0-20190603093022-26d8b4d95c61
 	github.com/thoas/go-funk v0.8.0
 	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4

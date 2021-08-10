@@ -287,13 +287,13 @@ func putModelInfo(mi *ModelInfo, in http.Handler) (out http.Handler) {
 }
 
 const rightDrawerName = "rightDrawer"
-const rightDrawerPortalName = "rightDrawerPortalName"
+const rightDrawerContentPortalName = "rightDrawerContentPortalName"
 
 func rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 		Name: rightDrawerName,
 		Body: VNavigationDrawer(
-			web.Portal(comp).Name(rightDrawerPortalName),
+			web.Portal(comp).Name(rightDrawerContentPortalName),
 		).Attr("v-model", "vars.rightDrawer").
 			Bottom(true).
 			Right(true).

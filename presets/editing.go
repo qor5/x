@@ -233,7 +233,7 @@ func (b *EditingBuilder) renderFormWithError(r *web.EventResponse, err error, ob
 	}
 
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-		Name: rightDrawerPortalName,
+		Name: rightDrawerContentPortalName,
 		Body: b.editFormFor(obj, ctx),
 	})
 

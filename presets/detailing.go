@@ -4,11 +4,9 @@ import (
 	"net/url"
 
 	"github.com/goplaid/web"
-
-	"github.com/jinzhu/inflection"
-
 	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"
 	"goji.io/pat"
 )
@@ -124,7 +122,7 @@ func (b *DetailingBuilder) doAction(ctx *web.EventContext) (r web.EventResponse,
 		}
 
 		r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-			Name: rightDrawerPortalName,
+			Name: rightDrawerContentPortalName,
 			Body: b.actionForm(action, ctx),
 		})
 		return
