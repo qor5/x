@@ -1,26 +1,10 @@
 package vuetify
 
 import (
-	"context"
 	"fmt"
 
 	h "github.com/theplant/htmlgo"
 )
-
-type VAutocompleteBuilder struct {
-	tag           *h.HTMLTagBuilder
-	selectedItems interface{}
-	items         interface{}
-}
-
-func VAutocomplete(children ...h.HTMLComponent) (r *VAutocompleteBuilder) {
-	r = &VAutocompleteBuilder{
-		tag: h.Tag("vw-autocomplete").Children(children...),
-	}
-	r.Multiple(true)
-
-	return
-}
 
 func (b *VAutocompleteBuilder) AllowOverflow(v bool) (r *VAutocompleteBuilder) {
 	b.tag.Attr(":allow-overflow", fmt.Sprint(v))
@@ -82,8 +66,13 @@ func (b *VAutocompleteBuilder) Color(v string) (r *VAutocompleteBuilder) {
 	return b
 }
 
-func (b *VAutocompleteBuilder) Counter(v bool) (r *VAutocompleteBuilder) {
+func (b *VAutocompleteBuilder) Counter(v int) (r *VAutocompleteBuilder) {
 	b.tag.Attr(":counter", fmt.Sprint(v))
+	return b
+}
+
+func (b *VAutocompleteBuilder) CounterValue(v interface{}) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":counter-value", h.JSONString(v))
 	return b
 }
 
@@ -127,13 +116,13 @@ func (b *VAutocompleteBuilder) ErrorCount(v int) (r *VAutocompleteBuilder) {
 	return b
 }
 
-func (b *VAutocompleteBuilder) ErrorMessages(v ...string) (r *VAutocompleteBuilder) {
-	setErrorMessages(b.tag, v)
+func (b *VAutocompleteBuilder) Filled(v bool) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":filled", fmt.Sprint(v))
 	return b
 }
 
-func (b *VAutocompleteBuilder) Filled(v bool) (r *VAutocompleteBuilder) {
-	b.tag.Attr(":filled", fmt.Sprint(v))
+func (b *VAutocompleteBuilder) Filter(v interface{}) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":filter", h.JSONString(v))
 	return b
 }
 
@@ -197,11 +186,6 @@ func (b *VAutocompleteBuilder) ItemValue(v string) (r *VAutocompleteBuilder) {
 	return b
 }
 
-func (b *VAutocompleteBuilder) Items(v interface{}) (r *VAutocompleteBuilder) {
-	b.items = v
-	return b
-}
-
 func (b *VAutocompleteBuilder) Label(v string) (r *VAutocompleteBuilder) {
 	b.tag.Attr("label", v)
 	return b
@@ -222,8 +206,8 @@ func (b *VAutocompleteBuilder) Loading(v bool) (r *VAutocompleteBuilder) {
 	return b
 }
 
-func (b *VAutocompleteBuilder) MenuProps(v string) (r *VAutocompleteBuilder) {
-	b.tag.Attr("menu-props", v)
+func (b *VAutocompleteBuilder) MenuProps(v interface{}) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":menu-props", h.JSONString(v))
 	return b
 }
 
@@ -307,7 +291,7 @@ func (b *VAutocompleteBuilder) Rounded(v bool) (r *VAutocompleteBuilder) {
 	return b
 }
 
-func (b *VAutocompleteBuilder) Rules(v []string) (r *VAutocompleteBuilder) {
+func (b *VAutocompleteBuilder) Rules(v interface{}) (r *VAutocompleteBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
@@ -372,6 +356,11 @@ func (b *VAutocompleteBuilder) Value(v interface{}) (r *VAutocompleteBuilder) {
 	return b
 }
 
+func (b *VAutocompleteBuilder) ValueComparator(v interface{}) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":value-comparator", h.JSONString(v))
+	return b
+}
+
 func (b *VAutocompleteBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
 }
@@ -414,13 +403,4 @@ func (b *VAutocompleteBuilder) On(name string, value string) (r *VAutocompleteBu
 func (b *VAutocompleteBuilder) Bind(name string, value string) (r *VAutocompleteBuilder) {
 	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
-}
-
-func (b *VAutocompleteBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	if b.items == nil {
-		b.items = b.selectedItems
-	}
-	b.tag.Attr(":items", b.items)
-	b.tag.Attr(":selected-items", b.selectedItems)
-	return b.tag.MarshalHTML(ctx)
 }

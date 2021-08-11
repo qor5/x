@@ -11,13 +11,6 @@ type VTextFieldBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VTextField(children ...h.HTMLComponent) (r *VTextFieldBuilder) {
-	r = &VTextFieldBuilder{
-		tag: h.Tag("vw-text-field").Children(children...),
-	}
-	return
-}
-
 func (b *VTextFieldBuilder) AppendIcon(v string) (r *VTextFieldBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b
@@ -53,8 +46,13 @@ func (b *VTextFieldBuilder) Color(v string) (r *VTextFieldBuilder) {
 	return b
 }
 
-func (b *VTextFieldBuilder) Counter(v bool) (r *VTextFieldBuilder) {
+func (b *VTextFieldBuilder) Counter(v int) (r *VTextFieldBuilder) {
 	b.tag.Attr(":counter", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTextFieldBuilder) CounterValue(v interface{}) (r *VTextFieldBuilder) {
+	b.tag.Attr(":counter-value", h.JSONString(v))
 	return b
 }
 
@@ -80,11 +78,6 @@ func (b *VTextFieldBuilder) Error(v bool) (r *VTextFieldBuilder) {
 
 func (b *VTextFieldBuilder) ErrorCount(v int) (r *VTextFieldBuilder) {
 	b.tag.Attr(":error-count", fmt.Sprint(v))
-	return b
-}
-
-func (b *VTextFieldBuilder) ErrorMessages(v ...string) (r *VTextFieldBuilder) {
-	setErrorMessages(b.tag, v)
 	return b
 }
 
@@ -198,7 +191,7 @@ func (b *VTextFieldBuilder) Rounded(v bool) (r *VTextFieldBuilder) {
 	return b
 }
 
-func (b *VTextFieldBuilder) Rules(v []string) (r *VTextFieldBuilder) {
+func (b *VTextFieldBuilder) Rules(v interface{}) (r *VTextFieldBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }

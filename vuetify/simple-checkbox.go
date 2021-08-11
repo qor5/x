@@ -11,9 +11,9 @@ type VSimpleCheckboxBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VSimpleCheckbox() (r *VSimpleCheckboxBuilder) {
+func VSimpleCheckbox(children ...h.HTMLComponent) (r *VSimpleCheckboxBuilder) {
 	r = &VSimpleCheckboxBuilder{
-		tag: h.Tag("v-simple-checkbox"),
+		tag: h.Tag("v-simple-checkbox").Children(children...),
 	}
 	return
 }

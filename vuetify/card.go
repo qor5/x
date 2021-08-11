@@ -78,8 +78,8 @@ func (b *VCardBuilder) Hover(v bool) (r *VCardBuilder) {
 	return b
 }
 
-func (b *VCardBuilder) Href(v string) (r *VCardBuilder) {
-	b.tag.Attr("href", v)
+func (b *VCardBuilder) Href(v interface{}) (r *VCardBuilder) {
+	b.tag.Attr(":href", h.JSONString(v))
 	return b
 }
 
@@ -148,8 +148,8 @@ func (b *VCardBuilder) Replace(v bool) (r *VCardBuilder) {
 	return b
 }
 
-func (b *VCardBuilder) Ripple(v bool) (r *VCardBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VCardBuilder) Ripple(v interface{}) (r *VCardBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 
@@ -178,8 +178,8 @@ func (b *VCardBuilder) Tile(v bool) (r *VCardBuilder) {
 	return b
 }
 
-func (b *VCardBuilder) To(v string) (r *VCardBuilder) {
-	b.tag.Attr("to", v)
+func (b *VCardBuilder) To(v interface{}) (r *VCardBuilder) {
+	b.tag.Attr(":to", h.JSONString(v))
 	return b
 }
 

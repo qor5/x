@@ -11,13 +11,6 @@ type VBtnBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VBtn(text string) (r *VBtnBuilder) {
-	r = &VBtnBuilder{
-		tag: h.Tag("v-btn").Text(text),
-	}
-	return
-}
-
 func (b *VBtnBuilder) Absolute(v bool) (r *VBtnBuilder) {
 	b.tag.Attr(":absolute", fmt.Sprint(v))
 	return b
@@ -98,8 +91,8 @@ func (b *VBtnBuilder) Height(v int) (r *VBtnBuilder) {
 	return b
 }
 
-func (b *VBtnBuilder) Href(v string) (r *VBtnBuilder) {
-	b.tag.Attr("href", v)
+func (b *VBtnBuilder) Href(v interface{}) (r *VBtnBuilder) {
+	b.tag.Attr(":href", h.JSONString(v))
 	return b
 }
 
@@ -188,8 +181,8 @@ func (b *VBtnBuilder) Right(v bool) (r *VBtnBuilder) {
 	return b
 }
 
-func (b *VBtnBuilder) Ripple(v bool) (r *VBtnBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VBtnBuilder) Ripple(v interface{}) (r *VBtnBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 
@@ -228,8 +221,8 @@ func (b *VBtnBuilder) Tile(v bool) (r *VBtnBuilder) {
 	return b
 }
 
-func (b *VBtnBuilder) To(v string) (r *VBtnBuilder) {
-	b.tag.Attr("to", v)
+func (b *VBtnBuilder) To(v interface{}) (r *VBtnBuilder) {
+	b.tag.Attr(":to", h.JSONString(v))
 	return b
 }
 

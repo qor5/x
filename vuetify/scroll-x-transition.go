@@ -11,9 +11,9 @@ type VScrollXTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VScrollXTransition() (r *VScrollXTransitionBuilder) {
+func VScrollXTransition(children ...h.HTMLComponent) (r *VScrollXTransitionBuilder) {
 	r = &VScrollXTransitionBuilder{
-		tag: h.Tag("v-scroll-x-transition"),
+		tag: h.Tag("v-scroll-x-transition").Children(children...),
 	}
 	return
 }

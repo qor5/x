@@ -11,13 +11,6 @@ type VIconBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VIcon(name string) (r *VIconBuilder) {
-	r = &VIconBuilder{
-		tag: h.Tag("v-icon").Text(name),
-	}
-	return
-}
-
 func (b *VIconBuilder) Color(v string) (r *VIconBuilder) {
 	b.tag.Attr("color", v)
 	return b

@@ -11,13 +11,6 @@ type VSliderBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VSlider(children ...h.HTMLComponent) (r *VSliderBuilder) {
-	r = &VSliderBuilder{
-		tag: h.Tag("vw-slider").Children(children...),
-	}
-	return
-}
-
 func (b *VSliderBuilder) AppendIcon(v string) (r *VSliderBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b
@@ -55,11 +48,6 @@ func (b *VSliderBuilder) Error(v bool) (r *VSliderBuilder) {
 
 func (b *VSliderBuilder) ErrorCount(v int) (r *VSliderBuilder) {
 	b.tag.Attr(":error-count", fmt.Sprint(v))
-	return b
-}
-
-func (b *VSliderBuilder) ErrorMessages(v ...string) (r *VSliderBuilder) {
-	setErrorMessages(b.tag, v)
 	return b
 }
 
@@ -138,7 +126,7 @@ func (b *VSliderBuilder) Readonly(v bool) (r *VSliderBuilder) {
 	return b
 }
 
-func (b *VSliderBuilder) Rules(v []string) (r *VSliderBuilder) {
+func (b *VSliderBuilder) Rules(v interface{}) (r *VSliderBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
@@ -163,8 +151,8 @@ func (b *VSliderBuilder) ThumbColor(v string) (r *VSliderBuilder) {
 	return b
 }
 
-func (b *VSliderBuilder) ThumbLabel(v string) (r *VSliderBuilder) {
-	b.tag.Attr("thumb-label", v)
+func (b *VSliderBuilder) ThumbLabel(v bool) (r *VSliderBuilder) {
+	b.tag.Attr(":thumb-label", fmt.Sprint(v))
 	return b
 }
 
@@ -173,7 +161,7 @@ func (b *VSliderBuilder) ThumbSize(v int) (r *VSliderBuilder) {
 	return b
 }
 
-func (b *VSliderBuilder) TickLabels(v []string) (r *VSliderBuilder) {
+func (b *VSliderBuilder) TickLabels(v interface{}) (r *VSliderBuilder) {
 	b.tag.Attr(":tick-labels", h.JSONString(v))
 	return b
 }

@@ -11,9 +11,9 @@ type VFabTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VFabTransition() (r *VFabTransitionBuilder) {
+func VFabTransition(children ...h.HTMLComponent) (r *VFabTransitionBuilder) {
 	r = &VFabTransitionBuilder{
-		tag: h.Tag("v-fab-transition"),
+		tag: h.Tag("v-fab-transition").Children(children...),
 	}
 	return
 }

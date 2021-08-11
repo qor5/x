@@ -103,8 +103,8 @@ func (b *VRatingBuilder) Readonly(v bool) (r *VRatingBuilder) {
 	return b
 }
 
-func (b *VRatingBuilder) Ripple(v bool) (r *VRatingBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VRatingBuilder) Ripple(v interface{}) (r *VRatingBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 

@@ -11,9 +11,9 @@ type VFadeTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VFadeTransition() (r *VFadeTransitionBuilder) {
+func VFadeTransition(children ...h.HTMLComponent) (r *VFadeTransitionBuilder) {
 	r = &VFadeTransitionBuilder{
-		tag: h.Tag("v-fade-transition"),
+		tag: h.Tag("v-fade-transition").Children(children...),
 	}
 	return
 }

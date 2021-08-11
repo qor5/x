@@ -11,13 +11,6 @@ type VFileInputBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VFileInput(children ...h.HTMLComponent) (r *VFileInputBuilder) {
-	r = &VFileInputBuilder{
-		tag: h.Tag("vw-file-input").Children(children...),
-	}
-	return
-}
-
 func (b *VFileInputBuilder) AppendIcon(v string) (r *VFileInputBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b
@@ -58,7 +51,7 @@ func (b *VFileInputBuilder) Color(v string) (r *VFileInputBuilder) {
 	return b
 }
 
-func (b *VFileInputBuilder) Counter(v bool) (r *VFileInputBuilder) {
+func (b *VFileInputBuilder) Counter(v int) (r *VFileInputBuilder) {
 	b.tag.Attr(":counter", fmt.Sprint(v))
 	return b
 }
@@ -70,6 +63,11 @@ func (b *VFileInputBuilder) CounterSizeString(v string) (r *VFileInputBuilder) {
 
 func (b *VFileInputBuilder) CounterString(v string) (r *VFileInputBuilder) {
 	b.tag.Attr("counter-string", v)
+	return b
+}
+
+func (b *VFileInputBuilder) CounterValue(v interface{}) (r *VFileInputBuilder) {
+	b.tag.Attr(":counter-value", h.JSONString(v))
 	return b
 }
 
@@ -218,7 +216,7 @@ func (b *VFileInputBuilder) Rounded(v bool) (r *VFileInputBuilder) {
 	return b
 }
 
-func (b *VFileInputBuilder) Rules(v []string) (r *VFileInputBuilder) {
+func (b *VFileInputBuilder) Rules(v interface{}) (r *VFileInputBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
@@ -228,7 +226,7 @@ func (b *VFileInputBuilder) Shaped(v bool) (r *VFileInputBuilder) {
 	return b
 }
 
-func (b *VFileInputBuilder) ShowSize(v bool) (r *VFileInputBuilder) {
+func (b *VFileInputBuilder) ShowSize(v int) (r *VFileInputBuilder) {
 	b.tag.Attr(":show-size", fmt.Sprint(v))
 	return b
 }

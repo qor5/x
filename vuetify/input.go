@@ -118,7 +118,7 @@ func (b *VInputBuilder) Readonly(v bool) (r *VInputBuilder) {
 	return b
 }
 
-func (b *VInputBuilder) Rules(v []string) (r *VInputBuilder) {
+func (b *VInputBuilder) Rules(v interface{}) (r *VInputBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }

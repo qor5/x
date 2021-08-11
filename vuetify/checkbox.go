@@ -11,14 +11,6 @@ type VCheckboxBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VCheckbox(children ...h.HTMLComponent) (r *VCheckboxBuilder) {
-	r = &VCheckboxBuilder{
-		tag: h.Tag("vw-checkbox").Children(children...),
-	}
-	//r.FalseValue("false").TrueValue("true")
-	return
-}
-
 func (b *VCheckboxBuilder) AppendIcon(v string) (r *VCheckboxBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b
@@ -56,11 +48,6 @@ func (b *VCheckboxBuilder) Error(v bool) (r *VCheckboxBuilder) {
 
 func (b *VCheckboxBuilder) ErrorCount(v int) (r *VCheckboxBuilder) {
 	b.tag.Attr(":error-count", fmt.Sprint(v))
-	return b
-}
-
-func (b *VCheckboxBuilder) ErrorMessages(v ...string) (r *VCheckboxBuilder) {
-	setErrorMessages(b.tag, v)
 	return b
 }
 
@@ -144,12 +131,12 @@ func (b *VCheckboxBuilder) Readonly(v bool) (r *VCheckboxBuilder) {
 	return b
 }
 
-func (b *VCheckboxBuilder) Ripple(v bool) (r *VCheckboxBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VCheckboxBuilder) Ripple(v interface{}) (r *VCheckboxBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 
-func (b *VCheckboxBuilder) Rules(v []string) (r *VCheckboxBuilder) {
+func (b *VCheckboxBuilder) Rules(v interface{}) (r *VCheckboxBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
@@ -176,6 +163,11 @@ func (b *VCheckboxBuilder) ValidateOnBlur(v bool) (r *VCheckboxBuilder) {
 
 func (b *VCheckboxBuilder) Value(v interface{}) (r *VCheckboxBuilder) {
 	b.tag.Attr(":value", h.JSONString(v))
+	return b
+}
+
+func (b *VCheckboxBuilder) ValueComparator(v interface{}) (r *VCheckboxBuilder) {
+	b.tag.Attr(":value-comparator", h.JSONString(v))
 	return b
 }
 

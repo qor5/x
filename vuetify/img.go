@@ -103,8 +103,8 @@ func (b *VImgBuilder) Sizes(v string) (r *VImgBuilder) {
 	return b
 }
 
-func (b *VImgBuilder) Src(v string) (r *VImgBuilder) {
-	b.tag.Attr("src", v)
+func (b *VImgBuilder) Src(v interface{}) (r *VImgBuilder) {
+	b.tag.Attr(":src", h.JSONString(v))
 	return b
 }
 

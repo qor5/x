@@ -11,9 +11,9 @@ type VCarouselReverseTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VCarouselReverseTransition() (r *VCarouselReverseTransitionBuilder) {
+func VCarouselReverseTransition(children ...h.HTMLComponent) (r *VCarouselReverseTransitionBuilder) {
 	r = &VCarouselReverseTransitionBuilder{
-		tag: h.Tag("v-carousel-reverse-transition"),
+		tag: h.Tag("v-carousel-reverse-transition").Children(children...),
 	}
 	return
 }

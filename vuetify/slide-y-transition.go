@@ -11,9 +11,9 @@ type VSlideYTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VSlideYTransition() (r *VSlideYTransitionBuilder) {
+func VSlideYTransition(children ...h.HTMLComponent) (r *VSlideYTransitionBuilder) {
 	r = &VSlideYTransitionBuilder{
-		tag: h.Tag("v-slide-y-transition"),
+		tag: h.Tag("v-slide-y-transition").Children(children...),
 	}
 	return
 }

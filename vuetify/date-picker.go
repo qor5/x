@@ -23,6 +23,11 @@ func (b *VDatePickerBuilder) ActivePicker(v string) (r *VDatePickerBuilder) {
 	return b
 }
 
+func (b *VDatePickerBuilder) AllowedDates(v interface{}) (r *VDatePickerBuilder) {
+	b.tag.Attr(":allowed-dates", h.JSONString(v))
+	return b
+}
+
 func (b *VDatePickerBuilder) Color(v string) (r *VDatePickerBuilder) {
 	b.tag.Attr("color", v)
 	return b
@@ -30,6 +35,11 @@ func (b *VDatePickerBuilder) Color(v string) (r *VDatePickerBuilder) {
 
 func (b *VDatePickerBuilder) Dark(v bool) (r *VDatePickerBuilder) {
 	b.tag.Attr(":dark", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDatePickerBuilder) DayFormat(v interface{}) (r *VDatePickerBuilder) {
+	b.tag.Attr(":day-format", h.JSONString(v))
 	return b
 }
 
@@ -43,12 +53,12 @@ func (b *VDatePickerBuilder) Elevation(v int) (r *VDatePickerBuilder) {
 	return b
 }
 
-func (b *VDatePickerBuilder) EventColor(v []string) (r *VDatePickerBuilder) {
+func (b *VDatePickerBuilder) EventColor(v interface{}) (r *VDatePickerBuilder) {
 	b.tag.Attr(":event-color", h.JSONString(v))
 	return b
 }
 
-func (b *VDatePickerBuilder) Events(v []string) (r *VDatePickerBuilder) {
+func (b *VDatePickerBuilder) Events(v interface{}) (r *VDatePickerBuilder) {
 	b.tag.Attr(":events", h.JSONString(v))
 	return b
 }
@@ -70,6 +80,11 @@ func (b *VDatePickerBuilder) FullWidth(v bool) (r *VDatePickerBuilder) {
 
 func (b *VDatePickerBuilder) HeaderColor(v string) (r *VDatePickerBuilder) {
 	b.tag.Attr("header-color", v)
+	return b
+}
+
+func (b *VDatePickerBuilder) HeaderDateFormat(v interface{}) (r *VDatePickerBuilder) {
+	b.tag.Attr(":header-date-format", h.JSONString(v))
 	return b
 }
 
@@ -100,6 +115,11 @@ func (b *VDatePickerBuilder) Max(v string) (r *VDatePickerBuilder) {
 
 func (b *VDatePickerBuilder) Min(v string) (r *VDatePickerBuilder) {
 	b.tag.Attr("min", v)
+	return b
+}
+
+func (b *VDatePickerBuilder) MonthFormat(v interface{}) (r *VDatePickerBuilder) {
+	b.tag.Attr(":month-format", h.JSONString(v))
 	return b
 }
 
@@ -188,18 +208,33 @@ func (b *VDatePickerBuilder) ShowWeek(v bool) (r *VDatePickerBuilder) {
 	return b
 }
 
+func (b *VDatePickerBuilder) TitleDateFormat(v interface{}) (r *VDatePickerBuilder) {
+	b.tag.Attr(":title-date-format", h.JSONString(v))
+	return b
+}
+
 func (b *VDatePickerBuilder) Type(v string) (r *VDatePickerBuilder) {
 	b.tag.Attr("type", v)
 	return b
 }
 
-func (b *VDatePickerBuilder) Value(v []string) (r *VDatePickerBuilder) {
-	b.tag.Attr(":value", h.JSONString(v))
+func (b *VDatePickerBuilder) Value(v string) (r *VDatePickerBuilder) {
+	b.tag.Attr("value", v)
+	return b
+}
+
+func (b *VDatePickerBuilder) WeekdayFormat(v interface{}) (r *VDatePickerBuilder) {
+	b.tag.Attr(":weekday-format", h.JSONString(v))
 	return b
 }
 
 func (b *VDatePickerBuilder) Width(v int) (r *VDatePickerBuilder) {
 	b.tag.Attr(":width", fmt.Sprint(v))
+	return b
+}
+
+func (b *VDatePickerBuilder) YearFormat(v interface{}) (r *VDatePickerBuilder) {
+	b.tag.Attr(":year-format", h.JSONString(v))
 	return b
 }
 

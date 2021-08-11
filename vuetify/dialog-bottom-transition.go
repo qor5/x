@@ -11,9 +11,9 @@ type VDialogBottomTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VDialogBottomTransition() (r *VDialogBottomTransitionBuilder) {
+func VDialogBottomTransition(children ...h.HTMLComponent) (r *VDialogBottomTransitionBuilder) {
 	r = &VDialogBottomTransitionBuilder{
-		tag: h.Tag("v-dialog-bottom-transition"),
+		tag: h.Tag("v-dialog-bottom-transition").Children(children...),
 	}
 	return
 }

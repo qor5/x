@@ -93,8 +93,8 @@ func (b *VChipBuilder) FilterIcon(v string) (r *VChipBuilder) {
 	return b
 }
 
-func (b *VChipBuilder) Href(v string) (r *VChipBuilder) {
-	b.tag.Attr("href", v)
+func (b *VChipBuilder) Href(v interface{}) (r *VChipBuilder) {
+	b.tag.Attr(":href", h.JSONString(v))
 	return b
 }
 
@@ -143,8 +143,8 @@ func (b *VChipBuilder) Replace(v bool) (r *VChipBuilder) {
 	return b
 }
 
-func (b *VChipBuilder) Ripple(v bool) (r *VChipBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VChipBuilder) Ripple(v interface{}) (r *VChipBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 
@@ -168,8 +168,8 @@ func (b *VChipBuilder) TextColor(v string) (r *VChipBuilder) {
 	return b
 }
 
-func (b *VChipBuilder) To(v string) (r *VChipBuilder) {
-	b.tag.Attr("to", v)
+func (b *VChipBuilder) To(v interface{}) (r *VChipBuilder) {
+	b.tag.Attr(":to", h.JSONString(v))
 	return b
 }
 

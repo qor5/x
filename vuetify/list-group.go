@@ -58,8 +58,8 @@ func (b *VListGroupBuilder) PrependIcon(v string) (r *VListGroupBuilder) {
 	return b
 }
 
-func (b *VListGroupBuilder) Ripple(v bool) (r *VListGroupBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VListGroupBuilder) Ripple(v interface{}) (r *VListGroupBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 

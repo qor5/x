@@ -11,9 +11,9 @@ type VMenuTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VMenuTransition() (r *VMenuTransitionBuilder) {
+func VMenuTransition(children ...h.HTMLComponent) (r *VMenuTransitionBuilder) {
 	r = &VMenuTransitionBuilder{
-		tag: h.Tag("v-menu-transition"),
+		tag: h.Tag("v-menu-transition").Children(children...),
 	}
 	return
 }

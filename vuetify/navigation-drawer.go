@@ -123,8 +123,8 @@ func (b *VNavigationDrawerBuilder) Right(v bool) (r *VNavigationDrawerBuilder) {
 	return b
 }
 
-func (b *VNavigationDrawerBuilder) Src(v string) (r *VNavigationDrawerBuilder) {
-	b.tag.Attr("src", v)
+func (b *VNavigationDrawerBuilder) Src(v interface{}) (r *VNavigationDrawerBuilder) {
+	b.tag.Attr(":src", h.JSONString(v))
 	return b
 }
 

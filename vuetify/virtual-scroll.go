@@ -33,7 +33,7 @@ func (b *VVirtualScrollBuilder) ItemHeight(v int) (r *VVirtualScrollBuilder) {
 	return b
 }
 
-func (b *VVirtualScrollBuilder) Items(v []string) (r *VVirtualScrollBuilder) {
+func (b *VVirtualScrollBuilder) Items(v interface{}) (r *VVirtualScrollBuilder) {
 	b.tag.Attr(":items", h.JSONString(v))
 	return b
 }

@@ -48,7 +48,7 @@ func (b *VSparklineBuilder) Fill(v bool) (r *VSparklineBuilder) {
 	return b
 }
 
-func (b *VSparklineBuilder) Gradient(v []string) (r *VSparklineBuilder) {
+func (b *VSparklineBuilder) Gradient(v interface{}) (r *VSparklineBuilder) {
 	b.tag.Attr(":gradient", h.JSONString(v))
 	return b
 }
@@ -68,7 +68,7 @@ func (b *VSparklineBuilder) LabelSize(v int) (r *VSparklineBuilder) {
 	return b
 }
 
-func (b *VSparklineBuilder) Labels(v []string) (r *VSparklineBuilder) {
+func (b *VSparklineBuilder) Labels(v interface{}) (r *VSparklineBuilder) {
 	b.tag.Attr(":labels", h.JSONString(v))
 	return b
 }
@@ -88,7 +88,7 @@ func (b *VSparklineBuilder) ShowLabels(v bool) (r *VSparklineBuilder) {
 	return b
 }
 
-func (b *VSparklineBuilder) Smooth(v bool) (r *VSparklineBuilder) {
+func (b *VSparklineBuilder) Smooth(v int) (r *VSparklineBuilder) {
 	b.tag.Attr(":smooth", fmt.Sprint(v))
 	return b
 }
@@ -98,7 +98,7 @@ func (b *VSparklineBuilder) Type(v string) (r *VSparklineBuilder) {
 	return b
 }
 
-func (b *VSparklineBuilder) Value(v []string) (r *VSparklineBuilder) {
+func (b *VSparklineBuilder) Value(v interface{}) (r *VSparklineBuilder) {
 	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }

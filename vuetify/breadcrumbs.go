@@ -28,7 +28,7 @@ func (b *VBreadcrumbsBuilder) Divider(v string) (r *VBreadcrumbsBuilder) {
 	return b
 }
 
-func (b *VBreadcrumbsBuilder) Items(v []string) (r *VBreadcrumbsBuilder) {
+func (b *VBreadcrumbsBuilder) Items(v interface{}) (r *VBreadcrumbsBuilder) {
 	b.tag.Attr(":items", h.JSONString(v))
 	return b
 }

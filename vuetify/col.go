@@ -23,18 +23,18 @@ func (b *VColBuilder) AlignSelf(v string) (r *VColBuilder) {
 	return b
 }
 
-func (b *VColBuilder) Cols(v bool) (r *VColBuilder) {
-	b.tag.Attr(":cols", fmt.Sprint(v))
+func (b *VColBuilder) Cols(v interface{}) (r *VColBuilder) {
+	b.tag.Attr(":cols", h.JSONString(v))
 	return b
 }
 
-func (b *VColBuilder) Lg(v bool) (r *VColBuilder) {
-	b.tag.Attr(":lg", fmt.Sprint(v))
+func (b *VColBuilder) Lg(v interface{}) (r *VColBuilder) {
+	b.tag.Attr(":lg", h.JSONString(v))
 	return b
 }
 
-func (b *VColBuilder) Md(v bool) (r *VColBuilder) {
-	b.tag.Attr(":md", fmt.Sprint(v))
+func (b *VColBuilder) Md(v interface{}) (r *VColBuilder) {
+	b.tag.Attr(":md", h.JSONString(v))
 	return b
 }
 
@@ -88,8 +88,8 @@ func (b *VColBuilder) OrderXl(v string) (r *VColBuilder) {
 	return b
 }
 
-func (b *VColBuilder) Sm(v bool) (r *VColBuilder) {
-	b.tag.Attr(":sm", fmt.Sprint(v))
+func (b *VColBuilder) Sm(v interface{}) (r *VColBuilder) {
+	b.tag.Attr(":sm", h.JSONString(v))
 	return b
 }
 
@@ -98,8 +98,8 @@ func (b *VColBuilder) Tag(v string) (r *VColBuilder) {
 	return b
 }
 
-func (b *VColBuilder) Xl(v bool) (r *VColBuilder) {
-	b.tag.Attr(":xl", fmt.Sprint(v))
+func (b *VColBuilder) Xl(v interface{}) (r *VColBuilder) {
+	b.tag.Attr(":xl", h.JSONString(v))
 	return b
 }
 

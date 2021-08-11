@@ -11,9 +11,9 @@ type VColorPickerBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VColorPicker() (r *VColorPickerBuilder) {
+func VColorPicker(children ...h.HTMLComponent) (r *VColorPickerBuilder) {
 	r = &VColorPickerBuilder{
-		tag: h.Tag("v-color-picker"),
+		tag: h.Tag("v-color-picker").Children(children...),
 	}
 	return
 }
@@ -83,7 +83,7 @@ func (b *VColorPickerBuilder) ShowSwatches(v bool) (r *VColorPickerBuilder) {
 	return b
 }
 
-func (b *VColorPickerBuilder) Swatches(v []string) (r *VColorPickerBuilder) {
+func (b *VColorPickerBuilder) Swatches(v interface{}) (r *VColorPickerBuilder) {
 	b.tag.Attr(":swatches", h.JSONString(v))
 	return b
 }

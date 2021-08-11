@@ -11,9 +11,9 @@ type VCalendarMonthlyBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VCalendarMonthly() (r *VCalendarMonthlyBuilder) {
+func VCalendarMonthly(children ...h.HTMLComponent) (r *VCalendarMonthlyBuilder) {
 	r = &VCalendarMonthlyBuilder{
-		tag: h.Tag("v-calendar-monthly"),
+		tag: h.Tag("v-calendar-monthly").Children(children...),
 	}
 	return
 }
@@ -28,8 +28,13 @@ func (b *VCalendarMonthlyBuilder) Dark(v bool) (r *VCalendarMonthlyBuilder) {
 	return b
 }
 
-func (b *VCalendarMonthlyBuilder) End(v string) (r *VCalendarMonthlyBuilder) {
-	b.tag.Attr("end", v)
+func (b *VCalendarMonthlyBuilder) DayFormat(v interface{}) (r *VCalendarMonthlyBuilder) {
+	b.tag.Attr(":day-format", h.JSONString(v))
+	return b
+}
+
+func (b *VCalendarMonthlyBuilder) End(v int) (r *VCalendarMonthlyBuilder) {
+	b.tag.Attr(":end", fmt.Sprint(v))
 	return b
 }
 
@@ -58,6 +63,11 @@ func (b *VCalendarMonthlyBuilder) MinWeeks(v interface{}) (r *VCalendarMonthlyBu
 	return b
 }
 
+func (b *VCalendarMonthlyBuilder) MonthFormat(v interface{}) (r *VCalendarMonthlyBuilder) {
+	b.tag.Attr(":month-format", h.JSONString(v))
+	return b
+}
+
 func (b *VCalendarMonthlyBuilder) Now(v string) (r *VCalendarMonthlyBuilder) {
 	b.tag.Attr("now", v)
 	return b
@@ -83,13 +93,18 @@ func (b *VCalendarMonthlyBuilder) ShowWeek(v bool) (r *VCalendarMonthlyBuilder) 
 	return b
 }
 
-func (b *VCalendarMonthlyBuilder) Start(v string) (r *VCalendarMonthlyBuilder) {
-	b.tag.Attr("start", v)
+func (b *VCalendarMonthlyBuilder) Start(v int) (r *VCalendarMonthlyBuilder) {
+	b.tag.Attr(":start", fmt.Sprint(v))
 	return b
 }
 
-func (b *VCalendarMonthlyBuilder) Weekdays(v []string) (r *VCalendarMonthlyBuilder) {
-	b.tag.Attr(":weekdays", h.JSONString(v))
+func (b *VCalendarMonthlyBuilder) WeekdayFormat(v interface{}) (r *VCalendarMonthlyBuilder) {
+	b.tag.Attr(":weekday-format", h.JSONString(v))
+	return b
+}
+
+func (b *VCalendarMonthlyBuilder) Weekdays(v string) (r *VCalendarMonthlyBuilder) {
+	b.tag.Attr("weekdays", v)
 	return b
 }
 

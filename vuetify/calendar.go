@@ -18,8 +18,8 @@ func VCalendar(children ...h.HTMLComponent) (r *VCalendarBuilder) {
 	return
 }
 
-func (b *VCalendarBuilder) Categories(v []string) (r *VCalendarBuilder) {
-	b.tag.Attr(":categories", h.JSONString(v))
+func (b *VCalendarBuilder) Categories(v string) (r *VCalendarBuilder) {
+	b.tag.Attr("categories", v)
 	return b
 }
 
@@ -58,8 +58,13 @@ func (b *VCalendarBuilder) Dark(v bool) (r *VCalendarBuilder) {
 	return b
 }
 
-func (b *VCalendarBuilder) End(v string) (r *VCalendarBuilder) {
-	b.tag.Attr("end", v)
+func (b *VCalendarBuilder) DayFormat(v interface{}) (r *VCalendarBuilder) {
+	b.tag.Attr(":day-format", h.JSONString(v))
+	return b
+}
+
+func (b *VCalendarBuilder) End(v int) (r *VCalendarBuilder) {
+	b.tag.Attr(":end", fmt.Sprint(v))
 	return b
 }
 
@@ -113,8 +118,8 @@ func (b *VCalendarBuilder) EventOverlapThreshold(v string) (r *VCalendarBuilder)
 	return b
 }
 
-func (b *VCalendarBuilder) EventRipple(v bool) (r *VCalendarBuilder) {
-	b.tag.Attr(":event-ripple", fmt.Sprint(v))
+func (b *VCalendarBuilder) EventRipple(v interface{}) (r *VCalendarBuilder) {
+	b.tag.Attr(":event-ripple", h.JSONString(v))
 	return b
 }
 
@@ -133,7 +138,7 @@ func (b *VCalendarBuilder) EventTimed(v string) (r *VCalendarBuilder) {
 	return b
 }
 
-func (b *VCalendarBuilder) Events(v []string) (r *VCalendarBuilder) {
+func (b *VCalendarBuilder) Events(v interface{}) (r *VCalendarBuilder) {
 	b.tag.Attr(":events", h.JSONString(v))
 	return b
 }
@@ -143,8 +148,8 @@ func (b *VCalendarBuilder) FirstInterval(v int) (r *VCalendarBuilder) {
 	return b
 }
 
-func (b *VCalendarBuilder) FirstTime(v int) (r *VCalendarBuilder) {
-	b.tag.Attr(":first-time", fmt.Sprint(v))
+func (b *VCalendarBuilder) FirstTime(v interface{}) (r *VCalendarBuilder) {
+	b.tag.Attr(":first-time", h.JSONString(v))
 	return b
 }
 
@@ -158,6 +163,11 @@ func (b *VCalendarBuilder) IntervalCount(v int) (r *VCalendarBuilder) {
 	return b
 }
 
+func (b *VCalendarBuilder) IntervalFormat(v interface{}) (r *VCalendarBuilder) {
+	b.tag.Attr(":interval-format", h.JSONString(v))
+	return b
+}
+
 func (b *VCalendarBuilder) IntervalHeight(v int) (r *VCalendarBuilder) {
 	b.tag.Attr(":interval-height", fmt.Sprint(v))
 	return b
@@ -165,6 +175,11 @@ func (b *VCalendarBuilder) IntervalHeight(v int) (r *VCalendarBuilder) {
 
 func (b *VCalendarBuilder) IntervalMinutes(v int) (r *VCalendarBuilder) {
 	b.tag.Attr(":interval-minutes", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCalendarBuilder) IntervalStyle(v interface{}) (r *VCalendarBuilder) {
+	b.tag.Attr(":interval-style", h.JSONString(v))
 	return b
 }
 
@@ -198,6 +213,11 @@ func (b *VCalendarBuilder) MinWeeks(v interface{}) (r *VCalendarBuilder) {
 	return b
 }
 
+func (b *VCalendarBuilder) MonthFormat(v interface{}) (r *VCalendarBuilder) {
+	b.tag.Attr(":month-format", h.JSONString(v))
+	return b
+}
+
 func (b *VCalendarBuilder) Now(v string) (r *VCalendarBuilder) {
 	b.tag.Attr("now", v)
 	return b
@@ -218,6 +238,11 @@ func (b *VCalendarBuilder) ShortWeekdays(v bool) (r *VCalendarBuilder) {
 	return b
 }
 
+func (b *VCalendarBuilder) ShowIntervalLabel(v interface{}) (r *VCalendarBuilder) {
+	b.tag.Attr(":show-interval-label", h.JSONString(v))
+	return b
+}
+
 func (b *VCalendarBuilder) ShowMonthOnFirst(v bool) (r *VCalendarBuilder) {
 	b.tag.Attr(":show-month-on-first", fmt.Sprint(v))
 	return b
@@ -228,8 +253,8 @@ func (b *VCalendarBuilder) ShowWeek(v bool) (r *VCalendarBuilder) {
 	return b
 }
 
-func (b *VCalendarBuilder) Start(v string) (r *VCalendarBuilder) {
-	b.tag.Attr("start", v)
+func (b *VCalendarBuilder) Start(v int) (r *VCalendarBuilder) {
+	b.tag.Attr(":start", fmt.Sprint(v))
 	return b
 }
 
@@ -238,13 +263,18 @@ func (b *VCalendarBuilder) Type(v string) (r *VCalendarBuilder) {
 	return b
 }
 
-func (b *VCalendarBuilder) Value(v string) (r *VCalendarBuilder) {
-	b.tag.Attr("value", v)
+func (b *VCalendarBuilder) Value(v int) (r *VCalendarBuilder) {
+	b.tag.Attr(":value", fmt.Sprint(v))
 	return b
 }
 
-func (b *VCalendarBuilder) Weekdays(v []string) (r *VCalendarBuilder) {
-	b.tag.Attr(":weekdays", h.JSONString(v))
+func (b *VCalendarBuilder) WeekdayFormat(v interface{}) (r *VCalendarBuilder) {
+	b.tag.Attr(":weekday-format", h.JSONString(v))
+	return b
+}
+
+func (b *VCalendarBuilder) Weekdays(v string) (r *VCalendarBuilder) {
+	b.tag.Attr("weekdays", v)
 	return b
 }
 

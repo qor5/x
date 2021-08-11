@@ -11,13 +11,6 @@ type VRadioGroupBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VRadioGroup(children ...h.HTMLComponent) (r *VRadioGroupBuilder) {
-	r = &VRadioGroupBuilder{
-		tag: h.Tag("vw-radio-group").Children(children...),
-	}
-	return
-}
-
 func (b *VRadioGroupBuilder) ActiveClass(v string) (r *VRadioGroupBuilder) {
 	b.tag.Attr("active-class", v)
 	return b
@@ -60,16 +53,6 @@ func (b *VRadioGroupBuilder) Error(v bool) (r *VRadioGroupBuilder) {
 
 func (b *VRadioGroupBuilder) ErrorCount(v int) (r *VRadioGroupBuilder) {
 	b.tag.Attr(":error-count", fmt.Sprint(v))
-	return b
-}
-
-func (b *VRadioGroupBuilder) ErrorMessages(v ...string) (r *VRadioGroupBuilder) {
-	setErrorMessages(b.tag, v)
-	return b
-}
-
-func (b *VRadioGroupBuilder) Height(v int) (r *VRadioGroupBuilder) {
-	b.tag.Attr(":height", fmt.Sprint(v))
 	return b
 }
 
@@ -143,7 +126,7 @@ func (b *VRadioGroupBuilder) Row(v bool) (r *VRadioGroupBuilder) {
 	return b
 }
 
-func (b *VRadioGroupBuilder) Rules(v []string) (r *VRadioGroupBuilder) {
+func (b *VRadioGroupBuilder) Rules(v interface{}) (r *VRadioGroupBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
@@ -170,6 +153,11 @@ func (b *VRadioGroupBuilder) ValidateOnBlur(v bool) (r *VRadioGroupBuilder) {
 
 func (b *VRadioGroupBuilder) Value(v interface{}) (r *VRadioGroupBuilder) {
 	b.tag.Attr(":value", h.JSONString(v))
+	return b
+}
+
+func (b *VRadioGroupBuilder) ValueComparator(v interface{}) (r *VRadioGroupBuilder) {
+	b.tag.Attr(":value-comparator", h.JSONString(v))
 	return b
 }
 

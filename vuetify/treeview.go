@@ -23,7 +23,7 @@ func (b *VTreeviewBuilder) Activatable(v bool) (r *VTreeviewBuilder) {
 	return b
 }
 
-func (b *VTreeviewBuilder) Active(v []string) (r *VTreeviewBuilder) {
+func (b *VTreeviewBuilder) Active(v interface{}) (r *VTreeviewBuilder) {
 	b.tag.Attr(":active", h.JSONString(v))
 	return b
 }
@@ -50,6 +50,11 @@ func (b *VTreeviewBuilder) Dense(v bool) (r *VTreeviewBuilder) {
 
 func (b *VTreeviewBuilder) ExpandIcon(v string) (r *VTreeviewBuilder) {
 	b.tag.Attr("expand-icon", v)
+	return b
+}
+
+func (b *VTreeviewBuilder) Filter(v interface{}) (r *VTreeviewBuilder) {
+	b.tag.Attr(":filter", h.JSONString(v))
 	return b
 }
 
@@ -83,13 +88,18 @@ func (b *VTreeviewBuilder) ItemText(v string) (r *VTreeviewBuilder) {
 	return b
 }
 
-func (b *VTreeviewBuilder) Items(v []string) (r *VTreeviewBuilder) {
+func (b *VTreeviewBuilder) Items(v interface{}) (r *VTreeviewBuilder) {
 	b.tag.Attr(":items", h.JSONString(v))
 	return b
 }
 
 func (b *VTreeviewBuilder) Light(v bool) (r *VTreeviewBuilder) {
 	b.tag.Attr(":light", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTreeviewBuilder) LoadChildren(v interface{}) (r *VTreeviewBuilder) {
+	b.tag.Attr(":load-children", h.JSONString(v))
 	return b
 }
 
@@ -113,7 +123,7 @@ func (b *VTreeviewBuilder) OnIcon(v string) (r *VTreeviewBuilder) {
 	return b
 }
 
-func (b *VTreeviewBuilder) Open(v []string) (r *VTreeviewBuilder) {
+func (b *VTreeviewBuilder) Open(v interface{}) (r *VTreeviewBuilder) {
 	b.tag.Attr(":open", h.JSONString(v))
 	return b
 }
@@ -168,7 +178,7 @@ func (b *VTreeviewBuilder) Transition(v bool) (r *VTreeviewBuilder) {
 	return b
 }
 
-func (b *VTreeviewBuilder) Value(v []string) (r *VTreeviewBuilder) {
+func (b *VTreeviewBuilder) Value(v interface{}) (r *VTreeviewBuilder) {
 	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }

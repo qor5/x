@@ -11,13 +11,6 @@ type VSwitchBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VSwitch(children ...h.HTMLComponent) (r *VSwitchBuilder) {
-	r = &VSwitchBuilder{
-		tag: h.Tag("vw-switch").Children(children...),
-	}
-	return
-}
-
 func (b *VSwitchBuilder) AppendIcon(v string) (r *VSwitchBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b
@@ -55,11 +48,6 @@ func (b *VSwitchBuilder) Error(v bool) (r *VSwitchBuilder) {
 
 func (b *VSwitchBuilder) ErrorCount(v int) (r *VSwitchBuilder) {
 	b.tag.Attr(":error-count", fmt.Sprint(v))
-	return b
-}
-
-func (b *VSwitchBuilder) ErrorMessages(v ...string) (r *VSwitchBuilder) {
-	setErrorMessages(b.tag, v)
 	return b
 }
 
@@ -138,12 +126,12 @@ func (b *VSwitchBuilder) Readonly(v bool) (r *VSwitchBuilder) {
 	return b
 }
 
-func (b *VSwitchBuilder) Ripple(v bool) (r *VSwitchBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VSwitchBuilder) Ripple(v interface{}) (r *VSwitchBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 
-func (b *VSwitchBuilder) Rules(v []string) (r *VSwitchBuilder) {
+func (b *VSwitchBuilder) Rules(v interface{}) (r *VSwitchBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
@@ -170,6 +158,11 @@ func (b *VSwitchBuilder) ValidateOnBlur(v bool) (r *VSwitchBuilder) {
 
 func (b *VSwitchBuilder) Value(v interface{}) (r *VSwitchBuilder) {
 	b.tag.Attr(":value", h.JSONString(v))
+	return b
+}
+
+func (b *VSwitchBuilder) ValueComparator(v interface{}) (r *VSwitchBuilder) {
+	b.tag.Attr(":value-comparator", h.JSONString(v))
 	return b
 }
 

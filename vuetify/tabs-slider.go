@@ -11,9 +11,9 @@ type VTabsSliderBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VTabsSlider() (r *VTabsSliderBuilder) {
+func VTabsSlider(children ...h.HTMLComponent) (r *VTabsSliderBuilder) {
 	r = &VTabsSliderBuilder{
-		tag: h.Tag("v-tabs-slider"),
+		tag: h.Tag("v-tabs-slider").Children(children...),
 	}
 	return
 }

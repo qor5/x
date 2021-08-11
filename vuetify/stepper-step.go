@@ -48,7 +48,7 @@ func (b *VStepperStepBuilder) ErrorIcon(v string) (r *VStepperStepBuilder) {
 	return b
 }
 
-func (b *VStepperStepBuilder) Rules(v []string) (r *VStepperStepBuilder) {
+func (b *VStepperStepBuilder) Rules(v interface{}) (r *VStepperStepBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }

@@ -23,6 +23,21 @@ func (b *VDataIteratorBuilder) CheckboxColor(v string) (r *VDataIteratorBuilder)
 	return b
 }
 
+func (b *VDataIteratorBuilder) CustomFilter(v interface{}) (r *VDataIteratorBuilder) {
+	b.tag.Attr(":custom-filter", h.JSONString(v))
+	return b
+}
+
+func (b *VDataIteratorBuilder) CustomGroup(v interface{}) (r *VDataIteratorBuilder) {
+	b.tag.Attr(":custom-group", h.JSONString(v))
+	return b
+}
+
+func (b *VDataIteratorBuilder) CustomSort(v interface{}) (r *VDataIteratorBuilder) {
+	b.tag.Attr(":custom-sort", h.JSONString(v))
+	return b
+}
+
 func (b *VDataIteratorBuilder) Dark(v bool) (r *VDataIteratorBuilder) {
 	b.tag.Attr(":dark", fmt.Sprint(v))
 	return b
@@ -43,7 +58,7 @@ func (b *VDataIteratorBuilder) DisableSort(v bool) (r *VDataIteratorBuilder) {
 	return b
 }
 
-func (b *VDataIteratorBuilder) Expanded(v []string) (r *VDataIteratorBuilder) {
+func (b *VDataIteratorBuilder) Expanded(v interface{}) (r *VDataIteratorBuilder) {
 	b.tag.Attr(":expanded", h.JSONString(v))
 	return b
 }
@@ -73,7 +88,7 @@ func (b *VDataIteratorBuilder) ItemKey(v string) (r *VDataIteratorBuilder) {
 	return b
 }
 
-func (b *VDataIteratorBuilder) Items(v []string) (r *VDataIteratorBuilder) {
+func (b *VDataIteratorBuilder) Items(v interface{}) (r *VDataIteratorBuilder) {
 	b.tag.Attr(":items", h.JSONString(v))
 	return b
 }
@@ -173,7 +188,7 @@ func (b *VDataIteratorBuilder) SortDesc(v bool) (r *VDataIteratorBuilder) {
 	return b
 }
 
-func (b *VDataIteratorBuilder) Value(v []string) (r *VDataIteratorBuilder) {
+func (b *VDataIteratorBuilder) Value(v interface{}) (r *VDataIteratorBuilder) {
 	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }

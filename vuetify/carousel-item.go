@@ -53,8 +53,8 @@ func (b *VCarouselItemBuilder) ExactPath(v bool) (r *VCarouselItemBuilder) {
 	return b
 }
 
-func (b *VCarouselItemBuilder) Href(v string) (r *VCarouselItemBuilder) {
-	b.tag.Attr("href", v)
+func (b *VCarouselItemBuilder) Href(v interface{}) (r *VCarouselItemBuilder) {
+	b.tag.Attr(":href", h.JSONString(v))
 	return b
 }
 
@@ -78,8 +78,8 @@ func (b *VCarouselItemBuilder) ReverseTransition(v bool) (r *VCarouselItemBuilde
 	return b
 }
 
-func (b *VCarouselItemBuilder) Ripple(v bool) (r *VCarouselItemBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VCarouselItemBuilder) Ripple(v interface{}) (r *VCarouselItemBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 
@@ -93,8 +93,8 @@ func (b *VCarouselItemBuilder) Target(v string) (r *VCarouselItemBuilder) {
 	return b
 }
 
-func (b *VCarouselItemBuilder) To(v string) (r *VCarouselItemBuilder) {
-	b.tag.Attr("to", v)
+func (b *VCarouselItemBuilder) To(v interface{}) (r *VCarouselItemBuilder) {
+	b.tag.Attr(":to", h.JSONString(v))
 	return b
 }
 

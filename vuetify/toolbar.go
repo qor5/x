@@ -128,8 +128,8 @@ func (b *VToolbarBuilder) Short(v bool) (r *VToolbarBuilder) {
 	return b
 }
 
-func (b *VToolbarBuilder) Src(v string) (r *VToolbarBuilder) {
-	b.tag.Attr("src", v)
+func (b *VToolbarBuilder) Src(v interface{}) (r *VToolbarBuilder) {
+	b.tag.Attr(":src", h.JSONString(v))
 	return b
 }
 

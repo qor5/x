@@ -11,9 +11,9 @@ type VScrollYReverseTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VScrollYReverseTransition() (r *VScrollYReverseTransitionBuilder) {
+func VScrollYReverseTransition(children ...h.HTMLComponent) (r *VScrollYReverseTransitionBuilder) {
 	r = &VScrollYReverseTransitionBuilder{
-		tag: h.Tag("v-scroll-y-reverse-transition"),
+		tag: h.Tag("v-scroll-y-reverse-transition").Children(children...),
 	}
 	return
 }

@@ -11,6 +11,7 @@ import {
 	VChipGroup,
 	VItemGroup,
 	VFileInput,
+	VCombobox,
 } from 'vuetify/lib';
 
 import 'vuetify/dist/vuetify.min.css';
@@ -39,6 +40,7 @@ declare var window: any;
 		Vue.component('vw-text-field', WithField(VTextField));
 		Vue.component('vw-textarea', WithField(VTextarea));
 		Vue.component('vw-checkbox', WithField(VCheckbox, 'input-value'));
+		Vue.component('vw-combobox', WithField(VCombobox));
 		Vue.component('vw-switch', WithField(VSwitch, 'input-value'));
 		Vue.component('vw-radio-group', WithField(VRadioGroup));
 		Vue.component('vw-slider', WithField(VSlider));

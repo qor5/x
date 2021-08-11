@@ -11,9 +11,9 @@ type VCalendarDailyBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VCalendarDaily() (r *VCalendarDailyBuilder) {
+func VCalendarDaily(children ...h.HTMLComponent) (r *VCalendarDailyBuilder) {
 	r = &VCalendarDailyBuilder{
-		tag: h.Tag("v-calendar-daily"),
+		tag: h.Tag("v-calendar-daily").Children(children...),
 	}
 	return
 }
@@ -28,8 +28,13 @@ func (b *VCalendarDailyBuilder) Dark(v bool) (r *VCalendarDailyBuilder) {
 	return b
 }
 
-func (b *VCalendarDailyBuilder) End(v string) (r *VCalendarDailyBuilder) {
-	b.tag.Attr("end", v)
+func (b *VCalendarDailyBuilder) DayFormat(v interface{}) (r *VCalendarDailyBuilder) {
+	b.tag.Attr(":day-format", h.JSONString(v))
+	return b
+}
+
+func (b *VCalendarDailyBuilder) End(v int) (r *VCalendarDailyBuilder) {
+	b.tag.Attr(":end", fmt.Sprint(v))
 	return b
 }
 
@@ -38,8 +43,8 @@ func (b *VCalendarDailyBuilder) FirstInterval(v int) (r *VCalendarDailyBuilder) 
 	return b
 }
 
-func (b *VCalendarDailyBuilder) FirstTime(v int) (r *VCalendarDailyBuilder) {
-	b.tag.Attr(":first-time", fmt.Sprint(v))
+func (b *VCalendarDailyBuilder) FirstTime(v interface{}) (r *VCalendarDailyBuilder) {
+	b.tag.Attr(":first-time", h.JSONString(v))
 	return b
 }
 
@@ -53,6 +58,11 @@ func (b *VCalendarDailyBuilder) IntervalCount(v int) (r *VCalendarDailyBuilder) 
 	return b
 }
 
+func (b *VCalendarDailyBuilder) IntervalFormat(v interface{}) (r *VCalendarDailyBuilder) {
+	b.tag.Attr(":interval-format", h.JSONString(v))
+	return b
+}
+
 func (b *VCalendarDailyBuilder) IntervalHeight(v int) (r *VCalendarDailyBuilder) {
 	b.tag.Attr(":interval-height", fmt.Sprint(v))
 	return b
@@ -60,6 +70,11 @@ func (b *VCalendarDailyBuilder) IntervalHeight(v int) (r *VCalendarDailyBuilder)
 
 func (b *VCalendarDailyBuilder) IntervalMinutes(v int) (r *VCalendarDailyBuilder) {
 	b.tag.Attr(":interval-minutes", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCalendarDailyBuilder) IntervalStyle(v interface{}) (r *VCalendarDailyBuilder) {
+	b.tag.Attr(":interval-style", h.JSONString(v))
 	return b
 }
 
@@ -98,13 +113,23 @@ func (b *VCalendarDailyBuilder) ShortWeekdays(v bool) (r *VCalendarDailyBuilder)
 	return b
 }
 
-func (b *VCalendarDailyBuilder) Start(v string) (r *VCalendarDailyBuilder) {
-	b.tag.Attr("start", v)
+func (b *VCalendarDailyBuilder) ShowIntervalLabel(v interface{}) (r *VCalendarDailyBuilder) {
+	b.tag.Attr(":show-interval-label", h.JSONString(v))
 	return b
 }
 
-func (b *VCalendarDailyBuilder) Weekdays(v []string) (r *VCalendarDailyBuilder) {
-	b.tag.Attr(":weekdays", h.JSONString(v))
+func (b *VCalendarDailyBuilder) Start(v int) (r *VCalendarDailyBuilder) {
+	b.tag.Attr(":start", fmt.Sprint(v))
+	return b
+}
+
+func (b *VCalendarDailyBuilder) WeekdayFormat(v interface{}) (r *VCalendarDailyBuilder) {
+	b.tag.Attr(":weekday-format", h.JSONString(v))
+	return b
+}
+
+func (b *VCalendarDailyBuilder) Weekdays(v string) (r *VCalendarDailyBuilder) {
+	b.tag.Attr("weekdays", v)
 	return b
 }
 

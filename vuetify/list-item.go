@@ -63,8 +63,8 @@ func (b *VListItemBuilder) ExactPath(v bool) (r *VListItemBuilder) {
 	return b
 }
 
-func (b *VListItemBuilder) Href(v string) (r *VListItemBuilder) {
-	b.tag.Attr("href", v)
+func (b *VListItemBuilder) Href(v interface{}) (r *VListItemBuilder) {
+	b.tag.Attr(":href", h.JSONString(v))
 	return b
 }
 
@@ -98,8 +98,8 @@ func (b *VListItemBuilder) Replace(v bool) (r *VListItemBuilder) {
 	return b
 }
 
-func (b *VListItemBuilder) Ripple(v bool) (r *VListItemBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VListItemBuilder) Ripple(v interface{}) (r *VListItemBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 
@@ -123,8 +123,8 @@ func (b *VListItemBuilder) ThreeLine(v bool) (r *VListItemBuilder) {
 	return b
 }
 
-func (b *VListItemBuilder) To(v string) (r *VListItemBuilder) {
-	b.tag.Attr("to", v)
+func (b *VListItemBuilder) To(v interface{}) (r *VListItemBuilder) {
+	b.tag.Attr(":to", h.JSONString(v))
 	return b
 }
 

@@ -11,13 +11,6 @@ type VSimpleTableBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VSimpleTable(children ...h.HTMLComponent) (r *VSimpleTableBuilder) {
-	r = &VSimpleTableBuilder{
-		tag: h.Tag("table").Children(children...).Attr("is", "v-simple-table"),
-	}
-	return
-}
-
 func (b *VSimpleTableBuilder) Dark(v bool) (r *VSimpleTableBuilder) {
 	b.tag.Attr(":dark", fmt.Sprint(v))
 	return b

@@ -18,17 +18,17 @@ func VTimePicker(children ...h.HTMLComponent) (r *VTimePickerBuilder) {
 	return
 }
 
-func (b *VTimePickerBuilder) AllowedHours(v []string) (r *VTimePickerBuilder) {
+func (b *VTimePickerBuilder) AllowedHours(v interface{}) (r *VTimePickerBuilder) {
 	b.tag.Attr(":allowed-hours", h.JSONString(v))
 	return b
 }
 
-func (b *VTimePickerBuilder) AllowedMinutes(v []string) (r *VTimePickerBuilder) {
+func (b *VTimePickerBuilder) AllowedMinutes(v interface{}) (r *VTimePickerBuilder) {
 	b.tag.Attr(":allowed-minutes", h.JSONString(v))
 	return b
 }
 
-func (b *VTimePickerBuilder) AllowedSeconds(v []string) (r *VTimePickerBuilder) {
+func (b *VTimePickerBuilder) AllowedSeconds(v interface{}) (r *VTimePickerBuilder) {
 	b.tag.Attr(":allowed-seconds", h.JSONString(v))
 	return b
 }

@@ -73,8 +73,8 @@ func (b *VRadioBuilder) Readonly(v bool) (r *VRadioBuilder) {
 	return b
 }
 
-func (b *VRadioBuilder) Ripple(v bool) (r *VRadioBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VRadioBuilder) Ripple(v interface{}) (r *VRadioBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 

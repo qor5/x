@@ -11,9 +11,9 @@ type VDialogTopTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VDialogTopTransition() (r *VDialogTopTransitionBuilder) {
+func VDialogTopTransition(children ...h.HTMLComponent) (r *VDialogTopTransitionBuilder) {
 	r = &VDialogTopTransitionBuilder{
-		tag: h.Tag("v-dialog-top-transition"),
+		tag: h.Tag("v-dialog-top-transition").Children(children...),
 	}
 	return
 }

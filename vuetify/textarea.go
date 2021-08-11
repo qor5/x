@@ -11,13 +11,6 @@ type VTextareaBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VTextarea(children ...h.HTMLComponent) (r *VTextareaBuilder) {
-	r = &VTextareaBuilder{
-		tag: h.Tag("vw-textarea").Children(children...),
-	}
-	return
-}
-
 func (b *VTextareaBuilder) AppendIcon(v string) (r *VTextareaBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b
@@ -58,8 +51,13 @@ func (b *VTextareaBuilder) Color(v string) (r *VTextareaBuilder) {
 	return b
 }
 
-func (b *VTextareaBuilder) Counter(v bool) (r *VTextareaBuilder) {
+func (b *VTextareaBuilder) Counter(v int) (r *VTextareaBuilder) {
 	b.tag.Attr(":counter", fmt.Sprint(v))
+	return b
+}
+
+func (b *VTextareaBuilder) CounterValue(v interface{}) (r *VTextareaBuilder) {
+	b.tag.Attr(":counter-value", h.JSONString(v))
 	return b
 }
 
@@ -85,11 +83,6 @@ func (b *VTextareaBuilder) Error(v bool) (r *VTextareaBuilder) {
 
 func (b *VTextareaBuilder) ErrorCount(v int) (r *VTextareaBuilder) {
 	b.tag.Attr(":error-count", fmt.Sprint(v))
-	return b
-}
-
-func (b *VTextareaBuilder) ErrorMessages(v ...string) (r *VTextareaBuilder) {
-	setErrorMessages(b.tag, v)
 	return b
 }
 
@@ -218,7 +211,7 @@ func (b *VTextareaBuilder) Rows(v int) (r *VTextareaBuilder) {
 	return b
 }
 
-func (b *VTextareaBuilder) Rules(v []string) (r *VTextareaBuilder) {
+func (b *VTextareaBuilder) Rules(v interface{}) (r *VTextareaBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }

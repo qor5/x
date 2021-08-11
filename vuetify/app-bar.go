@@ -193,8 +193,8 @@ func (b *VAppBarBuilder) ShrinkOnScroll(v bool) (r *VAppBarBuilder) {
 	return b
 }
 
-func (b *VAppBarBuilder) Src(v string) (r *VAppBarBuilder) {
-	b.tag.Attr("src", v)
+func (b *VAppBarBuilder) Src(v interface{}) (r *VAppBarBuilder) {
+	b.tag.Attr(":src", h.JSONString(v))
 	return b
 }
 

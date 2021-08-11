@@ -11,9 +11,9 @@ type VContentBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VContent() (r *VContentBuilder) {
+func VContent(children ...h.HTMLComponent) (r *VContentBuilder) {
 	r = &VContentBuilder{
-		tag: h.Tag("v-content"),
+		tag: h.Tag("v-content").Children(children...),
 	}
 	return
 }

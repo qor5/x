@@ -11,9 +11,9 @@ type VBreadcrumbsDividerBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VBreadcrumbsDivider() (r *VBreadcrumbsDividerBuilder) {
+func VBreadcrumbsDivider(children ...h.HTMLComponent) (r *VBreadcrumbsDividerBuilder) {
 	r = &VBreadcrumbsDividerBuilder{
-		tag: h.Tag("v-breadcrumbs-divider"),
+		tag: h.Tag("v-breadcrumbs-divider").Children(children...),
 	}
 	return
 }

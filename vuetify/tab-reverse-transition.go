@@ -11,9 +11,9 @@ type VTabReverseTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VTabReverseTransition() (r *VTabReverseTransitionBuilder) {
+func VTabReverseTransition(children ...h.HTMLComponent) (r *VTabReverseTransitionBuilder) {
 	r = &VTabReverseTransitionBuilder{
-		tag: h.Tag("v-tab-reverse-transition"),
+		tag: h.Tag("v-tab-reverse-transition").Children(children...),
 	}
 	return
 }

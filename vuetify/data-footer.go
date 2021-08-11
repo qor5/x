@@ -38,7 +38,7 @@ func (b *VDataFooterBuilder) ItemsPerPageAllText(v string) (r *VDataFooterBuilde
 	return b
 }
 
-func (b *VDataFooterBuilder) ItemsPerPageOptions(v []string) (r *VDataFooterBuilder) {
+func (b *VDataFooterBuilder) ItemsPerPageOptions(v interface{}) (r *VDataFooterBuilder) {
 	b.tag.Attr(":items-per-page-options", h.JSONString(v))
 	return b
 }

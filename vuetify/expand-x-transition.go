@@ -11,9 +11,9 @@ type VExpandXTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VExpandXTransition() (r *VExpandXTransitionBuilder) {
+func VExpandXTransition(children ...h.HTMLComponent) (r *VExpandXTransitionBuilder) {
 	r = &VExpandXTransitionBuilder{
-		tag: h.Tag("v-expand-x-transition"),
+		tag: h.Tag("v-expand-x-transition").Children(children...),
 	}
 	return
 }

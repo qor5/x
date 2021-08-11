@@ -1,24 +1,10 @@
 package vuetify
 
 import (
-	"context"
 	"fmt"
 
 	h "github.com/theplant/htmlgo"
 )
-
-type VSelectBuilder struct {
-	tag           *h.HTMLTagBuilder
-	selectedItems interface{}
-	items         interface{}
-}
-
-func VSelect(children ...h.HTMLComponent) (r *VSelectBuilder) {
-	r = &VSelectBuilder{
-		tag: h.Tag("vw-select").Children(children...),
-	}
-	return
-}
 
 func (b *VSelectBuilder) AppendIcon(v string) (r *VSelectBuilder) {
 	b.tag.Attr("append-icon", v)
@@ -70,8 +56,13 @@ func (b *VSelectBuilder) Color(v string) (r *VSelectBuilder) {
 	return b
 }
 
-func (b *VSelectBuilder) Counter(v bool) (r *VSelectBuilder) {
+func (b *VSelectBuilder) Counter(v int) (r *VSelectBuilder) {
 	b.tag.Attr(":counter", fmt.Sprint(v))
+	return b
+}
+
+func (b *VSelectBuilder) CounterValue(v interface{}) (r *VSelectBuilder) {
+	b.tag.Attr(":counter-value", h.JSONString(v))
 	return b
 }
 
@@ -112,11 +103,6 @@ func (b *VSelectBuilder) Error(v bool) (r *VSelectBuilder) {
 
 func (b *VSelectBuilder) ErrorCount(v int) (r *VSelectBuilder) {
 	b.tag.Attr(":error-count", fmt.Sprint(v))
-	return b
-}
-
-func (b *VSelectBuilder) ErrorMessages(v ...string) (r *VSelectBuilder) {
-	setErrorMessages(b.tag, v)
 	return b
 }
 
@@ -180,11 +166,6 @@ func (b *VSelectBuilder) ItemValue(v string) (r *VSelectBuilder) {
 	return b
 }
 
-func (b *VSelectBuilder) Items(v interface{}) (r *VSelectBuilder) {
-	b.items = v
-	return b
-}
-
 func (b *VSelectBuilder) Label(v string) (r *VSelectBuilder) {
 	b.tag.Attr("label", v)
 	return b
@@ -205,8 +186,8 @@ func (b *VSelectBuilder) Loading(v bool) (r *VSelectBuilder) {
 	return b
 }
 
-func (b *VSelectBuilder) MenuProps(v string) (r *VSelectBuilder) {
-	b.tag.Attr("menu-props", v)
+func (b *VSelectBuilder) MenuProps(v interface{}) (r *VSelectBuilder) {
+	b.tag.Attr(":menu-props", h.JSONString(v))
 	return b
 }
 
@@ -285,7 +266,7 @@ func (b *VSelectBuilder) Rounded(v bool) (r *VSelectBuilder) {
 	return b
 }
 
-func (b *VSelectBuilder) Rules(v []string) (r *VSelectBuilder) {
+func (b *VSelectBuilder) Rules(v interface{}) (r *VSelectBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
@@ -345,6 +326,11 @@ func (b *VSelectBuilder) Value(v interface{}) (r *VSelectBuilder) {
 	return b
 }
 
+func (b *VSelectBuilder) ValueComparator(v interface{}) (r *VSelectBuilder) {
+	b.tag.Attr(":value-comparator", h.JSONString(v))
+	return b
+}
+
 func (b *VSelectBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
 }
@@ -387,14 +373,4 @@ func (b *VSelectBuilder) On(name string, value string) (r *VSelectBuilder) {
 func (b *VSelectBuilder) Bind(name string, value string) (r *VSelectBuilder) {
 	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
-}
-
-func (b *VSelectBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	if b.items == nil {
-		b.items = b.selectedItems
-	}
-	b.tag.Attr(":items", b.items)
-	b.tag.Attr(":selected-items", b.selectedItems)
-
-	return b.tag.MarshalHTML(ctx)
 }

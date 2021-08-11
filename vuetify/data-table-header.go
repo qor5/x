@@ -11,9 +11,9 @@ type VDataTableHeaderBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VDataTableHeader() (r *VDataTableHeaderBuilder) {
+func VDataTableHeader(children ...h.HTMLComponent) (r *VDataTableHeaderBuilder) {
 	r = &VDataTableHeaderBuilder{
-		tag: h.Tag("v-data-table-header"),
+		tag: h.Tag("v-data-table-header").Children(children...),
 	}
 	return
 }
@@ -33,7 +33,7 @@ func (b *VDataTableHeaderBuilder) EveryItem(v bool) (r *VDataTableHeaderBuilder)
 	return b
 }
 
-func (b *VDataTableHeaderBuilder) Headers(v []string) (r *VDataTableHeaderBuilder) {
+func (b *VDataTableHeaderBuilder) Headers(v interface{}) (r *VDataTableHeaderBuilder) {
 	b.tag.Attr(":headers", h.JSONString(v))
 	return b
 }

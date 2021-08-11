@@ -11,9 +11,9 @@ type VCarouselTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VCarouselTransition() (r *VCarouselTransitionBuilder) {
+func VCarouselTransition(children ...h.HTMLComponent) (r *VCarouselTransitionBuilder) {
 	r = &VCarouselTransitionBuilder{
-		tag: h.Tag("v-carousel-transition"),
+		tag: h.Tag("v-carousel-transition").Children(children...),
 	}
 	return
 }

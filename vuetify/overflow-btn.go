@@ -78,8 +78,13 @@ func (b *VOverflowBtnBuilder) Color(v string) (r *VOverflowBtnBuilder) {
 	return b
 }
 
-func (b *VOverflowBtnBuilder) Counter(v bool) (r *VOverflowBtnBuilder) {
+func (b *VOverflowBtnBuilder) Counter(v int) (r *VOverflowBtnBuilder) {
 	b.tag.Attr(":counter", fmt.Sprint(v))
+	return b
+}
+
+func (b *VOverflowBtnBuilder) CounterValue(v interface{}) (r *VOverflowBtnBuilder) {
+	b.tag.Attr(":counter-value", h.JSONString(v))
 	return b
 }
 
@@ -135,6 +140,11 @@ func (b *VOverflowBtnBuilder) ErrorMessages(v string) (r *VOverflowBtnBuilder) {
 
 func (b *VOverflowBtnBuilder) Filled(v bool) (r *VOverflowBtnBuilder) {
 	b.tag.Attr(":filled", fmt.Sprint(v))
+	return b
+}
+
+func (b *VOverflowBtnBuilder) Filter(v interface{}) (r *VOverflowBtnBuilder) {
+	b.tag.Attr(":filter", h.JSONString(v))
 	return b
 }
 
@@ -198,7 +208,7 @@ func (b *VOverflowBtnBuilder) ItemValue(v string) (r *VOverflowBtnBuilder) {
 	return b
 }
 
-func (b *VOverflowBtnBuilder) Items(v []string) (r *VOverflowBtnBuilder) {
+func (b *VOverflowBtnBuilder) Items(v interface{}) (r *VOverflowBtnBuilder) {
 	b.tag.Attr(":items", h.JSONString(v))
 	return b
 }
@@ -223,8 +233,8 @@ func (b *VOverflowBtnBuilder) Loading(v bool) (r *VOverflowBtnBuilder) {
 	return b
 }
 
-func (b *VOverflowBtnBuilder) MenuProps(v string) (r *VOverflowBtnBuilder) {
-	b.tag.Attr("menu-props", v)
+func (b *VOverflowBtnBuilder) MenuProps(v interface{}) (r *VOverflowBtnBuilder) {
+	b.tag.Attr(":menu-props", h.JSONString(v))
 	return b
 }
 
@@ -308,7 +318,7 @@ func (b *VOverflowBtnBuilder) Rounded(v bool) (r *VOverflowBtnBuilder) {
 	return b
 }
 
-func (b *VOverflowBtnBuilder) Rules(v []string) (r *VOverflowBtnBuilder) {
+func (b *VOverflowBtnBuilder) Rules(v interface{}) (r *VOverflowBtnBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
 	return b
 }
@@ -375,6 +385,11 @@ func (b *VOverflowBtnBuilder) ValidateOnBlur(v bool) (r *VOverflowBtnBuilder) {
 
 func (b *VOverflowBtnBuilder) Value(v interface{}) (r *VOverflowBtnBuilder) {
 	b.tag.Attr(":value", h.JSONString(v))
+	return b
+}
+
+func (b *VOverflowBtnBuilder) ValueComparator(v interface{}) (r *VOverflowBtnBuilder) {
+	b.tag.Attr(":value-comparator", h.JSONString(v))
 	return b
 }
 

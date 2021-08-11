@@ -33,6 +33,21 @@ func (b *VDataTableBuilder) CheckboxColor(v string) (r *VDataTableBuilder) {
 	return b
 }
 
+func (b *VDataTableBuilder) CustomFilter(v interface{}) (r *VDataTableBuilder) {
+	b.tag.Attr(":custom-filter", h.JSONString(v))
+	return b
+}
+
+func (b *VDataTableBuilder) CustomGroup(v interface{}) (r *VDataTableBuilder) {
+	b.tag.Attr(":custom-group", h.JSONString(v))
+	return b
+}
+
+func (b *VDataTableBuilder) CustomSort(v interface{}) (r *VDataTableBuilder) {
+	b.tag.Attr(":custom-sort", h.JSONString(v))
+	return b
+}
+
 func (b *VDataTableBuilder) Dark(v bool) (r *VDataTableBuilder) {
 	b.tag.Attr(":dark", fmt.Sprint(v))
 	return b
@@ -63,7 +78,7 @@ func (b *VDataTableBuilder) ExpandIcon(v string) (r *VDataTableBuilder) {
 	return b
 }
 
-func (b *VDataTableBuilder) Expanded(v []string) (r *VDataTableBuilder) {
+func (b *VDataTableBuilder) Expanded(v interface{}) (r *VDataTableBuilder) {
 	b.tag.Attr(":expanded", h.JSONString(v))
 	return b
 }
@@ -128,7 +143,7 @@ func (b *VDataTableBuilder) ItemKey(v string) (r *VDataTableBuilder) {
 	return b
 }
 
-func (b *VDataTableBuilder) Items(v []string) (r *VDataTableBuilder) {
+func (b *VDataTableBuilder) Items(v interface{}) (r *VDataTableBuilder) {
 	b.tag.Attr(":items", h.JSONString(v))
 	return b
 }
@@ -248,7 +263,7 @@ func (b *VDataTableBuilder) SortDesc(v bool) (r *VDataTableBuilder) {
 	return b
 }
 
-func (b *VDataTableBuilder) Value(v []string) (r *VDataTableBuilder) {
+func (b *VDataTableBuilder) Value(v interface{}) (r *VDataTableBuilder) {
 	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }

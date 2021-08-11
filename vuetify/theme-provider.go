@@ -11,9 +11,9 @@ type VThemeProviderBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VThemeProvider() (r *VThemeProviderBuilder) {
+func VThemeProvider(children ...h.HTMLComponent) (r *VThemeProviderBuilder) {
 	r = &VThemeProviderBuilder{
-		tag: h.Tag("v-theme-provider"),
+		tag: h.Tag("v-theme-provider").Children(children...),
 	}
 	return
 }

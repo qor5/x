@@ -38,8 +38,8 @@ func (b *VExpansionPanelHeaderBuilder) HideActions(v bool) (r *VExpansionPanelHe
 	return b
 }
 
-func (b *VExpansionPanelHeaderBuilder) Ripple(v bool) (r *VExpansionPanelHeaderBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VExpansionPanelHeaderBuilder) Ripple(v interface{}) (r *VExpansionPanelHeaderBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 

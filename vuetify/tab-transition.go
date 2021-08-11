@@ -11,9 +11,9 @@ type VTabTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VTabTransition() (r *VTabTransitionBuilder) {
+func VTabTransition(children ...h.HTMLComponent) (r *VTabTransitionBuilder) {
 	r = &VTabTransitionBuilder{
-		tag: h.Tag("v-tab-transition"),
+		tag: h.Tag("v-tab-transition").Children(children...),
 	}
 	return
 }

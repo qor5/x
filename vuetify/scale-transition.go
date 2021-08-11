@@ -11,9 +11,9 @@ type VScaleTransitionBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VScaleTransition() (r *VScaleTransitionBuilder) {
+func VScaleTransition(children ...h.HTMLComponent) (r *VScaleTransitionBuilder) {
 	r = &VScaleTransitionBuilder{
-		tag: h.Tag("v-scale-transition"),
+		tag: h.Tag("v-scale-transition").Children(children...),
 	}
 	return
 }

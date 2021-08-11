@@ -11,9 +11,9 @@ type VDividerBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VDivider() (r *VDividerBuilder) {
+func VDivider(children ...h.HTMLComponent) (r *VDividerBuilder) {
 	r = &VDividerBuilder{
-		tag: h.Tag("v-divider"),
+		tag: h.Tag("v-divider").Children(children...),
 	}
 	return
 }

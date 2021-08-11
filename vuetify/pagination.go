@@ -11,9 +11,9 @@ type VPaginationBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VPagination() (r *VPaginationBuilder) {
+func VPagination(children ...h.HTMLComponent) (r *VPaginationBuilder) {
 	r = &VPaginationBuilder{
-		tag: h.Tag("vw-pagination"),
+		tag: h.Tag("v-pagination").Children(children...),
 	}
 	return
 }

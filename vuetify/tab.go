@@ -53,8 +53,8 @@ func (b *VTabBuilder) ExactPath(v bool) (r *VTabBuilder) {
 	return b
 }
 
-func (b *VTabBuilder) Href(v string) (r *VTabBuilder) {
-	b.tag.Attr("href", v)
+func (b *VTabBuilder) Href(v interface{}) (r *VTabBuilder) {
+	b.tag.Attr(":href", h.JSONString(v))
 	return b
 }
 
@@ -78,8 +78,8 @@ func (b *VTabBuilder) Replace(v bool) (r *VTabBuilder) {
 	return b
 }
 
-func (b *VTabBuilder) Ripple(v bool) (r *VTabBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VTabBuilder) Ripple(v interface{}) (r *VTabBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 
@@ -93,8 +93,8 @@ func (b *VTabBuilder) Target(v string) (r *VTabBuilder) {
 	return b
 }
 
-func (b *VTabBuilder) To(v string) (r *VTabBuilder) {
-	b.tag.Attr("to", v)
+func (b *VTabBuilder) To(v interface{}) (r *VTabBuilder) {
+	b.tag.Attr(":to", h.JSONString(v))
 	return b
 }
 

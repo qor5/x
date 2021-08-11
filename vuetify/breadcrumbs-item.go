@@ -48,8 +48,8 @@ func (b *VBreadcrumbsItemBuilder) ExactPath(v bool) (r *VBreadcrumbsItemBuilder)
 	return b
 }
 
-func (b *VBreadcrumbsItemBuilder) Href(v string) (r *VBreadcrumbsItemBuilder) {
-	b.tag.Attr("href", v)
+func (b *VBreadcrumbsItemBuilder) Href(v interface{}) (r *VBreadcrumbsItemBuilder) {
+	b.tag.Attr(":href", h.JSONString(v))
 	return b
 }
 
@@ -68,8 +68,8 @@ func (b *VBreadcrumbsItemBuilder) Replace(v bool) (r *VBreadcrumbsItemBuilder) {
 	return b
 }
 
-func (b *VBreadcrumbsItemBuilder) Ripple(v bool) (r *VBreadcrumbsItemBuilder) {
-	b.tag.Attr(":ripple", fmt.Sprint(v))
+func (b *VBreadcrumbsItemBuilder) Ripple(v interface{}) (r *VBreadcrumbsItemBuilder) {
+	b.tag.Attr(":ripple", h.JSONString(v))
 	return b
 }
 
@@ -83,8 +83,8 @@ func (b *VBreadcrumbsItemBuilder) Target(v string) (r *VBreadcrumbsItemBuilder) 
 	return b
 }
 
-func (b *VBreadcrumbsItemBuilder) To(v string) (r *VBreadcrumbsItemBuilder) {
-	b.tag.Attr("to", v)
+func (b *VBreadcrumbsItemBuilder) To(v interface{}) (r *VBreadcrumbsItemBuilder) {
+	b.tag.Attr(":to", h.JSONString(v))
 	return b
 }
 
