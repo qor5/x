@@ -7,6 +7,7 @@ import (
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/docs/utils"
 	. "github.com/goplaid/x/vuetify"
+	h "github.com/theplant/htmlgo"
 )
 
 type myFormValue struct {
@@ -17,6 +18,8 @@ type myFormValue struct {
 	Feature1      bool
 	Slider1       int
 	Files1        []*multipart.FileHeader
+	Files2        []*multipart.FileHeader
+	Files3        []*multipart.FileHeader
 }
 
 var s = &myFormValue{
@@ -62,6 +65,16 @@ func VuetifyBasicInputs(ctx *web.EventContext) (pr web.PageResponse, err error) 
 			Value(s.Slider1),
 
 		VFileInput().FieldName("Files1"),
+
+		web.Bind(
+			VFileInput().FieldName("Files2").Label("Auto post to server after select file"),
+		).On("change").EventFunc("update"),
+
+		h.Div(
+			web.Bind(
+				h.Input("Files3").Type("file"),
+			).OnInput("update").FieldName("Files3"),
+		).Class("mb-4"),
 
 		VBtn("Update").OnClick("update"),
 	)

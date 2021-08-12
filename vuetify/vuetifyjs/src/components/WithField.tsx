@@ -31,15 +31,25 @@ export const WithField = (
 			} = self.$props;
 
 			const trueValue = self.$attrs['true-value'];
+			const ch = self.$listeners["change"];
 
+			let chs: Function[] = [];
+			if (ch) {
+				if (Array.isArray(ch)) {
+					chs = ch;
+				} else {
+					chs = [ch];
+				}
+			}
 			const data: VNodeData = {
 				props: {
 					...self.$attrs,
 				},
 
 				on: {
+					...this.$listeners,
 					...{
-						change: (val: any) => {
+						change: [(val: any) => {
 							if (loadPageWithArrayOp && trueValue) {
 								const opValue: any = { value: trueValue.split(',') };
 								if (val === true || val === trueValue) {
@@ -52,9 +62,8 @@ export const WithField = (
 								return;
 							}
 							self.core.setFormValue(fieldName, val);
-						},
+						}, ...chs],
 					},
-					...this.$listeners,
 				},
 
 				scopedSlots: this.$scopedSlots,
