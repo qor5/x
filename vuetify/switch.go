@@ -11,6 +11,13 @@ type VSwitchBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
+func VSwitch(children ...h.HTMLComponent) (r *VSwitchBuilder) {
+	r = &VSwitchBuilder{
+		tag: h.Tag("v-switch").Children(children...),
+	}
+	return
+}
+
 func (b *VSwitchBuilder) AppendIcon(v string) (r *VSwitchBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b

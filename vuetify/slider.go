@@ -11,6 +11,13 @@ type VSliderBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
+func VSlider(children ...h.HTMLComponent) (r *VSliderBuilder) {
+	r = &VSliderBuilder{
+		tag: h.Tag("v-slider").Children(children...),
+	}
+	return
+}
+
 func (b *VSliderBuilder) AppendIcon(v string) (r *VSliderBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b

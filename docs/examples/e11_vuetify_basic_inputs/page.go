@@ -67,13 +67,17 @@ func VuetifyBasicInputs(ctx *web.EventContext) (pr web.PageResponse, err error) 
 		VFileInput().FieldName("Files1"),
 
 		web.Bind(
-			VFileInput().FieldName("Files2").Label("Auto post to server after select file"),
-		).On("change").EventFunc("update"),
+			VFileInput().FieldName("Files2").Label("Auto post to server after select file").Multiple(true),
+		).On("change").
+			EventScript("console.log(123123123)").
+			EventFunc("update"),
 
 		h.Div(
 			web.Bind(
 				h.Input("Files3").Type("file"),
-			).OnInput("update").FieldName("Files3"),
+			).On("change").
+				EventFunc("update").
+				FieldName("Files3"),
 		).Class("mb-4"),
 
 		VBtn("Update").OnClick("update"),

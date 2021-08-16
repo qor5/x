@@ -23,7 +23,8 @@ func HelloButton(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		web.Bind(Tag("input").
 			Attr("type", "text").
 			Attr("value", s.Message)).
-			OnInput("reload").
+			On("input").
+			EventFunc("reload").
 			FieldName("Message"),
 		Div().
 			Style("font-family: monospace;").

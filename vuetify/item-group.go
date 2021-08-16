@@ -11,6 +11,13 @@ type VItemGroupBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
+func VItemGroup(children ...h.HTMLComponent) (r *VItemGroupBuilder) {
+	r = &VItemGroupBuilder{
+		tag: h.Tag("v-item-group").Children(children...),
+	}
+	return
+}
+
 func (b *VItemGroupBuilder) ActiveClass(v string) (r *VItemGroupBuilder) {
 	b.tag.Attr("active-class", v)
 	return b

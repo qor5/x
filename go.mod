@@ -6,7 +6,7 @@ require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/aws/aws-sdk-go v1.38.62
 	github.com/go-chi/chi v1.5.4
-	github.com/goplaid/web v1.1.0
+	github.com/goplaid/web v1.1.2-0.20210816093331-2349f9945830
 	github.com/iancoleman/strcase v0.1.3
 	github.com/jinzhu/configor v1.2.1 // indirect
 	github.com/jinzhu/gorm v1.9.16

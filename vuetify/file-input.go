@@ -11,6 +11,13 @@ type VFileInputBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
+func VFileInput(children ...h.HTMLComponent) (r *VFileInputBuilder) {
+	r = &VFileInputBuilder{
+		tag: h.Tag("v-file-input").Children(children...),
+	}
+	return
+}
+
 func (b *VFileInputBuilder) AppendIcon(v string) (r *VFileInputBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b
