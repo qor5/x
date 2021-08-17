@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 
@@ -135,8 +134,8 @@ Content-Disposition: form-data; name="__event_data__"
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			partial := er.UpdatePortals[0].Body
-			if strings.Index(partial, "field-name='Number'") < 0 {
-				t.Error("can't find field-name='Number'", partial)
+			if strings.Index(partial, `field-name='"Number"'`) < 0 {
+				t.Error(`can't find field-name='"Number"'`, partial)
 			}
 			return
 		},
@@ -191,8 +190,8 @@ Content-Disposition: form-data; name="__event_data__"
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			partial := er.UpdatePortals[0].Body
-			if strings.Index(partial, "field-name='OwnerName'") < 0 {
-				t.Error("can't find field-name='OwnerName'", partial)
+			if strings.Index(partial, `field-name='"OwnerName"'`) < 0 {
+				t.Error(`can't find field-name='"OwnerName"'`, partial)
 			}
 			return
 		},
@@ -287,7 +286,7 @@ true
 }
 
 func ConnectDB() *gorm.DB {
-	db, err := gorm.Open("postgres", os.Getenv("DBString"))
+	db, err := gorm.Open("sqlite3", "/tmp/my_integration.db")
 	if err != nil {
 		panic(err)
 	}
