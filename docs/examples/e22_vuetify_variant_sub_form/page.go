@@ -40,10 +40,10 @@ func VuetifyVariantSubForm(ctx *web.EventContext) (pr web.PageResponse, err erro
 					"Type1",
 					"Type2",
 				}).
-				FieldName("Type").
 				Value(fv.Type),
 		).
-			On("input").
+			On("change").
+			FieldName("Type").
 			EventFunc("switchForm"),
 		web.Portal(
 			h.If(fv.Type == "Type1",
