@@ -11,6 +11,13 @@ type VTextFieldBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
+func VTextField(children ...h.HTMLComponent) (r *VTextFieldBuilder) {
+	r = &VTextFieldBuilder{
+		tag: h.Tag("v-text-field").Children(children...),
+	}
+	return
+}
+
 func (b *VTextFieldBuilder) AppendIcon(v string) (r *VTextFieldBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b

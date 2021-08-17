@@ -2,15 +2,8 @@ package vuetify
 
 import h "github.com/theplant/htmlgo"
 
-func VTextField(children ...h.HTMLComponent) (r *VTextFieldBuilder) {
-	r = &VTextFieldBuilder{
-		tag: h.Tag("vw-text-field").Children(children...),
-	}
-	return
-}
-
 func (b *VTextFieldBuilder) FieldName(v string) (r *VTextFieldBuilder) {
-	b.tag.Attr("field-name", v)
+	b.tag.Attr("v-field-name", h.JSONString(v))
 	return b
 }
 

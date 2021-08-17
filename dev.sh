@@ -6,10 +6,9 @@ cd $DIR
 function docsRestart() {
   echo "=================>"
   killall goplaidxdocs
-  go build -o /tmp/goplaidxdocs docs/docsmain/main.go
 #  export DEV_CORE_JS=1
 #  export DEV_VUETIFY_JS=1
-  /tmp/goplaidxdocs
+  go build -o /tmp/goplaidxdocs docs/docsmain/main.go && /tmp/goplaidxdocs
 }
 
 export -f docsRestart

@@ -11,15 +11,16 @@ import (
 )
 
 type myFormValue struct {
-	MyValue       string
-	TextareaValue string
-	Gender        string
-	Agreed        bool
-	Feature1      bool
-	Slider1       int
-	Files1        []*multipart.FileHeader
-	Files2        []*multipart.FileHeader
-	Files3        []*multipart.FileHeader
+	MyValue          string
+	TextareaValue    string
+	Gender           string
+	Agreed           bool
+	Feature1         bool
+	Slider1          int
+	PortalAddedValue string
+	Files1           []*multipart.FileHeader
+	Files2           []*multipart.FileHeader
+	Files3           []*multipart.FileHeader
 }
 
 var s = &myFormValue{
@@ -33,6 +34,7 @@ var s = &myFormValue{
 
 func VuetifyBasicInputs(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("update", update)
+	ctx.Hub.RegisterEventFunc("addPortal", addPortal)
 
 	var verr web.ValidationErrors
 	if ve, ok := ctx.Flash.(web.ValidationErrors); ok {
@@ -63,22 +65,38 @@ func VuetifyBasicInputs(ctx *web.EventContext) (pr web.PageResponse, err error) 
 		VSlider().FieldName("Slider1").
 			ErrorMessages(verr.GetFieldErrors("Slider1")...).
 			Value(s.Slider1),
+		web.Portal().Name("Portal1"),
 
 		VFileInput().FieldName("Files1"),
 
 		web.Bind(
-			VFileInput().FieldName("Files2").Label("Auto post to server after select file"),
-		).On("change").EventFunc("update"),
+			VFileInput().Label("Auto post to server after select file").Multiple(true),
+		).On("change").
+			FieldName("Files2").
+			EventFunc("update").
+			EventScript("console.log(123123123)"),
 
 		h.Div(
 			web.Bind(
 				h.Input("Files3").Type("file"),
-			).OnInput("update").FieldName("Files3"),
+			).On("input").
+				EventFunc("update").
+				FieldName("Files3"),
 		).Class("mb-4"),
 
-		VBtn("Update").OnClick("update"),
+		VBtn("Update").OnClick("update").Color("primary"),
+		h.P().Text("The following button will update a portal with a hidden field, if you click this button, and then click the above update button, you will find additional value posted to server"),
+		VBtn("Add Portal Hidden Value").OnClick("addPortal"),
 	)
 
+	return
+}
+
+func addPortal(ctx *web.EventContext) (r web.EventResponse, err error) {
+	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
+		Name: "Portal1",
+		Body: web.Bind(h.Input("").Type("hidden").Value("this is my portal added hidden value")).FieldName("PortalAddedValue"),
+	})
 	return
 }
 

@@ -11,6 +11,13 @@ type VRadioGroupBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
+func VRadioGroup(children ...h.HTMLComponent) (r *VRadioGroupBuilder) {
+	r = &VRadioGroupBuilder{
+		tag: h.Tag("v-radio-group").Children(children...),
+	}
+	return
+}
+
 func (b *VRadioGroupBuilder) ActiveClass(v string) (r *VRadioGroupBuilder) {
 	b.tag.Attr("active-class", v)
 	return b

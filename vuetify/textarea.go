@@ -11,6 +11,13 @@ type VTextareaBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
+func VTextarea(children ...h.HTMLComponent) (r *VTextareaBuilder) {
+	r = &VTextareaBuilder{
+		tag: h.Tag("v-textarea").Children(children...),
+	}
+	return
+}
+
 func (b *VTextareaBuilder) AppendIcon(v string) (r *VTextareaBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b

@@ -11,6 +11,13 @@ type VChipGroupBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
+func VChipGroup(children ...h.HTMLComponent) (r *VChipGroupBuilder) {
+	r = &VChipGroupBuilder{
+		tag: h.Tag("v-chip-group").Children(children...),
+	}
+	return
+}
+
 func (b *VChipGroupBuilder) ActiveClass(v string) (r *VChipGroupBuilder) {
 	b.tag.Attr("active-class", v)
 	return b

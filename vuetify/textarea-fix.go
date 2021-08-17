@@ -2,15 +2,8 @@ package vuetify
 
 import h "github.com/theplant/htmlgo"
 
-func VTextarea(children ...h.HTMLComponent) (r *VTextareaBuilder) {
-	r = &VTextareaBuilder{
-		tag: h.Tag("vw-textarea").Children(children...),
-	}
-	return
-}
-
 func (b *VTextareaBuilder) FieldName(v string) (r *VTextareaBuilder) {
-	b.tag.Attr("field-name", v)
+	b.tag.Attr("v-field-name", h.JSONString(v))
 	return b
 }
 
