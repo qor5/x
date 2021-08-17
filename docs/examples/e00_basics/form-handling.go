@@ -25,6 +25,7 @@ type MyData struct {
 	Week1          string
 	DatetimeLocal1 string
 	File1          []*multipart.FileHeader
+	HiddenValue1   string
 }
 
 func FormHandlingPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
@@ -32,6 +33,11 @@ func FormHandlingPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
 	var fv MyData
 	err = ctx.UnmarshalForm(&fv)
+	if fv.Text1 == "" {
+		fv.Text1 = `Hello '1
+World`
+	}
+
 	if err != nil {
 		panic(err)
 	}
@@ -44,7 +50,7 @@ func FormHandlingPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		Pre(fv.File1Bytes()).Style("width: 400px; white-space: pre-wrap;"),
 		Div(
 			Label("Text1"),
-			web.Bind(Input("").Type("text").Value(fv.Text1)).FieldName("Text1"),
+			Input("").Type("text").Value(fv.Text1).Attr("v-field-name", "\"Text1\""),
 		),
 		Div(
 			Label("Checkbox1"),
@@ -100,6 +106,11 @@ func FormHandlingPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		Div(
 			Label("File1"),
 			web.Bind(Input("").Type("file").Value("")).FieldName("File1"),
+		),
+		Div(
+			Label("Hidden values with default"),
+			web.Bind(Input("").Type("hidden").Value(`hidden value 
+'123`)).FieldName("HiddenValue1"),
 		),
 		Div(
 			web.Bind(

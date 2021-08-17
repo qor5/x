@@ -183,7 +183,7 @@ func demoLayout(in web.PageFunc) (out web.PageFunc) {
 			<script src='/assets/vue.js'></script>
 		`)
 
-		ctx.Injector.TailHTML(`<script src='/assets/main.js'></script>`)
+		ctx.Injector.TailHTML(coreJSTags)
 		ctx.Injector.HeadHTML(`
 		<style>
 			[v-cloak] {
