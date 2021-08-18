@@ -8,6 +8,7 @@ function docsRestart() {
   killall goplaidxdocs
 #  export DEV_CORE_JS=1
 #  export DEV_VUETIFY_JS=1
+#  export DEV_PRESETS=1
   go build -o /tmp/goplaidxdocs docs/docsmain/main.go && /tmp/goplaidxdocs
 }
 

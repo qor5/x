@@ -301,8 +301,8 @@ func rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 			Width(600).
 			Temporary(true).
 			Attr(web.InitContextVars, `{rightDrawer: false}`),
-		AfterLoaded: `setTimeout(function(){ comp.vars.rightDrawer = true }, 100)`,
 	})
+	r.VarsScript = "setTimeout(function(){ vars.rightDrawer = true }, 100)"
 }
 
 func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
@@ -335,10 +335,12 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 			ctx.Injector.HeadHTML(fmt.Sprintf("<script src=\"%s\"></script>", b.extraFullPath(ea)))
 		}
 
-		if len(os.Getenv("DEV")) > 0 {
+		if len(os.Getenv("DEV_PRESETS")) > 0 {
 			ctx.Injector.TailHTML(`
-			<script src='http://localhost:3080/app.js'></script>
-			<script src='http://localhost:3100/app.js'></script>
+<script src='http://localhost:3080/js/chunk-vendors.js'></script>
+<script src='http://localhost:3080/js/app.js'></script>
+<script src='http://localhost:3100/js/chunk-vendors.js'></script>
+<script src='http://localhost:3100/js/app.js'></script>
 			`)
 
 		} else {

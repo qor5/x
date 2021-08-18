@@ -220,6 +220,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	ctx.Flash = msgr.SuccessfullyUpdated
 
 	r.PushState = web.PushState(nil)
+	r.VarsScript = `vars.rightDrawer = false`
 	return
 }
 

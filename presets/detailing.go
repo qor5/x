@@ -129,6 +129,7 @@ func (b *DetailingBuilder) doAction(ctx *web.EventContext) (r web.EventResponse,
 	}
 
 	r.PushState = web.PushState(url.Values{})
+	r.VarsScript = `vars.rightDrawer = false`
 
 	return
 }
