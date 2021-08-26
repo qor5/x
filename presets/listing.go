@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/goplaid/web"
-
 	"github.com/goplaid/x/presets/actions"
 	s "github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
@@ -198,7 +197,10 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 		),
 
 		h.If(pagesCount > 1, h.Components(
-			VPagination().Length(pagesCount).Value(int(searchParams.Page)),
+			VPagination().
+				Length(pagesCount).
+				Value(int(searchParams.Page)).
+				Attr("@input", `loadPage({ query: {page: [$event]}, mergeQuery: true})`),
 		)),
 	).Fluid(true)
 

@@ -14,7 +14,6 @@ import Autocomplete from './components/Autocomplete';
 import { WithField } from './components/WithField';
 import { Core, SelectedItems } from './components/Helpers';
 import { Filter } from './components/Filter';
-import Pagination from './components/Pagination';
 
 const vuetify = new Vuetify({
 	icons: {
@@ -31,7 +30,6 @@ declare var window: any;
 		Vue.component('vw-checkbox', WithField(VCheckbox, 'input-value'));
 		Vue.component('vw-select', WithField(VSelect, undefined, [Core, SelectedItems]));
 		Vue.component('vw-filter', Filter);
-		Vue.component('vw-pagination', Pagination);
 
 		vueOptions.vuetify = vuetify;
 	});
