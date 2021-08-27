@@ -24,10 +24,9 @@ func Page1(ctx *web.EventContext) (pr web.PageResponse, err error) {
 					Text("To Page 2 With Normal Link"),
 			),
 			Li(
-				web.Bind(
-					A().Href("javascript:;").
-						Text("To Page 2 With Push State Link"),
-				).PushStateURL(Page2Path),
+				A().Href("javascript:;").
+					Text("To Page 2 With Push State Link").
+					Attr("@click", web.Plaid().PushStateURL(Page2Path).Go()),
 			),
 		),
 		fromParam(ctx),
@@ -43,23 +42,20 @@ func Page2(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		H1("Page 2"),
 		Ul(
 			Li(
-				web.Bind(
-					A().Href("javascript:;").
-						Text("To Page 1 With Normal Link"),
-				).PushStateURL(Page1Path).
-					PushStateQuery(
-						url.Values{"from": []string{"page 2 link 1"}},
-					),
+				A().Href("javascript:;").
+					Text("To Page 1 With Normal Link").
+					Attr("@click", web.Plaid().
+						PushStateURL(Page1Path).
+						PushStateQuery(url.Values{"from": []string{"page 2 link 1"}}).
+						Go()),
 			),
 			Li(
-				web.Bind(
-					Button("Do an action then go to Page 1 with push state and parameters"),
-				).OnClick("doAction2", "42"),
+				Button("Do an action then go to Page 1 with push state and parameters").
+					Attr("@click", web.Plaid().EventFunc("doAction2", "42").Go()),
 			),
 			Li(
-				web.Bind(
-					Button("Do an action then go to Page 1 with redirect url"),
-				).OnClick("doAction1", "41"),
+				Button("Do an action then go to Page 1 with redirect url").
+					Attr("@click", web.Plaid().EventFunc("doAction1", "41").Go()),
 			),
 		),
 	).Style("color: orange; font-size: 24px;")

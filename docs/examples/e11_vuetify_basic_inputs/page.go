@@ -69,19 +69,19 @@ func VuetifyBasicInputs(ctx *web.EventContext) (pr web.PageResponse, err error) 
 
 		VFileInput().FieldName("Files1"),
 
-		web.Bind(
-			VFileInput().Label("Auto post to server after select file").Multiple(true),
-		).On("change").
-			FieldName("Files2").
-			EventFunc("update").
-			EventScript("console.log(123123123)"),
+		VFileInput().Label("Auto post to server after select file").Multiple(true).
+			Attr("@change", web.Plaid().
+				EventFunc("update").
+				Run("console.log(123123123)").
+				FieldValue("Files2", web.Var("$event")).
+				Go()),
 
 		h.Div(
-			web.Bind(
-				h.Input("Files3").Type("file"),
-			).On("input").
-				EventFunc("update").
-				FieldName("Files3"),
+			h.Input("Files3").Type("file").
+				Attr("@input", web.Plaid().
+					EventFunc("update").
+					FieldValue("Files3", web.Var("$event")).
+					Go()),
 		).Class("mb-4"),
 
 		VBtn("Update").OnClick("update").Color("primary"),
@@ -95,7 +95,7 @@ func VuetifyBasicInputs(ctx *web.EventContext) (pr web.PageResponse, err error) 
 func addPortal(ctx *web.EventContext) (r web.EventResponse, err error) {
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 		Name: "Portal1",
-		Body: web.Bind(h.Input("").Type("hidden").Value("this is my portal added hidden value")).FieldName("PortalAddedValue"),
+		Body: h.Input("").Type("hidden").Value("this is my portal added hidden value").Attr(web.VFieldName("PortalAddedValue")...),
 	})
 	return
 }

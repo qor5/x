@@ -6,7 +6,7 @@ require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/aws/aws-sdk-go v1.38.62
 	github.com/go-chi/chi v1.5.4
-	github.com/goplaid/web v1.1.4
+	github.com/goplaid/web v1.1.5-0.20210827153449-a241597bfe83
 	github.com/iancoleman/strcase v0.1.3
 	github.com/jinzhu/configor v1.2.1 // indirect
 	github.com/jinzhu/gorm v1.9.16
@@ -38,3 +38,7 @@ require (
 	goji.io v2.0.2+incompatible
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )
+
+//replace (
+//	github.com/goplaid/web => ../web
+//)

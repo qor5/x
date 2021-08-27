@@ -34,17 +34,17 @@ func VuetifyVariantSubForm(ctx *web.EventContext) (pr web.PageResponse, err erro
 	pr.Body = VContainer(
 		utils.PrettyFormAsJSON(ctx),
 
-		web.Bind(
-			VSelect().
-				Items([]string{
-					"Type1",
-					"Type2",
-				}).
-				Value(fv.Type),
-		).
-			On("change").
-			FieldName("Type").
-			EventFunc("switchForm"),
+		VSelect().
+			Items([]string{
+				"Type1",
+				"Type2",
+			}).
+			Value(fv.Type).
+			Attr("@change", web.Plaid().
+				FieldValue("Type", web.Var("$event")).
+				EventFunc("switchForm").
+				Go()),
+
 		web.Portal(
 			h.If(fv.Type == "Type1",
 				form1(ctx, &fv),

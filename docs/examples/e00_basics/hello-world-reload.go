@@ -13,9 +13,7 @@ func HelloWorldReload(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	pr.Body = Div(
 		H1("Hello World"),
 		Text(time.Now().Format(time.RFC3339Nano)),
-		web.Bind(
-			Button("Reload Page"),
-		).OnClick("reload"),
+		Button("Reload Page").Attr("@click", web.Plaid().EventFunc("reload").Go()),
 	)
 	return
 }

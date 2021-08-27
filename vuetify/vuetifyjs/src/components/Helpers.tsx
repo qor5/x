@@ -1,7 +1,6 @@
 import Vue, { VNode, CreateElement } from 'vue';
 
 export const Core = Vue.extend({
-	inject: ['core'],
 	props: {
 		fieldName: String,
 		loadPageWithArrayOp: Boolean,

@@ -79,9 +79,7 @@ func PresetsEditingCustomizationFileType(b *presets.Builder) (
 			return h.Div(
 				img,
 				er,
-				web.Bind(
-					h.Input("").Type("file"),
-				).FieldName(fmt.Sprintf("%s_NewFile", field.Name)),
+				h.Input("").Type("file").Attr(web.VFieldName(fmt.Sprintf("%s_NewFile", field.Name))...),
 			)
 		}).
 		SetterFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) (err error) {

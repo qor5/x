@@ -50,72 +50,70 @@ World`
 		Pre(fv.File1Bytes()).Style("width: 400px; white-space: pre-wrap;"),
 		Div(
 			Label("Text1"),
-			Input("").Type("text").Value(fv.Text1).Attr("v-field-name", "\"Text1\""),
+			Input("").Type("text").Value(fv.Text1).Attr(web.VFieldName("Text1")...),
 		),
 		Div(
 			Label("Checkbox1"),
-			web.Bind(Input("").Type("checkbox").Value("1").Checked(fv.Checkbox1 == "1")).FieldName("Checkbox1"),
+			Input("").Type("checkbox").Value("1").Checked(fv.Checkbox1 == "1").Attr(web.VFieldName("Checkbox1")...),
 		),
 		Div(
 			Label("Color1"),
-			web.Bind(Input("").Type("color").Value(fv.Color1)).FieldName("Color1"),
+			Input("").Type("color").Value(fv.Color1).Attr(web.VFieldName("Color1")...),
 		),
 		Div(
 			Label("Email1"),
-			web.Bind(Input("").Type("email").Value(fv.Email1)).FieldName("Email1"),
+			Input("").Type("email").Value(fv.Email1).Attr(web.VFieldName("Email1")...),
 		),
 		Div(
 			Fieldset(
 				Legend("Radio"),
 				Label("Radio Value 1"),
-				web.Bind(Input("Radio1").Type("radio").
-					Value("1").Checked(fv.Radio1 == "1")).FieldName("Radio1"),
+				Input("Radio1").Type("radio").
+					Value("1").Checked(fv.Radio1 == "1").Attr(web.VFieldName("Radio1")...),
 				Label("Radio Value 2"),
-				web.Bind(Input("Radio1").Type("radio").
-					Value("2").Checked(fv.Radio1 == "2")).FieldName("Radio1"),
+				Input("Radio1").Type("radio").
+					Value("2").Checked(fv.Radio1 == "2").Attr(web.VFieldName("Radio1")...),
 			),
 		),
 		Div(
 			Label("Range1"),
-			web.Bind(Input("").Type("range").Value(fmt.Sprint(fv.Range1))).FieldName("Range1"),
+			Input("").Type("range").Value(fmt.Sprint(fv.Range1)).Attr(web.VFieldName("Range1")...),
 		),
 		Div(
 			Label("Url1"),
-			web.Bind(Input("").Type("url").Value(fv.Url1)).FieldName("Url1"),
+			Input("").Type("url").Value(fv.Url1).Attr(web.VFieldName("Url1")...),
 		),
 		Div(
 			Label("Tel1"),
-			web.Bind(Input("").Type("tel").Value(fv.Tel1)).FieldName("Tel1"),
+			Input("").Type("tel").Value(fv.Tel1).Attr(web.VFieldName("Tel1")...),
 		),
 		Div(
 			Label("Month1"),
-			web.Bind(Input("").Type("month").Value(fv.Month1)).FieldName("Month1"),
+			Input("").Type("month").Value(fv.Month1).Attr(web.VFieldName("Month1")...),
 		),
 		Div(
 			Label("Time1"),
-			web.Bind(Input("").Type("time").Value(fv.Time1)).FieldName("Time1"),
+			Input("").Type("time").Value(fv.Time1).Attr(web.VFieldName("Time1")...),
 		),
 		Div(
 			Label("Week1"),
-			web.Bind(Input("").Type("week").Value(fv.Week1)).FieldName("Week1"),
+			Input("").Type("week").Value(fv.Week1).Attr(web.VFieldName("Week1")...),
 		),
 		Div(
 			Label("DatetimeLocal1"),
-			web.Bind(Input("").Type("datetime-local").Value(fv.DatetimeLocal1)).FieldName("DatetimeLocal1"),
+			Input("").Type("datetime-local").Value(fv.DatetimeLocal1).Attr(web.VFieldName("DatetimeLocal1")...),
 		),
 		Div(
 			Label("File1"),
-			web.Bind(Input("").Type("file").Value("")).FieldName("File1"),
+			Input("").Type("file").Value("").Attr(web.VFieldName("File1")...),
 		),
 		Div(
 			Label("Hidden values with default"),
-			web.Bind(Input("").Type("hidden").Value(`hidden value 
-'123`)).FieldName("HiddenValue1"),
+			Input("").Type("hidden").Value(`hidden value 
+'123`).Attr(web.VFieldName("HiddenValue1")...),
 		),
 		Div(
-			web.Bind(
-				Button("Submit"),
-			).OnClick("checkvalue"),
+			Button("Submit").Attr("@click", web.Plaid().EventFunc("checkvalue").Go()),
 		),
 	)
 	return

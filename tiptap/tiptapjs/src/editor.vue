@@ -200,7 +200,7 @@ export default {
 
 	mounted() {
 		const {value, fieldName} = this.$props;
-		this.core.setFormValue(fieldName, value);
+		this.$plaid().fieldValue(fieldName, value);
 	},
 
 	data() {
@@ -216,7 +216,7 @@ export default {
 					if (!fieldName || fieldName.length == 0) {
 						return
 					}
-					self.core.setFormValue(fieldName, html);
+					this.$plaid().fieldValue(fieldName, html);
 				},
 			})
 		}

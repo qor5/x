@@ -30,9 +30,8 @@ func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		).Style("height: 200px; background-color: grey;"),
 		H2("Related Products"),
 		web.Portal().Name("related_products").EventFunc("related", "AH123"),
-		web.Bind(
-			A().Href("javascript:;").Text("Reload Related Products"),
-		).OnClick("reload3"),
+		A().Href("javascript:;").Text("Reload Related Products").
+			Attr("@click", web.Plaid().EventFunc("reload3").Go()),
 	)
 	return
 }

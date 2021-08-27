@@ -26,9 +26,8 @@ func ReloadWithFlash(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		H1("Whole Page Reload With a Flash"),
 		msg,
 		Div().Text(time.Now().Format(time.RFC3339Nano)),
-		web.Bind(
-			Button("Do Something"),
-		).OnClick("update2"),
+		Button("Do Something").
+			Attr("@click", web.Plaid().EventFunc("update2").Go()),
 	)
 	return
 }

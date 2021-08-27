@@ -48,8 +48,8 @@ And write the ~editor.vue~ something like this, We omitted the template at here.
 `),
 	ch.Code(examples.TipTapEditorVueComponent).Language("javascript"),
 	md.Markdown(`
-We injected the core dependencies. that is from ~web/corejs~, Which you will need to use
-For every Go Plaid web applications. Here we uses one function ~setFormValue~ from it.
+We injected the ~this.$plaid()~. that is from ~web/corejs~, Which you will need to use
+For every Go Plaid web applications. Here we uses one function ~fieldValue~ from it.
 It set the form value when the rich text editor changes. So that later when you call
 ~EventFunc~ it the value will be posted to the server side. Here we will post the html value.
 Also allow component user to set ~fieldName~, which is important when posting the value to the

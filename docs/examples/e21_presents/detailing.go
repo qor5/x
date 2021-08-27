@@ -80,13 +80,16 @@ func PresetsDetailPageTopNotes(b *presets.Builder) (
 			dt,
 		).HeaderTitle(title).
 			Actions(
-				web.Bind(VBtn("Add Note").
-					Depressed(true)).OnClick(
-					actions.DrawerNew,
-					"",
-					"Customer",
-					cusID,
-				).URL(mi.PresetsPrefix() + "/notes"),
+				VBtn("Add Note").
+					Depressed(true).
+					Attr("@click",
+						web.Plaid().EventFunc(
+							actions.DrawerNew,
+							"",
+							"Customer",
+							cusID).URL(mi.PresetsPrefix()+"/notes").
+							Go(),
+					),
 			).Class("mb-4")
 	})
 
@@ -146,16 +149,16 @@ func PresetsDetailPageDetails(b *presets.Builder) (
 
 		return stripeui.Card(detail).HeaderTitle("Details").
 			Actions(
-				web.Bind(VBtn("Agree Terms").
-					Depressed(true).Class("mr-2")).
+				VBtn("Agree Terms").
+					Depressed(true).Class("mr-2").
 					OnClick(actions.DrawerAction, "AgreeTerms", cusID),
 
-				web.Bind(VBtn("Update details").
-					Depressed(true)).
-					OnClick(
-						actions.DrawerEdit,
-						cusID,
-					).URL(mi.PresetsPrefix()+"/customers"),
+				VBtn("Update details").
+					Depressed(true).
+					Attr("@click", web.Plaid().
+						EventFunc(actions.DrawerEdit, cusID).
+						URL(mi.PresetsPrefix()+"/customers").
+						Go()),
 			).Class("mb-4")
 	})
 
@@ -253,13 +256,19 @@ func PresetsDetailPageCards(b *presets.Builder) (
 
 		return stripeui.Card(dt).HeaderTitle("Cards").
 			Actions(
-				web.Bind(VBtn("Add Card").
-					Depressed(true)).OnClick(
-					actions.DrawerNew,
-					"",
-					cusID,
-				).URL(mi.PresetsPrefix() + "/credit-cards"),
-			).Class("mb-4")
+				VBtn("Add Card").
+					Depressed(true).
+					Attr("@click",
+						web.Plaid().
+							EventFunc(
+								actions.DrawerNew,
+								"",
+								cusID,
+							).
+							URL(mi.PresetsPrefix()+"/credit-cards").
+							Go(),
+					).Class("mb-4"),
+			)
 	})
 
 	cc := b.Model(&CreditCard{}).

@@ -195,7 +195,7 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 			}
 			href := m.Info().ListingHref()
 			subMenus = append(subMenus,
-				web.Bind(VListItem(
+				VListItem(
 					VListItemAction(
 						VIcon(""),
 					),
@@ -204,7 +204,8 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 							h.Text(m.label),
 						),
 					),
-				).Class(activeClass(ctx, href))).PushStateURL(href),
+				).Class(activeClass(ctx, href)).
+					Attr("@click", web.Plaid().PushStateURL(href).Go()),
 			)
 		}
 		menus = append(menus, VListGroup(
@@ -225,7 +226,7 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 
 		href := m.Info().ListingHref()
 		menus = append(menus,
-			web.Bind(VListItem(
+			VListItem(
 				VListItemAction(
 					VIcon(m.menuIcon),
 				),
@@ -234,7 +235,8 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 						h.Text(m.label),
 					),
 				),
-			).Class(activeClass(ctx, href)).Color(b.primaryColor)).PushStateURL(href),
+			).Class(activeClass(ctx, href)).Color(b.primaryColor).
+				Attr("@click", web.Plaid().PushStateURL(href).Go()),
 		)
 	}
 
@@ -386,7 +388,9 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 						Clearable(true).
 						HideDetails(true).
 						Value(ctx.R.URL.Query().Get("keyword")).
-						Attr("@keyup.enter", `loadPage({ query: {keyword: [$event.target.value]}})`),
+						Attr("@keyup.enter", web.Plaid().
+							Query("keyword", web.Var("[$event.target.value]")).
+							Go()),
 					// ).Method("GET"),
 				).AlignCenter(true).Attr("style", "max-width: 650px"),
 			).Dark(true).

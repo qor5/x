@@ -29,9 +29,7 @@ func MultiStatePage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 					Input("").Type("date"),
 				),
 			),
-			web.Bind(
-				Button("Update"),
-			).OnClick("update5"),
+			Button("Update").Attr("@click", web.Plaid().EventFunc("update5").Go()),
 		).Style("border: 5px solid orange; height: 200px;")
 	}
 
@@ -39,14 +37,11 @@ func MultiStatePage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		H1(title),
 		Ol(
 			Li(
-				web.Bind(
-					A().Text("change page title").Href("javascript:;"),
-				).PushStateQuery(url.Values{"title": []string{"Hello"}}),
+				A().Text("change page title").Href("javascript:;").
+					Attr("@click", web.Plaid().PushStateQuery(url.Values{"title": []string{"Hello"}}).Go()),
 			),
 			Li(
-				web.Bind(
-					A().Text("show panel").Href("javascript:;"),
-				).OnClick("openPanel"),
+				A().Text("show panel").Href("javascript:;").Attr("@click", web.Plaid().EventFunc("openPanel").Go()),
 			),
 		),
 		panel,

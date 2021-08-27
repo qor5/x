@@ -132,12 +132,13 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 			),
 			VCardActions(
 				VSpacer(),
-				web.Bind(VBtn(buttonLabel).
+				VBtn(buttonLabel).
 					Dark(true).
-					Color(b.mb.p.primaryColor)).
-					OnClick("update",
-						ctx.Event.Params...).
-					URL(b.mb.Info().ListingHref()),
+					Color(b.mb.p.primaryColor).
+					Attr("@click", web.Plaid().
+						EventFunc("update", ctx.Event.Params...).
+						URL(b.mb.Info().ListingHref()).
+						Go()),
 			),
 		).Flat(true),
 	).Fluid(true)

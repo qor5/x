@@ -39,12 +39,9 @@ func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err e
 	var chips h.HTMLComponents
 	for _, city := range globalCities {
 		chips = append(chips,
-			web.Bind(
-				VChip(h.Text(city)).
-					Close(true),
-			).
-				On("click:close").
-				EventFunc("removeCity", city),
+			VChip(h.Text(city)).
+				Close(true).
+				Attr("@click:close", web.Plaid().EventFunc("removeCity", city).Go()),
 		)
 	}
 

@@ -14,9 +14,8 @@ func PartialUpdatePage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
 	pr.Body = Div(
 		H1("Partial Update"),
-		web.Bind(
-			A().Text("Edit").Href("javascript:;"),
-		).OnClick("edit1"),
+		A().Text("Edit").Href("javascript:;").
+			Attr("@click", web.Plaid().EventFunc("edit1").Go()),
 		web.Portal(
 			Text("original portal content here"),
 		).Name("part1"),
@@ -41,9 +40,8 @@ func edit1(ctx *web.EventContext) (er web.EventResponse, err error) {
 					Input("").Type("date"),
 				),
 			),
-			web.Bind(
-				Button("Update"),
-			).OnClick("reload2"),
+			Button("Update").
+				Attr("@click", web.Plaid().EventFunc("reload2").Go()),
 		),
 	})
 	return

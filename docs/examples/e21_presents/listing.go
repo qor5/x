@@ -90,10 +90,11 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 			db.First(&comp, "id = ?", c.CompanyID)
 		}
 		return Td(
-			web.Bind(
-				A().Text(comp.Name)).
-				URL(PresetsListingCustomizationFieldsPath+"/companies").
-				EventFunc(actions.DrawerEdit, fmt.Sprint(comp.ID)),
+			A().Text(comp.Name).
+				Attr("@click", web.Plaid().
+					URL(PresetsListingCustomizationFieldsPath+"/companies").
+					EventFunc(actions.DrawerEdit, fmt.Sprint(comp.ID)).
+					Go()),
 		)
 	})
 

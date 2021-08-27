@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/goplaid/web"
@@ -103,6 +104,9 @@ func footer() HTMLComponent {
 }
 
 func addGA(ctx *web.EventContext) {
+	if strings.Index(ctx.R.Host, "localhost") >= 0 {
+		return
+	}
 	ctx.Injector.HeadHTML(`
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-149605708-1"></script>
@@ -120,18 +124,10 @@ func layout(in web.PageFunc, secs []*section, prefix string, cp *pageItem) (out 
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		addGA(ctx)
 		pr.PageTitle = cp.title + " - " + "GoPlaid"
-		tailScript := `<script src='/assets/main.js'></script>`
-		if len(os.Getenv("DEV")) > 0 {
-			fmt.Println("Using Dev environment, make sure you did: yarn start")
-			tailScript = `
-				<script src='http://localhost:3300/app.js'></script>
-				<script src='http://localhost:3100/app.js'></script>
-			`
-		} else {
-			ctx.Injector.HeadHTML(`
+
+		ctx.Injector.HeadHTML(`
 				<link rel="stylesheet" href="/assets/main.css">
 			`)
-		}
 
 		ctx.Injector.Title(cp.title)
 		ctx.Injector.HeadHTML(`
@@ -139,7 +135,7 @@ func layout(in web.PageFunc, secs []*section, prefix string, cp *pageItem) (out 
 			<script src='/assets/codehighlight.js'></script>
 		`)
 
-		ctx.Injector.TailHTML(tailScript)
+		ctx.Injector.TailHTML(coreJSTags)
 
 		var innerPr web.PageResponse
 		innerPr, err = in(ctx)

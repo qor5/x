@@ -115,6 +115,7 @@ func toggleFavored(ctx *web.EventContext) (er web.EventResponse, err error) {
 
 func submit(ctx *web.EventContext) (er web.EventResponse, err error) {
 	er.Reload = true
+	er.VarsScript = "vars.myMenuShow = false"
 	return
 }
 

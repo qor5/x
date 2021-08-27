@@ -14,9 +14,9 @@ import (
 )
 
 type FieldContext struct {
-	Name   string
-	Label  string
-	Errors []string
+	Name    string
+	Label   string
+	Errors  []string
 	Context context.Context
 }
 
@@ -193,13 +193,15 @@ func cfTextTd(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTM
 				return h.Td().Text(id)
 			}
 
-			a := web.Bind(h.A().Text(id))
+			a := h.A().Text(id)
 			if mi.HasDetailing() {
-				a.PushStateURL(
-					mi.DetailingHref(id),
+				a.Attr("@click", web.Plaid().
+					PushStateURL(mi.DetailingHref(id)).
+					Go(),
 				)
 			} else {
-				a.OnClick("DrawerEdit", id)
+				a.Attr("@click", web.Plaid().EventFunc("DrawerEdit", id).
+					Go())
 			}
 			return h.Td(a)
 		}

@@ -46,9 +46,8 @@ func HelloWorldTipTap(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		Pre(
 			gohtml.Format(ctx.R.FormValue("Content1")),
 		).Style("background-color: #f8f8f8; padding: 20px;"),
-		web.Bind(
-			Button("Submit").Style("font-size: 24px"),
-		).OnClick("refresh"),
+		Button("Submit").Style("font-size: 24px").
+			Attr("@click", web.Plaid().EventFunc("refresh").Go()),
 	)
 
 	return

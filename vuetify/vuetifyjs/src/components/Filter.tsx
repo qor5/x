@@ -668,7 +668,7 @@ export const Filter = Vue.extend({
 
 		doReplaceWindowLocation(event: any) {
 			const qs = event.encodedFilterData;
-			this.core.loadPage(qs);
+			(this as any).$plaid().pushState(qs).go();
 		},
 
 		clear(e: any) {

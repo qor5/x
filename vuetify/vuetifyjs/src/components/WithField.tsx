@@ -6,7 +6,7 @@ import Vue, {
 	VueConstructor,
 	ComponentOptions,
 } from 'vue';
-import { Core, slotTemplates } from './Helpers';
+import {Core, slotTemplates} from './Helpers';
 
 
 export const WithField = (
@@ -20,7 +20,7 @@ export const WithField = (
 
 		mounted() {
 			const val = this.$attrs[valueField || 'value'];
-			this.core.setFormValue(this.$props.fieldName, val);
+			(this as any).$plaid().fieldValue(this.$props.fieldName, val);
 		},
 
 		render(h: CreateElement): VNode {
@@ -58,10 +58,10 @@ export const WithField = (
 									opValue.remove = true;
 								}
 								const pushState = { query: { [fieldName]: opValue }, mergeQuery: true };
-								self.core.loadPage(pushState);
+								(self as any).$plaid().pushState(pushState).go();
 								return;
 							}
-							self.core.setFormValue(fieldName, val);
+							(self as any).$plaid().fieldValue(fieldName, val);
 						}, ...chs],
 					},
 				},

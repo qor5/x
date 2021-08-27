@@ -165,11 +165,17 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 
 	dataTable := s.DataTable(objs).
 		CellWrapperFunc(func(cell h.MutableAttrHTMLComponent, id string) h.HTMLComponent {
-			tdbind := web.Bind(cell)
+			tdbind := cell
 			if b.mb.hasDetailing {
-				tdbind.On("click.self").PushStateURL(b.mb.Info().DetailingHref(id))
+				tdbind.SetAttr("@click.self", web.Plaid().
+					PushStateURL(
+						b.mb.Info().
+							DetailingHref(id)).
+					Go())
 			} else {
-				tdbind.On("click.self").EventFunc(actions.DrawerEdit, id)
+				tdbind.SetAttr("@click.self", web.Plaid().
+					EventFunc(actions.DrawerEdit, id).
+					Go())
 			}
 			return tdbind
 		}).
@@ -200,7 +206,10 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			VPagination().
 				Length(pagesCount).
 				Value(int(searchParams.Page)).
-				Attr("@input", `loadPage({ query: {page: [$event]}, mergeQuery: true})`),
+				Attr("@input", web.Plaid().
+					Query("page", web.Var("[$event]")).
+					MergeQuery(true).
+					Go()),
 		)),
 	).Fluid(true)
 
@@ -230,9 +239,13 @@ func (b *ListingBuilder) bulkPanel(bulk *ActionBuilder, selectedIds []string, ct
 		),
 		VCardActions(
 			VSpacer(),
-			web.Bind(VBtn(msgr.Cancel).
+			VBtn(msgr.Cancel).
 				Depressed(true).
-				Class("ml-2")).PushStateQuery(url.Values{bulkPanelOpenParamName: []string{""}}).MergeQuery(true),
+				Class("ml-2").
+				Attr("@click", web.Plaid().
+					PushStateQuery(url.Values{bulkPanelOpenParamName: []string{""}}).
+					MergeQuery(true).
+					Go()),
 
 			VBtn(msgr.OK).
 				Color(b.mb.p.primaryColor).
@@ -259,11 +272,14 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 						Class("ml-2").
 						On("click", "vars.deleteConfirmation = false"),
 
-					web.Bind(VBtn(msgr.Delete).
+					VBtn(msgr.Delete).
 						Color(b.mb.p.primaryColor).
 						Depressed(true).
-						Dark(true)).
-						OnClick("doDelete", id).URL(ctx.R.URL.Path),
+						Dark(true).
+						Attr("@click", web.Plaid().
+							EventFunc("doDelete", id).
+							URL(ctx.R.URL.Path).
+							Go()),
 				),
 			),
 		).MaxWidth("600px").
@@ -302,11 +318,15 @@ func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *web.EventContex
 
 	for _, ba := range b.bulkActions {
 		toolbar.AppendChildren(
-			web.Bind(VBtn(b.mb.getLabel(ba.NameLabel)).
+			VBtn(b.mb.getLabel(ba.NameLabel)).
 				Color(b.mb.p.primaryColor).
 				Depressed(true).
 				Dark(true).
-				Class("ml-2")).PushStateQuery(url.Values{bulkPanelOpenParamName: []string{ba.name}}).MergeQuery(true),
+				Class("ml-2").
+				Attr("@click", web.Plaid().
+					PushStateQuery(url.Values{bulkPanelOpenParamName: []string{ba.name}}).
+					MergeQuery(true).
+					Go()),
 		)
 	}
 	return toolbar
@@ -326,9 +346,8 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 			value = i
 		}
 		tabs.AppendChildren(
-			web.Bind(
-				VTab(h.Text(td.Label)),
-			).PushStateQuery(td.Query),
+			VTab(h.Text(td.Label)).
+				Attr("@click", web.Plaid().PushStateQuery(td.Query).Go()),
 		)
 	}
 	return tabs.Value(value)

@@ -159,12 +159,13 @@ func (b *DetailingBuilder) actionForm(action *ActionBuilder, ctx *web.EventConte
 			),
 			VCardActions(
 				VSpacer(),
-				web.Bind(VBtn(msgr.Update).
+				VBtn(msgr.Update).
 					Dark(true).
-					Color(b.mb.p.primaryColor)).
-					OnClick("doAction",
-						ctx.Event.Params...).
-					URL(b.mb.Info().DetailingHref(id)),
+					Color(b.mb.p.primaryColor).
+					Attr("@click", web.Plaid().
+						EventFunc("doAction", ctx.Event.Params...).
+						URL(b.mb.Info().DetailingHref(id)).
+						Go()),
 			),
 		).Flat(true),
 	).Fluid(true)

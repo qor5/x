@@ -11,15 +11,21 @@ import (
 func EditDeleteMenuItems(ctx *web.EventContext, url string, id string, editExtraParams ...string) []h.HTMLComponent {
 	msgr := MustGetMessages(ctx.R)
 	return []h.HTMLComponent{
-		web.Bind(VListItem(
+		VListItem(
 			VListItemIcon(VIcon("edit")),
 			VListItemTitle(h.Text(msgr.Edit)),
-		)).OnClick(actions.DrawerEdit, append([]string{id}, editExtraParams...)...).URL(url),
+		).Attr("@click", web.Plaid().
+			EventFunc(actions.DrawerEdit, append([]string{id}, editExtraParams...)...).
+			URL(url).
+			Go()),
 
-		web.Bind(VListItem(
+		VListItem(
 			VListItemIcon(VIcon("delete")),
 			VListItemTitle(h.Text(msgr.Delete)),
-		)).OnClick(actions.DeleteConfirmation, id).URL(url),
+		).Attr("@click", web.Plaid().
+			EventFunc(actions.DeleteConfirmation, id).
+			URL(url).
+			Go()),
 	}
 }
 
