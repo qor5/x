@@ -72,7 +72,6 @@ func VuetifyBasicInputs(ctx *web.EventContext) (pr web.PageResponse, err error) 
 		VFileInput().Label("Auto post to server after select file").Multiple(true).
 			Attr("@change", web.Plaid().
 				EventFunc("update").
-				Run("console.log(123123123)").
 				FieldValue("Files2", web.Var("$event")).
 				Go()),
 

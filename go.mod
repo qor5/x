@@ -6,7 +6,7 @@ require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/aws/aws-sdk-go v1.38.62
 	github.com/go-chi/chi v1.5.4
-	github.com/goplaid/web v1.1.5-0.20210827155609-47682c0464b1
+	github.com/goplaid/web v1.1.5-0.20210829105035-19a81079fb0a
 	github.com/iancoleman/strcase v0.1.3
 	github.com/jinzhu/configor v1.2.1 // indirect
 	github.com/jinzhu/gorm v1.9.16
@@ -36,7 +36,6 @@ require (
 	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
 	go.uber.org/zap v1.17.0
 	goji.io v2.0.2+incompatible
-	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )
 
 //replace (

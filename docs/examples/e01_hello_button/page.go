@@ -18,14 +18,14 @@ func HelloButton(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	}
 
 	pr.Body = Div(
-		web.Bind(Button("Hello")).
-			OnClick("reload"),
-		web.Bind(Tag("input").
+		Button("Hello").Attr("@click", web.Plaid().EventFunc("reload").Go()),
+		Tag("input").
 			Attr("type", "text").
-			Attr("value", s.Message)).
-			On("input").
-			EventFunc("reload").
-			FieldName("Message"),
+			Attr("value", s.Message).
+			Attr("@input", web.Plaid().
+				EventFunc("reload").
+				FieldValue("Message", web.Var("$event.target.value")).
+				Go()),
 		Div().
 			Style("font-family: monospace;").
 			Text(s.Message),

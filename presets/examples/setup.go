@@ -167,13 +167,16 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			dt,
 		).HeaderTitle(field.Label).
 			Actions(
-				web.Bind(VBtn("Add Event").
-					Depressed(true)).OnClick(
-					actions.DrawerNew,
-					"",
-					typeName,
-					objId,
-				).URL("/admin/events"),
+				VBtn("Add Event").
+					Depressed(true).Attr("@click",
+					web.Plaid().EventFunc(
+						actions.DrawerNew,
+						"",
+						typeName,
+						objId,
+					).URL("/admin/events").
+						Go(),
+				),
 			).Class("mb-4")
 	})
 
@@ -203,10 +206,13 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		if err != nil && err != gorm.ErrRecordNotFound {
 			panic(err)
 		}
-		return h.Td(web.Bind(
-			h.A().Text(comp.Name)).
-			URL("/admin/companies").
-			EventFunc(actions.DrawerEdit, fmt.Sprint(comp.ID)))
+		return h.Td(
+			h.A().Text(comp.Name).
+				Attr("@click",
+					web.Plaid().URL("/admin/companies").
+						EventFunc(actions.DrawerEdit, fmt.Sprint(comp.ID)).
+						Go()),
+		)
 	})
 
 	l.BulkAction("Approve").Label("Approve").UpdateFunc(func(selectedIds []string, ctx *web.EventContext) (err error) {
@@ -403,13 +409,16 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			dt,
 		).HeaderTitle(title).
 			Actions(
-				web.Bind(VBtn("Add Note").
-					Depressed(true)).OnClick(
-					actions.DrawerNew,
-					"",
-					"Customer",
-					cusID,
-				).URL("/admin/notes"),
+				VBtn("Add Note").
+					Depressed(true).
+					Attr("@click",
+						web.Plaid().EventFunc(actions.DrawerNew,
+							"",
+							"Customer",
+							cusID,
+						).URL("/admin/notes").
+							Go(),
+					),
 			).Class("mb-4")
 	})
 
@@ -440,16 +449,18 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 
 		return s.Card(detail).HeaderTitle("Details").
 			Actions(
-				web.Bind(VBtn("Agree Terms").
-					Depressed(true).Class("mr-2")).
-					OnClick(actions.DrawerAction, "AgreeTerms", cusID),
+				VBtn("Agree Terms").
+					Depressed(true).Class("mr-2").
+					Attr("@click", web.Plaid().
+						EventFunc(actions.DrawerAction, "AgreeTerms", cusID).
+						Go()),
 
-				web.Bind(VBtn("Update details").
-					Depressed(true)).
-					OnClick(
-						actions.DrawerEdit,
-						cusID,
-					).URL("/admin/customers"),
+				VBtn("Update details").
+					Depressed(true).
+					Attr("@click", web.Plaid().
+						EventFunc(actions.DrawerEdit,
+							cusID,
+						).URL("/admin/customers").Go()),
 			).Class("mb-4")
 	})
 
@@ -485,12 +496,15 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 
 		return s.Card(dt).HeaderTitle("Cards").
 			Actions(
-				web.Bind(VBtn("Add Card").
-					Depressed(true)).OnClick(
-					actions.DrawerNew,
-					"",
-					cusID,
-				).URL("/admin/credit-cards"),
+				VBtn("Add Card").
+					Depressed(true).
+					Attr("@click",
+						web.Plaid().EventFunc(
+							actions.DrawerNew,
+							"",
+							cusID,
+						).URL("/admin/credit-cards").
+							Go()),
 			).Class("mb-4")
 	})
 

@@ -127,7 +127,9 @@ func HelloCustomziedComponent(ctx *web.EventContext) (pr web.PageResponse, err e
 
 	pr.Body = Div(
 		TagsInput().Selected([]string{"1", "2", "3"}).Options(opts...),
-		web.Bind(Button("Refresh")).OnClick("refresh"),
+		Button("Refresh").Attr("@click",
+			web.Plaid().EventFunc("refresh").Go(),
+		),
 	)
 	return
 }
