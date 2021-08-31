@@ -123,25 +123,35 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 
 	vErr, _ := ctx.Flash.(*web.ValidationErrors)
 
-	return VContainer(
-		notice,
-		h.H2(title).Class("title px-4 py-2"),
-		VCard(
-			VCardText(
-				b.ToComponent(obj, vErr, ctx),
-			),
-			VCardActions(
-				VSpacer(),
-				VBtn(buttonLabel).
-					Dark(true).
-					Color(b.mb.p.primaryColor).
-					Attr("@click", web.Plaid().
-						EventFunc("update", ctx.Event.Params...).
-						URL(b.mb.Info().ListingHref()).
-						Go()),
-			),
-		).Flat(true),
-	).Fluid(true)
+	return h.Components(
+		VAppBar(
+			VToolbarTitle(title).Class("pl-2"),
+			VSpacer(),
+			VBtn("").Icon(true).Children(
+				VIcon("close"),
+			).Attr("@click.stop", "vars.rightDrawer = false"),
+		).Color("white").Elevation(0).Dense(true),
+
+		VContainer(
+
+			notice,
+			VCard(
+				VCardText(
+					b.ToComponent(obj, vErr, ctx),
+				),
+				VCardActions(
+					VSpacer(),
+					VBtn(buttonLabel).
+						Dark(true).
+						Color(b.mb.p.primaryColor).
+						Attr("@click", web.Plaid().
+							EventFunc("update", ctx.Event.Params...).
+							URL(b.mb.Info().ListingHref()).
+							Go()),
+				),
+			).Flat(true),
+		).Fluid(true),
+	)
 }
 
 func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, err error) {

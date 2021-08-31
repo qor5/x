@@ -296,12 +296,16 @@ func rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 		Name: rightDrawerName,
 		Body: VNavigationDrawer(
 			web.Portal(comp).Name(rightDrawerContentPortalName),
-		).Attr("v-model", "vars.rightDrawer").
+		).
+			Class("v-navigation-drawer--temporary").
+			Attr("v-model", "vars.rightDrawer").
 			Bottom(true).
 			Right(true).
-			Absolute(true).
+			Fixed(true).
 			Width(600).
-			Temporary(true).
+			//Temporary(true).
+			//HideOverlay(true).
+			//Floating(true).
 			Attr(web.InitContextVars, `{rightDrawer: false}`),
 	})
 	r.VarsScript = "setTimeout(function(){ vars.rightDrawer = true }, 100)"
