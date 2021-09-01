@@ -303,6 +303,8 @@ func rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 			Right(true).
 			Fixed(true).
 			Width(600).
+			Bottom(false).
+			Attr(":height", `"100%"`).
 			//Temporary(true).
 			//HideOverlay(true).
 			//Floating(true).
