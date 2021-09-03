@@ -140,7 +140,7 @@ func (b *DetailingBuilder) formDrawerAction(ctx *web.EventContext) (r web.EventR
 		panic("action required")
 	}
 
-	rightDrawer(&r, b.actionForm(action, ctx))
+	b.mb.p.rightDrawer(&r, b.actionForm(action, ctx))
 	return
 }
 

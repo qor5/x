@@ -30,6 +30,7 @@ type Builder struct {
 	brandTitle          string
 	primaryColor        string
 	progressBarColor    string
+	rightDrawerWidth    int
 	writeFieldDefaults  *FieldDefaults
 	listFieldDefaults   *FieldDefaults
 	detailFieldDefaults *FieldDefaults
@@ -59,6 +60,7 @@ func New() *Builder {
 		primaryColor:        "indigo",
 		progressBarColor:    "amber",
 		brandTitle:          "Admin",
+		rightDrawerWidth:    600,
 	}
 }
 
@@ -94,6 +96,11 @@ func (b *Builder) BrandFunc(v ComponentFunc) (r *Builder) {
 
 func (b *Builder) BrandTitle(v string) (r *Builder) {
 	b.brandTitle = v
+	return b
+}
+
+func (b *Builder) RightDrawerWidth(v int) (r *Builder) {
+	b.rightDrawerWidth = v
 	return b
 }
 
@@ -291,7 +298,7 @@ func putModelInfo(mi *ModelInfo, in http.Handler) (out http.Handler) {
 const rightDrawerName = "rightDrawer"
 const rightDrawerContentPortalName = "rightDrawerContentPortalName"
 
-func rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
+func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 		Name: rightDrawerName,
 		Body: VNavigationDrawer(
@@ -302,7 +309,7 @@ func rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 			Bottom(true).
 			Right(true).
 			Fixed(true).
-			Width(600).
+			Width(b.rightDrawerWidth).
 			Bottom(false).
 			Attr(":height", `"100%"`).
 			//Temporary(true).

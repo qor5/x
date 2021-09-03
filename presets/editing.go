@@ -83,12 +83,12 @@ func (b *EditingBuilder) formDrawerNew(ctx *web.EventContext) (r web.EventRespon
 		creatingB = b.mb.creating
 	}
 
-	rightDrawer(&r, creatingB.editFormFor(nil, ctx))
+	b.mb.p.rightDrawer(&r, creatingB.editFormFor(nil, ctx))
 	return
 }
 
 func (b *EditingBuilder) formDrawerEdit(ctx *web.EventContext) (r web.EventResponse, err error) {
-	rightDrawer(&r, b.editFormFor(nil, ctx))
+	b.mb.p.rightDrawer(&r, b.editFormFor(nil, ctx))
 	return
 }
 

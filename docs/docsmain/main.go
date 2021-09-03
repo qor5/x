@@ -12,7 +12,7 @@ func main() {
 	mux := docs.Mux("")
 	port := os.Getenv("PORT")
 	if len(port) == 0 {
-		port = "9000"
+		port = "9100"
 	}
 	// @snippet_begin(HelloWorldMainSample)
 	fmt.Println("Starting docs at :" + port)
