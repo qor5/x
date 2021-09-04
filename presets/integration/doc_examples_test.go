@@ -10,12 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/theplant/gofixtures"
-
-	"github.com/jinzhu/gorm"
-
 	"github.com/goplaid/x/docs"
 	"github.com/goplaid/x/docs/examples/e21_presents"
+	"github.com/jinzhu/gorm"
+	"github.com/theplant/gofixtures"
 )
 
 func TestDocExamples(t *testing.T) {
@@ -46,7 +44,7 @@ func TestDocExamples(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-				if !strings.HasPrefix(string(u.MainImage), "https://transfer.sh") {
+				if !strings.HasPrefix(string(u.MainImage), "http://transfer.sh") {
 					t.Error(u)
 				}
 				return

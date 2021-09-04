@@ -5,12 +5,11 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/sunfmin/reflectutils"
-
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/tiptap"
 	"github.com/jinzhu/gorm"
+	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -89,14 +88,14 @@ func PresetsEditingCustomizationFileType(b *presets.Builder) (
 				return
 			}
 
-			req, err := http.NewRequest("PUT", "https://transfer.sh/myfile.png", ff)
+			req, err := http.NewRequest("PUT", "http://transfer.sh/myfile.png", ff)
 			if err != nil {
 				return
 			}
 			var res *http.Response
 			res, err = http.DefaultClient.Do(req)
 			if err != nil {
-				return
+				panic(err)
 			}
 			var b []byte
 			b, err = ioutil.ReadAll(res.Body)

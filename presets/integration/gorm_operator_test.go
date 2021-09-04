@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	
-	"github.com/jinzhu/gorm"
+
 	"github.com/goplaid/web"
-	gormop2 "github.com/goplaid/x/presets/gormop"
+	"github.com/goplaid/x/presets/gormop"
+	"github.com/jinzhu/gorm"
 	"github.com/theplant/gofixtures"
 )
 
@@ -39,7 +39,7 @@ func TestPrimarySlugger(t *testing.T) {
 	db := ConnectDB()
 	db.AutoMigrate(&TestVariant{})
 	emptyData.TruncatePut(db)
-	op := gormop2.DataOperator(db)
+	op := gormop.DataOperator(db)
 	ctx := new(web.EventContext)
 	err := op.Save(&TestVariant{ProductCode: "P01", ColorCode: "C01", Name: "Product 1"}, "", ctx)
 	if err != nil {
