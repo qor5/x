@@ -8,7 +8,10 @@ import (
 	"os"
 	"strings"
 
+	"golang.org/x/text/language"
+
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/i18n"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"
@@ -22,6 +25,7 @@ type Builder struct {
 	models              []*ModelBuilder
 	mux                 *goji.Mux
 	builder             *web.Builder
+	i18nBuilder         *i18n.Builder
 	logger              *zap.Logger
 	dataOperator        DataOperator
 	messagesFunc        MessagesFunc
@@ -48,12 +52,14 @@ type extraAsset struct {
 	refTag      string
 }
 
+var presetsModuleKey i18n.ModuleKey = "presets-core"
+
 func New() *Builder {
 	l, _ := zap.NewDevelopment()
 	return &Builder{
 		logger:              l,
 		builder:             web.New(),
-		messagesFunc:        defaultMessageFunc,
+		i18nBuilder:         i18n.New().RegisterForModule(language.English, presetsModuleKey, Messages_en_US),
 		writeFieldDefaults:  NewFieldDefaults(WRITE),
 		listFieldDefaults:   NewFieldDefaults(LIST),
 		detailFieldDefaults: NewFieldDefaults(DETAIL),
@@ -62,6 +68,10 @@ func New() *Builder {
 		brandTitle:          "Admin",
 		rightDrawerWidth:    600,
 	}
+}
+
+func (b *Builder) I18n() (r *i18n.Builder) {
+	return b.i18nBuilder
 }
 
 func (b *Builder) URIPrefix(v string) (r *Builder) {
@@ -269,12 +279,20 @@ func (b *Builder) runBrandFunc(ctx *web.EventContext) (r h.HTMLComponent) {
 type contextKey int
 
 const (
-	messagesKey contextKey = iota
+	presetsKey contextKey = iota
 	modelInfoKey
 )
 
+func MustGetModuleMessages(r *http.Request, moduleKey i18n.ModuleKey) i18n.Messages {
+	return MustGetPresets(r).I18n().MustGetModuleMessages(r, moduleKey).(*Messages)
+}
+
 func MustGetMessages(r *http.Request) *Messages {
-	return r.Context().Value(messagesKey).(*Messages)
+	return MustGetModuleMessages(r, presetsModuleKey).(*Messages)
+}
+
+func MustGetPresets(r *http.Request) *Builder {
+	return r.Context().Value(presetsKey).(*Builder)
 }
 
 func GetModelInfo(req *http.Request) (r *ModelInfo) {
@@ -282,16 +300,15 @@ func GetModelInfo(req *http.Request) (r *ModelInfo) {
 	return
 }
 
-func (b *Builder) putMessages(in http.Handler) (out http.Handler) {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		msgr := b.messagesFunc(r)
-		in.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), messagesKey, msgr)))
-	})
-}
-
 func putModelInfo(mi *ModelInfo, in http.Handler) (out http.Handler) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		in.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), modelInfoKey, mi)))
+	})
+}
+
+func (b *Builder) putPresets(in http.Handler) (out http.Handler) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		in.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), presetsKey, b)))
 	})
 }
 
@@ -510,10 +527,12 @@ func (b *Builder) initMux() {
 }
 
 func (b *Builder) wrap(mi *ModelInfo, pf web.PageFunc) http.Handler {
-	return putModelInfo(
-		mi,
-		b.putMessages(
-			b.builder.Page(pf),
+	return b.putPresets(
+		putModelInfo(
+			mi,
+			b.I18n().EnsureLanguage(
+				b.builder.Page(pf),
+			),
 		),
 	)
 }

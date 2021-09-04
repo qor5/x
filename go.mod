@@ -36,6 +36,7 @@ require (
 	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
 	go.uber.org/zap v1.17.0
 	goji.io v2.0.2+incompatible
+	golang.org/x/text v0.3.6
 )
 
 //replace (

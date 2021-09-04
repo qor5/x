@@ -1,8 +1,7 @@
 package presets
 
 import (
-	"fmt"
-	"net/http"
+	"strings"
 )
 
 type Messages struct {
@@ -21,22 +20,27 @@ type Messages struct {
 	DetailingObjectTitle   func(label string, name string) string
 }
 
-var Messages_en_US = Messages{
+var Messages_en_US = &Messages{
 	SuccessfullyUpdated: "Successfully Updated",
 	EditingObjectTitle: func(label string, name string) string {
-		return fmt.Sprintf("Editing %s %s", label, name)
+		return strings.NewReplacer("{id}", name, "{modelName}", label).
+			Replace("Editing {modelName} {id}")
 	},
 	CreatingObjectTitle: func(label string) string {
-		return fmt.Sprintf("New %s", label)
+		return strings.NewReplacer("{modelName}", label).
+			Replace("New {modelName}")
 	},
 	ListingObjectTitle: func(label string) string {
-		return fmt.Sprintf("Listing %s", label)
+		return strings.NewReplacer("{modelName}", label).
+			Replace("Listing {modelName}")
 	},
 	DetailingObjectTitle: func(label string, name string) string {
-		return fmt.Sprintf("%s %s", label, name)
+		return strings.NewReplacer("{id}", name, "{modelName}", label).
+			Replace("{modelName} {id}")
 	},
 	DeleteConfirmationText: func(id string) string {
-		return fmt.Sprintf("Are you sure you want to delete object with id: %s?", id)
+		return strings.NewReplacer("{id}", id).
+			Replace("Are you sure you want to delete object with id: {id}?")
 	},
 
 	New:    "New",
@@ -46,9 +50,4 @@ var Messages_en_US = Messages{
 	OK:     "OK",
 	Cancel: "Cancel",
 	Create: "Create",
-}
-
-func defaultMessageFunc(r *http.Request) *Messages {
-	msg := Messages_en_US
-	return &msg
 }
