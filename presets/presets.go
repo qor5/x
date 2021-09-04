@@ -283,16 +283,8 @@ const (
 	modelInfoKey
 )
 
-func MustGetModuleMessages(r *http.Request, moduleKey i18n.ModuleKey) i18n.Messages {
-	return MustGetPresets(r).I18n().MustGetModuleMessages(r, moduleKey).(*Messages)
-}
-
 func MustGetMessages(r *http.Request) *Messages {
-	return MustGetModuleMessages(r, presetsModuleKey).(*Messages)
-}
-
-func MustGetPresets(r *http.Request) *Builder {
-	return r.Context().Value(presetsKey).(*Builder)
+	return i18n.MustGetModuleMessages(r, presetsModuleKey, Messages_en_US).(*Messages)
 }
 
 func GetModelInfo(req *http.Request) (r *ModelInfo) {
@@ -303,12 +295,6 @@ func GetModelInfo(req *http.Request) (r *ModelInfo) {
 func putModelInfo(mi *ModelInfo, in http.Handler) (out http.Handler) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		in.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), modelInfoKey, mi)))
-	})
-}
-
-func (b *Builder) putPresets(in http.Handler) (out http.Handler) {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		in.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), presetsKey, b)))
 	})
 }
 
@@ -527,12 +513,10 @@ func (b *Builder) initMux() {
 }
 
 func (b *Builder) wrap(mi *ModelInfo, pf web.PageFunc) http.Handler {
-	return b.putPresets(
-		putModelInfo(
-			mi,
-			b.I18n().EnsureLanguage(
-				b.builder.Page(pf),
-			),
+	return putModelInfo(
+		mi,
+		b.I18n().EnsureLanguage(
+			b.builder.Page(pf),
 		),
 	)
 }

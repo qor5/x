@@ -67,11 +67,15 @@ func (b *Builder) RegisterForModule(lang language.Tag, module ModuleKey, msg Mes
 	return b
 }
 
-func (b *Builder) MustGetModuleMessages(r *http.Request, module ModuleKey) Messages {
-	moduleContext := r.Context().Value(contextKey).(context.Context)
-	msg := moduleContext.Value(module)
+func MustGetModuleMessages(r *http.Request, module ModuleKey, defaultMessages Messages) Messages {
+	v := r.Context().Value(contextKey)
+	if v == nil {
+		return defaultMessages
+	}
+
+	msg := v.(context.Context).Value(module)
 	if msg == nil {
-		msg = b.moduleMessages[b.defaultLanguage()].Value(module)
+		msg = defaultMessages
 	}
 	return msg
 }

@@ -31,7 +31,7 @@ func TestLanguage(t *testing.T) {
 		RegisterForModule(language.English, mediaLibraryKey, Messages_en_US)
 
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		msg := b.MustGetModuleMessages(r, mediaLibraryKey).(*Messages)
+		msg := i18n.MustGetModuleMessages(r, mediaLibraryKey, Messages_en_US).(*Messages)
 		_, _ = fmt.Fprint(w, msg.Update)
 	})
 
