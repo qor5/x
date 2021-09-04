@@ -84,6 +84,10 @@ func (b *Builder) Builder(v *web.Builder) (r *Builder) {
 	return b
 }
 
+func (b *Builder) GetWebBuilder() (r *web.Builder) {
+	return b.builder
+}
+
 func (b *Builder) Logger(v *zap.Logger) (r *Builder) {
 	b.logger = v
 	return b
