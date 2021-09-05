@@ -2,7 +2,7 @@ package admin
 
 import (
 	"github.com/goplaid/web"
-	"github.com/goplaid/x/goplaid/template/models"
+	"github.com/goplaid/x/goplaid/admintemplate/models"
 	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/presets/gormop"
 	"github.com/goplaid/x/vuetify"

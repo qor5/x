@@ -3,7 +3,7 @@ package admin
 import (
 	"os"
 
-	"github.com/goplaid/x/goplaid/template/models"
+	"github.com/goplaid/x/goplaid/admintemplate/models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )

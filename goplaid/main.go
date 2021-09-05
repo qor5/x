@@ -13,8 +13,11 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-//go:embed template
-var box embed.FS
+//go:embed admintemplate
+var adminBox embed.FS
+
+//go:embed baretemplate
+var bareBox embed.FS
 
 func main() {
 
@@ -28,7 +31,7 @@ func main() {
 	}
 
 	prompt := promptui.Prompt{
-		Label:     "Admin Go Package",
+		Label:     "Go Package",
 		AllowEdit: true,
 		Default:   "github.com/theplant/myadmin",
 	}
@@ -53,6 +56,16 @@ func main() {
 		}
 	}
 
+	templateSel := promptui.Select{
+		Label: "Select a template",
+		Items: []string{
+			"Admin: Deep Customizable Database CRUD UI",
+			"Bare: Simplest Workable Web App",
+		},
+	}
+
+	result, _, _ := templateSel.Run()
+
 	dir := filepath.Base(pkg)
 
 	err = os.MkdirAll(dir, 0755)
@@ -60,11 +73,22 @@ func main() {
 		panic(err)
 	}
 
-	fs.WalkDir(box, "template", func(path string, d fs.DirEntry, err1 error) error {
+	if result == 0 {
+		copyAndReplaceFiles(adminBox, dir, "admintemplate", pkg)
+		fmt.Printf("\ncd %s && docker-compose up -d && source dev_env && go run main.go\nto start your project\n", dir)
+	} else {
+		copyAndReplaceFiles(bareBox, dir, "baretemplate", pkg)
+		fmt.Printf("\ncd %s && go run main.go\nto start your project\n", dir)
+	}
+}
+
+func copyAndReplaceFiles(box embed.FS, dir string, template string, pkg string) {
+	var err error
+	fs.WalkDir(box, template, func(path string, d fs.DirEntry, err1 error) error {
 		if d != nil && d.IsDir() {
 			return nil
 		}
-		newPath := strings.ReplaceAll(path, "template/", "")
+		newPath := strings.ReplaceAll(path, template+"/", "")
 		fp := filepath.Join(dir, newPath)
 		err := os.MkdirAll(filepath.Dir(fp), 0755)
 		if err != nil {
@@ -92,7 +116,7 @@ func main() {
 
 	fmt.Println("Done")
 
-	replaceInFiles(dir, "github.com/goplaid/x/goplaid/template", pkg)
+	replaceInFiles(dir, "github.com/goplaid/x/goplaid/"+template, pkg)
 	replaceInFiles(dir, "GoplaidPackageName", dir)
 
 	if _, err = os.Stat(filepath.Join(dir, "go.mod")); err != nil {
@@ -105,9 +129,18 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-	}
 
-	fmt.Printf("\ncd %s && docker-compose up -d && source dev_env && go run main.go\nto start your project\n", dir)
+		cmdGet := exec.Command("go", "get", "./...")
+		cmdGet.Dir = dir
+		cmdGet.Stdout = os.Stdout
+		cmdGet.Stderr = os.Stderr
+
+		err = cmdGet.Run()
+		if err != nil {
+			panic(err)
+		}
+	}
+	return
 }
 
 func replaceInFiles(baseDir string, from, to string) {

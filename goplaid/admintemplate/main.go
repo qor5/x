@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/goplaid/x/goplaid/template/admin"
+	"github.com/goplaid/x/goplaid/admintemplate/admin"
 )
 
 func main() {
