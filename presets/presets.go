@@ -315,7 +315,6 @@ func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 		).
 			Class("v-navigation-drawer--temporary").
 			Attr("v-model", "vars.rightDrawer").
-			Bottom(true).
 			Right(true).
 			Fixed(true).
 			Width(b.rightDrawerWidth).
