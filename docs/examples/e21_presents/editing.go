@@ -8,9 +8,9 @@ import (
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/tiptap"
-	"github.com/jinzhu/gorm"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
+	"gorm.io/gorm"
 )
 
 // @snippet_begin(PresetsEditingCustomizationDescriptionSample)
@@ -57,7 +57,7 @@ func PresetsEditingCustomizationFileType(b *presets.Builder) (
 	db *gorm.DB,
 ) {
 	cust, cl, ce, db = PresetsEditingCustomizationDescription(b)
-	err := db.AutoMigrate(&Product{}).Error
+	err := db.AutoMigrate(&Product{})
 	if err != nil {
 		panic(err)
 	}

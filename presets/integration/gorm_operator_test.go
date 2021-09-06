@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/goplaid/web"
-	"github.com/goplaid/x/presets/gormop"
-	"github.com/jinzhu/gorm"
+	"github.com/goplaid/x/presets/gorm2op"
 	"github.com/theplant/gofixtures"
+	"gorm.io/gorm"
 )
 
 type TestVariant struct {
@@ -38,8 +38,9 @@ func (tv *TestVariant) PrimaryColumnValuesBySlug(slug string) [][]string {
 func TestPrimarySlugger(t *testing.T) {
 	db := ConnectDB()
 	db.AutoMigrate(&TestVariant{})
-	emptyData.TruncatePut(db)
-	op := gormop.DataOperator(db)
+	rawDB, _ := db.DB()
+	emptyData.TruncatePut(rawDB)
+	op := gorm2op.DataOperator(db)
 	ctx := new(web.EventContext)
 	err := op.Save(&TestVariant{ProductCode: "P01", ColorCode: "C01", Name: "Product 1"}, "", ctx)
 	if err != nil {

@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"mime/multipart"
@@ -12,8 +13,8 @@ import (
 
 	"github.com/goplaid/x/docs"
 	"github.com/goplaid/x/docs/examples/e21_presents"
-	"github.com/jinzhu/gorm"
 	"github.com/theplant/gofixtures"
+	"gorm.io/gorm"
 )
 
 func TestDocExamples(t *testing.T) {
@@ -22,7 +23,7 @@ func TestDocExamples(t *testing.T) {
 	var mycases = []reqCase{
 		{
 			name: "Custom MyFile Type",
-			reqFunc: func(db *gorm.DB) *http.Request {
+			reqFunc: func(db *sql.DB) *http.Request {
 				emptyProductsData.TruncatePut(db)
 				body := bytes.NewBuffer(nil)
 
@@ -52,7 +53,7 @@ func TestDocExamples(t *testing.T) {
 		},
 		{
 			name: "Custom MyFile Type Without File",
-			reqFunc: func(db *gorm.DB) *http.Request {
+			reqFunc: func(db *sql.DB) *http.Request {
 				emptyProductsData.TruncatePut(db)
 				body := bytes.NewBuffer(nil)
 
@@ -85,7 +86,8 @@ func TestDocExamples(t *testing.T) {
 	for _, c := range mycases {
 		t.Run(c.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := c.reqFunc(db)
+			rawDB, _ := db.DB()
+			r := c.reqFunc(rawDB)
 			h.ServeHTTP(w, r)
 
 			if c.eventResponseMatch != nil {

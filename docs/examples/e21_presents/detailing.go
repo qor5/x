@@ -9,8 +9,8 @@ import (
 	"github.com/goplaid/x/presets/actions"
 	"github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
-	"github.com/jinzhu/gorm"
 	h "github.com/theplant/htmlgo"
+	"gorm.io/gorm"
 )
 
 // @snippet_begin(PresetsDetailPageTopNotesSample)
@@ -33,7 +33,7 @@ func PresetsDetailPageTopNotes(b *presets.Builder) (
 ) {
 	cust, cl, ce, db = PresetsEditingCustomizationValidation(b)
 	b.URIPrefix(PresetsDetailPageTopNotesPath)
-	err := db.AutoMigrate(&Note{}).Error
+	err := db.AutoMigrate(&Note{})
 	if err != nil {
 		panic(err)
 	}
@@ -119,7 +119,7 @@ func PresetsDetailPageDetails(b *presets.Builder) (
 ) {
 	cust, cl, ce, dp, db = PresetsDetailPageTopNotes(b)
 	b.URIPrefix(PresetsDetailPageDetailsPath)
-	err := db.AutoMigrate(&CreditCard{}).Error
+	err := db.AutoMigrate(&CreditCard{})
 	if err != nil {
 		panic(err)
 	}
@@ -218,7 +218,7 @@ func PresetsDetailPageCards(b *presets.Builder) (
 ) {
 	cust, cl, ce, dp, db = PresetsDetailPageDetails(b)
 	b.URIPrefix(PresetsDetailPageCardsPath)
-	err := db.AutoMigrate(&CreditCard{}).Error
+	err := db.AutoMigrate(&CreditCard{})
 	if err != nil {
 		panic(err)
 	}

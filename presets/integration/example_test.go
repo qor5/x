@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,9 +10,11 @@ import (
 	"strings"
 	"testing"
 
+	"gorm.io/driver/sqlite"
+
 	examples2 "github.com/goplaid/x/presets/examples"
-	"github.com/jinzhu/gorm"
 	"github.com/theplant/gofixtures"
+	"gorm.io/gorm"
 )
 
 var customerData = gofixtures.Data(gofixtures.Sql(`
@@ -27,7 +30,7 @@ var creditCardData = gofixtures.Data(customerData, gofixtures.Sql(``, []string{"
 
 type reqCase struct {
 	name               string
-	reqFunc            func(db *gorm.DB) *http.Request
+	reqFunc            func(db *sql.DB) *http.Request
 	eventResponseMatch func(er *testEventResponse, db *gorm.DB, t *testing.T)
 	pageMatch          func(body *bytes.Buffer, db *gorm.DB, t *testing.T)
 }
@@ -35,7 +38,7 @@ type reqCase struct {
 var cases = []reqCase{
 	{
 		name: "Update",
-		reqFunc: func(db *gorm.DB) *http.Request {
+		reqFunc: func(db *sql.DB) *http.Request {
 			customerData.TruncatePut(db)
 			r := httptest.NewRequest("POST", "/admin/customers?__execute_event__=update", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
@@ -77,7 +80,7 @@ Felix11
 	},
 	{
 		name: "Create",
-		reqFunc: func(db *gorm.DB) *http.Request {
+		reqFunc: func(db *sql.DB) *http.Request {
 			emptyCustomerData.TruncatePut(db)
 			r := httptest.NewRequest("POST", "/admin/customers?__execute_event__=update", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
@@ -120,7 +123,7 @@ Felix
 
 	{
 		name: "New Form For Creating",
-		reqFunc: func(db *gorm.DB) *http.Request {
+		reqFunc: func(db *sql.DB) *http.Request {
 			emptyCustomerData.TruncatePut(db)
 			r := httptest.NewRequest("POST", "/admin/credit-cards?__execute_event__=DrawerNew", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
@@ -143,7 +146,7 @@ Content-Disposition: form-data; name="__event_data__"
 
 	{
 		name: "Create CreditCard",
-		reqFunc: func(db *gorm.DB) *http.Request {
+		reqFunc: func(db *sql.DB) *http.Request {
 			creditCardData.TruncatePut(db)
 			r := httptest.NewRequest("POST", "/admin/credit-cards?__execute_event__=update", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
@@ -176,7 +179,7 @@ Content-Disposition: form-data; name="Number"
 
 	{
 		name: "Without Editing Config/Product Edit Form",
-		reqFunc: func(db *gorm.DB) *http.Request {
+		reqFunc: func(db *sql.DB) *http.Request {
 			productData.TruncatePut(db)
 			r := httptest.NewRequest("POST", "/admin/products?__execute_event__=DrawerEdit", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
@@ -199,7 +202,7 @@ Content-Disposition: form-data; name="__event_data__"
 
 	{
 		name: "Without Editing Config/Create Product",
-		reqFunc: func(db *gorm.DB) *http.Request {
+		reqFunc: func(db *sql.DB) *http.Request {
 			productData.TruncatePut(db)
 			r := httptest.NewRequest("POST", "/admin/products?__execute_event__=update", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
@@ -232,7 +235,7 @@ owner1
 
 	{
 		name: "formDrawerAction AgreeTerms",
-		reqFunc: func(db *gorm.DB) *http.Request {
+		reqFunc: func(db *sql.DB) *http.Request {
 			customerData.TruncatePut(db)
 			r := httptest.NewRequest("POST", "/admin/customers/11?__execute_event__=DrawerAction", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
@@ -255,7 +258,7 @@ Content-Disposition: form-data; name="__event_data__"
 
 	{
 		name: "doAction AgreeTerms",
-		reqFunc: func(db *gorm.DB) *http.Request {
+		reqFunc: func(db *sql.DB) *http.Request {
 			customerData.TruncatePut(db)
 			r := httptest.NewRequest("POST", "/admin/customers/11?__execute_event__=doAction", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
@@ -286,12 +289,11 @@ true
 }
 
 func ConnectDB() *gorm.DB {
-	db, err := gorm.Open("sqlite3", "/tmp/my_integration.db")
+	db, err := gorm.Open(sqlite.Open("/tmp/my_integration.db"), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
-	db.LogMode(true)
-	return db
+	return db.Debug()
 }
 
 type testPortalUpdate struct {
@@ -316,7 +318,8 @@ func TestAll(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := c.reqFunc(db)
+			dbraw, _ := db.DB()
+			r := c.reqFunc(dbraw)
 			p.ServeHTTP(w, r)
 
 			if c.eventResponseMatch != nil {

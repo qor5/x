@@ -9,13 +9,13 @@ import (
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/presets/actions"
-	"github.com/goplaid/x/presets/gormop"
+	"github.com/goplaid/x/presets/gorm2op"
 	s "github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
+	"gorm.io/gorm"
 )
 
 type Thumb struct {
@@ -27,7 +27,7 @@ type Customer struct {
 	Name            string
 	Email           string
 	Description     string
-	Thumb1          *Thumb
+	Thumb1          *Thumb `gorm:"-"`
 	CompanyID       int
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
@@ -35,8 +35,7 @@ type Customer struct {
 	TermAgreedAt    *time.Time
 	ApprovalComment string
 	LanguageCode    string
-
-	Events []*Event
+	Events          []*Event `gorm:"-"`
 }
 
 func (c *Customer) PageTitle() string {
@@ -120,7 +119,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		&Company{},
 		&Product{},
 		&Language{},
-	).Error
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -180,7 +179,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			).Class("mb-4")
 	})
 
-	p.DataOperator(gormop.DataOperator(db))
+	p.DataOperator(gorm2op.DataOperator(db))
 
 	p.MenuGroup("Customer Management").Icon("group")
 	mp := p.Model(&Product{}).MenuIcon("laptop")

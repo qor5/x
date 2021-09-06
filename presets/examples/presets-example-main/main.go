@@ -6,18 +6,20 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/middleware"
-	"github.com/jinzhu/gorm"
-	examples2 "github.com/goplaid/x/presets/examples"
+	"github.com/goplaid/x/presets/examples"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func main() {
-	db, err := gorm.Open("postgres", os.Getenv("DBString"))
+	db, err := gorm.Open(postgres.Open(os.Getenv("DBString")), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
-	db.LogMode(true)
+	db.Logger.LogMode(logger.Info)
 
-	p := examples2.Preset1(db)
+	p := examples.Preset1(db)
 
 	log.Println("serving on :7000")
 	log.Fatal(http.ListenAndServe(":7000", middleware.Logger(

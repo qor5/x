@@ -9,12 +9,13 @@ import (
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/presets/actions"
-	"github.com/goplaid/x/presets/gormop"
+	"github.com/goplaid/x/presets/gorm2op"
 	v "github.com/goplaid/x/vuetify"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	. "github.com/theplant/htmlgo"
 	"golang.org/x/text/language"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type Customer struct {
@@ -38,15 +39,15 @@ func init() {
 
 func setupDB() (db *gorm.DB) {
 	var err error
-	db, err = gorm.Open("sqlite3", "/tmp/my.db")
+	db, err = gorm.Open(sqlite.Open("/tmp/my.db"), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
-	db.LogMode(true)
+	db.Logger.LogMode(logger.Info)
 	err = db.AutoMigrate(
 		&Customer{},
 		&Company{},
-	).Error
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -57,7 +58,7 @@ func PresetsHelloWorld(b *presets.Builder) (m *presets.ModelBuilder, db *gorm.DB
 	db = DB
 	b.I18n().SupportLanguages(language.English, language.SimplifiedChinese)
 	b.URIPrefix(PresetsHelloWorldPath).
-		DataOperator(gormop.DataOperator(db))
+		DataOperator(gorm2op.DataOperator(db))
 	m = b.Model(&Customer{})
 
 	return
