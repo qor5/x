@@ -14,6 +14,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	. "github.com/theplant/htmlgo"
+	"golang.org/x/text/language"
 )
 
 type Customer struct {
@@ -54,6 +55,7 @@ func setupDB() (db *gorm.DB) {
 
 func PresetsHelloWorld(b *presets.Builder) (m *presets.ModelBuilder, db *gorm.DB) {
 	db = DB
+	b.I18n().SupportLanguages(language.English, language.SimplifiedChinese)
 	b.URIPrefix(PresetsHelloWorldPath).
 		DataOperator(gormop.DataOperator(db))
 	m = b.Model(&Customer{})

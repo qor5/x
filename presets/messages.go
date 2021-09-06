@@ -58,3 +58,19 @@ var Messages_en_US = &Messages{
 	Cancel:                         "Cancel",
 	Create:                         "Create",
 }
+
+var Messages_zh_CN = &Messages{
+	DeleteConfirmationTextTemplate: "你确定你要删除这个对象吗，对象ID: {id}?",
+	CreatingObjectTitleTemplate:    "新建{modelName}",
+	EditingObjectTitleTemplate:     "编辑{modelName} {id}",
+	ListingObjectTitleTemplate:     "{modelName}列表",
+	DetailingObjectTitleTemplate:   "{modelName} {id}",
+	SuccessfullyUpdated:            "成功更新了",
+	New:                            "新建",
+	Update:                         "更新",
+	Delete:                         "删除",
+	Edit:                           "编辑",
+	OK:                             "确定",
+	Cancel:                         "取消",
+	Create:                         "创建",
+}

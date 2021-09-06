@@ -52,14 +52,16 @@ type extraAsset struct {
 	refTag      string
 }
 
-var presetsModuleKey i18n.ModuleKey = "presets-core"
+var CoreModuleKey i18n.ModuleKey = "presets-core"
 
 func New() *Builder {
 	l, _ := zap.NewDevelopment()
 	return &Builder{
-		logger:              l,
-		builder:             web.New(),
-		i18nBuilder:         i18n.New().RegisterForModule(language.English, presetsModuleKey, Messages_en_US),
+		logger:  l,
+		builder: web.New(),
+		i18nBuilder: i18n.New().
+			RegisterForModule(language.English, CoreModuleKey, Messages_en_US).
+			RegisterForModule(language.SimplifiedChinese, CoreModuleKey, Messages_zh_CN),
 		writeFieldDefaults:  NewFieldDefaults(WRITE),
 		listFieldDefaults:   NewFieldDefaults(LIST),
 		detailFieldDefaults: NewFieldDefaults(DETAIL),
@@ -288,7 +290,7 @@ const (
 )
 
 func MustGetMessages(r *http.Request) *Messages {
-	return i18n.MustGetModuleMessages(r, presetsModuleKey, Messages_en_US).(*Messages)
+	return i18n.MustGetModuleMessages(r, CoreModuleKey, Messages_en_US).(*Messages)
 }
 
 func GetModelInfo(req *http.Request) (r *ModelInfo) {
