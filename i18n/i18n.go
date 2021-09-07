@@ -3,6 +3,7 @@ package i18n
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	"golang.org/x/text/language"
@@ -68,7 +69,7 @@ func (b *Builder) RegisterForModule(lang language.Tag, module ModuleKey, msg Mes
 }
 
 func MustGetModuleMessages(r *http.Request, module ModuleKey, defaultMessages Messages) Messages {
-	v := r.Context().Value(contextKey)
+	v := r.Context().Value(moduleMessagesKey)
 	if v == nil {
 		return defaultMessages
 	}
@@ -82,7 +83,10 @@ func MustGetModuleMessages(r *http.Request, module ModuleKey, defaultMessages Me
 
 type i18nContextKey int
 
-const contextKey i18nContextKey = iota
+const (
+	moduleMessagesKey i18nContextKey = iota
+	dynaBuilderKey
+)
 
 func (b *Builder) EnsureLanguage(in http.Handler) (out http.Handler) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -106,7 +110,12 @@ func (b *Builder) EnsureLanguage(in http.Handler) (out http.Handler) {
 		if moduleMsgs == nil {
 			panic(fmt.Sprintf("language %s not supported", tag.String()))
 		}
-
-		in.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), contextKey, moduleMsgs)))
+		dyna := DynaNew().Language(tag.String())
+		ctx := context.WithValue(r.Context(), moduleMessagesKey, moduleMsgs)
+		ctx = context.WithValue(ctx, dynaBuilderKey, dyna)
+		in.ServeHTTP(w, r.WithContext(ctx))
+		if dyna.HaveMissingKeys() {
+			log.Println(dyna.PrettyMissingKeys())
+		}
 	})
 }
