@@ -385,6 +385,8 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 			panic(err)
 		}
 
+		msgr := i18n.MustGetModuleMessages(ctx.R, CoreI18nModuleKey, Messages_en_US).(*Messages)
+
 		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
 		pr.Body = VApp(
 
@@ -407,7 +409,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 					VTextField().
 						SoloInverted(true).
 						PrependIcon("search").
-						Label("Search").
+						Label(msgr.Search).
 						Flat(true).
 						Clearable(true).
 						HideDetails(true).

@@ -6,6 +6,7 @@ import (
 
 type Messages struct {
 	SuccessfullyUpdated            string
+	Search                         string
 	New                            string
 	Update                         string
 	Delete                         string
@@ -71,6 +72,7 @@ var Messages_en_US = &Messages{
 	ListingObjectTitleTemplate:     "Listing {modelName}",
 	DetailingObjectTitleTemplate:   "{modelName} {id}",
 	SuccessfullyUpdated:            "Successfully Updated",
+	Search:                         "Search",
 	New:                            "New",
 	Update:                         "Update",
 	Delete:                         "Delete",
@@ -108,6 +110,7 @@ var Messages_zh_CN = &Messages{
 	ListingObjectTitleTemplate:     "{modelName}列表",
 	DetailingObjectTitleTemplate:   "{modelName} {id}",
 	SuccessfullyUpdated:            "成功更新了",
+	Search:                         "搜索",
 	New:                            "新建",
 	Update:                         "更新",
 	Delete:                         "删除",
