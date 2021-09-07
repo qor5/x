@@ -40,6 +40,7 @@ func TestLanguage(t *testing.T) {
 		_, _ = fmt.Fprintln(w, msg.Update)
 		_, _ = fmt.Fprintln(w, i18n.T(r, mediaLibraryKey, "Welcome Home &!@*#&^*!@^#*(!@ Felix"))
 		_, _ = fmt.Fprintln(w, i18n.T(r, mediaLibraryKey, "Welcome to QOR5, {name}", "{name}", "Felix"))
+		_, _ = fmt.Fprintln(w, i18n.PT(r, mediaLibraryKey, "Customer", "Name"))
 	})
 
 	recorder := httptest.NewRecorder()
@@ -50,6 +51,7 @@ func TestLanguage(t *testing.T) {
 更新
 Welcome Home &!@*#&^*!@^#*(!@ Felix
 欢迎来到QOR5, Felix
+Name
 `, recorder.Body.String())
 	if len(diff) > 0 {
 		t.Error(diff)

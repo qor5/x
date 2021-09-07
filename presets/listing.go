@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goplaid/x/i18n"
+
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets/actions"
 	s "github.com/goplaid/x/stripeui"
@@ -90,7 +92,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 	ctx.Hub.RegisterEventFunc("doBulkAction", b.doBulkAction)
 
 	msgr := MustGetMessages(ctx.R)
-	title := msgr.ListingObjectTitle(inflection.Plural(b.mb.label))
+	title := msgr.ListingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Plural(b.mb.label)))
 	r.PageTitle = title
 
 	perPage := b.perPage
@@ -185,7 +187,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 
 	for _, f := range b.fields {
 		dataTable.Column(f.name).
-			Title(b.mb.getLabel(f.NameLabel)).
+			Title(i18n.PT(ctx.R, ModelsI18nModuleKey, b.mb.label, b.mb.getLabel(f.NameLabel))).
 			CellComponentFunc(b.cellComponentFunc(f))
 	}
 
@@ -354,6 +356,32 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 }
 
 func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventContext, fd FilterData) h.HTMLComponent {
+	ft := FilterTranslations{}
+	ft.Filters = msgr.Filters
+	ft.Filter = msgr.Filter
+	ft.Done = msgr.FiltersDone
+	ft.Clear = msgr.FiltersClear
+
+	ft.Date.InTheLast = msgr.FiltersDateInTheLast
+	ft.Date.Days = msgr.FiltersDateDays
+	ft.Date.Months = msgr.FiltersDateMonths
+	ft.Date.And = msgr.FiltersDateAnd
+	ft.Date.Between = msgr.FiltersDateBetween
+	ft.Date.Equals = msgr.FiltersDateEquals
+	ft.Date.IsAfter = msgr.FiltersDateIsAfter
+	ft.Date.IsAfterOrOn = msgr.FiltersDateIsAfterOrOn
+	ft.Date.IsBeforeOrOn = msgr.FiltersDateIsBeforeOrOn
+	ft.Date.IsBefore = msgr.FiltersDateIsBefore
+
+	ft.Number.And = msgr.FiltersNumberAnd
+	ft.Number.Equals = msgr.FiltersNumberEquals
+	ft.Number.Between = msgr.FiltersNumberBetween
+	ft.Number.GreaterThan = msgr.FiltersNumberGreaterThan
+	ft.Number.LessThan = msgr.FiltersNumberLessThan
+
+	ft.String.Equals = msgr.FiltersStringEquals
+	ft.String.Contains = msgr.FiltersStringContains
+
 	var toolbar = VToolbar(
 		VSpacer(),
 		VBtn(msgr.New).
@@ -363,7 +391,7 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 			OnClick("DrawerNew", ""),
 	).Flat(true)
 	if fd != nil {
-		toolbar.PrependChildren(Filter(fd))
+		toolbar.PrependChildren(Filter(fd).Translations(ft))
 	}
 	return toolbar
 }

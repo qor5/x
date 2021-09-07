@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/goplaid/x/i18n"
+
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/presets/actions"
@@ -56,7 +58,11 @@ func setupDB() (db *gorm.DB) {
 
 func PresetsHelloWorld(b *presets.Builder) (m *presets.ModelBuilder, db *gorm.DB) {
 	db = DB
-	b.I18n().SupportLanguages(language.English, language.SimplifiedChinese)
+
+	b.I18n().
+		SupportLanguages(language.English, language.SimplifiedChinese).
+		RegisterForModule(language.SimplifiedChinese, presets.ModelsI18nModuleKey, Messages_zh_CN)
+
 	b.URIPrefix(PresetsHelloWorldPath).
 		DataOperator(gorm2op.DataOperator(db))
 	m = b.Model(&Customer{})
@@ -103,11 +109,12 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 
 	ce = cust.Editing("Name", "CompanyID")
 	ce.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) HTMLComponent {
+		msgr := i18n.MustGetModuleMessages(ctx.R, presets.ModelsI18nModuleKey, Messages_en_US).(*Messages)
 		c := obj.(*Customer)
 		var comps []Company
 		db.Find(&comps)
 		return v.VSelect().
-			Label("Company").
+			Label(msgr.CustomersCompanyID).
 			Items(comps).
 			ItemText("Name").
 			ItemValue("ID").
@@ -136,6 +143,7 @@ func PresetsListingCustomizationFilters(b *presets.Builder) (
 	b.URIPrefix(PresetsListingCustomizationFiltersPath)
 
 	cl.FilterDataFunc(func(ctx *web.EventContext) v.FilterData {
+		msgr := i18n.MustGetModuleMessages(ctx.R, presets.ModelsI18nModuleKey, Messages_en_US).(*Messages)
 		var companyOptions []*v.SelectItem
 		err := db.Model(&Company{}).Select("name as text, id as value").Scan(&companyOptions).Error
 		if err != nil {
@@ -145,25 +153,25 @@ func PresetsListingCustomizationFilters(b *presets.Builder) (
 		return []*v.FilterItem{
 			{
 				Key:          "created",
-				Label:        "Created",
+				Label:        msgr.CustomersFilterCreated,
 				ItemType:     v.ItemTypeDate,
 				SQLCondition: `cast(strftime('%%s', created_at) as INTEGER) %s ?`,
 			},
 			{
 				Key:          "approved",
-				Label:        "Approved",
+				Label:        msgr.CustomersFilterApproved,
 				ItemType:     v.ItemTypeDate,
 				SQLCondition: `cast(strftime('%%s', approved_at) as INTEGER) %s ?`,
 			},
 			{
 				Key:          "name",
-				Label:        "Name",
+				Label:        msgr.CustomersFilterName,
 				ItemType:     v.ItemTypeString,
 				SQLCondition: `name %s ?`,
 			},
 			{
 				Key:          "company",
-				Label:        "Company",
+				Label:        msgr.CustomersFilterCompany,
 				ItemType:     v.ItemTypeSelect,
 				SQLCondition: `company_id %s ?`,
 				Options:      companyOptions,

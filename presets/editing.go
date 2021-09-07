@@ -2,6 +2,7 @@ package presets
 
 import (
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/i18n"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"
@@ -99,7 +100,9 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	ctx.Hub.RegisterEventFunc("update", b.defaultUpdate)
 
 	var buttonLabel = msgr.Create
-	var title = msgr.CreatingObjectTitle(inflection.Singular(b.mb.label))
+	var title = msgr.CreatingObjectTitle(
+		i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Singular(b.mb.label)),
+	)
 	if len(id) > 0 {
 		if obj == nil {
 			var err error
@@ -109,7 +112,9 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 			}
 		}
 		buttonLabel = msgr.Update
-		title = msgr.EditingObjectTitle(inflection.Singular(b.mb.label), getPageTitle(obj, id))
+		title = msgr.EditingObjectTitle(
+			i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Singular(b.mb.label)),
+			getPageTitle(obj, id))
 	}
 
 	if obj == nil {
@@ -137,7 +142,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 			notice,
 			VCard(
 				VCardText(
-					b.ToComponent(obj, vErr, ctx),
+					b.ToComponent(b.mb, obj, vErr, ctx),
 				),
 				VCardActions(
 					VSpacer(),

@@ -18,6 +18,27 @@ type Messages struct {
 	EditingObjectTitleTemplate     string
 	ListingObjectTitleTemplate     string
 	DetailingObjectTitleTemplate   string
+	FiltersClear                   string
+	FiltersDone                    string
+	Filters                        string
+	Filter                         string
+	FiltersDateInTheLast           string
+	FiltersDateEquals              string
+	FiltersDateBetween             string
+	FiltersDateIsAfter             string
+	FiltersDateIsAfterOrOn         string
+	FiltersDateIsBefore            string
+	FiltersDateIsBeforeOrOn        string
+	FiltersDateDays                string
+	FiltersDateMonths              string
+	FiltersDateAnd                 string
+	FiltersNumberEquals            string
+	FiltersNumberBetween           string
+	FiltersNumberGreaterThan       string
+	FiltersNumberLessThan          string
+	FiltersNumberAnd               string
+	FiltersStringEquals            string
+	FiltersStringContains          string
 }
 
 func (msgr *Messages) DeleteConfirmationText(id string) string {
@@ -57,6 +78,27 @@ var Messages_en_US = &Messages{
 	OK:                             "OK",
 	Cancel:                         "Cancel",
 	Create:                         "Create",
+	Filters:                        "Filters",
+	Filter:                         "Filter",
+	FiltersClear:                   "Clear",
+	FiltersDone:                    "Done",
+	FiltersDateInTheLast:           "is in the last",
+	FiltersDateEquals:              "is equal to",
+	FiltersDateBetween:             "is between",
+	FiltersDateIsAfter:             "is after",
+	FiltersDateIsAfterOrOn:         "is on or after",
+	FiltersDateIsBefore:            "is before",
+	FiltersDateIsBeforeOrOn:        "is before or on",
+	FiltersDateDays:                "days",
+	FiltersDateMonths:              "months",
+	FiltersDateAnd:                 "and",
+	FiltersNumberEquals:            "is equal to",
+	FiltersNumberBetween:           "between",
+	FiltersNumberGreaterThan:       "is greater than",
+	FiltersNumberLessThan:          "is less than",
+	FiltersNumberAnd:               "and",
+	FiltersStringEquals:            "is equal to",
+	FiltersStringContains:          "contains",
 }
 
 var Messages_zh_CN = &Messages{
@@ -73,4 +115,25 @@ var Messages_zh_CN = &Messages{
 	OK:                             "确定",
 	Cancel:                         "取消",
 	Create:                         "创建",
+	Filters:                        "筛选",
+	Filter:                         "筛选",
+	FiltersClear:                   "清除",
+	FiltersDone:                    "确定",
+	FiltersDateInTheLast:           "过去",
+	FiltersDateEquals:              "等于",
+	FiltersDateBetween:             "之间",
+	FiltersDateIsAfter:             "之后",
+	FiltersDateIsAfterOrOn:         "当天或之后",
+	FiltersDateIsBefore:            "之前",
+	FiltersDateIsBeforeOrOn:        "当天或之前",
+	FiltersDateDays:                "天",
+	FiltersDateMonths:              "月",
+	FiltersDateAnd:                 "和",
+	FiltersNumberEquals:            "等于",
+	FiltersNumberBetween:           "之间",
+	FiltersNumberGreaterThan:       "大于",
+	FiltersNumberLessThan:          "小于",
+	FiltersNumberAnd:               "和",
+	FiltersStringEquals:            "等于",
+	FiltersStringContains:          "包含",
 }

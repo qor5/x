@@ -639,6 +639,7 @@ export const Filter = Vue.extend({
 					},
 					clear: 'Clear',
 					filters: 'Filters',
+					filter: 'Filter',
 					done: 'Done',
 				};
 			},
@@ -768,7 +769,7 @@ export const Filter = Vue.extend({
 				activator: ({ on }: any) => {
 					return (<vbtn on={on} depressed>
 						<vicon>filter_list</vicon>
-						<span class='px-2'>Filter</span>
+						<span class='px-2'>{t.filter}</span>
 						{this.filterCount()}
 					</vbtn>);
 				},

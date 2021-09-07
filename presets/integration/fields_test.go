@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/presets"
 	. "github.com/goplaid/x/presets"
 	h "github.com/theplant/htmlgo"
 	"github.com/theplant/testingutils"
@@ -63,6 +64,7 @@ func TestFields(t *testing.T) {
 			FoundedAt: time.Unix(1567048169, 0),
 		},
 	}
+	mb := presets.New().Model(&User{})
 
 	ftRead := NewFieldDefaults(LIST)
 
@@ -78,6 +80,7 @@ func TestFields(t *testing.T) {
 					Labels("Int1", "整数1", "Company.Name", "公司名").
 					Only("Int1", "Float1", "String1", "Bool1", "Time1", "Company.Name", "Company.FoundedAt").
 					ToComponent(
+						mb,
 						user,
 						vd,
 						ctx)
@@ -104,7 +107,7 @@ func TestFields(t *testing.T) {
 			toComponentFun: func() h.HTMLComponent {
 				return ft.InspectFields(&User{}).
 					Except("Bool*").
-					ToComponent(user, vd, ctx)
+					ToComponent(mb, user, vd, ctx)
 			},
 			expect: `
 <v-text-field type='number' v-field-name='"Int1"' label='Int1' :value='"2"'></v-text-field>
@@ -121,7 +124,7 @@ func TestFields(t *testing.T) {
 			name: "Read Except with file glob pattern",
 			toComponentFun: func() h.HTMLComponent {
 				return ftRead.InspectFields(&User{}).
-					Except("Float*").ToComponent(user, vd, ctx)
+					Except("Float*").ToComponent(mb, user, vd, ctx)
 			},
 			expect: `
 <td>1</td>
@@ -138,7 +141,7 @@ func TestFields(t *testing.T) {
 			name: "Read for a time field",
 			toComponentFun: func() h.HTMLComponent {
 				return ftRead.InspectFields(&User{}).
-					Only("Time1", "Int1").ToComponent(user, vd, ctx)
+					Only("Time1", "Int1").ToComponent(mb, user, vd, ctx)
 			},
 			expect: `
 <td>2019-08-29 11:09:29 +0800 CST</td>
@@ -155,7 +158,7 @@ func TestFields(t *testing.T) {
 				fb.Field("Media1").
 					WithContextValue("a", "context value1").
 					WithContextValue("b", "context value2")
-				return fb.ToComponent(user, vd, ctx)
+				return fb.ToComponent(mb, user, vd, ctx)
 			},
 			expect: `context value1, context value2`,
 		},

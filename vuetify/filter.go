@@ -40,8 +40,80 @@ func (b *FilterBuilder) ReplaceWindowLocation(v bool) (r *FilterBuilder) {
 	return b
 }
 
+func (b *FilterBuilder) Translations(v FilterTranslations) (r *FilterBuilder) {
+	b.tag.Attr(":translations", h.JSONString(v))
+	return b
+}
+
 func (b *FilterBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
+}
+
+/*
+	translations: {
+		type: Object,
+		default: () => {
+			return {
+				date: {
+					inTheLast: 'is in the last',
+					equals: 'is equal to',
+					between: 'is between',
+					isAfter: 'is after',
+					isAfterOrOn: 'is on or after',
+					isBefore: 'is before',
+					isBeforeOrOn: 'is before or on',
+					days: 'days',
+					months: 'months',
+					and: 'and',
+				},
+				number: {
+					equals: 'is equal to',
+					between: 'between',
+					greaterThan: 'is greater than',
+					lessThan: 'is less than',
+					and: 'and',
+				},
+				string: {
+					equals: 'is equal to',
+					contains: 'contains',
+				},
+				clear: 'Clear',
+				filters: 'Filters',
+				filter: 'Filter',
+				done: 'Done',
+			};
+		},
+*/
+type FilterTranslations struct {
+	Clear   string `json:"clear,omitempty"`
+	Done    string `json:"done,omitempty"`
+	Filters string `json:"filters,omitempty"`
+	Filter  string `json:"filter,omitempty"`
+	Date    struct {
+		InTheLast    string `json:"inTheLast,omitempty"`
+		Equals       string `json:"equals,omitempty"`
+		Between      string `json:"between,omitempty"`
+		IsAfter      string `json:"isAfter,omitempty"`
+		IsAfterOrOn  string `json:"isAfterOrOn,omitempty"`
+		IsBefore     string `json:"isBefore,omitempty"`
+		IsBeforeOrOn string `json:"isBeforeOrOn,omitempty"`
+		Days         string `json:"days,omitempty"`
+		Months       string `json:"months,omitempty"`
+		And          string `json:"and,omitempty"`
+	} `json:"date,omitempty"`
+
+	Number struct {
+		Equals      string `json:"equals,omitempty"`
+		Between     string `json:"between,omitempty"`
+		GreaterThan string `json:"greaterThan,omitempty"`
+		LessThan    string `json:"lessThan,omitempty"`
+		And         string `json:"and,omitempty"`
+	} `json:"number,omitempty"`
+
+	String struct {
+		Equals   string `json:"equals,omitempty"`
+		Contains string `json:"contains,omitempty"`
+	} `json:"string,omitempty"`
 }
 
 type FilterItemType string

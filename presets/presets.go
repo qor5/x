@@ -52,7 +52,10 @@ type extraAsset struct {
 	refTag      string
 }
 
-var CoreModuleKey i18n.ModuleKey = "presets-core"
+const (
+	CoreI18nModuleKey   i18n.ModuleKey = "CoreI18nModuleKey"
+	ModelsI18nModuleKey i18n.ModuleKey = "ModelsI18nModuleKey"
+)
 
 func New() *Builder {
 	l, _ := zap.NewDevelopment()
@@ -60,8 +63,8 @@ func New() *Builder {
 		logger:  l,
 		builder: web.New(),
 		i18nBuilder: i18n.New().
-			RegisterForModule(language.English, CoreModuleKey, Messages_en_US).
-			RegisterForModule(language.SimplifiedChinese, CoreModuleKey, Messages_zh_CN),
+			RegisterForModule(language.English, CoreI18nModuleKey, Messages_en_US).
+			RegisterForModule(language.SimplifiedChinese, CoreI18nModuleKey, Messages_zh_CN),
 		writeFieldDefaults:  NewFieldDefaults(WRITE),
 		listFieldDefaults:   NewFieldDefaults(LIST),
 		detailFieldDefaults: NewFieldDefaults(DETAIL),
@@ -208,7 +211,7 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 		var subMenus = []h.HTMLComponent{
 			VListItem(
 				VListItemContent(
-					VListItemTitle(h.Text(mg.label)),
+					VListItemTitle(h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, mg.name))),
 				),
 			).Slot("activator").Class("pa-0"),
 		}
@@ -224,7 +227,7 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 					),
 					VListItemContent(
 						VListItemTitle(
-							h.Text(m.label),
+							h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, m.label)),
 						),
 					),
 				).Class(activeClass(ctx, href)).
@@ -255,7 +258,7 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 				),
 				VListItemContent(
 					VListItemTitle(
-						h.Text(m.label),
+						h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, m.label)),
 					),
 				),
 			).Class(activeClass(ctx, href)).Color(b.primaryColor).
@@ -279,7 +282,7 @@ func (b *Builder) runBrandFunc(ctx *web.EventContext) (r h.HTMLComponent) {
 		return b.brandFunc(ctx)
 	}
 
-	return VToolbarTitle(b.brandTitle)
+	return VToolbarTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
 }
 
 type contextKey int
@@ -290,7 +293,7 @@ const (
 )
 
 func MustGetMessages(r *http.Request) *Messages {
-	return i18n.MustGetModuleMessages(r, CoreModuleKey, Messages_en_US).(*Messages)
+	return i18n.MustGetModuleMessages(r, CoreI18nModuleKey, Messages_en_US).(*Messages)
 }
 
 func GetModelInfo(req *http.Request) (r *ModelInfo) {
@@ -382,7 +385,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 			panic(err)
 		}
 
-		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, b.brandTitle)
+		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
 		pr.Body = VApp(
 
 			VNavigationDrawer(

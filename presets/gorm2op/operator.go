@@ -25,8 +25,7 @@ type DataOperatorBuilder struct {
 
 func (op *DataOperatorBuilder) Search(obj interface{}, params *presets.SearchParams, ctx *web.EventContext) (r interface{}, totalCount int, err error) {
 	ilike := "ILIKE"
-
-	if op.db.Dialector.Name() == "sqlite3" {
+	if op.db.Dialector.Name() == "sqlite" {
 		ilike = "LIKE"
 	}
 

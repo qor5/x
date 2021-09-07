@@ -36,6 +36,10 @@ func (d *DynaBuilder) Language(lang string) (r *DynaBuilder) {
 }
 
 func T(req *http.Request, module ModuleKey, key string, args ...string) (r string) {
+	return PT(req, module, "", key, args...)
+}
+
+func PT(req *http.Request, module ModuleKey, prefix string, key string, args ...string) (r string) {
 	defaultVal := strings.NewReplacer(args...).Replace(key)
 	msgr := MustGetModuleMessages(req, module, nil)
 	if msgr == nil {
@@ -48,7 +52,7 @@ func T(req *http.Request, module ModuleKey, key string, args ...string) (r strin
 		builder = b.(*DynaBuilder)
 	}
 
-	fieldKey := strcase.ToCamel(key)
+	fieldKey := strcase.ToCamel(prefix + " " + key)
 	val, err := reflectutils.Get(msgr, fieldKey)
 	if err != nil {
 		if builder != nil {

@@ -2,14 +2,8 @@ package presets
 
 type MenuGroupBuilder struct {
 	name   string
-	label  string
 	icon   string
 	models []*ModelBuilder
-}
-
-func (b *MenuGroupBuilder) Label(v string) (r *MenuGroupBuilder) {
-	b.label = v
-	return b
 }
 
 func (b *MenuGroupBuilder) Icon(v string) (r *MenuGroupBuilder) {
@@ -37,7 +31,7 @@ func (g *MenuGroups) MenuGroup(name string) (r *MenuGroupBuilder) {
 			return mg
 		}
 	}
-	r = &MenuGroupBuilder{name: name, label: name}
+	r = &MenuGroupBuilder{name: name}
 	g.menuGroups = append(g.menuGroups, r)
 	return
 }

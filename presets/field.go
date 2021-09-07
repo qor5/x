@@ -6,6 +6,8 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/goplaid/x/i18n"
+
 	"github.com/goplaid/web"
 	v "github.com/goplaid/x/vuetify"
 	"github.com/sunfmin/reflectutils"
@@ -185,7 +187,7 @@ func (b *FieldBuilders) String() (r string) {
 	return fmt.Sprint(names)
 }
 
-func (b *FieldBuilders) ToComponent(obj interface{}, verr *web.ValidationErrors, ctx *web.EventContext) h.HTMLComponent {
+func (b *FieldBuilders) ToComponent(mb *ModelBuilder, obj interface{}, verr *web.ValidationErrors, ctx *web.EventContext) h.HTMLComponent {
 
 	var comps []h.HTMLComponent
 
@@ -212,7 +214,7 @@ func (b *FieldBuilders) ToComponent(obj interface{}, verr *web.ValidationErrors,
 
 		comps = append(comps, f.compFunc(obj, &FieldContext{
 			Name:    f.name,
-			Label:   b.getLabel(f.NameLabel),
+			Label:   i18n.PT(ctx.R, ModelsI18nModuleKey, mb.label, b.getLabel(f.NameLabel)),
 			Errors:  verr.GetFieldErrors(f.name),
 			Context: f.context,
 		}, ctx))
