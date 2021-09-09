@@ -84,12 +84,6 @@ const bulkPanelPortalName = "bulkPanel"
 const deleteConfirmPortalName = "deleteConfirm"
 
 func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc(actions.DrawerNew, b.mb.editing.formDrawerNew)
-	ctx.Hub.RegisterEventFunc(actions.DrawerEdit, b.mb.editing.formDrawerEdit)
-	ctx.Hub.RegisterEventFunc(actions.DeleteConfirmation, b.deleteConfirmation)
-	ctx.Hub.RegisterEventFunc("update", b.mb.editing.defaultUpdate)
-	ctx.Hub.RegisterEventFunc("doDelete", b.mb.editing.doDelete)
-	ctx.Hub.RegisterEventFunc("doBulkAction", b.doBulkAction)
 
 	msgr := MustGetMessages(ctx.R)
 	title := msgr.ListingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Plural(b.mb.label)))
@@ -253,7 +247,7 @@ func (b *ListingBuilder) bulkPanel(bulk *ActionBuilder, selectedIds []string, ct
 				Color(b.mb.p.primaryColor).
 				Depressed(true).
 				Dark(true).
-				OnClick("doBulkAction", bulk.name, strings.Join(selectedIds, ",")),
+				OnClick(actions.DoBulkAction, bulk.name, strings.Join(selectedIds, ",")),
 		),
 	).Class("mb-5")
 }
@@ -388,7 +382,7 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 			Color(b.mb.p.primaryColor).
 			Depressed(true).
 			Dark(true).
-			OnClick("DrawerNew", ""),
+			OnClick(actions.DrawerNew, ""),
 	).Flat(true)
 	if fd != nil {
 		toolbar.PrependChildren(Filter(fd).Translations(ft))

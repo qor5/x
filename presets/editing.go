@@ -3,6 +3,7 @@ package presets
 import (
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
+	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"
@@ -97,7 +98,6 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	msgr := MustGetMessages(ctx.R)
 
 	id := ctx.Event.Params[0]
-	ctx.Hub.RegisterEventFunc("update", b.defaultUpdate)
 
 	var buttonLabel = msgr.Create
 	var title = msgr.CreatingObjectTitle(
@@ -150,7 +150,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 						Dark(true).
 						Color(b.mb.p.primaryColor).
 						Attr("@click", web.Plaid().
-							EventFunc("update", ctx.Event.Params...).
+							EventFunc(actions.Update, ctx.Event.Params...).
 							URL(b.mb.Info().ListingHref()).
 							Go()),
 				),

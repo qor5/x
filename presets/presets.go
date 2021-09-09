@@ -398,7 +398,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 				Attr("v-model", "vars.navDrawer").
 				Attr(web.InitContextVars, `{navDrawer: null}`),
 
-			web.Portal().EventFunc("").Name(rightDrawerName),
+			web.Portal().Name(rightDrawerName),
 
 			VAppBar(
 				VAppBarNavIcon().On("click.stop", "vars.navDrawer = !vars.navDrawer"),
@@ -506,14 +506,14 @@ func (b *Builder) initMux() {
 		routePath := info.ListingHref()
 		mux.Handle(
 			pat.New(routePath),
-			b.wrap(info, b.defaultLayout(m.listing.GetPageFunc())),
+			b.wrap(m, b.defaultLayout(m.listing.GetPageFunc())),
 		)
 		log.Println("mounted url", routePath)
 		if m.hasDetailing {
 			routePath = fmt.Sprintf("%s/%s/:id", b.prefix, pluralUri)
 			mux.Handle(
 				pat.New(routePath),
-				b.wrap(info, b.defaultLayout(m.detailing.GetPageFunc())),
+				b.wrap(m, b.defaultLayout(m.detailing.GetPageFunc())),
 			)
 			log.Println("mounted url", routePath)
 		}
@@ -522,11 +522,17 @@ func (b *Builder) initMux() {
 	b.mux = mux
 }
 
-func (b *Builder) wrap(mi *ModelInfo, pf web.PageFunc) http.Handler {
+func (b *Builder) wrap(m *ModelBuilder, pf web.PageFunc) http.Handler {
+	p := b.builder.Page(pf)
+	var mi *ModelInfo
+	if m != nil {
+		m.ensureEventFuncs(p)
+		mi = m.Info()
+	}
 	return putModelInfo(
 		mi,
 		b.I18n().EnsureLanguage(
-			b.builder.Page(pf),
+			p,
 		),
 	)
 }

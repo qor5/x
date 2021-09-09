@@ -10,10 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"gorm.io/driver/sqlite"
-
 	examples2 "github.com/goplaid/x/presets/examples"
 	"github.com/theplant/gofixtures"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -44,7 +43,7 @@ var cases = []reqCase{
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
-{"eventFuncId":{"id":"update","params":["11"],"pushState":null},"event":{}}
+{"eventFuncId":{"id":"presets_Update","params":["11"],"pushState":null},"event":{}}
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="Bool1"
 
@@ -86,7 +85,7 @@ Felix11
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
-{"eventFuncId":{"id":"update","params":[""],"pushState":null},"event":{}}
+{"eventFuncId":{"id":"presets_Update","params":[""],"pushState":null},"event":{}}
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="Bool1"
 
@@ -129,7 +128,7 @@ Felix
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
-{"eventFuncId":{"id":"DrawerNew","params":[""],"pushState":null},"event":{}}
+{"eventFuncId":{"id":"presets_DrawerNew","params":[""],"pushState":null},"event":{}}
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 `))
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
@@ -152,7 +151,7 @@ Content-Disposition: form-data; name="__event_data__"
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
-{"eventFuncId":{"id":"update","params":["", "11"],"pushState":null},"event":{}}
+{"eventFuncId":{"id":"presets_Update","params":["", "11"],"pushState":null},"event":{}}
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="Number"
 
@@ -185,7 +184,7 @@ Content-Disposition: form-data; name="Number"
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
-{"eventFuncId":{"id":"DrawerEdit","params":["12"],"pushState":null},"event":{}}
+{"eventFuncId":{"id":"presets_DrawerEdit","params":["12"],"pushState":null},"event":{}}
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 `))
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
@@ -208,7 +207,7 @@ Content-Disposition: form-data; name="__event_data__"
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
-{"eventFuncId":{"id":"update","params":["12"],"pushState":null},"event":{}}
+{"eventFuncId":{"id":"presets_Update","params":["12"],"pushState":null},"event":{}}
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="OwnerName"
 
@@ -241,7 +240,7 @@ owner1
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
-{"eventFuncId":{"id":"DrawerAction","params":["AgreeTerms", "11"],"pushState":null},"event":{}}
+{"eventFuncId":{"id":"presets_DrawerAction","params":["AgreeTerms", "11"],"pushState":null},"event":{}}
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 `))
 			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
@@ -264,7 +263,7 @@ Content-Disposition: form-data; name="__event_data__"
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
-{"eventFuncId":{"id":"doAction","params":["AgreeTerms", "11"],"pushState":null},"event":{}}
+{"eventFuncId":{"id":"presets_DoAction","params":["AgreeTerms", "11"],"pushState":null},"event":{}}
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="Agree"
 

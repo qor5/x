@@ -5,7 +5,6 @@ import (
 	"net/url"
 
 	"github.com/goplaid/web"
-
 	v "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 )

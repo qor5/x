@@ -5,9 +5,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/jinzhu/inflection"
-
+	"github.com/goplaid/web"
+	"github.com/goplaid/x/presets/actions"
 	"github.com/iancoleman/strcase"
+	"github.com/jinzhu/inflection"
 )
 
 type ModelBuilder struct {
@@ -44,7 +45,19 @@ func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
 	r.newListing()
 	r.newDetailing()
 	r.newEditing()
+
 	return
+}
+
+func (b *ModelBuilder) ensureEventFuncs(hub web.EventFuncHub) {
+	hub.RegisterEventFunc(actions.DrawerNew, b.editing.formDrawerNew)
+	hub.RegisterEventFunc(actions.DrawerEdit, b.editing.formDrawerEdit)
+	hub.RegisterEventFunc(actions.DeleteConfirmation, b.listing.deleteConfirmation)
+	hub.RegisterEventFunc(actions.Update, b.editing.defaultUpdate)
+	hub.RegisterEventFunc(actions.DoDelete, b.editing.doDelete)
+	hub.RegisterEventFunc(actions.DoBulkAction, b.listing.doBulkAction)
+	hub.RegisterEventFunc(actions.DrawerAction, b.detailing.formDrawerAction)
+	hub.RegisterEventFunc(actions.DoAction, b.detailing.doAction)
 }
 
 func (b *ModelBuilder) newModel() (r interface{}) {

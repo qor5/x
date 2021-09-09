@@ -28,7 +28,7 @@ func TestDocExamples(t *testing.T) {
 				body := bytes.NewBuffer(nil)
 
 				mw := multipart.NewWriter(body)
-				_ = mw.WriteField("__event_data__", `{"eventFuncId":{"id":"update","pushState":null, "params":[""]},"event":{"value":""}}
+				_ = mw.WriteField("__event_data__", `{"eventFuncId":{"id":"presets_Update","pushState":null, "params":[""]},"event":{"value":""}}
 		`)
 				fw, _ := mw.CreateFormFile("MainImage_NewFile", "myfile.png")
 				_, _ = fw.Write([]byte("Hello"))
@@ -58,7 +58,7 @@ func TestDocExamples(t *testing.T) {
 				body := bytes.NewBuffer(nil)
 
 				mw := multipart.NewWriter(body)
-				_ = mw.WriteField("__event_data__", `{"eventFuncId":{"id":"update","pushState":null, "params":[""]},"event":{"value":""}}
+				_ = mw.WriteField("__event_data__", `{"eventFuncId":{"id":"presets_Update","pushState":null, "params":[""]},"event":{"value":""}}
 	`)
 				_ = mw.Close()
 

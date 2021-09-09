@@ -58,8 +58,6 @@ func (b *DetailingBuilder) GetPageFunc() web.PageFunc {
 }
 
 func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc(actions.DrawerAction, b.formDrawerAction)
-	ctx.Hub.RegisterEventFunc("doAction", b.doAction)
 
 	id := pat.Param(ctx.R, "id")
 	r.Body = VContainer(h.Text(id))
@@ -163,7 +161,7 @@ func (b *DetailingBuilder) actionForm(action *ActionBuilder, ctx *web.EventConte
 					Dark(true).
 					Color(b.mb.p.primaryColor).
 					Attr("@click", web.Plaid().
-						EventFunc("doAction", ctx.Event.Params...).
+						EventFunc(actions.DoAction, ctx.Event.Params...).
 						URL(b.mb.Info().DetailingHref(id)).
 						Go()),
 			),
