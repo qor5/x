@@ -24,7 +24,7 @@ require (
 	github.com/shurcooL/sanitized_anchor_name v1.0.0
 	github.com/sourcegraph/annotate v0.0.0-20160123013949-f4cad6c6324d // indirect
 	github.com/sourcegraph/syntaxhighlight v0.0.0-20170531221838-bd320f5d308e // indirect
-	github.com/sunfmin/reflectutils v1.0.1
+	github.com/sunfmin/reflectutils v1.0.2
 	github.com/theplant/gofixtures v1.1.0
 	github.com/theplant/htmlgo v1.0.1
 	github.com/theplant/testingutils v0.0.0-20190603093022-26d8b4d95c61

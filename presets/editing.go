@@ -176,7 +176,9 @@ func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, e
 func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
 	id := ctx.Event.Params[0]
 	var newObj = b.mb.newModel()
-	ctx.MustUnmarshalForm(newObj)
+
+	// don't panic for fields that set in SetterFunc
+	_ = ctx.UnmarshalForm(newObj)
 
 	var obj = b.mb.newModel()
 
