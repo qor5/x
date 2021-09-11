@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/go-chi/chi v1.5.4
-	github.com/goplaid/web v1.1.7
+	github.com/goplaid/web v1.1.8
 	github.com/iancoleman/strcase v0.1.3
 	github.com/jinzhu/gorm v1.9.16
 	github.com/jinzhu/inflection v1.0.0
@@ -24,7 +24,7 @@ require (
 	github.com/shurcooL/sanitized_anchor_name v1.0.0
 	github.com/sourcegraph/annotate v0.0.0-20160123013949-f4cad6c6324d // indirect
 	github.com/sourcegraph/syntaxhighlight v0.0.0-20170531221838-bd320f5d308e // indirect
-	github.com/sunfmin/reflectutils v1.0.0
+	github.com/sunfmin/reflectutils v1.0.1
 	github.com/theplant/gofixtures v1.1.0
 	github.com/theplant/htmlgo v1.0.1
 	github.com/theplant/testingutils v0.0.0-20190603093022-26d8b4d95c61
