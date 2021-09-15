@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/iancoleman/strcase"
 	"github.com/ory/ladon"
 )
 
@@ -67,7 +66,7 @@ func (b *Verifier) On(v string) (r *Verifier) {
 		return b
 	}
 
-	b.vr.resourcesParts = append(b.vr.resourcesParts, strcase.ToSnake(v))
+	b.vr.resourcesParts = append(b.vr.resourcesParts, v)
 	return b
 }
 
