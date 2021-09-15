@@ -8,8 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"golang.org/x/text/language"
-
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
 	. "github.com/goplaid/x/vuetify"
@@ -18,6 +16,7 @@ import (
 	"go.uber.org/zap"
 	goji "goji.io"
 	"goji.io/pat"
+	"golang.org/x/text/language"
 )
 
 type Builder struct {

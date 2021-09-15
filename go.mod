@@ -12,6 +12,7 @@ require (
 	github.com/lib/pq v1.8.0 // indirect
 	github.com/manifoldco/promptui v0.8.0
 	github.com/microcosm-cc/bluemonday v1.0.10 // indirect
+	github.com/ory/ladon v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rs/xid v1.3.0
 	github.com/sergi/go-diff v1.2.0 // indirect
