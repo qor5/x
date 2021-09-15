@@ -53,7 +53,7 @@ func TestPermission(t *testing.T) {
 					_, _ = fmt.Fprintln(w, "upload")
 				}
 
-				if verifier.Do(Create).OnObject(post).Req(r).IsAllowed() == nil {
+				if verifier.Do(Create).OnObject(&Post{}).Req(r).IsAllowed() == nil {
 					_, _ = fmt.Fprintln(w, "create")
 				}
 

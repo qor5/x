@@ -33,7 +33,7 @@ func ToPermRN(v interface{}) []string {
 	typeName = strings.NewReplacer("*", "", ".", "-").Replace(typeName)
 	typeName = strcase.ToSnake(inflection.Plural(typeName))
 	id, err := reflectutils.Get(v, "ID")
-	if err == nil {
+	if err == nil && len(fmt.Sprint(id)) > 0 {
 		return []string{typeName, fmt.Sprint(id)}
 	}
 	return []string{typeName}
