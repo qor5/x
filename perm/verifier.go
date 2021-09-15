@@ -61,12 +61,12 @@ func (b *Verifier) Do(v string) (r *Verifier) {
 	return
 }
 
-func (b *Verifier) On(v string) (r *Verifier) {
+func (b *Verifier) On(vs ...string) (r *Verifier) {
 	if b.builder == nil {
 		return b
 	}
 
-	b.vr.resourcesParts = append(b.vr.resourcesParts, v)
+	b.vr.resourcesParts = append(b.vr.resourcesParts, vs...)
 	return b
 }
 
@@ -80,7 +80,7 @@ func (b *Verifier) OnObject(v interface{}) (r *Verifier) {
 	return b
 }
 
-func (b *Verifier) Req(v *http.Request) (r *Verifier) {
+func (b *Verifier) WithReq(v *http.Request) (r *Verifier) {
 	if b.builder == nil {
 		return b
 	}

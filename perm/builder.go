@@ -16,8 +16,10 @@ import (
 const Allowed = ladon.AllowAccess
 const Denied = ladon.DenyAccess
 
+type Context = ladon.Context
+type Conditions = ladon.Conditions
 type SubjectFunc func(r *http.Request) []string
-type ContextFunc func(r *http.Request, objs []interface{}) ladon.Context
+type ContextFunc func(r *http.Request, objs []interface{}) Context
 
 type permRNer interface {
 	PermRN() []string
@@ -92,17 +94,17 @@ func (b *PolicyBuilder) Are(effect string) (r *PolicyBuilder) {
 	return b
 }
 
-func (b *PolicyBuilder) ToDo(vs ...string) (r *PolicyBuilder) {
-	b.policy.Actions = vs
+func (b *PolicyBuilder) ToDo(actions ...string) (r *PolicyBuilder) {
+	b.policy.Actions = actions
 	return b
 }
 
-func (b *PolicyBuilder) On(vs ...string) (r *PolicyBuilder) {
-	b.policy.Resources = vs
+func (b *PolicyBuilder) On(resources ...string) (r *PolicyBuilder) {
+	b.policy.Resources = resources
 	return b
 }
 
-func (b *PolicyBuilder) Given(conditions ladon.Conditions) (r *PolicyBuilder) {
+func (b *PolicyBuilder) Given(conditions Conditions) (r *PolicyBuilder) {
 	b.policy.Conditions = conditions
 	return b
 }
