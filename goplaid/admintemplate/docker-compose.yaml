@@ -1,8 +1,9 @@
-postgres:
-  image: postgres
-  environment:
-    - "POSTGRES_USER=GoplaidPackageName"
-    - "POSTGRES_PASSWORD=123"
-    - "POSTGRES_DB=GoplaidPackageName_dev"
-  ports:
-    - "6432:5432"
+services:
+  postgres:
+    image: postgres
+    environment:
+      - "POSTGRES_USER=GoplaidPackageName"
+      - "POSTGRES_PASSWORD=123"
+      - "POSTGRES_DB=GoplaidPackageName_dev"
+    ports:
+      - "6432:5432"
