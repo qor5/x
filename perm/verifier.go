@@ -76,7 +76,7 @@ func (b *Verifier) OnObject(v interface{}) (r *Verifier) {
 	}
 
 	b.vr.objs = append(b.vr.objs, v)
-	b.vr.resourcesParts = append(b.vr.resourcesParts, ToPermRN(v)...)
+	b.vr.resourcesParts = append(b.vr.resourcesParts, ToPermissionRN(v)...)
 	return b
 }
 

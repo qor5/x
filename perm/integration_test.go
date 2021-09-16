@@ -22,7 +22,7 @@ type MediaLibrary struct {
 	Category string
 }
 
-func (m *MediaLibrary) PermRN() []string {
+func (m *MediaLibrary) PermissionRN() []string {
 	return []string{"media_libraries", fmt.Sprint(m.ID), m.Category}
 }
 
