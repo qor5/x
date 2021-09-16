@@ -112,8 +112,8 @@ func (b *Verifier) IsAllowed() error {
 
 	b.vr.req.Resource = strings.Join(b.vr.resourcesParts, ":")
 
-	if len(b.vr.subjects) == 0 && b.builder.subjectFunc != nil {
-		b.vr.subjects = b.builder.subjectFunc(b.vr.r)
+	if len(b.vr.subjects) == 0 && b.builder.subjectsFunc != nil {
+		b.vr.subjects = b.builder.subjectsFunc(b.vr.r)
 	}
 
 	if len(b.vr.subjects) == 0 {

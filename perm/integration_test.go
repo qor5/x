@@ -44,7 +44,7 @@ func TestPermission(t *testing.T) {
 			var p *perm.Builder
 			if !c.nilBuilder {
 				p = perm.New().Policies(c.policies...).
-					SubjectFunc(sf(c.subjects...)).
+					SubjectsFunc(sf(c.subjects...)).
 					ContextFunc(c.contextFunc)
 			}
 
@@ -86,7 +86,7 @@ func TestPermission(t *testing.T) {
 
 }
 
-func sf(roles ...string) perm.SubjectFunc {
+func sf(roles ...string) perm.SubjectsFunc {
 	return func(r *http.Request) []string {
 		return roles
 	}

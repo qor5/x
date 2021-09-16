@@ -13,12 +13,17 @@ import (
 	"github.com/sunfmin/reflectutils"
 )
 
-const Allowed = ladon.AllowAccess
-const Denied = ladon.DenyAccess
+const (
+	Allowed   = ladon.AllowAccess
+	Denied    = ladon.DenyAccess
+	Anything  = "*"
+	Anybody   = "*"
+	Anonymous = "anonymous"
+)
 
 type Context = ladon.Context
 type Conditions = ladon.Conditions
-type SubjectFunc func(r *http.Request) []string
+type SubjectsFunc func(r *http.Request) []string
 type ContextFunc func(r *http.Request, objs []interface{}) Context
 
 type permRNer interface {
@@ -42,10 +47,10 @@ func ToPermRN(v interface{}) []string {
 }
 
 type Builder struct {
-	policies    []*PolicyBuilder
-	ladon       *ladon.Ladon
-	subjectFunc SubjectFunc
-	contextFunc ContextFunc
+	policies     []*PolicyBuilder
+	ladon        *ladon.Ladon
+	subjectsFunc SubjectsFunc
+	contextFunc  ContextFunc
 }
 
 func New() *Builder {
@@ -69,8 +74,8 @@ func (b *Builder) Policies(ps ...*PolicyBuilder) (r *Builder) {
 	return b
 }
 
-func (b *Builder) SubjectFunc(v SubjectFunc) (r *Builder) {
-	b.subjectFunc = v
+func (b *Builder) SubjectsFunc(v SubjectsFunc) (r *Builder) {
+	b.subjectsFunc = v
 	return b
 }
 
@@ -108,9 +113,3 @@ func (b *PolicyBuilder) Given(conditions Conditions) (r *PolicyBuilder) {
 	b.policy.Conditions = conditions
 	return b
 }
-
-const (
-	Anything  string = "*"
-	Anybody   string = "*"
-	Anonymous string = "anonymous"
-)
