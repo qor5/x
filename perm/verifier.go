@@ -117,7 +117,7 @@ func (b *Verifier) IsAllowed() error {
 	}
 
 	if len(b.vr.subjects) == 0 {
-		b.vr.subjects = []string{"anonymous"}
+		b.vr.subjects = []string{Anonymous}
 	}
 
 	if b.builder.contextFunc != nil {

@@ -110,6 +110,7 @@ func (b *PolicyBuilder) Given(conditions Conditions) (r *PolicyBuilder) {
 }
 
 const (
-	Anything string = "*"
-	Anybody  string = "*"
+	Anything  string = "*"
+	Anybody   string = "*"
+	Anonymous string = "anonymous"
 )
