@@ -48,7 +48,7 @@ func TestPermission(t *testing.T) {
 					ContextFunc(c.contextFunc)
 			}
 
-			verifier := perm.Module("presets", p).Verbose(true)
+			verifier := perm.NewVerifier("presets", p).Verbose(true)
 
 			hello := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				post := getPost()
@@ -117,7 +117,7 @@ var cases = []struct {
 	{
 		name: "anonymous should not have permission for upload on posts",
 		policies: []*perm.PolicyBuilder{
-			perm.They("developer").Are(perm.Allowed).ToDo(Upload).On("*:posts:*"),
+			perm.NewPolicy().They("developer").Are(perm.Allowed).ToDo(Upload).On("*:posts:*"),
 		},
 		subjects:           nil,
 		dontWantPermission: "upload",
@@ -126,7 +126,7 @@ var cases = []struct {
 	{
 		name: "developer should have permission for upload on posts",
 		policies: []*perm.PolicyBuilder{
-			perm.They("developer").Are(perm.Allowed).ToDo(Upload).On("*:posts:*"),
+			perm.NewPolicy().They("developer").Are(perm.Allowed).ToDo(Upload).On("*:posts:*"),
 		},
 		subjects:       []string{"developer"},
 		wantPermission: "upload",
@@ -135,7 +135,7 @@ var cases = []struct {
 	{
 		name: "developer should not have permission for upload on posts",
 		policies: []*perm.PolicyBuilder{
-			perm.They("developer").Are(perm.Allowed).ToDo(Upload).On("*:users:*"),
+			perm.NewPolicy().They("developer").Are(perm.Allowed).ToDo(Upload).On("*:users:*"),
 		},
 		subjects:           []string{"developer"},
 		dontWantPermission: "upload",
@@ -144,7 +144,7 @@ var cases = []struct {
 	{
 		name: "developer should have permission for upload on any posts media_libraries 33",
 		policies: []*perm.PolicyBuilder{
-			perm.They("developer").Are(perm.Allowed).ToDo(Upload).On("*media_libraries:33*"),
+			perm.NewPolicy().They("developer").Are(perm.Allowed).ToDo(Upload).On("*media_libraries:33*"),
 		},
 		subjects:       []string{"developer"},
 		wantPermission: "upload",
@@ -153,7 +153,7 @@ var cases = []struct {
 	{
 		name: "developer should have permission for upload on any posts media_libraries images category",
 		policies: []*perm.PolicyBuilder{
-			perm.They("developer").Are(perm.Allowed).ToDo(Upload).On("*media_libraries:*:images"),
+			perm.NewPolicy().They("developer").Are(perm.Allowed).ToDo(Upload).On("*media_libraries:*:images"),
 		},
 		subjects:       []string{"developer"},
 		wantPermission: "upload",
@@ -162,7 +162,7 @@ var cases = []struct {
 	{
 		name: "developer cant do anything",
 		policies: []*perm.PolicyBuilder{
-			perm.They("developer").Are(perm.Denied).ToDo(perm.Anything).On(perm.Anything),
+			perm.NewPolicy().They("developer").Are(perm.Denied).ToDo(perm.Anything).On(perm.Anything),
 		},
 		subjects:           []string{"developer"},
 		dontWantPermission: "upload",
@@ -171,7 +171,7 @@ var cases = []struct {
 	{
 		name: "developer can do anything",
 		policies: []*perm.PolicyBuilder{
-			perm.They("developer").Are(perm.Allowed).ToDo(perm.Anything).On(perm.Anything),
+			perm.NewPolicy().They("developer").Are(perm.Allowed).ToDo(perm.Anything).On(perm.Anything),
 		},
 		subjects:       []string{"developer"},
 		wantPermission: "upload",
@@ -180,7 +180,7 @@ var cases = []struct {
 	{
 		name: "any body can do anything if they are owner",
 		policies: []*perm.PolicyBuilder{
-			perm.They(perm.Anybody).
+			perm.NewPolicy().They(perm.Anybody).
 				Are(perm.Allowed).ToDo(perm.Anything).On(perm.Anything).Given(
 				perm.Conditions{
 					"owner": &ladon.EqualsSubjectCondition{},
@@ -195,7 +195,7 @@ var cases = []struct {
 	{
 		name: "any body cant do anything if they are not owner",
 		policies: []*perm.PolicyBuilder{
-			perm.They(perm.Anybody).
+			perm.NewPolicy().They(perm.Anybody).
 				Are(perm.Allowed).ToDo(perm.Anything).On(perm.Anything).Given(
 				perm.Conditions{
 					"owner": &ladon.EqualsSubjectCondition{},

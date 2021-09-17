@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/goplaid/x/perm"
+
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
 	. "github.com/goplaid/x/vuetify"
@@ -26,6 +28,8 @@ type Builder struct {
 	builder             *web.Builder
 	i18nBuilder         *i18n.Builder
 	logger              *zap.Logger
+	permissionBuilder   *perm.Builder
+	verifier            *perm.Verifier
 	dataOperator        DataOperator
 	messagesFunc        MessagesFunc
 	homePageFunc        web.PageFunc
@@ -71,11 +75,22 @@ func New() *Builder {
 		progressBarColor:    "amber",
 		brandTitle:          "Admin",
 		rightDrawerWidth:    600,
+		verifier:            perm.NewVerifier(PermModule, nil),
 	}
 }
 
 func (b *Builder) I18n() (r *i18n.Builder) {
 	return b.i18nBuilder
+}
+
+func (b *Builder) Permission(v *perm.Builder, verbose bool) (r *Builder) {
+	b.permissionBuilder = v
+	b.verifier = perm.NewVerifier(PermModule, v).Verbose(verbose)
+	return b
+}
+
+func (b *Builder) GetPermission() (r *perm.Builder) {
+	return b.permissionBuilder
 }
 
 func (b *Builder) URIPrefix(v string) (r *Builder) {

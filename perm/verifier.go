@@ -23,9 +23,9 @@ type Verifier struct {
 	verbose bool
 }
 
-func Module(v string, b *Builder) (r *Verifier) {
+func NewVerifier(module string, b *Builder) (r *Verifier) {
 	r = &Verifier{
-		module: v,
+		module: module,
 	}
 
 	if b == nil {

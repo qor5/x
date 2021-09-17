@@ -84,7 +84,6 @@ const bulkPanelPortalName = "bulkPanel"
 const deleteConfirmPortalName = "deleteConfirm"
 
 func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
-
 	msgr := MustGetMessages(ctx.R)
 	title := msgr.ListingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Plural(b.mb.label)))
 	r.PageTitle = title
@@ -376,13 +375,15 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 	ft.String.Equals = msgr.FiltersStringEquals
 	ft.String.Contains = msgr.FiltersStringContains
 
+	disableNewBtn := b.mb.p.verifier.Do(PermCreate).OnObject(b.mb.model).WithReq(ctx.R).IsAllowed() != nil
+
 	var toolbar = VToolbar(
 		VSpacer(),
 		VBtn(msgr.New).
 			Color(b.mb.p.primaryColor).
 			Depressed(true).
 			Dark(true).
-			OnClick(actions.DrawerNew, ""),
+			OnClick(actions.DrawerNew, "").Disabled(disableNewBtn),
 	).Flat(true)
 	if fd != nil {
 		toolbar.PrependChildren(Filter(fd).Translations(ft))

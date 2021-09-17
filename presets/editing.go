@@ -1,8 +1,11 @@
 package presets
 
 import (
+	"errors"
+
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
+	"github.com/goplaid/x/perm"
 	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/inflection"
@@ -176,12 +179,17 @@ func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, e
 func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
 	id := ctx.Event.Params[0]
 	var newObj = b.mb.newModel()
-
 	// don't panic for fields that set in SetterFunc
 	_ = ctx.UnmarshalForm(newObj)
 
-	var obj = b.mb.newModel()
+	if len(id) == 0 {
+		if perr := b.mb.p.verifier.Do(PermCreate).OnObject(b.mb.model).WithReq(ctx.R).IsAllowed(); perr != nil {
+			b.renderFormWithError(&r, errors.New(perm.PermissionDenied), newObj, ctx)
+			return
+		}
+	}
 
+	var obj = b.mb.newModel()
 	usingB := b
 	if b.mb.creating != nil && len(id) == 0 {
 		usingB = b.mb.creating

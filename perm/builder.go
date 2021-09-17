@@ -14,11 +14,12 @@ import (
 )
 
 const (
-	Allowed   = ladon.AllowAccess
-	Denied    = ladon.DenyAccess
-	Anything  = "*"
-	Anybody   = "*"
-	Anonymous = "anonymous"
+	Allowed          = ladon.AllowAccess
+	Denied           = ladon.DenyAccess
+	Anything         = "*"
+	Anybody          = "*"
+	Anonymous        = "anonymous"
+	PermissionDenied = "Permission Denied"
 )
 
 type Context = ladon.Context
@@ -40,7 +41,7 @@ func ToPermRN(v interface{}) []string {
 	typeName = strings.NewReplacer("*", "", ".", "-").Replace(typeName)
 	typeName = strcase.ToSnake(inflection.Plural(typeName))
 	id, err := reflectutils.Get(v, "ID")
-	if err == nil && len(fmt.Sprint(id)) > 0 {
+	if err == nil && len(fmt.Sprint(id)) > 0 && fmt.Sprint(id) != "0" {
 		return []string{typeName, fmt.Sprint(id)}
 	}
 	return []string{typeName}
@@ -86,12 +87,23 @@ func (b *Builder) ContextFunc(v ContextFunc) (r *Builder) {
 
 type PolicyBuilder struct {
 	policy *ladon.DefaultPolicy
+	module string
 }
 
-func They(subjects ...string) (r *PolicyBuilder) {
-	r = &PolicyBuilder{}
-	r.policy = &ladon.DefaultPolicy{Subjects: subjects}
-	return
+func NewPolicy() *PolicyBuilder {
+	return &PolicyBuilder{
+		policy: &ladon.DefaultPolicy{},
+	}
+}
+
+func (b *PolicyBuilder) Module(module string) (r *PolicyBuilder) {
+	b.module = module
+	return b
+}
+
+func (b *PolicyBuilder) They(subjects ...string) (r *PolicyBuilder) {
+	b.policy.Subjects = subjects
+	return b
 }
 
 func (b *PolicyBuilder) Are(effect string) (r *PolicyBuilder) {
@@ -105,7 +117,16 @@ func (b *PolicyBuilder) ToDo(actions ...string) (r *PolicyBuilder) {
 }
 
 func (b *PolicyBuilder) On(resources ...string) (r *PolicyBuilder) {
-	b.policy.Resources = resources
+	if b.module == "" {
+		b.policy.Resources = append(b.policy.Resources, resources...)
+		return
+	}
+
+	var newRes []string
+	for _, res := range resources {
+		newRes = append(newRes, strings.Join([]string{b.module, res}, ":"))
+	}
+	b.policy.Resources = append(b.policy.Resources, newRes...)
 	return b
 }
 
