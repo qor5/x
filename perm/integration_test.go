@@ -38,6 +38,7 @@ const Create = "Create"
 const Upload = "Upload"
 
 func TestPermission(t *testing.T) {
+	perm.Verbose = true
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -48,7 +49,7 @@ func TestPermission(t *testing.T) {
 					ContextFunc(c.contextFunc)
 			}
 
-			verifier := perm.Module("presets", p).Verbose(true)
+			verifier := perm.Module("presets", p)
 
 			hello := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				post := getPost()

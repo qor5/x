@@ -8,6 +8,8 @@ import (
 	"github.com/ory/ladon"
 )
 
+var Verbose = false
+
 type verReq struct {
 	subjects       []string
 	objs           []interface{}
@@ -20,7 +22,6 @@ type Verifier struct {
 	builder *Builder
 	module  string
 	vr      *verReq
-	verbose bool
 }
 
 func Module(v string, b *Builder) (r *Verifier) {
@@ -36,11 +37,6 @@ func Module(v string, b *Builder) (r *Verifier) {
 	return
 }
 
-func (b *Verifier) Verbose(v bool) (r *Verifier) {
-	b.verbose = v
-	return b
-}
-
 func (b *Verifier) Do(v string) (r *Verifier) {
 	if b.builder == nil {
 		return b
@@ -49,7 +45,6 @@ func (b *Verifier) Do(v string) (r *Verifier) {
 	r = &Verifier{
 		module:  b.module,
 		builder: b.builder,
-		verbose: b.verbose,
 	}
 
 	r.vr = &verReq{
@@ -134,7 +129,7 @@ func (b *Verifier) IsAllowed() error {
 	// any of the subjects have permission, then have permission
 	for _, sub := range b.vr.subjects {
 		b.vr.req.Subject = sub
-		if b.verbose {
+		if Verbose {
 			fmt.Printf("permission req: %#+v\n", b.vr.req)
 		}
 		err = b.builder.ladon.IsAllowed(b.vr.req)
