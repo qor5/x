@@ -103,6 +103,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	id := ctx.Event.Params[0]
 
 	var buttonLabel = msgr.Create
+	var disableUpdateBtn bool
 	var title = msgr.CreatingObjectTitle(
 		i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Singular(b.mb.label)),
 	)
@@ -114,6 +115,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 				panic(err)
 			}
 		}
+		disableUpdateBtn = b.mb.p.verifier.Do(PermUpdate).OnObject(obj).WithReq(ctx.R).IsAllowed() != nil
 		buttonLabel = msgr.Update
 		title = msgr.EditingObjectTitle(
 			i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Singular(b.mb.label)),
@@ -152,6 +154,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 					VBtn(buttonLabel).
 						Dark(true).
 						Color(b.mb.p.primaryColor).
+						Disabled(disableUpdateBtn).
 						Attr("@click", web.Plaid().
 							EventFunc(actions.Update, ctx.Event.Params...).
 							URL(b.mb.Info().ListingHref()).
@@ -199,6 +202,10 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 		obj, err1 := usingB.fetcher(obj, id, ctx)
 		if err1 != nil {
 			b.renderFormWithError(&r, err1, obj, ctx)
+			return
+		}
+		if perr := b.mb.p.verifier.Do(PermUpdate).OnObject(obj).WithReq(ctx.R).IsAllowed(); perr != nil {
+			b.renderFormWithError(&r, errors.New(perm.PermissionDenied), obj, ctx)
 			return
 		}
 	}
