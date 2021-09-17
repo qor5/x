@@ -28,12 +28,12 @@ type SubjectsFunc func(r *http.Request) []string
 type ContextFunc func(r *http.Request, objs []interface{}) Context
 
 type permRNer interface {
-	PermRN() []string
+	PermissionRN() []string
 }
 
-func ToPermRN(v interface{}) []string {
+func ToPermissionRN(v interface{}) []string {
 	if pr, ok := v.(permRNer); ok {
-		return pr.PermRN()
+		return pr.PermissionRN()
 	}
 	typeName := fmt.Sprint(reflect.TypeOf(v))
 	ss := strings.Split(typeName, ".")

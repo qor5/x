@@ -22,7 +22,7 @@ type MediaLibrary struct {
 	Category string
 }
 
-func (m *MediaLibrary) PermRN() []string {
+func (m *MediaLibrary) PermissionRN() []string {
 	return []string{"media_libraries", fmt.Sprint(m.ID), m.Category}
 }
 
@@ -38,6 +38,7 @@ const Create = "Create"
 const Upload = "Upload"
 
 func TestPermission(t *testing.T) {
+	perm.Verbose = true
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -48,7 +49,7 @@ func TestPermission(t *testing.T) {
 					ContextFunc(c.contextFunc)
 			}
 
-			verifier := perm.NewVerifier("presets", p).Verbose(true)
+			verifier := perm.NewVerifier("presets", p)
 
 			hello := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				post := getPost()
