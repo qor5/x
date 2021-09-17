@@ -83,9 +83,9 @@ func (b *Builder) I18n() (r *i18n.Builder) {
 	return b.i18nBuilder
 }
 
-func (b *Builder) Permission(v *perm.Builder, verbose bool) (r *Builder) {
+func (b *Builder) Permission(v *perm.Builder) (r *Builder) {
 	b.permissionBuilder = v
-	b.verifier = perm.NewVerifier(PermModule, v).Verbose(verbose)
+	b.verifier = perm.NewVerifier(PermModule, v)
 	return b
 }
 
