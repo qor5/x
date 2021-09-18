@@ -19,6 +19,9 @@ var adminBox embed.FS
 //go:embed baretemplate
 var bareBox embed.FS
 
+//go:embed tailwind_alpinejs_template
+var tailwindBox embed.FS
+
 func main() {
 
 	validateFileExists := func(input string) error {
@@ -60,6 +63,7 @@ func main() {
 		Label: "Select a template",
 		Items: []string{
 			"Admin: Deep Customizable Database CRUD UI",
+			"Tailwind + AlpineJS: Fit for most customizable Web App",
 			"Bare: Simplest Workable Web App",
 		},
 	}
@@ -76,6 +80,11 @@ func main() {
 	if result == 0 {
 		copyAndReplaceFiles(adminBox, dir, "admintemplate", pkg)
 		fmt.Printf("\ncd %s && docker-compose up -d && source dev_env && go run main.go\nto start your project\n", dir)
+	} else if result == 1 {
+		copyAndReplaceFiles(tailwindBox, dir, "tailwind_alpinejs_template", pkg)
+		runCmd(dir, "chmod", "+x", "./dev.sh")
+		runCmd(filepath.Join(dir, "front"), "npm", "install")
+		fmt.Printf("\ncd %s && ./dev.sh \nto start your project\n", dir)
 	} else {
 		copyAndReplaceFiles(bareBox, dir, "baretemplate", pkg)
 		fmt.Printf("\ncd %s && go run main.go\nto start your project\n", dir)
@@ -120,27 +129,22 @@ func copyAndReplaceFiles(box embed.FS, dir string, template string, pkg string) 
 	replaceInFiles(dir, "GoplaidPackageName", dir)
 
 	if _, err = os.Stat(filepath.Join(dir, "go.mod")); err != nil {
-		cmd := exec.Command("go", "mod", "init", pkg)
-		cmd.Dir = dir
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		err = cmd.Run()
-		if err != nil {
-			panic(err)
-		}
-
-		cmdGet := exec.Command("go", "get", "./...")
-		cmdGet.Dir = dir
-		cmdGet.Stdout = os.Stdout
-		cmdGet.Stderr = os.Stderr
-
-		err = cmdGet.Run()
-		if err != nil {
-			panic(err)
-		}
+		runCmd(dir, "go", "mod", "init", pkg)
+		runCmd(dir, "go", "get", "./...")
 	}
 	return
+}
+
+func runCmd(dir string, name string, args ...string) {
+	cmdGet := exec.Command(name, args...)
+	cmdGet.Dir = dir
+	cmdGet.Stdout = os.Stdout
+	cmdGet.Stderr = os.Stderr
+
+	err := cmdGet.Run()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func replaceInFiles(baseDir string, from, to string) {
