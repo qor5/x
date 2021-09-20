@@ -19,7 +19,7 @@ var adminBox embed.FS
 //go:embed baretemplate
 var bareBox embed.FS
 
-//go:embed tailwind_alpinejs_template
+//go:embed tailwindtemplate
 var tailwindBox embed.FS
 
 func main() {
@@ -63,7 +63,7 @@ func main() {
 		Label: "Select a template",
 		Items: []string{
 			"Admin: Deep Customizable Database CRUD UI",
-			"Tailwind + AlpineJS: Fit for most customizable Web App",
+			"Tailwind: Tailwind CSS Powered Web App",
 			"Bare: Simplest Workable Web App",
 		},
 	}
@@ -81,7 +81,7 @@ func main() {
 		copyAndReplaceFiles(adminBox, dir, "admintemplate", pkg)
 		fmt.Printf("\ncd %s && docker-compose up -d && source dev_env && go run main.go\nto start your project\n", dir)
 	} else if result == 1 {
-		copyAndReplaceFiles(tailwindBox, dir, "tailwind_alpinejs_template", pkg)
+		copyAndReplaceFiles(tailwindBox, dir, "tailwindtemplate", pkg)
 		runCmd(dir, "chmod", "+x", "./dev.sh")
 		runCmd(filepath.Join(dir, "front"), "npm", "install")
 		fmt.Printf("\ncd %s && ./dev.sh \nto start your project\n", dir)

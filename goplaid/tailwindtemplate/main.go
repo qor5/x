@@ -21,10 +21,10 @@ func Home(ctx *web.EventContext) (r web.PageResponse, err error) {
 				web.Plaid().EventFunc(doAction1, "1", "2").Go(),
 			).Class("px-5 py-3 rounded-xl text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-800 active:bg-grey-900 focus:outline-none border-4 border-white focus:border-purple-200 transition-all"),
 			Div(
-				Button("Browser side action").Attr("x-on:click", "count++").
+				Button("Browser side action").Attr("@click", "locals.count++").
 					Class("px-5 py-3 rounded-xl text-sm font-medium text-indigo-600 bg-white outline-none focus:outline-none m-1 hover:m-0 focus:m-0 border border-indigo-600 hover:border-4 focus:border-4 hover:border-indigo-800 hover:text-indigo-800 focus:border-purple-200 active:border-grey-900 active:text-grey-900 transition-all"),
-				Span("").Attr("x-text", "count"),
-			).Attr("x-data", "{count: 0}"),
+				Span("{{locals.count}}"),
+			).Attr("v-init-context:locals", "{count: 0}"),
 		).Class("p-5 w-80 bg-white rounded-lg shadow-lg hover:shadow-2xl cursor-pointer"),
 	).Class("min-h-screen bg-gray-100 flex items-center justify-center")
 	return

@@ -1,7 +1,7 @@
 {
   "name": "front",
   "version": "1.0.0",
-  "description": "Alpine.js project created by esbuild",
+  "description": "tailwind",
   "main": "src/index.js",
   "scripts": {
     "build": "NODE_ENV=production npx tailwindcss --minify -i src/index.css -o ./public/index.css && node esbuild.config.js",
@@ -12,8 +12,5 @@
   "license": "MIT",
   "devDependencies": {
     "esbuild": "^0.12.9"
-  },
-  "dependencies": {
-    "alpinejs": "^3.2.2"
   }
 }
