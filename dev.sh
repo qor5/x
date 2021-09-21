@@ -14,5 +14,5 @@ function docsRestart() {
 
 export -f docsRestart
 
-find . -name *.go | entr -r bash -c "docsRestart"
+find . -name "*.go" | entr -r bash -c "docsRestart"
 
