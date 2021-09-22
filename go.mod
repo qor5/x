@@ -53,6 +53,6 @@ require (
 	gorm.io/gorm v1.21.15
 )
 
-replace (
-	github.com/goplaid/web => ../web
-)
+//replace (
+//	github.com/goplaid/web => ../web
+//)
