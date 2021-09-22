@@ -33,6 +33,12 @@ func PresetsPermissions(b *presets.Builder) (
 		Policies(
 			perm.PolicyFor("editor").WhoAre(perm.Allowed).ToDo(perm.Anything).On(perm.Anything),
 			perm.PolicyFor("editor").WhoAre(perm.Denied).ToDo(presets.PermRead...).On("*user_management*"),
+			perm.PolicyFor("editor").WhoAre(perm.Denied).
+				ToDo(presets.PermCreate, presets.PermDelete).On("*customers*"),
+			perm.PolicyFor("editor").WhoAre(perm.Denied).
+				ToDo(presets.PermCreate, presets.PermUpdate).On("*companies*"),
+			perm.PolicyFor("editor").WhoAre(perm.Denied).
+				ToDo(presets.PermGet).On("*customers:*:company_id*"),
 		).
 		SubjectsFunc(func(r *http.Request) []string {
 			return []string{"editor"}

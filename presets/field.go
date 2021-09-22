@@ -212,11 +212,16 @@ func (b *FieldBuilders) ToComponent(mb *ModelBuilder, obj interface{}, verr *web
 			continue
 		}
 
+		if mb.p.verifier.Do(PermGet).SnakeOn(mb.uriName).OnObject(obj).SnakeOn(f.name).IsAllowed() != nil {
+			continue
+		}
+
 		comps = append(comps, f.compFunc(obj, &FieldContext{
-			Name:    f.name,
-			Label:   i18n.PT(ctx.R, ModelsI18nModuleKey, mb.label, b.getLabel(f.NameLabel)),
-			Errors:  verr.GetFieldErrors(f.name),
-			Context: f.context,
+			ModelInfo: mb.Info(),
+			Name:      f.name,
+			Label:     i18n.PT(ctx.R, ModelsI18nModuleKey, mb.label, b.getLabel(f.NameLabel)),
+			Errors:    verr.GetFieldErrors(f.name),
+			Context:   f.context,
 		}, ctx))
 	}
 

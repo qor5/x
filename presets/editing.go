@@ -113,7 +113,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 				panic(err)
 			}
 		}
-		disableUpdateBtn = b.mb.p.verifier.Do(PermUpdate).OnObject(obj).WithReq(ctx.R).IsAllowed() != nil
+		disableUpdateBtn = b.mb.p.verifier.Do(PermUpdate).SnakeOn(b.mb.uriName).OnObject(obj).WithReq(ctx.R).IsAllowed() != nil
 		buttonLabel = msgr.Update
 		title = msgr.EditingObjectTitle(
 			i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Singular(b.mb.label)),
@@ -184,7 +184,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	_ = ctx.UnmarshalForm(newObj)
 
 	if len(id) == 0 {
-		if perr := b.mb.p.verifier.Do(PermCreate).OnObject(b.mb.model).WithReq(ctx.R).IsAllowed(); perr != nil {
+		if b.mb.p.verifier.Do(PermCreate).SnakeOn(b.mb.uriName).OnObject(newObj).WithReq(ctx.R).IsAllowed() != nil {
 			b.renderFormWithError(&r, perm.PermissionDenied, newObj, ctx)
 			return
 		}
@@ -202,7 +202,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 			b.renderFormWithError(&r, err1, obj, ctx)
 			return
 		}
-		if perr := b.mb.p.verifier.Do(PermUpdate).OnObject(obj).WithReq(ctx.R).IsAllowed(); perr != nil {
+		if b.mb.p.verifier.Do(PermUpdate).SnakeOn(b.mb.uriName).OnObject(obj).WithReq(ctx.R).IsAllowed() != nil {
 			b.renderFormWithError(&r, perm.PermissionDenied, obj, ctx)
 			return
 		}
@@ -221,8 +221,9 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 		}
 
 		err1 := f.setterFunc(obj, &FieldContext{
-			Name:  f.name,
-			Label: b.getLabel(f.NameLabel),
+			ModelInfo: b.mb.Info(),
+			Name:      f.name,
+			Label:     b.getLabel(f.NameLabel),
 		}, ctx)
 		if err1 != nil {
 			vErr.FieldError(f.name, err1.Error())

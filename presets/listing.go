@@ -86,7 +86,7 @@ const deleteConfirmPortalName = "deleteConfirm"
 func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
 
 	if b.mb.p.verifier.Do(PermList).SnakeOn(b.mb.menuGroupName).
-		On(strcase.ToSnake(b.mb.label)).IsAllowed() != nil {
+		On(strcase.ToSnake(b.mb.label)).WithReq(ctx.R).IsAllowed() != nil {
 		err = perm.PermissionDenied
 		return
 	}
@@ -181,7 +181,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			}
 			return tdbind
 		}).
-		RowMenuItemsFunc(EditDeleteRowMenuItemsFunc(ctx, "")).
+		RowMenuItemsFunc(EditDeleteRowMenuItemsFunc(b.mb.Info(), "")).
 		Selectable(haveCheckboxes).
 		SelectionParamName(selectedParamName)
 
@@ -382,7 +382,8 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 	ft.String.Equals = msgr.FiltersStringEquals
 	ft.String.Contains = msgr.FiltersStringContains
 
-	disableNewBtn := b.mb.p.verifier.Do(PermCreate).OnObject(b.mb.model).WithReq(ctx.R).IsAllowed() != nil
+	disableNewBtn := b.mb.p.verifier.Do(PermCreate).SnakeOn(b.mb.menuGroupName).
+		SnakeOn(b.mb.label).WithReq(ctx.R).IsAllowed() != nil
 
 	var toolbar = VToolbar(
 		VSpacer(),

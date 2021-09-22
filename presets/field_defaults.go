@@ -14,10 +14,11 @@ import (
 )
 
 type FieldContext struct {
-	Name    string
-	Label   string
-	Errors  []string
-	Context context.Context
+	Name      string
+	Label     string
+	Errors    []string
+	ModelInfo *ModelInfo
+	Context   context.Context
 }
 
 func (fc *FieldContext) StringValue(obj interface{}) (r string) {
@@ -188,7 +189,7 @@ func cfTextTd(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTM
 	if field.Name == "ID" {
 		id := field.StringValue(obj)
 		if len(id) > 0 {
-			mi := GetModelInfo(ctx.R)
+			mi := field.ModelInfo
 			if mi == nil {
 				return h.Td().Text(id)
 			}

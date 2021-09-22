@@ -160,7 +160,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		dt.Column("Type")
 		dt.Column("Description")
 
-		dt.RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(ctx, "/admin/events", typeName, objId))
+		dt.RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(field.ModelInfo, "/admin/events", typeName, objId))
 
 		return s.Card(
 			dt,
@@ -185,7 +185,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	mp := p.Model(&Product{}).MenuIcon("laptop")
 	mp.Listing().PerPage(3)
 
-	m := p.Model(&Customer{}).URIName("customer").MenuGroup("Customer Management")
+	m := p.Model(&Customer{}).URIName("my_customers").MenuGroup("Customer Management")
 	p.Model(&Company{}).MenuGroup("Customer Management")
 	m.Labels(
 		"Name", "名字",
@@ -402,7 +402,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		})
 
 		cusID := fmt.Sprint(cu.ID)
-		dt.RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(ctx, "/admin/notes", "Customer", cusID))
+		dt.RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(field.ModelInfo, "/admin/notes", "Customer", cusID))
 
 		return s.Card(
 			dt,
@@ -487,7 +487,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 						s.DetailField(s.OptionalText(card.Email).ZeroLabel("No email provided")).Label("Email"),
 					),
 				)
-			}).RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(ctx, "/admin/credit-cards", cusID))
+			}).RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(field.ModelInfo, "/admin/credit-cards", cusID))
 
 		dt.Column("Type")
 		dt.Column("Number")

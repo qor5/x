@@ -87,8 +87,9 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRes
 			continue
 		}
 		comps = append(comps, f.compFunc(obj, &FieldContext{
-			Name:  f.name,
-			Label: b.mb.getLabel(f.NameLabel),
+			ModelInfo: b.mb.Info(),
+			Name:      f.name,
+			Label:     b.mb.getLabel(f.NameLabel),
 		}, ctx))
 	}
 

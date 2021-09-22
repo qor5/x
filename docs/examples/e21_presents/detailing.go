@@ -41,7 +41,7 @@ func PresetsDetailPageTopNotes(b *presets.Builder) (
 	dp = cust.Detailing("TopNotes", "Details", "Cards")
 
 	dp.Field("TopNotes").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
-		mi := presets.GetModelInfo(ctx.R)
+		mi := field.ModelInfo
 		cu := obj.(*Customer)
 
 		title := cu.Name
@@ -74,7 +74,7 @@ func PresetsDetailPageTopNotes(b *presets.Builder) (
 		})
 
 		cusID := fmt.Sprint(cu.ID)
-		dt.RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(ctx, mi.PresetsPrefix()+"/notes", "Customer", cusID))
+		dt.RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(mi, mi.PresetsPrefix()+"/notes", "Customer", cusID))
 
 		return stripeui.Card(
 			dt,
@@ -125,7 +125,7 @@ func PresetsDetailPageDetails(b *presets.Builder) (
 	}
 
 	dp.Field("Details").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
-		mi := presets.GetModelInfo(ctx.R)
+		mi := field.ModelInfo
 		cu := obj.(*Customer)
 		cusID := fmt.Sprint(cu.ID)
 
@@ -224,7 +224,7 @@ func PresetsDetailPageCards(b *presets.Builder) (
 	}
 
 	dp.Field("Cards").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
-		mi := presets.GetModelInfo(ctx.R)
+		mi := field.ModelInfo
 		cu := obj.(*Customer)
 		cusID := fmt.Sprint(cu.ID)
 
@@ -248,7 +248,7 @@ func PresetsDetailPageCards(b *presets.Builder) (
 						stripeui.DetailField(stripeui.OptionalText(card.Email).ZeroLabel("No email provided")).Label("Email"),
 					),
 				)
-			}).RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(ctx, mi.PresetsPrefix()+"/credit-cards", cusID))
+			}).RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(mi, mi.PresetsPrefix()+"/credit-cards", cusID))
 
 		dt.Column("Type")
 		dt.Column("Number")
