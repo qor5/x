@@ -54,11 +54,11 @@ func TestPermission(t *testing.T) {
 			hello := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				post := getPost()
 				ml := getMediaLibrary()
-				if verifier.Do(Upload).OnObject(post).On("heroImage").OnObject(ml).WithReq(r).IsAllowed() == nil {
+				if verifier.Do(Upload).ObjectOn(post).On("heroImage").ObjectOn(ml).WithReq(r).IsAllowed() == nil {
 					_, _ = fmt.Fprintln(w, "upload")
 				}
 
-				if verifier.Do(Create).OnObject(&Post{}).WithReq(r).IsAllowed() == nil {
+				if verifier.Do(Create).ObjectOn(&Post{}).WithReq(r).IsAllowed() == nil {
 					_, _ = fmt.Fprintln(w, "create")
 				}
 

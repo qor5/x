@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/perm"
 	"github.com/goplaid/x/presets/actions"
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
@@ -125,6 +126,12 @@ func (b *ModelInfo) PresetsPrefix() string {
 
 func (b *ModelInfo) URIName() string {
 	return b.uriName
+}
+
+func (b *ModelInfo) Verifier() *perm.Verifier {
+	return b.p.verifier.Spawn().
+		SnakeOn(b.menuGroupName).
+		SnakeOn(b.uriName)
 }
 
 func (b *ModelBuilder) URIName(v string) (r *ModelBuilder) {

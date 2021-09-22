@@ -38,7 +38,7 @@ func NewVerifier(module string, b *Builder) (r *Verifier) {
 	return
 }
 
-func (b *Verifier) Do(v string) (r *Verifier) {
+func (b *Verifier) Spawn() (r *Verifier) {
 	if b.builder == nil {
 		return b
 	}
@@ -48,12 +48,26 @@ func (b *Verifier) Do(v string) (r *Verifier) {
 		builder: b.builder,
 	}
 
-	r.vr = &verReq{
-		resourcesParts: []string{b.module},
-		req: &ladon.Request{
-			Action: v,
-		},
+	resourceParts := []string{b.module}
+	if b.vr != nil {
+		resourceParts = b.vr.resourcesParts
 	}
+
+	r.vr = &verReq{
+		resourcesParts: append([]string{}, resourceParts...),
+		req:            &ladon.Request{},
+	}
+
+	return
+}
+
+func (b *Verifier) Do(v string) (r *Verifier) {
+	if b.builder == nil {
+		return b
+	}
+
+	r = b.Spawn()
+	r.vr.req.Action = v
 	return
 }
 
@@ -83,7 +97,7 @@ func (b *Verifier) SnakeOn(vs ...string) (r *Verifier) {
 	return b
 }
 
-func (b *Verifier) OnObject(v interface{}) (r *Verifier) {
+func (b *Verifier) ObjectOn(v interface{}) (r *Verifier) {
 	if b.builder == nil {
 		return b
 	}

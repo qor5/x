@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/iancoleman/strcase"
 	"github.com/sunfmin/reflectutils"
@@ -194,15 +195,19 @@ func cfTextTd(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTM
 				return h.Td().Text(id)
 			}
 
-			a := h.A().Text(id)
+			var a h.HTMLComponent
 			if mi.HasDetailing() {
-				a.Attr("@click", web.Plaid().
+				a = h.A().Text(id).Attr("@click", web.Plaid().
 					PushStateURL(mi.DetailingHref(id)).
 					Go(),
 				)
 			} else {
-				a.Attr("@click", web.Plaid().EventFunc("DrawerEdit", id).
-					Go())
+				if field.ModelInfo.Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() == nil {
+					a = h.A().Text(id).Attr("@click", web.Plaid().EventFunc(actions.DrawerEdit, id).
+						Go())
+				} else {
+					a = h.Text(id)
+				}
 			}
 			return h.Td(a)
 		}

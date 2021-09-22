@@ -12,7 +12,7 @@ func EditDeleteRowMenuItemsFunc(m *ModelInfo, url string, editExtraParams ...str
 	return func(obj interface{}, id string, ctx *web.EventContext) []h.HTMLComponent {
 		msgr := MustGetMessages(ctx.R)
 		var r []h.HTMLComponent
-		if m.p.verifier.Do(PermUpdate).SnakeOn(m.URIName()).OnObject(obj).WithReq(ctx.R).IsAllowed() == nil {
+		if m.Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() == nil {
 			r = append(r,
 				VListItem(
 					VListItemIcon(VIcon("edit")),
@@ -24,7 +24,7 @@ func EditDeleteRowMenuItemsFunc(m *ModelInfo, url string, editExtraParams ...str
 			)
 		}
 
-		if m.p.verifier.Do(PermDelete).SnakeOn(m.URIName()).OnObject(obj).WithReq(ctx.R).IsAllowed() == nil {
+		if m.Verifier().Do(PermDelete).ObjectOn(obj).WithReq(ctx.R).IsAllowed() == nil {
 			r = append(r,
 				VListItem(
 					VListItemIcon(VIcon("delete")),
