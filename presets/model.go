@@ -12,23 +12,24 @@ import (
 )
 
 type ModelBuilder struct {
-	p            *Builder
-	model        interface{}
-	primaryField string
-	modelType    reflect.Type
-	inGroup      bool
-	notInMenu    bool
-	menuIcon     string
-	uriName      string
-	label        string
-	fieldLabels  []string
-	placeholders []string
-	listing      *ListingBuilder
-	detailing    *DetailingBuilder
-	editing      *EditingBuilder
-	creating     *EditingBuilder
-	writeFields  *FieldBuilders
-	hasDetailing bool
+	p             *Builder
+	model         interface{}
+	primaryField  string
+	modelType     reflect.Type
+	inGroup       bool
+	menuGroupName string
+	notInMenu     bool
+	menuIcon      string
+	uriName       string
+	label         string
+	fieldLabels   []string
+	placeholders  []string
+	listing       *ListingBuilder
+	detailing     *DetailingBuilder
+	editing       *EditingBuilder
+	creating      *EditingBuilder
+	writeFields   *FieldBuilders
+	hasDetailing  bool
 }
 
 func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
@@ -137,6 +138,7 @@ func (b *ModelBuilder) PrimaryField(v string) (r *ModelBuilder) {
 
 func (b *ModelBuilder) MenuGroup(v string) (r *ModelBuilder) {
 	b.p.MenuGroup(v).AppendModels(b)
+	b.menuGroupName = v
 	b.inGroup = true
 	return b
 }

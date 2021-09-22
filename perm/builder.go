@@ -1,6 +1,7 @@
 package perm
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -14,13 +15,14 @@ import (
 )
 
 const (
-	Allowed          = ladon.AllowAccess
-	Denied           = ladon.DenyAccess
-	Anything         = "*"
-	Anybody          = "*"
-	Anonymous        = "anonymous"
-	PermissionDenied = "Permission Denied"
+	Allowed   = ladon.AllowAccess
+	Denied    = ladon.DenyAccess
+	Anything  = "*"
+	Anybody   = "*"
+	Anonymous = "anonymous"
 )
+
+var PermissionDenied = errors.New("permission denied")
 
 type Context = ladon.Context
 type Conditions = ladon.Conditions

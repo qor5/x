@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/iancoleman/strcase"
 	"github.com/ory/ladon"
 )
 
@@ -62,6 +63,23 @@ func (b *Verifier) On(vs ...string) (r *Verifier) {
 	}
 
 	b.vr.resourcesParts = append(b.vr.resourcesParts, vs...)
+	return b
+}
+
+func (b *Verifier) SnakeOn(vs ...string) (r *Verifier) {
+	if b.builder == nil {
+		return b
+	}
+
+	var fixed []string
+	for _, v := range vs {
+		if len(v) == 0 {
+			continue
+		}
+		fixed = append(fixed, strcase.ToSnake(v))
+	}
+
+	b.On(fixed...)
 	return b
 }
 
@@ -129,10 +147,11 @@ func (b *Verifier) IsAllowed() error {
 	// any of the subjects have permission, then have permission
 	for _, sub := range b.vr.subjects {
 		b.vr.req.Subject = sub
-		if Verbose {
-			fmt.Printf("permission req: %#+v\n", b.vr.req)
-		}
+
 		err = b.builder.ladon.IsAllowed(b.vr.req)
+		if Verbose {
+			fmt.Printf("have permission: %+v, req: %#+v\n", err == nil, b.vr.req)
+		}
 		if err == nil {
 			return nil
 		}

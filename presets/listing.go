@@ -6,13 +6,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goplaid/x/i18n"
-
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/i18n"
+	"github.com/goplaid/x/perm"
 	"github.com/goplaid/x/presets/actions"
 	s "github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
-	"github.com/jinzhu/inflection"
+	"github.com/iancoleman/strcase"
 	h "github.com/theplant/htmlgo"
 	"github.com/thoas/go-funk"
 )
@@ -84,8 +84,15 @@ const bulkPanelPortalName = "bulkPanel"
 const deleteConfirmPortalName = "deleteConfirm"
 
 func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
+
+	if b.mb.p.verifier.Do(PermList).SnakeOn(b.mb.menuGroupName).
+		On(strcase.ToSnake(b.mb.label)).IsAllowed() != nil {
+		err = perm.PermissionDenied
+		return
+	}
+
 	msgr := MustGetMessages(ctx.R)
-	title := msgr.ListingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Plural(b.mb.label)))
+	title := msgr.ListingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.mb.label))
 	r.PageTitle = title
 
 	perPage := b.perPage

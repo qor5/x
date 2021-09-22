@@ -1,8 +1,6 @@
 package presets
 
 import (
-	"errors"
-
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
 	"github.com/goplaid/x/perm"
@@ -187,7 +185,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 
 	if len(id) == 0 {
 		if perr := b.mb.p.verifier.Do(PermCreate).OnObject(b.mb.model).WithReq(ctx.R).IsAllowed(); perr != nil {
-			b.renderFormWithError(&r, errors.New(perm.PermissionDenied), newObj, ctx)
+			b.renderFormWithError(&r, perm.PermissionDenied, newObj, ctx)
 			return
 		}
 	}
@@ -205,7 +203,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 			return
 		}
 		if perr := b.mb.p.verifier.Do(PermUpdate).OnObject(obj).WithReq(ctx.R).IsAllowed(); perr != nil {
-			b.renderFormWithError(&r, errors.New(perm.PermissionDenied), obj, ctx)
+			b.renderFormWithError(&r, perm.PermissionDenied, obj, ctx)
 			return
 		}
 	}

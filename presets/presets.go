@@ -12,6 +12,7 @@ import (
 	"github.com/goplaid/x/i18n"
 	"github.com/goplaid/x/perm"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"
 	"go.uber.org/zap"
@@ -221,6 +222,10 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 
 	var menus []h.HTMLComponent
 	for _, mg := range b.menuGroups {
+		ver := b.verifier.Do(PermList).On("menu:groups").On(strcase.ToSnake(mg.name))
+		if ver.IsAllowed() != nil {
+			continue
+		}
 		var subMenus = []h.HTMLComponent{
 			VListItem(
 				VListItemContent(
@@ -232,6 +237,10 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 			if m.notInMenu {
 				continue
 			}
+			if ver.OnObject(m.model).IsAllowed() != nil {
+				continue
+			}
+
 			href := m.Info().ListingHref()
 			subMenus = append(subMenus,
 				VListItem(
@@ -256,9 +265,14 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 	}
 
 	for _, m := range b.models {
+		if b.verifier.Do(PermList).On("menu").On(strcase.ToSnake(m.label)).IsAllowed() != nil {
+			continue
+		}
+
 		if m.inGroup {
 			continue
 		}
+
 		if m.notInMenu {
 			continue
 		}
