@@ -170,15 +170,6 @@ func (b *FieldBuilders) Except(patterns ...string) (r *FieldBuilders) {
 	return
 }
 
-func (b *FieldBuilders) MustSet(obj interface{}, newObj interface{}) {
-	for _, f := range b.fields {
-		err := reflectutils.Set(obj, f.name, reflectutils.MustGet(newObj, f.name))
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
 func (b *FieldBuilders) String() (r string) {
 	var names []string
 	for _, f := range b.fields {
@@ -212,7 +203,7 @@ func (b *FieldBuilders) ToComponent(mb *ModelBuilder, obj interface{}, verr *web
 			continue
 		}
 
-		if mb.p.verifier.Do(PermGet).SnakeOn(mb.uriName).OnObject(obj).SnakeOn(f.name).IsAllowed() != nil {
+		if mb.p.verifier.Do(PermUpdate).SnakeOn(mb.uriName).OnObject(obj).SnakeOn(f.name).IsAllowed() != nil {
 			continue
 		}
 

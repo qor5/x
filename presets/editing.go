@@ -7,6 +7,7 @@ import (
 	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/inflection"
+	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -208,15 +209,19 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 		}
 	}
 
-	usingB.MustSet(obj, newObj)
-
 	if usingB.setter != nil {
 		usingB.setter(obj, ctx)
 	}
 
 	var vErr web.ValidationErrors
 	for _, f := range usingB.fields {
+
+		if b.mb.p.verifier.Do(PermUpdate).SnakeOn(b.mb.uriName).OnObject(obj).SnakeOn(f.name).IsAllowed() != nil {
+			continue
+		}
+
 		if f.setterFunc == nil {
+			_ = reflectutils.Set(obj, f.name, reflectutils.MustGet(newObj, f.name))
 			continue
 		}
 
