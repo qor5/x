@@ -39,7 +39,7 @@ var cases = []reqCase{
 		name: "Update",
 		reqFunc: func(db *sql.DB) *http.Request {
 			customerData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/customers?__execute_event__=update", strings.NewReader(`
+			r := httptest.NewRequest("POST", "/admin/my_customers?__execute_event__=update", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
@@ -81,7 +81,7 @@ Felix11
 		name: "Create",
 		reqFunc: func(db *sql.DB) *http.Request {
 			emptyCustomerData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/customers?__execute_event__=update", strings.NewReader(`
+			r := httptest.NewRequest("POST", "/admin/my_customers?__execute_event__=update", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
@@ -236,7 +236,7 @@ owner1
 		name: "formDrawerAction AgreeTerms",
 		reqFunc: func(db *sql.DB) *http.Request {
 			customerData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/customers/11?__execute_event__=DrawerAction", strings.NewReader(`
+			r := httptest.NewRequest("POST", "/admin/my_customers/11?__execute_event__=DrawerAction", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
@@ -259,7 +259,7 @@ Content-Disposition: form-data; name="__event_data__"
 		name: "doAction AgreeTerms",
 		reqFunc: func(db *sql.DB) *http.Request {
 			customerData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/customers/11?__execute_event__=doAction", strings.NewReader(`
+			r := httptest.NewRequest("POST", "/admin/my_customers/11?__execute_event__=doAction", strings.NewReader(`
 ------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
 Content-Disposition: form-data; name="__event_data__"
 
@@ -325,7 +325,7 @@ func TestAll(t *testing.T) {
 				var er testEventResponse
 				err := json.NewDecoder(w.Body).Decode(&er)
 				if err != nil {
-					panic(err)
+					t.Fatalf("%s for: %s", err, w.Body.String())
 				}
 				c.eventResponseMatch(&er, db, t)
 			}

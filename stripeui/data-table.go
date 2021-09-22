@@ -170,7 +170,8 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			bindTds = append(bindTds, tdWrapped)
 		}
 
-		if haveRowMenus {
+		opMenuItems := b.rowMenuItemsFunc(obj, id, ctx)
+		if haveRowMenus && len(opMenuItems) > 0 {
 			bindTds = append(bindTds, h.Td(
 				VMenu(
 					web.Slot(
@@ -180,7 +181,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 					).Name("activator").Scope("{ on }"),
 
 					VList(
-						b.rowMenuItemsFunc(obj, id, ctx)...,
+						opMenuItems...,
 					).Dense(true),
 				),
 			).Style("width: 64px;").Class("pl-0"))

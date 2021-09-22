@@ -6,13 +6,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goplaid/x/i18n"
-
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/i18n"
+	"github.com/goplaid/x/perm"
 	"github.com/goplaid/x/presets/actions"
 	s "github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
-	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"
 	"github.com/thoas/go-funk"
 )
@@ -85,8 +84,13 @@ const deleteConfirmPortalName = "deleteConfirm"
 
 func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
 
+	if b.mb.Info().Verifier().Do(PermList).WithReq(ctx.R).IsAllowed() != nil {
+		err = perm.PermissionDenied
+		return
+	}
+
 	msgr := MustGetMessages(ctx.R)
-	title := msgr.ListingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Plural(b.mb.label)))
+	title := msgr.ListingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.mb.label))
 	r.PageTitle = title
 
 	perPage := b.perPage
@@ -169,13 +173,17 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 							DetailingHref(id)).
 					Go())
 			} else {
-				tdbind.SetAttr("@click.self", web.Plaid().
-					EventFunc(actions.DrawerEdit, id).
-					Go())
+				if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(b.mb.model).On(id).WithReq(ctx.R).IsAllowed() == nil {
+
+					tdbind.SetAttr("@click.self", web.Plaid().
+						EventFunc(actions.DrawerEdit, id).
+						Go())
+				}
+
 			}
 			return tdbind
 		}).
-		RowMenuItemsFunc(EditDeleteRowMenuItemsFunc(ctx, "")).
+		RowMenuItemsFunc(EditDeleteRowMenuItemsFunc(b.mb.Info(), "")).
 		Selectable(haveCheckboxes).
 		SelectionParamName(selectedParamName)
 
@@ -376,13 +384,15 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 	ft.String.Equals = msgr.FiltersStringEquals
 	ft.String.Contains = msgr.FiltersStringContains
 
+	disableNewBtn := b.mb.Info().Verifier().Do(PermCreate).WithReq(ctx.R).IsAllowed() != nil
+
 	var toolbar = VToolbar(
 		VSpacer(),
 		VBtn(msgr.New).
 			Color(b.mb.p.primaryColor).
 			Depressed(true).
 			Dark(true).
-			OnClick(actions.DrawerNew, ""),
+			OnClick(actions.DrawerNew, "").Disabled(disableNewBtn),
 	).Flat(true)
 	if fd != nil {
 		toolbar.PrependChildren(Filter(fd).Translations(ft))

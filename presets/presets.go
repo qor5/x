@@ -1,7 +1,6 @@
 package presets
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
+	"github.com/goplaid/x/perm"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"
@@ -26,6 +26,8 @@ type Builder struct {
 	builder             *web.Builder
 	i18nBuilder         *i18n.Builder
 	logger              *zap.Logger
+	permissionBuilder   *perm.Builder
+	verifier            *perm.Verifier
 	dataOperator        DataOperator
 	messagesFunc        MessagesFunc
 	homePageFunc        web.PageFunc
@@ -71,11 +73,22 @@ func New() *Builder {
 		progressBarColor:    "amber",
 		brandTitle:          "Admin",
 		rightDrawerWidth:    600,
+		verifier:            perm.NewVerifier(PermModule, nil),
 	}
 }
 
 func (b *Builder) I18n() (r *i18n.Builder) {
 	return b.i18nBuilder
+}
+
+func (b *Builder) Permission(v *perm.Builder) (r *Builder) {
+	b.permissionBuilder = v
+	b.verifier = perm.NewVerifier(PermModule, v)
+	return b
+}
+
+func (b *Builder) GetPermission() (r *perm.Builder) {
+	return b.permissionBuilder
 }
 
 func (b *Builder) URIPrefix(v string) (r *Builder) {
@@ -207,6 +220,10 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 
 	var menus []h.HTMLComponent
 	for _, mg := range b.menuGroups {
+		ver := b.verifier.Do(PermList).On("menu:groups").SnakeOn(mg.name).WithReq(ctx.R)
+		if ver.IsAllowed() != nil {
+			continue
+		}
 		var subMenus = []h.HTMLComponent{
 			VListItem(
 				VListItemContent(
@@ -218,6 +235,10 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 			if m.notInMenu {
 				continue
 			}
+			if ver.SnakeOn(m.uriName).IsAllowed() != nil {
+				continue
+			}
+
 			href := m.Info().ListingHref()
 			subMenus = append(subMenus,
 				VListItem(
@@ -242,9 +263,14 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 	}
 
 	for _, m := range b.models {
+		if b.verifier.Do(PermList).On("menu").SnakeOn(m.uriName).WithReq(ctx.R).IsAllowed() != nil {
+			continue
+		}
+
 		if m.inGroup {
 			continue
 		}
+
 		if m.notInMenu {
 			continue
 		}
@@ -288,22 +314,10 @@ type contextKey int
 
 const (
 	presetsKey contextKey = iota
-	modelInfoKey
 )
 
 func MustGetMessages(r *http.Request) *Messages {
 	return i18n.MustGetModuleMessages(r, CoreI18nModuleKey, Messages_en_US).(*Messages)
-}
-
-func GetModelInfo(req *http.Request) (r *ModelInfo) {
-	r, _ = req.Context().Value(modelInfoKey).(*ModelInfo)
-	return
-}
-
-func putModelInfo(mi *ModelInfo, in http.Handler) (out http.Handler) {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		in.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), modelInfoKey, mi)))
-	})
 }
 
 const rightDrawerName = "rightDrawer"
@@ -523,16 +537,11 @@ func (b *Builder) initMux() {
 
 func (b *Builder) wrap(m *ModelBuilder, pf web.PageFunc) http.Handler {
 	p := b.builder.Page(pf)
-	var mi *ModelInfo
 	if m != nil {
 		m.ensureEventFuncs(p)
-		mi = m.Info()
 	}
-	return putModelInfo(
-		mi,
-		b.I18n().EnsureLanguage(
-			p,
-		),
+	return b.I18n().EnsureLanguage(
+		p,
 	)
 }
 

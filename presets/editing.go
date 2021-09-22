@@ -3,9 +3,11 @@ package presets
 import (
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
+	"github.com/goplaid/x/perm"
 	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/inflection"
+	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -100,6 +102,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	id := ctx.Event.Params[0]
 
 	var buttonLabel = msgr.Create
+	var disableUpdateBtn bool
 	var title = msgr.CreatingObjectTitle(
 		i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Singular(b.mb.label)),
 	)
@@ -111,6 +114,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 				panic(err)
 			}
 		}
+		disableUpdateBtn = b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil
 		buttonLabel = msgr.Update
 		title = msgr.EditingObjectTitle(
 			i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Singular(b.mb.label)),
@@ -149,6 +153,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 					VBtn(buttonLabel).
 						Dark(true).
 						Color(b.mb.p.primaryColor).
+						Disabled(disableUpdateBtn).
 						Attr("@click", web.Plaid().
 							EventFunc(actions.Update, ctx.Event.Params...).
 							URL(b.mb.Info().ListingHref()).
@@ -176,12 +181,17 @@ func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, e
 func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
 	id := ctx.Event.Params[0]
 	var newObj = b.mb.newModel()
-
 	// don't panic for fields that set in SetterFunc
 	_ = ctx.UnmarshalForm(newObj)
 
-	var obj = b.mb.newModel()
+	if len(id) == 0 {
+		if b.mb.Info().Verifier().Do(PermCreate).ObjectOn(newObj).WithReq(ctx.R).IsAllowed() != nil {
+			b.renderFormWithError(&r, perm.PermissionDenied, newObj, ctx)
+			return
+		}
+	}
 
+	var obj = b.mb.newModel()
 	usingB := b
 	if b.mb.creating != nil && len(id) == 0 {
 		usingB = b.mb.creating
@@ -193,9 +203,11 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 			b.renderFormWithError(&r, err1, obj, ctx)
 			return
 		}
+		if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
+			b.renderFormWithError(&r, perm.PermissionDenied, obj, ctx)
+			return
+		}
 	}
-
-	usingB.MustSet(obj, newObj)
 
 	if usingB.setter != nil {
 		usingB.setter(obj, ctx)
@@ -203,13 +215,20 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 
 	var vErr web.ValidationErrors
 	for _, f := range usingB.fields {
+
+		if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).IsAllowed() != nil {
+			continue
+		}
+
 		if f.setterFunc == nil {
+			_ = reflectutils.Set(obj, f.name, reflectutils.MustGet(newObj, f.name))
 			continue
 		}
 
 		err1 := f.setterFunc(obj, &FieldContext{
-			Name:  f.name,
-			Label: b.getLabel(f.NameLabel),
+			ModelInfo: b.mb.Info(),
+			Name:      f.name,
+			Label:     b.getLabel(f.NameLabel),
 		}, ctx)
 		if err1 != nil {
 			vErr.FieldError(f.name, err1.Error())

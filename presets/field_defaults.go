@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/iancoleman/strcase"
 	"github.com/sunfmin/reflectutils"
@@ -14,10 +15,11 @@ import (
 )
 
 type FieldContext struct {
-	Name    string
-	Label   string
-	Errors  []string
-	Context context.Context
+	Name      string
+	Label     string
+	Errors    []string
+	ModelInfo *ModelInfo
+	Context   context.Context
 }
 
 func (fc *FieldContext) StringValue(obj interface{}) (r string) {
@@ -188,20 +190,24 @@ func cfTextTd(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTM
 	if field.Name == "ID" {
 		id := field.StringValue(obj)
 		if len(id) > 0 {
-			mi := GetModelInfo(ctx.R)
+			mi := field.ModelInfo
 			if mi == nil {
 				return h.Td().Text(id)
 			}
 
-			a := h.A().Text(id)
+			var a h.HTMLComponent
 			if mi.HasDetailing() {
-				a.Attr("@click", web.Plaid().
+				a = h.A().Text(id).Attr("@click", web.Plaid().
 					PushStateURL(mi.DetailingHref(id)).
 					Go(),
 				)
 			} else {
-				a.Attr("@click", web.Plaid().EventFunc("DrawerEdit", id).
-					Go())
+				if field.ModelInfo.Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() == nil {
+					a = h.A().Text(id).Attr("@click", web.Plaid().EventFunc(actions.DrawerEdit, id).
+						Go())
+				} else {
+					a = h.Text(id)
+				}
 			}
 			return h.Td(a)
 		}

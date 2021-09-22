@@ -559,6 +559,12 @@ func Mux(prefix string) http.Handler {
 					slug:  "detail-page-for-complex-object.html",
 					doc:   presets_guide.DetailPageForComplexObject,
 				},
+
+				{
+					title: "Permissions",
+					slug:  "permissions.html",
+					doc:   presets_guide.Permissions,
+				},
 			},
 		},
 		{
@@ -856,6 +862,13 @@ func SamplesHandler(prefix string) http.Handler {
 	mux.Handle(
 		e21_presents.PresetsDetailPageCardsPath+"/",
 		c10,
+	)
+
+	c11 := presets.New().AssetFunc(addGA)
+	e21_presents.PresetsPermissions(c11)
+	mux.Handle(
+		e21_presents.PresetsPermissionsPath+"/",
+		c11,
 	)
 
 	return mux

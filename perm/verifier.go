@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/iancoleman/strcase"
 	"github.com/ory/ladon"
 )
 
@@ -24,9 +25,9 @@ type Verifier struct {
 	vr      *verReq
 }
 
-func Module(v string, b *Builder) (r *Verifier) {
+func NewVerifier(module string, b *Builder) (r *Verifier) {
 	r = &Verifier{
-		module: v,
+		module: module,
 	}
 
 	if b == nil {
@@ -37,7 +38,7 @@ func Module(v string, b *Builder) (r *Verifier) {
 	return
 }
 
-func (b *Verifier) Do(v string) (r *Verifier) {
+func (b *Verifier) Spawn() (r *Verifier) {
 	if b.builder == nil {
 		return b
 	}
@@ -47,12 +48,26 @@ func (b *Verifier) Do(v string) (r *Verifier) {
 		builder: b.builder,
 	}
 
-	r.vr = &verReq{
-		resourcesParts: []string{b.module},
-		req: &ladon.Request{
-			Action: v,
-		},
+	resourceParts := []string{b.module}
+	if b.vr != nil {
+		resourceParts = b.vr.resourcesParts
 	}
+
+	r.vr = &verReq{
+		resourcesParts: append([]string{}, resourceParts...),
+		req:            &ladon.Request{},
+	}
+
+	return
+}
+
+func (b *Verifier) Do(v string) (r *Verifier) {
+	if b.builder == nil {
+		return b
+	}
+
+	r = b.Spawn()
+	r.vr.req.Action = v
 	return
 }
 
@@ -65,7 +80,24 @@ func (b *Verifier) On(vs ...string) (r *Verifier) {
 	return b
 }
 
-func (b *Verifier) OnObject(v interface{}) (r *Verifier) {
+func (b *Verifier) SnakeOn(vs ...string) (r *Verifier) {
+	if b.builder == nil {
+		return b
+	}
+
+	var fixed []string
+	for _, v := range vs {
+		if len(v) == 0 {
+			continue
+		}
+		fixed = append(fixed, strcase.ToSnake(v))
+	}
+
+	b.On(fixed...)
+	return b
+}
+
+func (b *Verifier) ObjectOn(v interface{}) (r *Verifier) {
 	if b.builder == nil {
 		return b
 	}
@@ -129,10 +161,11 @@ func (b *Verifier) IsAllowed() error {
 	// any of the subjects have permission, then have permission
 	for _, sub := range b.vr.subjects {
 		b.vr.req.Subject = sub
-		if Verbose {
-			fmt.Printf("permission req: %#+v\n", b.vr.req)
-		}
+
 		err = b.builder.ladon.IsAllowed(b.vr.req)
+		if Verbose {
+			fmt.Printf("have permission: %+v, req: %#+v\n", err == nil, b.vr.req)
+		}
 		if err == nil {
 			return nil
 		}

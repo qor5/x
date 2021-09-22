@@ -6,29 +6,31 @@ import (
 	"strings"
 
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/perm"
 	"github.com/goplaid/x/presets/actions"
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 )
 
 type ModelBuilder struct {
-	p            *Builder
-	model        interface{}
-	primaryField string
-	modelType    reflect.Type
-	inGroup      bool
-	notInMenu    bool
-	menuIcon     string
-	uriName      string
-	label        string
-	fieldLabels  []string
-	placeholders []string
-	listing      *ListingBuilder
-	detailing    *DetailingBuilder
-	editing      *EditingBuilder
-	creating     *EditingBuilder
-	writeFields  *FieldBuilders
-	hasDetailing bool
+	p             *Builder
+	model         interface{}
+	primaryField  string
+	modelType     reflect.Type
+	inGroup       bool
+	menuGroupName string
+	notInMenu     bool
+	menuIcon      string
+	uriName       string
+	label         string
+	fieldLabels   []string
+	placeholders  []string
+	listing       *ListingBuilder
+	detailing     *DetailingBuilder
+	editing       *EditingBuilder
+	creating      *EditingBuilder
+	writeFields   *FieldBuilders
+	hasDetailing  bool
 }
 
 func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
@@ -40,7 +42,7 @@ func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
 	modelstr := r.modelType.String()
 	modelName := modelstr[strings.LastIndex(modelstr, ".")+1:]
 	r.label = strcase.ToCamel(inflection.Plural(modelName))
-	r.uriName = strcase.ToKebab(modelName)
+	r.uriName = inflection.Plural(strcase.ToKebab(modelName))
 
 	r.newListing()
 	r.newDetailing()
@@ -103,18 +105,15 @@ func (b *ModelBuilder) Info() (r *ModelInfo) {
 type ModelInfo ModelBuilder
 
 func (b *ModelInfo) ListingHref() string {
-	muri := inflection.Plural(b.uriName)
-	return fmt.Sprintf("%s/%s", b.p.prefix, muri)
+	return fmt.Sprintf("%s/%s", b.p.prefix, b.uriName)
 }
 
 func (b *ModelInfo) EditingHref(id string) string {
-	muri := inflection.Plural(b.uriName)
-	return fmt.Sprintf("%s/%s/%s/edit", b.p.prefix, muri, id)
+	return fmt.Sprintf("%s/%s/%s/edit", b.p.prefix, b.uriName, id)
 }
 
 func (b *ModelInfo) DetailingHref(id string) string {
-	muri := inflection.Plural(b.uriName)
-	return fmt.Sprintf("%s/%s/%s", b.p.prefix, muri, id)
+	return fmt.Sprintf("%s/%s/%s", b.p.prefix, b.uriName, id)
 }
 
 func (b *ModelInfo) HasDetailing() bool {
@@ -123,6 +122,16 @@ func (b *ModelInfo) HasDetailing() bool {
 
 func (b *ModelInfo) PresetsPrefix() string {
 	return b.p.prefix
+}
+
+func (b *ModelInfo) URIName() string {
+	return b.uriName
+}
+
+func (b *ModelInfo) Verifier() *perm.Verifier {
+	return b.p.verifier.Spawn().
+		SnakeOn(b.menuGroupName).
+		SnakeOn(b.uriName)
 }
 
 func (b *ModelBuilder) URIName(v string) (r *ModelBuilder) {
@@ -137,6 +146,7 @@ func (b *ModelBuilder) PrimaryField(v string) (r *ModelBuilder) {
 
 func (b *ModelBuilder) MenuGroup(v string) (r *ModelBuilder) {
 	b.p.MenuGroup(v).AppendModels(b)
+	b.menuGroupName = v
 	b.inGroup = true
 	return b
 }
@@ -168,8 +178,9 @@ func (b *ModelBuilder) Placeholders(vs ...string) (r *ModelBuilder) {
 
 func (b *ModelBuilder) getComponentFuncField(field *FieldBuilder) (r *FieldContext) {
 	r = &FieldContext{
-		Name:  field.name,
-		Label: b.getLabel(field.NameLabel),
+		ModelInfo: b.Info(),
+		Name:      field.name,
+		Label:     b.getLabel(field.NameLabel),
 	}
 	return
 }

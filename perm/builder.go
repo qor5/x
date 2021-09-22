@@ -1,6 +1,7 @@
 package perm
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -21,6 +22,8 @@ const (
 	Anonymous = "anonymous"
 )
 
+var PermissionDenied = errors.New("permission denied")
+
 type Context = ladon.Context
 type Conditions = ladon.Conditions
 type SubjectsFunc func(r *http.Request) []string
@@ -40,7 +43,7 @@ func ToPermissionRN(v interface{}) []string {
 	typeName = strings.NewReplacer("*", "", ".", "-").Replace(typeName)
 	typeName = strcase.ToSnake(inflection.Plural(typeName))
 	id, err := reflectutils.Get(v, "ID")
-	if err == nil && len(fmt.Sprint(id)) > 0 {
+	if err == nil && len(fmt.Sprint(id)) > 0 && fmt.Sprint(id) != "0" {
 		return []string{typeName, fmt.Sprint(id)}
 	}
 	return []string{typeName}
@@ -81,35 +84,5 @@ func (b *Builder) SubjectsFunc(v SubjectsFunc) (r *Builder) {
 
 func (b *Builder) ContextFunc(v ContextFunc) (r *Builder) {
 	b.contextFunc = v
-	return b
-}
-
-type PolicyBuilder struct {
-	policy *ladon.DefaultPolicy
-}
-
-func They(subjects ...string) (r *PolicyBuilder) {
-	r = &PolicyBuilder{}
-	r.policy = &ladon.DefaultPolicy{Subjects: subjects}
-	return
-}
-
-func (b *PolicyBuilder) Are(effect string) (r *PolicyBuilder) {
-	b.policy.Effect = effect
-	return b
-}
-
-func (b *PolicyBuilder) ToDo(actions ...string) (r *PolicyBuilder) {
-	b.policy.Actions = actions
-	return b
-}
-
-func (b *PolicyBuilder) On(resources ...string) (r *PolicyBuilder) {
-	b.policy.Resources = resources
-	return b
-}
-
-func (b *PolicyBuilder) Given(conditions Conditions) (r *PolicyBuilder) {
-	b.policy.Conditions = conditions
 	return b
 }

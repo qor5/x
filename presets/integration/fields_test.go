@@ -127,7 +127,9 @@ func TestFields(t *testing.T) {
 					Except("Float*").ToComponent(mb, user, vd, ctx)
 			},
 			expect: `
-<td>1</td>
+<td>
+<a @click='$plaid().event($event).vars(vars).eventFunc("presets_DrawerEdit", "1").go()'>1</a>
+</td>
 
 <td>2</td>
 
