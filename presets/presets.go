@@ -8,10 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/goplaid/x/perm"
-
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
+	"github.com/goplaid/x/perm"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"

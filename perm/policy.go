@@ -11,9 +11,11 @@ type PolicyBuilder struct {
 	module string
 }
 
-func NewPolicy() *PolicyBuilder {
+func PolicyFor(subjects ...string) *PolicyBuilder {
 	return &PolicyBuilder{
-		policy: &ladon.DefaultPolicy{},
+		policy: &ladon.DefaultPolicy{
+			Subjects: subjects,
+		},
 	}
 }
 
@@ -22,12 +24,7 @@ func (b *PolicyBuilder) Module(module string) (r *PolicyBuilder) {
 	return b
 }
 
-func (b *PolicyBuilder) They(subjects ...string) (r *PolicyBuilder) {
-	b.policy.Subjects = subjects
-	return b
-}
-
-func (b *PolicyBuilder) Are(effect string) (r *PolicyBuilder) {
+func (b *PolicyBuilder) WhoAre(effect string) (r *PolicyBuilder) {
 	b.policy.Effect = effect
 	return b
 }
