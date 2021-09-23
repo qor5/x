@@ -216,7 +216,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	var vErr web.ValidationErrors
 	for _, f := range usingB.fields {
 
-		if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).IsAllowed() != nil {
+		if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
 			continue
 		}
 

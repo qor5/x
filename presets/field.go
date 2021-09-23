@@ -202,7 +202,7 @@ func (b *FieldBuilders) ToComponent(mb *ModelBuilder, obj interface{}, verr *web
 			continue
 		}
 
-		if mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).IsAllowed() != nil {
+		if mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
 			continue
 		}
 
