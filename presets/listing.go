@@ -13,7 +13,6 @@ import (
 	s "github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
-	"github.com/thoas/go-funk"
 )
 
 type ListingBuilder struct {
@@ -408,13 +407,4 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 		toolbar.PrependChildren(Filter(fd).Translations(ft))
 	}
 	return toolbar
-}
-
-func allSelected(selectedInURL []string, pageSelected []string) bool {
-	for _, ps := range pageSelected {
-		if !funk.ContainsString(selectedInURL, ps) {
-			return false
-		}
-	}
-	return true
 }

@@ -6,9 +6,8 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/goplaid/x/i18n"
-
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/i18n"
 	v "github.com/goplaid/x/vuetify"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
