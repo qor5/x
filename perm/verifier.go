@@ -71,6 +71,14 @@ func (b *Verifier) Do(v string) (r *Verifier) {
 	return
 }
 
+func (b *Verifier) SnakeDo(actions ...string) (r *Verifier) {
+	var fixed = []string{b.module}
+	for _, a := range actions {
+		fixed = append(fixed, strcase.ToSnake(a))
+	}
+	return b.Do(strings.Join(fixed, ":"))
+}
+
 func (b *Verifier) On(vs ...string) (r *Verifier) {
 	if b.builder == nil {
 		return b

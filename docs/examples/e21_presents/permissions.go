@@ -39,6 +39,8 @@ func PresetsPermissions(b *presets.Builder) (
 				ToDo(presets.PermCreate, presets.PermUpdate).On("*companies*"),
 			perm.PolicyFor("editor").WhoAre(perm.Denied).
 				ToDo(presets.PermUpdate).On("*customers:*:company_id*"),
+			perm.PolicyFor("editor").WhoAre(perm.Denied).
+				ToDo("*bulk_actions:delete").On("*:customers*"),
 		).
 		SubjectsFunc(func(r *http.Request) []string {
 			return []string{"editor"}

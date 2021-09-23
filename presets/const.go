@@ -2,11 +2,11 @@ package presets
 
 const (
 	PermModule = "presets"
-	PermList   = "list"
-	PermGet    = "get"
-	PermCreate = "create"
-	PermUpdate = "update"
-	PermDelete = "delete"
+	PermList   = "presets:list"
+	PermGet    = "presets:get"
+	PermCreate = "presets:create"
+	PermUpdate = "presets:update"
+	PermDelete = "presets:delete"
 )
 
 var (

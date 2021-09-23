@@ -300,6 +300,12 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 	if bulk == nil {
 		panic("bulk required")
 	}
+
+	if b.mb.Info().Verifier().SnakeDo("bulk_actions", bulk.name).WithReq(ctx.R).IsAllowed() != nil {
+		err = perm.PermissionDenied
+		return
+	}
+
 	selectedIds := strings.Split(ctx.Event.Params[1], ",")
 	err1 := bulk.updateFunc(selectedIds, ctx)
 	if err1 != nil || ctx.Flash != nil {
@@ -321,6 +327,10 @@ func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *web.EventContex
 	).Flat(true)
 
 	for _, ba := range b.bulkActions {
+		if b.mb.Info().Verifier().SnakeDo("bulk_actions", ba.name).WithReq(ctx.R).IsAllowed() != nil {
+			continue
+		}
+
 		toolbar.AppendChildren(
 			VBtn(b.mb.getLabel(ba.NameLabel)).
 				Color(b.mb.p.primaryColor).
