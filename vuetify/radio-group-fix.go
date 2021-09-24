@@ -8,6 +8,6 @@ func (b *VRadioGroupBuilder) FieldName(v string) (r *VRadioGroupBuilder) {
 }
 
 func (b *VRadioGroupBuilder) ErrorMessages(v ...string) (r *VRadioGroupBuilder) {
-	setErrorMessages(b.tag, v)
+	SetErrorMessages(b.tag, v)
 	return b
 }

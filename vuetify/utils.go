@@ -15,7 +15,7 @@ func stringsTrim(vs ...string) (r []string) {
 	return
 }
 
-func setErrorMessages(t h.MutableAttrHTMLComponent, vs []string) {
+func SetErrorMessages(t h.MutableAttrHTMLComponent, vs []string) {
 	cvs := stringsTrim(vs...)
 	if len(cvs) == 0 {
 		return

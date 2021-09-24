@@ -12,6 +12,7 @@ import (
 	"github.com/goplaid/x/presets/actions"
 	s "github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/goplaid/x/vuetifyx"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -116,7 +117,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 		searchParams.Page = 1
 	}
 
-	var fd FilterData
+	var fd vuetifyx.FilterData
 	if b.filterDataFunc != nil {
 		fd = b.filterDataFunc(ctx)
 
@@ -251,7 +252,7 @@ func (b *ListingBuilder) bulkPanel(bulk *ActionBuilder, selectedIds []string, ct
 					Go()),
 
 			VBtn(msgr.OK).
-				Color(b.mb.p.primaryColor).
+				Color("primary").
 				Depressed(true).
 				Dark(true).
 				OnClick(actions.DoBulkAction, bulk.name, strings.Join(selectedIds, ",")),
@@ -276,7 +277,7 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 						On("click", "vars.deleteConfirmation = false"),
 
 					VBtn(msgr.Delete).
-						Color(b.mb.p.primaryColor).
+						Color("primary").
 						Depressed(true).
 						Dark(true).
 						Attr("@click", web.Plaid().
@@ -332,7 +333,7 @@ func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *web.EventContex
 
 		toolbar.AppendChildren(
 			VBtn(b.mb.getLabel(ba.NameLabel)).
-				Color(b.mb.p.primaryColor).
+				Color("primary").
 				Depressed(true).
 				Dark(true).
 				Class("ml-2").
@@ -366,8 +367,8 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 	return tabs.Value(value)
 }
 
-func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventContext, fd FilterData) h.HTMLComponent {
-	ft := FilterTranslations{}
+func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventContext, fd vuetifyx.FilterData) h.HTMLComponent {
+	ft := vuetifyx.FilterTranslations{}
 	ft.Filters = msgr.Filters
 	ft.Filter = msgr.Filter
 	ft.Done = msgr.FiltersDone
@@ -398,13 +399,13 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 	var toolbar = VToolbar(
 		VSpacer(),
 		VBtn(msgr.New).
-			Color(b.mb.p.primaryColor).
+			Color("primary").
 			Depressed(true).
 			Dark(true).
 			OnClick(actions.DrawerNew, "").Disabled(disableNewBtn),
 	).Flat(true)
 	if fd != nil {
-		toolbar.PrependChildren(Filter(fd).Translations(ft))
+		toolbar.PrependChildren(vuetifyx.VXFilter(fd).Translations(ft))
 	}
 	return toolbar
 }

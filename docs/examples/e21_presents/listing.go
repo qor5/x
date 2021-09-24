@@ -12,6 +12,7 @@ import (
 	"github.com/goplaid/x/presets/actions"
 	"github.com/goplaid/x/presets/gorm2op"
 	v "github.com/goplaid/x/vuetify"
+	"github.com/goplaid/x/vuetifyx"
 	. "github.com/theplant/htmlgo"
 	"golang.org/x/text/language"
 	"gorm.io/driver/sqlite"
@@ -141,37 +142,37 @@ func PresetsListingCustomizationFilters(b *presets.Builder) (
 	cust, cl, ce, db = PresetsListingCustomizationFields(b)
 	b.URIPrefix(PresetsListingCustomizationFiltersPath)
 
-	cl.FilterDataFunc(func(ctx *web.EventContext) v.FilterData {
+	cl.FilterDataFunc(func(ctx *web.EventContext) vuetifyx.FilterData {
 		msgr := i18n.MustGetModuleMessages(ctx.R, presets.ModelsI18nModuleKey, Messages_en_US).(*Messages)
-		var companyOptions []*v.SelectItem
+		var companyOptions []*vuetifyx.SelectItem
 		err := db.Model(&Company{}).Select("name as text, id as value").Scan(&companyOptions).Error
 		if err != nil {
 			panic(err)
 		}
 
-		return []*v.FilterItem{
+		return []*vuetifyx.FilterItem{
 			{
 				Key:          "created",
 				Label:        msgr.CustomersFilterCreated,
-				ItemType:     v.ItemTypeDate,
+				ItemType:     vuetifyx.ItemTypeDate,
 				SQLCondition: `cast(strftime('%%s', created_at) as INTEGER) %s ?`,
 			},
 			{
 				Key:          "approved",
 				Label:        msgr.CustomersFilterApproved,
-				ItemType:     v.ItemTypeDate,
+				ItemType:     vuetifyx.ItemTypeDate,
 				SQLCondition: `cast(strftime('%%s', approved_at) as INTEGER) %s ?`,
 			},
 			{
 				Key:          "name",
 				Label:        msgr.CustomersFilterName,
-				ItemType:     v.ItemTypeString,
+				ItemType:     vuetifyx.ItemTypeString,
 				SQLCondition: `name %s ?`,
 			},
 			{
 				Key:          "company",
 				Label:        msgr.CustomersFilterCompany,
-				ItemType:     v.ItemTypeSelect,
+				ItemType:     vuetifyx.ItemTypeSelect,
 				SQLCondition: `company_id %s ?`,
 				Options:      companyOptions,
 			},

@@ -7,6 +7,7 @@ import (
 
 	"github.com/goplaid/web"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/goplaid/x/vuetifyx"
 	"github.com/rs/xid"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
@@ -139,7 +140,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 
 		if b.selectable {
 			tds = append(tds, h.Td(
-				VCheckbox().
+				vuetifyx.VXCheckbox().
 					Class("mt-0").
 					FieldName(b.selectionParamName).
 					LoadPageWithArrayOp(true).
@@ -236,7 +237,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			}
 
 			heads = append(heads, h.Th("").Children(
-				VCheckbox().
+				vuetifyx.VXCheckbox().
 					Class("mt-0").
 					TrueValue(idsOfPageComma).
 					InputValue(allInputValue).

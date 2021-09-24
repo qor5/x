@@ -29,6 +29,7 @@ import (
 	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/tiptap"
 	v "github.com/goplaid/x/vuetify"
+	"github.com/goplaid/x/vuetifyx"
 	. "github.com/theplant/htmlgo"
 )
 
@@ -401,7 +402,9 @@ func Mux(prefix string) http.Handler {
 	// @snippet_begin(VuetifyComponentsPackSample)
 	mux.Handle("/assets/vuetify.js",
 		ub.PacksHandler("text/javascript",
+			v.Vuetify(""),
 			v.JSComponentsPack(),
+			vuetifyx.JSComponentsPack(),
 		),
 	)
 

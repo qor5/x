@@ -1,4 +1,4 @@
-package vuetify
+package vuetifyx
 
 import (
 	"bytes"
@@ -14,15 +14,15 @@ import (
 	h "github.com/theplant/htmlgo"
 )
 
-type FilterBuilder struct {
+type VXFilterBuilder struct {
 	value FilterData
 	tag   *h.HTMLTagBuilder
 }
 
-func Filter(value FilterData) (r *FilterBuilder) {
-	r = &FilterBuilder{
+func VXFilter(value FilterData) (r *VXFilterBuilder) {
+	r = &VXFilterBuilder{
 		value: value,
-		tag:   h.Tag("vw-filter"),
+		tag:   h.Tag("vx-filter"),
 	}
 
 	r.Value(value).ReplaceWindowLocation(true)
@@ -30,22 +30,22 @@ func Filter(value FilterData) (r *FilterBuilder) {
 	return
 }
 
-func (b *FilterBuilder) Value(v FilterData) (r *FilterBuilder) {
+func (b *VXFilterBuilder) Value(v FilterData) (r *VXFilterBuilder) {
 	b.tag.Attr(":value", v)
 	return b
 }
 
-func (b *FilterBuilder) ReplaceWindowLocation(v bool) (r *FilterBuilder) {
+func (b *VXFilterBuilder) ReplaceWindowLocation(v bool) (r *VXFilterBuilder) {
 	b.tag.Attr(":replace-window-location", fmt.Sprint(v))
 	return b
 }
 
-func (b *FilterBuilder) Translations(v FilterTranslations) (r *FilterBuilder) {
+func (b *VXFilterBuilder) Translations(v FilterTranslations) (r *VXFilterBuilder) {
 	b.tag.Attr(":translations", h.JSONString(v))
 	return b
 }
 
-func (b *FilterBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+func (b *VXFilterBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }
 

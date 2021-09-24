@@ -6,6 +6,7 @@ import (
 	"github.com/Pallinder/go-randomdata"
 	"github.com/goplaid/web"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/goplaid/x/vuetifyx"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -79,7 +80,7 @@ func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error)
 			Label("Static Options").
 			Value(globalState.Values1),
 
-		VAutocomplete().
+		vuetifyx.VXAutocomplete().
 			ItemsEventFunc("users").
 			ItemText("Name").
 			ItemValue("Login").

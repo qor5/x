@@ -3,7 +3,7 @@ package vuetify
 import h "github.com/theplant/htmlgo"
 
 func (b *VSliderBuilder) ErrorMessages(v ...string) (r *VSliderBuilder) {
-	setErrorMessages(b.tag, v)
+	SetErrorMessages(b.tag, v)
 	return b
 }
 

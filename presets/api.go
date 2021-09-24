@@ -5,7 +5,7 @@ import (
 	"net/url"
 
 	"github.com/goplaid/web"
-	v "github.com/goplaid/x/vuetify"
+	"github.com/goplaid/x/vuetifyx"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -34,7 +34,7 @@ type FetchFunc func(obj interface{}, id string, ctx *web.EventContext) (r interf
 type SaveFunc func(obj interface{}, id string, ctx *web.EventContext) (err error)
 type DeleteFunc func(obj interface{}, id string, ctx *web.EventContext) (err error)
 
-type FilterDataFunc func(ctx *web.EventContext) v.FilterData
+type FilterDataFunc func(ctx *web.EventContext) vuetifyx.FilterData
 
 type FilterTab struct {
 	Label string

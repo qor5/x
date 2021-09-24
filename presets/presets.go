@@ -11,6 +11,7 @@ import (
 	"github.com/goplaid/x/i18n"
 	"github.com/goplaid/x/perm"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/goplaid/x/vuetifyx"
 	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"
 	"go.uber.org/zap"
@@ -33,7 +34,7 @@ type Builder struct {
 	homePageFunc        web.PageFunc
 	brandFunc           ComponentFunc
 	brandTitle          string
-	primaryColor        string
+	vuetifyOptions      string
 	progressBarColor    string
 	rightDrawerWidth    int
 	writeFieldDefaults  *FieldDefaults
@@ -69,7 +70,6 @@ func New() *Builder {
 		writeFieldDefaults:  NewFieldDefaults(WRITE),
 		listFieldDefaults:   NewFieldDefaults(LIST),
 		detailFieldDefaults: NewFieldDefaults(DETAIL),
-		primaryColor:        "indigo",
 		progressBarColor:    "amber",
 		brandTitle:          "Admin",
 		rightDrawerWidth:    600,
@@ -130,13 +130,13 @@ func (b *Builder) BrandTitle(v string) (r *Builder) {
 	return b
 }
 
-func (b *Builder) RightDrawerWidth(v int) (r *Builder) {
-	b.rightDrawerWidth = v
+func (b *Builder) VuetifyOptions(v string) (r *Builder) {
+	b.vuetifyOptions = v
 	return b
 }
 
-func (b *Builder) PrimaryColor(v string) (r *Builder) {
-	b.primaryColor = v
+func (b *Builder) RightDrawerWidth(v int) (r *Builder) {
+	b.rightDrawerWidth = v
 	return b
 }
 
@@ -257,8 +257,7 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 		menus = append(menus, VListGroup(
 			subMenus...).
 			PrependIcon(mg.icon).
-			Value(true).
-			Color(b.primaryColor),
+			Value(true),
 		)
 	}
 
@@ -286,7 +285,7 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 						h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, m.label)),
 					),
 				),
-			).Class(activeClass(ctx, href)).Color(b.primaryColor).
+			).Class(activeClass(ctx, href)).Color("primary").
 				Attr("@click", web.Plaid().PushStateURL(href).Go()),
 		)
 	}
@@ -433,7 +432,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 					// ).Method("GET"),
 				).AlignCenter(true).Attr("style", "max-width: 650px"),
 			).Dark(true).
-				Color(b.primaryColor).
+				Color("primary").
 				App(true).
 				ClippedLeft(true),
 
@@ -477,7 +476,9 @@ func (b *Builder) initMux() {
 	mainJSPath := b.prefix + "/assets/main.js"
 	mux.Handle(pat.Get(mainJSPath),
 		ub.PacksHandler("text/javascript",
+			Vuetify(b.vuetifyOptions),
 			JSComponentsPack(),
+			vuetifyx.JSComponentsPack(),
 			web.JSComponentsPack(),
 		),
 	)

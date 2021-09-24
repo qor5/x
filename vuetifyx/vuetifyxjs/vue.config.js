@@ -8,6 +8,6 @@ module.exports = {
 		output: {
 			libraryExport: 'default'
 		},
-		externals: { vue: "Vue" },
+		externals: { vue: "Vue", vuetify: "Vuetify" },
 	}
 }

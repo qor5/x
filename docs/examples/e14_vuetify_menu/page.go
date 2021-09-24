@@ -43,7 +43,7 @@ func HelloVuetifyMenu(ctx *web.EventContext) (pr web.PageResponse, err error) {
 				VList(
 					VListItem(
 						VListItemAvatar(
-							h.Img("https://cdn.vuetifyjs.com/images/john.jpg").Alt("John"),
+							h.Img("https://cdn.vuetifyxjs.com/images/john.jpg").Alt("John"),
 						),
 						VListItemContent(
 							VListItemTitle(h.Text("John Leider")),

@@ -1,10 +1,3 @@
-CUR=$(pwd)/$(dirname $0)
-
-if test "$1" = 'clean'; then
-    echo "Removing node_modules"
-    rm -rf ./vuetifyjs/node_modules/
-fi
-
-rm -r $CUR/vuetifyjs/dist
-echo "Building vuetifyjs"
-cd $CUR/vuetifyjs && npm install && npm run build
+mkdir -p dist
+curl https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.js > dist/vuetify.min.js
+curl https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css > dist/vuetify.min.css

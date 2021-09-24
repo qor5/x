@@ -11,6 +11,13 @@ type VCheckboxBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
+func VCheckbox(children ...h.HTMLComponent) (r *VCheckboxBuilder) {
+	r = &VCheckboxBuilder{
+		tag: h.Tag("v-checkbox").Children(children...),
+	}
+	return
+}
+
 func (b *VCheckboxBuilder) AppendIcon(v string) (r *VCheckboxBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b

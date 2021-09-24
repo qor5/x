@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --target lib --name vuetifyjs --formats umd-min src/main.ts",
+    "build": "vue-cli-service build --target lib --name vuetifyxjs --formats umd-min src/main.ts",
     "lint": "vue-cli-service lint",
     "test": "vue-cli-service test:unit"
   },

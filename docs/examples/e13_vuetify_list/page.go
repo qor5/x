@@ -31,7 +31,7 @@ func HelloVuetifyList(ctx *web.EventContext) (pr web.PageResponse, err error) {
 			VSubheader(h.Text("Today")),
 			VListItem(
 				VListItemAvatar(
-					h.Img("https://cdn.vuetifyjs.com/images/lists/1.jpg"),
+					h.Img("https://cdn.vuetifyxjs.com/images/lists/1.jpg"),
 				),
 				VListItemContent(
 					VListItemTitle(h.Text("Brunch this weekend?")),
@@ -44,7 +44,7 @@ func HelloVuetifyList(ctx *web.EventContext) (pr web.PageResponse, err error) {
 			VDivider().Inset(true),
 			VListItem(
 				VListItemAvatar(
-					h.Img("https://cdn.vuetifyjs.com/images/lists/2.jpg"),
+					h.Img("https://cdn.vuetifyxjs.com/images/lists/2.jpg"),
 				),
 				VListItemContent(
 					VListItemTitle(h.RawHTML(`Summer BBQ <span class="grey--text text--lighten-1">4</span>`)),
@@ -54,7 +54,7 @@ func HelloVuetifyList(ctx *web.EventContext) (pr web.PageResponse, err error) {
 			VDivider().Inset(true),
 			VListItem(
 				VListItemAvatar(
-					h.Img("https://cdn.vuetifyjs.com/images/lists/3.jpg"),
+					h.Img("https://cdn.vuetifyxjs.com/images/lists/3.jpg"),
 				),
 				VListItemContent(
 					VListItemTitle(h.Text(`Oui oui`)),

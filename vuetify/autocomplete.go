@@ -1,10 +1,22 @@
 package vuetify
 
 import (
+	"context"
 	"fmt"
 
 	h "github.com/theplant/htmlgo"
 )
+
+type VAutocompleteBuilder struct {
+	tag *h.HTMLTagBuilder
+}
+
+func VAutocomplete(children ...h.HTMLComponent) (r *VAutocompleteBuilder) {
+	r = &VAutocompleteBuilder{
+		tag: h.Tag("v-autocomplete").Children(children...),
+	}
+	return
+}
 
 func (b *VAutocompleteBuilder) AllowOverflow(v bool) (r *VAutocompleteBuilder) {
 	b.tag.Attr(":allow-overflow", fmt.Sprint(v))
@@ -183,6 +195,11 @@ func (b *VAutocompleteBuilder) ItemText(v string) (r *VAutocompleteBuilder) {
 
 func (b *VAutocompleteBuilder) ItemValue(v string) (r *VAutocompleteBuilder) {
 	b.tag.Attr("item-value", v)
+	return b
+}
+
+func (b *VAutocompleteBuilder) Items(v interface{}) (r *VAutocompleteBuilder) {
+	b.tag.Attr(":items", h.JSONString(v))
 	return b
 }
 
@@ -403,4 +420,8 @@ func (b *VAutocompleteBuilder) On(name string, value string) (r *VAutocompleteBu
 func (b *VAutocompleteBuilder) Bind(name string, value string) (r *VAutocompleteBuilder) {
 	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
+}
+
+func (b *VAutocompleteBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	return b.tag.MarshalHTML(ctx)
 }

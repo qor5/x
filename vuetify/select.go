@@ -1,10 +1,22 @@
 package vuetify
 
 import (
+	"context"
 	"fmt"
 
 	h "github.com/theplant/htmlgo"
 )
+
+type VSelectBuilder struct {
+	tag *h.HTMLTagBuilder
+}
+
+func VSelect(children ...h.HTMLComponent) (r *VSelectBuilder) {
+	r = &VSelectBuilder{
+		tag: h.Tag("v-select").Children(children...),
+	}
+	return
+}
 
 func (b *VSelectBuilder) AppendIcon(v string) (r *VSelectBuilder) {
 	b.tag.Attr("append-icon", v)
@@ -163,6 +175,11 @@ func (b *VSelectBuilder) ItemText(v string) (r *VSelectBuilder) {
 
 func (b *VSelectBuilder) ItemValue(v string) (r *VSelectBuilder) {
 	b.tag.Attr("item-value", v)
+	return b
+}
+
+func (b *VSelectBuilder) Items(v interface{}) (r *VSelectBuilder) {
+	b.tag.Attr(":items", h.JSONString(v))
 	return b
 }
 
@@ -373,4 +390,8 @@ func (b *VSelectBuilder) On(name string, value string) (r *VSelectBuilder) {
 func (b *VSelectBuilder) Bind(name string, value string) (r *VSelectBuilder) {
 	b.tag.Attr(fmt.Sprintf("v-bind:%s", name), value)
 	return b
+}
+
+func (b *VSelectBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	return b.tag.MarshalHTML(ctx)
 }

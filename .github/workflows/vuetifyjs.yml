@@ -1,7 +1,7 @@
 # This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: vuetifyjs
+name: vuetifyxjs
 
 on:
   push:
@@ -29,5 +29,5 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-          cache-dependency-path: vuetify/vuetifyjs/package-lock.json
-      - run: cd ./vuetify/vuetifyjs/ && npm install && npm run build && npm run test
+          cache-dependency-path: vuetifyx/vuetifyxjs/package-lock.json
+      - run: cd ./vuetifyx/vuetifyxjs/ && npm install && npm run build && npm run test

@@ -1,9 +1,9 @@
-package vuetify_test
+package vuetifyx_test
 
 import (
 	"testing"
 
-	. "github.com/goplaid/x/vuetify"
+	. "github.com/goplaid/x/vuetifyx"
 	"github.com/theplant/testingutils"
 )
 

@@ -152,7 +152,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 					VSpacer(),
 					VBtn(buttonLabel).
 						Dark(true).
-						Color(b.mb.p.primaryColor).
+						Color("primary").
 						Disabled(disableUpdateBtn).
 						Attr("@click", web.Plaid().
 							EventFunc(actions.Update, ctx.Event.Params...).

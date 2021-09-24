@@ -8,6 +8,6 @@ func (b *VTextareaBuilder) FieldName(v string) (r *VTextareaBuilder) {
 }
 
 func (b *VTextareaBuilder) ErrorMessages(v ...string) (r *VTextareaBuilder) {
-	setErrorMessages(b.tag, v)
+	SetErrorMessages(b.tag, v)
 	return b
 }

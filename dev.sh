@@ -13,6 +13,6 @@ function docsRestart() {
 }
 
 export -f docsRestart
-
+ulimit -n 1000000
 find . -name "*.go" | entr -r bash -c "docsRestart"
 

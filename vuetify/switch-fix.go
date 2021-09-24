@@ -3,7 +3,7 @@ package vuetify
 import h "github.com/theplant/htmlgo"
 
 func (b *VSwitchBuilder) ErrorMessages(v ...string) (r *VSwitchBuilder) {
-	setErrorMessages(b.tag, v)
+	SetErrorMessages(b.tag, v)
 	return b
 }
 
