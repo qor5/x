@@ -12,6 +12,7 @@ import (
 	"github.com/goplaid/x/presets/gorm2op"
 	s "github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/goplaid/x/vuetifyx"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
@@ -124,7 +125,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		panic(err)
 	}
 
-	p := presets.New().URIPrefix("/admin").PrimaryColor("cyan darken-3")
+	p := presets.New().URIPrefix("/admin")
 
 	p.BrandFunc(func(ctx *web.EventContext) h.HTMLComponent {
 		return h.Components(
@@ -247,36 +248,36 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		return h.Div().Text(fmt.Sprintf("Are you sure you want to delete %s ?", selectedIds)).Class("title deep-orange--text")
 	})
 
-	l.FilterDataFunc(func(ctx *web.EventContext) FilterData {
-		var companyOptions []*SelectItem
+	l.FilterDataFunc(func(ctx *web.EventContext) vuetifyx.FilterData {
+		var companyOptions []*vuetifyx.SelectItem
 		err := db.Model(&Company{}).Select("name as text, id as value").Scan(&companyOptions).Error
 		if err != nil {
 			panic(err)
 		}
 
-		return []*FilterItem{
+		return []*vuetifyx.FilterItem{
 			{
 				Key:          "created",
 				Label:        "Created",
-				ItemType:     ItemTypeDate,
+				ItemType:     vuetifyx.ItemTypeDate,
 				SQLCondition: `extract(epoch from created_at) %s ?`,
 			},
 			{
 				Key:          "approved",
 				Label:        "Approved",
-				ItemType:     ItemTypeDate,
+				ItemType:     vuetifyx.ItemTypeDate,
 				SQLCondition: `extract(epoch from approved_at) %s ?`,
 			},
 			{
 				Key:          "name",
 				Label:        "Name",
-				ItemType:     ItemTypeString,
+				ItemType:     vuetifyx.ItemTypeString,
 				SQLCondition: `name %s ?`,
 			},
 			{
 				Key:          "company",
 				Label:        "Company",
-				ItemType:     ItemTypeSelect,
+				ItemType:     vuetifyx.ItemTypeSelect,
 				SQLCondition: `company_id %s ?`,
 				Options:      companyOptions,
 			},

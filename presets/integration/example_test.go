@@ -248,8 +248,8 @@ Content-Disposition: form-data; name="__event_data__"
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			partial := er.UpdatePortals[0].Body
-			if strings.Index(partial, "field-name='Agree'") < 0 {
-				t.Error("can't find field-name='Agree'", partial)
+			if strings.Index(partial, "v-field-name='\"Agree\"'") < 0 {
+				t.Error("can't find v-field-name='\"Agree\"'", partial)
 			}
 			return
 		},

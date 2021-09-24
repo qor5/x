@@ -3,24 +3,25 @@ package e18_filter_component
 import (
 	"github.com/goplaid/web"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/goplaid/x/vuetifyx"
 )
 
 func FilterComponent(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
-	fd := FilterData([]*FilterItem{
+	fd := vuetifyx.FilterData([]*vuetifyx.FilterItem{
 		{
 			Key:          "invoiceDate",
 			Label:        "Invoice Date",
-			ItemType:     ItemTypeDate,
+			ItemType:     vuetifyx.ItemTypeDate,
 			SQLCondition: "InvoiceDate %s datetime(?, 'unixepoch')",
 			Selected:     true,
 		},
 		{
 			Key:          "country",
 			Label:        "Country",
-			ItemType:     ItemTypeSelect,
+			ItemType:     vuetifyx.ItemTypeSelect,
 			SQLCondition: "upper(BillingCountry) %s upper(?)",
-			Options: []*SelectItem{
+			Options: []*vuetifyx.SelectItem{
 				{
 					Value: "US",
 					Text:  "United States",
@@ -34,7 +35,7 @@ func FilterComponent(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		{
 			Key:          "totalAmount",
 			Label:        "Total Amount",
-			ItemType:     ItemTypeNumber,
+			ItemType:     vuetifyx.ItemTypeNumber,
 			SQLCondition: "Total %s ?",
 		},
 	})
@@ -43,7 +44,7 @@ func FilterComponent(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
 	pr.Body = VApp(
 		VMain(
-			Filter(fd),
+			vuetifyx.VXFilter(fd),
 		),
 	)
 	return

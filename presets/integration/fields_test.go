@@ -92,7 +92,7 @@ func TestFields(t *testing.T) {
 
 <v-text-field type='text' v-field-name='"String1"' label='String1' :value='"hello"' :error-messages='["too small"]'></v-text-field>
 
-<vw-checkbox field-name='Bool1' label='Bool1' :input-value='true'></vw-checkbox>
+<v-checkbox v-field-name='"Bool1"' label='Bool1' :input-value='true'></v-checkbox>
 
 <div v-field-name='"Time1"' class='time-control'>2019-08-29</div>
 
