@@ -3,8 +3,11 @@ package e21_presents
 import (
 	"net/http"
 
+	"github.com/goplaid/web"
 	"github.com/goplaid/x/perm"
 	"github.com/goplaid/x/presets"
+	. "github.com/goplaid/x/vuetify"
+	h "github.com/theplant/htmlgo"
 	"gorm.io/gorm"
 )
 
@@ -28,6 +31,26 @@ func PresetsPermissions(b *presets.Builder) (
 ) {
 	cust, cl, ce, dp, db = PresetsDetailPageCards(b)
 	b.URIPrefix(PresetsPermissionsPath)
+
+	b.ProfileFunc(func(ctx *web.EventContext) h.HTMLComponent {
+		return VMenu(
+			web.Slot(
+				VBtn("").
+					Icon(true).
+					Attr("v-bind", "attrs", "v-on", "on").
+					Children(
+						VIcon("person"),
+					).Class("ml-2"),
+			).Name("activator").Scope("{ on, attrs }"),
+
+			VList(
+				VListItem(
+					VListItemTitle(h.Text("Logout")),
+				),
+			),
+		)
+	})
+
 	perm.Verbose = true
 	b.Permission(perm.New().
 		Policies(

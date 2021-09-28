@@ -33,6 +33,7 @@ type Builder struct {
 	messagesFunc        MessagesFunc
 	homePageFunc        web.PageFunc
 	brandFunc           ComponentFunc
+	profileFunc         ComponentFunc
 	brandTitle          string
 	vuetifyOptions      string
 	progressBarColor    string
@@ -122,6 +123,11 @@ func (b *Builder) HomePageFunc(v web.PageFunc) (r *Builder) {
 
 func (b *Builder) BrandFunc(v ComponentFunc) (r *Builder) {
 	b.brandFunc = v
+	return b
+}
+
+func (b *Builder) ProfileFunc(v ComponentFunc) (r *Builder) {
+	b.profileFunc = v
 	return b
 }
 
@@ -397,6 +403,11 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 			panic(err)
 		}
 
+		var profile h.HTMLComponent
+		if b.profileFunc != nil {
+			profile = b.profileFunc(ctx)
+		}
+
 		msgr := i18n.MustGetModuleMessages(ctx.R, CoreI18nModuleKey, Messages_en_US).(*Messages)
 
 		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
@@ -431,6 +442,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 							Go()),
 					// ).Method("GET"),
 				).AlignCenter(true).Attr("style", "max-width: 650px"),
+				profile,
 			).Dark(true).
 				Color("primary").
 				App(true).
