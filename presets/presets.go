@@ -294,9 +294,20 @@ func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (
 				h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, m.label)),
 			),
 		),
-	).Class(activeClass(ctx, href)).
-		Attr("@click", web.Plaid().PushStateURL(href).Go())
+	).Attr("@click", web.Plaid().PushStateURL(href).Go())
+	if b.isMenuItemActive(ctx, m) {
+		item = item.Class("v-list-item--active")
+	}
 	return item
+}
+
+func (b *Builder) isMenuItemActive(ctx *web.EventContext, m *ModelBuilder) bool {
+	href := m.Info().ListingHref()
+	if strings.HasPrefix(ctx.R.URL.Path, href) {
+		return true
+	}
+
+	return false
 }
 
 func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
@@ -322,6 +333,7 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 				).Slot("activator").Class("pa-0"),
 			}
 			subCount := 0
+			hasActiveMenuItem := false
 			for _, subOm := range v.subMenuItems {
 				m, ok := mMap[subOm]
 				if !ok {
@@ -341,6 +353,9 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 				subMenus = append(subMenus, b.menuItem(ctx, m, true))
 				subCount++
 				inOrderMap[m.uriName] = struct{}{}
+				if b.isMenuItemActive(ctx, m) {
+					hasActiveMenuItem = true
+				}
 			}
 			if subCount == 0 {
 				continue
@@ -348,7 +363,7 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 			menus = append(menus, VListGroup(
 				subMenus...).
 				PrependIcon(v.icon).
-				Value(true),
+				Value(hasActiveMenuItem),
 			)
 		case string:
 			m, ok := mMap[v]
@@ -387,15 +402,8 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 		menus = append(menus, b.menuItem(ctx, m, false))
 	}
 
-	r = VList(menus...).Class("primary--text").Expand(true)
+	r = VList(menus...).Class("primary--text")
 	return
-}
-
-func activeClass(ctx *web.EventContext, url string) string {
-	if strings.HasPrefix(ctx.R.URL.Path, url) {
-		return "v-list-item--active"
-	}
-	return ""
 }
 
 func (b *Builder) runBrandFunc(ctx *web.EventContext) (r h.HTMLComponent) {
