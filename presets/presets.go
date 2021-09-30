@@ -241,6 +241,16 @@ func (b *Builder) isMenuGroupInOrder(mgb *MenuGroupBuilder) bool {
 	return false
 }
 
+func (b *Builder) removeMenuGroupInOrder(mgb *MenuGroupBuilder) {
+	for i, om := range b.menuOrder {
+		if om == mgb {
+			b.menuOrder = append(b.menuOrder[:i], b.menuOrder[i+1:]...)
+			break
+		}
+	}
+
+}
+
 // item can be URI name, model name, *MenuGroupBuilder
 // the underlying logic is using URI name,
 // so if the URI name is customized, item must be the URI name
@@ -259,7 +269,7 @@ func (b *Builder) MenuOrder(items ...interface{}) {
 			b.menuOrder = append(b.menuOrder, v)
 		case *MenuGroupBuilder:
 			if b.isMenuGroupInOrder(v) {
-				continue
+				b.removeMenuGroupInOrder(v)
 			}
 			b.menuOrder = append(b.menuOrder, v)
 		default:
