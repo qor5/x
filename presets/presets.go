@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/goplaid/web"
@@ -278,10 +279,67 @@ func (b *Builder) MenuOrder(items ...interface{}) {
 	}
 }
 
+var (
+	defaultMenuIconUserRe        = regexp.MustCompile(`\busers?|members?\b`)
+	defaultMenuIconStoreRe       = regexp.MustCompile(`\bstores?\b`)
+	defaultMenuIconOrderRe       = regexp.MustCompile(`\borders?\b`)
+	defaultMenuIconProductRe     = regexp.MustCompile(`\bproducts?\b`)
+	defaultMenuIconPostRe        = regexp.MustCompile(`\bposts?|articles?\b`)
+	defaultMenuIconWebRe         = regexp.MustCompile(`\bweb|site\b`)
+	defaultMenuIconSEORe         = regexp.MustCompile(`\bseo\b`)
+	defaultMenuIconTranslationRe = regexp.MustCompile(`\bi18n|translations?\b`)
+	defaultMenuIconChartRe       = regexp.MustCompile(`\banalytics|charts?|statistics?\b`)
+	defaultMenuIconDashboardRe   = regexp.MustCompile(`\bdashboard?\b`)
+	defaultMenuIconSettingRe     = regexp.MustCompile(`\bsettings?\b`)
+)
+
+func defaultMenuIcon(mLabel string) string {
+	ws := strings.Join(strings.Split(strcase.ToSnake(mLabel), "_"), " ")
+	if defaultMenuIconUserRe.MatchString(ws) {
+		return "person"
+	}
+	if defaultMenuIconStoreRe.MatchString(ws) {
+		return "store"
+	}
+	if defaultMenuIconOrderRe.MatchString(ws) {
+		return "shopping_cart"
+	}
+	if defaultMenuIconProductRe.MatchString(ws) {
+		return "format_list_bulleted"
+	}
+	if defaultMenuIconPostRe.MatchString(ws) {
+		return "article"
+	}
+	if defaultMenuIconChartRe.MatchString(ws) {
+		return "analytics"
+	}
+	if defaultMenuIconWebRe.MatchString(ws) {
+		return "web"
+	}
+	if defaultMenuIconSEORe.MatchString(ws) {
+		return "travel_explore"
+	}
+	if defaultMenuIconTranslationRe.MatchString(ws) {
+		return "language"
+	}
+	if defaultMenuIconDashboardRe.MatchString(ws) {
+		return "dashboard"
+	}
+	if defaultMenuIconSettingRe.MatchString(ws) {
+		return "settings"
+	}
+
+	return "widgets"
+}
+
 func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (r h.HTMLComponent) {
 	menuIcon := m.menuIcon
 	if isSub {
 		menuIcon = ""
+	} else {
+		if menuIcon == "" {
+			menuIcon = defaultMenuIcon(m.label)
+		}
 	}
 
 	href := m.Info().ListingHref()
@@ -360,9 +418,13 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 			if subCount == 0 {
 				continue
 			}
+			groupIcon := v.icon
+			if groupIcon == "" {
+				groupIcon = defaultMenuIcon(v.name)
+			}
 			menus = append(menus, VListGroup(
 				subMenus...).
-				PrependIcon(v.icon).
+				PrependIcon(groupIcon).
 				Value(hasActiveMenuItem),
 			)
 		case string:
