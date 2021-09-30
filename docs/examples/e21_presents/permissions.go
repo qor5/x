@@ -74,8 +74,9 @@ func PresetsPermissions(b *presets.Builder) (
 		panic(err)
 	}
 
-	b.Model(&User{}).MenuGroup("User Management")
-	b.Model(&Group{}).MenuGroup("User Management")
+	b.MenuGroup("User Management").SubItems("user", "group")
+	b.Model(&User{})
+	b.Model(&Group{})
 	return
 }
 

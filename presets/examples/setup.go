@@ -182,12 +182,12 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 
 	p.DataOperator(gorm2op.DataOperator(db))
 
-	p.MenuGroup("Customer Management").Icon("group")
+	p.MenuGroup("Customer Management").Icon("group").SubItems("my_customers", "company")
 	mp := p.Model(&Product{}).MenuIcon("laptop")
 	mp.Listing().PerPage(3)
 
-	m := p.Model(&Customer{}).URIName("my_customers").MenuGroup("Customer Management")
-	p.Model(&Company{}).MenuGroup("Customer Management")
+	m := p.Model(&Customer{}).URIName("my_customers")
+	p.Model(&Company{})
 	m.Labels(
 		"Name", "名字",
 		"Bool1", "性别",
