@@ -387,7 +387,7 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 		menus = append(menus, b.menuItem(ctx, m, false))
 	}
 
-	r = VList(menus...).Class("primary--text")
+	r = VList(menus...).Class("primary--text").Expand(true)
 	return
 }
 
