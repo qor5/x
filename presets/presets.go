@@ -12,6 +12,7 @@ import (
 	"github.com/goplaid/x/perm"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/goplaid/x/vuetifyx"
+	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 	h "github.com/theplant/htmlgo"
 	"go.uber.org/zap"
@@ -43,7 +44,8 @@ type Builder struct {
 	detailFieldDefaults *FieldDefaults
 	extraAssets         []*extraAsset
 	assetFunc           AssetFunc
-	MenuGroups
+	menuGroups          MenuGroups
+	menuOrder           []interface{}
 }
 
 type AssetFunc func(ctx *web.EventContext)
@@ -222,78 +224,160 @@ func (b *Builder) defaultBrandFunc(ctx *web.EventContext) (r h.HTMLComponent) {
 	return
 }
 
-func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
+func (b *Builder) MenuGroup(name string) *MenuGroupBuilder {
+	mgb := b.menuGroups.MenuGroup(name)
+	if !b.isMenuGroupInOrder(mgb) {
+		b.menuOrder = append(b.menuOrder, mgb)
+	}
+	return mgb
+}
 
+func (b *Builder) isMenuGroupInOrder(mgb *MenuGroupBuilder) bool {
+	for _, v := range b.menuOrder {
+		if v == mgb {
+			return true
+		}
+	}
+	return false
+}
+
+// item can be URI name, model name, *MenuGroupBuilder
+// the underlying logic is using URI name,
+// so if the URI name is customized, item must be the URI name
+// example:
+// b.MenuOrder(
+// 	b.MenuGroup("Product Management").SubItems(
+// 		"products",
+// 		"Variant",
+// 	),
+// 	"customized-uri",
+// )
+func (b *Builder) MenuOrder(items ...interface{}) {
+	for _, item := range items {
+		switch v := item.(type) {
+		case string:
+			b.menuOrder = append(b.menuOrder, v)
+		case *MenuGroupBuilder:
+			if b.isMenuGroupInOrder(v) {
+				continue
+			}
+			b.menuOrder = append(b.menuOrder, v)
+		default:
+			panic(fmt.Sprintf("unknown menu order item type: %T\n", item))
+		}
+	}
+}
+
+func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (r h.HTMLComponent) {
+	menuIcon := m.menuIcon
+	if isSub {
+		menuIcon = ""
+	}
+
+	href := m.Info().ListingHref()
+	item := VListItem(
+		VListItemAction(
+			VIcon(menuIcon),
+		),
+		VListItemContent(
+			VListItemTitle(
+				h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, m.label)),
+			),
+		),
+	).Class(activeClass(ctx, href)).
+		Attr("@click", web.Plaid().PushStateURL(href).Go())
+	if !isSub {
+		item.Color("primary")
+	}
+	return item
+}
+
+func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
+	mMap := make(map[string]*ModelBuilder)
+	for _, m := range b.models {
+		mMap[m.uriName] = m
+	}
+
+	inOrderMap := make(map[string]struct{})
 	var menus []h.HTMLComponent
-	for _, mg := range b.menuGroups {
-		ver := b.verifier.Do(PermList).On("menu:groups").SnakeOn(mg.name).WithReq(ctx.R)
-		if ver.IsAllowed() != nil {
-			continue
-		}
-		var subMenus = []h.HTMLComponent{
-			VListItem(
-				VListItemContent(
-					VListItemTitle(h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, mg.name))),
-				),
-			).Slot("activator").Class("pa-0"),
-		}
-		for _, m := range mg.models {
+	for _, om := range b.menuOrder {
+		switch v := om.(type) {
+		case *MenuGroupBuilder:
+			ver := b.verifier.Do(PermList).On("menu:groups").SnakeOn(v.name).WithReq(ctx.R)
+			if ver.IsAllowed() != nil {
+				continue
+			}
+			var subMenus = []h.HTMLComponent{
+				VListItem(
+					VListItemContent(
+						VListItemTitle(h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, v.name))),
+					),
+				).Slot("activator").Class("pa-0"),
+			}
+			subCount := 0
+			for _, subOm := range v.subMenuItems {
+				m, ok := mMap[subOm]
+				if !ok {
+					m = mMap[inflection.Plural(strcase.ToKebab(subOm))]
+				}
+				if m == nil {
+					continue
+				}
+				m.menuGroupName = v.name
+				if m.notInMenu {
+					continue
+				}
+				if ver.SnakeOn(m.uriName).IsAllowed() != nil {
+					continue
+				}
+
+				subMenus = append(subMenus, b.menuItem(ctx, m, true))
+				subCount++
+				inOrderMap[m.uriName] = struct{}{}
+			}
+			if subCount == 0 {
+				continue
+			}
+			menus = append(menus, VListGroup(
+				subMenus...).
+				PrependIcon(v.icon).
+				Value(true),
+			)
+		case string:
+			m, ok := mMap[v]
+			if !ok {
+				m = mMap[inflection.Plural(strcase.ToKebab(v))]
+			}
+			if m == nil {
+				continue
+			}
+			if b.verifier.Do(PermList).On("menu").SnakeOn(m.uriName).WithReq(ctx.R).IsAllowed() != nil {
+				continue
+			}
+
 			if m.notInMenu {
 				continue
 			}
-			if ver.SnakeOn(m.uriName).IsAllowed() != nil {
-				continue
-			}
 
-			href := m.Info().ListingHref()
-			subMenus = append(subMenus,
-				VListItem(
-					VListItemAction(
-						VIcon(""),
-					),
-					VListItemContent(
-						VListItemTitle(
-							h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, m.label)),
-						),
-					),
-				).Class(activeClass(ctx, href)).
-					Attr("@click", web.Plaid().PushStateURL(href).Go()),
-			)
+			menus = append(menus, b.menuItem(ctx, m, false))
+			inOrderMap[m.uriName] = struct{}{}
 		}
-		menus = append(menus, VListGroup(
-			subMenus...).
-			PrependIcon(mg.icon).
-			Value(true),
-		)
 	}
 
 	for _, m := range b.models {
-		if b.verifier.Do(PermList).On("menu").SnakeOn(m.uriName).WithReq(ctx.R).IsAllowed() != nil {
+		_, ok := inOrderMap[m.uriName]
+		if ok {
 			continue
 		}
 
-		if m.inGroup {
+		if b.verifier.Do(PermList).On("menu").SnakeOn(m.uriName).WithReq(ctx.R).IsAllowed() != nil {
 			continue
 		}
 
 		if m.notInMenu {
 			continue
 		}
-
-		href := m.Info().ListingHref()
-		menus = append(menus,
-			VListItem(
-				VListItemAction(
-					VIcon(m.menuIcon),
-				),
-				VListItemContent(
-					VListItemTitle(
-						h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, m.label)),
-					),
-				),
-			).Class(activeClass(ctx, href)).Color("primary").
-				Attr("@click", web.Plaid().PushStateURL(href).Go()),
-		)
+		menus = append(menus, b.menuItem(ctx, m, false))
 	}
 
 	r = VList(menus...)

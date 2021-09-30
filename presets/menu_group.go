@@ -1,9 +1,12 @@
 package presets
 
 type MenuGroupBuilder struct {
-	name   string
-	icon   string
-	models []*ModelBuilder
+	name string
+	icon string
+	// item can be URI name, model name
+	// the underlying logic is using URI name,
+	// so if the URI name is customized, item must be the URI name
+	subMenuItems []string
 }
 
 func (b *MenuGroupBuilder) Icon(v string) (r *MenuGroupBuilder) {
@@ -11,13 +14,8 @@ func (b *MenuGroupBuilder) Icon(v string) (r *MenuGroupBuilder) {
 	return b
 }
 
-func (b *MenuGroupBuilder) AppendModels(ms ...*ModelBuilder) (r *MenuGroupBuilder) {
-	b.models = append(b.models, ms...)
-	return b
-}
-
-func (b *MenuGroupBuilder) Models(ms ...*ModelBuilder) (r *MenuGroupBuilder) {
-	b.models = ms
+func (b *MenuGroupBuilder) SubItems(ss ...string) (r *MenuGroupBuilder) {
+	b.subMenuItems = ss
 	return b
 }
 

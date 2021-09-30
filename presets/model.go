@@ -17,7 +17,6 @@ type ModelBuilder struct {
 	model         interface{}
 	primaryField  string
 	modelType     reflect.Type
-	inGroup       bool
 	menuGroupName string
 	notInMenu     bool
 	menuIcon      string
@@ -141,13 +140,6 @@ func (b *ModelBuilder) URIName(v string) (r *ModelBuilder) {
 
 func (b *ModelBuilder) PrimaryField(v string) (r *ModelBuilder) {
 	b.primaryField = v
-	return b
-}
-
-func (b *ModelBuilder) MenuGroup(v string) (r *ModelBuilder) {
-	b.p.MenuGroup(v).AppendModels(b)
-	b.menuGroupName = v
-	b.inGroup = true
 	return b
 }
 
