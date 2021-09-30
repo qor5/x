@@ -296,9 +296,6 @@ func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (
 		),
 	).Class(activeClass(ctx, href)).
 		Attr("@click", web.Plaid().PushStateURL(href).Go())
-	if !isSub {
-		item.Color("primary")
-	}
 	return item
 }
 
@@ -390,7 +387,7 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 		menus = append(menus, b.menuItem(ctx, m, false))
 	}
 
-	r = VList(menus...)
+	r = VList(menus...).Class("primary--text")
 	return
 }
 
