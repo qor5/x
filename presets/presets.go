@@ -31,6 +31,7 @@ type Builder struct {
 	logger              *zap.Logger
 	permissionBuilder   *perm.Builder
 	verifier            *perm.Verifier
+	layoutFunc          func(in web.PageFunc) (out web.PageFunc)
 	dataOperator        DataOperator
 	messagesFunc        MessagesFunc
 	homePageFunc        web.PageFunc
@@ -65,7 +66,7 @@ const (
 
 func New() *Builder {
 	l, _ := zap.NewDevelopment()
-	return &Builder{
+	r := &Builder{
 		logger:  l,
 		builder: web.New(),
 		i18nBuilder: i18n.New().
@@ -79,6 +80,9 @@ func New() *Builder {
 		rightDrawerWidth:    600,
 		verifier:            perm.NewVerifier(PermModule, nil),
 	}
+
+	r.layoutFunc = r.defaultLayout
+	return r
 }
 
 func (b *Builder) I18n() (r *i18n.Builder) {
@@ -97,6 +101,11 @@ func (b *Builder) GetPermission() (r *perm.Builder) {
 
 func (b *Builder) URIPrefix(v string) (r *Builder) {
 	b.prefix = strings.TrimRight(v, "/")
+	return b
+}
+
+func (b *Builder) LayoutFunc(v func(in web.PageFunc) (out web.PageFunc)) (r *Builder) {
+	b.layoutFunc = v
 	return b
 }
 
@@ -486,12 +495,12 @@ func MustGetMessages(r *http.Request) *Messages {
 	return i18n.MustGetModuleMessages(r, CoreI18nModuleKey, Messages_en_US).(*Messages)
 }
 
-const rightDrawerName = "rightDrawer"
+const RightDrawerPortalName = "presets_RightDrawerPortalName"
 const rightDrawerContentPortalName = "rightDrawerContentPortalName"
 
 func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-		Name: rightDrawerName,
+		Name: RightDrawerPortalName,
 		Body: VNavigationDrawer(
 			web.Portal(comp).Name(rightDrawerContentPortalName),
 		).
@@ -502,9 +511,9 @@ func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 			Width(b.rightDrawerWidth).
 			Bottom(false).
 			Attr(":height", `"100%"`).
-			//Temporary(true).
-			//HideOverlay(true).
-			//Floating(true).
+			// Temporary(true).
+			// HideOverlay(true).
+			// Floating(true).
 			Attr(web.InitContextVars, `{rightDrawer: false}`),
 	})
 	r.VarsScript = "setTimeout(function(){ vars.rightDrawer = true }, 100)"
@@ -582,7 +591,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 				Attr("v-model", "vars.navDrawer").
 				Attr(web.InitContextVars, `{navDrawer: null}`),
 
-			web.Portal().Name(rightDrawerName),
+			web.Portal().Name(RightDrawerPortalName),
 
 			VAppBar(
 				VAppBarNavIcon().On("click.stop", "vars.navDrawer = !vars.navDrawer"),
@@ -684,7 +693,7 @@ func (b *Builder) initMux() {
 
 	mux.Handle(
 		pat.New(b.prefix),
-		b.wrap(nil, b.defaultLayout(b.getHomePageFunc())),
+		b.wrap(nil, b.layoutFunc(b.getHomePageFunc())),
 	)
 
 	for _, m := range b.models {
@@ -693,14 +702,14 @@ func (b *Builder) initMux() {
 		routePath := info.ListingHref()
 		mux.Handle(
 			pat.New(routePath),
-			b.wrap(m, b.defaultLayout(m.listing.GetPageFunc())),
+			b.wrap(m, b.layoutFunc(m.listing.GetPageFunc())),
 		)
 		log.Println("mounted url", routePath)
 		if m.hasDetailing {
 			routePath = fmt.Sprintf("%s/%s/:id", b.prefix, pluralUri)
 			mux.Handle(
 				pat.New(routePath),
-				b.wrap(m, b.defaultLayout(m.detailing.GetPageFunc())),
+				b.wrap(m, b.layoutFunc(m.detailing.GetPageFunc())),
 			)
 			log.Println("mounted url", routePath)
 		}
