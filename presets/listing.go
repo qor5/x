@@ -103,7 +103,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 		orderBy = fmt.Sprintf("%s DESC", b.mb.primaryField)
 	}
 
-	//time.Sleep(1 * time.Second)
+	// time.Sleep(1 * time.Second)
 	urlQuery := ctx.R.URL.Query()
 	searchParams := &SearchParams{
 		KeywordColumns: b.searchColumns,
@@ -281,7 +281,7 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 						Depressed(true).
 						Dark(true).
 						Attr("@click", web.Plaid().
-							EventFunc("doDelete", id).
+							EventFunc(actions.DoDelete, id).
 							URL(ctx.R.URL.Path).
 							Go()),
 				),
