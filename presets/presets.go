@@ -535,19 +535,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 			</style>
 		`, "{{prefix}}", b.prefix, -1))
 
-		for _, ea := range b.extraAssets {
-			if len(ea.refTag) > 0 {
-				ctx.Injector.HeadHTML(ea.refTag)
-				continue
-			}
-
-			if strings.HasSuffix(ea.path, "css") {
-				ctx.Injector.HeadHTML(fmt.Sprintf("<link rel=\"stylesheet\" href=\"%s\">", b.extraFullPath(ea)))
-				continue
-			}
-
-			ctx.Injector.HeadHTML(fmt.Sprintf("<script src=\"%s\"></script>", b.extraFullPath(ea)))
-		}
+		b.InjectExtraAssets(ctx)
 
 		if len(os.Getenv("DEV_PRESETS")) > 0 {
 			ctx.Injector.TailHTML(`
@@ -631,6 +619,22 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 		).Id("vt-app")
 
 		return
+	}
+}
+
+func (b *Builder) InjectExtraAssets(ctx *web.EventContext) {
+	for _, ea := range b.extraAssets {
+		if len(ea.refTag) > 0 {
+			ctx.Injector.HeadHTML(ea.refTag)
+			continue
+		}
+
+		if strings.HasSuffix(ea.path, "css") {
+			ctx.Injector.HeadHTML(fmt.Sprintf("<link rel=\"stylesheet\" href=\"%s\">", b.extraFullPath(ea)))
+			continue
+		}
+
+		ctx.Injector.HeadHTML(fmt.Sprintf("<script src=\"%s\"></script>", b.extraFullPath(ea)))
 	}
 }
 
