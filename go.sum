@@ -54,8 +54,8 @@ github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm4
 github.com/google/uuid v1.0.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/goplaid/web v1.1.12 h1:MEEiP5cGwTVvJKzFc8vz/3hh452JLVmErNMq+ET8rP8=
-github.com/goplaid/web v1.1.12/go.mod h1:elgPhqt3Yb69U79Bs4PMC6wpvQGc5AgiwXkCiuxPPFc=
+github.com/goplaid/web v1.1.13 h1:yOnM5DPMxTZuxgrw/H1Lyz/X4PQjeJKiDrtj39xJ7kY=
+github.com/goplaid/web v1.1.13/go.mod h1:elgPhqt3Yb69U79Bs4PMC6wpvQGc5AgiwXkCiuxPPFc=
 github.com/gorilla/css v1.0.0 h1:BQqNyPTi50JCFMTw/b67hByjMVXZRwGha6wxVGkeihY=
 github.com/gorilla/css v1.0.0/go.mod h1:Dn721qIggHpt4+EFCcTLTU/vk5ySda2ReITrtgBl60c=
 github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
