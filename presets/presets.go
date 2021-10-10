@@ -485,12 +485,6 @@ func (b *Builder) runBrandFunc(ctx *web.EventContext) (r h.HTMLComponent) {
 	return VToolbarTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
 }
 
-type contextKey int
-
-const (
-	presetsKey contextKey = iota
-)
-
 func MustGetMessages(r *http.Request) *Messages {
 	return i18n.MustGetModuleMessages(r, CoreI18nModuleKey, Messages_en_US).(*Messages)
 }
@@ -510,11 +504,10 @@ func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 			Fixed(true).
 			Width(b.rightDrawerWidth).
 			Bottom(false).
-			Attr(":height", `"100%"`).
-			// Temporary(true).
-			// HideOverlay(true).
-			// Floating(true).
-			Attr(web.InitContextVars, `{rightDrawer: false}`),
+			Attr(":height", `"100%"`),
+		// Temporary(true).
+		// HideOverlay(true).
+		// Floating(true).
 	})
 	r.VarsScript = "setTimeout(function(){ vars.rightDrawer = true }, 100)"
 }
@@ -616,7 +609,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 			VMain(
 				innerPr.Body.(h.HTMLComponent),
 			),
-		).Id("vt-app")
+		).Id("vt-app").Attr(web.InitContextVars, `{rightDrawer: false}`)
 
 		return
 	}
