@@ -288,54 +288,42 @@ func (b *Builder) MenuOrder(items ...interface{}) {
 	}
 }
 
-var (
-	defaultMenuIconUserRe        = regexp.MustCompile(`\busers?|members?\b`)
-	defaultMenuIconStoreRe       = regexp.MustCompile(`\bstores?\b`)
-	defaultMenuIconOrderRe       = regexp.MustCompile(`\borders?\b`)
-	defaultMenuIconProductRe     = regexp.MustCompile(`\bproducts?\b`)
-	defaultMenuIconPostRe        = regexp.MustCompile(`\bposts?|articles?\b`)
-	defaultMenuIconWebRe         = regexp.MustCompile(`\bweb|site\b`)
-	defaultMenuIconSEORe         = regexp.MustCompile(`\bseo\b`)
-	defaultMenuIconTranslationRe = regexp.MustCompile(`\bi18n|translations?\b`)
-	defaultMenuIconChartRe       = regexp.MustCompile(`\banalytics|charts?|statistics?\b`)
-	defaultMenuIconDashboardRe   = regexp.MustCompile(`\bdashboard?\b`)
-	defaultMenuIconSettingRe     = regexp.MustCompile(`\bsettings?\b`)
-)
+type defaultMenuIconRE struct {
+	re   *regexp.Regexp
+	icon string
+}
+
+var defaultMenuIconREs = []defaultMenuIconRE{
+	// user
+	{re: regexp.MustCompile(`\busers?|members?\b`), icon: "person"},
+	// store
+	{re: regexp.MustCompile(`\bstores?\b`), icon: "store"},
+	// order
+	{re: regexp.MustCompile(`\borders?\b`), icon: "shopping_cart"},
+	// product
+	{re: regexp.MustCompile(`\bproducts?\b`), icon: "format_list_bulleted"},
+	// post
+	{re: regexp.MustCompile(`\bposts?|articles?\b`), icon: "article"},
+	// web
+	{re: regexp.MustCompile(`\bweb|site\b`), icon: "web"},
+	// seo
+	{re: regexp.MustCompile(`\bseo\b`), icon: "travel_explore"},
+	// i18n
+	{re: regexp.MustCompile(`\bi18n|translations?\b`), icon: "language"},
+	// chart
+	{re: regexp.MustCompile(`\banalytics?|charts?|statistics?\b`), icon: "analytics"},
+	// dashboard
+	{re: regexp.MustCompile(`\bdashboard\b`), icon: "dashboard"},
+	// setting
+	{re: regexp.MustCompile(`\bsettings?\b`), icon: "settings"},
+}
 
 func defaultMenuIcon(mLabel string) string {
 	ws := strings.Join(strings.Split(strcase.ToSnake(mLabel), "_"), " ")
-	if defaultMenuIconUserRe.MatchString(ws) {
-		return "person"
-	}
-	if defaultMenuIconStoreRe.MatchString(ws) {
-		return "store"
-	}
-	if defaultMenuIconOrderRe.MatchString(ws) {
-		return "shopping_cart"
-	}
-	if defaultMenuIconProductRe.MatchString(ws) {
-		return "format_list_bulleted"
-	}
-	if defaultMenuIconPostRe.MatchString(ws) {
-		return "article"
-	}
-	if defaultMenuIconChartRe.MatchString(ws) {
-		return "analytics"
-	}
-	if defaultMenuIconWebRe.MatchString(ws) {
-		return "web"
-	}
-	if defaultMenuIconSEORe.MatchString(ws) {
-		return "travel_explore"
-	}
-	if defaultMenuIconTranslationRe.MatchString(ws) {
-		return "language"
-	}
-	if defaultMenuIconDashboardRe.MatchString(ws) {
-		return "dashboard"
-	}
-	if defaultMenuIconSettingRe.MatchString(ws) {
-		return "settings"
+	for _, v := range defaultMenuIconREs {
+		if v.re.MatchString(ws) {
+			return v.icon
+		}
 	}
 
 	return "widgets"
