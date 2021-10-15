@@ -1,6 +1,6 @@
 package e00_basics
 
-//@snippet_begin(PartialReloadSample)
+// @snippet_begin(PartialReloadSample)
 import (
 	"time"
 
@@ -9,8 +9,10 @@ import (
 )
 
 func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
+	reloadCount = 0
 	ctx.Hub.RegisterEventFunc("related", related)
 	ctx.Hub.RegisterEventFunc("reload3", reload3)
+	ctx.Hub.RegisterEventFunc("autoReload", autoReload)
 	ctx.Injector.HeadHTML(`
 <style>
 .rp {
@@ -24,6 +26,12 @@ func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 `,
 	)
 	pr.Body = Div(
+		H1("Portal Reload Automatically"),
+		Div(
+			web.Portal().EventFunc("autoReload").AutoReloadInterval("vars.interval"),
+			Button("stop").Attr("@click", "vars.interval = 0"),
+		).Attr(web.InitContextVars, `{interval: 2000}`),
+
 		H1("Partial Load and Reload"),
 		Div(
 			H2("Product 1"),
@@ -61,6 +69,18 @@ func reload3(ctx *web.EventContext) (er web.EventResponse, err error) {
 	return
 }
 
-//@snippet_end
+var reloadCount = 1
+
+func autoReload(ctx *web.EventContext) (er web.EventResponse, err error) {
+	er.Body = Span(time.Now().String())
+	reloadCount++
+
+	if reloadCount > 5 {
+		er.VarsScript = `vars.interval = 0;`
+	}
+	return
+}
+
+// @snippet_end
 
 const PartialReloadPagePath = "/samples/partial_reload"
