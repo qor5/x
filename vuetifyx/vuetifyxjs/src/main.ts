@@ -8,6 +8,8 @@ import Autocomplete from './components/Autocomplete';
 import { WithField } from './components/WithField';
 import { Core, SelectedItems } from './components/Helpers';
 import { Filter } from './components/Filter';
+// @ts-ignore
+import DatetimePicker from './components/DateTimePicker.vue';
 
 declare var window: any;
 
@@ -17,5 +19,5 @@ declare var window: any;
 		Vue.component('vx-checkbox', WithField(VCheckbox, 'input-value'));
 		Vue.component('vx-select', WithField(VSelect, undefined, [Core, SelectedItems]));
 		Vue.component('vx-filter', Filter);
-
+		Vue.component('vx-datetimepicker', DatetimePicker);
 	});
