@@ -470,7 +470,7 @@ func (b *Builder) runBrandFunc(ctx *web.EventContext) (r h.HTMLComponent) {
 		return b.brandFunc(ctx)
 	}
 
-	return VToolbarTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
+	return VToolbar(VToolbarTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))).Elevation(1)
 }
 
 func MustGetMessages(r *http.Request) *Messages {
@@ -553,18 +553,18 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 		pr.Body = VApp(
 
 			VNavigationDrawer(
+				b.runBrandFunc(ctx),
 				b.createMenus(ctx),
 			).App(true).
-				Clipped(true).
+				// Clipped(true).
+				Fixed(true).
 				Value(true).
 				Attr("v-model", "vars.navDrawer").
 				Attr(web.InitContextVars, `{navDrawer: null}`),
 
-			web.Portal().Name(RightDrawerPortalName),
-
 			VAppBar(
 				VAppBarNavIcon().On("click.stop", "vars.navDrawer = !vars.navDrawer"),
-				b.runBrandFunc(ctx),
+				h.Span(innerPr.PageTitle).Class("text-h6 font-weight-regular"),
 				VSpacer(),
 				VLayout(
 					// h.Form(
@@ -585,7 +585,10 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 			).Dark(true).
 				Color("primary").
 				App(true).
-				ClippedLeft(true),
+				Fixed(true),
+			// ClippedLeft(true),
+
+			web.Portal().Name(RightDrawerPortalName),
 
 			VProgressLinear().
 				Attr(":active", "isFetching").
