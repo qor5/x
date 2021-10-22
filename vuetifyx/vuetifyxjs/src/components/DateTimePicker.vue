@@ -1,5 +1,5 @@
 <template>
-	<v-menu v-model="display" :max-width="dialogWidth" :close-on-content-click="false">
+	<v-dialog v-model="display" :width="dialogWidth" >
 		<template v-slot:activator="{ on }">
 			<v-text-field
 				v-bind="textFieldProps"
@@ -52,7 +52,7 @@
 				</slot>
 			</v-card-actions>
 		</v-card>
-	</v-menu>
+	</v-dialog>
 </template>
 
 <script>
@@ -69,12 +69,12 @@ const DEFAULT_OK_TEXT = 'OK'
 export default {
 	name: 'v-datetime-picker',
 	model: {
-		prop: 'datetime',
+		prop: 'value',
 		event: 'input'
 	},
 	props: {
-		datetime: {
-			type: [Date, String],
+		value: {
+			type: String,
 			default: null
 		},
 		disabled: {
@@ -154,24 +154,19 @@ export default {
 	},
 	methods: {
 		init() {
-			if (!this.datetime) {
+			if (!this.value) {
 				return
 			}
 
-			let initDateTime
-			if (this.datetime instanceof Date) {
-				initDateTime = this.datetime
-			} else if (typeof this.datetime === 'string' || this.datetime instanceof String) {
-				// see https://stackoverflow.com/a/9436948
-				initDateTime = parse(this.datetime, this.dateTimeFormat, new Date())
-			}
+			// see https://stackoverflow.com/a/9436948
+			let initDateTime = parse(this.value, this.dateTimeFormat, new Date())
 
 			this.date = format(initDateTime, DEFAULT_DATE_FORMAT)
 			this.time = format(initDateTime, DEFAULT_TIME_FORMAT)
 		},
 		okHandler() {
 			this.resetPicker()
-			this.$emit('input', this.selectedDatetime)
+			this.$emit('input', this.formattedDatetime)
 		},
 		clearHandler() {
 			this.resetPicker()
@@ -187,7 +182,7 @@ export default {
 		}
 	},
 	watch: {
-		datetime: function () {
+		value: function () {
 			this.init()
 		}
 	}
