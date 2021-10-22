@@ -107,7 +107,7 @@ func (op *DataOperatorBuilder) Save(obj interface{}, id string, ctx *web.EventCo
 		err = op.db.Create(obj).Error
 		return
 	}
-	err = op.primarySluggerWhere(obj, id).Updates(obj).Error
+	err = op.primarySluggerWhere(obj, id).Save(obj).Error
 	return
 }
 
