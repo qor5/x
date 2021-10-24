@@ -54,6 +54,8 @@ github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm4
 github.com/google/uuid v1.0.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/goplaid/multipartestutils v0.0.2 h1:TsrPfS0giTAwCGGTY613YiOeTUwwYsQ42Jk++oTtjMQ=
+github.com/goplaid/multipartestutils v0.0.2/go.mod h1:jic2wg6tSAdLgLMTs1N+9+KzRu+Bs85z1+lMvh/5NO8=
 github.com/goplaid/web v1.1.15 h1:sQVQB4u/tww7er0surJIuHw4g/8uFpNOpNOpfnMQxPc=
 github.com/goplaid/web v1.1.15/go.mod h1:elgPhqt3Yb69U79Bs4PMC6wpvQGc5AgiwXkCiuxPPFc=
 github.com/gorilla/css v1.0.0 h1:BQqNyPTi50JCFMTw/b67hByjMVXZRwGha6wxVGkeihY=

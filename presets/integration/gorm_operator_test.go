@@ -47,7 +47,7 @@ func TestPrimarySlugger(t *testing.T) {
 		panic(err)
 	}
 
-	err = op.Save(&TestVariant{Name: "Product 2"}, "P01_C01", ctx)
+	err = op.Save(&TestVariant{ProductCode: "P01", ColorCode: "C01", Name: "Product 2"}, "P01_C01", ctx)
 	if err != nil {
 		panic(err)
 	}

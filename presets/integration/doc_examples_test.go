@@ -1,16 +1,14 @@
 package integration_test
 
 import (
-	"bytes"
 	"database/sql"
 	"encoding/json"
-	"fmt"
-	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/goplaid/multipartestutils"
 	"github.com/goplaid/x/docs"
 	"github.com/goplaid/x/docs/examples/e21_presents"
 	"github.com/theplant/gofixtures"
@@ -25,19 +23,11 @@ func TestDocExamples(t *testing.T) {
 			name: "Custom MyFile Type",
 			reqFunc: func(db *sql.DB) *http.Request {
 				emptyProductsData.TruncatePut(db)
-				body := bytes.NewBuffer(nil)
-
-				mw := multipart.NewWriter(body)
-				_ = mw.WriteField("__event_data__", `{"eventFuncId":{"id":"presets_Update","pushState":null, "params":[""]},"event":{"value":""}}
-		`)
-				fw, _ := mw.CreateFormFile("MainImage_NewFile", "myfile.png")
-				_, _ = fw.Write([]byte("Hello"))
-
-				_ = mw.Close()
-
-				r := httptest.NewRequest("POST", e21_presents.PresetsEditingCustomizationFileTypePath+"/products?__execute_event__=update", body)
-				r.Header.Add("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", mw.Boundary()))
-				return r
+				return multipartestutils.NewMultipartBuilder().
+					EventFunc("presets_Update", "").
+					AddReader("MainImage_NewFile", "myfile.png", strings.NewReader("Hello")).
+					PageURL(e21_presents.PresetsEditingCustomizationFileTypePath + "/products").
+					BuildEventFuncRequest()
 			},
 			eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 				var u = &e21_presents.Product{}
@@ -55,16 +45,10 @@ func TestDocExamples(t *testing.T) {
 			name: "Custom MyFile Type Without File",
 			reqFunc: func(db *sql.DB) *http.Request {
 				emptyProductsData.TruncatePut(db)
-				body := bytes.NewBuffer(nil)
-
-				mw := multipart.NewWriter(body)
-				_ = mw.WriteField("__event_data__", `{"eventFuncId":{"id":"presets_Update","pushState":null, "params":[""]},"event":{"value":""}}
-	`)
-				_ = mw.Close()
-
-				r := httptest.NewRequest("POST", e21_presents.PresetsEditingCustomizationFileTypePath+"/products?__execute_event__=update", body)
-				r.Header.Add("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", mw.Boundary()))
-				return r
+				return multipartestutils.NewMultipartBuilder().
+					EventFunc("presets_Update", "").
+					PageURL(e21_presents.PresetsEditingCustomizationFileTypePath + "/products").
+					BuildEventFuncRequest()
 			},
 			eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 				var u = &e21_presents.Product{}

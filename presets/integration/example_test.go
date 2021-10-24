@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/goplaid/multipartestutils"
+	"github.com/goplaid/x/presets/actions"
 	examples2 "github.com/goplaid/x/presets/examples"
 	"github.com/theplant/gofixtures"
 	"gorm.io/driver/sqlite"
@@ -39,31 +41,14 @@ var cases = []reqCase{
 		name: "Update",
 		reqFunc: func(db *sql.DB) *http.Request {
 			customerData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/my_customers?__execute_event__=update", strings.NewReader(`
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="__event_data__"
-
-{"eventFuncId":{"id":"presets_Update","params":["11"],"pushState":null},"event":{}}
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="Bool1"
-
-true
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="ID"
-
-11
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="Int1"
-
-42
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="Name"
-
-Felix11
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8--
-`))
-			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
-			return r
+			return multipartestutils.NewMultipartBuilder().
+				PageURL("/admin/my_customers").
+				EventFunc(actions.Update, "11").
+				AddField("Bool1", "true").
+				AddField("ID", "11").
+				AddField("Int1", "42").
+				AddField("Name", "Felix11").
+				BuildEventFuncRequest()
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			var u = &examples2.Customer{}
@@ -81,31 +66,15 @@ Felix11
 		name: "Create",
 		reqFunc: func(db *sql.DB) *http.Request {
 			emptyCustomerData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/my_customers?__execute_event__=update", strings.NewReader(`
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="__event_data__"
+			return multipartestutils.NewMultipartBuilder().
+				PageURL("/admin/my_customers").
+				EventFunc(actions.Update, "").
+				AddField("Bool1", "true").
+				AddField("ID", "").
+				AddField("Int1", "42").
+				AddField("Name", "Felix").
+				BuildEventFuncRequest()
 
-{"eventFuncId":{"id":"presets_Update","params":[""],"pushState":null},"event":{}}
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="Bool1"
-
-true
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="ID"
-
-0
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="Int1"
-
-42
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="Name"
-
-Felix
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8--
-`))
-			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
-			return r
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			var u = &examples2.Customer{}
@@ -124,15 +93,10 @@ Felix
 		name: "New Form For Creating",
 		reqFunc: func(db *sql.DB) *http.Request {
 			emptyCustomerData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/credit-cards?__execute_event__=DrawerNew", strings.NewReader(`
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="__event_data__"
-
-{"eventFuncId":{"id":"presets_DrawerNew","params":[""],"pushState":null},"event":{}}
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-`))
-			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
-			return r
+			return multipartestutils.NewMultipartBuilder().
+				PageURL("/admin/credit-cards").
+				EventFunc(actions.DrawerNew, "").
+				BuildEventFuncRequest()
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			partial := er.UpdatePortals[0].Body
@@ -147,20 +111,12 @@ Content-Disposition: form-data; name="__event_data__"
 		name: "Create CreditCard",
 		reqFunc: func(db *sql.DB) *http.Request {
 			creditCardData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/credit-cards?__execute_event__=update", strings.NewReader(`
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="__event_data__"
+			return multipartestutils.NewMultipartBuilder().
+				PageURL("/admin/credit-cards").
+				EventFunc(actions.Update, "", "11").
+				AddField("Number", "12345678").
+				BuildEventFuncRequest()
 
-{"eventFuncId":{"id":"presets_Update","params":["", "11"],"pushState":null},"event":{}}
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="Number"
-
-12345678
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8--
-
-`))
-			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
-			return r
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			var u = &examples2.CreditCard{}
@@ -180,15 +136,10 @@ Content-Disposition: form-data; name="Number"
 		name: "Without Editing Config/Product Edit Form",
 		reqFunc: func(db *sql.DB) *http.Request {
 			productData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/products?__execute_event__=DrawerEdit", strings.NewReader(`
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="__event_data__"
-
-{"eventFuncId":{"id":"presets_DrawerEdit","params":["12"],"pushState":null},"event":{}}
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-`))
-			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
-			return r
+			return multipartestutils.NewMultipartBuilder().
+				PageURL("/admin/products").
+				EventFunc(actions.DrawerEdit, "12").
+				BuildEventFuncRequest()
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			partial := er.UpdatePortals[0].Body
@@ -203,20 +154,11 @@ Content-Disposition: form-data; name="__event_data__"
 		name: "Without Editing Config/Create Product",
 		reqFunc: func(db *sql.DB) *http.Request {
 			productData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/products?__execute_event__=update", strings.NewReader(`
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="__event_data__"
-
-{"eventFuncId":{"id":"presets_Update","params":["12"],"pushState":null},"event":{}}
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="OwnerName"
-
-owner1
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8--
-
-`))
-			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
-			return r
+			return multipartestutils.NewMultipartBuilder().
+				PageURL("/admin/products").
+				EventFunc(actions.Update, "12").
+				AddField("OwnerName", "owner1").
+				BuildEventFuncRequest()
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			var u = &examples2.Product{}
@@ -236,15 +178,11 @@ owner1
 		name: "formDrawerAction AgreeTerms",
 		reqFunc: func(db *sql.DB) *http.Request {
 			customerData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/my_customers/11?__execute_event__=DrawerAction", strings.NewReader(`
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="__event_data__"
+			return multipartestutils.NewMultipartBuilder().
+				PageURL("/admin/my_customers/11").
+				EventFunc(actions.DrawerAction, "AgreeTerms", "11").
+				BuildEventFuncRequest()
 
-{"eventFuncId":{"id":"presets_DrawerAction","params":["AgreeTerms", "11"],"pushState":null},"event":{}}
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-`))
-			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
-			return r
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			partial := er.UpdatePortals[0].Body
@@ -259,19 +197,12 @@ Content-Disposition: form-data; name="__event_data__"
 		name: "doAction AgreeTerms",
 		reqFunc: func(db *sql.DB) *http.Request {
 			customerData.TruncatePut(db)
-			r := httptest.NewRequest("POST", "/admin/my_customers/11?__execute_event__=doAction", strings.NewReader(`
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="__event_data__"
+			return multipartestutils.NewMultipartBuilder().
+				PageURL("/admin/my_customers/11").
+				EventFunc(actions.DoAction, "AgreeTerms", "11").
+				AddField("Agree", "true").
+				BuildEventFuncRequest()
 
-{"eventFuncId":{"id":"presets_DoAction","params":["AgreeTerms", "11"],"pushState":null},"event":{}}
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-Content-Disposition: form-data; name="Agree"
-
-true
-------WebKitFormBoundaryOv2oq9YJ8tIG3xJ8
-`))
-			r.Header.Add("Content-Type", `multipart/form-data; boundary=----WebKitFormBoundaryOv2oq9YJ8tIG3xJ8`)
-			return r
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			var u = &examples2.Customer{}
@@ -325,7 +256,7 @@ func TestAll(t *testing.T) {
 				var er testEventResponse
 				err := json.NewDecoder(w.Body).Decode(&er)
 				if err != nil {
-					t.Fatalf("%s for: %s", err, w.Body.String())
+					t.Fatalf("%s for: %#+v", err, w.Body.String())
 				}
 				c.eventResponseMatch(&er, db, t)
 			}
@@ -334,11 +265,6 @@ func TestAll(t *testing.T) {
 				c.pageMatch(w.Body, db, t)
 			}
 		})
-
-		//diff := htmltestingutils.PrettyHtmlDiff(w.Body, "body", "abc")
-		//if len(diff) > 0 {
-		//	t.Error(diff)
-		//}
 
 	}
 }

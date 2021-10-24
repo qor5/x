@@ -7,6 +7,7 @@ require (
 	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/go-chi/chi v1.5.4
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/goplaid/multipartestutils v0.0.2
 	github.com/goplaid/web v1.1.15
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/iancoleman/strcase v0.2.0
