@@ -38,7 +38,6 @@
 								v-model="time"
 								v-bind="timePickerProps"
 								full-width
-								scrollable
 							></v-time-picker>
 						</v-col>
 					</v-row>
@@ -188,10 +187,3 @@ export default {
 	}
 }
 </script>
-
-<style lang="scss" scoped>
-.v-time-picker-title {
-	height: 50px !important;
-	color: black !important;
-}
-</style>
