@@ -165,6 +165,9 @@ export default {
 		},
 		okHandler() {
 			this.resetPicker()
+			if (!this.date) {
+				this.date = format(new Date(), DEFAULT_DATE_FORMAT)
+			}
 			this.$emit('input', this.formattedDatetime)
 		},
 		clearHandler() {
