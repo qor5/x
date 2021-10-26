@@ -18,6 +18,7 @@ type EditingBuilder struct {
 	saver     SaveFunc
 	deleter   DeleteFunc
 	validator ValidateFunc
+	sidePanel ComponentFunc
 	FieldBuilders
 }
 
@@ -81,18 +82,23 @@ func (b *EditingBuilder) SetterFunc(v SetterFunc) (r *EditingBuilder) {
 	return b
 }
 
+func (b *EditingBuilder) SidePanelFunc(v ComponentFunc) (r *EditingBuilder) {
+	b.sidePanel = v
+	return b
+}
+
 func (b *EditingBuilder) formDrawerNew(ctx *web.EventContext) (r web.EventResponse, err error) {
 	creatingB := b
 	if b.mb.creating != nil {
 		creatingB = b.mb.creating
 	}
 
-	b.mb.p.rightDrawer(&r, creatingB.editFormFor(nil, ctx))
+	b.mb.p.rightDrawer(&r, creatingB.editFormFor(nil, ctx), b.mb.rightDrawerWidth)
 	return
 }
 
 func (b *EditingBuilder) formDrawerEdit(ctx *web.EventContext) (r web.EventResponse, err error) {
-	b.mb.p.rightDrawer(&r, b.editFormFor(nil, ctx))
+	b.mb.p.rightDrawer(&r, b.editFormFor(nil, ctx), b.mb.rightDrawerWidth)
 	return
 }
 
@@ -132,6 +138,39 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 
 	vErr, _ := ctx.Flash.(*web.ValidationErrors)
 
+	var panel h.HTMLComponent
+
+	var formContent h.HTMLComponent = h.Components(
+		VCardText(
+			b.ToComponent(b.mb, obj, vErr, ctx),
+		),
+		VCardActions(
+			VSpacer(),
+			VBtn(buttonLabel).
+				Dark(true).
+				Color("primary").
+				Disabled(disableUpdateBtn).
+				Attr("@click", web.Plaid().
+					EventFunc(actions.Update, ctx.Event.Params...).
+					URL(b.mb.Info().ListingHref()).
+					Go()),
+		),
+	)
+
+	if b.sidePanel != nil {
+		panel = b.sidePanel(ctx)
+		formContent = VContainer(
+			VRow(
+				VCol(
+					formContent,
+				).Cols(8),
+				VCol(
+					panel,
+				).Cols(4),
+			),
+		)
+	}
+
 	return h.Components(
 		VAppBar(
 			VToolbarTitle(title).Class("pl-2"),
@@ -142,24 +181,9 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		).Color("white").Elevation(0).Dense(true),
 
 		VContainer(
-
+			formContent,
 			notice,
-			VCard(
-				VCardText(
-					b.ToComponent(b.mb, obj, vErr, ctx),
-				),
-				VCardActions(
-					VSpacer(),
-					VBtn(buttonLabel).
-						Dark(true).
-						Color("primary").
-						Disabled(disableUpdateBtn).
-						Attr("@click", web.Plaid().
-							EventFunc(actions.Update, ctx.Event.Params...).
-							URL(b.mb.Info().ListingHref()).
-							Go()),
-				),
-			).Flat(true),
+			VCard().Flat(true),
 		).Fluid(true),
 	)
 }

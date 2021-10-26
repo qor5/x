@@ -38,6 +38,7 @@ require (
 	github.com/sunfmin/reflectutils v1.0.2
 	github.com/theplant/gofixtures v1.1.0
 	github.com/theplant/htmlgo v1.0.3
+	github.com/theplant/jsontyperegistry v0.0.2
 	github.com/theplant/testingutils v0.0.0-20190603093022-26d8b4d95c61
 	github.com/thoas/go-funk v0.9.1
 	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4

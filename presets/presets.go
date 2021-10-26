@@ -40,7 +40,7 @@ type Builder struct {
 	brandTitle          string
 	vuetifyOptions      string
 	progressBarColor    string
-	rightDrawerWidth    int
+	rightDrawerWidth    string
 	writeFieldDefaults  *FieldDefaults
 	listFieldDefaults   *FieldDefaults
 	detailFieldDefaults *FieldDefaults
@@ -77,7 +77,7 @@ func New() *Builder {
 		detailFieldDefaults: NewFieldDefaults(DETAIL),
 		progressBarColor:    "amber",
 		brandTitle:          "Admin",
-		rightDrawerWidth:    600,
+		rightDrawerWidth:    "600",
 		verifier:            perm.NewVerifier(PermModule, nil),
 	}
 
@@ -153,7 +153,7 @@ func (b *Builder) VuetifyOptions(v string) (r *Builder) {
 	return b
 }
 
-func (b *Builder) RightDrawerWidth(v int) (r *Builder) {
+func (b *Builder) RightDrawerWidth(v string) (r *Builder) {
 	b.rightDrawerWidth = v
 	return b
 }
@@ -480,7 +480,10 @@ func MustGetMessages(r *http.Request) *Messages {
 const RightDrawerPortalName = "presets_RightDrawerPortalName"
 const rightDrawerContentPortalName = "rightDrawerContentPortalName"
 
-func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
+func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent, width string) {
+	if width == "" {
+		width = b.rightDrawerWidth
+	}
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 		Name: RightDrawerPortalName,
 		Body: VNavigationDrawer(
@@ -490,7 +493,7 @@ func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent) {
 			Attr("v-model", "vars.rightDrawer").
 			Right(true).
 			Fixed(true).
-			Width(b.rightDrawerWidth).
+			Attr("width", width).
 			Bottom(false).
 			Attr(":height", `"100%"`),
 		// Temporary(true).
@@ -709,7 +712,8 @@ func (b *Builder) initMux() {
 func (b *Builder) wrap(m *ModelBuilder, pf web.PageFunc) http.Handler {
 	p := b.builder.Page(pf)
 	if m != nil {
-		m.ensureEventFuncs(p)
+		m.registerDefaultEventFuncs()
+		p.MergeHub(&m.EventsHub)
 	}
 	return b.I18n().EnsureLanguage(
 		p,

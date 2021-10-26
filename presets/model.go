@@ -13,23 +13,25 @@ import (
 )
 
 type ModelBuilder struct {
-	p             *Builder
-	model         interface{}
-	primaryField  string
-	modelType     reflect.Type
-	menuGroupName string
-	notInMenu     bool
-	menuIcon      string
-	uriName       string
-	label         string
-	fieldLabels   []string
-	placeholders  []string
-	listing       *ListingBuilder
-	detailing     *DetailingBuilder
-	editing       *EditingBuilder
-	creating      *EditingBuilder
-	writeFields   *FieldBuilders
-	hasDetailing  bool
+	p                *Builder
+	model            interface{}
+	primaryField     string
+	modelType        reflect.Type
+	menuGroupName    string
+	notInMenu        bool
+	menuIcon         string
+	uriName          string
+	label            string
+	fieldLabels      []string
+	placeholders     []string
+	listing          *ListingBuilder
+	detailing        *DetailingBuilder
+	editing          *EditingBuilder
+	creating         *EditingBuilder
+	writeFields      *FieldBuilders
+	hasDetailing     bool
+	rightDrawerWidth string
+	web.EventsHub
 }
 
 func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
@@ -50,15 +52,20 @@ func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
 	return
 }
 
-func (b *ModelBuilder) ensureEventFuncs(hub web.EventFuncHub) {
-	hub.RegisterEventFunc(actions.DrawerNew, b.editing.formDrawerNew)
-	hub.RegisterEventFunc(actions.DrawerEdit, b.editing.formDrawerEdit)
-	hub.RegisterEventFunc(actions.DeleteConfirmation, b.listing.deleteConfirmation)
-	hub.RegisterEventFunc(actions.Update, b.editing.defaultUpdate)
-	hub.RegisterEventFunc(actions.DoDelete, b.editing.doDelete)
-	hub.RegisterEventFunc(actions.DoBulkAction, b.listing.doBulkAction)
-	hub.RegisterEventFunc(actions.DrawerAction, b.detailing.formDrawerAction)
-	hub.RegisterEventFunc(actions.DoAction, b.detailing.doAction)
+func (b *ModelBuilder) RightDrawerWidth(v string) *ModelBuilder {
+	b.rightDrawerWidth = v
+	return b
+}
+
+func (b *ModelBuilder) registerDefaultEventFuncs() {
+	b.RegisterEventFunc(actions.DrawerNew, b.editing.formDrawerNew)
+	b.RegisterEventFunc(actions.DrawerEdit, b.editing.formDrawerEdit)
+	b.RegisterEventFunc(actions.DeleteConfirmation, b.listing.deleteConfirmation)
+	b.RegisterEventFunc(actions.Update, b.editing.defaultUpdate)
+	b.RegisterEventFunc(actions.DoDelete, b.editing.doDelete)
+	b.RegisterEventFunc(actions.DoBulkAction, b.listing.doBulkAction)
+	b.RegisterEventFunc(actions.DrawerAction, b.detailing.formDrawerAction)
+	b.RegisterEventFunc(actions.DoAction, b.detailing.doAction)
 }
 
 func (b *ModelBuilder) newModel() (r interface{}) {

@@ -224,10 +224,16 @@ github.com/theplant/htmlgo v1.0.3 h1:G7/YSf8OrOIRHVQ13avd78T/GV1kDl/jMwpQURrXB0o
 github.com/theplant/htmlgo v1.0.3/go.mod h1:pCKSFJsoVNkyW+yN2i1Mst+8130NSQzIU7L2IbnuyKg=
 github.com/theplant/htmltestingutils v0.0.0-20190423050759-0e06de7b6967 h1:yPrgtU8bj7Q/XbXgjjmngZtOhsUufBAraruNwxv/eXM=
 github.com/theplant/htmltestingutils v0.0.0-20190423050759-0e06de7b6967/go.mod h1:86iN4EAYaQbx1VTW5uPslTIviRkYH8CzslMC//g+BgY=
+github.com/theplant/jsontyperegistry v0.0.2 h1:wyt/aYNI90rLNdngmCyWxhOo/GLCvksUVcVS5inwrqY=
+github.com/theplant/jsontyperegistry v0.0.2/go.mod h1:w0raQ2vzq7YtYc+L07iTsgbE/XnalDuGG4WMIDQINjQ=
 github.com/theplant/testingutils v0.0.0-20190603093022-26d8b4d95c61 h1:757/ruZNgTsOf5EkQBo0i3Bx/P2wgF5ljVkODeUX/uA=
 github.com/theplant/testingutils v0.0.0-20190603093022-26d8b4d95c61/go.mod h1:p22Q3Bg5ML+hdI3QSQkB/pZ2+CjfOnGugoQIoyE2Ub8=
 github.com/thoas/go-funk v0.9.1 h1:O549iLZqPpTUQ10ykd26sZhzD+rmR5pWhuElrhbC20M=
 github.com/thoas/go-funk v0.9.1/go.mod h1:+IWnUfUmFO1+WVYQWQtIJHeRRdaIyyYglZN7xzUPe4Q=
+github.com/vedranvuk/errorex v0.3.2 h1:zn9+BrueXiOlU4T8YO6T36SBNtSHeCealWH5+09IMzE=
+github.com/vedranvuk/errorex v0.3.2/go.mod h1:sP0DQ6dh/fEmjtNU/5+8G2eV981hms4mIBESJ1XI90Q=
+github.com/vedranvuk/typeregistry v0.1.0 h1:tx0817samtlTU3nWnFemorJ3mehajAAdHqsdQ/DbFww=
+github.com/vedranvuk/typeregistry v0.1.0/go.mod h1:hJh16szXLU1sWNS4v8QKufj75k9QAnrK/uU0YkYwSUY=
 github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4 h1:0sw0nJM544SpsihWx1bkXdYLQDlzRflMgFJQ4Yih9ts=
 github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4/go.mod h1:+ccdNT0xMY1dtc5XBxumbYfOUhmduiGudqaDgD2rVRE=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
