@@ -19,6 +19,7 @@ import (
 type ListingBuilder struct {
 	mb             *ModelBuilder
 	bulkActions    []*ActionBuilder
+	rowMenu        *RowMenuBuilder
 	filterDataFunc FilterDataFunc
 	filterTabsFunc FilterTabsFunc
 	pageFunc       web.PageFunc
@@ -183,7 +184,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			}
 			return tdbind
 		}).
-		RowMenuItemsFunc(EditDeleteRowMenuItemsFunc(b.mb.Info(), "")).
+		RowMenuItemFuncs(b.RowMenu().listingItemFuncs(ctx)...).
 		Selectable(haveCheckboxes).
 		SelectionParamName(selectedParamName)
 

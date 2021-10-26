@@ -74,7 +74,7 @@ func PresetsDetailPageTopNotes(b *presets.Builder) (
 		})
 
 		cusID := fmt.Sprint(cu.ID)
-		dt.RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(mi, mi.PresetsPrefix()+"/notes", "Customer", cusID))
+		dt.RowMenuItemFuncs(presets.EditDeleteRowMenuItemFuncs(mi, mi.PresetsPrefix()+"/notes", "Customer", cusID)...)
 
 		return stripeui.Card(
 			dt,
@@ -248,7 +248,7 @@ func PresetsDetailPageCards(b *presets.Builder) (
 						stripeui.DetailField(stripeui.OptionalText(card.Email).ZeroLabel("No email provided")).Label("Email"),
 					),
 				)
-			}).RowMenuItemsFunc(presets.EditDeleteRowMenuItemsFunc(mi, mi.PresetsPrefix()+"/credit-cards", cusID))
+			}).RowMenuItemFuncs(presets.EditDeleteRowMenuItemFuncs(mi, mi.PresetsPrefix()+"/credit-cards", cusID)...)
 
 		dt.Column("Type")
 		dt.Column("Number")

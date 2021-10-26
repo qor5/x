@@ -74,6 +74,9 @@ func (b *ModelBuilder) newListing() (r *ListingBuilder) {
 	if b.p.dataOperator != nil {
 		b.listing.Searcher(b.p.dataOperator.Search)
 	}
+	rmb := b.listing.RowMenu("Edit", "Delete")
+	rmb.RowMenuItem("Edit").ComponentFunc(editRowMenuItemFunc(b.Info(), ""))
+	rmb.RowMenuItem("Delete").ComponentFunc(deleteRowMenuItemFunc(b.Info(), ""))
 	return
 }
 

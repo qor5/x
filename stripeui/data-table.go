@@ -16,7 +16,7 @@ import (
 
 type CellComponentFunc func(obj interface{}, fieldName string, ctx *web.EventContext) h.HTMLComponent
 type CellWrapperFunc func(cell h.MutableAttrHTMLComponent, id string) h.HTMLComponent
-type RowMenuItemsFunc func(obj interface{}, id string, ctx *web.EventContext) []h.HTMLComponent
+type RowMenuItemFunc func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent
 type RowComponentFunc func(obj interface{}, ctx *web.EventContext) h.HTMLComponent
 
 type DataTableBuilder struct {
@@ -25,7 +25,7 @@ type DataTableBuilder struct {
 	withoutHeaders     bool
 	selectionParamName string
 	cellWrapper        CellWrapperFunc
-	rowMenuItemsFunc   RowMenuItemsFunc
+	rowMenuItemFuncs   []RowMenuItemFunc
 	rowExpandFunc      RowComponentFunc
 	columns            []*DataTableColumnBuilder
 	loadMoreCount      int
@@ -77,8 +77,13 @@ func (b *DataTableBuilder) CellWrapperFunc(v CellWrapperFunc) (r *DataTableBuild
 	return b
 }
 
-func (b *DataTableBuilder) RowMenuItemsFunc(v RowMenuItemsFunc) (r *DataTableBuilder) {
-	b.rowMenuItemsFunc = v
+func (b *DataTableBuilder) RowMenuItemFuncs(vs ...RowMenuItemFunc) (r *DataTableBuilder) {
+	b.rowMenuItemFuncs = vs
+	return b
+}
+
+func (b *DataTableBuilder) RowMenuItemFunc(v RowMenuItemFunc) (r *DataTableBuilder) {
+	b.rowMenuItemFuncs = append(b.rowMenuItemFuncs, v)
 	return b
 }
 
@@ -102,7 +107,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 
 	initContextVarsMap := map[string]bool{}
 
-	haveRowMenus := b.rowMenuItemsFunc != nil
+	haveRowMenus := len(b.rowMenuItemFuncs) > 0
 
 	var rows []h.HTMLComponent
 	var idsOfPage []string
@@ -171,7 +176,10 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			bindTds = append(bindTds, tdWrapped)
 		}
 
-		opMenuItems := b.rowMenuItemsFunc(obj, id, ctx)
+		var opMenuItems []h.HTMLComponent
+		for _, f := range b.rowMenuItemFuncs {
+			opMenuItems = append(opMenuItems, f(obj, id, ctx))
+		}
 		if haveRowMenus && len(opMenuItems) > 0 {
 			bindTds = append(bindTds, h.Td(
 				VMenu(
