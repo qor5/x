@@ -8,7 +8,6 @@ import (
 
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
-	v "github.com/goplaid/x/vuetify"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 )
@@ -183,18 +182,6 @@ func (b *FieldBuilders) ToComponent(mb *ModelBuilder, obj interface{}, verr *web
 
 	if verr == nil {
 		verr = &web.ValidationErrors{}
-	}
-
-	gErr := verr.GetGlobalError()
-	if len(gErr) > 0 {
-		comps = append(
-			comps,
-			v.VAlert(h.Text(gErr)).
-				Border("left").
-				Type("error").
-				Elevation(2).
-				ColoredBorder(true),
-		)
 	}
 
 	for _, f := range b.fields {

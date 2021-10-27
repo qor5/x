@@ -62,7 +62,7 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRes
 	id := pat.Param(ctx.R, "id")
 	r.Body = VContainer(h.Text(id))
 
-	var obj = b.mb.newModel()
+	var obj = b.mb.NewModel()
 
 	if len(id) == 0 {
 		panic("not found")

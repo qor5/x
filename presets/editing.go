@@ -12,13 +12,14 @@ import (
 )
 
 type EditingBuilder struct {
-	mb        *ModelBuilder
-	fetcher   FetchFunc
-	setter    SetterFunc
-	saver     SaveFunc
-	deleter   DeleteFunc
-	validator ValidateFunc
-	sidePanel ComponentFunc
+	mb          *ModelBuilder
+	Fetcher     FetchFunc
+	Setter      SetterFunc
+	Saver       SaveFunc
+	Deleter     DeleteFunc
+	Validator   ValidateFunc
+	sidePanel   ComponentFunc
+	actionsFunc ComponentFunc
 	FieldBuilders
 }
 
@@ -43,11 +44,11 @@ func (b *EditingBuilder) Creating(vs ...string) (r *EditingBuilder) {
 	if b.mb.creating == nil {
 		b.mb.creating = &EditingBuilder{
 			mb:        b.mb,
-			fetcher:   b.fetcher,
-			setter:    b.setter,
-			saver:     b.saver,
-			deleter:   b.deleter,
-			validator: b.validator,
+			Fetcher:   b.Fetcher,
+			Setter:    b.Setter,
+			Saver:     b.Saver,
+			Deleter:   b.Deleter,
+			Validator: b.Validator,
 		}
 	}
 	r = b.mb.creating
@@ -58,32 +59,37 @@ func (b *EditingBuilder) Creating(vs ...string) (r *EditingBuilder) {
 }
 
 func (b *EditingBuilder) FetchFunc(v FetchFunc) (r *EditingBuilder) {
-	b.fetcher = v
+	b.Fetcher = v
 	return b
 }
 
 func (b *EditingBuilder) SaveFunc(v SaveFunc) (r *EditingBuilder) {
-	b.saver = v
+	b.Saver = v
 	return b
 }
 
 func (b *EditingBuilder) DeleteFunc(v DeleteFunc) (r *EditingBuilder) {
-	b.deleter = v
+	b.Deleter = v
 	return b
 }
 
 func (b *EditingBuilder) ValidateFunc(v ValidateFunc) (r *EditingBuilder) {
-	b.validator = v
+	b.Validator = v
 	return b
 }
 
 func (b *EditingBuilder) SetterFunc(v SetterFunc) (r *EditingBuilder) {
-	b.setter = v
+	b.Setter = v
 	return b
 }
 
 func (b *EditingBuilder) SidePanelFunc(v ComponentFunc) (r *EditingBuilder) {
 	b.sidePanel = v
+	return b
+}
+
+func (b *EditingBuilder) ActionsFunc(v ComponentFunc) (r *EditingBuilder) {
+	b.actionsFunc = v
 	return b
 }
 
@@ -115,7 +121,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	if len(id) > 0 {
 		if obj == nil {
 			var err error
-			obj, err = b.fetcher(b.mb.newModel(), id, ctx)
+			obj, err = b.Fetcher(b.mb.NewModel(), id, ctx)
 			if err != nil {
 				panic(err)
 			}
@@ -128,44 +134,65 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	}
 
 	if obj == nil {
-		obj = b.mb.newModel()
+		obj = b.mb.NewModel()
 	}
 
 	var notice h.HTMLComponent
 	if msg, ok := ctx.Flash.(string); ok {
-		notice = VSnackbar(h.Text(msg)).Value(true).Top(true).Color("success").Value(true)
+		if len(msg) > 0 {
+			notice = VAlert(h.Text(msg)).
+				Border("left").
+				Type("success").
+				Elevation(2).
+				ColoredBorder(true)
+		}
 	}
 
-	vErr, _ := ctx.Flash.(*web.ValidationErrors)
+	vErr, ok := ctx.Flash.(*web.ValidationErrors)
+	if ok {
+		gErr := vErr.GetGlobalError()
+		if len(gErr) > 0 {
+			notice = VAlert(h.Text(gErr)).
+				Border("left").
+				Type("error").
+				Elevation(2).
+				ColoredBorder(true)
+		}
+	}
 
-	var panel h.HTMLComponent
+	var actionButtons h.HTMLComponent = h.Components(
+		VSpacer(),
+		VBtn(buttonLabel).
+			Color("primary").
+			Disabled(disableUpdateBtn).
+			Attr("@click", web.Plaid().
+				EventFunc(actions.Update, ctx.Event.Params...).
+				URL(b.mb.Info().ListingHref()).
+				Go()),
+	)
+
+	if b.actionsFunc != nil {
+		actionButtons = b.actionsFunc(ctx)
+	}
 
 	var formContent h.HTMLComponent = h.Components(
 		VCardText(
+			notice,
 			b.ToComponent(b.mb, obj, vErr, ctx),
 		),
-		VCardActions(
-			VSpacer(),
-			VBtn(buttonLabel).
-				Dark(true).
-				Color("primary").
-				Disabled(disableUpdateBtn).
-				Attr("@click", web.Plaid().
-					EventFunc(actions.Update, ctx.Event.Params...).
-					URL(b.mb.Info().ListingHref()).
-					Go()),
-		),
+		VCardActions(actionButtons),
 	)
 
+	var sidePanel h.HTMLComponent
 	if b.sidePanel != nil {
-		panel = b.sidePanel(ctx)
+		sidePanel = b.sidePanel(ctx)
 		formContent = VContainer(
 			VRow(
 				VCol(
 					formContent,
 				).Cols(8),
 				VCol(
-					panel,
+					sidePanel,
 				).Cols(4),
 			),
 		)
@@ -182,7 +209,6 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 
 		VContainer(
 			formContent,
-			notice,
 			VCard().Flat(true),
 		).Fluid(true),
 	)
@@ -190,9 +216,9 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 
 func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, err error) {
 	id := ctx.Event.Params[0]
-	var obj = b.mb.newModel()
+	var obj = b.mb.NewModel()
 	if len(id) > 0 {
-		err = b.deleter(obj, id, ctx)
+		err = b.Deleter(obj, id, ctx)
 		if err != nil {
 			return
 		}
@@ -204,37 +230,37 @@ func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, e
 
 func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
 	id := ctx.Event.Params[0]
-	var newObj = b.mb.newModel()
+	var newObj = b.mb.NewModel()
 	// don't panic for fields that set in SetterFunc
 	_ = ctx.UnmarshalForm(newObj)
 
 	if len(id) == 0 {
 		if b.mb.Info().Verifier().Do(PermCreate).ObjectOn(newObj).WithReq(ctx.R).IsAllowed() != nil {
-			b.renderFormWithError(&r, perm.PermissionDenied, newObj, ctx)
+			b.UpdateRightDrawerContent(ctx, &r, newObj, "", perm.PermissionDenied)
 			return
 		}
 	}
 
-	var obj = b.mb.newModel()
+	var obj = b.mb.NewModel()
 	usingB := b
 	if b.mb.creating != nil && len(id) == 0 {
 		usingB = b.mb.creating
 	}
 
 	if len(id) > 0 {
-		obj, err1 := usingB.fetcher(obj, id, ctx)
+		obj, err1 := usingB.Fetcher(obj, id, ctx)
 		if err1 != nil {
-			b.renderFormWithError(&r, err1, obj, ctx)
+			b.UpdateRightDrawerContent(ctx, &r, obj, "", err1)
 			return
 		}
 		if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
-			b.renderFormWithError(&r, perm.PermissionDenied, obj, ctx)
+			b.UpdateRightDrawerContent(ctx, &r, obj, "", perm.PermissionDenied)
 			return
 		}
 	}
 
-	if usingB.setter != nil {
-		usingB.setter(obj, ctx)
+	if usingB.Setter != nil {
+		usingB.Setter(obj, ctx)
 	}
 
 	var vErr web.ValidationErrors
@@ -245,7 +271,11 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 		}
 
 		if f.setterFunc == nil {
-			_ = reflectutils.Set(obj, f.name, reflectutils.MustGet(newObj, f.name))
+			val, err1 := reflectutils.Get(newObj, f.name)
+			if err1 != nil {
+				continue
+			}
+			_ = reflectutils.Set(obj, f.name, val)
 			continue
 		}
 
@@ -260,20 +290,20 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	}
 
 	if vErr.HaveErrors() {
-		b.renderFormWithError(&r, &vErr, obj, ctx)
+		b.UpdateRightDrawerContent(ctx, &r, obj, "", &vErr)
 		return
 	}
 
-	if usingB.validator != nil {
-		if vErr := usingB.validator(obj, ctx); vErr.HaveErrors() {
-			b.renderFormWithError(&r, &vErr, obj, ctx)
+	if usingB.Validator != nil {
+		if vErr := usingB.Validator(obj, ctx); vErr.HaveErrors() {
+			b.UpdateRightDrawerContent(ctx, &r, obj, "", &vErr)
 			return
 		}
 	}
 
-	err1 := usingB.saver(obj, id, ctx)
+	err1 := usingB.Saver(obj, id, ctx)
 	if err1 != nil {
-		b.renderFormWithError(&r, err1, obj, ctx)
+		b.UpdateRightDrawerContent(ctx, &r, obj, "", err1)
 		return
 	}
 
@@ -285,13 +315,25 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	return
 }
 
-func (b *EditingBuilder) renderFormWithError(r *web.EventResponse, err error, obj interface{}, ctx *web.EventContext) {
+func (b *EditingBuilder) UpdateRightDrawerContent(
+	ctx *web.EventContext,
+	r *web.EventResponse,
+	obj interface{},
+	successMessage string,
+	err error,
+) {
 	ctx.Flash = err
 
-	if _, ok := err.(*web.ValidationErrors); !ok {
-		vErr := &web.ValidationErrors{}
-		vErr.GlobalError(err.Error())
-		ctx.Flash = vErr
+	if err != nil {
+		if _, ok := err.(*web.ValidationErrors); !ok {
+			vErr := &web.ValidationErrors{}
+			vErr.GlobalError(err.Error())
+			ctx.Flash = vErr
+		}
+	}
+
+	if ctx.Flash == nil {
+		ctx.Flash = successMessage
 	}
 
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{

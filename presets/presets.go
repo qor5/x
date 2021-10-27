@@ -599,11 +599,18 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 				Indeterminate(true).
 				Height(2).
 				Color(b.progressBarColor),
-
+			h.Template(
+				VSnackbar(h.Text("{{vars.presetsMessage.message}}")).
+					Attr("v-model", "vars.presetsMessage.message.length > 0").
+					Attr(":color", "vars.presetsMessage.color").
+					Timeout(2000).
+					Top(true),
+			).Attr("v-if", "vars.presetsMessage"),
 			VMain(
 				innerPr.Body.(h.HTMLComponent),
 			),
-		).Id("vt-app").Attr(web.InitContextVars, `{rightDrawer: false}`)
+		).Id("vt-app").
+			Attr(web.InitContextVars, `{rightDrawer: false, presetsMessage: {color: "success", message: ""}}`)
 
 		return
 	}

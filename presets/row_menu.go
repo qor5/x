@@ -106,8 +106,8 @@ func (b *RowMenuItemBuilder) getComponentFunc(ctx *web.EventContext) stripeui.Ro
 	ctx.Hub.RegisterEventFunc(eventID, func(ctx *web.EventContext) (r web.EventResponse, err error) {
 		id := ctx.Event.Params[0]
 		if b.permAction != "" {
-			var obj = b.rmb.lb.mb.newModel()
-			obj, err = b.rmb.lb.mb.editing.fetcher(obj, id, ctx)
+			var obj = b.rmb.lb.mb.NewModel()
+			obj, err = b.rmb.lb.mb.editing.Fetcher(obj, id, ctx)
 			if err != nil {
 				return r, err
 			}

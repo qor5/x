@@ -1,12 +1,28 @@
 package presets
 
 import (
+	"fmt"
+
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets/actions"
 	"github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
 )
+
+func ShowMessage(r *web.EventResponse, msg string, color string) {
+	if len(msg) == 0 {
+		return
+	}
+
+	if len(color) == 0 {
+		color = "success"
+	}
+
+	r.VarsScript = fmt.Sprintf(
+		`vars.presetsMessage = { message: %s, color: %s}`,
+		h.JSONString(msg), h.JSONString(color))
+}
 
 func EditDeleteRowMenuItemFuncs(m *ModelInfo, url string, editExtraParams ...string) []stripeui.RowMenuItemFunc {
 	return []stripeui.RowMenuItemFunc{

@@ -68,11 +68,11 @@ func (b *ModelBuilder) registerDefaultEventFuncs() {
 	b.RegisterEventFunc(actions.DoAction, b.detailing.doAction)
 }
 
-func (b *ModelBuilder) newModel() (r interface{}) {
+func (b *ModelBuilder) NewModel() (r interface{}) {
 	return reflect.New(b.modelType.Elem()).Interface()
 }
 
-func (b *ModelBuilder) newModelArray() (r interface{}) {
+func (b *ModelBuilder) NewModelArray() (r interface{}) {
 	return reflect.New(reflect.SliceOf(b.modelType)).Interface()
 }
 
