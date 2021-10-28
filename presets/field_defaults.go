@@ -203,7 +203,7 @@ func cfTextTd(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTM
 				)
 			} else {
 				if field.ModelInfo.Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() == nil {
-					a = h.A().Text(id).Attr("@click", web.Plaid().EventFunc(actions.DrawerEdit, id).
+					a = h.A().Text(id).Attr("@click", web.Plaid().EventFunc(actions.Edit, id).
 						Go())
 				} else {
 					a = h.Text(id)

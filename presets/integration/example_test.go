@@ -95,7 +95,7 @@ var cases = []reqCase{
 			emptyCustomerData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/credit-cards").
-				EventFunc(actions.DrawerNew, "").
+				EventFunc(actions.New, "").
 				BuildEventFuncRequest()
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
@@ -138,7 +138,7 @@ var cases = []reqCase{
 			productData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/products").
-				EventFunc(actions.DrawerEdit, "12").
+				EventFunc(actions.Edit, "12").
 				BuildEventFuncRequest()
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
@@ -180,7 +180,7 @@ var cases = []reqCase{
 			customerData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/my_customers/11").
-				EventFunc(actions.DrawerAction, "AgreeTerms", "11").
+				EventFunc(actions.Action, "AgreeTerms", "11").
 				BuildEventFuncRequest()
 
 		},

@@ -20,7 +20,7 @@ func ShowMessage(r *web.EventResponse, msg string, color string) {
 	}
 
 	r.VarsScript = fmt.Sprintf(
-		`vars.presetsMessage = { message: %s, color: %s}`,
+		`vars.presetsMessage = { show: true, message: %s, color: %s}`,
 		h.JSONString(msg), h.JSONString(color))
 }
 
@@ -41,7 +41,7 @@ func editRowMenuItemFunc(m *ModelInfo, url string, editExtraParams ...string) st
 			VListItemIcon(VIcon("edit")),
 			VListItemTitle(h.Text(msgr.Edit)),
 		).Attr("@click", web.Plaid().
-			EventFunc(actions.DrawerEdit, append([]string{id}, editExtraParams...)...).
+			EventFunc(actions.Edit, append([]string{id}, editExtraParams...)...).
 			URL(url).
 			Go())
 	}

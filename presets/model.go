@@ -58,13 +58,13 @@ func (b *ModelBuilder) RightDrawerWidth(v string) *ModelBuilder {
 }
 
 func (b *ModelBuilder) registerDefaultEventFuncs() {
-	b.RegisterEventFunc(actions.DrawerNew, b.editing.formDrawerNew)
-	b.RegisterEventFunc(actions.DrawerEdit, b.editing.formDrawerEdit)
+	b.RegisterEventFunc(actions.New, b.editing.formNew)
+	b.RegisterEventFunc(actions.Edit, b.editing.formEdit)
 	b.RegisterEventFunc(actions.DeleteConfirmation, b.listing.deleteConfirmation)
 	b.RegisterEventFunc(actions.Update, b.editing.defaultUpdate)
 	b.RegisterEventFunc(actions.DoDelete, b.editing.doDelete)
 	b.RegisterEventFunc(actions.DoBulkAction, b.listing.doBulkAction)
-	b.RegisterEventFunc(actions.DrawerAction, b.detailing.formDrawerAction)
+	b.RegisterEventFunc(actions.Action, b.detailing.formDrawerAction)
 	b.RegisterEventFunc(actions.DoAction, b.detailing.doAction)
 }
 

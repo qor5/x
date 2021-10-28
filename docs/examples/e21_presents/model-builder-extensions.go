@@ -65,7 +65,7 @@ func changeNameEventFunc(mb *presets.ModelBuilder) web.EventFunc {
 		obj.(*Customer).Name = "Darwin"
 		err = eb.Saver(obj, id, ctx)
 		presets.ShowMessage(&r, "Nicely updated", "")
-		eb.UpdateRightDrawerContent(ctx, &r, obj, "Good work", err)
+		eb.UpdateOverlayContent(ctx, &r, obj, "Good work", err)
 		return
 	}
 }

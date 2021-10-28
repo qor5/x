@@ -93,7 +93,7 @@ func (b *EditingBuilder) ActionsFunc(v ComponentFunc) (r *EditingBuilder) {
 	return b
 }
 
-func (b *EditingBuilder) formDrawerNew(ctx *web.EventContext) (r web.EventResponse, err error) {
+func (b *EditingBuilder) formNew(ctx *web.EventContext) (r web.EventResponse, err error) {
 	creatingB := b
 	if b.mb.creating != nil {
 		creatingB = b.mb.creating
@@ -103,7 +103,7 @@ func (b *EditingBuilder) formDrawerNew(ctx *web.EventContext) (r web.EventRespon
 	return
 }
 
-func (b *EditingBuilder) formDrawerEdit(ctx *web.EventContext) (r web.EventResponse, err error) {
+func (b *EditingBuilder) formEdit(ctx *web.EventContext) (r web.EventResponse, err error) {
 	b.mb.p.rightDrawer(&r, b.editFormFor(nil, ctx), b.mb.rightDrawerWidth)
 	return
 }
@@ -111,7 +111,8 @@ func (b *EditingBuilder) formDrawerEdit(ctx *web.EventContext) (r web.EventRespo
 func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.HTMLComponent {
 	msgr := MustGetMessages(ctx.R)
 
-	id := ctx.Event.Params[0]
+	overlayType := ctx.Event.Params[0]
+	id := ctx.Event.Params[1]
 
 	var buttonLabel = msgr.Create
 	var disableUpdateBtn bool
@@ -198,19 +199,23 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		)
 	}
 
+	closeBtnVarScript := closeRightDrawerVarScript
+	if overlayType == string(actions.Dialog) {
+		closeBtnVarScript = closeDialogVarScript
+	}
+
 	return h.Components(
 		VAppBar(
 			VToolbarTitle(title).Class("pl-2"),
 			VSpacer(),
 			VBtn("").Icon(true).Children(
 				VIcon("close"),
-			).Attr("@click.stop", "vars.rightDrawer = false"),
+			).Attr("@click.stop", closeBtnVarScript),
 		).Color("white").Elevation(0).Dense(true),
 
-		VContainer(
-			formContent,
-			VCard().Flat(true),
-		).Fluid(true),
+		VSheet(
+			VCard(formContent).Flat(true),
+		).Class("pa-2"),
 	)
 }
 
@@ -229,14 +234,14 @@ func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, e
 }
 
 func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
-	id := ctx.Event.Params[0]
+	id := ctx.Event.Params[1]
 	var newObj = b.mb.NewModel()
 	// don't panic for fields that set in SetterFunc
 	_ = ctx.UnmarshalForm(newObj)
 
 	if len(id) == 0 {
 		if b.mb.Info().Verifier().Do(PermCreate).ObjectOn(newObj).WithReq(ctx.R).IsAllowed() != nil {
-			b.UpdateRightDrawerContent(ctx, &r, newObj, "", perm.PermissionDenied)
+			b.UpdateOverlayContent(ctx, &r, newObj, "", perm.PermissionDenied)
 			return
 		}
 	}
@@ -250,11 +255,11 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	if len(id) > 0 {
 		obj, err1 := usingB.Fetcher(obj, id, ctx)
 		if err1 != nil {
-			b.UpdateRightDrawerContent(ctx, &r, obj, "", err1)
+			b.UpdateOverlayContent(ctx, &r, obj, "", err1)
 			return
 		}
 		if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
-			b.UpdateRightDrawerContent(ctx, &r, obj, "", perm.PermissionDenied)
+			b.UpdateOverlayContent(ctx, &r, obj, "", perm.PermissionDenied)
 			return
 		}
 	}
@@ -290,32 +295,31 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	}
 
 	if vErr.HaveErrors() {
-		b.UpdateRightDrawerContent(ctx, &r, obj, "", &vErr)
+		b.UpdateOverlayContent(ctx, &r, obj, "", &vErr)
 		return
 	}
 
 	if usingB.Validator != nil {
 		if vErr := usingB.Validator(obj, ctx); vErr.HaveErrors() {
-			b.UpdateRightDrawerContent(ctx, &r, obj, "", &vErr)
+			b.UpdateOverlayContent(ctx, &r, obj, "", &vErr)
 			return
 		}
 	}
 
 	err1 := usingB.Saver(obj, id, ctx)
 	if err1 != nil {
-		b.UpdateRightDrawerContent(ctx, &r, obj, "", err1)
+		b.UpdateOverlayContent(ctx, &r, obj, "", err1)
 		return
 	}
 
 	msgr := MustGetMessages(ctx.R)
-	ctx.Flash = msgr.SuccessfullyUpdated
-
+	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
 	r.PushState = web.PushState(nil)
-	r.VarsScript = `vars.rightDrawer = false`
+	r.VarsScript = r.VarsScript + ";" + closeRightDrawerVarScript
 	return
 }
 
-func (b *EditingBuilder) UpdateRightDrawerContent(
+func (b *EditingBuilder) UpdateOverlayContent(
 	ctx *web.EventContext,
 	r *web.EventResponse,
 	obj interface{},
@@ -336,8 +340,15 @@ func (b *EditingBuilder) UpdateRightDrawerContent(
 		ctx.Flash = successMessage
 	}
 
+	overlayType := ctx.Event.Params[0]
+	p := rightDrawerContentPortalName
+
+	if overlayType == string(actions.Dialog) {
+		p = dialogContentPortalName
+	}
+
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-		Name: rightDrawerContentPortalName,
+		Name: p,
 		Body: b.editFormFor(obj, ctx),
 	})
 

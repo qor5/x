@@ -95,15 +95,24 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 	cl.Field("Company").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) HTMLComponent {
 		c := obj.(*Customer)
 		var comp Company
-		if c.CompanyID > 0 {
-			db.First(&comp, "id = ?", c.CompanyID)
+		if c.CompanyID == 0 {
+			return Td()
 		}
+
+		db.First(&comp, "id = ?", c.CompanyID)
 		return Td(
 			A().Text(comp.Name).
-				Attr("@click", web.Plaid().
-					URL(PresetsListingCustomizationFieldsPath+"/companies").
-					EventFunc(actions.DrawerEdit, fmt.Sprint(comp.ID)).
-					Go()),
+				Attr("@click",
+					actions.FormEventFunc(actions.Edit, actions.Drawer, fmt.Sprint(comp.ID)).
+						URL(PresetsListingCustomizationFieldsPath+"/companies").
+						Go()),
+			Text("-"),
+			A().Text("(Open in Dialog)").
+				Attr("@click",
+					actions.FormEventFunc(actions.Edit, actions.Dialog, fmt.Sprint(comp.ID)).
+						URL(PresetsListingCustomizationFieldsPath+"/companies").
+						Go(),
+				),
 		)
 	})
 
@@ -122,7 +131,14 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 			FieldName("CompanyID")
 	})
 
-	b.Model(&Company{})
+	comp := b.Model(&Company{})
+	comp.Editing().ValidateFunc(func(obj interface{}, ctx *web.EventContext) (err web.ValidationErrors) {
+		c := obj.(*Company)
+		if len(c.Name) < 5 {
+			err.GlobalError("name must longer than 5")
+		}
+		return
+	})
 
 	return
 }

@@ -477,20 +477,25 @@ func MustGetMessages(r *http.Request) *Messages {
 	return i18n.MustGetModuleMessages(r, CoreI18nModuleKey, Messages_en_US).(*Messages)
 }
 
-const RightDrawerPortalName = "presets_RightDrawerPortalName"
-const rightDrawerContentPortalName = "rightDrawerContentPortalName"
+const rightDrawerPortalName = "presets_RightDrawerPortalName"
+const rightDrawerContentPortalName = "presets_RightDrawerContentPortalName"
+const dialogPortalName = "presets_DialogPortalName"
+const dialogContentPortalName = "presets_DialogContentPortalName"
+
+const closeRightDrawerVarScript = "vars.presetsRightDrawer = false"
+const closeDialogVarScript = "vars.presetsDialog = false"
 
 func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent, width string) {
 	if width == "" {
 		width = b.rightDrawerWidth
 	}
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-		Name: RightDrawerPortalName,
+		Name: rightDrawerPortalName,
 		Body: VNavigationDrawer(
 			web.Portal(comp).Name(rightDrawerContentPortalName),
 		).
 			Class("v-navigation-drawer--temporary").
-			Attr("v-model", "vars.rightDrawer").
+			Attr("v-model", "vars.presetsRightDrawer").
 			Right(true).
 			Fixed(true).
 			Attr("width", width).
@@ -500,7 +505,22 @@ func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent, width 
 		// HideOverlay(true).
 		// Floating(true).
 	})
-	r.VarsScript = "setTimeout(function(){ vars.rightDrawer = true }, 100)"
+	r.VarsScript = "setTimeout(function(){ vars.presetsRightDrawer = true }, 100)"
+}
+
+func (b *Builder) dialog(r *web.EventResponse, comp h.HTMLComponent, width string) {
+	if width == "" {
+		width = b.rightDrawerWidth
+	}
+	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
+		Name: dialogPortalName,
+		Body: VDialog(
+			web.Portal(comp).Name(dialogContentPortalName),
+		).
+			Attr("v-model", "vars.presetsDialog").
+			Width(width),
+	})
+	r.VarsScript = "setTimeout(function(){ vars.presetsDialog = true }, 100)"
 }
 
 func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
@@ -591,7 +611,8 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 				Fixed(true),
 			// ClippedLeft(true),
 
-			web.Portal().Name(RightDrawerPortalName),
+			web.Portal().Name(rightDrawerPortalName),
+			web.Portal().Name(dialogPortalName),
 
 			VProgressLinear().
 				Attr(":active", "isFetching").
@@ -601,7 +622,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 				Color(b.progressBarColor),
 			h.Template(
 				VSnackbar(h.Text("{{vars.presetsMessage.message}}")).
-					Attr("v-model", "vars.presetsMessage.message.length > 0").
+					Attr("v-model", "vars.presetsMessage.show").
 					Attr(":color", "vars.presetsMessage.color").
 					Timeout(2000).
 					Top(true),
@@ -610,7 +631,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 				innerPr.Body.(h.HTMLComponent),
 			),
 		).Id("vt-app").
-			Attr(web.InitContextVars, `{rightDrawer: false, presetsMessage: {color: "success", message: ""}}`)
+			Attr(web.InitContextVars, `{presetsRightDrawer: false, presetsDialog: false, presetsMessage: {show: false, color: "success", message: ""}}`)
 
 		return
 	}

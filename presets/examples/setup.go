@@ -170,7 +170,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 				VBtn("Add Event").
 					Depressed(true).Attr("@click",
 					web.Plaid().EventFunc(
-						actions.DrawerNew,
+						actions.New,
 						"",
 						typeName,
 						objId,
@@ -210,7 +210,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			h.A().Text(comp.Name).
 				Attr("@click",
 					web.Plaid().URL("/admin/companies").
-						EventFunc(actions.DrawerEdit, fmt.Sprint(comp.ID)).
+						EventFunc(actions.Edit, fmt.Sprint(comp.ID)).
 						Go()),
 		)
 	})
@@ -412,7 +412,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 				VBtn("Add Note").
 					Depressed(true).
 					Attr("@click",
-						web.Plaid().EventFunc(actions.DrawerNew,
+						web.Plaid().EventFunc(actions.New,
 							"",
 							"Customer",
 							cusID,
@@ -452,13 +452,13 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 				VBtn("Agree Terms").
 					Depressed(true).Class("mr-2").
 					Attr("@click", web.Plaid().
-						EventFunc(actions.DrawerAction, "AgreeTerms", cusID).
+						EventFunc(actions.Action, "AgreeTerms", cusID).
 						Go()),
 
 				VBtn("Update details").
 					Depressed(true).
 					Attr("@click", web.Plaid().
-						EventFunc(actions.DrawerEdit,
+						EventFunc(actions.Edit,
 							cusID,
 						).URL("/admin/customers").Go()),
 			).Class("mb-4")
@@ -500,7 +500,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 					Depressed(true).
 					Attr("@click",
 						web.Plaid().EventFunc(
-							actions.DrawerNew,
+							actions.New,
 							"",
 							cusID,
 						).URL("/admin/credit-cards").
