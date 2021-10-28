@@ -11,6 +11,7 @@ import (
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
 	"github.com/goplaid/x/perm"
+	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/goplaid/x/vuetifyx"
 	"github.com/iancoleman/strcase"
@@ -484,6 +485,14 @@ const dialogContentPortalName = "presets_DialogContentPortalName"
 
 const closeRightDrawerVarScript = "vars.presetsRightDrawer = false"
 const closeDialogVarScript = "vars.presetsDialog = false"
+
+func (b *Builder) overlay(overlayType string, r *web.EventResponse, comp h.HTMLComponent, width string) {
+	if overlayType == actions.Dialog {
+		b.dialog(r, comp, width)
+		return
+	}
+	b.rightDrawer(r, comp, width)
+}
 
 func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent, width string) {
 	if width == "" {

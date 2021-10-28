@@ -13,13 +13,11 @@ const (
 	DoBulkAction       = "presets_DoBulkAction"
 )
 
-type OverlayType string
-
 const (
-	Dialog OverlayType = "dialog"
-	Drawer OverlayType = "drawer"
+	Dialog = "dialog"
+	Drawer = "drawer"
 )
 
-func FormEventFunc(eventFuncID string, overlayType OverlayType, params ...string) *web.VueEventTagBuilder {
-	return web.Plaid().EventFunc(eventFuncID, append([]string{string(overlayType)}, params...)...)
+func FormEventFunc(eventFuncID string, overlayType string, params ...string) *web.VueEventTagBuilder {
+	return web.Plaid().EventFunc(eventFuncID, append([]string{overlayType}, params...)...)
 }

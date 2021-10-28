@@ -95,7 +95,7 @@ var cases = []reqCase{
 			emptyCustomerData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/credit-cards").
-				EventFunc(actions.New, "").
+				EventFunc(actions.New, actions.Drawer, "").
 				BuildEventFuncRequest()
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
@@ -138,7 +138,7 @@ var cases = []reqCase{
 			productData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/products").
-				EventFunc(actions.Edit, "12").
+				EventFunc(actions.Edit, actions.Drawer, "12").
 				BuildEventFuncRequest()
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {

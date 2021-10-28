@@ -41,7 +41,7 @@ func editRowMenuItemFunc(m *ModelInfo, url string, editExtraParams ...string) st
 			VListItemIcon(VIcon("edit")),
 			VListItemTitle(h.Text(msgr.Edit)),
 		).Attr("@click", web.Plaid().
-			EventFunc(actions.Edit, append([]string{id}, editExtraParams...)...).
+			EventFunc(actions.Edit, append([]string{actions.Drawer, id}, editExtraParams...)...).
 			URL(url).
 			Go())
 	}

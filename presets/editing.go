@@ -99,12 +99,12 @@ func (b *EditingBuilder) formNew(ctx *web.EventContext) (r web.EventResponse, er
 		creatingB = b.mb.creating
 	}
 
-	b.mb.p.rightDrawer(&r, creatingB.editFormFor(nil, ctx), b.mb.rightDrawerWidth)
+	b.mb.p.overlay(ctx.Event.Params[0], &r, creatingB.editFormFor(nil, ctx), b.mb.rightDrawerWidth)
 	return
 }
 
 func (b *EditingBuilder) formEdit(ctx *web.EventContext) (r web.EventResponse, err error) {
-	b.mb.p.rightDrawer(&r, b.editFormFor(nil, ctx), b.mb.rightDrawerWidth)
+	b.mb.p.overlay(ctx.Event.Params[0], &r, b.editFormFor(nil, ctx), b.mb.rightDrawerWidth)
 	return
 }
 
@@ -200,7 +200,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	}
 
 	closeBtnVarScript := closeRightDrawerVarScript
-	if overlayType == string(actions.Dialog) {
+	if overlayType == actions.Dialog {
 		closeBtnVarScript = closeDialogVarScript
 	}
 

@@ -177,7 +177,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 				if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(b.mb.model).On(id).WithReq(ctx.R).IsAllowed() == nil {
 
 					tdbind.SetAttr("@click.self", web.Plaid().
-						EventFunc(actions.Edit, id).
+						EventFunc(actions.Edit, actions.Drawer, id).
 						Go())
 				}
 
@@ -403,7 +403,9 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 			Color("primary").
 			Depressed(true).
 			Dark(true).
-			OnClick(actions.New, "").Disabled(disableNewBtn),
+			Disabled(disableNewBtn).
+			Attr("@click", actions.FormEventFunc(actions.New, actions.Drawer, "").
+				Go()),
 	).Flat(true)
 	if fd != nil {
 		toolbar.PrependChildren(vuetifyx.VXFilter(fd).Translations(ft))

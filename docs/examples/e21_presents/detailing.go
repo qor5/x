@@ -85,6 +85,7 @@ func PresetsDetailPageTopNotes(b *presets.Builder) (
 					Attr("@click",
 						web.Plaid().EventFunc(
 							actions.New,
+							actions.Drawer,
 							"",
 							"Customer",
 							cusID).URL(mi.PresetsPrefix()+"/notes").
@@ -156,7 +157,7 @@ func PresetsDetailPageDetails(b *presets.Builder) (
 				VBtn("Update details").
 					Depressed(true).
 					Attr("@click", web.Plaid().
-						EventFunc(actions.Edit, cusID).
+						EventFunc(actions.Edit, actions.Drawer, cusID).
 						URL(mi.PresetsPrefix()+"/customers").
 						Go()),
 			).Class("mb-4")
@@ -262,6 +263,7 @@ func PresetsDetailPageCards(b *presets.Builder) (
 						web.Plaid().
 							EventFunc(
 								actions.New,
+								actions.Drawer,
 								"",
 								cusID,
 							).
