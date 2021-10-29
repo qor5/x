@@ -478,7 +478,7 @@ func MustGetMessages(r *http.Request) *Messages {
 	return i18n.MustGetModuleMessages(r, CoreI18nModuleKey, Messages_en_US).(*Messages)
 }
 
-const rightDrawerPortalName = "presets_RightDrawerPortalName"
+const RightDrawerPortalName = "presets_RightDrawerPortalName"
 const rightDrawerContentPortalName = "presets_RightDrawerContentPortalName"
 const dialogPortalName = "presets_DialogPortalName"
 const dialogContentPortalName = "presets_DialogContentPortalName"
@@ -499,7 +499,7 @@ func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent, width 
 		width = b.rightDrawerWidth
 	}
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-		Name: rightDrawerPortalName,
+		Name: RightDrawerPortalName,
 		Body: VNavigationDrawer(
 			web.Portal(comp).Name(rightDrawerContentPortalName),
 		).
@@ -620,7 +620,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 				Fixed(true),
 			// ClippedLeft(true),
 
-			web.Portal().Name(rightDrawerPortalName),
+			web.Portal().Name(RightDrawerPortalName),
 			web.Portal().Name(dialogPortalName),
 
 			VProgressLinear().
