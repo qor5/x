@@ -234,6 +234,7 @@ func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, e
 }
 
 func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
+	overlayType := ctx.Event.Params[0]
 	id := ctx.Event.Params[1]
 	var newObj = b.mb.NewModel()
 	// don't panic for fields that set in SetterFunc
@@ -264,27 +265,53 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 		}
 	}
 
-	if usingB.Setter != nil {
-		usingB.Setter(obj, ctx)
+	if err2 := usingB.RunSetterFunc(ctx, &r, obj, newObj); err2.HaveErrors() {
+		return
 	}
 
-	var vErr web.ValidationErrors
-	for _, f := range usingB.fields {
+	if usingB.Validator != nil {
+		if vErr := usingB.Validator(obj, ctx); vErr.HaveErrors() {
+			usingB.UpdateOverlayContent(ctx, &r, obj, "", &vErr)
+			return
+		}
+	}
 
-		if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
+	err1 := usingB.Saver(obj, id, ctx)
+	if err1 != nil {
+		usingB.UpdateOverlayContent(ctx, &r, obj, "", err1)
+		return
+	}
+
+	script := closeRightDrawerVarScript
+	if overlayType == actions.Dialog {
+		script = closeRightDrawerVarScript
+	}
+	msgr := MustGetMessages(ctx.R)
+	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
+	r.PushState = web.PushState(nil)
+	r.VarsScript = r.VarsScript + ";" + script
+	return
+}
+
+func (b *EditingBuilder) RunSetterFunc(ctx *web.EventContext, r *web.EventResponse, toObj interface{}, fromObj interface{}) (vErr web.ValidationErrors) {
+	if b.Setter != nil {
+		b.Setter(toObj, ctx)
+	}
+	for _, f := range b.fields {
+		if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(toObj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
 			continue
 		}
 
 		if f.setterFunc == nil {
-			val, err1 := reflectutils.Get(newObj, f.name)
+			val, err1 := reflectutils.Get(fromObj, f.name)
 			if err1 != nil {
 				continue
 			}
-			_ = reflectutils.Set(obj, f.name, val)
+			_ = reflectutils.Set(toObj, f.name, val)
 			continue
 		}
 
-		err1 := f.setterFunc(obj, &FieldContext{
+		err1 := f.setterFunc(toObj, &FieldContext{
 			ModelInfo: b.mb.Info(),
 			Name:      f.name,
 			Label:     b.getLabel(f.NameLabel),
@@ -295,27 +322,9 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	}
 
 	if vErr.HaveErrors() {
-		b.UpdateOverlayContent(ctx, &r, obj, "", &vErr)
+		b.UpdateOverlayContent(ctx, r, toObj, "", &vErr)
 		return
 	}
-
-	if usingB.Validator != nil {
-		if vErr := usingB.Validator(obj, ctx); vErr.HaveErrors() {
-			b.UpdateOverlayContent(ctx, &r, obj, "", &vErr)
-			return
-		}
-	}
-
-	err1 := usingB.Saver(obj, id, ctx)
-	if err1 != nil {
-		b.UpdateOverlayContent(ctx, &r, obj, "", err1)
-		return
-	}
-
-	msgr := MustGetMessages(ctx.R)
-	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
-	r.PushState = web.PushState(nil)
-	r.VarsScript = r.VarsScript + ";" + closeRightDrawerVarScript
 	return
 }
 
