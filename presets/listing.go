@@ -404,7 +404,7 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 			Depressed(true).
 			Dark(true).
 			Disabled(disableNewBtn).
-			Attr("@click", actions.FormEventFunc(actions.New, actions.Drawer, "").
+			Attr("@click", web.Plaid().EventFunc(actions.New, actions.Drawer, "").
 				Go()),
 	).Flat(true)
 	if fd != nil {

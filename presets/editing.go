@@ -111,7 +111,6 @@ func (b *EditingBuilder) formEdit(ctx *web.EventContext) (r web.EventResponse, e
 func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.HTMLComponent {
 	msgr := MustGetMessages(ctx.R)
 
-	overlayType := ctx.Event.Params[0]
 	id := ctx.Event.Params[1]
 
 	var buttonLabel = msgr.Create
@@ -199,8 +198,9 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		)
 	}
 
+	overlayOptions := actions.ParamAsOptions(ctx.Event.Params[0])
 	closeBtnVarScript := closeRightDrawerVarScript
-	if overlayType == actions.Dialog {
+	if overlayOptions.Type == actions.Dialog {
 		closeBtnVarScript = closeDialogVarScript
 	}
 
@@ -234,7 +234,6 @@ func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, e
 }
 
 func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
-	overlayType := ctx.Event.Params[0]
 	id := ctx.Event.Params[1]
 	var newObj = b.mb.NewModel()
 	// don't panic for fields that set in SetterFunc
@@ -282,12 +281,21 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 		return
 	}
 
-	script := closeRightDrawerVarScript
-	if overlayType == actions.Dialog {
-		script = closeRightDrawerVarScript
-	}
 	msgr := MustGetMessages(ctx.R)
 	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
+
+	overlayOptions := actions.ParamAsOptions(ctx.Event.Params[0])
+	if len(overlayOptions.NextScript) > 0 {
+		ctx.Event.Params[0] = actions.Drawer
+		r.VarsScript = r.VarsScript + ";" + closeDialogVarScript + ";" + overlayOptions.NextScript
+		// usingB.UpdateOverlayContent(ctx, &r, obj, "", nil)
+		return
+	}
+
+	script := closeRightDrawerVarScript
+	if overlayOptions.Type == actions.Dialog {
+		script = closeDialogVarScript
+	}
 	r.PushState = web.PushState(nil)
 	r.VarsScript = r.VarsScript + ";" + script
 	return
@@ -349,10 +357,10 @@ func (b *EditingBuilder) UpdateOverlayContent(
 		ctx.Flash = successMessage
 	}
 
-	overlayType := ctx.Event.Params[0]
+	overlayOptions := actions.ParamAsOptions(ctx.Event.Params[0])
 	p := rightDrawerContentPortalName
 
-	if overlayType == string(actions.Dialog) {
+	if overlayOptions.Type == actions.Dialog {
 		p = dialogContentPortalName
 	}
 
