@@ -176,9 +176,11 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			} else {
 				if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(b.mb.model).On(id).WithReq(ctx.R).IsAllowed() == nil {
 
-					tdbind.SetAttr("@click.self", web.Plaid().
-						EventFunc(actions.Edit, actions.Drawer, id).
-						Go())
+					tdbind.SetAttr("@click.self",
+						web.Plaid().
+							EventFunc(actions.Edit).
+							Query(ParamID, id).
+							Go())
 				}
 
 			}
@@ -248,22 +250,27 @@ func (b *ListingBuilder) bulkPanel(bulk *ActionBuilder, selectedIds []string, ct
 				Depressed(true).
 				Class("ml-2").
 				Attr("@click", web.Plaid().
-					PushStateQuery(url.Values{bulkPanelOpenParamName: []string{""}}).
+					Queries(url.Values{bulkPanelOpenParamName: []string{""}}).
 					MergeQuery(true).
+					PushState(true).
 					Go()),
 
 			VBtn(msgr.OK).
 				Color("primary").
 				Depressed(true).
 				Dark(true).
-				OnClick(actions.DoBulkAction, bulk.name, strings.Join(selectedIds, ",")),
+				Attr("@click", web.Plaid().EventFunc(actions.DoBulkAction).
+					Query(ParamBulkActionName, bulk.name).
+					Query(ParamSelectedIds, strings.Join(selectedIds, ",")).
+					Go(),
+				),
 		),
 	).Class("mb-5")
 }
 
 func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventResponse, err error) {
 	msgr := MustGetMessages(ctx.R)
-	id := ctx.Event.Params[0]
+	id := ctx.R.FormValue(ParamID)
 
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 		Name: deleteConfirmPortalName,
@@ -282,7 +289,8 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 						Depressed(true).
 						Dark(true).
 						Attr("@click", web.Plaid().
-							EventFunc(actions.DoDelete, id).
+							EventFunc(actions.DoDelete).
+							Query(ParamID, id).
 							URL(ctx.R.URL.Path).
 							Go()),
 				),
@@ -297,7 +305,7 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 }
 
 func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventResponse, err error) {
-	bulk := getAction(b.bulkActions, ctx.Event.Params[0])
+	bulk := getAction(b.bulkActions, ctx.R.FormValue(ParamBulkActionName))
 	if bulk == nil {
 		panic("bulk required")
 	}
@@ -307,7 +315,7 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 		return
 	}
 
-	selectedIds := strings.Split(ctx.Event.Params[1], ",")
+	selectedIds := strings.Split(ctx.R.FormValue(ParamSelectedIds), ",")
 	err1 := bulk.updateFunc(selectedIds, ctx)
 	if err1 != nil || ctx.Flash != nil {
 		r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
@@ -317,7 +325,7 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 		return
 	}
 
-	r.PushState = web.PushState(url.Values{bulkPanelOpenParamName: []string{}, selectedParamName: []string{}}).MergeQuery(true)
+	r.PushState = web.Location(url.Values{bulkPanelOpenParamName: []string{}, selectedParamName: []string{}}).MergeQuery(true)
 
 	return
 }
@@ -339,7 +347,7 @@ func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *web.EventContex
 				Dark(true).
 				Class("ml-2").
 				Attr("@click", web.Plaid().
-					PushStateQuery(url.Values{bulkPanelOpenParamName: []string{ba.name}}).
+					Queries(url.Values{bulkPanelOpenParamName: []string{ba.name}}).
 					MergeQuery(true).
 					Go()),
 		)
@@ -362,7 +370,7 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 		}
 		tabs.AppendChildren(
 			VTab(h.Text(td.Label)).
-				Attr("@click", web.Plaid().PushStateQuery(td.Query).Go()),
+				Attr("@click", web.Plaid().Queries(td.Query).Go()),
 		)
 	}
 	return tabs.Value(value)
@@ -404,7 +412,7 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 			Depressed(true).
 			Dark(true).
 			Disabled(disableNewBtn).
-			Attr("@click", actions.FormEventFunc(actions.New, actions.Drawer, "").
+			Attr("@click", web.Plaid().EventFunc(actions.New).
 				Go()),
 	).Flat(true)
 	if fd != nil {

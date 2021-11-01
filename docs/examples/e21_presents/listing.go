@@ -103,13 +103,16 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 		return Td(
 			A().Text(comp.Name).
 				Attr("@click",
-					actions.FormEventFunc(actions.Edit, actions.Drawer, fmt.Sprint(comp.ID)).
+					web.Plaid().EventFunc(actions.Edit).
+						Query(presets.ParamID, fmt.Sprint(comp.ID)).
 						URL(PresetsListingCustomizationFieldsPath+"/companies").
 						Go()),
 			Text("-"),
 			A().Text("(Open in Dialog)").
 				Attr("@click",
-					actions.FormEventFunc(actions.Edit, actions.Dialog, fmt.Sprint(comp.ID)).
+					web.Plaid().EventFunc(actions.Edit).
+						Query(presets.ParamID, fmt.Sprint(comp.ID)).
+						Query(presets.ParamOverlay, actions.Dialog).
 						URL(PresetsListingCustomizationFieldsPath+"/companies").
 						Go(),
 				),
@@ -122,13 +125,32 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 		c := obj.(*Customer)
 		var comps []Company
 		db.Find(&comps)
-		return v.VSelect().
-			Label(msgr.CustomersCompanyID).
-			Items(comps).
-			ItemText("Name").
-			ItemValue("ID").
-			Value(c.CompanyID).
-			FieldName("CompanyID")
+		return Div(
+			v.VSelect().
+				Label(msgr.CustomersCompanyID).
+				Items(comps).
+				ItemText("Name").
+				ItemValue("ID").
+				Value(c.CompanyID).
+				FieldName("CompanyID"),
+
+			A().Text("Add Company").Attr("@click",
+				web.Plaid().
+					URL(PresetsListingCustomizationFieldsPath+"/companies").
+					EventFunc(actions.New).
+					Query(presets.ParamOverlay,
+						actions.OptionType(actions.Dialog).
+							SetNextScript(web.Plaid().
+								URL(PresetsListingCustomizationFieldsPath+"/customers").
+								EventFunc(actions.Edit).
+								Query(presets.ParamOverlay, actions.Drawer).
+								Query(presets.ParamID, fmt.Sprint(c.ID)).
+								Go(),
+							).
+							String(),
+					).Go(),
+			),
+		)
 	})
 
 	comp := b.Model(&Company{})

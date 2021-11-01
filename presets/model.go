@@ -2,6 +2,7 @@ package presets
 
 import (
 	"fmt"
+	"net/url"
 	"reflect"
 	"strings"
 
@@ -82,8 +83,8 @@ func (b *ModelBuilder) newListing() (r *ListingBuilder) {
 		b.listing.Searcher(b.p.dataOperator.Search)
 	}
 	rmb := b.listing.RowMenu("Edit", "Delete")
-	rmb.RowMenuItem("Edit").ComponentFunc(editRowMenuItemFunc(b.Info(), ""))
-	rmb.RowMenuItem("Delete").ComponentFunc(deleteRowMenuItemFunc(b.Info(), ""))
+	rmb.RowMenuItem("Edit").ComponentFunc(editRowMenuItemFunc(b.Info(), "", url.Values{}))
+	rmb.RowMenuItem("Delete").ComponentFunc(deleteRowMenuItemFunc(b.Info(), "", url.Values{}))
 	return
 }
 

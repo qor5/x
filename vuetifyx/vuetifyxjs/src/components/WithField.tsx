@@ -57,8 +57,8 @@ export const WithField = (
 								} else {
 									opValue.remove = true;
 								}
-								const pushState = { query: { [fieldName]: opValue }, mergeQuery: true };
-								(self as any).$plaid().pushState(pushState).go();
+								const loc = { query: { [fieldName]: opValue }, mergeQuery: true };
+								(self as any).$plaid().location(loc).pushState(true).go();
 								return;
 							}
 							(self as any).$plaid().fieldValue(fieldName, val);

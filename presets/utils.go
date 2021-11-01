@@ -2,6 +2,7 @@ package presets
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets/actions"
@@ -24,14 +25,14 @@ func ShowMessage(r *web.EventResponse, msg string, color string) {
 		h.JSONString(msg), h.JSONString(color))
 }
 
-func EditDeleteRowMenuItemFuncs(m *ModelInfo, url string, editExtraParams ...string) []stripeui.RowMenuItemFunc {
+func EditDeleteRowMenuItemFuncs(m *ModelInfo, url string, editExtraParams url.Values) []stripeui.RowMenuItemFunc {
 	return []stripeui.RowMenuItemFunc{
-		editRowMenuItemFunc(m, url, editExtraParams...),
-		deleteRowMenuItemFunc(m, url, editExtraParams...),
+		editRowMenuItemFunc(m, url, editExtraParams),
+		deleteRowMenuItemFunc(m, url, editExtraParams),
 	}
 }
 
-func editRowMenuItemFunc(m *ModelInfo, url string, editExtraParams ...string) stripeui.RowMenuItemFunc {
+func editRowMenuItemFunc(m *ModelInfo, url string, editExtraParams url.Values) stripeui.RowMenuItemFunc {
 	return func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent {
 		msgr := MustGetMessages(ctx.R)
 		if m.Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
@@ -41,13 +42,15 @@ func editRowMenuItemFunc(m *ModelInfo, url string, editExtraParams ...string) st
 			VListItemIcon(VIcon("edit")),
 			VListItemTitle(h.Text(msgr.Edit)),
 		).Attr("@click", web.Plaid().
-			EventFunc(actions.Edit, append([]string{actions.Drawer, id}, editExtraParams...)...).
+			EventFunc(actions.Edit).
+			Queries(editExtraParams).
+			Query(ParamID, id).
 			URL(url).
 			Go())
 	}
 }
 
-func deleteRowMenuItemFunc(m *ModelInfo, url string, editExtraParams ...string) stripeui.RowMenuItemFunc {
+func deleteRowMenuItemFunc(m *ModelInfo, url string, editExtraParams url.Values) stripeui.RowMenuItemFunc {
 	return func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent {
 		msgr := MustGetMessages(ctx.R)
 		if m.Verifier().Do(PermDelete).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
@@ -57,7 +60,9 @@ func deleteRowMenuItemFunc(m *ModelInfo, url string, editExtraParams ...string) 
 			VListItemIcon(VIcon("delete")),
 			VListItemTitle(h.Text(msgr.Delete)),
 		).Attr("@click", web.Plaid().
-			EventFunc(actions.DeleteConfirmation, id).
+			EventFunc(actions.DeleteConfirmation).
+			Queries(editExtraParams).
+			Query(ParamID, id).
 			URL(url).
 			Go())
 	}

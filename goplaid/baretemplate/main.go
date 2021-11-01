@@ -16,7 +16,7 @@ func Home(ctx *web.EventContext) (r web.PageResponse, err error) {
 	r.Body = Div(
 		H1(time.Now().String()),
 		Button("DoAction1").Attr("@click",
-			web.Plaid().EventFunc(doAction1, "1", "2").Go(),
+			web.Plaid().EventFunc(doAction1).Query("id", "1").Go(),
 		))
 	return
 }

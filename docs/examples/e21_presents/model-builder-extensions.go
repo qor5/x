@@ -28,7 +28,8 @@ func PresetsModelBuilderExtensions(b *presets.Builder) (
 			VBtn("Update").
 				Color("primary").
 				Attr("@click", web.Plaid().
-					EventFunc(actions.Update, ctx.Event.Params...).
+					EventFunc(actions.Update).
+					Queries(ctx.Queries()).
 					URL(mb.Info().ListingHref()).
 					Go()),
 		)
@@ -38,7 +39,8 @@ func PresetsModelBuilderExtensions(b *presets.Builder) (
 		cust := obj.(*Customer)
 		return VBtn("Change Name").Attr("@click",
 			web.Plaid().
-				EventFunc("changeName", fmt.Sprint(cust.ID)).
+				EventFunc("changeName").
+				Query(presets.ParamID, fmt.Sprint(cust.ID)).
 				Go(),
 		)
 	})
@@ -60,7 +62,7 @@ func changeNameEventFunc(mb *presets.ModelBuilder) web.EventFunc {
 	return func(ctx *web.EventContext) (r web.EventResponse, err error) {
 		eb := mb.Editing()
 		obj := mb.NewModel()
-		id := ctx.Event.Params[0]
+		id := ctx.R.FormValue(presets.ParamID)
 		obj, err = eb.Fetcher(obj, id, ctx)
 		obj.(*Customer).Name = "Darwin"
 		err = eb.Saver(obj, id, ctx)

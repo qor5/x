@@ -1,6 +1,8 @@
 package actions
 
-import "github.com/goplaid/web"
+import (
+	"encoding/json"
+)
 
 const (
 	New                = "presets_New"
@@ -18,6 +20,36 @@ const (
 	Drawer = "drawer"
 )
 
-func FormEventFunc(eventFuncID string, overlayType string, params ...string) *web.VueEventTagBuilder {
-	return web.Plaid().EventFunc(eventFuncID, append([]string{overlayType}, params...)...)
+type OverlayOptionsBuilder struct {
+	Type       string
+	NextScript string
+}
+
+func (opts *OverlayOptionsBuilder) String() string {
+	r, _ := json.Marshal(opts)
+	return string(r)
+}
+
+func ParamAsOptions(param string) (r OverlayOptionsBuilder) {
+	if len(param) == 0 {
+		return
+	}
+
+	if param[0] == '{' {
+		_ = json.Unmarshal([]byte(param), &r)
+		return
+	}
+
+	r.Type = param
+	return
+}
+
+func OptionType(v string) (r *OverlayOptionsBuilder) {
+	r = &OverlayOptionsBuilder{Type: v}
+	return
+}
+
+func (b *OverlayOptionsBuilder) SetNextScript(v string) (r *OverlayOptionsBuilder) {
+	b.NextScript = v
+	return b
 }

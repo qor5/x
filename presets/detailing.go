@@ -109,11 +109,11 @@ func getPageTitle(obj interface{}, id string) string {
 }
 
 func (b *DetailingBuilder) doAction(ctx *web.EventContext) (r web.EventResponse, err error) {
-	action := getAction(b.actions, ctx.Event.Params[0])
+	action := getAction(b.actions, ctx.R.FormValue(ParamAction))
 	if action == nil {
 		panic("action required")
 	}
-	id := ctx.Event.Params[1]
+	id := ctx.R.FormValue(ParamID)
 	err1 := action.updateFunc([]string{id}, ctx)
 	if err1 != nil || ctx.Flash != nil {
 		if ctx.Flash == nil {
@@ -127,14 +127,14 @@ func (b *DetailingBuilder) doAction(ctx *web.EventContext) (r web.EventResponse,
 		return
 	}
 
-	r.PushState = web.PushState(url.Values{})
+	r.PushState = web.Location(url.Values{})
 	r.VarsScript = closeRightDrawerVarScript
 
 	return
 }
 
 func (b *DetailingBuilder) formDrawerAction(ctx *web.EventContext) (r web.EventResponse, err error) {
-	action := getAction(b.actions, ctx.Event.Params[0])
+	action := getAction(b.actions, ctx.R.FormValue(ParamAction))
 	if action == nil {
 		panic("action required")
 	}
@@ -146,7 +146,7 @@ func (b *DetailingBuilder) formDrawerAction(ctx *web.EventContext) (r web.EventR
 func (b *DetailingBuilder) actionForm(action *ActionBuilder, ctx *web.EventContext) h.HTMLComponent {
 	msgr := MustGetMessages(ctx.R)
 
-	id := ctx.Event.Params[1]
+	id := ctx.R.FormValue(ParamID)
 	if len(id) == 0 {
 		panic("id required")
 	}
@@ -162,7 +162,9 @@ func (b *DetailingBuilder) actionForm(action *ActionBuilder, ctx *web.EventConte
 					Dark(true).
 					Color("primary").
 					Attr("@click", web.Plaid().
-						EventFunc(actions.DoAction, ctx.Event.Params...).
+						EventFunc(actions.DoAction).
+						Query(ParamID, id).
+						Query(ParamAction, ctx.R.FormValue(ParamAction)).
 						URL(b.mb.Info().DetailingHref(id)).
 						Go()),
 			),
