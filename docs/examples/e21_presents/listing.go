@@ -103,13 +103,16 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 		return Td(
 			A().Text(comp.Name).
 				Attr("@click",
-					web.Plaid().EventFunc(actions.Edit, actions.Drawer, fmt.Sprint(comp.ID)).
+					web.Plaid().EventFunc(actions.Edit).
+						Query(presets.ParamID, fmt.Sprint(comp.ID)).
 						URL(PresetsListingCustomizationFieldsPath+"/companies").
 						Go()),
 			Text("-"),
 			A().Text("(Open in Dialog)").
 				Attr("@click",
-					web.Plaid().EventFunc(actions.Edit, actions.Dialog, fmt.Sprint(comp.ID)).
+					web.Plaid().EventFunc(actions.Edit).
+						Query(presets.ParamID, fmt.Sprint(comp.ID)).
+						Query(presets.ParamOverlay, actions.Dialog).
 						URL(PresetsListingCustomizationFieldsPath+"/companies").
 						Go(),
 				),
@@ -134,16 +137,18 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 			A().Text("Add Company").Attr("@click",
 				web.Plaid().
 					URL(PresetsListingCustomizationFieldsPath+"/companies").
-					EventFunc(
-						actions.New,
+					EventFunc(actions.New).
+					Query(presets.ParamOverlay,
 						actions.OptionType(actions.Dialog).
 							SetNextScript(web.Plaid().
 								URL(PresetsListingCustomizationFieldsPath+"/customers").
-								EventFunc(actions.Edit, actions.Drawer, fmt.Sprint(c.ID)).
+								EventFunc(actions.Edit).
+								Query(presets.ParamOverlay, actions.Drawer).
+								Query(presets.ParamID, fmt.Sprint(c.ID)).
 								Go(),
 							).
 							String(),
-						"").Go(),
+					).Go(),
 			),
 		)
 	})

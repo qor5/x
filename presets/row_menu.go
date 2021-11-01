@@ -104,7 +104,7 @@ func (b *RowMenuItemBuilder) getComponentFunc(ctx *web.EventContext) stripeui.Ro
 
 	eventID := fmt.Sprintf("%s_rowMenuItemFunc_%s", b.rmb.lb.mb.label, b.name)
 	ctx.Hub.RegisterEventFunc(eventID, func(ctx *web.EventContext) (r web.EventResponse, err error) {
-		id := ctx.Event.Params[0]
+		id := ctx.R.FormValue(ParamID)
 		if b.permAction != "" {
 			var obj = b.rmb.lb.mb.NewModel()
 			obj, err = b.rmb.lb.mb.editing.Fetcher(obj, id, ctx)
@@ -129,7 +129,8 @@ func (b *RowMenuItemBuilder) getComponentFunc(ctx *web.EventContext) stripeui.Ro
 			VListItemIcon(VIcon(b.icon)),
 			VListItemTitle(h.Text(i18n.PT(ctx.R, ModelsI18nModuleKey, strcase.ToCamel(b.rmb.lb.mb.label+" RowMenuItem"), b.name))),
 		).Attr("@click", web.Plaid().
-			EventFunc(eventID, id).
+			EventFunc(eventID).
+			Query(ParamID, id).
 			Go())
 	}
 }

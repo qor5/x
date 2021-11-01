@@ -28,7 +28,7 @@ func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	pr.Body = Div(
 		H1("Portal Reload Automatically"),
 		Div(
-			web.Portal().EventFunc("autoReload").AutoReloadInterval("vars.interval"),
+			web.Portal().Loader(web.Plaid().EventFunc("autoReload")).AutoReloadInterval("vars.interval"),
 			Button("stop").Attr("@click", "vars.interval = 0"),
 		).Attr(web.InitContextVars, `{interval: 2000}`),
 
@@ -37,7 +37,7 @@ func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 			H2("Product 1"),
 		).Style("height: 200px; background-color: grey;"),
 		H2("Related Products"),
-		web.Portal().Name("related_products").EventFunc("related", "AH123"),
+		web.Portal().Name("related_products").Loader(web.Plaid().EventFunc("related").Query("productCode", "AH123")),
 		A().Href("javascript:;").Text("Reload Related Products").
 			Attr("@click", web.Plaid().EventFunc("reload3").Go()),
 	)
@@ -45,7 +45,7 @@ func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 }
 
 func related(ctx *web.EventContext) (er web.EventResponse, err error) {
-	code := ctx.Event.Params[0]
+	code := ctx.R.FormValue("productCode")
 	er.Body = Div(
 
 		Div(

@@ -41,7 +41,7 @@ func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err e
 		chips = append(chips,
 			VChip(h.Text(city)).
 				Close(true).
-				Attr("@click:close", web.Plaid().EventFunc("removeCity", city).Go()),
+				Attr("@click:close", web.Plaid().EventFunc("removeCity").Query("city", city).Go()),
 		)
 	}
 
@@ -113,7 +113,7 @@ func submit(ctx *web.EventContext) (r web.EventResponse, err error) {
 }
 
 func removeCity(ctx *web.EventContext) (r web.EventResponse, err error) {
-	city := ctx.Event.Params[0]
+	city := ctx.R.FormValue("city")
 	var newCities []string
 	for _, c := range globalCities {
 		if c != city {

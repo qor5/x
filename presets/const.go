@@ -12,3 +12,12 @@ const (
 var (
 	PermRead = []string{PermList, PermGet}
 )
+
+// params
+const (
+	ParamID             = "id"
+	ParamAction         = "action"
+	ParamOverlay        = "overlay"
+	ParamBulkActionName = "bulk_action"
+	ParamSelectedIds    = "selected_ids"
+)

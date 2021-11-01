@@ -24,7 +24,7 @@ func TestDocExamples(t *testing.T) {
 			reqFunc: func(db *sql.DB) *http.Request {
 				emptyProductsData.TruncatePut(db)
 				return multipartestutils.NewMultipartBuilder().
-					EventFunc("presets_Update", "").
+					EventFunc("presets_Update").
 					AddReader("MainImage_NewFile", "myfile.png", strings.NewReader("Hello")).
 					PageURL(e21_presents.PresetsEditingCustomizationFileTypePath + "/products").
 					BuildEventFuncRequest()
@@ -46,7 +46,7 @@ func TestDocExamples(t *testing.T) {
 			reqFunc: func(db *sql.DB) *http.Request {
 				emptyProductsData.TruncatePut(db)
 				return multipartestutils.NewMultipartBuilder().
-					EventFunc("presets_Update", "").
+					EventFunc("presets_Update").
 					PageURL(e21_presents.PresetsEditingCustomizationFileTypePath + "/products").
 					BuildEventFuncRequest()
 			},

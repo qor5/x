@@ -43,11 +43,10 @@ func (b *VXAutocompleteBuilder) SelectedItems(v interface{}) (r *VXAutocompleteB
 	return b
 }
 
-func (b *VXAutocompleteBuilder) ItemsEventFunc(eventFuncId string, params ...string) (r *VXAutocompleteBuilder) {
+func (b *VXAutocompleteBuilder) ItemsEventFunc(eventFuncId string) (r *VXAutocompleteBuilder) {
 
 	b.tag.Attr(":items-event-func-id", &web.EventFuncID{
-		ID:     eventFuncId,
-		Params: params,
+		ID: eventFuncId,
 	})
 	return b
 }

@@ -161,7 +161,8 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		dt.Column("Type")
 		dt.Column("Description")
 
-		dt.RowMenuItemFuncs(presets.EditDeleteRowMenuItemFuncs(field.ModelInfo, "/admin/events", typeName, objId)...)
+		dt.RowMenuItemFuncs(presets.EditDeleteRowMenuItemFuncs(field.ModelInfo, "/admin/events",
+			url.Values{"model": []string{typeName}, "model_id": []string{objId}})...)
 
 		return s.Card(
 			dt,
@@ -169,13 +170,10 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			Actions(
 				VBtn("Add Event").
 					Depressed(true).Attr("@click",
-					web.Plaid().EventFunc(
-						actions.New,
-						actions.Drawer,
-						"",
-						typeName,
-						objId,
-					).URL("/admin/events").
+					web.Plaid().EventFunc(actions.New).
+						Query("model", typeName).
+						Query("model_id", objId).
+						URL("/admin/events").
 						Go(),
 				),
 			).Class("mb-4")
@@ -211,7 +209,8 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			h.A().Text(comp.Name).
 				Attr("@click",
 					web.Plaid().URL("/admin/companies").
-						EventFunc(actions.Edit, actions.Drawer, fmt.Sprint(comp.ID)).
+						EventFunc(actions.Edit).
+						Query(presets.ParamID, fmt.Sprint(comp.ID)).
 						Go()),
 		)
 	})
@@ -404,7 +403,8 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		})
 
 		cusID := fmt.Sprint(cu.ID)
-		dt.RowMenuItemFuncs(presets.EditDeleteRowMenuItemFuncs(field.ModelInfo, "/admin/notes", "Customer", cusID)...)
+		dt.RowMenuItemFuncs(presets.EditDeleteRowMenuItemFuncs(field.ModelInfo, "/admin/notes",
+			url.Values{"model": []string{"Customer"}, "model_id": []string{cusID}})...)
 
 		return s.Card(
 			dt,
@@ -413,13 +413,10 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 				VBtn("Add Note").
 					Depressed(true).
 					Attr("@click",
-						web.Plaid().EventFunc(
-							actions.New,
-							actions.Drawer,
-							"",
-							"Customer",
-							cusID,
-						).URL("/admin/notes").
+						web.Plaid().EventFunc(actions.New).
+							Query("model", "Customer").
+							Query("model_id", cusID).
+							URL("/admin/notes").
 							Go(),
 					),
 			).Class("mb-4")
@@ -455,16 +452,17 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 				VBtn("Agree Terms").
 					Depressed(true).Class("mr-2").
 					Attr("@click", web.Plaid().
-						EventFunc(actions.Action, "AgreeTerms", cusID).
+						EventFunc(actions.Action).
+						Query(presets.ParamAction, "AgreeTerms").
+						Query("customerID", cusID).
 						Go()),
 
 				VBtn("Update details").
 					Depressed(true).
 					Attr("@click", web.Plaid().
-						EventFunc(actions.Edit,
-							actions.Drawer,
-							cusID,
-						).URL("/admin/customers").Go()),
+						EventFunc(actions.Edit).
+						Query("customerID", cusID).
+						URL("/admin/customers").Go()),
 			).Class("mb-4")
 	})
 
@@ -492,7 +490,11 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 						s.DetailField(s.OptionalText(card.Email).ZeroLabel("No email provided")).Label("Email"),
 					),
 				)
-			}).RowMenuItemFuncs(presets.EditDeleteRowMenuItemFuncs(field.ModelInfo, "/admin/credit-cards", cusID)...)
+			}).RowMenuItemFuncs(
+			presets.EditDeleteRowMenuItemFuncs(
+				field.ModelInfo, "/admin/credit-cards",
+				url.Values{"customerID": []string{cusID}},
+			)...)
 
 		dt.Column("Type")
 		dt.Column("Number")
@@ -504,11 +506,8 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 					Depressed(true).
 					Attr("@click",
 						web.Plaid().EventFunc(
-							actions.New,
-							actions.Drawer,
-							"",
-							cusID,
-						).URL("/admin/credit-cards").
+							actions.New).Query("customerID", cusID).
+							URL("/admin/credit-cards").
 							Go()),
 			).Class("mb-4")
 	})
@@ -546,8 +545,8 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		Editing("Content").
 		SetterFunc(func(obj interface{}, ctx *web.EventContext) {
 			note := obj.(*Note)
-			note.SourceID = ctx.Event.ParamAsInt(2)
-			note.SourceType = ctx.Event.Params[1]
+			note.SourceID = ctx.QueryAsInt("model_id")
+			note.SourceType = ctx.R.FormValue("model")
 		})
 
 	p.Model(&Event{}).
@@ -555,8 +554,8 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		Editing("Type", "Description").
 		SetterFunc(func(obj interface{}, ctx *web.EventContext) {
 			note := obj.(*Event)
-			note.SourceID = ctx.Event.ParamAsInt(2)
-			note.SourceType = ctx.Event.Params[1]
+			note.SourceID = ctx.QueryAsInt("model_id")
+			note.SourceType = ctx.R.FormValue("model")
 		})
 
 	cc := p.Model(&CreditCard{}).
@@ -565,7 +564,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 	ccedit := cc.Editing("ExpireYearMonth", "Phone", "Email").
 		SetterFunc(func(obj interface{}, ctx *web.EventContext) {
 			card := obj.(*CreditCard)
-			card.CustomerID = ctx.Event.ParamAsInt(1)
+			card.CustomerID = ctx.QueryAsInt("customerID")
 		})
 
 	ccedit.Creating("Number")

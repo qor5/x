@@ -18,7 +18,7 @@ func Home(ctx *web.EventContext) (r web.PageResponse, err error) {
 		Div(
 			H1(time.Now().String()).Class("transition duration-500 transform hover:scale-105"),
 			Button("Server side action").Attr("@click",
-				web.Plaid().EventFunc(doAction1, "1", "2").Go(),
+				web.Plaid().EventFunc(doAction1).Query("id", "1").Go(),
 			).Class("px-5 py-3 rounded-xl text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-800 active:bg-grey-900 focus:outline-none border-4 border-white focus:border-purple-200 transition-all"),
 			Div(
 				Button("Browser side action").Attr("@click", "locals.count++").

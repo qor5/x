@@ -128,7 +128,7 @@ func TestFields(t *testing.T) {
 			},
 			expect: `
 <td>
-<a @click='$plaid().event($event).vars(vars).eventFunc("presets_DrawerEdit", "1").go()'>1</a>
+<a @click='$plaid().vars(vars).eventFunc("presets_Edit").query("id", "1").go()'>1</a>
 </td>
 
 <td>2</td>

@@ -20,7 +20,7 @@ The behaviour of ~web.EventFunc~ is controlled by it's return type ~web.EventRes
   html component when using ~ReloadPortals~ together with ~web.Portal().EventFunc("related")~
 - ~Reload~ is to reload the ~web.PageFunc~, before reload, you can set ~ctx.Flash~ object to let the
   event func render the page differently (flash message, validation errors, etc)
-- ~PushState~ is to change the browser url with push state, and AJAX load the page of that url
+- ~Location~ is to change the browser url with push state, and AJAX load the page of that url
 - ~RedirectURL~ is to change the browser url without AJAX, reload the whole page html includes it's
   head script, css assets
 - ~ReloadPortals~ is for reload the portal that uses ~web.Portal().EventFunc("related")~

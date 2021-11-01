@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/goplaid/multipartestutils"
+	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/presets/actions"
 	examples2 "github.com/goplaid/x/presets/examples"
 	"github.com/theplant/gofixtures"
@@ -43,7 +44,8 @@ var cases = []reqCase{
 			customerData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/my_customers").
-				EventFunc(actions.Update, "11").
+				EventFunc(actions.Update).
+				Query(presets.ParamID, "11").
 				AddField("Bool1", "true").
 				AddField("ID", "11").
 				AddField("Int1", "42").
@@ -68,7 +70,7 @@ var cases = []reqCase{
 			emptyCustomerData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/my_customers").
-				EventFunc(actions.Update, "").
+				EventFunc(actions.Update).
 				AddField("Bool1", "true").
 				AddField("ID", "").
 				AddField("Int1", "42").
@@ -95,7 +97,7 @@ var cases = []reqCase{
 			emptyCustomerData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/credit-cards").
-				EventFunc(actions.New, actions.Drawer, "").
+				EventFunc(actions.New).
 				BuildEventFuncRequest()
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
@@ -113,7 +115,8 @@ var cases = []reqCase{
 			creditCardData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/credit-cards").
-				EventFunc(actions.Update, "", "11").
+				EventFunc(actions.Update).
+				Query("customerID", "11").
 				AddField("Number", "12345678").
 				BuildEventFuncRequest()
 
@@ -138,7 +141,8 @@ var cases = []reqCase{
 			productData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/products").
-				EventFunc(actions.Edit, actions.Drawer, "12").
+				EventFunc(actions.Edit).
+				Query(presets.ParamID, "12").
 				BuildEventFuncRequest()
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
@@ -156,7 +160,8 @@ var cases = []reqCase{
 			productData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/products").
-				EventFunc(actions.Update, "12").
+				EventFunc(actions.Update).
+				Query(presets.ParamID, "12").
 				AddField("OwnerName", "owner1").
 				BuildEventFuncRequest()
 		},
@@ -180,7 +185,9 @@ var cases = []reqCase{
 			customerData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/my_customers/11").
-				EventFunc(actions.Action, "AgreeTerms", "11").
+				EventFunc(actions.Action).
+				Query(presets.ParamAction, "AgreeTerms").
+				Query(presets.ParamID, "11").
 				BuildEventFuncRequest()
 
 		},
@@ -199,7 +206,9 @@ var cases = []reqCase{
 			customerData.TruncatePut(db)
 			return multipartestutils.NewMultipartBuilder().
 				PageURL("/admin/my_customers/11").
-				EventFunc(actions.DoAction, "AgreeTerms", "11").
+				EventFunc(actions.DoAction).
+				Query(presets.ParamAction, "AgreeTerms").
+				Query(presets.ParamID, "11").
 				AddField("Agree", "true").
 				BuildEventFuncRequest()
 

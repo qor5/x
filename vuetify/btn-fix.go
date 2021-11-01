@@ -12,7 +12,7 @@ func VBtn(text string) (r *VBtnBuilder) {
 	return
 }
 
-func (b *VBtnBuilder) OnClick(eventFuncId string, params ...string) (r *VBtnBuilder) {
-	b.tag.Attr("@click", web.Plaid().EventFunc(eventFuncId, params...).Go())
+func (b *VBtnBuilder) OnClick(eventFuncId string) (r *VBtnBuilder) {
+	b.tag.Attr("@click", web.Plaid().EventFunc(eventFuncId).Go())
 	return b
 }

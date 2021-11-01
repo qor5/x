@@ -99,19 +99,19 @@ func (b *EditingBuilder) formNew(ctx *web.EventContext) (r web.EventResponse, er
 		creatingB = b.mb.creating
 	}
 
-	b.mb.p.overlay(ctx.Event.Params[0], &r, creatingB.editFormFor(nil, ctx), b.mb.rightDrawerWidth)
+	b.mb.p.overlay(ctx.R.FormValue(ParamOverlay), &r, creatingB.editFormFor(nil, ctx), b.mb.rightDrawerWidth)
 	return
 }
 
 func (b *EditingBuilder) formEdit(ctx *web.EventContext) (r web.EventResponse, err error) {
-	b.mb.p.overlay(ctx.Event.Params[0], &r, b.editFormFor(nil, ctx), b.mb.rightDrawerWidth)
+	b.mb.p.overlay(ctx.R.FormValue(ParamOverlay), &r, b.editFormFor(nil, ctx), b.mb.rightDrawerWidth)
 	return
 }
 
 func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.HTMLComponent {
 	msgr := MustGetMessages(ctx.R)
 
-	id := ctx.Event.Params[1]
+	id := ctx.R.FormValue(ParamID)
 
 	var buttonLabel = msgr.Create
 	var disableUpdateBtn bool
@@ -166,7 +166,8 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 			Color("primary").
 			Disabled(disableUpdateBtn).
 			Attr("@click", web.Plaid().
-				EventFunc(actions.Update, ctx.Event.Params...).
+				EventFunc(actions.Update).
+				Queries(ctx.Queries()).
 				URL(b.mb.Info().ListingHref()).
 				Go()),
 	)
@@ -198,7 +199,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		)
 	}
 
-	overlayOptions := actions.ParamAsOptions(ctx.Event.Params[0])
+	overlayOptions := actions.ParamAsOptions(ctx.R.FormValue(ParamOverlay))
 	closeBtnVarScript := closeRightDrawerVarScript
 	if overlayOptions.Type == actions.Dialog {
 		closeBtnVarScript = closeDialogVarScript
@@ -220,7 +221,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 }
 
 func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, err error) {
-	id := ctx.Event.Params[0]
+	id := ctx.R.FormValue(ParamID)
 	var obj = b.mb.NewModel()
 	if len(id) > 0 {
 		err = b.Deleter(obj, id, ctx)
@@ -229,12 +230,12 @@ func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, e
 		}
 	}
 
-	r.PushState = web.PushState(nil)
+	r.PushState = web.Location(nil)
 	return
 }
 
 func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
-	id := ctx.Event.Params[1]
+	id := ctx.R.FormValue(ParamID)
 	var newObj = b.mb.NewModel()
 	// don't panic for fields that set in SetterFunc
 	_ = ctx.UnmarshalForm(newObj)
@@ -284,9 +285,8 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	msgr := MustGetMessages(ctx.R)
 	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
 
-	overlayOptions := actions.ParamAsOptions(ctx.Event.Params[0])
+	overlayOptions := actions.ParamAsOptions(ctx.R.FormValue(ParamOverlay))
 	if len(overlayOptions.NextScript) > 0 {
-		ctx.Event.Params[0] = actions.Drawer
 		r.VarsScript = r.VarsScript + ";" + closeDialogVarScript + ";" + overlayOptions.NextScript
 		// usingB.UpdateOverlayContent(ctx, &r, obj, "", nil)
 		return
@@ -296,7 +296,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	if overlayOptions.Type == actions.Dialog {
 		script = closeDialogVarScript
 	}
-	r.PushState = web.PushState(nil)
+	r.PushState = web.Location(nil)
 	r.VarsScript = r.VarsScript + ";" + script
 	return
 }
@@ -357,7 +357,7 @@ func (b *EditingBuilder) UpdateOverlayContent(
 		ctx.Flash = successMessage
 	}
 
-	overlayOptions := actions.ParamAsOptions(ctx.Event.Params[0])
+	overlayOptions := actions.ParamAsOptions(ctx.R.FormValue(ParamOverlay))
 	p := rightDrawerContentPortalName
 
 	if overlayOptions.Type == actions.Dialog {

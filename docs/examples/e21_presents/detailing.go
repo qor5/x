@@ -2,6 +2,7 @@ package e21_presents
 
 import (
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/goplaid/web"
@@ -74,7 +75,7 @@ func PresetsDetailPageTopNotes(b *presets.Builder) (
 		})
 
 		cusID := fmt.Sprint(cu.ID)
-		dt.RowMenuItemFuncs(presets.EditDeleteRowMenuItemFuncs(mi, mi.PresetsPrefix()+"/notes", "Customer", cusID)...)
+		dt.RowMenuItemFuncs(presets.EditDeleteRowMenuItemFuncs(mi, mi.PresetsPrefix()+"/notes", url.Values{"model": []string{"Customer"}, "model_id": []string{cusID}})...)
 
 		return stripeui.Card(
 			dt,
@@ -83,12 +84,10 @@ func PresetsDetailPageTopNotes(b *presets.Builder) (
 				VBtn("Add Note").
 					Depressed(true).
 					Attr("@click",
-						web.Plaid().EventFunc(
-							actions.New,
-							actions.Drawer,
-							"",
-							"Customer",
-							cusID).URL(mi.PresetsPrefix()+"/notes").
+						web.Plaid().EventFunc(actions.New).
+							Query("model", "Customer").
+							Query("model_id", cusID).
+							URL(mi.PresetsPrefix()+"/notes").
 							Go(),
 					),
 			).Class("mb-4")
@@ -99,8 +98,8 @@ func PresetsDetailPageTopNotes(b *presets.Builder) (
 		Editing("Content").
 		SetterFunc(func(obj interface{}, ctx *web.EventContext) {
 			note := obj.(*Note)
-			note.SourceID = ctx.Event.ParamAsInt(2)
-			note.SourceType = ctx.Event.Params[1]
+			note.SourceID = ctx.QueryAsInt("model_id")
+			note.SourceType = ctx.R.FormValue("model")
 		})
 	return
 }
@@ -152,14 +151,22 @@ func PresetsDetailPageDetails(b *presets.Builder) (
 			Actions(
 				VBtn("Agree Terms").
 					Depressed(true).Class("mr-2").
-					OnClick(actions.Action, "AgreeTerms", cusID),
+					Attr("@click", web.Plaid().
+						EventFunc(actions.Action).
+						Query(presets.ParamAction, "AgreeTerms").
+						Query(presets.ParamID, cusID).
+						Go(),
+					),
 
 				VBtn("Update details").
 					Depressed(true).
 					Attr("@click", web.Plaid().
-						EventFunc(actions.Edit, actions.Drawer, cusID).
+						EventFunc(actions.Edit).
+						Query(presets.ParamOverlay, actions.Dialog).
+						Query(presets.ParamID, cusID).
 						URL(mi.PresetsPrefix()+"/customers").
-						Go()),
+						Go(),
+					),
 			).Class("mb-4")
 	})
 
@@ -249,7 +256,7 @@ func PresetsDetailPageCards(b *presets.Builder) (
 						stripeui.DetailField(stripeui.OptionalText(card.Email).ZeroLabel("No email provided")).Label("Email"),
 					),
 				)
-			}).RowMenuItemFuncs(presets.EditDeleteRowMenuItemFuncs(mi, mi.PresetsPrefix()+"/credit-cards", cusID)...)
+			}).RowMenuItemFuncs(presets.EditDeleteRowMenuItemFuncs(mi, mi.PresetsPrefix()+"/credit-cards", url.Values{"customerID": []string{cusID}})...)
 
 		dt.Column("Type")
 		dt.Column("Number")
@@ -261,12 +268,8 @@ func PresetsDetailPageCards(b *presets.Builder) (
 					Depressed(true).
 					Attr("@click",
 						web.Plaid().
-							EventFunc(
-								actions.New,
-								actions.Drawer,
-								"",
-								cusID,
-							).
+							EventFunc(actions.New).
+							Query("customerID", cusID).
 							URL(mi.PresetsPrefix()+"/credit-cards").
 							Go(),
 					).Class("mb-4"),
@@ -279,7 +282,7 @@ func PresetsDetailPageCards(b *presets.Builder) (
 	ccedit := cc.Editing("ExpireYearMonth", "Phone", "Email").
 		SetterFunc(func(obj interface{}, ctx *web.EventContext) {
 			card := obj.(*CreditCard)
-			card.CustomerID = ctx.Event.ParamAsInt(1)
+			card.CustomerID = ctx.QueryAsInt("customerID")
 		})
 
 	ccedit.Creating("Number")

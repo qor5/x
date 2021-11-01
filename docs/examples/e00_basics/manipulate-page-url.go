@@ -38,7 +38,7 @@ func MultiStatePage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		Ol(
 			Li(
 				A().Text("change page title").Href("javascript:;").
-					Attr("@click", web.Plaid().PushStateQuery(url.Values{"title": []string{"Hello"}}).Go()),
+					Attr("@click", web.Plaid().Queries(url.Values{"title": []string{"Hello"}}).Go()),
 			),
 			Li(
 				A().Text("show panel").Href("javascript:;").Attr("@click", web.Plaid().EventFunc("openPanel").Go()),
@@ -63,12 +63,12 @@ func MultiStatePage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 }
 
 func openPanel(ctx *web.EventContext) (er web.EventResponse, err error) {
-	er.PushState = web.PushState(url.Values{"panel": []string{"1"}}).MergeQuery(true)
+	er.PushState = web.Location(url.Values{"panel": []string{"1"}}).MergeQuery(true)
 	return
 }
 
 func update5(ctx *web.EventContext) (er web.EventResponse, err error) {
-	er.PushState = web.PushState(url.Values{"panel": []string{""}}).MergeQuery(true)
+	er.PushState = web.Location(url.Values{"panel": []string{""}}).MergeQuery(true)
 	return
 }
 

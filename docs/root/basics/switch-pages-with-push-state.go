@@ -27,7 +27,7 @@ This example demonstrated the above:
 	utils.Demo("Switch Pages With Push State", e00_basics.Page1Path, "e00_basics/page-transition.go"),
 	md.Markdown(`
 When running the above demo, If you check Chrome Developer Tools about Network requests, 
-You will see that the PushState link and the Button is actually doing an AJAX request to the other page.
+You will see that the Location link and the Button is actually doing an AJAX request to the other page.
 
 Look like this:
 ~~~
