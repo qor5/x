@@ -41,12 +41,13 @@ export default Vue.extend({
 			this.isLoading = true;
 
 			(this as any).$plaid().
-				debounce(500).
 				eventFuncID(this.itemsEventFuncId).
-				event({value: val}).
+				event(val).
 				go().
 				then((r: any) => {
-					this._items = r.data;
+					let v = [].concat((this as any).selectedItems || [], r.data || []);
+					// console.log("after concat", v);
+					this._items = v
 				})
 				// .catch((err: any) => {
 				// 	console.log('debounceFetchEvent', err);
@@ -101,7 +102,7 @@ export default Vue.extend({
 					change: (vals: any) => {
 						(self as any).$plaid().fieldValue(fieldName, vals);
 					},
-					click: (e: any) => {
+					focus: (e: any) => {
 						self.searchKeyword = '';
 					},
 				},

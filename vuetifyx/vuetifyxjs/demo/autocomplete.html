@@ -9,6 +9,33 @@
 
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
 	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+	<script>
+		(window.__goplaidVueComponentRegisters =
+			window.__goplaidVueComponentRegisters || []).push(function(Vue, vueOptions) {
+			var vuetify = new Vuetify({
+				icons: {
+					iconfont: 'md', // 'mdi' || 'mdiSvg' || 'md' || 'fa' || 'fa4'
+				},
+				theme: {
+					themes: {
+						light: {
+							primary: "#673ab7",
+							secondary: "#009688",
+							accent: "#ff5722",
+							error: "#f44336",
+							warning: "#ff9800",
+							info: "#8bc34a",
+							success: "#4caf50"
+						},
+					},
+				},
+			});
+			Vue.use(Vuetify);
+			vueOptions.vuetify = vuetify;
+		});
+	</script>
 	<title>vuetify demo</title>
 </head>
 
@@ -33,19 +60,18 @@
 
 				<v-container>
 					<h2>Multiple Remote</h2>
-					<vw-autocomplete
+					<vx-autocomplete
 						field-name="Name1"
 						item-value="symbol"
 						item-text="name"
 						:multiple="true"
 						:items-event-func-id='{"id": "getCoins"}'
 						:selected-items='[{"symbol": "BTC", "name": "BitCoin"}, {"symbol": "ETH", "name": "Ethereum"}]'
-						:items='[{"symbol": "BTC", "name": "BitCoin"}, {"symbol": "ETH", "name": "Ethereum"}]'
 						label="Multiple Remote"
-					></vw-autocomplete>
+					></vx-autocomplete>
 
 					<h2>Multiple</h2>
-					<vw-autocomplete
+					<vx-autocomplete
 						:multiple="true"
 						:items='[{"Login":"sam","Name":"Sam"},{"Login":"john","Name":"John"},{"Login":"charles","Name":"Charles"}]'
 						:selected-items='[{"Login":"sam","Name":"Sam"},{"Login":"charles","Name":"Charles"}]'
@@ -53,10 +79,10 @@
 						item-text='Name'
 						item-value='Login'
 						label="Multiple"
-					></vw-autocomplete>
+					></vx-autocomplete>
 
 					<h2>Single Remote</h2>
-					<vw-autocomplete
+					<vx-autocomplete
 						field-name="Name2"
 						item-value="symbol"
 						item-text="name"
@@ -64,26 +90,27 @@
 						:items='[{"symbol": "BTC", "name": "Bitcoin"}]'
 						:selected-items='[{"symbol": "BTC", "name": "Bitcoin"}]'
 						label="Single Remote"
-					></vw-autocomplete>
+					></vx-autocomplete>
 
 
 					<h2>Single</h2>
-					<vw-autocomplete
+					<vx-autocomplete
 						field-name="Name2"
 						:items='[{"text":"Vue","value":"vue"},{"text":"React","value":"react"},{"text":"Angular","value":"angular"},{"text":"Amber","value":"amber"},{"text":"jQuery","value":"jquery"}]'
 						:selected-items='[{"text":"Angular","value":"angular"}]'
 						label="Single"
-					></vw-autocomplete>
+					></vx-autocomplete>
 
-					<v-btn color="info" v-on:click='triggerEventFunc({"id": "update"}, $event)' >Post</v-btn>
-
+					<button @click='$plaid().event($event).eventFunc("a").go()'>SEND</button>
 				</v-container>
 			</v-content>
 		</v-app>
 	</div>
 
-	<script src="http://localhost:3080/app.js"></script>
-	<script src="http://localhost:3100/app.js"></script>
+	<script src="http://localhost:3080/js/chunk-vendors.js"></script>
+	<script src="http://localhost:3080/js/app.js"></script>
+	<script src="http://localhost:3100/js/chunk-vendors.js"></script>
+	<script src="http://localhost:3100/js/app.js"></script>
 
 </body>
 

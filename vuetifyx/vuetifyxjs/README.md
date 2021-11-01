@@ -2,33 +2,23 @@
 
 ## Project setup
 ```
-yarn install
+cd goplaid/web/corejs
+npm run serve
+
+cd goplaid/x/vuetifyx/vuetifyxjs
+npm run serve
+
+cd goplaid/x/vuetifyx/vuetifyxjs
+python -m SimpleHTTPServer
+
+or
+
+go install github.com/sunfmin/branfileserver@master
+cd goplaid/x/vuetifyx/vuetifyxjs
+branfileserver
+
 ```
 
-### Compiles and hot-reloads for development
-```
-yarn run serve
-```
-
-### Compiles and minifies for production
-```
-yarn run build
-```
-
-### Run your tests
-```
-yarn run test
-```
-
-### Lints and fixes files
-```
-yarn run lint
-```
-
-### Run your unit tests
-```
-yarn run test:unit
-```
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
