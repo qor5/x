@@ -187,16 +187,18 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	var sidePanel h.HTMLComponent
 	if b.sidePanel != nil {
 		sidePanel = b.sidePanel(ctx)
-		formContent = VContainer(
-			VRow(
-				VCol(
-					formContent,
-				).Cols(8),
-				VCol(
-					sidePanel,
-				).Cols(4),
-			),
-		)
+		if sidePanel != nil {
+			formContent = VContainer(
+				VRow(
+					VCol(
+						formContent,
+					).Cols(8),
+					VCol(
+						sidePanel,
+					).Cols(4),
+				),
+			)
+		}
 	}
 
 	overlayOptions := actions.ParamAsOptions(ctx.R.FormValue(ParamOverlay))
