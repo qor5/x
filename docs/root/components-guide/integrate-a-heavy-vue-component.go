@@ -1,16 +1,15 @@
 package components_guide
 
 import (
-	ch "github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples"
 	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/utils"
-	"github.com/goplaid/x/md"
-	. "github.com/theplant/htmlgo"
+	. "github.com/theplant/docgo"
+	"github.com/theplant/docgo/ch"
 )
 
-var IntegrateAHeavyVueComponent = Components(
-	md.Markdown(`
+var IntegrateAHeavyVueComponent = Doc(
+	Markdown(`
 We can abstract any complicated of server side render component with [htmlgo](https://github.com/theplant/htmlgo).
 But a lots of components in the modern web have done many things on the client side. means there are many logic
 happens before the it interact with server side.
@@ -30,7 +29,7 @@ Modify or add a separate ~vue.config.js~ config file,
 `),
 	ch.Code(examples.TipTapVueConfig).Language("javascript"),
 
-	md.Markdown(`
+	Markdown(`
 - Enable ~runtimeCompiler~ so that vue can parse template html generate from server.
 - Made ~Vue~ as externals so that it won't be packed to the dist production js file, 
   Since we will be sharing one Vue.js for in one page with other libraries.
@@ -47,7 +46,7 @@ And write the ~editor.vue~ something like this, We omitted the template at here.
 
 `),
 	ch.Code(examples.TipTapEditorVueComponent).Language("javascript"),
-	md.Markdown(`
+	Markdown(`
 We injected the ~this.$plaid()~. that is from ~web/corejs~, Which you will need to use
 For every Go Plaid web applications. Here we uses one function ~fieldValue~ from it.
 It set the form value when the rich text editor changes. So that later when you call
@@ -59,14 +58,14 @@ server.
 
 `),
 	ch.Code(examples.GoPlaidRegisterVueComponentSample).Language("go"),
-	md.Markdown(`
+	Markdown(`
 **Step 4**: Test the component in a simple html
 
 We edited the ~index.html~ inside public to be the following:
 
 `),
 	ch.Code(examples.TipTapDemoHTML).Language("html"),
-	md.Markdown(`
+	Markdown(`
 - For ~http://localhost:3500/app.js~ to be able to serve. you have to run ~yarn serve~ in 
 tiptapjs directory. 
 - ~http://localhost:3100/app.js~ is goplaid web corejs vue project.
@@ -79,35 +78,36 @@ tiptapjs directory.
 We write a packr box inside ~tiptapjs.go~ along side the tiptapjs folder.
 `),
 	ch.Code(examples.TipTapPackrSample).Language("go"),
-	md.Markdown(`
+	Markdown(`
 And write a ~build.sh~ to build the javascript to production version, and run packr to pack
 them into ~a_tiptap-packr.go~ file.
 `),
 	ch.Code(examples.TiptapBuilderSH).Language("bash"),
 
-	md.Markdown(`
+	Markdown(`
 **Step 6**: Write a Go wrapper to wrap it to be a ~HTMLComponent~ 
 `),
 	ch.Code(examples.TipTapEditorHTMLComponent).Language("go"),
 
-	md.Markdown(`
+	Markdown(`
 **Step 7**: Use it in your web app
 
 To use it, first we have to mount the assets into our app
 `),
 	ch.Code(examples.TipTapComponentsPackSample).Language("go"),
-	md.Markdown(`
+	Markdown(`
 And reference them in our layout function.
 `),
 	ch.Code(examples.TipTapLayoutSample).Language("go"),
 
-	md.Markdown(`
+	Markdown(`
 And we write a page func to use it like any other component:
 `),
 	ch.Code(examples.HelloWorldTipTapSample).Language("go"),
 
-	md.Markdown(`
+	Markdown(`
 And now let's check out our fruits:
 `),
 	utils.Demo("Integrate a Heavy Vue Component", e00_basics.HelloWorldTipTapPath, "e00_basics/use-tiptap-editor.go"),
-)
+).Title("Integrate a heavy Vue Component").
+	Slug("components-guide/integrate-a-heavy-vue-component")

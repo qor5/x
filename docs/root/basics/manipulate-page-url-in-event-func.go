@@ -1,16 +1,15 @@
 package basics
 
 import (
-	ch "github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples"
 	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/utils"
-	"github.com/goplaid/x/md"
-	. "github.com/theplant/htmlgo"
+	. "github.com/theplant/docgo"
+	"github.com/theplant/docgo/ch"
 )
 
-var ManipulatePageURLInEventFunc = Components(
-	md.Markdown(`
+var ManipulatePageURLInEventFunc = Doc(
+	Markdown(`
 Encode page state into query strings in url is useful. because user can paste the link to another person,
 That can open the page to the exact state of the page being sent, Not the initial state of the page.
 
@@ -18,7 +17,7 @@ For example:
 `),
 	ch.Code(examples.MultiStatePageSample).Language("go"),
 	utils.Demo("Manipulate Page URL In Event Func", e00_basics.MultiStatePagePath, "e00_basics/manipulate-page-url.go"),
-	md.Markdown(`
+	Markdown(`
 This page have several state that encoded in the url:
 
 - Page title have a default value, but if provided with a ~title~ query string, it will use that value
@@ -40,4 +39,5 @@ web.Bind(
 This don't have ~.MergeQuery(true)~, So it will replace the whole query string to only ~title=Hello~ 
 
 `),
-)
+).Title("Manipulate Page URL in Event Func").
+	Slug("basics/manipulate-page-url-in-event-func")

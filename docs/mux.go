@@ -2,14 +2,12 @@ package docs
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/goplaid/web"
-	"github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/examples/e10_vuetify_autocomplete"
 	"github.com/goplaid/x/docs/examples/e11_vuetify_basic_inputs"
@@ -20,16 +18,13 @@ import (
 	"github.com/goplaid/x/docs/examples/e21_presents"
 	"github.com/goplaid/x/docs/examples/e22_vuetify_variant_sub_form"
 	"github.com/goplaid/x/docs/examples/e23_vuetify_components_kitchen"
-	"github.com/goplaid/x/docs/root/basics"
-	components_guide "github.com/goplaid/x/docs/root/components-guide"
-	getting_started "github.com/goplaid/x/docs/root/getting-started"
-	presets_guide "github.com/goplaid/x/docs/root/presets-guide"
-	vuetify_components "github.com/goplaid/x/docs/root/vuetify-components"
+	"github.com/goplaid/x/docs/root"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/tiptap"
 	v "github.com/goplaid/x/vuetify"
 	"github.com/goplaid/x/vuetifyx"
+	"github.com/theplant/docgo"
 	. "github.com/theplant/htmlgo"
 )
 
@@ -348,8 +343,6 @@ func rf(comp HTMLComponent, p *pageItem) web.PageFunc {
 	}
 }
 
-var tbd = Text("TBD")
-
 func Mux(prefix string) http.Handler {
 
 	// @snippet_begin(HelloWorldMuxSample1)
@@ -360,7 +353,6 @@ func Mux(prefix string) http.Handler {
 	ub := web.New()
 	mux.Handle("/assets/main.js",
 		ub.PacksHandler("text/javascript",
-			JSComponentsPack(),
 			web.JSComponentsPack(),
 		),
 	)
@@ -371,18 +363,6 @@ func Mux(prefix string) http.Handler {
 		),
 	)
 
-	mux.Handle("/assets/codehighlight.js",
-		ub.PacksHandler("text/javascript",
-			codehighlight.JSComponentsPack(),
-		),
-	)
-
-	mux.Handle("/assets/main.css",
-		ub.PacksHandler("text/css",
-			codehighlight.CSSComponentsPack(),
-			CSSComponentsPack(),
-		),
-	)
 	// @snippet_end
 
 	// @snippet_begin(TipTapComponentsPackSample)
@@ -417,183 +397,6 @@ func Mux(prefix string) http.Handler {
 
 	mux.Handle("/favicon.ico", http.NotFoundHandler())
 
-	var secs = []*section{
-		{
-			title: "Getting Started",
-			slug:  "getting-started",
-			items: []*pageItem{
-				{
-					title: "1 Minute Quick Start",
-					slug:  "one-minute-quick-start.html",
-					doc:   getting_started.OneMinuteQuickStart,
-				},
-				{
-					title: "What is GoPlaid?",
-					slug:  "what-is-goplaid.html",
-					doc:   getting_started.WhatIsGoPlaid,
-				},
-				{
-					title: "The Go HTML builder",
-					slug:  "the-go-html-builder.html",
-					doc:   getting_started.TheGoHTMLBuilder,
-				},
-			},
-		},
-
-		{
-			title: "Basics",
-			slug:  "basics",
-			items: []*pageItem{
-				{
-					title: "Page Func and Event Func",
-					slug:  "page-func-and-event-func.html",
-					doc:   basics.PageFuncAndEventFunc,
-				},
-				{
-					title: "Layout Function and Page Injector",
-					slug:  "layout-function-and-page-injector.html",
-					doc:   basics.LayoutFunctionAndPageInjector,
-				},
-				{
-					title: "Switch Pages with Push State",
-					slug:  "switch-pages-with-push-state.html",
-					doc:   basics.SwitchPagesWithPushState,
-				},
-				{
-					title: "Reload Page with a Flash",
-					slug:  "reload-page-with-a-flash.html",
-					doc:   basics.ReloadPageWithAFlash,
-				},
-				{
-					title: "Partial Refresh with Portal",
-					slug:  "partial-refresh-with-portal.html",
-					doc:   basics.PartialRefreshWithPortal,
-				},
-				{
-					title: "Manipulate Page URL in Event Func",
-					slug:  "manipulate-page-url-in-event-func.html",
-					doc:   basics.ManipulatePageURLInEventFunc,
-				},
-				{
-					title: "Form Handling",
-					slug:  "form-handling.html",
-					doc:   basics.FormHandling,
-				},
-				{
-					title: "Summary of Event Response",
-					slug:  "summary-of-event-response.html",
-					doc:   basics.SummaryOfEventResponse,
-				},
-			},
-		},
-		{
-			title: "Components Guide",
-			slug:  "components-guide",
-			items: []*pageItem{
-				{
-					title: "Composite new Component With Go",
-					slug:  "composite-new-component-with-go.html",
-					doc:   components_guide.CompositeNewComponentWithGo,
-				},
-				{
-					title: "Integrate a heavy Vue Component",
-					slug:  "integrate-a-heavy-vue-component.html",
-					doc:   components_guide.IntegrateAHeavyVueComponent,
-				},
-			},
-		},
-		{
-			title: "Vuetify Components",
-			slug:  "vuetify-components",
-			items: []*pageItem{
-				{
-					title: "A Taste of using Vuetify in Go",
-					slug:  "a-taste-of-using-vuetify-in-go.html",
-					doc:   vuetify_components.ATasteOfUsingVuetifyInGo,
-				},
-				{
-					title: "Basic Inputs",
-					slug:  "basic-inputs.html",
-					doc:   vuetify_components.BasicInputs,
-				},
-				{
-					title: "Auto Complete",
-					slug:  "auto-complete.html",
-					doc:   vuetify_components.AutoComplete,
-				},
-				{
-					title: "Variant Sub Form",
-					slug:  "variant-sub-form.html",
-					doc:   vuetify_components.VariantSubForm,
-				},
-				{
-					title: "Navigation Drawer",
-					slug:  "navigation-drawer.html",
-					doc:   vuetify_components.NavigationDrawer,
-				},
-				{
-					title: "Lazy Portals",
-					slug:  "lazy-portals.html",
-					doc:   vuetify_components.LazyPortalsAndReload,
-				},
-			},
-		},
-		{
-			title: "Presets Guide",
-			slug:  "presets-guide",
-			items: []*pageItem{
-				{
-					title: "Not just scaffolding, it's the whole house",
-					slug:  "its-the-whole-house.html",
-					doc:   presets_guide.ItsTheWholeHouse,
-				},
-				{
-					title: "Listing Customizations",
-					slug:  "listing-customizations.html",
-					doc:   presets_guide.ListingCustomizations,
-				},
-				{
-					title: "Editing Customizations",
-					slug:  "editing-customizations.html",
-					doc:   presets_guide.EditingCustomizations,
-				},
-				{
-					title: "Detail page for complex object",
-					slug:  "detail-page-for-complex-object.html",
-					doc:   presets_guide.DetailPageForComplexObject,
-				},
-
-				{
-					title: "Permissions",
-					slug:  "permissions.html",
-					doc:   presets_guide.Permissions,
-				},
-			},
-		},
-		{
-			title: "Appendix",
-			slug:  "appendix",
-			items: []*pageItem{
-				{
-					title: "All Demo Examples",
-					slug:  "all-demo-examples",
-					doc:   utils.ExamplesDoc(),
-				},
-			},
-		},
-	}
-
-	for _, sec := range secs {
-		for _, p := range sec.items {
-			url := fmt.Sprintf("/%s/%s", sec.slug, p.slug)
-			log.Println(url)
-			mux.Handle(
-				url,
-				ub.Page(layout(rf(p.doc, p), secs, prefix, p)),
-			)
-		}
-	}
-
 	samplesMux := SamplesHandler(prefix)
 	mux.Handle("/samples/",
 		middleware.Logger(
@@ -603,11 +406,14 @@ func Mux(prefix string) http.Handler {
 		),
 	)
 
-	home := secs[0].items[0]
 	mux.Handle("/",
 		middleware.Logger(
 			middleware.RequestID(
-				ub.Page(layout(rf(home.doc, home), secs, prefix, home)),
+				docgo.New().
+					SitePrefix(prefix).
+					Assets("/assets/", root.Assets).
+					Home(root.Home).
+					Build(),
 			),
 		),
 	)

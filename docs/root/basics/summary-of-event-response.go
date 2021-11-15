@@ -1,18 +1,17 @@
 package basics
 
 import (
-	ch "github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples"
-	"github.com/goplaid/x/md"
-	. "github.com/theplant/htmlgo"
+	. "github.com/theplant/docgo"
+	"github.com/theplant/docgo/ch"
 )
 
-var SummaryOfEventResponse = Components(
-	md.Markdown(`
+var SummaryOfEventResponse = Doc(
+	Markdown(`
 The behaviour of ~web.EventFunc~ is controlled by it's return type ~web.EventResponse~
 `),
 	ch.Code(examples.EventResponseDefinition).Language("go"),
-	md.Markdown(`
+	Markdown(`
 - ~PageTitle~ set the html head title, It not only set when render html page directly which is
   request the url directly from the browser. Also use javascript to set the page title when you do
   push state AJAX request to load the page
@@ -26,8 +25,9 @@ The behaviour of ~web.EventFunc~ is controlled by it's return type ~web.EventRes
 - ~ReloadPortals~ is for reload the portal that uses ~web.Portal().EventFunc("related")~
 - ~UpdatePortals~ update the portal specified by the name ~web.Portal().Name("hello")~, ~pu.AfterLoaded~
   set the javascript function that execute after the portal is updated, for example:
-  ~AfterLoaded: "setTimeout(function(){ comp.vars.drawer2 = true }, 100)"~
+  ~VarsScript: "setTimeout(function(){ comp.vars.drawer2 = true }, 100)"~
 - ~Data~ is for any AJAX call that want pure JSON, you can set ~er.Data = myobj~ to any object that
   will marshals to JSON, and on the client side use javascript to utilize them
 `),
-)
+).Title("Summary of Event Response").
+	Slug("basics/summary-of-event-response")

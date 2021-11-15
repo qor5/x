@@ -1,16 +1,16 @@
 package basics
 
 import (
-	ch "github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples"
 	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/utils"
-	"github.com/goplaid/x/md"
+	. "github.com/theplant/docgo"
+	"github.com/theplant/docgo/ch"
 	. "github.com/theplant/htmlgo"
 )
 
-var SwitchPagesWithPushState = Components(
-	md.Markdown(`Ways that page transition (between ~web.PageFunc~) in GoPlaid web app:
+var SwitchPagesWithPushState = Doc(
+	Markdown(`Ways that page transition (between ~web.PageFunc~) in GoPlaid web app:
 
 - Use a traditional link to a new page by url
 - Use a push state link to a new page that only change the current page body to new page body and browser url
@@ -25,7 +25,7 @@ This example demonstrated the above:
 `),
 	ch.Code(examples.PageTransitionSample).Language("go"),
 	utils.Demo("Switch Pages With Push State", e00_basics.Page1Path, "e00_basics/page-transition.go"),
-	md.Markdown(`
+	Markdown(`
 When running the above demo, If you check Chrome Developer Tools about Network requests, 
 You will see that the Location link and the Button is actually doing an AJAX request to the other page.
 
@@ -41,7 +41,7 @@ both respond to normal HTTP request from Browser, Search Engine, Or from
 other pages in the same web app that can do push state link.
 `),
 	utils.Anchor(H2(""), "Summary"),
-	md.Markdown(`
+	Markdown(`
 - Write once with PageFunc, you get both normal html page render, and AJAX JSON page render
 - EventFunc is always called with AJAX request, and you can return to a different page, or rerender the current page, 
 - EventFunc is not wrapped with layout function.
@@ -52,4 +52,5 @@ other pages in the same web app that can do push state link.
 
 Next we will talk about how to reload the whole current page, and update partial of the current page.
 `),
-)
+).Title("Switch Pages with Push State").
+	Slug("basics/switch-pages-with-push-state")

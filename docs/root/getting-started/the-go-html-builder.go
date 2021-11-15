@@ -1,16 +1,15 @@
 package getting_started
 
 import (
-	ch "github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples"
 	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/utils"
-	"github.com/goplaid/x/md"
-	. "github.com/theplant/htmlgo"
+	. "github.com/theplant/docgo"
+	"github.com/theplant/docgo/ch"
 )
 
-var TheGoHTMLBuilder = Components(
-	md.Markdown(`
+var TheGoHTMLBuilder = Doc(
+	Markdown(`
 Like at the beginning we said, That we don't use interpreted template language (eg go html/template)
 to generate html page. We think they are:
 
@@ -28,8 +27,9 @@ But it can also do quite well.
 Consider the following code:
 `),
 	ch.Code(examples.TypeSafeBuilderSample).Language("go"),
-	md.Markdown(`
+	Markdown(`
 It's basically assembled what Kotlin can do, Also is legitimate Go code.
 `),
 	utils.Demo("The Go HTML Builder", e00_basics.TypeSafeBuilderSamplePath, "e00_basics/type-safe-builder-sample.go"),
-)
+).Title("The Go HTML builder").
+	Slug("getting-started/the-go-html-builder")

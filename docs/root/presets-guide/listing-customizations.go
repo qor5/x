@@ -1,27 +1,27 @@
 package presets_guide
 
 import (
-	ch "github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples"
 	"github.com/goplaid/x/docs/examples/e21_presents"
 	"github.com/goplaid/x/docs/utils"
-	"github.com/goplaid/x/md"
+	. "github.com/theplant/docgo"
+	"github.com/theplant/docgo/ch"
 	. "github.com/theplant/htmlgo"
 )
 
-var ListingCustomizations = Components(
-	md.Markdown(`
+var ListingCustomizations = Doc(
+	Markdown(`
 We get a default listing page with default columns, But default columns from database
 columns rarely fit the needs for any real application.
 
 `),
 	utils.Anchor(H2(""), "Change List Columns and Component of Field"),
-	md.Markdown(`
+	Markdown(`
 Here is how do we change the columns of the list and how to we change the content display of a columns.
 `),
 	ch.Code(examples.PresetsListingCustomizationFieldsSample).Language("go"),
 	utils.Demo("Presets Listing Customization Fields", e21_presents.PresetsListingCustomizationFieldsPath+"/customers", "e21_presents/listing.go"),
-	md.Markdown(`
+	Markdown(`
 What we did with above code:
 
 - Added a new field to listing table that not exists on the struct ~Customer~
@@ -34,12 +34,12 @@ What we did with above code:
 `),
 
 	utils.Anchor(H2(""), "Filters Panel"),
-	md.Markdown(`
+	Markdown(`
 Here we continue to add filters for the list
 `),
 	ch.Code(examples.PresetsListingCustomizationFiltersSample).Language("go"),
 	utils.Demo("Presets Listing Filters", e21_presents.PresetsListingCustomizationFiltersPath+"/customers", "e21_presents/listing.go"),
-	md.Markdown(`
+	Markdown(`
 ~FilterDataFunc~ of ~presets.ListingBuilder~ setup to have the filter menu or not.
 And how it will combine the sql conditions when doing query. the filter menu will 
 change the url query strings with the filter values, and for date type in url query
@@ -55,19 +55,19 @@ Current we support these types
 `),
 
 	utils.Anchor(H2(""), "Filter Tabs"),
-	md.Markdown(`
+	Markdown(`
 Filter tabs is based on Filters configuration. But display as tabs above the list,
 You can think it as a short cut that used very frequently to filter something instead of 
 use the pop up panel of filter.
 `),
 	ch.Code(examples.PresetsListingCustomizationTabsSample).Language("go"),
 	utils.Demo("Presets Listing Filter Tabs", e21_presents.PresetsListingCustomizationTabsPath+"/customers", "e21_presents/listing.go"),
-	md.Markdown(`
+	Markdown(`
 ~Query~ string name must be from the Filter's item configuration key field.
 `),
 
 	utils.Anchor(H2(""), "Bulk Actions"),
-	md.Markdown(`
+	Markdown(`
 Bulk actions makes the list row show checkboxes, and you can select one or many rows,
 Later do an bulk update data for all of them.
 
@@ -75,8 +75,9 @@ Here is how to use it:
 `),
 	ch.Code(examples.PresetsListingCustomizationBulkActionsSample).Language("go"),
 	utils.Demo("Presets Listing Bulk Actions", e21_presents.PresetsListingCustomizationBulkActionsPath+"/customers", "e21_presents/listing.go"),
-	md.Markdown(`
+	Markdown(`
 - ~ComponentFunc~ of the bulk action configure the component that will show to user to input after user clicked the bulk action button
 - ~UpdateFunc~ configure the logic that the bulk action execute
 `),
-)
+).Title("Listing Customizations").
+	Slug("presets-guide/listing-customizations")

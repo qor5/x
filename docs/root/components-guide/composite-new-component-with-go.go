@@ -1,16 +1,15 @@
 package components_guide
 
 import (
-	ch "github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples"
 	"github.com/goplaid/x/docs/examples/e00_basics"
 	"github.com/goplaid/x/docs/utils"
-	"github.com/goplaid/x/md"
-	. "github.com/theplant/htmlgo"
+	. "github.com/theplant/docgo"
+	"github.com/theplant/docgo/ch"
 )
 
-var CompositeNewComponentWithGo = Components(
-	md.Markdown(`
+var CompositeNewComponentWithGo = Doc(
+	Markdown(`
 Any Go function that returns an ~htmlgo.HTMLComponent~ is a component,
 Any Go struct that implements ~MarshalHTML(ctx context.Context) ([]byte, error)~ function is an component.
 They can be composite into a new component very easy. 
@@ -19,7 +18,7 @@ This example is ported from [Bootstrap4 Navbar](https://getbootstrap.com/docs/4.
 `),
 	ch.Code(examples.CompositeComponentSample1).Language("go"),
 	utils.Demo("Composite New Component With Go", e00_basics.CompositeComponentSample1PagePath, "e00_basics/composite-components.go"),
-	md.Markdown(`
+	Markdown(`
 You can see from the example, We have created ~Navbar~ and ~Carousel~ components by 
 simply create Go func that returns ~htmlgo.HTMLComponent~. 
 It is easy to pass in components as parameter, and wrap components.
@@ -31,7 +30,7 @@ For this ~Navbar~ component to work, I have to import Bootstrap assets in this n
 `),
 	ch.Code(examples.DemoBootstrapLayoutSample).Language("go"),
 
-	md.Markdown(`
+	Markdown(`
 You can utilize the command line tool [html2go](https://github.com/sunfmin/html2go) to convert existing html code to htmlgo code.
 By writing html in Go you get:
 
@@ -46,4 +45,5 @@ By writing html in Go you get:
 Once you have these, Why generate html in any interpreted template language!
 
 `),
-)
+).Title("Composite new Component With Go").
+	Slug("components-guide/composite-new-component-with-go")

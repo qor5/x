@@ -1,16 +1,25 @@
-package getting_started
+package root
 
 import (
+	"embed"
+
 	"github.com/goplaid/x/docs/examples"
 	"github.com/goplaid/x/docs/examples/e00_basics"
+	"github.com/goplaid/x/docs/root/basics"
+	components_guide "github.com/goplaid/x/docs/root/components-guide"
+	getting_started "github.com/goplaid/x/docs/root/getting-started"
+	presets_guide "github.com/goplaid/x/docs/root/presets-guide"
+	vuetify_components "github.com/goplaid/x/docs/root/vuetify-components"
 	"github.com/goplaid/x/docs/utils"
 	. "github.com/theplant/docgo"
 	"github.com/theplant/docgo/ch"
 	. "github.com/theplant/htmlgo"
 )
 
-var WhatIsGoPlaid = Doc(
+var Home = Doc(
 	Markdown(`
+## What is GoPlaid
+
 GoPlaid is yet another Go library to build web applications. 
 different from other MVC frameworks. the concepts in GoPlaid is **Page**, **Event**, **Component**. 
 and doesn't include Model.
@@ -46,5 +55,55 @@ The above is the code you mostly writing. the following is the boilerplate code 
 	Markdown(`
 If you wondering why ~H1("Hello World")~ and how this worked, Please go ahead and checkout next page
 `),
-).Title("What is GoPlaid?").
-	Slug("getting-started/what-is-goplaid")
+).Title("GoPlaid").
+	Slug("/").
+	Tables(
+		ChildrenTable(
+			ContentGroup(
+				getting_started.OneMinuteQuickStart,
+				getting_started.TheGoHTMLBuilder,
+			).Title("Getting Started"),
+
+			ContentGroup(
+				basics.PageFuncAndEventFunc,
+				basics.LayoutFunctionAndPageInjector,
+				basics.SwitchPagesWithPushState,
+				basics.ReloadPageWithAFlash,
+				basics.PartialRefreshWithPortal,
+				basics.ManipulatePageURLInEventFunc,
+				basics.FormHandling,
+				basics.SummaryOfEventResponse,
+			).Title("Basics"),
+
+			ContentGroup(
+				components_guide.CompositeNewComponentWithGo,
+				components_guide.IntegrateAHeavyVueComponent,
+			).Title("Components Guide"),
+
+			ContentGroup(
+				vuetify_components.ATasteOfUsingVuetifyInGo,
+				vuetify_components.BasicInputs,
+				vuetify_components.AutoComplete,
+				vuetify_components.VariantSubForm,
+				vuetify_components.NavigationDrawer,
+				vuetify_components.LazyPortalsAndReload,
+			).Title("Vuetify Components"),
+
+			ContentGroup(
+				presets_guide.ItsTheWholeHouse,
+				presets_guide.ListingCustomizations,
+				presets_guide.EditingCustomizations,
+				presets_guide.DetailPageForComplexObject,
+				presets_guide.Permissions,
+			).Title("Presets Guide"),
+
+			ContentGroup(
+				Doc(utils.ExamplesDoc()).
+					Title("All Demo Examples").
+					Slug("appendix/all-demo-examples"),
+			).Title("Appendix"),
+		),
+	)
+
+//go:embed assets/**.*
+var Assets embed.FS

@@ -262,9 +262,9 @@ func (b *Builder) removeMenuGroupInOrder(mgb *MenuGroupBuilder) {
 
 }
 
-// item can be URI name, model name, *MenuGroupBuilder
-// the underlying logic is using URI name,
-// so if the URI name is customized, item must be the URI name
+// item can be Slug name, model name, *MenuGroupBuilder
+// the underlying logic is using Slug name,
+// so if the Slug name is customized, item must be the Slug name
 // example:
 // b.MenuOrder(
 // 	b.MenuGroup("Product Management").SubItems(

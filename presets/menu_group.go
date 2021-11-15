@@ -3,9 +3,9 @@ package presets
 type MenuGroupBuilder struct {
 	name string
 	icon string
-	// item can be URI name, model name
-	// the underlying logic is using URI name,
-	// so if the URI name is customized, item must be the URI name
+	// item can be Slug name, model name
+	// the underlying logic is using Slug name,
+	// so if the Slug name is customized, item must be the Slug name
 	subMenuItems []string
 }
 

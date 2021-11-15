@@ -1,16 +1,15 @@
 package vuetify_components
 
 import (
-	ch "github.com/goplaid/x/codehighlight"
 	"github.com/goplaid/x/docs/examples"
 	"github.com/goplaid/x/docs/examples/e10_vuetify_autocomplete"
 	"github.com/goplaid/x/docs/utils"
-	"github.com/goplaid/x/md"
-	. "github.com/theplant/htmlgo"
+	. "github.com/theplant/docgo"
+	"github.com/theplant/docgo/ch"
 )
 
-var AutoComplete = Components(
-	md.Markdown(`
+var AutoComplete = Doc(
+	Markdown(`
 AutoComplete is a more advanced component that vuetify provides, We extend it
 So that it can fetch remote options from an event func. here we show these examples:
 
@@ -21,4 +20,5 @@ So that it can fetch remote options from an event func. here we show these examp
 `),
 	ch.Code(examples.VuetifyAutoCompleteSample).Language("go"),
 	utils.Demo("Vuetify AutoComplete", e10_vuetify_autocomplete.VuetifyAutoCompletePath, "e10_vuetify_autocomplete/page.go"),
-)
+).Title("Auto Complete").
+	Slug("vuetify-components/auto-complete")
