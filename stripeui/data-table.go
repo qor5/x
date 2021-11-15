@@ -178,7 +178,11 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 
 		var opMenuItems []h.HTMLComponent
 		for _, f := range b.rowMenuItemFuncs {
-			opMenuItems = append(opMenuItems, f(obj, id, ctx))
+			item := f(obj, id, ctx)
+			if item == nil {
+				continue
+			}
+			opMenuItems = append(opMenuItems, item)
 		}
 		if haveRowMenus && len(opMenuItems) > 0 {
 			bindTds = append(bindTds, h.Td(
