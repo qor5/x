@@ -242,7 +242,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	// don't panic for fields that set in SetterFunc
 	_ = ctx.UnmarshalForm(newObj)
 
-	if len(id) == 0 {
+	if id == "" {
 		if b.mb.Info().Verifier().Do(PermCreate).ObjectOn(newObj).WithReq(ctx.R).IsAllowed() != nil {
 			b.UpdateOverlayContent(ctx, &r, newObj, "", perm.PermissionDenied)
 			return
@@ -251,7 +251,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 
 	var obj = b.mb.NewModel()
 	usingB := b
-	if b.mb.creating != nil && len(id) == 0 {
+	if b.mb.creating != nil && id == "" {
 		usingB = b.mb.creating
 	}
 

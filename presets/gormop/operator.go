@@ -75,7 +75,7 @@ func (op *DataOperatorBuilder) Search(obj interface{}, params *presets.SearchPar
 func (op *DataOperatorBuilder) primarySluggerWhere(obj interface{}, id string) *gorm.DB {
 	wh := op.db.Model(obj)
 
-	if len(id) == 0 {
+	if id == "" {
 		return wh
 	}
 
@@ -101,7 +101,7 @@ func (op *DataOperatorBuilder) Fetch(obj interface{}, id string, ctx *web.EventC
 }
 
 func (op *DataOperatorBuilder) Save(obj interface{}, id string, ctx *web.EventContext) (err error) {
-	if len(id) == 0 {
+	if id == "" {
 		err = op.db.Create(obj).Error
 		return
 	}

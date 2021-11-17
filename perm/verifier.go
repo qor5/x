@@ -95,7 +95,7 @@ func (b *Verifier) SnakeOn(vs ...string) (r *Verifier) {
 
 	var fixed []string
 	for _, v := range vs {
-		if len(v) == 0 {
+		if v == "" {
 			continue
 		}
 		fixed = append(fixed, strcase.ToSnake(v))

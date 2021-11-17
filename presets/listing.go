@@ -100,7 +100,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 	}
 
 	orderBy := b.orderBy
-	if len(orderBy) == 0 {
+	if orderBy == "" {
 		orderBy = fmt.Sprintf("%s DESC", b.mb.primaryField)
 	}
 

@@ -12,11 +12,11 @@ import (
 )
 
 func ShowMessage(r *web.EventResponse, msg string, color string) {
-	if len(msg) == 0 {
+	if msg == "" {
 		return
 	}
 
-	if len(color) == 0 {
+	if color == "" {
 		color = "success"
 	}
 

@@ -61,7 +61,7 @@ func PT(req *http.Request, module ModuleKey, prefix string, key string, args ...
 		return defaultVal
 	}
 
-	if len(val.(string)) == 0 {
+	if val.(string) == "" {
 		if builder != nil {
 			builder.putMissingVal(module, fieldKey, key)
 		}

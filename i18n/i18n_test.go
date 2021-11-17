@@ -57,7 +57,7 @@ Name
 		t.Error(diff)
 	}
 
-	if len(recorder.Header().Get("Set-Cookie")) == 0 {
+	if recorder.Header().Get("Set-Cookie") == "" {
 		t.Error("cookie not set")
 	}
 

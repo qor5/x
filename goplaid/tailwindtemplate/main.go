@@ -80,7 +80,7 @@ func main() {
 		EventFuncs(doAction1, DoAction1))
 
 	port := os.Getenv("PORT")
-	if len(port) == 0 {
+	if port == "" {
 		port = "9010"
 	}
 	log.Printf("Listen on %s", port)
