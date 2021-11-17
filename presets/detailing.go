@@ -64,7 +64,7 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRes
 
 	var obj = b.mb.NewModel()
 
-	if len(id) == 0 {
+	if id == "" {
 		panic("not found")
 	}
 
@@ -147,7 +147,7 @@ func (b *DetailingBuilder) actionForm(action *ActionBuilder, ctx *web.EventConte
 	msgr := MustGetMessages(ctx.R)
 
 	id := ctx.R.FormValue(ParamID)
-	if len(id) == 0 {
+	if id == "" {
 		panic("id required")
 	}
 

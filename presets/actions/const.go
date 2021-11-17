@@ -31,7 +31,7 @@ func (opts *OverlayOptionsBuilder) String() string {
 }
 
 func ParamAsOptions(param string) (r OverlayOptionsBuilder) {
-	if len(param) == 0 {
+	if param == "" {
 		return
 	}
 

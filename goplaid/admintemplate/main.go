@@ -11,7 +11,7 @@ import (
 func main() {
 	mux := admin.Router()
 	port := os.Getenv("PORT")
-	if len(port) == 0 {
+	if port == "" {
 		port = "9000"
 	}
 	fmt.Println("Served at http://localhost:" + port + "/admin")

@@ -112,7 +112,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 	var rows []h.HTMLComponent
 	var idsOfPage []string
 
-	inPlaceLoadMore := b.loadMoreCount > 0 && len(b.loadMoreURL) == 0
+	inPlaceLoadMore := b.loadMoreCount > 0 && b.loadMoreURL == ""
 
 	hasExpand := b.rowExpandFunc != nil
 

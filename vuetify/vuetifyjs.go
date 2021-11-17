@@ -44,7 +44,7 @@ const defaultVuetifyOpts = `{
 }`
 
 func Vuetify(opts string) web.ComponentsPack {
-	if len(opts) == 0 {
+	if opts == "" {
 		opts = defaultVuetifyOpts
 	}
 	return web.ComponentsPack(
