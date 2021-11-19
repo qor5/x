@@ -1,9 +1,11 @@
 package vuetify
 
-import h "github.com/theplant/htmlgo"
+import (
+	"github.com/goplaid/web"
+)
 
 func (b *VTextFieldBuilder) FieldName(v string) (r *VTextFieldBuilder) {
-	b.tag.Attr("v-field-name", h.JSONString(v))
+	b.tag.Attr(web.VFieldName(v)...)
 	return b
 }
 

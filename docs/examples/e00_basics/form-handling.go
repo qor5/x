@@ -1,6 +1,6 @@
 package e00_basics
 
-//@snippet_begin(FormHandlingSample)
+// @snippet_begin(FormHandlingSample)
 import (
 	"fmt"
 	"io"
@@ -56,14 +56,34 @@ World`
 			Label("Checkbox1"),
 			Input("").Type("checkbox").Value("1").Checked(fv.Checkbox1 == "1").Attr(web.VFieldName("Checkbox1")...),
 		),
-		Div(
-			Label("Color1"),
-			Input("").Type("color").Value(fv.Color1).Attr(web.VFieldName("Color1")...),
-		),
-		Div(
-			Label("Email1"),
-			Input("").Type("email").Value(fv.Email1).Attr(web.VFieldName("Email1")...),
-		),
+
+		web.Scope(
+			Fieldset(
+				Legend("Nested Form"),
+
+				Div(
+					Label("Color1"),
+					Input("").Type("color").
+						Value(fv.Color1).
+						Attr(web.VFieldName("Color1")...),
+				),
+				Div(
+					Label("Email1"),
+					Input("").Type("email").Value(fv.Email1).Attr(web.VFieldName("Email1")...),
+				),
+
+				Input("").Type("checkbox").
+					Attr("v-model", "locals.checked").
+					Attr(web.VFieldName("Checked123")...),
+
+				Button("Uncheck it").Attr("@click", "locals.checked = false"),
+				Hr(),
+				Button("Send").Attr("@click", web.Plaid().
+					EventFunc("checkvalue").
+					Go()),
+			),
+		).VSlot("{ plaidForm, locals }").Init("{checked: true}"),
+
 		Div(
 			Fieldset(
 				Legend("Radio"),
@@ -79,18 +99,22 @@ World`
 			Label("Range1"),
 			Input("").Type("range").Value(fmt.Sprint(fv.Range1)).Attr(web.VFieldName("Range1")...),
 		),
-		Div(
-			Label("Url1"),
-			Input("").Type("url").Value(fv.Url1).Attr(web.VFieldName("Url1")...),
-		),
-		Div(
-			Label("Tel1"),
-			Input("").Type("tel").Value(fv.Tel1).Attr(web.VFieldName("Tel1")...),
-		),
-		Div(
-			Label("Month1"),
-			Input("").Type("month").Value(fv.Month1).Attr(web.VFieldName("Month1")...),
-		),
+
+		web.Scope(
+			Div(
+				Label("Url1"),
+				Input("").Type("url").Value(fv.Url1).Attr(web.VFieldName("Url1")...),
+			),
+			Div(
+				Label("Tel1"),
+				Input("").Type("tel").Value(fv.Tel1).Attr(web.VFieldName("Tel1")...),
+			),
+			Div(
+				Label("Month1"),
+				Input("").Type("month").Value(fv.Month1).Attr(web.VFieldName("Month1")...),
+			),
+		).VSlot("{ locals }"),
+
 		Div(
 			Label("Time1"),
 			Input("").Type("time").Value(fv.Time1).Attr(web.VFieldName("Time1")...),
@@ -140,6 +164,6 @@ func (m *MyData) File1Bytes() string {
 	return fmt.Sprintf("%+v ...", b)
 }
 
-//@snippet_end
+// @snippet_end
 
 const FormHandlingPagePath = "/samples/form_handling"

@@ -102,8 +102,8 @@ var cases = []reqCase{
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			partial := er.UpdatePortals[0].Body
-			if strings.Index(partial, `field-name='"Number"'`) < 0 {
-				t.Error(`can't find field-name='"Number"'`, partial)
+			if strings.Index(partial, `field-name='[plaidForm, "Number"]'`) < 0 {
+				t.Error(`can't find field-name='[plaidForm, "Number"]'`, partial)
 			}
 			return
 		},
@@ -147,8 +147,8 @@ var cases = []reqCase{
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			partial := er.UpdatePortals[0].Body
-			if strings.Index(partial, `field-name='"OwnerName"'`) < 0 {
-				t.Error(`can't find field-name='"OwnerName"'`, partial)
+			if strings.Index(partial, `field-name='[plaidForm, "OwnerName"]'`) < 0 {
+				t.Error(`can't find field-name='[plaidForm, "OwnerName"]'`, partial)
 			}
 			return
 		},
@@ -193,8 +193,8 @@ var cases = []reqCase{
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			partial := er.UpdatePortals[0].Body
-			if strings.Index(partial, "v-field-name='\"Agree\"'") < 0 {
-				t.Error("can't find v-field-name='\"Agree\"'", partial)
+			if strings.Index(partial, `v-field-name='[plaidForm, "Agree"]'`) < 0 {
+				t.Error(`can't find v-field-name='[plaidForm, "Agree"]'`, partial)
 			}
 			return
 		},

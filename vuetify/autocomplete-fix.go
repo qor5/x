@@ -1,6 +1,8 @@
 package vuetify
 
-import h "github.com/theplant/htmlgo"
+import (
+	"github.com/goplaid/web"
+)
 
 func (b *VAutocompleteBuilder) ErrorMessages(v ...string) (r *VAutocompleteBuilder) {
 	SetErrorMessages(b.tag, v)
@@ -8,6 +10,6 @@ func (b *VAutocompleteBuilder) ErrorMessages(v ...string) (r *VAutocompleteBuild
 }
 
 func (b *VAutocompleteBuilder) FieldName(v string) (r *VAutocompleteBuilder) {
-	b.tag.Attr("v-field-name", h.JSONString(v))
+	b.tag.Attr(web.VFieldName(v)...)
 	return b
 }

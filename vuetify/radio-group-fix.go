@@ -1,9 +1,11 @@
 package vuetify
 
-import h "github.com/theplant/htmlgo"
+import (
+	"github.com/goplaid/web"
+)
 
 func (b *VRadioGroupBuilder) FieldName(v string) (r *VRadioGroupBuilder) {
-	b.tag.Attr("v-field-name", h.JSONString(v))
+	b.tag.Attr(web.VFieldName(v)...)
 	return b
 }
 

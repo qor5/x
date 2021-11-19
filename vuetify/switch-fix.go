@@ -1,6 +1,8 @@
 package vuetify
 
-import h "github.com/theplant/htmlgo"
+import (
+	"github.com/goplaid/web"
+)
 
 func (b *VSwitchBuilder) ErrorMessages(v ...string) (r *VSwitchBuilder) {
 	SetErrorMessages(b.tag, v)
@@ -8,6 +10,6 @@ func (b *VSwitchBuilder) ErrorMessages(v ...string) (r *VSwitchBuilder) {
 }
 
 func (b *VSwitchBuilder) FieldName(v string) (r *VSwitchBuilder) {
-	b.tag.Attr("v-field-name", h.JSONString(v))
+	b.tag.Attr(web.VFieldName(v)...)
 	return b
 }

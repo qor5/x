@@ -38,7 +38,9 @@ func TestFields(t *testing.T) {
 
 	ft := NewFieldDefaults(WRITE).Exclude("ID")
 	ft.FieldType(time.Time{}).ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
-		return h.Div().Class("time-control").Text(field.Value(obj).(time.Time).Format("2006-01-02")).Attr("v-field-name", h.JSONString(field.Name))
+		return h.Div().Class("time-control").
+			Text(field.Value(obj).(time.Time).Format("2006-01-02")).
+			Attr(web.VFieldName(field.Name)...)
 	})
 
 	ft.FieldType(Media("")).ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
@@ -86,19 +88,19 @@ func TestFields(t *testing.T) {
 						ctx)
 			},
 			expect: `
-<v-text-field type='number' v-field-name='"Int1"' label='整数1' :value='"2"'></v-text-field>
+<v-text-field type='number' v-field-name='[plaidForm, "Int1"]' label='整数1' :value='"2"'></v-text-field>
 
-<v-text-field type='number' v-field-name='"Float1"' label='Float1' :value='"23.1"'></v-text-field>
+<v-text-field type='number' v-field-name='[plaidForm, "Float1"]' label='Float1' :value='"23.1"'></v-text-field>
 
-<v-text-field type='text' v-field-name='"String1"' label='String1' :value='"hello"' :error-messages='["too small"]'></v-text-field>
+<v-text-field type='text' v-field-name='[plaidForm, "String1"]' label='String1' :value='"hello"' :error-messages='["too small"]'></v-text-field>
 
-<v-checkbox v-field-name='"Bool1"' label='Bool1' :input-value='true'></v-checkbox>
+<v-checkbox v-field-name='[plaidForm, "Bool1"]' label='Bool1' :input-value='true'></v-checkbox>
 
-<div v-field-name='"Time1"' class='time-control'>2019-08-29</div>
+<div v-field-name='[plaidForm, "Time1"]' class='time-control'>2019-08-29</div>
 
-<v-text-field type='text' v-field-name='"Company.Name"' label='公司名' :value='"Company1"'></v-text-field>
+<v-text-field type='text' v-field-name='[plaidForm, "Company.Name"]' label='公司名' :value='"Company1"'></v-text-field>
 
-<div v-field-name='"Company.FoundedAt"' class='time-control'>2019-08-29</div>
+<div v-field-name='[plaidForm, "Company.FoundedAt"]' class='time-control'>2019-08-29</div>
 `,
 		},
 
@@ -110,13 +112,13 @@ func TestFields(t *testing.T) {
 					ToComponent(mb, user, vd, ctx)
 			},
 			expect: `
-<v-text-field type='number' v-field-name='"Int1"' label='Int1' :value='"2"'></v-text-field>
+<v-text-field type='number' v-field-name='[plaidForm, "Int1"]' label='Int1' :value='"2"'></v-text-field>
 
-<v-text-field type='number' v-field-name='"Float1"' label='Float1' :value='"23.1"'></v-text-field>
+<v-text-field type='number' v-field-name='[plaidForm, "Float1"]' label='Float1' :value='"23.1"'></v-text-field>
 
-<v-text-field type='text' v-field-name='"String1"' label='String1' :value='"hello"' :error-messages='["too small"]'></v-text-field>
+<v-text-field type='text' v-field-name='[plaidForm, "String1"]' label='String1' :value='"hello"' :error-messages='["too small"]'></v-text-field>
 
-<div v-field-name='"Time1"' class='time-control'>2019-08-29</div>
+<div v-field-name='[plaidForm, "Time1"]' class='time-control'>2019-08-29</div>
 `,
 		},
 
@@ -128,7 +130,7 @@ func TestFields(t *testing.T) {
 			},
 			expect: `
 <td>
-<a @click='$plaid().vars(vars).eventFunc("presets_Edit").query("id", "1").go()'>1</a>
+<a @click='$plaid().vars(vars).form(plaidForm).eventFunc("presets_Edit").query("id", "1").go()'>1</a>
 </td>
 
 <td>2</td>
