@@ -214,6 +214,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 				Length(pagesCount).
 				Value(int(searchParams.Page)).
 				Attr("@input", web.Plaid().
+					PushState(true).
 					Query("page", web.Var("[$event]")).
 					MergeQuery(true).
 					Go()),
