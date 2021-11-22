@@ -35,7 +35,7 @@ func TestDocExamples(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-				if !strings.HasPrefix(string(u.MainImage), "http://transfer.sh") {
+				if !strings.HasPrefix(string(u.MainImage), "https://transfer.sh") {
 					t.Error(u)
 				}
 				return

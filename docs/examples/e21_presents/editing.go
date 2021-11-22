@@ -88,7 +88,7 @@ func PresetsEditingCustomizationFileType(b *presets.Builder) (
 				return
 			}
 
-			req, err := http.NewRequest("PUT", "http://transfer.sh/myfile.png", ff)
+			req, err := http.NewRequest("PUT", "https://transfer.sh/myfile.png", ff)
 			if err != nil {
 				return
 			}

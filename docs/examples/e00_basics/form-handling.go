@@ -80,6 +80,8 @@ World`
 				Hr(),
 				Button("Send").Attr("@click", web.Plaid().
 					EventFunc("checkvalue").
+					Query("id", 123).
+					FieldValue("name", "azuma").
 					Go()),
 			),
 		).VSlot("{ plaidForm, locals }").Init("{checked: true}"),

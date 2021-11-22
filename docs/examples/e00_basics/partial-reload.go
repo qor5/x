@@ -27,10 +27,11 @@ func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	)
 	pr.Body = Div(
 		H1("Portal Reload Automatically"),
-		Div(
-			web.Portal().Loader(web.Plaid().EventFunc("autoReload")).AutoReloadInterval("vars.interval"),
-			Button("stop").Attr("@click", "vars.interval = 0"),
-		).Attr(web.InitContextVars, `{interval: 2000}`),
+
+		web.Scope(
+			web.Portal().Loader(web.Plaid().EventFunc("autoReload")).AutoReloadInterval("locals.interval"),
+			Button("stop").Attr("@click", "locals.interval = 0"),
+		).Init(`{interval: 2000}`).VSlot("{ locals }"),
 
 		H1("Partial Load and Reload"),
 		Div(
