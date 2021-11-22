@@ -1,10 +1,14 @@
 package presets
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
 	"github.com/goplaid/x/perm"
 	"github.com/goplaid/x/presets/actions"
+	"github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/inflection"
 	"github.com/sunfmin/reflectutils"
@@ -201,9 +205,9 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		}
 	}
 
-	overlayOptions := actions.ParamAsOptions(ctx.R.FormValue(ParamOverlay))
+	overlayType := ctx.R.FormValue(ParamOverlay)
 	closeBtnVarScript := closeRightDrawerVarScript
-	if overlayOptions.Type == actions.Dialog {
+	if overlayType == actions.Dialog {
 		closeBtnVarScript = closeDialogVarScript
 	}
 
@@ -217,7 +221,9 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		).Color("white").Elevation(0).Dense(true),
 
 		VSheet(
-			VCard(formContent).Flat(true),
+			web.Scope(
+				VCard(formContent).Flat(true),
+			).VSlot("{ plaidForm }"),
 		).Class("pa-2"),
 	)
 }
@@ -287,15 +293,23 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	msgr := MustGetMessages(ctx.R)
 	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
 
-	overlayOptions := actions.ParamAsOptions(ctx.R.FormValue(ParamOverlay))
-	if len(overlayOptions.NextScript) > 0 {
-		r.VarsScript = r.VarsScript + ";" + closeDialogVarScript + ";" + overlayOptions.NextScript
-		// usingB.UpdateOverlayContent(ctx, &r, obj, "", nil)
+	overlayType := ctx.R.FormValue(ParamOverlay)
+	afterUpdateScript := ctx.R.FormValue(ParamOverlayAfterUpdateScript)
+	if afterUpdateScript != "" {
+		r.VarsScript = strings.Join([]string{
+			r.VarsScript,
+			closeDialogVarScript,
+			strings.NewReplacer(".go()",
+				fmt.Sprintf(".query(%s, %s).go()",
+					h.JSONString(ParamOverlayUpdateID),
+					h.JSONString(stripeui.ObjectID(obj)),
+				)).Replace(afterUpdateScript),
+		}, "; ")
 		return
 	}
 
 	script := closeRightDrawerVarScript
-	if overlayOptions.Type == actions.Dialog {
+	if overlayType == actions.Dialog {
 		script = closeDialogVarScript
 	}
 	r.PushState = web.Location(nil)
@@ -359,10 +373,10 @@ func (b *EditingBuilder) UpdateOverlayContent(
 		ctx.Flash = successMessage
 	}
 
-	overlayOptions := actions.ParamAsOptions(ctx.R.FormValue(ParamOverlay))
+	overlayType := ctx.R.FormValue(ParamOverlay)
 	p := rightDrawerContentPortalName
 
-	if overlayOptions.Type == actions.Dialog {
+	if overlayType == actions.Dialog {
 		p = dialogContentPortalName
 	}
 

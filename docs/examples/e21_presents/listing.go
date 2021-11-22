@@ -120,37 +120,19 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 	})
 
 	ce = cust.Editing("Name", "CompanyID")
-	ce.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) HTMLComponent {
-		msgr := i18n.MustGetModuleMessages(ctx.R, presets.ModelsI18nModuleKey, Messages_en_US).(*Messages)
-		c := obj.(*Customer)
-		var comps []Company
-		db.Find(&comps)
-		return Div(
-			v.VSelect().
-				Label(msgr.CustomersCompanyID).
-				Items(comps).
-				ItemText("Name").
-				ItemValue("ID").
-				Value(c.CompanyID).
-				FieldName("CompanyID"),
 
-			A().Text("Add Company").Attr("@click",
-				web.Plaid().
-					URL(PresetsListingCustomizationFieldsPath+"/companies").
-					EventFunc(actions.New).
-					Query(presets.ParamOverlay,
-						actions.OptionType(actions.Dialog).
-							SetNextScript(web.Plaid().
-								URL(PresetsListingCustomizationFieldsPath+"/customers").
-								EventFunc(actions.Edit).
-								Query(presets.ParamOverlay, actions.Drawer).
-								Query(presets.ParamID, fmt.Sprint(c.ID)).
-								Go(),
-							).
-							String(),
-					).Go(),
-			),
-		)
+	cust.RegisterEventFunc("updateCompanyList", func(ctx *web.EventContext) (r web.EventResponse, err error) {
+		companyID := ctx.QueryAsInt(presets.ParamOverlayUpdateID)
+		r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
+			Name: "companyListPortal",
+			Body: companyList(ctx, db, companyID),
+		})
+		return
+	})
+
+	ce.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) HTMLComponent {
+		c := obj.(*Customer)
+		return web.Portal(companyList(ctx, db, c.CompanyID)).Name("companyListPortal")
 	})
 
 	comp := b.Model(&Company{})
@@ -163,6 +145,31 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 	})
 
 	return
+}
+
+func companyList(ctx *web.EventContext, db *gorm.DB, companyID int) HTMLComponent {
+	msgr := i18n.MustGetModuleMessages(ctx.R, presets.ModelsI18nModuleKey, Messages_en_US).(*Messages)
+	var comps []Company
+	db.Find(&comps)
+	return Div(
+		v.VSelect().
+			Label(msgr.CustomersCompanyID).
+			Items(comps).
+			ItemText("Name").
+			ItemValue("ID").
+			Value(companyID).
+			FieldName("CompanyID"),
+
+		A().Text("Add Company").Attr("@click",
+			web.Plaid().
+				URL(PresetsListingCustomizationFieldsPath+"/companies").
+				EventFunc(actions.New).
+				Query(presets.ParamOverlay, actions.Dialog).
+				Query(presets.ParamOverlayAfterUpdateScript,
+					web.Plaid().EventFunc("updateCompanyList").Go()).
+				Go(),
+		),
+	)
 }
 
 const PresetsListingCustomizationFieldsPath = "/samples/presets-listing-customization-fields"

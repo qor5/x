@@ -487,8 +487,7 @@ const closeRightDrawerVarScript = "vars.presetsRightDrawer = false"
 const closeDialogVarScript = "vars.presetsDialog = false"
 
 func (b *Builder) overlay(overlayType string, r *web.EventResponse, comp h.HTMLComponent, width string) {
-	overlayOptions := actions.ParamAsOptions(overlayType)
-	if overlayOptions.Type == actions.Dialog {
+	if overlayType == actions.Dialog {
 		b.dialog(r, comp, width)
 		return
 	}

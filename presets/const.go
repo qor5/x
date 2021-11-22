@@ -15,9 +15,11 @@ var (
 
 // params
 const (
-	ParamID             = "id"
-	ParamAction         = "action"
-	ParamOverlay        = "overlay"
-	ParamBulkActionName = "bulk_action"
-	ParamSelectedIds    = "selected_ids"
+	ParamID                       = "id"
+	ParamAction                   = "action"
+	ParamOverlay                  = "overlay"
+	ParamOverlayAfterUpdateScript = "overlay_after_update_script"
+	ParamOverlayUpdateID          = "overlay_update_id"
+	ParamBulkActionName           = "bulk_action"
+	ParamSelectedIds              = "selected_ids"
 )

@@ -121,12 +121,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 	haveMoreRecord := false
 	funk.ForEach(b.data, func(obj interface{}) {
 
-		var id string
-		if slugger, ok := obj.(primarySlugger); ok {
-			id = slugger.PrimarySlug()
-		} else {
-			id = fmt.Sprint(reflectutils.MustGet(obj, "ID"))
-		}
+		id := ObjectID(obj)
 
 		idsOfPage = append(idsOfPage, id)
 		inputValue := ""
@@ -316,6 +311,16 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 	}
 
 	return table.MarshalHTML(c)
+}
+
+func ObjectID(obj interface{}) string {
+	var id string
+	if slugger, ok := obj.(primarySlugger); ok {
+		id = slugger.PrimarySlug()
+	} else {
+		id = fmt.Sprint(reflectutils.MustGet(obj, "ID"))
+	}
+	return id
 }
 
 func getSelectedIds(ctx *web.EventContext, selectedParamName string) (selected []string) {
