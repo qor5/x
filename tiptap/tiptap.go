@@ -4,6 +4,7 @@ package tiptap
 import (
 	"context"
 
+	"github.com/goplaid/web"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -20,7 +21,7 @@ func TipTapEditor() (r *TipTapEditorBuilder) {
 }
 
 func (b *TipTapEditorBuilder) FieldName(v string) (r *TipTapEditorBuilder) {
-	b.tag.Attr(":field-name", h.JSONString(v))
+	b.tag.Attr(web.VFieldName(v)...)
 	return b
 }
 

@@ -8,7 +8,7 @@ require (
 	github.com/go-chi/chi v1.5.4
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/goplaid/multipartestutils v0.0.3
-	github.com/goplaid/web v1.1.21-0.20211122124741-4da4546ea39d
+	github.com/goplaid/web v1.1.21-0.20211123080642-d8f0b20b76a5
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/iancoleman/strcase v0.2.0
 	github.com/jinzhu/gorm v1.9.16

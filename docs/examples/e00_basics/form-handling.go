@@ -85,7 +85,20 @@ World`
 					Go()),
 			),
 		).VSlot("{ plaidForm, locals }").Init("{checked: true}"),
+		web.Scope(
+			Fieldset(
+				Legend("Nested Form 2"),
 
+				Div(
+					Label("Email1"),
+					Input("").Type("email").Value(fv.Email1).Attr(web.VFieldName("Email1")...),
+				),
+
+				Button("Send").Attr("@click", web.Plaid().
+					EventFunc("checkvalue").
+					Go()),
+			),
+		).VSlot("{ plaidForm, locals }").Init("{checked: true}"),
 		Div(
 			Fieldset(
 				Legend("Radio"),
