@@ -22,6 +22,7 @@ type EditingBuilder struct {
 	Saver       SaveFunc
 	Deleter     DeleteFunc
 	Validator   ValidateFunc
+	tabsPanel   TabComponentFunc
 	sidePanel   ComponentFunc
 	actionsFunc ComponentFunc
 	FieldBuilders
@@ -44,7 +45,6 @@ func (b *EditingBuilder) Only(vs ...string) (r *EditingBuilder) {
 }
 
 func (b *EditingBuilder) Creating(vs ...string) (r *EditingBuilder) {
-
 	if b.mb.creating == nil {
 		b.mb.creating = &EditingBuilder{
 			mb:        b.mb,
@@ -84,6 +84,11 @@ func (b *EditingBuilder) ValidateFunc(v ValidateFunc) (r *EditingBuilder) {
 
 func (b *EditingBuilder) SetterFunc(v SetterFunc) (r *EditingBuilder) {
 	b.Setter = v
+	return b
+}
+
+func (b *EditingBuilder) TabsPanelFunc(v TabComponentFunc) (r *EditingBuilder) {
+	b.tabsPanel = v
 	return b
 }
 
@@ -180,7 +185,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		actionButtons = b.actionsFunc(ctx)
 	}
 
-	var formContent h.HTMLComponent = h.Components(
+	formContent := h.Components(
 		VCardText(
 			notice,
 			b.ToComponent(b.mb, obj, vErr, ctx),
@@ -188,18 +193,22 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		VCardActions(actionButtons),
 	)
 
-	var sidePanel h.HTMLComponent
+	var asideContent h.HTMLComponent = formContent
+
+	if b.tabsPanel != nil {
+		tabsPanel := b.tabsPanel(formContent, ctx)
+		if tabsPanel != nil {
+			asideContent = tabsPanel
+		}
+	}
+
 	if b.sidePanel != nil {
-		sidePanel = b.sidePanel(ctx)
+		sidePanel := b.sidePanel(ctx)
 		if sidePanel != nil {
-			formContent = VContainer(
+			asideContent = VContainer(
 				VRow(
-					VCol(
-						formContent,
-					).Cols(8),
-					VCol(
-						sidePanel,
-					).Cols(4),
+					VCol(asideContent).Cols(8),
+					VCol(sidePanel).Cols(4),
 				),
 			)
 		}
@@ -222,7 +231,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 
 		VSheet(
 			web.Scope(
-				VCard(formContent).Flat(true),
+				VCard(asideContent).Flat(true),
 			).VSlot("{ plaidForm }"),
 		).Class("pa-2"),
 	)
