@@ -610,6 +610,7 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 						Value(ctx.R.URL.Query().Get("keyword")).
 						Attr("@keyup.enter", web.Plaid().
 							Query("keyword", web.Var("[$event.target.value]")).
+							PushState(true).
 							Go()),
 					// ).Method("GET"),
 				).AlignCenter(true).Attr("style", "max-width: 650px"),
