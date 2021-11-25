@@ -78,7 +78,7 @@ func (b *VPaginationBuilder) PreviousAriaLabel(v string) (r *VPaginationBuilder)
 	return b
 }
 
-func (b *VPaginationBuilder) TotalVisible(v int) (r *VPaginationBuilder) {
+func (b *VPaginationBuilder) TotalVisible(v int64) (r *VPaginationBuilder) {
 	b.tag.Attr(":total-visible", fmt.Sprint(v))
 	return b
 }

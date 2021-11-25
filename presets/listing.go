@@ -26,6 +26,7 @@ type ListingBuilder struct {
 	searcher        SearchFunc
 	searchColumns   []string
 	perPage         int64
+	totalVisible    int64
 	orderBy         string
 	orderableFields []*OrderableField
 	FieldBuilders
@@ -64,6 +65,11 @@ func (b *ListingBuilder) SearchColumns(vs ...string) (r *ListingBuilder) {
 
 func (b *ListingBuilder) PerPage(v int64) (r *ListingBuilder) {
 	b.perPage = v
+	return b
+}
+
+func (b *ListingBuilder) TotalVisible(v int64) (r *ListingBuilder) {
+	b.totalVisible = v
 	return b
 }
 
@@ -108,6 +114,11 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 	perPage := b.perPage
 	if perPage == 0 {
 		perPage = 50
+	}
+
+	totalVisible := b.totalVisible
+	if totalVisible == 0 {
+		totalVisible = 10
 	}
 
 	// time.Sleep(1 * time.Second)
@@ -244,6 +255,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 		h.If(pagesCount > 1, h.Components(
 			VPagination().
 				Length(pagesCount).
+				TotalVisible(totalVisible).
 				Value(int(searchParams.Page)).
 				Attr("@input", web.Plaid().
 					PushState(true).
