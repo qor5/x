@@ -17,17 +17,18 @@ import (
 )
 
 type ListingBuilder struct {
-	mb             *ModelBuilder
-	bulkActions    []*ActionBuilder
-	rowMenu        *RowMenuBuilder
-	filterDataFunc FilterDataFunc
-	filterTabsFunc FilterTabsFunc
-	pageFunc       web.PageFunc
-	searcher       SearchFunc
-	searchColumns  []string
-	perPage        int64
-	totalVisible   int64
-	orderBy        string
+	mb              *ModelBuilder
+	bulkActions     []*ActionBuilder
+	rowMenu         *RowMenuBuilder
+	filterDataFunc  FilterDataFunc
+	filterTabsFunc  FilterTabsFunc
+	pageFunc        web.PageFunc
+	searcher        SearchFunc
+	searchColumns   []string
+	perPage         int64
+	totalVisible    int64
+	orderBy         string
+	orderableFields []*OrderableField
 	FieldBuilders
 }
 
@@ -77,6 +78,16 @@ func (b *ListingBuilder) OrderBy(v string) (r *ListingBuilder) {
 	return b
 }
 
+type OrderableField struct {
+	FieldName string
+	DBColumn  string
+}
+
+func (b *ListingBuilder) OrderableFields(v []*OrderableField) (r *ListingBuilder) {
+	b.orderableFields = v
+	return b
+}
+
 func (b *ListingBuilder) GetPageFunc() web.PageFunc {
 	if b.pageFunc != nil {
 		return b.pageFunc
@@ -110,18 +121,37 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 		totalVisible = 10
 	}
 
-	orderBy := b.orderBy
-	if orderBy == "" {
-		orderBy = fmt.Sprintf("%s DESC", b.mb.primaryField)
-	}
-
 	// time.Sleep(1 * time.Second)
 	urlQuery := ctx.R.URL.Query()
+	var orderBySQL string
+	orderBys := s.GetOrderBysFromQuery(urlQuery)
+	// map[FieldName]DBColumn
+	orderableFieldMap := make(map[string]string)
+	for _, v := range b.orderableFields {
+		orderableFieldMap[v.FieldName] = v.DBColumn
+	}
+	for _, ob := range orderBys {
+		dbCol, ok := orderableFieldMap[ob.FieldName]
+		if !ok {
+			continue
+		}
+		orderBySQL += fmt.Sprintf("%s %s,", dbCol, ob.OrderBy)
+	}
+	if orderBySQL != "" {
+		orderBySQL = orderBySQL[:len(orderBySQL)-1]
+	}
+	if orderBySQL == "" {
+		if b.orderBy != "" {
+			orderBySQL = b.orderBy
+		} else {
+			orderBySQL = fmt.Sprintf("%s DESC", b.mb.primaryField)
+		}
+	}
 	searchParams := &SearchParams{
 		KeywordColumns: b.searchColumns,
 		Keyword:        urlQuery.Get("keyword"),
 		PerPage:        perPage,
-		OrderBy:        orderBy,
+		OrderBy:        orderBySQL,
 	}
 
 	searchParams.Page, _ = strconv.ParseInt(urlQuery.Get("page"), 10, 64)
@@ -202,9 +232,11 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 		SelectionParamName(selectedParamName)
 
 	for _, f := range b.fields {
+		_, ok := orderableFieldMap[f.name]
 		dataTable.Column(f.name).
 			Title(i18n.PT(ctx.R, ModelsI18nModuleKey, b.mb.label, b.mb.getLabel(f.NameLabel))).
-			CellComponentFunc(b.cellComponentFunc(f))
+			CellComponentFunc(b.cellComponentFunc(f)).
+			Orderable(ok)
 	}
 
 	r.Body = VContainer(
