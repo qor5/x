@@ -278,6 +278,12 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 						).ElseIf(orderBy == "DESC",
 							VIcon("arrow_drop_down").Small(true),
 							h.Span(fmt.Sprint(orderByIdx)),
+						).Else(
+							// take up place
+							h.Span("").Style("visibility: hidden;").Children(
+								VIcon("arrow_drop_down").Small(true),
+								h.Span(fmt.Sprint(orderByIdx)),
+							),
 						),
 					).
 					Attr("@click", web.Plaid().
