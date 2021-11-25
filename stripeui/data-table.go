@@ -273,10 +273,10 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 						h.Span(f.title).
 							Style("text-decoration: underline;"),
 						h.If(orderBy == "ASC",
-							VIcon("arrow_drop_down").Small(true),
+							VIcon("arrow_drop_up").Small(true),
 							h.Span(fmt.Sprint(orderByIdx)),
 						).ElseIf(orderBy == "DESC",
-							VIcon("arrow_drop_up").Small(true),
+							VIcon("arrow_drop_down").Small(true),
 							h.Span(fmt.Sprint(orderByIdx)),
 						),
 					).
