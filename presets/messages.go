@@ -40,6 +40,7 @@ type Messages struct {
 	FiltersNumberAnd               string
 	FiltersStringEquals            string
 	FiltersStringContains          string
+	PaginationRowsPerPage          string
 }
 
 func (msgr *Messages) DeleteConfirmationText(id string) string {
@@ -101,6 +102,7 @@ var Messages_en_US = &Messages{
 	FiltersNumberAnd:               "and",
 	FiltersStringEquals:            "is equal to",
 	FiltersStringContains:          "contains",
+	PaginationRowsPerPage:          "Rows per page: ",
 }
 
 var Messages_zh_CN = &Messages{
@@ -139,4 +141,5 @@ var Messages_zh_CN = &Messages{
 	FiltersNumberAnd:               "和",
 	FiltersStringEquals:            "等于",
 	FiltersStringContains:          "包含",
+	PaginationRowsPerPage:          "每页: ",
 }

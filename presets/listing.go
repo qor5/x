@@ -266,7 +266,13 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			).Class("pa-0"),
 		),
 
-		vTablePagination(int64(totalCount), searchParams.Page, searchParams.PerPage, []int64{b.perPage}),
+		vTablePagination(
+			msgr,
+			int64(totalCount),
+			searchParams.Page,
+			searchParams.PerPage,
+			[]int64{b.perPage},
+		),
 	).Fluid(true)
 
 	return
@@ -523,6 +529,7 @@ func setLocalPerPage(
 }
 
 func vTablePagination(
+	msgr *Messages,
 	total int64,
 	currPage int64,
 	perPage int64,
@@ -531,8 +538,8 @@ func vTablePagination(
 	var sItems []string
 	{
 		perPagesM := map[int64]struct{}{
-			5:   {},
 			10:  {},
+			15:  {},
 			20:  {},
 			50:  {},
 			100: {},
@@ -579,10 +586,14 @@ func vTablePagination(
 		prevIconStyle = "cursor: pointer;"
 	}
 
+	rowsPerPageText := "Rows per page: "
+	if msgr.PaginationRowsPerPage != "" {
+		rowsPerPageText = msgr.PaginationRowsPerPage
+	}
 	return VRow().Justify("end").Align("center").Class("mt-3 mr-3").
 		Children(
 			h.Div(
-				h.Text("Rows per page: "),
+				h.Text(rowsPerPageText),
 			),
 			h.Div(
 				VSelect().Items(sItems).Value(fmt.Sprint(perPage)).
