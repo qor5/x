@@ -2,7 +2,9 @@ package presets
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -111,7 +113,19 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 	title := msgr.ListingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.mb.label))
 	r.PageTitle = title
 
+	var requestPerPage int64
+	qPerPageStr := ctx.R.URL.Query().Get("per_page")
+	qPerPage, _ := strconv.ParseInt(qPerPageStr, 10, 64)
+	if qPerPage != 0 {
+		setLocalPerPage(ctx, b.mb, qPerPage)
+		requestPerPage = qPerPage
+	} else if cPerPage := getLocalPerPage(ctx, b.mb); cPerPage != 0 {
+		requestPerPage = cPerPage
+	}
 	perPage := b.perPage
+	if requestPerPage != 0 {
+		perPage = requestPerPage
+	}
 	if perPage == 0 {
 		perPage = 50
 	}
@@ -252,17 +266,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			).Class("pa-0"),
 		),
 
-		h.If(pagesCount > 1, h.Components(
-			VPagination().
-				Length(pagesCount).
-				TotalVisible(totalVisible).
-				Value(int(searchParams.Page)).
-				Attr("@input", web.Plaid().
-					PushState(true).
-					Query("page", web.Var("[$event]")).
-					MergeQuery(true).
-					Go()),
-		)),
+		vTablePagination(int64(totalCount), searchParams.Page, searchParams.PerPage, []int64{b.perPage}),
 	).Fluid(true)
 
 	return
@@ -464,4 +468,150 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 		toolbar.PrependChildren(vuetifyx.VXFilter(fd).Translations(ft))
 	}
 	return toolbar
+}
+
+func getLocalPerPage(
+	ctx *web.EventContext,
+	mb *ModelBuilder,
+) int64 {
+	c, err := ctx.R.Cookie("_perPage")
+	if err != nil {
+		return 0
+	}
+	vals := strings.Split(c.Value, "$")
+	for _, v := range vals {
+		vvs := strings.Split(v, "#")
+		if len(vvs) != 2 {
+			continue
+		}
+		if vvs[0] == mb.uriName {
+			r, _ := strconv.ParseInt(vvs[1], 10, 64)
+			return r
+		}
+	}
+
+	return 0
+}
+
+func setLocalPerPage(
+	ctx *web.EventContext,
+	mb *ModelBuilder,
+	v int64,
+) {
+	var oldVals []string
+	{
+		c, err := ctx.R.Cookie("_perPage")
+		if err == nil {
+			oldVals = strings.Split(c.Value, "$")
+		}
+	}
+	newVals := []string{fmt.Sprintf("%s#%d", mb.uriName, v)}
+	for _, v := range oldVals {
+		vvs := strings.Split(v, "#")
+		if len(vvs) != 2 {
+			continue
+		}
+		if vvs[0] == mb.uriName {
+			continue
+		}
+		newVals = append(newVals, v)
+	}
+	http.SetCookie(ctx.W, &http.Cookie{
+		Name:  "_perPage",
+		Value: strings.Join(newVals, "$"),
+	})
+}
+
+func vTablePagination(
+	total int64,
+	currPage int64,
+	perPage int64,
+	customPerPages []int64,
+) h.HTMLComponent {
+	var sItems []string
+	{
+		perPagesM := map[int64]struct{}{
+			5:   {},
+			10:  {},
+			20:  {},
+			50:  {},
+			100: {},
+		}
+		if perPage > 0 {
+			perPagesM[perPage] = struct{}{}
+		}
+		for _, v := range customPerPages {
+			if v <= 0 {
+				continue
+			}
+			perPagesM[v] = struct{}{}
+		}
+		perPages := make([]int, 0, len(perPagesM))
+		for k, _ := range perPagesM {
+			perPages = append(perPages, int(k))
+		}
+		sort.Ints(perPages)
+		for _, v := range perPages {
+			sItems = append(sItems, fmt.Sprint(v))
+		}
+	}
+
+	currPageStart := (currPage-1)*perPage + 1
+	currPageEnd := currPage * perPage
+	if currPageEnd > total {
+		currPageEnd = total
+	}
+
+	canNext := false
+	canPrev := false
+	if currPage*perPage < total {
+		canNext = true
+	}
+	if currPage > 1 {
+		canPrev = true
+	}
+	var nextIconStyle string
+	var prevIconStyle string
+	if canNext {
+		nextIconStyle = "cursor: pointer;"
+	}
+	if canPrev {
+		prevIconStyle = "cursor: pointer;"
+	}
+
+	return VRow().Justify("end").Align("center").Class("mt-3 mr-3").
+		Children(
+			h.Div(
+				h.Text("Rows per page: "),
+			),
+			h.Div(
+				VSelect().Items(sItems).Value(fmt.Sprint(perPage)).
+					Attr("@input", web.Plaid().
+						PushState(true).
+						Query("per_page", web.Var("[$event]")).
+						MergeQuery(true).
+						Go()),
+			).Style("width: 60px;").Class("ml-6"),
+			h.Div(
+				h.Text(fmt.Sprintf("%d-%d of %d", currPageStart, currPageEnd, total)),
+			).Class("ml-6"),
+			h.Div(
+				h.Span("").Style(prevIconStyle).Children(
+					VIcon("navigate_before").Size(32).Disabled(!canPrev).
+						Attr("@click", web.Plaid().
+							PushState(true).
+							Query("page", currPage-1).
+							MergeQuery(true).
+							Go()),
+				),
+				h.Span("").Style(nextIconStyle).Children(
+					VIcon("navigate_next").Size(32).Disabled(!canNext).
+						Attr("@click", web.Plaid().
+							PushState(true).
+							Query("page", currPage+1).
+							MergeQuery(true).
+							Go()),
+				).Class("ml-3"),
+			).Class("ml-6"),
+		)
 }
