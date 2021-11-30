@@ -501,6 +501,7 @@ func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent, width 
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 		Name: RightDrawerPortalName,
 		Body: VNavigationDrawer(
+			web.GlobalEvents().Attr("@keyup.esc", "vars.presetsRightDrawer = false"),
 			web.Portal(comp).Name(rightDrawerContentPortalName),
 		).
 			Class("v-navigation-drawer--temporary").
@@ -509,7 +510,8 @@ func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent, width 
 			Fixed(true).
 			Attr("width", width).
 			Bottom(false).
-			Attr(":height", `"100%"`),
+			Attr(":height", `"100%"`).
+			Attr("@keydown.esc", "alert(1)"),
 		// Temporary(true).
 		// HideOverlay(true).
 		// Floating(true).
