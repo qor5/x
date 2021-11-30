@@ -500,24 +500,30 @@ func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent, width 
 	}
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 		Name: RightDrawerPortalName,
-		Body: VNavigationDrawer(
-			web.GlobalEvents().Attr("@keyup.esc", "vars.presetsRightDrawer = false"),
-			web.Portal(comp).Name(rightDrawerContentPortalName),
-		).
-			Class("v-navigation-drawer--temporary").
-			Attr("v-model", "vars.presetsRightDrawer").
-			Right(true).
-			Fixed(true).
-			Attr("width", width).
-			Bottom(false).
-			Attr(":height", `"100%"`).
-			Attr("@keydown.esc", "alert(1)"),
-		// Temporary(true).
-		// HideOverlay(true).
-		// Floating(true).
+		Body: web.Scope(
+			VNavigationDrawer(
+				web.GlobalEvents().Attr("@keyup.esc", "vars.presetsRightDrawer = false"),
+				web.Portal(comp).Name(rightDrawerContentPortalName),
+			).
+				Attr("@input", "plaidForm.dirty && vars.presetsRightDrawer == false && !confirm('You have unsaved changes on this form. If you close it, you will lose all unsaved changes. Are you sure you want to close it?') ? vars.presetsRightDrawer = true: vars.presetsRightDrawer = $event").
+				Class("v-navigation-drawer--temporary").
+				Attr("v-model", "vars.presetsRightDrawer").
+				Right(true).
+				Fixed(true).
+				Attr("width", width).
+				Bottom(false).
+				Attr(":height", `"100%"`).
+				Attr("@keydown.esc", "alert(1)"),
+			// Temporary(true),
+			// HideOverlay(true).
+			// Floating(true).
+
+		).VSlot("{ plaidForm }"),
 	})
 	r.VarsScript = "setTimeout(function(){ vars.presetsRightDrawer = true }, 100)"
 }
+
+// 				Attr("@input", "alert(plaidForm.dirty) && !confirm('You have unsaved changes on this form. If you close it, you will lose all unsaved changes. Are you sure you want to close it?') ? vars.presetsDialog = true : vars.presetsDialog = $event").
 
 func (b *Builder) dialog(r *web.EventResponse, comp h.HTMLComponent, width string) {
 	if width == "" {
@@ -525,11 +531,13 @@ func (b *Builder) dialog(r *web.EventResponse, comp h.HTMLComponent, width strin
 	}
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 		Name: dialogPortalName,
-		Body: VDialog(
-			web.Portal(comp).Name(dialogContentPortalName),
-		).
-			Attr("v-model", "vars.presetsDialog").
-			Width(width),
+		Body: web.Scope(
+			VDialog(
+				web.Portal(comp).Name(dialogContentPortalName),
+			).
+				Attr("v-model", "vars.presetsDialog").
+				Width(width),
+		).VSlot("{ plaidForm }"),
 	})
 	r.VarsScript = "setTimeout(function(){ vars.presetsDialog = true }, 100)"
 }

@@ -57,8 +57,8 @@ github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+
 github.com/goplaid/multipartestutils v0.0.3 h1:Un+a6XfVrn/hlYs9Y7wiwXMjfKw+cVdOmJYyy7GhuM8=
 github.com/goplaid/multipartestutils v0.0.3/go.mod h1:jic2wg6tSAdLgLMTs1N+9+KzRu+Bs85z1+lMvh/5NO8=
 github.com/goplaid/web v1.1.20/go.mod h1:wuOBZR8zr6OFD0V/CXtg8UCQXm6KvGEzn5euXs17gI0=
-github.com/goplaid/web v1.1.22-0.20211130055726-3ca2f8973dc6 h1:Kpj+oRA6UXk4InJ4GvVGsmJFgquvQ4jFzhlIKwCz7bE=
-github.com/goplaid/web v1.1.22-0.20211130055726-3ca2f8973dc6/go.mod h1:wuOBZR8zr6OFD0V/CXtg8UCQXm6KvGEzn5euXs17gI0=
+github.com/goplaid/web v1.1.22-0.20211130072140-c74595eb9bef h1:O3XEVJZ26c06WAeLutJ3NP/i4Qg/S6gbmfoQ5MdQLng=
+github.com/goplaid/web v1.1.22-0.20211130072140-c74595eb9bef/go.mod h1:wuOBZR8zr6OFD0V/CXtg8UCQXm6KvGEzn5euXs17gI0=
 github.com/gorilla/css v1.0.0 h1:BQqNyPTi50JCFMTw/b67hByjMVXZRwGha6wxVGkeihY=
 github.com/gorilla/css v1.0.0/go.mod h1:Dn721qIggHpt4+EFCcTLTU/vk5ySda2ReITrtgBl60c=
 github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=

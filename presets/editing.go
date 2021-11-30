@@ -230,9 +230,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		).Color("white").Elevation(0).Dense(true),
 
 		VSheet(
-			web.Scope(
-				VCard(asideContent).Flat(true),
-			).VSlot("{ plaidForm }"),
+			VCard(asideContent).Flat(true),
 		).Class("pa-2"),
 	)
 }
