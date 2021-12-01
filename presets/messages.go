@@ -11,6 +11,7 @@ type Messages struct {
 	Update                         string
 	Delete                         string
 	Edit                           string
+	FormTitle                      string
 	OK                             string
 	Cancel                         string
 	Create                         string

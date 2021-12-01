@@ -22,7 +22,7 @@ type EditingBuilder struct {
 	Saver       SaveFunc
 	Deleter     DeleteFunc
 	Validator   ValidateFunc
-	tabsPanel   TabComponentFunc
+	tabPanels   []TabComponentFunc
 	sidePanel   ComponentFunc
 	actionsFunc ComponentFunc
 	FieldBuilders
@@ -87,8 +87,8 @@ func (b *EditingBuilder) SetterFunc(v SetterFunc) (r *EditingBuilder) {
 	return b
 }
 
-func (b *EditingBuilder) TabsPanelFunc(v TabComponentFunc) (r *EditingBuilder) {
-	b.tabsPanel = v
+func (b *EditingBuilder) AppendTabsPanelFunc(v TabComponentFunc) (r *EditingBuilder) {
+	b.tabPanels = append(b.tabPanels, v)
 	return b
 }
 
@@ -195,10 +195,19 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 
 	var asideContent h.HTMLComponent = formContent
 
-	if b.tabsPanel != nil {
-		tabsPanel := b.tabsPanel(formContent, ctx)
-		if tabsPanel != nil {
-			asideContent = tabsPanel
+	if len(b.tabPanels) != 0 {
+		var tabs []h.HTMLComponent
+
+		for _, panelFunc := range b.tabPanels {
+			tabs = append(tabs, panelFunc(formContent, ctx))
+		}
+
+		if len(tabs) != 0 {
+			asideContent = VTabs(
+				VTab(h.Text(msgr.FormTitle)),
+				VTabItem(web.Scope(formContent).VSlot("{plaidForm}")),
+				h.Components(tabs...),
+			).Class("v-tabs--fixed-tabs")
 		}
 	}
 
