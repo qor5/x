@@ -199,7 +199,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		var tabs []h.HTMLComponent
 
 		for _, panelFunc := range b.tabPanels {
-			tabs = append(tabs, panelFunc(formContent, ctx))
+			tabs = append(tabs, panelFunc(obj, ctx))
 		}
 
 		if len(tabs) != 0 {
