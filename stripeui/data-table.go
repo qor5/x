@@ -108,7 +108,22 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 
 	initContextVarsMap := map[string]bool{}
 
-	haveRowMenus := false
+	// map[obj_id]{rowMenus}
+	objRowMenusMap := make(map[string][]h.HTMLComponent)
+	funk.ForEach(b.data, func(obj interface{}) {
+		id := ObjectID(obj)
+		var opMenuItems []h.HTMLComponent
+		for _, f := range b.rowMenuItemFuncs {
+			item := f(obj, id, ctx)
+			if item == nil {
+				continue
+			}
+			opMenuItems = append(opMenuItems, item)
+		}
+		if len(opMenuItems) > 0 {
+			objRowMenusMap[id] = opMenuItems
+		}
+	})
 
 	var rows []h.HTMLComponent
 	var idsOfPage []string
@@ -172,29 +187,27 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			bindTds = append(bindTds, tdWrapped)
 		}
 
-		var opMenuItems []h.HTMLComponent
-		for _, f := range b.rowMenuItemFuncs {
-			item := f(obj, id, ctx)
-			if item == nil {
-				continue
-			}
-			opMenuItems = append(opMenuItems, item)
-		}
-		if len(opMenuItems) > 0 {
-			haveRowMenus = true
-			bindTds = append(bindTds, h.Td(
-				VMenu(
-					web.Slot(
-						VBtn("").Children(
-							VIcon("more_horiz"),
-						).Attr("v-on", "on").Text(true).Fab(true).Small(true),
-					).Name("activator").Scope("{ on }"),
+		if len(objRowMenusMap) > 0 {
+			var td h.HTMLComponent
+			rowMenus, ok := objRowMenusMap[id]
+			if ok {
+				td = h.Td(
+					VMenu(
+						web.Slot(
+							VBtn("").Children(
+								VIcon("more_horiz"),
+							).Attr("v-on", "on").Text(true).Fab(true).Small(true),
+						).Name("activator").Scope("{ on }"),
 
-					VList(
-						opMenuItems...,
-					).Dense(true),
-				),
-			).Style("width: 64px;").Class("pl-0"))
+						VList(
+							rowMenus...,
+						).Dense(true),
+					),
+				).Style("width: 64px;").Class("pl-0")
+			} else {
+				td = h.Td().Style("width: 64px;").Class("pl-0")
+			}
+			bindTds = append(bindTds, td)
 		}
 
 		tdCount = len(bindTds)
@@ -295,7 +308,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			heads = append(heads, head)
 		}
 
-		if haveRowMenus {
+		if len(objRowMenusMap) > 0 {
 			heads = append(heads, h.Th(" ").Style("width: 56px;")) // Edit, Delete menu
 		}
 		thead = h.Thead(
