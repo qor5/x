@@ -220,7 +220,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 	}
 
 	dataTable := s.DataTable(objs).
-		CellWrapperFunc(func(cell h.MutableAttrHTMLComponent, id string) h.HTMLComponent {
+		CellWrapperFunc(func(cell h.MutableAttrHTMLComponent, id string, obj interface{}) h.HTMLComponent {
 			tdbind := cell
 			if b.mb.hasDetailing {
 				tdbind.SetAttr("@click.self", web.Plaid().
@@ -229,7 +229,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 							DetailingHref(id)).
 					Go())
 			} else {
-				if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(b.mb.model).On(id).WithReq(ctx.R).IsAllowed() == nil {
+				if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() == nil {
 
 					tdbind.SetAttr("@click.self",
 						web.Plaid().

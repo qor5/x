@@ -16,7 +16,7 @@ import (
 )
 
 type CellComponentFunc func(obj interface{}, fieldName string, ctx *web.EventContext) h.HTMLComponent
-type CellWrapperFunc func(cell h.MutableAttrHTMLComponent, id string) h.HTMLComponent
+type CellWrapperFunc func(cell h.MutableAttrHTMLComponent, id string, obj interface{}) h.HTMLComponent
 type RowMenuItemFunc func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent
 type RowComponentFunc func(obj interface{}, ctx *web.EventContext) h.HTMLComponent
 
@@ -181,7 +181,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 
 			var tdWrapped h.HTMLComponent = std
 			if b.cellWrapper != nil {
-				tdWrapped = b.cellWrapper(std, id)
+				tdWrapped = b.cellWrapper(std, id, obj)
 			}
 
 			bindTds = append(bindTds, tdWrapped)
