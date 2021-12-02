@@ -108,7 +108,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 
 	initContextVarsMap := map[string]bool{}
 
-	haveRowMenus := len(b.rowMenuItemFuncs) > 0
+	haveRowMenus := false
 
 	var rows []h.HTMLComponent
 	var idsOfPage []string
@@ -180,7 +180,8 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			}
 			opMenuItems = append(opMenuItems, item)
 		}
-		if haveRowMenus && len(opMenuItems) > 0 {
+		if len(opMenuItems) > 0 {
+			haveRowMenus = true
 			bindTds = append(bindTds, h.Td(
 				VMenu(
 					web.Slot(
