@@ -425,7 +425,8 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 		}
 		tabs.AppendChildren(
 			VTab(h.Text(td.Label)).
-				Attr("@click", web.Plaid().Queries(td.Query).Go()),
+				Attr("@click", web.Plaid().Queries(td.Query).
+					PushState(true).Go()),
 		)
 	}
 	return tabs.Value(value)
