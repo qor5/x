@@ -176,12 +176,13 @@ func (b *FieldBuilders) String() (r string) {
 	return fmt.Sprint(names)
 }
 
-func (b *FieldBuilders) ToComponent(mb *ModelBuilder, obj interface{}, verr *web.ValidationErrors, ctx *web.EventContext) h.HTMLComponent {
+func (b *FieldBuilders) ToComponent(info *ModelInfo, obj interface{}, ctx *web.EventContext) h.HTMLComponent {
 
 	var comps []h.HTMLComponent
 
-	if verr == nil {
-		verr = &web.ValidationErrors{}
+	vErr, _ := ctx.Flash.(*web.ValidationErrors)
+	if vErr == nil {
+		vErr = &web.ValidationErrors{}
 	}
 
 	for _, f := range b.fields {
@@ -189,15 +190,19 @@ func (b *FieldBuilders) ToComponent(mb *ModelBuilder, obj interface{}, verr *web
 			continue
 		}
 
-		if mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
-			continue
+		label := b.getLabel(f.NameLabel)
+		if info != nil {
+			if info.Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
+				continue
+			}
+			label = i18n.PT(ctx.R, ModelsI18nModuleKey, info.Label(), b.getLabel(f.NameLabel))
 		}
 
 		comps = append(comps, f.compFunc(obj, &FieldContext{
-			ModelInfo: mb.Info(),
+			ModelInfo: info,
 			Name:      f.name,
-			Label:     i18n.PT(ctx.R, ModelsI18nModuleKey, mb.label, b.getLabel(f.NameLabel)),
-			Errors:    verr.GetFieldErrors(f.name),
+			Label:     label,
+			Errors:    vErr.GetFieldErrors(f.name),
 			Context:   f.context,
 		}, ctx))
 	}

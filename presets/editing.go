@@ -188,7 +188,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	formContent := h.Components(
 		VCardText(
 			notice,
-			b.ToComponent(b.mb, obj, vErr, ctx),
+			b.ToComponent(b.mb.Info(), obj, ctx),
 		),
 		VCardActions(actionButtons),
 	)

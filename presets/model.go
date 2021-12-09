@@ -138,6 +138,10 @@ func (b *ModelInfo) URIName() string {
 	return b.uriName
 }
 
+func (b *ModelInfo) Label() string {
+	return b.label
+}
+
 func (b *ModelInfo) Verifier() *perm.Verifier {
 	return b.p.verifier.Spawn().
 		SnakeOn(b.menuGroupName).

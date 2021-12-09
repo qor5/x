@@ -52,7 +52,7 @@ func TestFields(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/hello", nil)
 
-	ctx := &web.EventContext{R: r}
+	ctx := &web.EventContext{R: r, Flash: vd}
 
 	user := &User{
 		ID:      1,
@@ -82,9 +82,8 @@ func TestFields(t *testing.T) {
 					Labels("Int1", "整数1", "Company.Name", "公司名").
 					Only("Int1", "Float1", "String1", "Bool1", "Time1", "Company.Name", "Company.FoundedAt").
 					ToComponent(
-						mb,
+						mb.Info(),
 						user,
-						vd,
 						ctx)
 			},
 			expect: `
@@ -109,7 +108,7 @@ func TestFields(t *testing.T) {
 			toComponentFun: func() h.HTMLComponent {
 				return ft.InspectFields(&User{}).
 					Except("Bool*").
-					ToComponent(mb, user, vd, ctx)
+					ToComponent(mb.Info(), user, ctx)
 			},
 			expect: `
 <v-text-field type='number' v-field-name='[plaidForm, "Int1"]' label='Int1' :value='"2"'></v-text-field>
@@ -126,7 +125,7 @@ func TestFields(t *testing.T) {
 			name: "Read Except with file glob pattern",
 			toComponentFun: func() h.HTMLComponent {
 				return ftRead.InspectFields(&User{}).
-					Except("Float*").ToComponent(mb, user, vd, ctx)
+					Except("Float*").ToComponent(mb.Info(), user, ctx)
 			},
 			expect: `
 <td>
@@ -145,7 +144,7 @@ func TestFields(t *testing.T) {
 			name: "Read for a time field",
 			toComponentFun: func() h.HTMLComponent {
 				return ftRead.InspectFields(&User{}).
-					Only("Time1", "Int1").ToComponent(mb, user, vd, ctx)
+					Only("Time1", "Int1").ToComponent(mb.Info(), user, ctx)
 			},
 			expect: `
 <td>2019-08-29 11:09:29 +0800 CST</td>
@@ -162,7 +161,7 @@ func TestFields(t *testing.T) {
 				fb.Field("Media1").
 					WithContextValue("a", "context value1").
 					WithContextValue("b", "context value2")
-				return fb.ToComponent(mb, user, vd, ctx)
+				return fb.ToComponent(mb.Info(), user, ctx)
 			},
 			expect: `context value1, context value2`,
 		},
