@@ -2,8 +2,9 @@ package presets
 
 type ActionBuilder struct {
 	NameLabel
-	updateFunc ActionUpdateFunc
-	compFunc   ActionComponentFunc
+	buttonCompFunc ComponentFunc
+	updateFunc     ActionUpdateFunc
+	compFunc       ActionComponentFunc
 }
 
 func (b *ListingBuilder) BulkAction(name string) (r *ActionBuilder) {
@@ -14,6 +15,18 @@ func (b *ListingBuilder) BulkAction(name string) (r *ActionBuilder) {
 	r = &ActionBuilder{}
 	r.name = name
 	b.bulkActions = append(b.bulkActions, r)
+	return
+}
+
+func (b *ListingBuilder) Action(name string) (r *ActionBuilder) {
+	builder := getAction(b.actions, name)
+	if builder != nil {
+		return builder
+	}
+
+	r = &ActionBuilder{}
+	r.name = name
+	b.actions = append(b.actions, r)
 	return
 }
 
@@ -33,6 +46,11 @@ func (b *ActionBuilder) UpdateFunc(v ActionUpdateFunc) (r *ActionBuilder) {
 
 func (b *ActionBuilder) Label(v string) (r *ActionBuilder) {
 	b.label = v
+	return b
+}
+
+func (b *ActionBuilder) ButtonCompFunc(v ComponentFunc) (r *ActionBuilder) {
+	b.buttonCompFunc = v
 	return b
 }
 

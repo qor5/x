@@ -21,6 +21,7 @@ import (
 type ListingBuilder struct {
 	mb              *ModelBuilder
 	bulkActions     []*ActionBuilder
+	actions         []*ActionBuilder
 	rowMenu         *RowMenuBuilder
 	filterDataFunc  FilterDataFunc
 	filterTabsFunc  FilterTabsFunc
@@ -103,7 +104,6 @@ const bulkPanelPortalName = "bulkPanel"
 const deleteConfirmPortalName = "deleteConfirm"
 
 func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
-
 	if b.mb.Info().Verifier().Do(PermList).WithReq(ctx.R).IsAllowed() != nil {
 		err = perm.PermissionDenied
 		return
@@ -176,7 +176,6 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 	var fd vuetifyx.FilterData
 	if b.filterDataFunc != nil {
 		fd = b.filterDataFunc(ctx)
-
 		cond, args := fd.SetByQueryString(ctx.R.URL.RawQuery)
 
 		searchParams.SQLConditions = append(searchParams.SQLConditions, &SQLCondition{
@@ -463,14 +462,35 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 
 	var toolbar = VToolbar(
 		VSpacer(),
-		VBtn(msgr.New).
+	).Flat(true)
+
+	for _, ba := range b.actions {
+		if b.mb.Info().Verifier().SnakeDo("actions", ba.name).WithReq(ctx.R).IsAllowed() != nil {
+			continue
+		}
+
+		var button h.HTMLComponent = VBtn(b.mb.getLabel(ba.NameLabel)).
 			Color("primary").
 			Depressed(true).
 			Dark(true).
+			Class("ml-2")
+		if ba.buttonCompFunc != nil {
+			button = ba.buttonCompFunc(ctx)
+		}
+
+		toolbar.AppendChildren(button)
+	}
+
+	if !disableNewBtn {
+		toolbar.AppendChildren(VBtn(msgr.New).
+			Color("primary").
+			Depressed(true).
+			Dark(true).Class("ml-2").
 			Disabled(disableNewBtn).
 			Attr("@click", web.Plaid().EventFunc(actions.New).
-				Go()),
-	).Flat(true)
+				Go()))
+	}
+
 	if fd != nil {
 		toolbar.PrependChildren(vuetifyx.VXFilter(fd).Translations(ft))
 	}
