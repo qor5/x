@@ -394,8 +394,11 @@ func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *web.EventContex
 			continue
 		}
 
-		toolbar.AppendChildren(
-			VBtn(b.mb.getLabel(ba.NameLabel)).
+		var btn h.HTMLComponent
+		if ba.buttonCompFunc != nil {
+			btn = ba.buttonCompFunc(ctx)
+		} else {
+			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
 				Color("primary").
 				Depressed(true).
 				Dark(true).
@@ -403,8 +406,10 @@ func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *web.EventContex
 				Attr("@click", web.Plaid().
 					Queries(url.Values{bulkPanelOpenParamName: []string{ba.name}}).
 					MergeQuery(true).
-					Go()),
-		)
+					Go())
+		}
+
+		toolbar.AppendChildren(btn)
 	}
 	return toolbar
 }
