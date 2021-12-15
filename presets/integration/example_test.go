@@ -102,8 +102,8 @@ var cases = []reqCase{
 		},
 		eventResponseMatch: func(er *testEventResponse, db *gorm.DB, t *testing.T) {
 			partial := er.UpdatePortals[0].Body
-			if strings.Index(partial, `field-name='[plaidForm, "Number"]'`) < 0 {
-				t.Error(`can't find field-name='[plaidForm, "Number"]'`, partial)
+			if strings.Index(partial, `field-name='[plaidForm, "Name"]'`) < 0 {
+				t.Error(`can't find field-name='[plaidForm, "Name"]'`, partial)
 			}
 			return
 		},
@@ -117,7 +117,7 @@ var cases = []reqCase{
 				PageURL("/admin/credit-cards").
 				EventFunc(actions.Update).
 				Query("customerID", "11").
-				AddField("Number", "12345678").
+				AddField("Name", "12345678").
 				BuildEventFuncRequest()
 
 		},

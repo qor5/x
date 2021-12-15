@@ -1,7 +1,6 @@
 package presets
 
 import (
-	"context"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -13,37 +12,6 @@ import (
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 )
-
-type FieldContext struct {
-	Name      string
-	Label     string
-	Errors    []string
-	ModelInfo *ModelInfo
-	Context   context.Context
-}
-
-func (fc *FieldContext) StringValue(obj interface{}) (r string) {
-	val := fc.Value(obj)
-	switch vt := val.(type) {
-	case []rune:
-		return string(vt)
-	case []byte:
-		return string(vt)
-	}
-	return fmt.Sprint(val)
-}
-
-func (fc *FieldContext) Value(obj interface{}) (r interface{}) {
-	fieldName := fc.Name
-	return reflectutils.MustGet(obj, fieldName)
-}
-
-func (fc *FieldContext) ContextValue(key interface{}) (r interface{}) {
-	if fc.Context == nil {
-		return
-	}
-	return fc.Context.Value(key)
-}
 
 type FieldDefaultBuilder struct {
 	valType    reflect.Type
@@ -126,7 +94,7 @@ func (b *FieldDefaults) inspectFieldsAndCollectName(val interface{}, collectType
 
 	r = &FieldBuilders{
 		defaults: b,
-		obj:      val,
+		model:    val,
 	}
 
 	for i := 0; i < t.NumField(); i++ {

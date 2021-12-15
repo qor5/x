@@ -11,7 +11,6 @@ import (
 	"github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/inflection"
-	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -289,7 +288,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 		}
 	}
 
-	if err2 := usingB.RunSetterFunc(ctx, &r, obj, newObj); err2.HaveErrors() {
+	if err2 := usingB.RunSetterFunc(ctx, &r, obj); err2.HaveErrors() {
 		return
 	}
 
@@ -333,33 +332,12 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	return
 }
 
-func (b *EditingBuilder) RunSetterFunc(ctx *web.EventContext, r *web.EventResponse, toObj interface{}, fromObj interface{}) (vErr web.ValidationErrors) {
+func (b *EditingBuilder) RunSetterFunc(ctx *web.EventContext, r *web.EventResponse, toObj interface{}) (vErr web.ValidationErrors) {
 	if b.Setter != nil {
 		b.Setter(toObj, ctx)
 	}
-	for _, f := range b.fields {
-		if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(toObj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
-			continue
-		}
 
-		if f.setterFunc == nil {
-			val, err1 := reflectutils.Get(fromObj, f.name)
-			if err1 != nil {
-				continue
-			}
-			_ = reflectutils.Set(toObj, f.name, val)
-			continue
-		}
-
-		err1 := f.setterFunc(toObj, &FieldContext{
-			ModelInfo: b.mb.Info(),
-			Name:      f.name,
-			Label:     b.getLabel(f.NameLabel),
-		}, ctx)
-		if err1 != nil {
-			vErr.FieldError(f.name, err1.Error())
-		}
-	}
+	vErr = b.SetModelFields(toObj, b.mb.Info(), ctx)
 
 	if vErr.HaveErrors() {
 		b.UpdateOverlayContent(ctx, r, toObj, "", &vErr)

@@ -191,7 +191,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 
 	var objs interface{}
 	var totalCount int
-	objs, totalCount, err = b.searcher(b.mb.NewModelArray(), searchParams, ctx)
+	objs, totalCount, err = b.searcher(b.mb.NewModelSlice(), searchParams, ctx)
 	if err != nil {
 		panic(err)
 	}

@@ -73,7 +73,7 @@ func (b *ModelBuilder) NewModel() (r interface{}) {
 	return reflect.New(b.modelType.Elem()).Interface()
 }
 
-func (b *ModelBuilder) NewModelArray() (r interface{}) {
+func (b *ModelBuilder) NewModelSlice() (r interface{}) {
 	return reflect.New(reflect.SliceOf(b.modelType)).Interface()
 }
 

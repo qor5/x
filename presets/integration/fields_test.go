@@ -3,11 +3,11 @@ package integration_test
 import (
 	"context"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/goplaid/web"
-	"github.com/goplaid/x/presets"
 	. "github.com/goplaid/x/presets"
 	h "github.com/theplant/htmlgo"
 	"github.com/theplant/testingutils"
@@ -66,7 +66,7 @@ func TestFields(t *testing.T) {
 			FoundedAt: time.Unix(1567048169, 0),
 		},
 	}
-	mb := presets.New().Model(&User{})
+	mb := New().Model(&User{})
 
 	ftRead := NewFieldDefaults(LIST)
 
@@ -175,6 +175,124 @@ func TestFields(t *testing.T) {
 				t.Error(c.name, diff)
 			}
 		})
+	}
+
+}
+
+type Person struct {
+	Addresses []*Org
+}
+
+type Org struct {
+	Name        string
+	Departments []*Department
+	Phones      []string
+}
+
+type Department struct {
+	Name      string
+	Employees []string
+}
+
+func TestFieldBuilders(t *testing.T) {
+
+	defaults := NewFieldDefaults(WRITE)
+
+	employeeFbs := NewFieldBuilders().Defaults(defaults)
+	employeeFbs.Field(".").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
+		return h.Input(field.KeyPath).Type("text").Value(field.StringValue(obj))
+	})
+
+	deptFbs := NewFieldBuilders().Defaults(defaults)
+	deptFbs.Field("Name").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
+		// [0].Departments[0].Name
+		// [0].Departments[1].Name
+		// [1].Departments[0].Name
+		return h.Input(field.KeyPath).Type("text").Value(field.StringValue(obj))
+	})
+	deptFbs.Field("Employees").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
+		return h.Div(
+			employeeFbs.ToComponentForEach(field, obj.(*Department).Employees, ctx, nil),
+			h.Button("Add Employee"),
+		).Class("employees")
+	})
+
+	fbs := NewFieldBuilders().Defaults(defaults)
+	fbs.Field("Name").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
+		// [0].Name
+		return h.Input(field.Name).Type("text").Value(field.StringValue(obj))
+	}).SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
+		return
+	})
+
+	fbs.Field("Departments").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
+		// [0].Departments
+		return h.Div(
+			deptFbs.ToComponentForEach(field, obj.(*Org).Departments, ctx, nil),
+			h.Button("Add Department"),
+		).Class("departments")
+	})
+
+	formObj := &Org{}
+	ctx := &web.EventContext{}
+	fbs.ToComponent(nil, formObj, ctx)
+
+	arrayObjs := []*Org{
+		{
+			Name: "Name 1",
+			Departments: []*Department{
+				{
+					Name: "11111",
+					Employees: []string{
+						"111",
+						"222",
+					},
+				},
+				{
+					Name: "22222",
+					Employees: []string{
+						"333",
+						"444",
+					},
+				},
+			},
+		},
+		{
+			Name: "Name 2",
+			Departments: []*Department{
+				{
+					Name: "33333",
+					Employees: []string{
+						"555",
+						"666",
+					},
+				},
+				{
+					Name: "44444",
+					Employees: []string{
+						"777",
+						"888",
+					},
+				},
+			},
+		},
+	}
+
+	result := fbs.ToComponentForEach(nil, arrayObjs, ctx, nil)
+	h.Fprint(os.Stdout, result, context.TODO())
+
+	return
+
+	address := fbs.NewModel()
+	vErr := fbs.SetModelFields(address, nil, ctx)
+	if vErr.HaveErrors() {
+		panic(vErr)
+	}
+
+	addresses := fbs.NewModelSlice()
+	vErr = fbs.SetModelSliceFields(addresses, nil, ctx)
+	if vErr.HaveErrors() {
+		panic(vErr)
 	}
 
 }
