@@ -12,6 +12,7 @@ import (
 	"github.com/goplaid/x/i18n"
 	"github.com/goplaid/x/perm"
 	"github.com/goplaid/x/presets/actions"
+	"github.com/goplaid/x/stripeui"
 	s "github.com/goplaid/x/stripeui"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/goplaid/x/vuetifyx"
@@ -102,6 +103,7 @@ const selectedParamName = "selected"
 const bulkPanelOpenParamName = "bulkOpen"
 const bulkPanelPortalName = "bulkPanel"
 const deleteConfirmPortalName = "deleteConfirm"
+const dataTablePortalName = "dataTable"
 
 func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
 	if b.mb.Info().Verifier().Do(PermList).WithReq(ctx.R).IsAllowed() != nil {
@@ -113,144 +115,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 	title := msgr.ListingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.mb.label))
 	r.PageTitle = title
 
-	var requestPerPage int64
-	qPerPageStr := ctx.R.URL.Query().Get("per_page")
-	qPerPage, _ := strconv.ParseInt(qPerPageStr, 10, 64)
-	if qPerPage != 0 {
-		setLocalPerPage(ctx, b.mb, qPerPage)
-		requestPerPage = qPerPage
-	} else if cPerPage := getLocalPerPage(ctx, b.mb); cPerPage != 0 {
-		requestPerPage = cPerPage
-	}
-	perPage := b.perPage
-	if requestPerPage != 0 {
-		perPage = requestPerPage
-	}
-	if perPage == 0 {
-		perPage = 50
-	}
-
-	totalVisible := b.totalVisible
-	if totalVisible == 0 {
-		totalVisible = 10
-	}
-
-	// time.Sleep(1 * time.Second)
-	urlQuery := ctx.R.URL.Query()
-	var orderBySQL string
-	orderBys := s.GetOrderBysFromQuery(urlQuery)
-	// map[FieldName]DBColumn
-	orderableFieldMap := make(map[string]string)
-	for _, v := range b.orderableFields {
-		orderableFieldMap[v.FieldName] = v.DBColumn
-	}
-	for _, ob := range orderBys {
-		dbCol, ok := orderableFieldMap[ob.FieldName]
-		if !ok {
-			continue
-		}
-		orderBySQL += fmt.Sprintf("%s %s,", dbCol, ob.OrderBy)
-	}
-	if orderBySQL != "" {
-		orderBySQL = orderBySQL[:len(orderBySQL)-1]
-	}
-	if orderBySQL == "" {
-		if b.orderBy != "" {
-			orderBySQL = b.orderBy
-		} else {
-			orderBySQL = fmt.Sprintf("%s DESC", b.mb.primaryField)
-		}
-	}
-	searchParams := &SearchParams{
-		KeywordColumns: b.searchColumns,
-		Keyword:        urlQuery.Get("keyword"),
-		PerPage:        perPage,
-		OrderBy:        orderBySQL,
-	}
-
-	searchParams.Page, _ = strconv.ParseInt(urlQuery.Get("page"), 10, 64)
-	if searchParams.Page == 0 {
-		searchParams.Page = 1
-	}
-
-	var fd vuetifyx.FilterData
-	if b.filterDataFunc != nil {
-		fd = b.filterDataFunc(ctx)
-		cond, args := fd.SetByQueryString(ctx.R.URL.RawQuery)
-
-		searchParams.SQLConditions = append(searchParams.SQLConditions, &SQLCondition{
-			Query: cond,
-			Args:  args,
-		})
-	}
-
-	if b.searcher == nil || b.mb.p.dataOperator == nil {
-		panic("presets.New().DataOperator(...) required")
-	}
-
-	var objs interface{}
-	var totalCount int
-	objs, totalCount, err = b.searcher(b.mb.NewModelArray(), searchParams, ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	haveCheckboxes := len(b.bulkActions) > 0
-
-	selected := getSelectedIds(ctx)
-
-	var toolbar h.HTMLComponent
-	var bulkPanel h.HTMLComponent
-	bulkName := ctx.R.URL.Query().Get(bulkPanelOpenParamName)
-	bulk := getAction(b.bulkActions, bulkName)
-	if bulk == nil {
-		if haveCheckboxes && len(selected) > 0 {
-			toolbar = b.bulkActionsToolbar(msgr, ctx)
-		} else {
-			toolbar = b.newAndFilterToolbar(msgr, ctx, fd)
-		}
-	} else {
-		bulkPanel = web.Portal(b.bulkPanel(bulk, selected, ctx)).Name(bulkPanelPortalName)
-	}
-
-	pagesCount := int(int64(totalCount)/searchParams.PerPage + 1)
-	if int64(totalCount)%searchParams.PerPage == 0 {
-		pagesCount--
-	}
-
-	dataTable := s.DataTable(objs).
-		CellWrapperFunc(func(cell h.MutableAttrHTMLComponent, id string, obj interface{}) h.HTMLComponent {
-			tdbind := cell
-			if b.mb.hasDetailing {
-				tdbind.SetAttr("@click.self", web.Plaid().
-					PushStateURL(
-						b.mb.Info().
-							DetailingHref(id)).
-					Go())
-			} else {
-				if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() == nil {
-
-					tdbind.SetAttr("@click.self",
-						web.Plaid().
-							EventFunc(actions.Edit).
-							Query(ParamID, id).
-							Go())
-				}
-
-			}
-			return tdbind
-		}).
-		RowMenuItemFuncs(b.RowMenu().listingItemFuncs(ctx)...).
-		Selectable(haveCheckboxes).
-		SelectionParamName(selectedParamName)
-
-	for _, f := range b.fields {
-		_, ok := orderableFieldMap[f.name]
-		dataTable.Column(f.name).
-			Title(i18n.PT(ctx.R, ModelsI18nModuleKey, b.mb.label, b.mb.getLabel(f.NameLabel))).
-			CellComponentFunc(b.cellComponentFunc(f)).
-			Orderable(ok)
-	}
+	bulkPanel, toolbar, dataTable, pagination := b.getComponents(ctx, ctx.R.URL)
 
 	r.Body = VContainer(
 
@@ -261,17 +126,11 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			VDivider(),
 			VCardText(
 				web.Portal().Name(deleteConfirmPortalName),
-				dataTable,
+				web.Portal(dataTable).Name(dataTablePortalName),
 			).Class("pa-0"),
 		),
 
-		vTablePagination(
-			msgr,
-			int64(totalCount),
-			searchParams.Page,
-			searchParams.PerPage,
-			[]int64{b.perPage},
-		),
+		pagination,
 	).Fluid(true)
 
 	return
@@ -651,4 +510,174 @@ func vTablePagination(
 				).Class("ml-3"),
 			).Class("ml-6"),
 		)
+}
+
+func (b *ListingBuilder) getComponents(
+	ctx *web.EventContext,
+	pageURL *url.URL,
+) (
+	bulkPanel h.HTMLComponent,
+	toolbar h.HTMLComponent,
+	dataTable h.HTMLComponent,
+	pagination h.HTMLComponent,
+) {
+	msgr := MustGetMessages(ctx.R)
+
+	var requestPerPage int64
+	qPerPageStr := pageURL.Query().Get("per_page")
+	qPerPage, _ := strconv.ParseInt(qPerPageStr, 10, 64)
+	if qPerPage != 0 {
+		setLocalPerPage(ctx, b.mb, qPerPage)
+		requestPerPage = qPerPage
+	} else if cPerPage := getLocalPerPage(ctx, b.mb); cPerPage != 0 {
+		requestPerPage = cPerPage
+	}
+	perPage := b.perPage
+	if requestPerPage != 0 {
+		perPage = requestPerPage
+	}
+	if perPage == 0 {
+		perPage = 50
+	}
+
+	totalVisible := b.totalVisible
+	if totalVisible == 0 {
+		totalVisible = 10
+	}
+
+	var orderBySQL string
+	orderBys := s.GetOrderBysFromQuery(pageURL.Query())
+	// map[FieldName]DBColumn
+	orderableFieldMap := make(map[string]string)
+	for _, v := range b.orderableFields {
+		orderableFieldMap[v.FieldName] = v.DBColumn
+	}
+	for _, ob := range orderBys {
+		dbCol, ok := orderableFieldMap[ob.FieldName]
+		if !ok {
+			continue
+		}
+		orderBySQL += fmt.Sprintf("%s %s,", dbCol, ob.OrderBy)
+	}
+	if orderBySQL != "" {
+		orderBySQL = orderBySQL[:len(orderBySQL)-1]
+	}
+	if orderBySQL == "" {
+		if b.orderBy != "" {
+			orderBySQL = b.orderBy
+		} else {
+			orderBySQL = fmt.Sprintf("%s DESC", b.mb.primaryField)
+		}
+	}
+	searchParams := &SearchParams{
+		KeywordColumns: b.searchColumns,
+		Keyword:        pageURL.Query().Get("keyword"),
+		PerPage:        perPage,
+		OrderBy:        orderBySQL,
+	}
+
+	searchParams.Page, _ = strconv.ParseInt(pageURL.Query().Get("page"), 10, 64)
+	if searchParams.Page == 0 {
+		searchParams.Page = 1
+	}
+
+	var fd vuetifyx.FilterData
+	if b.filterDataFunc != nil {
+		fd = b.filterDataFunc(ctx)
+		cond, args := fd.SetByQueryString(pageURL.RawQuery)
+
+		searchParams.SQLConditions = append(searchParams.SQLConditions, &SQLCondition{
+			Query: cond,
+			Args:  args,
+		})
+	}
+
+	if b.searcher == nil || b.mb.p.dataOperator == nil {
+		panic("presets.New().DataOperator(...) required")
+	}
+
+	var objs interface{}
+	var totalCount int
+	var err error
+	objs, totalCount, err = b.searcher(b.mb.NewModelArray(), searchParams, ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	haveCheckboxes := len(b.bulkActions) > 0
+
+	selected := getSelectedIds(ctx)
+
+	bulkName := pageURL.Query().Get(bulkPanelOpenParamName)
+	bulk := getAction(b.bulkActions, bulkName)
+	if bulk == nil {
+		if haveCheckboxes && len(selected) > 0 {
+			toolbar = b.bulkActionsToolbar(msgr, ctx)
+		} else {
+			toolbar = b.newAndFilterToolbar(msgr, ctx, fd)
+		}
+	} else {
+		bulkPanel = web.Portal(b.bulkPanel(bulk, selected, ctx)).Name(bulkPanelPortalName)
+	}
+
+	pagesCount := int(int64(totalCount)/searchParams.PerPage + 1)
+	if int64(totalCount)%searchParams.PerPage == 0 {
+		pagesCount--
+	}
+
+	dataTable = s.DataTable(objs).
+		CellWrapperFunc(func(cell h.MutableAttrHTMLComponent, id string, obj interface{}) h.HTMLComponent {
+			tdbind := cell
+			if b.mb.hasDetailing {
+				tdbind.SetAttr("@click.self", web.Plaid().
+					PushStateURL(
+						b.mb.Info().
+							DetailingHref(id)).
+					Go())
+			} else {
+				if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() == nil {
+
+					tdbind.SetAttr("@click.self",
+						web.Plaid().
+							EventFunc(actions.Edit).
+							Query(ParamID, id).
+							Go())
+				}
+
+			}
+			return tdbind
+		}).
+		RowMenuItemFuncs(b.RowMenu().listingItemFuncs(ctx)...).
+		Selectable(haveCheckboxes).
+		SelectionParamName(selectedParamName)
+
+	for _, f := range b.fields {
+		_, ok := orderableFieldMap[f.name]
+		dataTable.(*stripeui.DataTableBuilder).Column(f.name).
+			Title(i18n.PT(ctx.R, ModelsI18nModuleKey, b.mb.label, b.mb.getLabel(f.NameLabel))).
+			CellComponentFunc(b.cellComponentFunc(f)).
+			Orderable(ok)
+	}
+
+	pagination = vTablePagination(
+		msgr,
+		int64(totalCount),
+		searchParams.Page,
+		searchParams.PerPage,
+		[]int64{b.perPage},
+	)
+
+	return
+}
+
+func (b *ListingBuilder) ReloadList(
+	ctx *web.EventContext,
+	r *web.EventResponse,
+	pageURL *url.URL,
+) {
+	_, _, dataTable, _ := b.getComponents(ctx, pageURL)
+	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
+		Name: dataTablePortalName,
+		Body: dataTable,
+	})
 }
