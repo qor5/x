@@ -211,13 +211,14 @@ func TestFieldBuilders(t *testing.T) {
 		// [1].Departments[0].Name
 		return h.Input(field.KeyPath).Type("text").Value(field.StringValue(obj))
 	}).SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
-		panic("")
+		testingutils.PrintlnJson(obj, field)
+		panic("dept name setter")
 		return
 	})
 
-	deptFbs.Field("Employees").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
+	deptFbs.ListField("Employees", employeeFbs).ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		return h.Div(
-			employeeFbs.ToComponentForEach(field, obj.(*Department).Employees, ctx, nil),
+			field.ListItemBuilders.ToComponentForEach(field, obj.(*Department).Employees, ctx, nil),
 			h.Button("Add Employee"),
 		).Class("employees")
 	})
@@ -231,15 +232,12 @@ func TestFieldBuilders(t *testing.T) {
 	// 	return
 	// })
 
-	fbs.Field("Departments").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
+	fbs.ListField("Departments", deptFbs).ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		// [0].Departments
 		return h.Div(
-			deptFbs.ToComponentForEach(field, obj.(*Org).Departments, ctx, nil),
+			field.ListItemBuilders.ToComponentForEach(field, obj.(*Org).Departments, ctx, nil),
 			h.Button("Add Department"),
 		).Class("departments")
-	}).SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
-		deptFbs.SetModelFields(obj, field, ctx)
-		return
 	})
 
 	formObj := &Org{
@@ -315,7 +313,7 @@ func TestFieldBuilders(t *testing.T) {
 		AddField("Departments[1].Employees[0]", "Employee 0").
 		BuildEventFuncRequest()
 	_ = ctx.R.ParseMultipartForm(128 << 20)
-	vErr := fbs.SetModelFields(toObj, nil, ctx)
+	vErr := fbs.SetRootModelFields(toObj, nil, ctx)
 	testingutils.PrintlnJson("toObj ===", toObj)
 	if vErr.HaveErrors() {
 		panic(vErr)

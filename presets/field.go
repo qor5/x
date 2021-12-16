@@ -16,12 +16,13 @@ import (
 const SelfFieldName = "."
 
 type FieldContext struct {
-	Name      string
-	KeyPath   string
-	Label     string
-	Errors    []string
-	ModelInfo *ModelInfo
-	Context   context.Context
+	Name             string
+	KeyPath          string
+	Label            string
+	Errors           []string
+	ModelInfo        *ModelInfo
+	ListItemBuilders *FieldBuilders
+	Context          context.Context
 }
 
 func (fc *FieldContext) StringValue(obj interface{}) (r string) {
@@ -52,9 +53,10 @@ func (fc *FieldContext) ContextValue(key interface{}) (r interface{}) {
 
 type FieldBuilder struct {
 	NameLabel
-	compFunc   FieldComponentFunc
-	setterFunc FieldSetterFunc
-	context    context.Context
+	compFunc         FieldComponentFunc
+	setterFunc       FieldSetterFunc
+	context          context.Context
+	listItemBuilders *FieldBuilders
 }
 
 func NewField(name string) (r *FieldBuilder) {
@@ -140,22 +142,58 @@ func (b *FieldBuilders) NewModelSlice() (r interface{}) {
 	return reflect.New(reflect.SliceOf(b.modelType)).Interface()
 }
 
-func (b *FieldBuilders) SetModelFields(toObj interface{}, field *FieldContext, ctx *web.EventContext) (vErr web.ValidationErrors) {
+func (b *FieldBuilders) SetRootModelFields(toObj interface{}, info *ModelInfo, ctx *web.EventContext) (vErr web.ValidationErrors) {
 	var fromObj = b.NewModel()
 	// don't panic for fields that set in SetterFunc
-	// fmt.Println(ctx.R.FormValue("Name"))
-
 	_ = ctx.UnmarshalForm(fromObj)
 
+	return b.SetModelFields(fromObj, toObj, &FieldContext{
+		ModelInfo: info,
+	}, ctx)
+}
+
+func (b *FieldBuilders) SetModelFields(fromObj interface{}, toObj interface{}, parent *FieldContext, ctx *web.EventContext) (vErr web.ValidationErrors) {
 	for _, f := range b.fields {
-		var info *ModelInfo
-		if field != nil {
-			info = field.ModelInfo
-			if info != nil {
-				if info.Verifier().Do(PermUpdate).ObjectOn(toObj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
-					continue
-				}
+		info := parent.ModelInfo
+		if info != nil {
+			if info.Verifier().Do(PermUpdate).ObjectOn(toObj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
+				continue
 			}
+		}
+
+		if f.listItemBuilders != nil {
+			childFromObjs := reflectutils.MustGet(fromObj, f.name)
+			childToObjs := reflectutils.MustGet(toObj, f.name)
+			if childToObjs == nil {
+				childToObjs = reflect.New(reflectutils.GetType(toObj, f.name).Elem()).Interface()
+				reflectutils.Set(toObj, f.name, childToObjs)
+			}
+			fmt.Printf("reflectutils.GetType(toObj, f.name) %#+v\n", reflectutils.GetType(toObj, f.name))
+			fmt.Printf("childToObjs %#+v\n", childToObjs)
+
+			var i = 0
+			funk.ForEach(childFromObjs, func(childFromObj interface{}) {
+				pf := &FieldContext{
+					ModelInfo: info,
+
+					Name:  f.name,
+					Label: b.getLabel(f.NameLabel),
+				}
+
+				elementName := fmt.Sprintf("[%d]", i)
+				childToObj := reflectutils.MustGet(childToObjs, elementName)
+				if childToObj == nil {
+					arrayElementType := reflectutils.GetType(childToObjs, elementName)
+					fmt.Printf("%+v\n", arrayElementType)
+					childToObj = reflect.New(arrayElementType.Elem()).Interface()
+					reflectutils.Set(childToObjs, elementName, childToObj)
+				}
+
+				f.listItemBuilders.SetModelFields(childFromObj, childToObj, pf, ctx)
+				i++
+			})
+
+			continue
 		}
 
 		if f.setterFunc == nil {
@@ -196,6 +234,15 @@ func (b *FieldBuilders) Field(name string) (r *FieldBuilder) {
 
 	r = NewField(name)
 	b.fields = append(b.fields, r)
+	return
+}
+
+func (b *FieldBuilders) ListField(name string, listItemBuilder *FieldBuilders) (r *FieldBuilder) {
+	r = b.Field(name)
+	if listItemBuilder.defaults == nil {
+		listItemBuilder.Defaults(b.defaults)
+	}
+	r.listItemBuilders = listItemBuilder
 	return
 }
 
@@ -313,12 +360,13 @@ func (b *FieldBuilders) ToComponentWithKeyPath(info *ModelInfo, obj interface{},
 		}
 
 		comps = append(comps, f.compFunc(obj, &FieldContext{
-			ModelInfo: info,
-			Name:      f.name,
-			KeyPath:   contextKeyPath,
-			Label:     label,
-			Errors:    vErr.GetFieldErrors(f.name),
-			Context:   f.context,
+			ModelInfo:        info,
+			Name:             f.name,
+			KeyPath:          contextKeyPath,
+			Label:            label,
+			Errors:           vErr.GetFieldErrors(f.name),
+			ListItemBuilders: f.listItemBuilders,
+			Context:          f.context,
 		}, ctx))
 	}
 
