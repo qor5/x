@@ -140,19 +140,21 @@ func (b *FieldBuilders) NewModelSlice() (r interface{}) {
 	return reflect.New(reflect.SliceOf(b.modelType)).Interface()
 }
 
-func (b *FieldBuilders) SetModelSliceFields(toObj interface{}, info *ModelInfo, ctx *web.EventContext) (vErr web.ValidationErrors) {
-
-	return
-}
-func (b *FieldBuilders) SetModelFields(toObj interface{}, info *ModelInfo, ctx *web.EventContext) (vErr web.ValidationErrors) {
+func (b *FieldBuilders) SetModelFields(toObj interface{}, field *FieldContext, ctx *web.EventContext) (vErr web.ValidationErrors) {
 	var fromObj = b.NewModel()
 	// don't panic for fields that set in SetterFunc
+	// fmt.Println(ctx.R.FormValue("Name"))
+
 	_ = ctx.UnmarshalForm(fromObj)
 
 	for _, f := range b.fields {
-		if info != nil {
-			if info.Verifier().Do(PermUpdate).ObjectOn(toObj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
-				continue
+		var info *ModelInfo
+		if field != nil {
+			info = field.ModelInfo
+			if info != nil {
+				if info.Verifier().Do(PermUpdate).ObjectOn(toObj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
+					continue
+				}
 			}
 		}
 
@@ -303,7 +305,11 @@ func (b *FieldBuilders) ToComponentWithKeyPath(info *ModelInfo, obj interface{},
 
 		contextKeyPath := keyPath
 		if f.name != SelfFieldName {
-			contextKeyPath = fmt.Sprintf("%s.%s", keyPath, f.name)
+			if keyPath != "" {
+				contextKeyPath = fmt.Sprintf("%s.%s", keyPath, f.name)
+			} else {
+				contextKeyPath = f.name
+			}
 		}
 
 		comps = append(comps, f.compFunc(obj, &FieldContext{

@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/goplaid/multipartestutils"
 	"github.com/goplaid/web"
 	. "github.com/goplaid/x/presets"
 	h "github.com/theplant/htmlgo"
@@ -209,7 +210,11 @@ func TestFieldBuilders(t *testing.T) {
 		// [0].Departments[1].Name
 		// [1].Departments[0].Name
 		return h.Input(field.KeyPath).Type("text").Value(field.StringValue(obj))
+	}).SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
+		panic("")
+		return
 	})
+
 	deptFbs.Field("Employees").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		return h.Div(
 			employeeFbs.ToComponentForEach(field, obj.(*Department).Employees, ctx, nil),
@@ -217,13 +222,14 @@ func TestFieldBuilders(t *testing.T) {
 		).Class("employees")
 	})
 
-	fbs := NewFieldBuilders().Defaults(defaults)
+	fbs := NewFieldBuilders().Defaults(defaults).Model(&Org{})
 	fbs.Field("Name").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		// [0].Name
 		return h.Input(field.Name).Type("text").Value(field.StringValue(obj))
-	}).SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
-		return
 	})
+	// .SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
+	// 	return
+	// })
 
 	fbs.Field("Departments").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		// [0].Departments
@@ -231,66 +237,86 @@ func TestFieldBuilders(t *testing.T) {
 			deptFbs.ToComponentForEach(field, obj.(*Org).Departments, ctx, nil),
 			h.Button("Add Department"),
 		).Class("departments")
+	}).SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
+		deptFbs.SetModelFields(obj, field, ctx)
+		return
 	})
 
-	formObj := &Org{}
-	ctx := &web.EventContext{}
-	fbs.ToComponent(nil, formObj, ctx)
-
-	arrayObjs := []*Org{
-		{
-			Name: "Name 1",
-			Departments: []*Department{
-				{
-					Name: "11111",
-					Employees: []string{
-						"111",
-						"222",
-					},
-				},
-				{
-					Name: "22222",
-					Employees: []string{
-						"333",
-						"444",
-					},
+	formObj := &Org{
+		Name: "Name 1",
+		Departments: []*Department{
+			{
+				Name: "11111",
+				Employees: []string{
+					"111",
+					"222",
 				},
 			},
-		},
-		{
-			Name: "Name 2",
-			Departments: []*Department{
-				{
-					Name: "33333",
-					Employees: []string{
-						"555",
-						"666",
-					},
-				},
-				{
-					Name: "44444",
-					Employees: []string{
-						"777",
-						"888",
-					},
+			{
+				Name: "22222",
+				Employees: []string{
+					"333",
+					"444",
 				},
 			},
 		},
 	}
 
-	result := fbs.ToComponentForEach(nil, arrayObjs, ctx, nil)
+	ctx := &web.EventContext{}
+	//
+	// arrayObjs := []*Org{
+	// 	{
+	// 		Name: "Name 1",
+	// 		Departments: []*Department{
+	// 			{
+	// 				Name: "11111",
+	// 				Employees: []string{
+	// 					"111",
+	// 					"222",
+	// 				},
+	// 			},
+	// 			{
+	// 				Name: "22222",
+	// 				Employees: []string{
+	// 					"333",
+	// 					"444",
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// 	{
+	// 		Name: "Name 2",
+	// 		Departments: []*Department{
+	// 			{
+	// 				Name: "33333",
+	// 				Employees: []string{
+	// 					"555",
+	// 					"666",
+	// 				},
+	// 			},
+	// 			{
+	// 				Name: "44444",
+	// 				Employees: []string{
+	// 					"777",
+	// 					"888",
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// }
+
+	result := fbs.ToComponent(nil, formObj, ctx)
 	h.Fprint(os.Stdout, result, context.TODO())
 
-	return
-
-	address := fbs.NewModel()
-	vErr := fbs.SetModelFields(address, nil, ctx)
-	if vErr.HaveErrors() {
-		panic(vErr)
-	}
-
-	addresses := fbs.NewModelSlice()
-	vErr = fbs.SetModelSliceFields(addresses, nil, ctx)
+	var toObj = &Org{}
+	ctx.R = multipartestutils.NewMultipartBuilder().
+		AddField("Name", "Org 1").
+		AddField("Departments[1].Name", "Department 1").
+		AddField("Departments[1].Employees[0]", "Employee 0").
+		BuildEventFuncRequest()
+	_ = ctx.R.ParseMultipartForm(128 << 20)
+	vErr := fbs.SetModelFields(toObj, nil, ctx)
+	testingutils.PrintlnJson("toObj ===", toObj)
 	if vErr.HaveErrors() {
 		panic(vErr)
 	}
