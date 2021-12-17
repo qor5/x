@@ -3,13 +3,13 @@ package integration_test
 import (
 	"context"
 	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
 
 	"github.com/goplaid/multipartestutils"
 	"github.com/goplaid/web"
 	. "github.com/goplaid/x/presets"
+	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 	"github.com/theplant/testingutils"
 )
@@ -187,12 +187,16 @@ type Person struct {
 type Org struct {
 	Name        string
 	Departments []*Department
-	Phones      []string
 }
 
 type Department struct {
 	Name      string
-	Employees []string
+	Employees []*Employee
+	DBStatus  string
+}
+
+type Employee struct {
+	Number int
 }
 
 func TestFieldBuilders(t *testing.T) {
@@ -200,8 +204,8 @@ func TestFieldBuilders(t *testing.T) {
 	defaults := NewFieldDefaults(WRITE)
 
 	employeeFbs := NewFieldBuilders().Defaults(defaults)
-	employeeFbs.Field(".").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
-		return h.Input(field.KeyPath).Type("text").Value(field.StringValue(obj))
+	employeeFbs.Field("Number").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
+		return h.Input(field.FormValueKey).Type("text").Value(field.StringValue(obj))
 	})
 
 	deptFbs := NewFieldBuilders().Defaults(defaults)
@@ -209,10 +213,10 @@ func TestFieldBuilders(t *testing.T) {
 		// [0].Departments[0].Name
 		// [0].Departments[1].Name
 		// [1].Departments[0].Name
-		return h.Input(field.KeyPath).Type("text").Value(field.StringValue(obj))
+		return h.Input(field.FormValueKey).Type("text").Value(field.StringValue(obj))
 	}).SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
-		testingutils.PrintlnJson(obj, field)
-		panic("dept name setter")
+		reflectutils.Set(obj, field.Name, ctx.R.FormValue(field.FormValueKey)+"!!!")
+		// panic("dept name setter")
 		return
 	})
 
@@ -223,7 +227,7 @@ func TestFieldBuilders(t *testing.T) {
 		).Class("employees")
 	})
 
-	fbs := NewFieldBuilders().Defaults(defaults).Model(&Org{})
+	fbs := NewFieldBuilders().Defaults(defaults)
 	fbs.Field("Name").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		// [0].Name
 		return h.Input(field.Name).Type("text").Value(field.StringValue(obj))
@@ -245,78 +249,96 @@ func TestFieldBuilders(t *testing.T) {
 		Departments: []*Department{
 			{
 				Name: "11111",
-				Employees: []string{
-					"111",
-					"222",
+				Employees: []*Employee{
+					{Number: 111},
+					{Number: 222},
 				},
 			},
 			{
 				Name: "22222",
-				Employees: []string{
-					"333",
-					"444",
+				Employees: []*Employee{
+					{Number: 333},
+					{Number: 444},
 				},
 			},
 		},
 	}
 
 	ctx := &web.EventContext{}
-	//
-	// arrayObjs := []*Org{
-	// 	{
-	// 		Name: "Name 1",
-	// 		Departments: []*Department{
-	// 			{
-	// 				Name: "11111",
-	// 				Employees: []string{
-	// 					"111",
-	// 					"222",
-	// 				},
-	// 			},
-	// 			{
-	// 				Name: "22222",
-	// 				Employees: []string{
-	// 					"333",
-	// 					"444",
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// 	{
-	// 		Name: "Name 2",
-	// 		Departments: []*Department{
-	// 			{
-	// 				Name: "33333",
-	// 				Employees: []string{
-	// 					"555",
-	// 					"666",
-	// 				},
-	// 			},
-	// 			{
-	// 				Name: "44444",
-	// 				Employees: []string{
-	// 					"777",
-	// 					"888",
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// }
 
 	result := fbs.ToComponent(nil, formObj, ctx)
-	h.Fprint(os.Stdout, result, context.TODO())
+	actual1 := h.MustString(result, context.TODO())
 
-	var toObj = &Org{}
+	expected1 := `
+<input name='Name' type='text' value='Name 1'>
+
+<div class='departments'>
+<input name='Departments[0].Name' type='text' value='11111'>
+
+<div class='employees'>
+<input name='Departments[0].Employees[0].Number' type='text' value='111'>
+
+<input name='Departments[0].Employees[1].Number' type='text' value='222'>
+
+<button>Add Employee</button>
+</div>
+
+<input name='Departments[1].Name' type='text' value='22222'>
+
+<div class='employees'>
+<input name='Departments[1].Employees[0].Number' type='text' value='333'>
+
+<input name='Departments[1].Employees[1].Number' type='text' value='444'>
+
+<button>Add Employee</button>
+</div>
+
+<button>Add Department</button>
+</div>
+`
+	diff := testingutils.PrettyJsonDiff(expected1, actual1)
+	if diff != "" {
+		t.Error(diff)
+	}
+
+	var actual2 = &Org{}
 	ctx.R = multipartestutils.NewMultipartBuilder().
 		AddField("Name", "Org 1").
 		AddField("Departments[1].Name", "Department 1").
-		AddField("Departments[1].Employees[0]", "Employee 0").
+		AddField("Departments[1].Employees[0].Number", "888").
+		AddField("Departments[1].Employees[2].Number", "999").
+		AddField("Departments[1].DBStatus", "Verified").
 		BuildEventFuncRequest()
 	_ = ctx.R.ParseMultipartForm(128 << 20)
-	vErr := fbs.SetRootModelFields(toObj, nil, ctx)
-	testingutils.PrintlnJson("toObj ===", toObj)
-	if vErr.HaveErrors() {
-		panic(vErr)
+
+	_ = fbs.Unmarshal(actual2, nil, ctx)
+
+	expected2 := &Org{
+		Name: "Org 1",
+		Departments: []*Department{
+			{
+				Name: "!!!",
+			},
+			{
+				Name: "Department 1!!!",
+				Employees: []*Employee{
+					{
+						Number: 888,
+					},
+					{
+						Number: 0,
+					},
+					{
+						Number: 999,
+					},
+				},
+			},
+		},
+	}
+
+	diff = testingutils.PrettyJsonDiff(expected2, actual2)
+	if diff != "" {
+		t.Error(diff)
 	}
 
 }

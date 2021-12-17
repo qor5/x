@@ -337,7 +337,7 @@ func (b *EditingBuilder) RunSetterFunc(ctx *web.EventContext, r *web.EventRespon
 		b.Setter(toObj, ctx)
 	}
 
-	vErr = b.SetRootModelFields(toObj, b.mb.Info(), ctx)
+	vErr = b.Unmarshal(toObj, b.mb.Info(), ctx)
 
 	if vErr.HaveErrors() {
 		b.UpdateOverlayContent(ctx, r, toObj, "", &vErr)

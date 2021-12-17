@@ -13,11 +13,9 @@ import (
 	"github.com/thoas/go-funk"
 )
 
-const SelfFieldName = "."
-
 type FieldContext struct {
 	Name             string
-	KeyPath          string
+	FormValueKey     string
 	Label            string
 	Errors           []string
 	ModelInfo        *ModelInfo
@@ -38,9 +36,6 @@ func (fc *FieldContext) StringValue(obj interface{}) (r string) {
 
 func (fc *FieldContext) Value(obj interface{}) (r interface{}) {
 	fieldName := fc.Name
-	if fieldName == SelfFieldName {
-		return obj
-	}
 	return reflectutils.MustGet(obj, fieldName)
 }
 
@@ -123,36 +118,29 @@ func NewFieldBuilders() *FieldBuilders {
 	return &FieldBuilders{}
 }
 
-func (b *FieldBuilders) Model(v interface{}) (r *FieldBuilders) {
-	b.modelType = reflect.TypeOf(v)
-	b.model = v
-	return b
-}
-
 func (b *FieldBuilders) Defaults(v *FieldDefaults) (r *FieldBuilders) {
 	b.defaults = v
 	return b
 }
 
-func (b *FieldBuilders) NewModel() (r interface{}) {
-	return reflect.New(b.modelType.Elem()).Interface()
-}
+func (b *FieldBuilders) Unmarshal(toObj interface{}, info *ModelInfo, ctx *web.EventContext) (vErr web.ValidationErrors) {
+	t := reflect.TypeOf(toObj)
+	if t.Kind() != reflect.Ptr {
+		panic("toObj must be pointer")
+	}
 
-func (b *FieldBuilders) NewModelSlice() (r interface{}) {
-	return reflect.New(reflect.SliceOf(b.modelType)).Interface()
-}
-
-func (b *FieldBuilders) SetRootModelFields(toObj interface{}, info *ModelInfo, ctx *web.EventContext) (vErr web.ValidationErrors) {
-	var fromObj = b.NewModel()
+	var fromObj = reflect.New(t.Elem()).Interface()
 	// don't panic for fields that set in SetterFunc
 	_ = ctx.UnmarshalForm(fromObj)
+	// testingutils.PrintlnJson("Unmarshal fromObj", fromObj)
 
-	return b.SetModelFields(fromObj, toObj, &FieldContext{
+	return b.setObjectFields(fromObj, toObj, &FieldContext{
 		ModelInfo: info,
 	}, ctx)
 }
 
-func (b *FieldBuilders) SetModelFields(fromObj interface{}, toObj interface{}, parent *FieldContext, ctx *web.EventContext) (vErr web.ValidationErrors) {
+func (b *FieldBuilders) setObjectFields(fromObj interface{}, toObj interface{}, parent *FieldContext, ctx *web.EventContext) (vErr web.ValidationErrors) {
+
 	for _, f := range b.fields {
 		info := parent.ModelInfo
 		if info != nil {
@@ -163,33 +151,44 @@ func (b *FieldBuilders) SetModelFields(fromObj interface{}, toObj interface{}, p
 
 		if f.listItemBuilders != nil {
 			childFromObjs := reflectutils.MustGet(fromObj, f.name)
-			childToObjs := reflectutils.MustGet(toObj, f.name)
-			if childToObjs == nil {
-				childToObjs = reflect.New(reflectutils.GetType(toObj, f.name).Elem()).Interface()
-				reflectutils.Set(toObj, f.name, childToObjs)
+			// fmt.Printf("childFromObjs %#+v, %+v\n", childFromObjs, reflect.TypeOf(childFromObjs))
+			if childFromObjs == nil || reflect.TypeOf(childFromObjs).Kind() != reflect.Slice {
+				continue
 			}
-			fmt.Printf("reflectutils.GetType(toObj, f.name) %#+v\n", reflectutils.GetType(toObj, f.name))
-			fmt.Printf("childToObjs %#+v\n", childToObjs)
-
 			var i = 0
 			funk.ForEach(childFromObjs, func(childFromObj interface{}) {
+				if childFromObj == nil {
+					return
+				}
+				sliceFieldName := fmt.Sprintf("%s[%d]", f.name, i)
+				keyPath := sliceFieldName
+				if parent != nil && parent.FormValueKey != "" {
+					keyPath = fmt.Sprintf("%s.%s", parent.FormValueKey, sliceFieldName)
+				}
 				pf := &FieldContext{
-					ModelInfo: info,
-
-					Name:  f.name,
-					Label: b.getLabel(f.NameLabel),
+					ModelInfo:    info,
+					FormValueKey: keyPath,
 				}
 
-				elementName := fmt.Sprintf("[%d]", i)
-				childToObj := reflectutils.MustGet(childToObjs, elementName)
+				childToObj := reflectutils.MustGet(toObj, sliceFieldName)
 				if childToObj == nil {
-					arrayElementType := reflectutils.GetType(childToObjs, elementName)
-					fmt.Printf("%+v\n", arrayElementType)
-					childToObj = reflect.New(arrayElementType.Elem()).Interface()
-					reflectutils.Set(childToObjs, elementName, childToObj)
+					arrayElementType := reflectutils.GetType(toObj, sliceFieldName)
+
+					if arrayElementType.Kind() == reflect.Ptr {
+						arrayElementType = arrayElementType.Elem()
+					}
+
+					err := reflectutils.Set(toObj, sliceFieldName, reflect.New(arrayElementType).Interface())
+					if err != nil {
+						panic(err)
+					}
+					childToObj = reflectutils.MustGet(toObj, sliceFieldName)
 				}
 
-				f.listItemBuilders.SetModelFields(childFromObj, childToObj, pf, ctx)
+				// fmt.Printf("childFromObj %#+v\n", childFromObj)
+				// fmt.Printf("childToObj %#+v\n", childToObj)
+				// fmt.Printf("fieldContext %#+v\n", pf)
+				f.listItemBuilders.setObjectFields(childFromObj, childToObj, pf, ctx)
 				i++
 			})
 
@@ -202,13 +201,20 @@ func (b *FieldBuilders) SetModelFields(fromObj interface{}, toObj interface{}, p
 				continue
 			}
 			_ = reflectutils.Set(toObj, f.name, val)
+			// fmt.Printf("fromObj %#+v, f.name %#+v, toObj %#+v, val %#+v\n", fromObj, f.name, toObj, val)
 			continue
 		}
 
+		keyPath := f.name
+		if parent != nil {
+			keyPath = fmt.Sprintf("%s.%s", parent.FormValueKey, f.name)
+		}
+
 		err1 := f.setterFunc(toObj, &FieldContext{
-			ModelInfo: info,
-			Name:      f.name,
-			Label:     b.getLabel(f.NameLabel),
+			ModelInfo:    info,
+			FormValueKey: keyPath,
+			Name:         f.name,
+			Label:        b.getLabel(f.NameLabel),
 		}, ctx)
 		if err1 != nil {
 			vErr.FieldError(f.name, err1.Error())
@@ -350,19 +356,15 @@ func (b *FieldBuilders) ToComponentWithKeyPath(info *ModelInfo, obj interface{},
 			label = i18n.PT(ctx.R, ModelsI18nModuleKey, info.Label(), b.getLabel(f.NameLabel))
 		}
 
-		contextKeyPath := keyPath
-		if f.name != SelfFieldName {
-			if keyPath != "" {
-				contextKeyPath = fmt.Sprintf("%s.%s", keyPath, f.name)
-			} else {
-				contextKeyPath = f.name
-			}
+		contextKeyPath := f.name
+		if keyPath != "" {
+			contextKeyPath = fmt.Sprintf("%s.%s", keyPath, f.name)
 		}
 
 		comps = append(comps, f.compFunc(obj, &FieldContext{
 			ModelInfo:        info,
 			Name:             f.name,
-			KeyPath:          contextKeyPath,
+			FormValueKey:     contextKeyPath,
 			Label:            label,
 			Errors:           vErr.GetFieldErrors(f.name),
 			ListItemBuilders: f.listItemBuilders,
@@ -384,7 +386,7 @@ func (b *FieldBuilders) ToComponentForEach(field *FieldContext, slice interface{
 	var parentKeyPath = ""
 	if field != nil {
 		info = field.ModelInfo
-		parentKeyPath = field.KeyPath
+		parentKeyPath = field.FormValueKey
 	}
 	if rowFunc == nil {
 		rowFunc = defaultRowFunc
