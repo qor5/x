@@ -14,13 +14,13 @@ import (
 )
 
 type FieldContext struct {
-	Name             string
-	FormValueKey     string
-	Label            string
-	Errors           []string
-	ModelInfo        *ModelInfo
-	ListItemBuilders *FieldBuilders
-	Context          context.Context
+	Name            string
+	FormValueKey    string
+	Label           string
+	Errors          []string
+	ModelInfo       *ModelInfo
+	ListItemBuilder *FieldsBuilder
+	Context         context.Context
 }
 
 func (fc *FieldContext) StringValue(obj interface{}) (r string) {
@@ -48,10 +48,10 @@ func (fc *FieldContext) ContextValue(key interface{}) (r interface{}) {
 
 type FieldBuilder struct {
 	NameLabel
-	compFunc         FieldComponentFunc
-	setterFunc       FieldSetterFunc
-	context          context.Context
-	listItemBuilders *FieldBuilders
+	compFunc        FieldComponentFunc
+	setterFunc      FieldSetterFunc
+	context         context.Context
+	listItemBuilder *FieldsBuilder
 }
 
 func NewField(name string) (r *FieldBuilder) {
@@ -106,24 +106,23 @@ type NameLabel struct {
 	label string
 }
 
-type FieldBuilders struct {
-	modelType   reflect.Type
+type FieldsBuilder struct {
 	model       interface{}
 	defaults    *FieldDefaults
 	fieldLabels []string
 	fields      []*FieldBuilder
 }
 
-func NewFieldBuilders() *FieldBuilders {
-	return &FieldBuilders{}
+func NewFieldsBuilder() *FieldsBuilder {
+	return &FieldsBuilder{}
 }
 
-func (b *FieldBuilders) Defaults(v *FieldDefaults) (r *FieldBuilders) {
+func (b *FieldsBuilder) Defaults(v *FieldDefaults) (r *FieldsBuilder) {
 	b.defaults = v
 	return b
 }
 
-func (b *FieldBuilders) Unmarshal(toObj interface{}, info *ModelInfo, ctx *web.EventContext) (vErr web.ValidationErrors) {
+func (b *FieldsBuilder) Unmarshal(toObj interface{}, info *ModelInfo, ctx *web.EventContext) (vErr web.ValidationErrors) {
 	t := reflect.TypeOf(toObj)
 	if t.Kind() != reflect.Ptr {
 		panic("toObj must be pointer")
@@ -139,7 +138,7 @@ func (b *FieldBuilders) Unmarshal(toObj interface{}, info *ModelInfo, ctx *web.E
 	}, ctx)
 }
 
-func (b *FieldBuilders) setObjectFields(fromObj interface{}, toObj interface{}, parent *FieldContext, ctx *web.EventContext) (vErr web.ValidationErrors) {
+func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, parent *FieldContext, ctx *web.EventContext) (vErr web.ValidationErrors) {
 
 	for _, f := range b.fields {
 		info := parent.ModelInfo
@@ -149,7 +148,7 @@ func (b *FieldBuilders) setObjectFields(fromObj interface{}, toObj interface{}, 
 			}
 		}
 
-		if f.listItemBuilders != nil {
+		if f.listItemBuilder != nil {
 			childFromObjs := reflectutils.MustGet(fromObj, f.name)
 			// fmt.Printf("childFromObjs %#+v, %+v\n", childFromObjs, reflect.TypeOf(childFromObjs))
 			if childFromObjs == nil || reflect.TypeOf(childFromObjs).Kind() != reflect.Slice {
@@ -176,6 +175,8 @@ func (b *FieldBuilders) setObjectFields(fromObj interface{}, toObj interface{}, 
 
 					if arrayElementType.Kind() == reflect.Ptr {
 						arrayElementType = arrayElementType.Elem()
+					} else {
+						panic(fmt.Sprintf("%s must be a pointer", sliceFieldName))
 					}
 
 					err := reflectutils.Set(toObj, sliceFieldName, reflect.New(arrayElementType).Interface())
@@ -188,7 +189,7 @@ func (b *FieldBuilders) setObjectFields(fromObj interface{}, toObj interface{}, 
 				// fmt.Printf("childFromObj %#+v\n", childFromObj)
 				// fmt.Printf("childToObj %#+v\n", childToObj)
 				// fmt.Printf("fieldContext %#+v\n", pf)
-				f.listItemBuilders.setObjectFields(childFromObj, childToObj, pf, ctx)
+				f.listItemBuilder.setObjectFields(childFromObj, childToObj, pf, ctx)
 				i++
 			})
 
@@ -223,8 +224,8 @@ func (b *FieldBuilders) setObjectFields(fromObj interface{}, toObj interface{}, 
 	return
 }
 
-func (b *FieldBuilders) Clone() (r *FieldBuilders) {
-	r = &FieldBuilders{
+func (b *FieldsBuilder) Clone() (r *FieldsBuilder) {
+	r = &FieldsBuilder{
 		model:       b.model,
 		defaults:    b.defaults,
 		fieldLabels: b.fieldLabels,
@@ -232,7 +233,7 @@ func (b *FieldBuilders) Clone() (r *FieldBuilders) {
 	return
 }
 
-func (b *FieldBuilders) Field(name string) (r *FieldBuilder) {
+func (b *FieldsBuilder) Field(name string) (r *FieldBuilder) {
 	r = b.GetField(name)
 	if r != nil {
 		return
@@ -243,21 +244,21 @@ func (b *FieldBuilders) Field(name string) (r *FieldBuilder) {
 	return
 }
 
-func (b *FieldBuilders) ListField(name string, listItemBuilder *FieldBuilders) (r *FieldBuilder) {
+func (b *FieldsBuilder) ListField(name string, listItemBuilder *FieldsBuilder) (r *FieldBuilder) {
 	r = b.Field(name)
 	if listItemBuilder.defaults == nil {
 		listItemBuilder.Defaults(b.defaults)
 	}
-	r.listItemBuilders = listItemBuilder
+	r.listItemBuilder = listItemBuilder
 	return
 }
 
-func (b *FieldBuilders) Labels(vs ...string) (r *FieldBuilders) {
+func (b *FieldsBuilder) Labels(vs ...string) (r *FieldsBuilder) {
 	b.fieldLabels = append(b.fieldLabels, vs...)
 	return b
 }
 
-func (b *FieldBuilders) getLabel(field NameLabel) (r string) {
+func (b *FieldsBuilder) getLabel(field NameLabel) (r string) {
 	if len(field.label) > 0 {
 		return field.label
 	}
@@ -271,7 +272,7 @@ func (b *FieldBuilders) getLabel(field NameLabel) (r string) {
 	return field.name
 }
 
-func (b *FieldBuilders) GetField(name string) (r *FieldBuilder) {
+func (b *FieldsBuilder) GetField(name string) (r *FieldBuilder) {
 	for _, f := range b.fields {
 		if f.name == name {
 			return f
@@ -280,7 +281,7 @@ func (b *FieldBuilders) GetField(name string) (r *FieldBuilder) {
 	return
 }
 
-func (b *FieldBuilders) Only(names ...string) (r *FieldBuilders) {
+func (b *FieldsBuilder) Only(names ...string) (r *FieldsBuilder) {
 	if len(names) == 0 {
 		return b
 	}
@@ -307,12 +308,12 @@ func (b *FieldBuilders) Only(names ...string) (r *FieldBuilders) {
 	return
 }
 
-func (b *FieldBuilders) Except(patterns ...string) (r *FieldBuilders) {
+func (b *FieldsBuilder) Except(patterns ...string) (r *FieldsBuilder) {
 	if len(patterns) == 0 {
 		return
 	}
 
-	r = &FieldBuilders{fieldLabels: b.fieldLabels}
+	r = &FieldsBuilder{fieldLabels: b.fieldLabels}
 	for _, f := range b.fields {
 		if hasMatched(patterns, f.name) {
 			continue
@@ -322,7 +323,7 @@ func (b *FieldBuilders) Except(patterns ...string) (r *FieldBuilders) {
 	return
 }
 
-func (b *FieldBuilders) String() (r string) {
+func (b *FieldsBuilder) String() (r string) {
 	var names []string
 	for _, f := range b.fields {
 		names = append(names, f.name)
@@ -330,11 +331,11 @@ func (b *FieldBuilders) String() (r string) {
 	return fmt.Sprint(names)
 }
 
-func (b *FieldBuilders) ToComponent(info *ModelInfo, obj interface{}, ctx *web.EventContext) h.HTMLComponent {
+func (b *FieldsBuilder) ToComponent(info *ModelInfo, obj interface{}, ctx *web.EventContext) h.HTMLComponent {
 	return b.ToComponentWithKeyPath(info, obj, "", ctx)
 }
 
-func (b *FieldBuilders) ToComponentWithKeyPath(info *ModelInfo, obj interface{}, keyPath string, ctx *web.EventContext) h.HTMLComponent {
+func (b *FieldsBuilder) ToComponentWithKeyPath(info *ModelInfo, obj interface{}, keyPath string, ctx *web.EventContext) h.HTMLComponent {
 
 	var comps []h.HTMLComponent
 
@@ -362,13 +363,13 @@ func (b *FieldBuilders) ToComponentWithKeyPath(info *ModelInfo, obj interface{},
 		}
 
 		comps = append(comps, f.compFunc(obj, &FieldContext{
-			ModelInfo:        info,
-			Name:             f.name,
-			FormValueKey:     contextKeyPath,
-			Label:            label,
-			Errors:           vErr.GetFieldErrors(f.name),
-			ListItemBuilders: f.listItemBuilders,
-			Context:          f.context,
+			ModelInfo:       info,
+			Name:            f.name,
+			FormValueKey:    contextKeyPath,
+			Label:           label,
+			Errors:          vErr.GetFieldErrors(f.name),
+			ListItemBuilder: f.listItemBuilder,
+			Context:         f.context,
 		}, ctx))
 	}
 
@@ -381,7 +382,7 @@ func defaultRowFunc(obj interface{}, content h.HTMLComponent, ctx *web.EventCont
 	return content
 }
 
-func (b *FieldBuilders) ToComponentForEach(field *FieldContext, slice interface{}, ctx *web.EventContext, rowFunc RowFunc) h.HTMLComponent {
+func (b *FieldsBuilder) ToComponentForEach(field *FieldContext, slice interface{}, ctx *web.EventContext, rowFunc RowFunc) h.HTMLComponent {
 	var info *ModelInfo
 	var parentKeyPath = ""
 	if field != nil {

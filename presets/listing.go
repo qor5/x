@@ -33,7 +33,7 @@ type ListingBuilder struct {
 	totalVisible    int64
 	orderBy         string
 	orderableFields []*OrderableField
-	FieldBuilders
+	FieldsBuilder
 }
 
 func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
@@ -48,7 +48,7 @@ func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
 
 func (b *ListingBuilder) Only(vs ...string) (r *ListingBuilder) {
 	r = b
-	r.FieldBuilders = *r.FieldBuilders.Only(vs...)
+	r.FieldsBuilder = *r.FieldsBuilder.Only(vs...)
 	return
 }
 

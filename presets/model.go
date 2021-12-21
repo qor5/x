@@ -29,7 +29,7 @@ type ModelBuilder struct {
 	detailing        *DetailingBuilder
 	editing          *EditingBuilder
 	creating         *EditingBuilder
-	writeFields      *FieldBuilders
+	writeFields      *FieldsBuilder
 	hasDetailing     bool
 	rightDrawerWidth string
 	web.EventsHub
@@ -78,7 +78,7 @@ func (b *ModelBuilder) NewModelSlice() (r interface{}) {
 }
 
 func (b *ModelBuilder) newListing() (r *ListingBuilder) {
-	b.listing = &ListingBuilder{mb: b, FieldBuilders: *b.p.listFieldDefaults.InspectFields(b.model)}
+	b.listing = &ListingBuilder{mb: b, FieldsBuilder: *b.p.listFieldDefaults.InspectFields(b.model)}
 	if b.p.dataOperator != nil {
 		b.listing.Searcher(b.p.dataOperator.Search)
 	}
@@ -90,7 +90,7 @@ func (b *ModelBuilder) newListing() (r *ListingBuilder) {
 
 func (b *ModelBuilder) newEditing() (r *EditingBuilder) {
 	b.writeFields, b.listing.searchColumns = b.p.writeFieldDefaults.inspectFieldsAndCollectName(b.model, reflect.TypeOf(""))
-	b.editing = &EditingBuilder{mb: b, FieldBuilders: *b.writeFields}
+	b.editing = &EditingBuilder{mb: b, FieldsBuilder: *b.writeFields}
 	if b.p.dataOperator != nil {
 		b.editing.FetchFunc(b.p.dataOperator.Fetch)
 		b.editing.SaveFunc(b.p.dataOperator.Save)
@@ -100,7 +100,7 @@ func (b *ModelBuilder) newEditing() (r *EditingBuilder) {
 }
 
 func (b *ModelBuilder) newDetailing() (r *DetailingBuilder) {
-	b.detailing = &DetailingBuilder{mb: b, FieldBuilders: *b.p.detailFieldDefaults.InspectFields(b.model)}
+	b.detailing = &DetailingBuilder{mb: b, FieldsBuilder: *b.p.detailFieldDefaults.InspectFields(b.model)}
 	if b.p.dataOperator != nil {
 		b.detailing.Fetcher(b.p.dataOperator.Fetch)
 	}

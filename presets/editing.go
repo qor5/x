@@ -24,7 +24,7 @@ type EditingBuilder struct {
 	tabPanels   []TabComponentFunc
 	sidePanel   ComponentFunc
 	actionsFunc ComponentFunc
-	FieldBuilders
+	FieldsBuilder
 }
 
 func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
@@ -39,7 +39,7 @@ func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
 
 func (b *EditingBuilder) Only(vs ...string) (r *EditingBuilder) {
 	r = b
-	r.FieldBuilders = *r.FieldBuilders.Only(vs...)
+	r.FieldsBuilder = *r.FieldsBuilder.Only(vs...)
 	return
 }
 
@@ -56,7 +56,7 @@ func (b *EditingBuilder) Creating(vs ...string) (r *EditingBuilder) {
 	}
 	r = b.mb.creating
 
-	r.FieldBuilders = *b.mb.writeFields.Only(vs...)
+	r.FieldsBuilder = *b.mb.writeFields.Only(vs...)
 
 	return r
 }

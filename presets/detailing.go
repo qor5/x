@@ -17,7 +17,7 @@ type DetailingBuilder struct {
 	actions    []*ActionBuilder
 	pageFunc   web.PageFunc
 	fetcher    FetchFunc
-	FieldBuilders
+	FieldsBuilder
 }
 
 type pageTitle interface {

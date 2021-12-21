@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"context"
+	"fmt"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -199,16 +200,26 @@ type Employee struct {
 	Number int
 }
 
-func TestFieldBuilders(t *testing.T) {
+func TestFieldsBuilder(t *testing.T) {
 
 	defaults := NewFieldDefaults(WRITE)
 
-	employeeFbs := NewFieldBuilders().Defaults(defaults)
+	employeeFbs := NewFieldsBuilder().Defaults(defaults)
 	employeeFbs.Field("Number").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		return h.Input(field.FormValueKey).Type("text").Value(field.StringValue(obj))
 	})
 
-	deptFbs := NewFieldBuilders().Defaults(defaults)
+	employeeFbs.Field("FakeNumber").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
+		return h.Input(field.FormValueKey).Type("text").Value(fmt.Sprintf("900%v", reflectutils.MustGet(obj, "Number")))
+	}).SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
+		v := ctx.R.FormValue(field.FormValueKey)
+		if v == "" {
+			return
+		}
+		return reflectutils.Set(obj, "Number", "900"+v)
+	})
+
+	deptFbs := NewFieldsBuilder().Defaults(defaults)
 	deptFbs.Field("Name").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		// [0].Departments[0].Name
 		// [0].Departments[1].Name
@@ -222,12 +233,12 @@ func TestFieldBuilders(t *testing.T) {
 
 	deptFbs.ListField("Employees", employeeFbs).ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		return h.Div(
-			field.ListItemBuilders.ToComponentForEach(field, obj.(*Department).Employees, ctx, nil),
+			field.ListItemBuilder.ToComponentForEach(field, obj.(*Department).Employees, ctx, nil),
 			h.Button("Add Employee"),
 		).Class("employees")
 	})
 
-	fbs := NewFieldBuilders().Defaults(defaults)
+	fbs := NewFieldsBuilder().Defaults(defaults)
 	fbs.Field("Name").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		// [0].Name
 		return h.Input(field.Name).Type("text").Value(field.StringValue(obj))
@@ -239,7 +250,7 @@ func TestFieldBuilders(t *testing.T) {
 	fbs.ListField("Departments", deptFbs).ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		// [0].Departments
 		return h.Div(
-			field.ListItemBuilders.ToComponentForEach(field, obj.(*Org).Departments, ctx, nil),
+			field.ListItemBuilder.ToComponentForEach(field, obj.(*Org).Departments, ctx, nil),
 			h.Button("Add Department"),
 		).Class("departments")
 	})
@@ -278,7 +289,11 @@ func TestFieldBuilders(t *testing.T) {
 <div class='employees'>
 <input name='Departments[0].Employees[0].Number' type='text' value='111'>
 
+<input name='Departments[0].Employees[0].FakeNumber' type='text' value='900111'>
+
 <input name='Departments[0].Employees[1].Number' type='text' value='222'>
+
+<input name='Departments[0].Employees[1].FakeNumber' type='text' value='900222'>
 
 <button>Add Employee</button>
 </div>
@@ -288,7 +303,11 @@ func TestFieldBuilders(t *testing.T) {
 <div class='employees'>
 <input name='Departments[1].Employees[0].Number' type='text' value='333'>
 
+<input name='Departments[1].Employees[0].FakeNumber' type='text' value='900333'>
+
 <input name='Departments[1].Employees[1].Number' type='text' value='444'>
+
+<input name='Departments[1].Employees[1].FakeNumber' type='text' value='900444'>
 
 <button>Add Employee</button>
 </div>
@@ -307,6 +326,7 @@ func TestFieldBuilders(t *testing.T) {
 		AddField("Departments[1].Name", "Department 1").
 		AddField("Departments[1].Employees[0].Number", "888").
 		AddField("Departments[1].Employees[2].Number", "999").
+		AddField("Departments[1].Employees[1].FakeNumber", "666").
 		AddField("Departments[1].DBStatus", "Verified").
 		BuildEventFuncRequest()
 	_ = ctx.R.ParseMultipartForm(128 << 20)
@@ -326,7 +346,7 @@ func TestFieldBuilders(t *testing.T) {
 						Number: 888,
 					},
 					{
-						Number: 0,
+						Number: 900666,
 					},
 					{
 						Number: 999,

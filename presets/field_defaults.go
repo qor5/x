@@ -77,12 +77,12 @@ func (b *FieldDefaults) Exclude(patterns ...string) (r *FieldDefaults) {
 	return b
 }
 
-func (b *FieldDefaults) InspectFields(val interface{}) (r *FieldBuilders) {
+func (b *FieldDefaults) InspectFields(val interface{}) (r *FieldsBuilder) {
 	r, _ = b.inspectFieldsAndCollectName(val, nil)
 	return
 }
 
-func (b *FieldDefaults) inspectFieldsAndCollectName(val interface{}, collectType reflect.Type) (r *FieldBuilders, names []string) {
+func (b *FieldDefaults) inspectFieldsAndCollectName(val interface{}, collectType reflect.Type) (r *FieldsBuilder, names []string) {
 	v := reflect.ValueOf(val)
 
 	for v.Elem().Kind() == reflect.Ptr {
@@ -92,10 +92,10 @@ func (b *FieldDefaults) inspectFieldsAndCollectName(val interface{}, collectType
 
 	t := v.Type()
 
-	r = &FieldBuilders{
-		defaults: b,
-		model:    val,
+	r = &FieldsBuilder{
+		model: val,
 	}
+	r.Defaults(b)
 
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
@@ -207,7 +207,7 @@ func cfTextField(obj interface{}, field *FieldContext, ctx *web.EventContext) h.
 		Type("text").
 		FieldName(field.Name).
 		Label(field.Label).
-		Value(reflectutils.MustGet(obj, field.Name).(string)).
+		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name))).
 		ErrorMessages(field.Errors...)
 }
 
