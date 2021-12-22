@@ -204,7 +204,7 @@ func TestFieldsBuilder(t *testing.T) {
 
 	defaults := NewFieldDefaults(WRITE)
 
-	employeeFbs := NewFieldsBuilder().Defaults(defaults)
+	employeeFbs := NewFieldsBuilder().Model(&Employee{}).Defaults(defaults)
 	employeeFbs.Field("Number").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		return h.Input(field.FormValueKey).Type("text").Value(field.StringValue(obj))
 	})
@@ -219,7 +219,7 @@ func TestFieldsBuilder(t *testing.T) {
 		return reflectutils.Set(obj, "Number", "900"+v)
 	})
 
-	deptFbs := NewFieldsBuilder().Defaults(defaults)
+	deptFbs := NewFieldsBuilder().Model(&Department{}).Defaults(defaults)
 	deptFbs.Field("Name").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		// [0].Departments[0].Name
 		// [0].Departments[1].Name
@@ -238,7 +238,7 @@ func TestFieldsBuilder(t *testing.T) {
 		).Class("employees")
 	})
 
-	fbs := NewFieldsBuilder().Defaults(defaults)
+	fbs := NewFieldsBuilder().Model(&Org{}).Defaults(defaults)
 	fbs.Field("Name").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		// [0].Name
 		return h.Input(field.Name).Type("text").Value(field.StringValue(obj))

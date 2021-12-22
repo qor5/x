@@ -312,7 +312,7 @@ func (b *FieldsBuilder) Only(names ...string) (r *FieldsBuilder) {
 	for _, n := range names {
 		f := b.GetField(n)
 		if f == nil {
-			b.appendNewFieldWithDefault(n)
+			r.appendNewFieldWithDefault(n)
 		} else {
 			r.fields = append(r.fields, f.Clone())
 		}

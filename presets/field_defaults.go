@@ -79,6 +79,7 @@ func (b *FieldDefaults) Exclude(patterns ...string) (r *FieldDefaults) {
 
 func (b *FieldDefaults) InspectFields(val interface{}) (r *FieldsBuilder) {
 	r, _ = b.inspectFieldsAndCollectName(val, nil)
+	r.Model(val)
 	return
 }
 
