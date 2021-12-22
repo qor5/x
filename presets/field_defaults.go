@@ -129,6 +129,14 @@ func hasMatched(patterns []string, name string) bool {
 	return false
 }
 
+func (b *FieldDefaults) String() string {
+	var types []string
+	for _, t := range b.fieldTypes {
+		types = append(types, fmt.Sprint(t.valType))
+	}
+	return fmt.Sprintf("mode: %d, types %v", b.mode, types)
+}
+
 func (b *FieldDefaults) fieldTypeByType(tv reflect.Type) (r *FieldDefaultBuilder) {
 	for _, ft := range b.fieldTypes {
 		if ft.valType == tv {

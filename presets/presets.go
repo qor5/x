@@ -213,6 +213,11 @@ func (b *Builder) FieldDefaults(v FieldMode) (r *FieldDefaults) {
 	return r
 }
 
+func (b *Builder) NewFieldsBuilder(v FieldMode) (r *FieldsBuilder) {
+	r = NewFieldsBuilder().Defaults(b.FieldDefaults(v))
+	return
+}
+
 func (b *Builder) Model(v interface{}) (r *ModelBuilder) {
 	r = NewModelBuilder(b, v)
 	b.models = append(b.models, r)

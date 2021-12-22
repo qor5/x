@@ -54,10 +54,27 @@ type FieldBuilder struct {
 	listItemBuilder *FieldsBuilder
 }
 
-func NewField(name string) (r *FieldBuilder) {
+func (b *FieldsBuilder) appendNewFieldWithDefault(name string) (r *FieldBuilder) {
 	r = &FieldBuilder{}
+
+	if b.model == nil {
+		panic("model must be provided")
+	}
+
+	fType := reflectutils.GetType(b.model, name)
+	if fType == nil {
+		fType = reflect.TypeOf("")
+	}
+
+	if b.defaults == nil {
+		panic("field defaults must be provided")
+	}
+
+	ft := b.defaults.fieldTypeByTypeOrCreate(fType)
 	r.name = name
-	r.compFunc = emptyComponentFunc
+	r.ComponentFunc(ft.compFunc).
+		SetterFunc(ft.setterFunc)
+	b.fields = append(b.fields, r)
 	return
 }
 
@@ -233,14 +250,18 @@ func (b *FieldsBuilder) Clone() (r *FieldsBuilder) {
 	return
 }
 
+func (b *FieldsBuilder) Model(v interface{}) (r *FieldsBuilder) {
+	b.model = v
+	return b
+}
+
 func (b *FieldsBuilder) Field(name string) (r *FieldBuilder) {
 	r = b.GetField(name)
 	if r != nil {
 		return
 	}
 
-	r = NewField(name)
-	b.fields = append(b.fields, r)
+	r = b.appendNewFieldWithDefault(name)
 	return
 }
 
@@ -291,15 +312,7 @@ func (b *FieldsBuilder) Only(names ...string) (r *FieldsBuilder) {
 	for _, n := range names {
 		f := b.GetField(n)
 		if f == nil {
-			fType := reflectutils.GetType(b.model, n)
-			if fType == nil {
-				fType = reflect.TypeOf("")
-			}
-
-			ft := b.defaults.fieldTypeByTypeOrCreate(fType)
-			r.Field(n).
-				ComponentFunc(ft.compFunc).
-				SetterFunc(ft.setterFunc)
+			b.appendNewFieldWithDefault(n)
 		} else {
 			r.fields = append(r.fields, f.Clone())
 		}
