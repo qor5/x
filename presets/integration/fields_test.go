@@ -187,6 +187,7 @@ type Person struct {
 
 type Org struct {
 	Name        string
+	PeopleCount int
 	Departments []*Department
 }
 
@@ -255,6 +256,11 @@ func TestFieldsBuilder(t *testing.T) {
 		).Class("departments")
 	})
 
+	fbs.Field("PeopleCount").SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
+		reflectutils.Set(obj, field.Name, ctx.R.FormValue(field.FormValueKey))
+		return
+	})
+
 	formObj := &Org{
 		Name: "Name 1",
 		Departments: []*Department{
@@ -314,6 +320,8 @@ func TestFieldsBuilder(t *testing.T) {
 
 <button>Add Department</button>
 </div>
+
+<v-text-field type='number' v-field-name='[plaidForm, "PeopleCount"]' label='PeopleCount' :value='"0"'></v-text-field>
 `
 	diff := testingutils.PrettyJsonDiff(expected1, actual1)
 	if diff != "" {
@@ -323,6 +331,7 @@ func TestFieldsBuilder(t *testing.T) {
 	var actual2 = &Org{}
 	ctx.R = multipartestutils.NewMultipartBuilder().
 		AddField("Name", "Org 1").
+		AddField("PeopleCount", "420").
 		AddField("Departments[1].Name", "Department 1").
 		AddField("Departments[1].Employees[0].Number", "888").
 		AddField("Departments[1].Employees[2].Number", "999").
@@ -334,7 +343,8 @@ func TestFieldsBuilder(t *testing.T) {
 	_ = fbs.Unmarshal(actual2, nil, ctx)
 
 	expected2 := &Org{
-		Name: "Org 1",
+		Name:        "Org 1",
+		PeopleCount: 420,
 		Departments: []*Department{
 			{
 				Name: "!!!",

@@ -224,7 +224,7 @@ func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, 
 		}
 
 		keyPath := f.name
-		if parent != nil {
+		if parent != nil && parent.FormValueKey != "" {
 			keyPath = fmt.Sprintf("%s.%s", parent.FormValueKey, f.name)
 		}
 
