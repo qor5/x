@@ -256,7 +256,7 @@ func (b *FieldsBuilder) Model(v interface{}) (r *FieldsBuilder) {
 }
 
 func (b *FieldsBuilder) Field(name string) (r *FieldBuilder) {
-	r = b.GetField(name)
+	r = b.getField(name)
 	if r != nil {
 		return
 	}
@@ -293,7 +293,7 @@ func (b *FieldsBuilder) getLabel(field NameLabel) (r string) {
 	return field.name
 }
 
-func (b *FieldsBuilder) GetField(name string) (r *FieldBuilder) {
+func (b *FieldsBuilder) getField(name string) (r *FieldBuilder) {
 	for _, f := range b.fields {
 		if f.name == name {
 			return f
@@ -310,7 +310,7 @@ func (b *FieldsBuilder) Only(names ...string) (r *FieldsBuilder) {
 	r = b.Clone()
 
 	for _, n := range names {
-		f := b.GetField(n)
+		f := b.getField(n)
 		if f == nil {
 			r.appendNewFieldWithDefault(n)
 		} else {
@@ -345,10 +345,10 @@ func (b *FieldsBuilder) String() (r string) {
 }
 
 func (b *FieldsBuilder) ToComponent(info *ModelInfo, obj interface{}, ctx *web.EventContext) h.HTMLComponent {
-	return b.ToComponentWithKeyPath(info, obj, "", ctx)
+	return b.toComponentWithFormValueKey(info, obj, "", ctx)
 }
 
-func (b *FieldsBuilder) ToComponentWithKeyPath(info *ModelInfo, obj interface{}, keyPath string, ctx *web.EventContext) h.HTMLComponent {
+func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interface{}, parentFormValueKey string, ctx *web.EventContext) h.HTMLComponent {
 
 	var comps []h.HTMLComponent
 
@@ -371,8 +371,8 @@ func (b *FieldsBuilder) ToComponentWithKeyPath(info *ModelInfo, obj interface{},
 		}
 
 		contextKeyPath := f.name
-		if keyPath != "" {
-			contextKeyPath = fmt.Sprintf("%s.%s", keyPath, f.name)
+		if parentFormValueKey != "" {
+			contextKeyPath = fmt.Sprintf("%s.%s", parentFormValueKey, f.name)
 		}
 
 		comps = append(comps, f.compFunc(obj, &FieldContext{
@@ -409,7 +409,7 @@ func (b *FieldsBuilder) ToComponentForEach(field *FieldContext, slice interface{
 	var i = 0
 
 	funk.ForEach(slice, func(obj interface{}) {
-		comps := b.ToComponentWithKeyPath(info, obj, fmt.Sprintf("%s[%d]", parentKeyPath, i), ctx)
+		comps := b.toComponentWithFormValueKey(info, obj, fmt.Sprintf("%s[%d]", parentKeyPath, i), ctx)
 		r = append(r, rowFunc(obj, comps, ctx))
 		i++
 	})
