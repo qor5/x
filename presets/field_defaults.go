@@ -196,7 +196,7 @@ func cfTextTd(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTM
 
 func cfCheckbox(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 	return VCheckbox().
-		FieldName(field.Name).
+		FieldName(field.FormKey).
 		Label(field.Label).
 		InputValue(reflectutils.MustGet(obj, field.Name).(bool)).
 		ErrorMessages(field.Errors...)
@@ -205,7 +205,7 @@ func cfCheckbox(obj interface{}, field *FieldContext, ctx *web.EventContext) h.H
 func cfNumber(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 	return VTextField().
 		Type("number").
-		FieldName(field.Name).
+		FieldName(field.FormKey).
 		Label(field.Label).
 		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name))).
 		ErrorMessages(field.Errors...)
@@ -214,7 +214,7 @@ func cfNumber(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTM
 func cfTextField(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 	return VTextField().
 		Type("text").
-		FieldName(field.Name).
+		FieldName(field.FormKey).
 		Label(field.Label).
 		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name))).
 		ErrorMessages(field.Errors...)

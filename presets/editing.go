@@ -257,43 +257,49 @@ func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, e
 	return
 }
 
-func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
-	id := ctx.R.FormValue(ParamID)
-	var newObj = b.mb.NewModel()
-	// don't panic for fields that set in SetterFunc
-	_ = ctx.UnmarshalForm(newObj)
-
-	if id == "" {
-		if b.mb.Info().Verifier().Do(PermCreate).ObjectOn(newObj).WithReq(ctx.R).IsAllowed() != nil {
-			b.UpdateOverlayContent(ctx, &r, newObj, "", perm.PermissionDenied)
+func (b *EditingBuilder) FetchAndUnmarshal(id string, ctx *web.EventContext) (obj interface{}, vErr web.ValidationErrors) {
+	obj = b.mb.NewModel()
+	if len(id) > 0 {
+		var err1 error
+		obj, err1 = b.Fetcher(obj, id, ctx)
+		if err1 != nil {
+			vErr.GlobalError(err1.Error())
+			// b.UpdateOverlayContent(ctx, &r, obj, "", err1)
 			return
 		}
 	}
 
-	var obj = b.mb.NewModel()
+	vErr = b.RunSetterFunc(ctx, obj)
+	return
+}
+
+func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
+	id := ctx.R.FormValue(ParamID)
 	usingB := b
 	if b.mb.creating != nil && id == "" {
 		usingB = b.mb.creating
 	}
 
+	obj, vErr := usingB.FetchAndUnmarshal(id, ctx)
+	if vErr.HaveErrors() {
+		usingB.UpdateOverlayContent(ctx, &r, obj, "", &vErr)
+		return
+	}
+
 	if len(id) > 0 {
-		obj, err1 := usingB.Fetcher(obj, id, ctx)
-		if err1 != nil {
-			b.UpdateOverlayContent(ctx, &r, obj, "", err1)
+		if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
+			b.UpdateOverlayContent(ctx, &r, obj, "", perm.PermissionDenied)
 			return
 		}
-		if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
+	} else {
+		if b.mb.Info().Verifier().Do(PermCreate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
 			b.UpdateOverlayContent(ctx, &r, obj, "", perm.PermissionDenied)
 			return
 		}
 	}
 
-	if err2 := usingB.RunSetterFunc(ctx, &r, obj); err2.HaveErrors() {
-		return
-	}
-
 	if usingB.Validator != nil {
-		if vErr := usingB.Validator(obj, ctx); vErr.HaveErrors() {
+		if vErr = usingB.Validator(obj, ctx); vErr.HaveErrors() {
 			usingB.UpdateOverlayContent(ctx, &r, obj, "", &vErr)
 			return
 		}
@@ -332,17 +338,13 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	return
 }
 
-func (b *EditingBuilder) RunSetterFunc(ctx *web.EventContext, r *web.EventResponse, toObj interface{}) (vErr web.ValidationErrors) {
+func (b *EditingBuilder) RunSetterFunc(ctx *web.EventContext, toObj interface{}) (vErr web.ValidationErrors) {
 	if b.Setter != nil {
 		b.Setter(toObj, ctx)
 	}
 
 	vErr = b.Unmarshal(toObj, b.mb.Info(), ctx)
 
-	if vErr.HaveErrors() {
-		b.UpdateOverlayContent(ctx, r, toObj, "", &vErr)
-		return
-	}
 	return
 }
 
