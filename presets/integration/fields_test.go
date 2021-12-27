@@ -207,13 +207,13 @@ func TestFieldsBuilder(t *testing.T) {
 
 	employeeFbs := NewFieldsBuilder().Model(&Employee{}).Defaults(defaults)
 	employeeFbs.Field("Number").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
-		return h.Input(field.FormValueKey).Type("text").Value(field.StringValue(obj))
+		return h.Input(field.FormKey).Type("text").Value(field.StringValue(obj))
 	})
 
 	employeeFbs.Field("FakeNumber").ComponentFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
-		return h.Input(field.FormValueKey).Type("text").Value(fmt.Sprintf("900%v", reflectutils.MustGet(obj, "Number")))
+		return h.Input(field.FormKey).Type("text").Value(fmt.Sprintf("900%v", reflectutils.MustGet(obj, "Number")))
 	}).SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
-		v := ctx.R.FormValue(field.FormValueKey)
+		v := ctx.R.FormValue(field.FormKey)
 		if v == "" {
 			return
 		}
@@ -225,9 +225,9 @@ func TestFieldsBuilder(t *testing.T) {
 		// [0].Departments[0].Name
 		// [0].Departments[1].Name
 		// [1].Departments[0].Name
-		return h.Input(field.FormValueKey).Type("text").Value(field.StringValue(obj))
+		return h.Input(field.FormKey).Type("text").Value(field.StringValue(obj))
 	}).SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
-		reflectutils.Set(obj, field.Name, ctx.R.FormValue(field.FormValueKey)+"!!!")
+		reflectutils.Set(obj, field.Name, ctx.R.FormValue(field.FormKey)+"!!!")
 		// panic("dept name setter")
 		return
 	})
@@ -257,7 +257,7 @@ func TestFieldsBuilder(t *testing.T) {
 	})
 
 	fbs.Field("PeopleCount").SetterFunc(func(obj interface{}, field *FieldContext, ctx *web.EventContext) (err error) {
-		reflectutils.Set(obj, field.Name, ctx.R.FormValue(field.FormValueKey))
+		reflectutils.Set(obj, field.Name, ctx.R.FormValue(field.FormKey))
 		return
 	})
 

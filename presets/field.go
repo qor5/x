@@ -15,7 +15,7 @@ import (
 
 type FieldContext struct {
 	Name            string
-	FormValueKey    string
+	FormKey         string
 	Label           string
 	Errors          []string
 	ModelInfo       *ModelInfo
@@ -178,12 +178,12 @@ func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, 
 				}
 				sliceFieldName := fmt.Sprintf("%s[%d]", f.name, i)
 				keyPath := sliceFieldName
-				if parent != nil && parent.FormValueKey != "" {
-					keyPath = fmt.Sprintf("%s.%s", parent.FormValueKey, sliceFieldName)
+				if parent != nil && parent.FormKey != "" {
+					keyPath = fmt.Sprintf("%s.%s", parent.FormKey, sliceFieldName)
 				}
 				pf := &FieldContext{
-					ModelInfo:    info,
-					FormValueKey: keyPath,
+					ModelInfo: info,
+					FormKey:   keyPath,
 				}
 
 				childToObj := reflectutils.MustGet(toObj, sliceFieldName)
@@ -224,15 +224,15 @@ func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, 
 		}
 
 		keyPath := f.name
-		if parent != nil && parent.FormValueKey != "" {
-			keyPath = fmt.Sprintf("%s.%s", parent.FormValueKey, f.name)
+		if parent != nil && parent.FormKey != "" {
+			keyPath = fmt.Sprintf("%s.%s", parent.FormKey, f.name)
 		}
 
 		err1 := f.setterFunc(toObj, &FieldContext{
-			ModelInfo:    info,
-			FormValueKey: keyPath,
-			Name:         f.name,
-			Label:        b.getLabel(f.NameLabel),
+			ModelInfo: info,
+			FormKey:   keyPath,
+			Name:      f.name,
+			Label:     b.getLabel(f.NameLabel),
 		}, ctx)
 		if err1 != nil {
 			vErr.FieldError(f.name, err1.Error())
@@ -378,7 +378,7 @@ func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interfa
 		comps = append(comps, f.compFunc(obj, &FieldContext{
 			ModelInfo:       info,
 			Name:            f.name,
-			FormValueKey:    contextKeyPath,
+			FormKey:         contextKeyPath,
 			Label:           label,
 			Errors:          vErr.GetFieldErrors(f.name),
 			ListItemBuilder: f.listItemBuilder,
@@ -400,7 +400,7 @@ func (b *FieldsBuilder) ToComponentForEach(field *FieldContext, slice interface{
 	var parentKeyPath = ""
 	if field != nil {
 		info = field.ModelInfo
-		parentKeyPath = field.FormValueKey
+		parentKeyPath = field.FormKey
 	}
 	if rowFunc == nil {
 		rowFunc = defaultRowFunc
