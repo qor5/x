@@ -22,9 +22,9 @@ type EditingBuilder struct {
 	Saver       SaveFunc
 	Deleter     DeleteFunc
 	Validator   ValidateFunc
-	tabPanels   []TabComponentFunc
+	tabPanels   []ObjectComponentFunc
 	sidePanel   ComponentFunc
-	actionsFunc ComponentFunc
+	actionsFunc ObjectComponentFunc
 	FieldBuilders
 }
 
@@ -87,7 +87,7 @@ func (b *EditingBuilder) SetterFunc(v SetterFunc) (r *EditingBuilder) {
 	return b
 }
 
-func (b *EditingBuilder) AppendTabsPanelFunc(v TabComponentFunc) (r *EditingBuilder) {
+func (b *EditingBuilder) AppendTabsPanelFunc(v ObjectComponentFunc) (r *EditingBuilder) {
 	b.tabPanels = append(b.tabPanels, v)
 	return b
 }
@@ -97,7 +97,7 @@ func (b *EditingBuilder) SidePanelFunc(v ComponentFunc) (r *EditingBuilder) {
 	return b
 }
 
-func (b *EditingBuilder) ActionsFunc(v ComponentFunc) (r *EditingBuilder) {
+func (b *EditingBuilder) ActionsFunc(v ObjectComponentFunc) (r *EditingBuilder) {
 	b.actionsFunc = v
 	return b
 }
@@ -182,7 +182,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	)
 
 	if b.actionsFunc != nil {
-		actionButtons = b.actionsFunc(ctx)
+		actionButtons = b.actionsFunc(obj, ctx)
 	}
 
 	formContent := h.Components(

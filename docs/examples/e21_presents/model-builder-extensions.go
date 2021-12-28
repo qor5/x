@@ -20,7 +20,7 @@ func PresetsModelBuilderExtensions(b *presets.Builder) (
 	mb, db = PresetsHelloWorld(b)
 	b.URIPrefix(PresetsModelBuilderExtensionsPath)
 
-	eb := mb.Editing("Actions", "Name").ActionsFunc(func(ctx *web.EventContext) h.HTMLComponent {
+	eb := mb.Editing("Actions", "Name").ActionsFunc(func(obj interface{}, ctx *web.EventContext) h.HTMLComponent {
 		return h.Components(
 			VSpacer(),
 			VBtn("Action 1"),
