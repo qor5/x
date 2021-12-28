@@ -21,7 +21,8 @@ type EditingBuilder struct {
 	Saver       SaveFunc
 	Deleter     DeleteFunc
 	Validator   ValidateFunc
-	tabPanels   []TabComponentFunc
+	tabPanels   []ObjectComponentFunc
+	hiddenFuncs []ObjectComponentFunc
 	sidePanel   ComponentFunc
 	actionsFunc ComponentFunc
 	FieldsBuilder
@@ -86,13 +87,18 @@ func (b *EditingBuilder) SetterFunc(v SetterFunc) (r *EditingBuilder) {
 	return b
 }
 
-func (b *EditingBuilder) AppendTabsPanelFunc(v TabComponentFunc) (r *EditingBuilder) {
+func (b *EditingBuilder) AppendTabsPanelFunc(v ObjectComponentFunc) (r *EditingBuilder) {
 	b.tabPanels = append(b.tabPanels, v)
 	return b
 }
 
 func (b *EditingBuilder) SidePanelFunc(v ComponentFunc) (r *EditingBuilder) {
 	b.sidePanel = v
+	return b
+}
+
+func (b *EditingBuilder) AppendHiddenFunc(v ObjectComponentFunc) (r *EditingBuilder) {
+	b.hiddenFuncs = append(b.hiddenFuncs, v)
 	return b
 }
 
@@ -184,9 +190,15 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		actionButtons = b.actionsFunc(ctx)
 	}
 
+	var hiddenComps []h.HTMLComponent
+	for _, hf := range b.hiddenFuncs {
+		hiddenComps = append(hiddenComps, hf(obj, ctx))
+	}
+
 	formContent := h.Components(
 		VCardText(
 			notice,
+			h.Components(hiddenComps...),
 			b.ToComponent(b.mb.Info(), obj, ctx),
 		),
 		VCardActions(actionButtons),
@@ -228,7 +240,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		closeBtnVarScript = closeDialogVarScript
 	}
 
-	return h.Components(
+	return web.Scope(
 		VAppBar(
 			VToolbarTitle(title).Class("pl-2"),
 			VSpacer(),
@@ -240,7 +252,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		VSheet(
 			VCard(asideContent).Flat(true),
 		).Class("pa-2"),
-	)
+	).VSlot("{ plaidForm }")
 }
 
 func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, err error) {

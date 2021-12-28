@@ -389,9 +389,9 @@ func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interfa
 	return h.Components(comps...)
 }
 
-type RowFunc func(obj interface{}, content h.HTMLComponent, ctx *web.EventContext) h.HTMLComponent
+type RowFunc func(obj interface{}, formKey string, content h.HTMLComponent, ctx *web.EventContext) h.HTMLComponent
 
-func defaultRowFunc(obj interface{}, content h.HTMLComponent, ctx *web.EventContext) h.HTMLComponent {
+func defaultRowFunc(obj interface{}, formKey string, content h.HTMLComponent, ctx *web.EventContext) h.HTMLComponent {
 	return content
 }
 
@@ -409,8 +409,9 @@ func (b *FieldsBuilder) ToComponentForEach(field *FieldContext, slice interface{
 	var i = 0
 
 	funk.ForEach(slice, func(obj interface{}) {
-		comps := b.toComponentWithFormValueKey(info, obj, fmt.Sprintf("%s[%d]", parentKeyPath, i), ctx)
-		r = append(r, rowFunc(obj, comps, ctx))
+		formKey := fmt.Sprintf("%s[%d]", parentKeyPath, i)
+		comps := b.toComponentWithFormValueKey(info, obj, formKey, ctx)
+		r = append(r, rowFunc(obj, formKey, comps, ctx))
 		i++
 	})
 

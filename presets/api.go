@@ -10,7 +10,7 @@ import (
 )
 
 type ComponentFunc func(ctx *web.EventContext) h.HTMLComponent
-type TabComponentFunc func(obj interface{}, ctx *web.EventContext) h.HTMLComponent
+type ObjectComponentFunc func(obj interface{}, ctx *web.EventContext) h.HTMLComponent
 
 type FieldComponentFunc func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent
 

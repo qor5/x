@@ -21,7 +21,7 @@ require (
 	github.com/rs/xid v1.3.0
 	github.com/russross/blackfriday v1.6.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0
-	github.com/sunfmin/reflectutils v1.0.2
+	github.com/sunfmin/reflectutils v1.0.3
 	github.com/theplant/docgo v0.0.7
 	github.com/theplant/gofixtures v1.1.0
 	github.com/theplant/htmlgo v1.0.3

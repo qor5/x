@@ -505,25 +505,22 @@ func (b *Builder) rightDrawer(r *web.EventResponse, comp h.HTMLComponent, width 
 	}
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 		Name: RightDrawerPortalName,
-		Body: web.Scope(
-			VNavigationDrawer(
-				web.GlobalEvents().Attr("@keyup.esc", "vars.presetsRightDrawer = false"),
-				web.Portal(comp).Name(rightDrawerContentPortalName),
-			).
-				Attr("@input", "plaidForm.dirty && vars.presetsRightDrawer == false && !confirm('You have unsaved changes on this form. If you close it, you will lose all unsaved changes. Are you sure you want to close it?') ? vars.presetsRightDrawer = true: vars.presetsRightDrawer = $event").
-				Class("v-navigation-drawer--temporary").
-				Attr("v-model", "vars.presetsRightDrawer").
-				Right(true).
-				Fixed(true).
-				Attr("width", width).
-				Bottom(false).
-				Attr(":height", `"100%"`).
-				Attr("@keydown.esc", "alert(1)"),
-			// Temporary(true),
-			// HideOverlay(true).
-			// Floating(true).
+		Body: VNavigationDrawer(
+			web.GlobalEvents().Attr("@keyup.esc", "vars.presetsRightDrawer = false"),
+			web.Portal(comp).Name(rightDrawerContentPortalName),
+		).
+			// Attr("@input", "plaidForm.dirty && vars.presetsRightDrawer == false && !confirm('You have unsaved changes on this form. If you close it, you will lose all unsaved changes. Are you sure you want to close it?') ? vars.presetsRightDrawer = true: vars.presetsRightDrawer = $event"). // remove because drawer plaidForm has to be reset when UpdateOverlayContent
+			Class("v-navigation-drawer--temporary").
+			Attr("v-model", "vars.presetsRightDrawer").
+			Right(true).
+			Fixed(true).
+			Attr("width", width).
+			Bottom(false).
+			Attr(":height", `"100%"`),
+		// Temporary(true),
+		// HideOverlay(true).
+		// Floating(true).
 
-		).VSlot("{ plaidForm }"),
 	})
 	r.VarsScript = "setTimeout(function(){ vars.presetsRightDrawer = true }, 100)"
 }
