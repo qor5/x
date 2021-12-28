@@ -189,16 +189,13 @@ func (b *FieldBuilders) ToComponent(mb *ModelBuilder, obj interface{}, verr *web
 			continue
 		}
 
-		if mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
-			continue
-		}
-
 		comps = append(comps, f.compFunc(obj, &FieldContext{
 			ModelInfo: mb.Info(),
 			Name:      f.name,
 			Label:     i18n.PT(ctx.R, ModelsI18nModuleKey, mb.label, b.getLabel(f.NameLabel)),
 			Errors:    verr.GetFieldErrors(f.name),
 			Context:   f.context,
+			Disabled:  mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil,
 		}, ctx))
 	}
 

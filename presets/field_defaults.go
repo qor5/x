@@ -20,6 +20,7 @@ type FieldContext struct {
 	Errors    []string
 	ModelInfo *ModelInfo
 	Context   context.Context
+	Disabled  bool
 }
 
 func (fc *FieldContext) StringValue(obj interface{}) (r string) {
@@ -222,7 +223,8 @@ func cfCheckbox(obj interface{}, field *FieldContext, ctx *web.EventContext) h.H
 		FieldName(field.Name).
 		Label(field.Label).
 		InputValue(reflectutils.MustGet(obj, field.Name).(bool)).
-		ErrorMessages(field.Errors...)
+		ErrorMessages(field.Errors...).
+		Disabled(field.Disabled)
 }
 
 func cfNumber(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
@@ -231,7 +233,8 @@ func cfNumber(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTM
 		FieldName(field.Name).
 		Label(field.Label).
 		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name))).
-		ErrorMessages(field.Errors...)
+		ErrorMessages(field.Errors...).
+		Disabled(field.Disabled)
 }
 
 func cfTextField(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
@@ -240,7 +243,8 @@ func cfTextField(obj interface{}, field *FieldContext, ctx *web.EventContext) h.
 		FieldName(field.Name).
 		Label(field.Label).
 		Value(reflectutils.MustGet(obj, field.Name).(string)).
-		ErrorMessages(field.Errors...)
+		ErrorMessages(field.Errors...).
+		Disabled(field.Disabled)
 }
 
 func (b *FieldDefaults) builtInFieldTypes() {

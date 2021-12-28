@@ -635,15 +635,11 @@ func (b *ListingBuilder) getComponents(
 							DetailingHref(id)).
 					Go())
 			} else {
-				if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() == nil {
-
-					tdbind.SetAttr("@click.self",
-						web.Plaid().
-							EventFunc(actions.Edit).
-							Query(ParamID, id).
-							Go())
-				}
-
+				tdbind.SetAttr("@click.self",
+					web.Plaid().
+						EventFunc(actions.Edit).
+						Query(ParamID, id).
+						Go())
 			}
 			return tdbind
 		}).
