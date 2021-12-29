@@ -24,7 +24,7 @@ type EditingBuilder struct {
 	tabPanels   []ObjectComponentFunc
 	hiddenFuncs []ObjectComponentFunc
 	sidePanel   ComponentFunc
-	actionsFunc ComponentFunc
+	actionsFunc ObjectComponentFunc
 	FieldsBuilder
 }
 
@@ -102,7 +102,7 @@ func (b *EditingBuilder) AppendHiddenFunc(v ObjectComponentFunc) (r *EditingBuil
 	return b
 }
 
-func (b *EditingBuilder) ActionsFunc(v ComponentFunc) (r *EditingBuilder) {
+func (b *EditingBuilder) ActionsFunc(v ObjectComponentFunc) (r *EditingBuilder) {
 	b.actionsFunc = v
 	return b
 }
@@ -187,7 +187,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	)
 
 	if b.actionsFunc != nil {
-		actionButtons = b.actionsFunc(ctx)
+		actionButtons = b.actionsFunc(obj, ctx)
 	}
 
 	var hiddenComps []h.HTMLComponent

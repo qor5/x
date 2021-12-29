@@ -22,6 +22,7 @@ type MediaLibrary struct {
 	Category string
 }
 
+// RN -> Resource Name
 func (m *MediaLibrary) PermissionRN() []string {
 	return []string{"media_libraries", fmt.Sprint(m.ID), m.Category}
 }

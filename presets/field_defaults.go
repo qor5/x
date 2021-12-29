@@ -199,7 +199,8 @@ func cfCheckbox(obj interface{}, field *FieldContext, ctx *web.EventContext) h.H
 		FieldName(field.FormKey).
 		Label(field.Label).
 		InputValue(reflectutils.MustGet(obj, field.Name).(bool)).
-		ErrorMessages(field.Errors...)
+		ErrorMessages(field.Errors...).
+		Disabled(field.Disabled)
 }
 
 func cfNumber(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
@@ -208,7 +209,8 @@ func cfNumber(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTM
 		FieldName(field.FormKey).
 		Label(field.Label).
 		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name))).
-		ErrorMessages(field.Errors...)
+		ErrorMessages(field.Errors...).
+		Disabled(field.Disabled)
 }
 
 func cfTextField(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
@@ -217,7 +219,8 @@ func cfTextField(obj interface{}, field *FieldContext, ctx *web.EventContext) h.
 		FieldName(field.FormKey).
 		Label(field.Label).
 		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name))).
-		ErrorMessages(field.Errors...)
+		ErrorMessages(field.Errors...).
+		Disabled(field.Disabled)
 }
 
 func (b *FieldDefaults) builtInFieldTypes() {

@@ -21,6 +21,7 @@ type FieldContext struct {
 	ModelInfo       *ModelInfo
 	ListItemBuilder *FieldsBuilder
 	Context         context.Context
+	Disabled        bool
 }
 
 func (fc *FieldContext) StringValue(obj interface{}) (r string) {
@@ -383,6 +384,7 @@ func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interfa
 			Errors:          vErr.GetFieldErrors(f.name),
 			ListItemBuilder: f.listItemBuilder,
 			Context:         f.context,
+			Disabled:        info.Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil,
 		}, ctx))
 	}
 

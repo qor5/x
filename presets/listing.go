@@ -238,15 +238,13 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 		return
 	}
 
-	r.PushState = web.Location(url.Values{bulkPanelOpenParamName: []string{}, selectedParamName: []string{}}).MergeQuery(true)
+	r.PushState = web.Location(url.Values{bulkPanelOpenParamName: []string{}}).MergeQuery(true)
 
 	return
 }
 
-func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *web.EventContext) h.HTMLComponent {
-	var toolbar = VToolbar(
-		VSpacer(),
-	).Flat(true)
+func (b *ListingBuilder) bulkActionsButtons(msgr *Messages, ctx *web.EventContext) h.HTMLComponent {
+	var bulkButtons []h.HTMLComponent
 
 	for _, ba := range b.bulkActions {
 		if b.mb.Info().Verifier().SnakeDo("bulk_actions", ba.name).WithReq(ctx.R).IsAllowed() != nil {
@@ -258,7 +256,7 @@ func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *web.EventContex
 			btn = ba.buttonCompFunc(ctx)
 		} else {
 			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
-				Color("primary").
+				Color("secondary").
 				Depressed(true).
 				Dark(true).
 				Class("ml-2").
@@ -268,9 +266,9 @@ func (b *ListingBuilder) bulkActionsToolbar(msgr *Messages, ctx *web.EventContex
 					Go())
 		}
 
-		toolbar.AppendChildren(btn)
+		bulkButtons = append(bulkButtons, btn)
 	}
-	return toolbar
+	return h.Components(bulkButtons...)
 }
 
 func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.HTMLComponent) {
@@ -327,6 +325,8 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 	var toolbar = VToolbar(
 		VSpacer(),
 	).Flat(true)
+
+	toolbar.AppendChildren(b.bulkActionsButtons(msgr, ctx))
 
 	for _, ba := range b.actions {
 		if b.mb.Info().Verifier().SnakeDo("actions", ba.name).WithReq(ctx.R).IsAllowed() != nil {
@@ -611,11 +611,7 @@ func (b *ListingBuilder) getComponents(
 	bulkName := pageURL.Query().Get(bulkPanelOpenParamName)
 	bulk := getAction(b.bulkActions, bulkName)
 	if bulk == nil {
-		if haveCheckboxes && len(selected) > 0 {
-			toolbar = b.bulkActionsToolbar(msgr, ctx)
-		} else {
-			toolbar = b.newAndFilterToolbar(msgr, ctx, fd)
-		}
+		toolbar = b.newAndFilterToolbar(msgr, ctx, fd)
 	} else {
 		bulkPanel = web.Portal(b.bulkPanel(bulk, selected, ctx)).Name(bulkPanelPortalName)
 	}
@@ -635,15 +631,11 @@ func (b *ListingBuilder) getComponents(
 							DetailingHref(id)).
 					Go())
 			} else {
-				if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() == nil {
-
-					tdbind.SetAttr("@click.self",
-						web.Plaid().
-							EventFunc(actions.Edit).
-							Query(ParamID, id).
-							Go())
-				}
-
+				tdbind.SetAttr("@click.self",
+					web.Plaid().
+						EventFunc(actions.Edit).
+						Query(ParamID, id).
+						Go())
 			}
 			return tdbind
 		}).

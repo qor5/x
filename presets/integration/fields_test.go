@@ -89,17 +89,17 @@ func TestFields(t *testing.T) {
 						ctx)
 			},
 			expect: `
-<v-text-field type='number' v-field-name='[plaidForm, "Int1"]' label='整数1' :value='"2"'></v-text-field>
+<v-text-field type='number' v-field-name='[plaidForm, "Int1"]' label='整数1' :value='"2"' :disabled='false'></v-text-field>
 
-<v-text-field type='number' v-field-name='[plaidForm, "Float1"]' label='Float1' :value='"23.1"'></v-text-field>
+<v-text-field type='number' v-field-name='[plaidForm, "Float1"]' label='Float1' :value='"23.1"' :disabled='false'></v-text-field>
 
-<v-text-field type='text' v-field-name='[plaidForm, "String1"]' label='String1' :value='"hello"' :error-messages='["too small"]'></v-text-field>
+<v-text-field type='text' v-field-name='[plaidForm, "String1"]' label='String1' :value='"hello"' :error-messages='["too small"]' :disabled='false'></v-text-field>
 
-<v-checkbox v-field-name='[plaidForm, "Bool1"]' label='Bool1' :input-value='true'></v-checkbox>
+<v-checkbox v-field-name='[plaidForm, "Bool1"]' label='Bool1' :input-value='true' :disabled='false'></v-checkbox>
 
 <div v-field-name='[plaidForm, "Time1"]' class='time-control'>2019-08-29</div>
 
-<v-text-field type='text' v-field-name='[plaidForm, "Company.Name"]' label='公司名' :value='"Company1"'></v-text-field>
+<v-text-field type='text' v-field-name='[plaidForm, "Company.Name"]' label='公司名' :value='"Company1"' :disabled='false'></v-text-field>
 
 <div v-field-name='[plaidForm, "Company.FoundedAt"]' class='time-control'>2019-08-29</div>
 `,
@@ -113,11 +113,11 @@ func TestFields(t *testing.T) {
 					ToComponent(mb.Info(), user, ctx)
 			},
 			expect: `
-<v-text-field type='number' v-field-name='[plaidForm, "Int1"]' label='Int1' :value='"2"'></v-text-field>
+<v-text-field type='number' v-field-name='[plaidForm, "Int1"]' label='Int1' :value='"2"' :disabled='false'></v-text-field>
 
-<v-text-field type='number' v-field-name='[plaidForm, "Float1"]' label='Float1' :value='"23.1"'></v-text-field>
+<v-text-field type='number' v-field-name='[plaidForm, "Float1"]' label='Float1' :value='"23.1"' :disabled='false'></v-text-field>
 
-<v-text-field type='text' v-field-name='[plaidForm, "String1"]' label='String1' :value='"hello"' :error-messages='["too small"]'></v-text-field>
+<v-text-field type='text' v-field-name='[plaidForm, "String1"]' label='String1' :value='"hello"' :error-messages='["too small"]' :disabled='false'></v-text-field>
 
 <div v-field-name='[plaidForm, "Time1"]' class='time-control'>2019-08-29</div>
 `,

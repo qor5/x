@@ -8,7 +8,6 @@ import (
 
 	"github.com/goplaid/web"
 	. "github.com/goplaid/x/vuetify"
-	"github.com/goplaid/x/vuetifyx"
 	"github.com/rs/xid"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
@@ -156,14 +155,19 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 
 		if b.selectable {
 			tds = append(tds, h.Td(
-				vuetifyx.VXCheckbox().
+				VCheckbox().
 					Class("mt-0").
-					FieldName(b.selectionParamName).
-					LoadPageWithArrayOp(true).
 					InputValue(inputValue).
 					TrueValue(id).
 					FalseValue("").
-					HideDetails(true),
+					HideDetails(true).
+					Attr("@change", web.Plaid().
+						PushState(true).
+						MergeQuery(true).
+						Query(b.selectionParamName,
+							web.Var(fmt.Sprintf(`{value: %s, add: $event, remove: !$event}`, h.JSONString(id))),
+						).RunPushState(),
+					),
 			).Class("pr-0"))
 		}
 
@@ -259,13 +263,19 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			}
 
 			heads = append(heads, h.Th("").Children(
-				vuetifyx.VXCheckbox().
+				VCheckbox().
 					Class("mt-0").
 					TrueValue(idsOfPageComma).
 					InputValue(allInputValue).
-					FieldName(b.selectionParamName).
-					LoadPageWithArrayOp(true).
-					HideDetails(true),
+					HideDetails(true).
+					Attr("@change", web.Plaid().
+						PushState(true).
+						MergeQuery(true).
+						Query(b.selectionParamName,
+							web.Var(fmt.Sprintf(`{value: %s, add: $event, remove: !$event}`,
+								h.JSONString(idsOfPage))),
+						).Go(),
+					),
 			).Style("width: 48px;").Class("pr-0"))
 		}
 
