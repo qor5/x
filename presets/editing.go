@@ -269,7 +269,7 @@ func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, e
 	return
 }
 
-func (b *EditingBuilder) FetchAndUnmarshal(id string, ctx *web.EventContext) (obj interface{}, vErr web.ValidationErrors) {
+func (b *EditingBuilder) FetchAndUnmarshal(id string, deletedAsNil bool, ctx *web.EventContext) (obj interface{}, vErr web.ValidationErrors) {
 	obj = b.mb.NewModel()
 	if len(id) > 0 {
 		var err1 error
@@ -281,7 +281,7 @@ func (b *EditingBuilder) FetchAndUnmarshal(id string, ctx *web.EventContext) (ob
 		}
 	}
 
-	vErr = b.RunSetterFunc(ctx, obj)
+	vErr = b.RunSetterFunc(ctx, deletedAsNil, obj)
 	return
 }
 
@@ -292,7 +292,7 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 		usingB = b.mb.creating
 	}
 
-	obj, vErr := usingB.FetchAndUnmarshal(id, ctx)
+	obj, vErr := usingB.FetchAndUnmarshal(id, false, ctx)
 	if vErr.HaveErrors() {
 		usingB.UpdateOverlayContent(ctx, &r, obj, "", &vErr)
 		return
@@ -350,12 +350,12 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 	return
 }
 
-func (b *EditingBuilder) RunSetterFunc(ctx *web.EventContext, toObj interface{}) (vErr web.ValidationErrors) {
+func (b *EditingBuilder) RunSetterFunc(ctx *web.EventContext, deletedAsNil bool, toObj interface{}) (vErr web.ValidationErrors) {
 	if b.Setter != nil {
 		b.Setter(toObj, ctx)
 	}
 
-	vErr = b.Unmarshal(toObj, b.mb.Info(), ctx)
+	vErr = b.Unmarshal(toObj, b.mb.Info(), deletedAsNil, ctx)
 
 	return
 }

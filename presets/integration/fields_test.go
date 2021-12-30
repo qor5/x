@@ -3,6 +3,7 @@ package integration_test
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -269,6 +270,7 @@ func TestFieldsBuilder(t *testing.T) {
 				Employees: []*Employee{
 					{Number: 111},
 					{Number: 222},
+					{Number: 333},
 				},
 			},
 			{
@@ -281,12 +283,20 @@ func TestFieldsBuilder(t *testing.T) {
 		},
 	}
 
-	ctx := &web.EventContext{}
+	ctx := &web.EventContext{
+		R: httptest.NewRequest("POST", "/", nil),
+	}
+
+	ContextDeletedIndexesBuilder(ctx).
+		Append("Departments[0].Employees", 1).
+		Append("Departments[0].Employees", 5)
 
 	result := fbs.ToComponent(nil, formObj, ctx)
 	actual1 := h.MustString(result, context.TODO())
 
 	expected1 := `
+<input v-field-name='[plaidForm, "__Deleted.Departments[0].Employees"]' value='1,5'>
+
 <input name='Name' type='text' value='Name 1'>
 
 <div class='departments'>
@@ -297,9 +307,9 @@ func TestFieldsBuilder(t *testing.T) {
 
 <input name='Departments[0].Employees[0].FakeNumber' type='text' value='900111'>
 
-<input name='Departments[0].Employees[1].Number' type='text' value='222'>
+<input name='Departments[0].Employees[2].Number' type='text' value='333'>
 
-<input name='Departments[0].Employees[1].FakeNumber' type='text' value='900222'>
+<input name='Departments[0].Employees[2].FakeNumber' type='text' value='900333'>
 
 <button>Add Employee</button>
 </div>
@@ -321,54 +331,178 @@ func TestFieldsBuilder(t *testing.T) {
 <button>Add Department</button>
 </div>
 
-<v-text-field type='number' v-field-name='[plaidForm, "PeopleCount"]' label='PeopleCount' :value='"0"'></v-text-field>
+<v-text-field type='number' v-field-name='[plaidForm, "PeopleCount"]' label='PeopleCount' :value='"0"' :disabled='false'></v-text-field>
 `
 	diff := testingutils.PrettyJsonDiff(expected1, actual1)
 	if diff != "" {
 		t.Error(diff)
 	}
 
-	var actual2 = &Org{}
-	ctx.R = multipartestutils.NewMultipartBuilder().
-		AddField("Name", "Org 1").
-		AddField("PeopleCount", "420").
-		AddField("Departments[1].Name", "Department 1").
-		AddField("Departments[1].Employees[0].Number", "888").
-		AddField("Departments[1].Employees[2].Number", "999").
-		AddField("Departments[1].Employees[1].FakeNumber", "666").
-		AddField("Departments[1].DBStatus", "Verified").
-		BuildEventFuncRequest()
-	_ = ctx.R.ParseMultipartForm(128 << 20)
-
-	_ = fbs.Unmarshal(actual2, nil, ctx)
-
-	expected2 := &Org{
-		Name:        "Org 1",
-		PeopleCount: 420,
-		Departments: []*Department{
-			{
-				Name: "!!!",
+	var unmarshalCases = []struct {
+		name         string
+		initial      *Org
+		expected     *Org
+		req          *http.Request
+		deletedAsNil bool
+	}{
+		{
+			name: "case with deleted",
+			initial: &Org{
+				Departments: []*Department{
+					{
+						Name: "Department A",
+						Employees: []*Employee{
+							{
+								Number: 0,
+							},
+							{
+								Number: 1,
+							},
+						},
+					},
+					{
+						Name: "Department B",
+						Employees: []*Employee{
+							{Number: 0},
+							{Number: 1},
+							{Number: 2},
+						},
+					},
+					{
+						Name: "Department C",
+					},
+				},
 			},
-			{
-				Name: "Department 1!!!",
-				Employees: []*Employee{
+			req: multipartestutils.NewMultipartBuilder().
+				AddField("Name", "Org 1").
+				AddField("PeopleCount", "420").
+				AddField("Departments[1].Name", "Department 1").
+				AddField("Departments[1].Employees[0].Number", "888").
+				AddField("Departments[1].Employees[2].Number", "999").
+				AddField("Departments[1].Employees[1].FakeNumber", "666").
+				AddField("Departments[1].DBStatus", "Verified").
+				AddField("__Deleted.Departments[0].Employees", "1,5").
+				AddField("__Deleted.Departments[1].Employees", "0").
+				BuildEventFuncRequest(),
+			deletedAsNil: true,
+			expected: &Org{
+				Name:        "Org 1",
+				PeopleCount: 420,
+				Departments: []*Department{
 					{
-						Number: 888,
+						Name: "!!!",
+						Employees: []*Employee{
+							{
+								Number: 0,
+							},
+							nil,
+						},
 					},
 					{
-						Number: 900666,
+						Name: "Department 1!!!",
+						Employees: []*Employee{
+							nil,
+							{
+								Number: 900666,
+							},
+							{
+								Number: 999,
+							},
+						},
 					},
 					{
-						Number: 999,
+						Name: "Department C",
+					},
+				},
+			},
+		},
+
+		{
+			name: "deletedAsNil false",
+			initial: &Org{
+				Departments: []*Department{
+					{
+						Name: "Department A",
+						Employees: []*Employee{
+							{
+								Number: 0,
+							},
+							{
+								Number: 1,
+							},
+						},
+					},
+					{
+						Name: "Department B",
+						Employees: []*Employee{
+							{Number: 0},
+							{Number: 1},
+							{Number: 2},
+						},
+					},
+					{
+						Name: "Department C",
+					},
+				},
+			},
+			req: multipartestutils.NewMultipartBuilder().
+				AddField("Name", "Org 1").
+				AddField("PeopleCount", "420").
+				AddField("Departments[1].Name", "Department 1").
+				AddField("Departments[1].Employees[0].Number", "888").
+				AddField("Departments[1].Employees[2].Number", "999").
+				AddField("Departments[1].Employees[1].FakeNumber", "666").
+				AddField("Departments[1].DBStatus", "Verified").
+				AddField("__Deleted.Departments[0].Employees", "1,5").
+				AddField("__Deleted.Departments[1].Employees", "0").
+				BuildEventFuncRequest(),
+			deletedAsNil: false,
+			expected: &Org{
+				Name:        "Org 1",
+				PeopleCount: 420,
+				Departments: []*Department{
+					{
+						Name: "!!!",
+						Employees: []*Employee{
+							{
+								Number: 0,
+							},
+						},
+					},
+					{
+						Name: "Department 1!!!",
+						Employees: []*Employee{
+							{
+								Number: 900666,
+							},
+							{
+								Number: 999,
+							},
+						},
+					},
+					{
+						Name: "Department C",
 					},
 				},
 			},
 		},
 	}
 
-	diff = testingutils.PrettyJsonDiff(expected2, actual2)
-	if diff != "" {
-		t.Error(diff)
+	for _, c := range unmarshalCases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx2 := &web.EventContext{R: c.req}
+			_ = ctx2.R.ParseMultipartForm(128 << 20)
+			actual2 := c.initial
+			vErr := fbs.Unmarshal(actual2, nil, c.deletedAsNil, ctx2)
+			if vErr.HaveErrors() {
+				t.Error(vErr.Error())
+			}
+			diff = testingutils.PrettyJsonDiff(c.expected, actual2)
+			if diff != "" {
+				t.Error(diff)
+			}
+		})
+
 	}
 
 }
