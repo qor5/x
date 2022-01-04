@@ -539,6 +539,9 @@ func (b *ListingBuilder) getComponents(
 	if perPage == 0 {
 		perPage = 50
 	}
+	if perPage > 100 {
+		perPage = 100
+	}
 
 	totalVisible := b.totalVisible
 	if totalVisible == 0 {
