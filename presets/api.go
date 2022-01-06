@@ -40,7 +40,9 @@ type FilterDataFunc func(ctx *web.EventContext) vuetifyx.FilterData
 
 type FilterTab struct {
 	Label string
-	Query url.Values
+	// render AdvancedLabel if it is not nil
+	AdvancedLabel h.HTMLComponent
+	Query         url.Values
 }
 
 type FilterTabsFunc func(ctx *web.EventContext) []*FilterTab
