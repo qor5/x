@@ -10,6 +10,7 @@ import { Core, SelectedItems } from './components/Helpers';
 import { Filter } from './components/Filter';
 // @ts-ignore
 import DatetimePicker from './components/DateTimePicker.vue';
+import draggable from 'vuedraggable'
 
 declare var window: any;
 
@@ -20,4 +21,5 @@ declare var window: any;
 		Vue.component('vx-select', WithField(VSelect, undefined, [Core, SelectedItems]));
 		Vue.component('vx-filter', Filter);
 		Vue.component('vx-datetimepicker', DatetimePicker);
+		Vue.component('vx-draggable', draggable);
 	});
