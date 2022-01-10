@@ -1,10 +1,10 @@
 import Vue, {
+	Component,
+	ComponentOptions,
 	CreateElement,
 	VNode,
 	VNodeData,
-	Component,
 	VueConstructor,
-	ComponentOptions,
 } from 'vue';
 import {Core, slotTemplates} from './Helpers';
 
@@ -27,10 +27,8 @@ export const WithField = (
 			const self = this;
 			const {
 				fieldName,
-				loadPageWithArrayOp,
 			} = self.$props;
 
-			const trueValue = self.$attrs['true-value'];
 			const ch = self.$listeners["change"];
 
 			let chs: Function[] = [];
@@ -50,17 +48,6 @@ export const WithField = (
 					...this.$listeners,
 					...{
 						change: [(val: any) => {
-							if (loadPageWithArrayOp && trueValue) {
-								const opValue: any = { value: trueValue.split(',') };
-								if (val === true || val === trueValue) {
-									opValue.add = true;
-								} else {
-									opValue.remove = true;
-								}
-								const loc = { query: { [fieldName]: opValue }, mergeQuery: true };
-								(self as any).$plaid().location(loc).pushState(true).go();
-								return;
-							}
 							(self as any).$plaid().fieldValue(fieldName, val);
 						}, ...chs],
 					},

@@ -1,6 +1,6 @@
 package e00_basics
 
-//@snippet_begin(HelloWorldReloadSample)
+// @snippet_begin(HelloWorldReloadSample)
 import (
 	"time"
 
@@ -13,7 +13,7 @@ func HelloWorldReload(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	pr.Body = Div(
 		H1("Hello World"),
 		Text(time.Now().Format(time.RFC3339Nano)),
-		Button("Reload Page").Attr("@click", web.Plaid().EventFunc("reload").Go()),
+		Button("Reload Page").Attr("@click", web.GET().EventFunc("reload").Go()),
 	)
 	return
 }
@@ -23,6 +23,6 @@ func update(ctx *web.EventContext) (er web.EventResponse, err error) {
 	return
 }
 
-//@snippet_end
+// @snippet_end
 
 const HelloWorldReloadPath = "/samples/hello_world_reload"

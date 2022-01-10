@@ -2,6 +2,7 @@ package e00_basics
 
 // @snippet_begin(PartialReloadSample)
 import (
+	"fmt"
 	"time"
 
 	"github.com/goplaid/web"
@@ -13,6 +14,7 @@ func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	ctx.Hub.RegisterEventFunc("related", related)
 	ctx.Hub.RegisterEventFunc("reload3", reload3)
 	ctx.Hub.RegisterEventFunc("autoReload", autoReload)
+	ctx.Hub.RegisterEventFunc("loadData", loadData)
 	ctx.Injector.HeadHTML(`
 <style>
 .rp {
@@ -32,6 +34,17 @@ func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 			web.Portal().Loader(web.Plaid().EventFunc("autoReload")).AutoReloadInterval("locals.interval"),
 			Button("stop").Attr("@click", "locals.interval = 0"),
 		).Init(`{interval: 2000}`).VSlot("{ locals }"),
+
+		H1("Load Data Only"),
+
+		web.Scope(
+			Ul(
+				Li(
+					Text("{{item}}"),
+				).Attr("v-for", "item in locals.items"),
+			),
+			Button("Fetch Data").Attr("@click", web.GET().EventFunc("loadData").ThenScript(`locals.items = r.data`).Go()),
+		).VSlot("{ locals }").Init("{ items: []}"),
 
 		H1("Partial Load and Reload"),
 		Div(
@@ -79,6 +92,15 @@ func autoReload(ctx *web.EventContext) (er web.EventResponse, err error) {
 	if reloadCount > 5 {
 		er.VarsScript = `vars.interval = 0;`
 	}
+	return
+}
+
+func loadData(ctx *web.EventContext) (er web.EventResponse, err error) {
+	var r []string
+	for i := 0; i < 10; i++ {
+		r = append(r, fmt.Sprintf("%d-%d", i, time.Now().Nanosecond()))
+	}
+	er.Data = r
 	return
 }
 
