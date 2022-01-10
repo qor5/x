@@ -1,7 +1,7 @@
-import { VAutocomplete } from 'vuetify/lib';
+import {VAutocomplete} from 'vuetify/lib';
 
-import Vue, { CreateElement, VNode, VNodeData, Component, PropType } from 'vue';
-import { Core, SelectedItems, slotTemplates } from './Helpers';
+import Vue, {CreateElement, VNode, VNodeData, Component, PropType} from 'vue';
+import {Core, SelectedItems, slotTemplates} from './Helpers';
 
 export default Vue.extend({
 	mixins: [Core, SelectedItems],
@@ -40,15 +40,11 @@ export default Vue.extend({
 			// if (this._items && this._items.length > 0) { return; }
 			this.isLoading = true;
 
-			(this as any).$plaid().
-				eventFuncID(this.itemsEventFuncId).
-				event(val).
-				go().
-				then((r: any) => {
-					let v = [].concat((this as any).selectedItems || [], r.data || []);
-					// console.log("after concat", v);
-					this._items = v
-				})
+			(this as any).$plaid().eventFuncID(this.itemsEventFuncId).query("keyword", val).go().then((r: any) => {
+				let v = [].concat((this as any).selectedItems || [], r.data || []);
+				// console.log("after concat", v);
+				this._items = v
+			})
 				// .catch((err: any) => {
 				// 	console.log('debounceFetchEvent', err);
 				// })
@@ -100,7 +96,7 @@ export default Vue.extend({
 			on: {
 				...{
 					change: (vals: any) => {
-						(self as any).$plaid().fieldValue(fieldName, vals);
+						self.$emit("change", vals);
 					},
 					focus: (e: any) => {
 						self.searchKeyword = '';

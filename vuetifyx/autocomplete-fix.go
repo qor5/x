@@ -34,7 +34,7 @@ func (b *VXAutocompleteBuilder) Items(v interface{}) (r *VXAutocompleteBuilder) 
 }
 
 func (b *VXAutocompleteBuilder) FieldName(v string) (r *VXAutocompleteBuilder) {
-	b.tag.Attr("field-name", v)
+	b.tag.Attr(web.VFieldName(v)...)
 	return b
 }
 
