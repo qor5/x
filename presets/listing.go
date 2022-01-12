@@ -271,6 +271,8 @@ func (b *ListingBuilder) bulkActionsButtons(msgr *Messages, ctx *web.EventContex
 	return h.Components(bulkButtons...)
 }
 
+const activeFilterTabQueryKey = "active_filter_tab"
+
 func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.HTMLComponent) {
 	if b.filterTabsFunc == nil {
 		return
@@ -281,16 +283,23 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 	value := -1
 	rawQuery := ctx.R.URL.RawQuery
 	for i, td := range tabsData {
-		if strings.Index(rawQuery, td.Query.Encode()) >= 0 {
+		if strings.Index(rawQuery, fmt.Sprintf("%s=%s", activeFilterTabQueryKey, td.ID)) >= 0 {
 			value = i
 		}
 		tabContent := h.Text(td.Label)
 		if td.AdvancedLabel != nil {
 			tabContent = td.AdvancedLabel
 		}
+
+		totalQuery := url.Values{}
+		totalQuery.Set(activeFilterTabQueryKey, td.ID)
+		for k, v := range td.Query {
+			totalQuery[k]= v
+		}
+
 		tabs.AppendChildren(
 			VTab(tabContent).
-				Attr("@click", web.Plaid().Queries(td.Query).
+				Attr("@click", web.Plaid().Queries(totalQuery).
 					PushState(true).Go()),
 		)
 	}

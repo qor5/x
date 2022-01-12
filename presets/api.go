@@ -39,6 +39,7 @@ type DeleteFunc func(obj interface{}, id string, ctx *web.EventContext) (err err
 type FilterDataFunc func(ctx *web.EventContext) vuetifyx.FilterData
 
 type FilterTab struct {
+	ID string
 	Label string
 	// render AdvancedLabel if it is not nil
 	AdvancedLabel h.HTMLComponent
