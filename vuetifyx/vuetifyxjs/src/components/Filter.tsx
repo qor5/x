@@ -589,7 +589,6 @@ function initInternalValue(items: FilterItem[]): FilterItem[] {
 }
 
 export const Filter = Vue.extend({
-	inject: ['core'],
 	components: {
 		vselect: VSelect,
 		vtextfield: VTextField,
@@ -669,7 +668,14 @@ export const Filter = Vue.extend({
 
 		doReplaceWindowLocation(event: any) {
 			const qs = event.encodedFilterData;
-			(this as any).$plaid().location(qs).pushState(true).go();
+
+			// collect all query keys in the filter, remove them from location search first. then add it by selecting status
+			// but keep original search conditions
+			let keysInFilterData = (this.internalValue).map((op: FilterItem, i: number) => {
+				return op.key;
+			});
+
+			return (this as any).$plaid().stringLocation(qs).mergeQueryWithoutParams(keysInFilterData).url(window.location.href).pushState(true).go()
 		},
 
 		clear(e: any) {
