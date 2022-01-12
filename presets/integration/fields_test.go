@@ -262,39 +262,42 @@ func TestFieldsBuilder(t *testing.T) {
 		return
 	})
 
-	formObj := &Org{
-		Name: "Name 1",
-		Departments: []*Department{
-			{
-				Name: "11111",
-				Employees: []*Employee{
-					{Number: 111},
-					{Number: 222},
-					{Number: 333},
+	var toComponentCases = []struct {
+		name         string
+		obj          *Org
+		setup        func(ctx *web.EventContext)
+		expectedHTML string
+	}{
+
+		{
+			name: "Only deleted",
+			obj: &Org{
+				Name: "Name 1",
+				Departments: []*Department{
+					{
+						Name: "11111",
+						Employees: []*Employee{
+							{Number: 111},
+							{Number: 222},
+							{Number: 333},
+						},
+					},
+					{
+						Name: "22222",
+						Employees: []*Employee{
+							{Number: 333},
+							{Number: 444},
+						},
+					},
 				},
 			},
-			{
-				Name: "22222",
-				Employees: []*Employee{
-					{Number: 333},
-					{Number: 444},
-				},
+			setup: func(ctx *web.EventContext) {
+				ContextModifiedIndexesBuilder(ctx).
+					AppendDeleted("Departments[0].Employees", 1).
+					AppendDeleted("Departments[0].Employees", 5)
 			},
-		},
-	}
 
-	ctx := &web.EventContext{
-		R: httptest.NewRequest("POST", "/", nil),
-	}
-
-	ContextDeletedIndexesBuilder(ctx).
-		Append("Departments[0].Employees", 1).
-		Append("Departments[0].Employees", 5)
-
-	result := fbs.ToComponent(nil, formObj, ctx)
-	actual1 := h.MustString(result, context.TODO())
-
-	expected1 := `
+			expectedHTML: `
 <input v-field-name='[plaidForm, "__Deleted.Departments[0].Employees"]' value='1,5'>
 
 <input name='Name' type='text' value='Name 1'>
@@ -332,18 +335,114 @@ func TestFieldsBuilder(t *testing.T) {
 </div>
 
 <v-text-field type='number' v-field-name='[plaidForm, "PeopleCount"]' label='PeopleCount' :value='"0"' :disabled='false'></v-text-field>
-`
-	diff := testingutils.PrettyJsonDiff(expected1, actual1)
-	if diff != "" {
-		t.Error(diff)
+`,
+		},
+
+		{
+			name: "Deleted with Sorted",
+			obj: &Org{
+				Name: "Name 1",
+				Departments: []*Department{
+					{
+						Name: "11111",
+						Employees: []*Employee{
+							{Number: 111},
+							{Number: 222},
+							{Number: 333},
+							{Number: 444},
+							{Number: 555},
+						},
+					},
+					{
+						Name: "22222",
+						Employees: []*Employee{
+							{Number: 333},
+							{Number: 444},
+						},
+					},
+				},
+			},
+			setup: func(ctx *web.EventContext) {
+				ContextModifiedIndexesBuilder(ctx).
+					AppendDeleted("Departments[0].Employees", 1).
+					SetSorted("Departments[0].Employees", []string{"2", "0", "3", "6"})
+			},
+
+			expectedHTML: `
+<input v-field-name='[plaidForm, "__Deleted.Departments[0].Employees"]' value='1'>
+
+<input v-field-name='[plaidForm, "__Sorted.Departments[0].Employees"]' value='2,0,3,6'>
+
+<input name='Name' type='text' value='Name 1'>
+
+<div class='departments'>
+<input name='Departments[0].Name' type='text' value='11111'>
+
+<div class='employees'>
+<input name='Departments[0].Employees[2].Number' type='text' value='333'>
+
+<input name='Departments[0].Employees[2].FakeNumber' type='text' value='900333'>
+
+<input name='Departments[0].Employees[0].Number' type='text' value='111'>
+
+<input name='Departments[0].Employees[0].FakeNumber' type='text' value='900111'>
+
+<input name='Departments[0].Employees[3].Number' type='text' value='444'>
+
+<input name='Departments[0].Employees[3].FakeNumber' type='text' value='900444'>
+
+<input name='Departments[0].Employees[4].Number' type='text' value='555'>
+
+<input name='Departments[0].Employees[4].FakeNumber' type='text' value='900555'>
+
+<button>Add Employee</button>
+</div>
+
+<input name='Departments[1].Name' type='text' value='22222'>
+
+<div class='employees'>
+<input name='Departments[1].Employees[0].Number' type='text' value='333'>
+
+<input name='Departments[1].Employees[0].FakeNumber' type='text' value='900333'>
+
+<input name='Departments[1].Employees[1].Number' type='text' value='444'>
+
+<input name='Departments[1].Employees[1].FakeNumber' type='text' value='900444'>
+
+<button>Add Employee</button>
+</div>
+
+<button>Add Department</button>
+</div>
+
+<v-text-field type='number' v-field-name='[plaidForm, "PeopleCount"]' label='PeopleCount' :value='"0"' :disabled='false'></v-text-field>
+`,
+		},
+	}
+
+	for _, c := range toComponentCases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx := &web.EventContext{
+				R: httptest.NewRequest("POST", "/", nil),
+			}
+			c.setup(ctx)
+			result := fbs.ToComponent(nil, c.obj, ctx)
+			actual1 := h.MustString(result, context.TODO())
+
+			diff := testingutils.PrettyJsonDiff(c.expectedHTML, actual1)
+			if diff != "" {
+				t.Error(diff)
+			}
+		})
+
 	}
 
 	var unmarshalCases = []struct {
-		name         string
-		initial      *Org
-		expected     *Org
-		req          *http.Request
-		deletedAsNil bool
+		name                 string
+		initial              *Org
+		expected             *Org
+		req                  *http.Request
+		removeDeletedAndSort bool
 	}{
 		{
 			name: "case with deleted",
@@ -384,7 +483,7 @@ func TestFieldsBuilder(t *testing.T) {
 				AddField("__Deleted.Departments[0].Employees", "1,5").
 				AddField("__Deleted.Departments[1].Employees", "0").
 				BuildEventFuncRequest(),
-			deletedAsNil: true,
+			removeDeletedAndSort: false,
 			expected: &Org{
 				Name:        "Org 1",
 				PeopleCount: 420,
@@ -418,7 +517,7 @@ func TestFieldsBuilder(t *testing.T) {
 		},
 
 		{
-			name: "deletedAsNil false",
+			name: "removeDeletedAndSort true",
 			initial: &Org{
 				Departments: []*Department{
 					{
@@ -456,7 +555,7 @@ func TestFieldsBuilder(t *testing.T) {
 				AddField("__Deleted.Departments[0].Employees", "1,5").
 				AddField("__Deleted.Departments[1].Employees", "0").
 				BuildEventFuncRequest(),
-			deletedAsNil: false,
+			removeDeletedAndSort: true,
 			expected: &Org{
 				Name:        "Org 1",
 				PeopleCount: 420,
@@ -486,6 +585,177 @@ func TestFieldsBuilder(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "removeDeletedAndSort true and sorted",
+			initial: &Org{
+				Departments: []*Department{
+					{
+						Name: "Department A",
+						Employees: []*Employee{
+							{
+								Number: 0,
+							},
+							{
+								Number: 1,
+							},
+							{
+								Number: 2,
+							},
+						},
+					},
+					{
+						Name: "Department B",
+						Employees: []*Employee{
+							{Number: 0},
+							{Number: 1},
+							{Number: 2},
+						},
+					},
+					{
+						Name: "Department C",
+					},
+				},
+			},
+			req: multipartestutils.NewMultipartBuilder().
+				AddField("Name", "Org 1").
+				AddField("PeopleCount", "420").
+				AddField("Departments[1].Name", "Department 1").
+				AddField("Departments[1].Employees[0].Number", "000").
+				AddField("Departments[1].Employees[2].Number", "222").
+				AddField("Departments[1].Employees[3].Number", "333").
+				AddField("Departments[1].Employees[4].Number", "444").
+				AddField("Departments[1].Employees[1].FakeNumber", "666"). // this will set Number[1] to 900666
+				AddField("Departments[1].DBStatus", "Verified").
+				AddField("__Deleted.Departments[0].Employees", "1,5").
+				AddField("__Sorted.Departments[1].Employees", "3,4,0,2").
+				AddField("__Deleted.Departments[1].Employees", "0").
+				BuildEventFuncRequest(),
+			removeDeletedAndSort: true,
+			expected: &Org{
+				Name:        "Org 1",
+				PeopleCount: 420,
+				Departments: []*Department{
+					{
+						Name: "!!!",
+						Employees: []*Employee{
+							{
+								Number: 0,
+							},
+							{
+								Number: 2,
+							},
+						},
+					},
+					{
+						Name: "Department 1!!!",
+						Employees: []*Employee{
+							{
+								Number: 333,
+							},
+							{
+								Number: 444,
+							},
+							{
+								Number: 222,
+							},
+							{
+								Number: 900666,
+							},
+						},
+					},
+					{
+						Name: "Department C",
+					},
+				},
+			},
+		},
+
+		{
+			name: "removeDeletedAndSort false and sorted",
+			initial: &Org{
+				Departments: []*Department{
+					{
+						Name: "Department A",
+						Employees: []*Employee{
+							{
+								Number: 0,
+							},
+							{
+								Number: 1,
+							},
+							{
+								Number: 2,
+							},
+						},
+					},
+					{
+						Name: "Department B",
+						Employees: []*Employee{
+							{Number: 0},
+							{Number: 1},
+							{Number: 2},
+						},
+					},
+					{
+						Name: "Department C",
+					},
+				},
+			},
+			req: multipartestutils.NewMultipartBuilder().
+				AddField("Name", "Org 1").
+				AddField("PeopleCount", "420").
+				AddField("Departments[1].Name", "Department 1").
+				AddField("Departments[1].Employees[0].Number", "000").
+				AddField("Departments[1].Employees[2].Number", "222").
+				AddField("Departments[1].Employees[3].Number", "333").
+				AddField("Departments[1].Employees[4].Number", "444").
+				AddField("Departments[1].Employees[1].FakeNumber", "666"). // this will set Number[1] to 900666
+				AddField("Departments[1].DBStatus", "Verified").
+				AddField("__Deleted.Departments[0].Employees", "1,5").
+				AddField("__Sorted.Departments[1].Employees", "3,4,0,2").
+				AddField("__Deleted.Departments[1].Employees", "0").
+				BuildEventFuncRequest(),
+			removeDeletedAndSort: false,
+			expected: &Org{
+				Name:        "Org 1",
+				PeopleCount: 420,
+				Departments: []*Department{
+					{
+						Name: "!!!",
+						Employees: []*Employee{
+							{
+								Number: 0,
+							},
+							nil,
+							{
+								Number: 2,
+							},
+						},
+					},
+					{
+						Name: "Department 1!!!",
+						Employees: []*Employee{
+							nil,
+							{
+								Number: 900666,
+							},
+							{
+								Number: 222,
+							},
+							{
+								Number: 333,
+							},
+							{
+								Number: 444,
+							},
+						},
+					},
+					{
+						Name: "Department C",
+					},
+				},
+			},
+		},
 	}
 
 	for _, c := range unmarshalCases {
@@ -493,11 +763,11 @@ func TestFieldsBuilder(t *testing.T) {
 			ctx2 := &web.EventContext{R: c.req}
 			_ = ctx2.R.ParseMultipartForm(128 << 20)
 			actual2 := c.initial
-			vErr := fbs.Unmarshal(actual2, nil, c.deletedAsNil, ctx2)
+			vErr := fbs.Unmarshal(actual2, nil, c.removeDeletedAndSort, ctx2)
 			if vErr.HaveErrors() {
 				t.Error(vErr.Error())
 			}
-			diff = testingutils.PrettyJsonDiff(c.expected, actual2)
+			diff := testingutils.PrettyJsonDiff(c.expected, actual2)
 			if diff != "" {
 				t.Error(diff)
 			}

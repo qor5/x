@@ -144,7 +144,7 @@ func (b *FieldsBuilder) Defaults(v *FieldDefaults) (r *FieldsBuilder) {
 	return b
 }
 
-func (b *FieldsBuilder) Unmarshal(toObj interface{}, info *ModelInfo, deletedAsNil bool, ctx *web.EventContext) (vErr web.ValidationErrors) {
+func (b *FieldsBuilder) Unmarshal(toObj interface{}, info *ModelInfo, removeDeletedAndSort bool, ctx *web.EventContext) (vErr web.ValidationErrors) {
 	t := reflect.TypeOf(toObj)
 	if t.Kind() != reflect.Ptr {
 		panic("toObj must be pointer")
@@ -155,14 +155,14 @@ func (b *FieldsBuilder) Unmarshal(toObj interface{}, info *ModelInfo, deletedAsN
 	_ = ctx.UnmarshalForm(fromObj)
 	// testingutils.PrintlnJson("Unmarshal fromObj", fromObj)
 
-	deletedIndexes := ContextDeletedIndexesBuilder(ctx).FromHidden(ctx.R)
+	modifiedIndexes := ContextModifiedIndexesBuilder(ctx).FromHidden(ctx.R)
 
 	return b.setObjectFields(fromObj, toObj, &FieldContext{
 		ModelInfo: info,
-	}, deletedAsNil, deletedIndexes, ctx)
+	}, removeDeletedAndSort, modifiedIndexes, ctx)
 }
 
-func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, parent *FieldContext, deletedAsNil bool, deletedIndexes *DeletedIndexesBuilder, ctx *web.EventContext) (vErr web.ValidationErrors) {
+func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, parent *FieldContext, removeDeletedAndSort bool, modifiedIndexes *ModifiedIndexesBuilder, ctx *web.EventContext) (vErr web.ValidationErrors) {
 
 	for _, f := range b.fields {
 		info := parent.ModelInfo
@@ -178,9 +178,9 @@ func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, 
 				formKey = fmt.Sprintf("%s.%s", parent.FormKey, f.name)
 			}
 
-			b.setWithChildFromObjs(fromObj, formKey, f, info, deletedIndexes, toObj, deletedAsNil, ctx)
+			b.setWithChildFromObjs(fromObj, formKey, f, info, modifiedIndexes, toObj, removeDeletedAndSort, ctx)
 
-			b.setToObjNilOrDelete(toObj, formKey, f, deletedIndexes, deletedAsNil)
+			b.setToObjNilOrDelete(toObj, formKey, f, modifiedIndexes, removeDeletedAndSort)
 
 			continue
 		}
@@ -213,17 +213,17 @@ func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, 
 	return
 }
 
-func (b *FieldsBuilder) setToObjNilOrDelete(toObj interface{}, formKey string, f *FieldBuilder, deletedIndexes *DeletedIndexesBuilder, deletedAsNil bool) {
+func (b *FieldsBuilder) setToObjNilOrDelete(toObj interface{}, formKey string, f *FieldBuilder, modifiedIndexes *ModifiedIndexesBuilder, removeDeletedAndSort bool) {
 	childToObjs := reflectutils.MustGet(toObj, f.name)
 	if childToObjs == nil {
 		return
 	}
 	j := 0
-	if deletedAsNil {
+	if !removeDeletedAndSort {
 		funk.ForEach(childToObjs, func(childToObj interface{}) {
 			defer func() { j++ }()
 			sliceFieldName := fmt.Sprintf("%s[%d]", f.name, j)
-			if deletedIndexes.Contains(formKey, j) {
+			if modifiedIndexes.DeletedContains(formKey, j) {
 				err := reflectutils.Set(toObj, sliceFieldName, nil)
 				if err != nil {
 					panic(err)
@@ -233,14 +233,21 @@ func (b *FieldsBuilder) setToObjNilOrDelete(toObj interface{}, formKey string, f
 		return
 	}
 
-	deletedIndex := deletedIndexes.ReversedIndexes(formKey)
-	for _, i := range deletedIndex {
-		sliceFieldName := fmt.Sprintf("%s[%d]", f.name, i)
-		err := reflectutils.Delete(toObj, sliceFieldName)
-		if err != nil {
-			panic(err)
+	t := reflectutils.GetType(toObj, f.name)
+	newSlice := reflect.MakeSlice(t, 0, 0)
+	modifiedIndexes.SortedForEach(childToObjs, formKey, func(obj interface{}, i int) {
+		// remove deleted
+		if modifiedIndexes.DeletedContains(formKey, i) {
+			return
 		}
+		newSlice = reflect.Append(newSlice, reflect.ValueOf(obj))
+	})
+
+	err := reflectutils.Set(toObj, f.name, newSlice.Interface())
+	if err != nil {
+		panic(err)
 	}
+
 	return
 }
 
@@ -249,9 +256,9 @@ func (b *FieldsBuilder) setWithChildFromObjs(
 	formKey string,
 	f *FieldBuilder,
 	info *ModelInfo,
-	deletedIndexes *DeletedIndexesBuilder,
+	modifiedIndexes *ModifiedIndexesBuilder,
 	toObj interface{},
-	deletedAsNil bool,
+	removeDeletedAndSort bool,
 	ctx *web.EventContext) {
 
 	childFromObjs := reflectutils.MustGet(fromObj, f.name)
@@ -266,7 +273,7 @@ func (b *FieldsBuilder) setWithChildFromObjs(
 			return
 		}
 		// if is deleted, do nothing, later, it will be set to nil
-		if deletedIndexes.Contains(formKey, i) {
+		if modifiedIndexes.DeletedContains(formKey, i) {
 			return
 		}
 
@@ -297,7 +304,7 @@ func (b *FieldsBuilder) setWithChildFromObjs(
 		// fmt.Printf("childFromObj %#+v\n", childFromObj)
 		// fmt.Printf("childToObj %#+v\n", childToObj)
 		// fmt.Printf("fieldContext %#+v\n", pf)
-		f.listItemBuilder.setObjectFields(childFromObj, childToObj, pf, deletedAsNil, deletedIndexes, ctx)
+		f.listItemBuilder.setObjectFields(childFromObj, childToObj, pf, removeDeletedAndSort, modifiedIndexes, ctx)
 	})
 
 }
@@ -406,15 +413,15 @@ func (b *FieldsBuilder) String() (r string) {
 }
 
 func (b *FieldsBuilder) ToComponent(info *ModelInfo, obj interface{}, ctx *web.EventContext) h.HTMLComponent {
-	deletedIndexes := ContextDeletedIndexesBuilder(ctx)
-	return b.toComponentWithFormValueKey(info, obj, "", deletedIndexes, ctx)
+	modifiedIndexes := ContextModifiedIndexesBuilder(ctx)
+	return b.toComponentWithFormValueKey(info, obj, "", modifiedIndexes, ctx)
 }
 
-func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interface{}, parentFormValueKey string, deletedIndexes *DeletedIndexesBuilder, ctx *web.EventContext) h.HTMLComponent {
+func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interface{}, parentFormValueKey string, modifiedIndexes *ModifiedIndexesBuilder, ctx *web.EventContext) h.HTMLComponent {
 
 	var comps []h.HTMLComponent
 	if parentFormValueKey == "" {
-		comps = append(comps, deletedIndexes.ToFormHidden())
+		comps = append(comps, modifiedIndexes.ToFormHidden())
 	}
 
 	vErr, _ := ctx.Flash.(*web.ValidationErrors)
@@ -474,24 +481,24 @@ func (b *FieldsBuilder) ToComponentForEach(field *FieldContext, slice interface{
 		rowFunc = defaultRowFunc
 	}
 	var r []h.HTMLComponent
-	var i = 0
-	deletedIndexes := ContextDeletedIndexesBuilder(ctx)
+	modifiedIndexes := ContextModifiedIndexesBuilder(ctx)
 
-	funk.ForEach(slice, func(obj interface{}) {
-		defer func() { i++ }()
-		if deletedIndexes.Contains(parentKeyPath, i) {
+	modifiedIndexes.SortedForEach(slice, parentKeyPath, func(obj interface{}, i int) {
+		if modifiedIndexes.DeletedContains(parentKeyPath, i) {
 			return
 		}
+
 		formKey := fmt.Sprintf("%s[%d]", parentKeyPath, i)
-		comps := b.toComponentWithFormValueKey(info, obj, formKey, deletedIndexes, ctx)
+		comps := b.toComponentWithFormValueKey(info, obj, formKey, modifiedIndexes, ctx)
 		r = append(r, rowFunc(obj, formKey, comps, ctx))
 	})
 
 	return h.Components(r...)
 }
 
-type DeletedIndexesBuilder struct {
-	values map[string][]string
+type ModifiedIndexesBuilder struct {
+	deletedValues map[string][]string
+	sortedValues  map[string][]string
 }
 
 type deletedIndexBuilderKeyType int
@@ -499,34 +506,43 @@ type deletedIndexBuilderKeyType int
 const theDeleteIndexBuilderKey deletedIndexBuilderKeyType = iota
 
 const deletedHiddenNamePrefix = "__Deleted"
+const sortedHiddenNamePrefix = "__Sorted"
 
-func ContextDeletedIndexesBuilder(ctx *web.EventContext) (r *DeletedIndexesBuilder) {
-	r, ok := ctx.R.Context().Value(theDeleteIndexBuilderKey).(*DeletedIndexesBuilder)
+func ContextModifiedIndexesBuilder(ctx *web.EventContext) (r *ModifiedIndexesBuilder) {
+	r, ok := ctx.R.Context().Value(theDeleteIndexBuilderKey).(*ModifiedIndexesBuilder)
 	if !ok {
-		r = &DeletedIndexesBuilder{}
+		r = &ModifiedIndexesBuilder{}
 		ctx.R = ctx.R.WithContext(context.WithValue(ctx.R.Context(), theDeleteIndexBuilderKey, r))
 	}
 	return r
 }
 
-func (b *DeletedIndexesBuilder) Append(sliceFormKey string, index int) (r *DeletedIndexesBuilder) {
-	if b.values == nil {
-		b.values = make(map[string][]string)
+func (b *ModifiedIndexesBuilder) AppendDeleted(sliceFormKey string, index int) (r *ModifiedIndexesBuilder) {
+	if b.deletedValues == nil {
+		b.deletedValues = make(map[string][]string)
 	}
-	b.values[sliceFormKey] = append(b.values[sliceFormKey], fmt.Sprint(index))
+	b.deletedValues[sliceFormKey] = append(b.deletedValues[sliceFormKey], fmt.Sprint(index))
 	return b
 }
 
-func (b *DeletedIndexesBuilder) Contains(sliceFormKey string, index int) (r bool) {
+func (b *ModifiedIndexesBuilder) SetSorted(sliceFormKey string, indexes []string) (r *ModifiedIndexesBuilder) {
+	if b.sortedValues == nil {
+		b.sortedValues = make(map[string][]string)
+	}
+	b.sortedValues[sliceFormKey] = indexes
+	return b
+}
 
-	if b.values == nil {
+func (b *ModifiedIndexesBuilder) DeletedContains(sliceFormKey string, index int) (r bool) {
+
+	if b.deletedValues == nil {
 		return false
 	}
-	if b.values[sliceFormKey] == nil {
+	if b.deletedValues[sliceFormKey] == nil {
 		return false
 	}
 	sIndex := fmt.Sprint(index)
-	for _, v := range b.values[sliceFormKey] {
+	for _, v := range b.deletedValues[sliceFormKey] {
 		if v == sIndex {
 			return true
 		}
@@ -534,27 +550,67 @@ func (b *DeletedIndexesBuilder) Contains(sliceFormKey string, index int) (r bool
 	return false
 }
 
+func (b *ModifiedIndexesBuilder) SortedForEach(slice interface{}, sliceFormKey string, f func(obj interface{}, i int)) {
+	sortedIndexes, ok := b.sortedValues[sliceFormKey]
+	if !ok {
+		i := 0
+		funk.ForEach(slice, func(obj interface{}) {
+			defer func() { i++ }()
+			f(obj, i)
+		})
+		return
+	}
+
+	sliceLen := reflect.ValueOf(slice).Len()
+	for j1 := 0; j1 < sliceLen; j1++ {
+		if funk.Contains(sortedIndexes, fmt.Sprint(j1)) {
+			continue
+		}
+		sortedIndexes = append(sortedIndexes, fmt.Sprint(j1))
+	}
+
+	for _, j := range sortedIndexes {
+		obj, err := reflectutils.Get(slice, fmt.Sprintf("[%s]", j))
+		if obj == nil || err != nil {
+			continue
+		}
+		j1, _ := strconv.Atoi(j)
+		f(obj, j1)
+	}
+
+}
+
 func deleteHiddenSliceFormKey(sliceFormKey string) string {
 	return deletedHiddenNamePrefix + "." + sliceFormKey
 }
+func sortedHiddenSliceFormKey(sliceFormKey string) string {
+	return sortedHiddenNamePrefix + "." + sliceFormKey
+}
 
-func (b *DeletedIndexesBuilder) FromHidden(req *http.Request) (r *DeletedIndexesBuilder) {
-	if b.values == nil {
-		b.values = make(map[string][]string)
+func (b *ModifiedIndexesBuilder) FromHidden(req *http.Request) (r *ModifiedIndexesBuilder) {
+	if b.deletedValues == nil {
+		b.deletedValues = make(map[string][]string)
+	}
+	if b.sortedValues == nil {
+		b.sortedValues = make(map[string][]string)
 	}
 	for k, vs := range req.Form {
 		if strings.HasPrefix(k, deletedHiddenNamePrefix) {
-			b.values[k[len(deletedHiddenNamePrefix)+1:]] = strings.Split(vs[0], ",")
+			b.deletedValues[k[len(deletedHiddenNamePrefix)+1:]] = strings.Split(vs[0], ",")
+		}
+
+		if strings.HasPrefix(k, sortedHiddenNamePrefix) {
+			b.sortedValues[k[len(sortedHiddenNamePrefix)+1:]] = strings.Split(vs[0], ",")
 		}
 	}
 	return b
 }
 
-func (b *DeletedIndexesBuilder) ReversedIndexes(sliceFormKey string) (r []int) {
-	if b.values == nil {
+func (b *ModifiedIndexesBuilder) ReversedmodifiedIndexes(sliceFormKey string) (r []int) {
+	if b.deletedValues == nil {
 		return
 	}
-	for _, v := range b.values[sliceFormKey] {
+	for _, v := range b.deletedValues[sliceFormKey] {
 		i, err := strconv.Atoi(v)
 		if err != nil {
 			panic(err)
@@ -565,11 +621,18 @@ func (b *DeletedIndexesBuilder) ReversedIndexes(sliceFormKey string) (r []int) {
 	return
 }
 
-func (b *DeletedIndexesBuilder) ToFormHidden() h.HTMLComponent {
+func (b *ModifiedIndexesBuilder) ToFormHidden() h.HTMLComponent {
 	var hidden []h.HTMLComponent
-	for sliceFormKey, values := range b.values {
+	for sliceFormKey, values := range b.deletedValues {
 		hidden = append(hidden, h.Input("").
 			Attr(web.VFieldName(deleteHiddenSliceFormKey(sliceFormKey))...).
+			Value(strings.Join(values, ",")))
+
+	}
+
+	for sliceFormKey, values := range b.sortedValues {
+		hidden = append(hidden, h.Input("").
+			Attr(web.VFieldName(sortedHiddenSliceFormKey(sliceFormKey))...).
 			Value(strings.Join(values, ",")))
 	}
 	return h.Components(hidden...)
