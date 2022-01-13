@@ -271,7 +271,7 @@ func (b *ListingBuilder) bulkActionsButtons(msgr *Messages, ctx *web.EventContex
 	return h.Components(bulkButtons...)
 }
 
-const activeFilterTabQueryKey = "active_filter_tab"
+const ActiveFilterTabQueryKey = "active_filter_tab"
 
 func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.HTMLComponent) {
 	if b.filterTabsFunc == nil {
@@ -282,8 +282,10 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 	tabsData := b.filterTabsFunc(ctx)
 	value := -1
 	rawQuery := ctx.R.URL.RawQuery
+
 	for i, td := range tabsData {
-		if strings.Index(rawQuery, fmt.Sprintf("%s=%s", activeFilterTabQueryKey, td.ID)) >= 0 {
+		// Find selected tab by active_filter_tab=xx in the url query
+		if strings.Index(rawQuery, fmt.Sprintf("%s=%s", ActiveFilterTabQueryKey, td.ID)) >= 0 {
 			value = i
 		}
 		tabContent := h.Text(td.Label)
@@ -292,7 +294,7 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 		}
 
 		totalQuery := url.Values{}
-		totalQuery.Set(activeFilterTabQueryKey, td.ID)
+		totalQuery.Set(ActiveFilterTabQueryKey, td.ID)
 		for k, v := range td.Query {
 			totalQuery[k]= v
 		}
@@ -615,7 +617,9 @@ func (b *ListingBuilder) getComponents(
 	var objs interface{}
 	var totalCount int
 	var err error
+
 	objs, totalCount, err = b.searcher(b.mb.NewModelSlice(), searchParams, ctx)
+
 	if err != nil {
 		panic(err)
 	}
