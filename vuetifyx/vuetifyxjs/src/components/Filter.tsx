@@ -1,22 +1,22 @@
-import { encodeFilterData, filterData } from './FilterData';
-import Vue, { VNode, CreateElement } from 'vue';
+import {encodeFilterData, filterData} from './FilterData';
+import Vue, {CreateElement, VNode} from 'vue';
 import {
+	VBtn,
+	VCheckbox,
+	VChip,
+	VExpansionPanel,
+	VExpansionPanelContent,
+	VExpansionPanelHeader,
+	VExpansionPanels,
+	VIcon,
+	VMenu,
 	VRadio,
 	VRadioGroup,
 	VSelect,
+	VSpacer,
 	VTextField,
-	VMenu,
-	VIcon,
-	VBtn,
-	VExpansionPanels,
-	VExpansionPanel,
-	VExpansionPanelHeader,
-	VExpansionPanelContent,
 	VToolbar,
 	VToolbarTitle,
-	VSpacer,
-	VCheckbox,
-	VChip,
 } from 'vuetify/lib';
 
 import TextDatePicker from './TextDatePicker';
@@ -467,7 +467,7 @@ export const SelectItem = Vue.extend({
 
 	data() {
 		return {
-			valueIs: this.$props.value.valueIs || this.$props.value.options[0].value,
+			valueIs: this.$props.value.valueIs || (this.$props.value.options && this.$props.value.options.length > 0 && this.$props.value.options[0].value),
 		};
 	},
 
