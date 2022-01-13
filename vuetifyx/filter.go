@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/goplaid/web"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -25,18 +26,23 @@ func VXFilter(value FilterData) (r *VXFilterBuilder) {
 		tag:   h.Tag("vx-filter"),
 	}
 
-	r.Value(value).ReplaceWindowLocation(true)
+	//	$plaid().stringLocation(qs).mergeQueryWithoutParams(keysInFilterData).url(window.location.href).pushState(true).go()
+	r.Value(value).Attr("@change", web.GET().
+		StringQuery(web.Var("$event.encodedFilterData")).
+		ClearMergeQuery(web.Var("$event.filterKeys")).
+		PushState(true).
+		Go())
 
 	return
 }
 
-func (b *VXFilterBuilder) Value(v FilterData) (r *VXFilterBuilder) {
-	b.tag.Attr(":value", v)
+func (b *VXFilterBuilder) Attr(vs ...interface{}) (r *VXFilterBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 
-func (b *VXFilterBuilder) ReplaceWindowLocation(v bool) (r *VXFilterBuilder) {
-	b.tag.Attr(":replace-window-location", fmt.Sprint(v))
+func (b *VXFilterBuilder) Value(v FilterData) (r *VXFilterBuilder) {
+	b.tag.Attr(":value", v)
 	return b
 }
 
