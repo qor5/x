@@ -298,7 +298,7 @@ func TestFieldsBuilder(t *testing.T) {
 			},
 
 			expectedHTML: `
-<input v-field-name='[plaidForm, "__Deleted.Departments[0].Employees"]' value='1,5'>
+<input type='hidden' v-field-name='[plaidForm, "__Deleted.Departments[0].Employees"]' value='1,5'>
 
 <input name='Name' type='text' value='Name 1'>
 
@@ -369,9 +369,9 @@ func TestFieldsBuilder(t *testing.T) {
 			},
 
 			expectedHTML: `
-<input v-field-name='[plaidForm, "__Deleted.Departments[0].Employees"]' value='1'>
+<input type='hidden' v-field-name='[plaidForm, "__Deleted.Departments[0].Employees"]' value='1'>
 
-<input v-field-name='[plaidForm, "__Sorted.Departments[0].Employees"]' value='2,0,3,6'>
+<input type='hidden' v-field-name='[plaidForm, "__Sorted.Departments[0].Employees"]' value='2,0,3,6'>
 
 <input name='Name' type='text' value='Name 1'>
 
