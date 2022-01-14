@@ -3,6 +3,7 @@ package vuetifyx
 import (
 	"context"
 
+	"github.com/goplaid/web"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -33,7 +34,7 @@ func (b *VXDateTimePickerBuilder) Value(v string) (r *VXDateTimePickerBuilder) {
 }
 
 func (b *VXDateTimePickerBuilder) FieldName(v string) (r *VXDateTimePickerBuilder) {
-	b.tag.Attr("v-field-name", h.JSONString(v))
+	b.tag.Attr(web.VFieldName(v)...)
 	return b
 }
 
