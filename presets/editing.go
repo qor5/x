@@ -174,16 +174,21 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		}
 	}
 
+	updateBtn := VBtn(buttonLabel).
+		Color("primary").
+		Attr("@click", web.Plaid().
+			EventFunc(actions.Update).
+			Queries(ctx.Queries()).
+			URL(b.mb.Info().ListingHref()).
+			Go())
+	if disableUpdateBtn {
+		updateBtn = updateBtn.Disabled(disableUpdateBtn)
+	} else {
+		updateBtn = updateBtn.Attr(":disabled", "isFetching")
+	}
 	var actionButtons h.HTMLComponent = h.Components(
 		VSpacer(),
-		VBtn(buttonLabel).
-			Color("primary").
-			Disabled(disableUpdateBtn).
-			Attr("@click", web.Plaid().
-				EventFunc(actions.Update).
-				Queries(ctx.Queries()).
-				URL(b.mb.Info().ListingHref()).
-				Go()),
+		updateBtn,
 	)
 
 	if b.actionsFunc != nil {
