@@ -184,7 +184,8 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	if disableUpdateBtn {
 		updateBtn = updateBtn.Disabled(disableUpdateBtn)
 	} else {
-		updateBtn = updateBtn.Attr(":disabled", "isFetching")
+		updateBtn = updateBtn.Attr(":disabled", "isFetching").
+			Attr(":loading", "isFetching")
 	}
 	var actionButtons h.HTMLComponent = h.Components(
 		VSpacer(),
