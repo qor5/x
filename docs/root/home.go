@@ -73,6 +73,7 @@ If you wondering why ~H1("Hello World")~ and how this worked, Please go ahead an
 				basics.ManipulatePageURLInEventFunc,
 				basics.FormHandling,
 				basics.SummaryOfEventResponse,
+				basics.WebScope,
 			).Title("Basics"),
 
 			ContentGroup(
