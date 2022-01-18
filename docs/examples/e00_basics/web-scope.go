@@ -9,7 +9,7 @@ import (
 //@snippet_begin(WebScopeUseLocalsSample1)
 func UseLocals(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	pr.Body = VCard(
-		VBtn("Test Can not change other scope").Attr("@click", `locals.btnLabel = "YES"`),
+		VBtn("Test Can Not Change Other Scope").Attr("@click", `locals.btnLabel = "YES"`),
 		web.Scope(
 			VCard(
 				VBtn("").
