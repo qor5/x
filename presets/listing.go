@@ -279,6 +279,11 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 
 	tabs := VTabs().Class("mb-3").Grow(true).Value(2)
 	tabsData := b.filterTabsFunc(ctx)
+	for i, tab := range tabsData {
+		if tab.ID == "" {
+			tab.ID = fmt.Sprintf("tab%d", i)
+		}
+	}
 	value := -1
 	rawQuery := ctx.R.URL.RawQuery
 
