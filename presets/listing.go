@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -296,7 +295,7 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 		totalQuery := url.Values{}
 		totalQuery.Set(ActiveFilterTabQueryKey, td.ID)
 		for k, v := range td.Query {
-			totalQuery[k]= v
+			totalQuery[k] = v
 		}
 
 		tabs.AppendChildren(
@@ -426,105 +425,6 @@ func setLocalPerPage(
 		Name:  "_perPage",
 		Value: strings.Join(newVals, "$"),
 	})
-}
-
-func vTablePagination(
-	msgr *Messages,
-	total int64,
-	currPage int64,
-	perPage int64,
-	customPerPages []int64,
-) h.HTMLComponent {
-	var sItems []string
-	{
-		perPagesM := map[int64]struct{}{
-			10:  {},
-			15:  {},
-			20:  {},
-			50:  {},
-			100: {},
-		}
-		if perPage > 0 {
-			perPagesM[perPage] = struct{}{}
-		}
-		for _, v := range customPerPages {
-			if v <= 0 {
-				continue
-			}
-			perPagesM[v] = struct{}{}
-		}
-		perPages := make([]int, 0, len(perPagesM))
-		for k, _ := range perPagesM {
-			perPages = append(perPages, int(k))
-		}
-		sort.Ints(perPages)
-		for _, v := range perPages {
-			sItems = append(sItems, fmt.Sprint(v))
-		}
-	}
-
-	currPageStart := (currPage-1)*perPage + 1
-	currPageEnd := currPage * perPage
-	if currPageEnd > total {
-		currPageEnd = total
-	}
-
-	canNext := false
-	canPrev := false
-	if currPage*perPage < total {
-		canNext = true
-	}
-	if currPage > 1 {
-		canPrev = true
-	}
-	var nextIconStyle string
-	var prevIconStyle string
-	if canNext {
-		nextIconStyle = "cursor: pointer;"
-	}
-	if canPrev {
-		prevIconStyle = "cursor: pointer;"
-	}
-
-	rowsPerPageText := "Rows per page: "
-	if msgr.PaginationRowsPerPage != "" {
-		rowsPerPageText = msgr.PaginationRowsPerPage
-	}
-	return VRow().Justify("end").Align("center").Class("mt-3 mr-3").
-		Children(
-			h.Div(
-				h.Text(rowsPerPageText),
-			),
-			h.Div(
-				VSelect().Items(sItems).Value(fmt.Sprint(perPage)).
-					Attr("@input", web.Plaid().
-						PushState(true).
-						Query("per_page", web.Var("[$event]")).
-						MergeQuery(true).
-						Go()),
-			).Style("width: 60px;").Class("ml-6"),
-			h.Div(
-				h.Text(fmt.Sprintf("%d-%d of %d", currPageStart, currPageEnd, total)),
-			).Class("ml-6"),
-			h.Div(
-				h.Span("").Style(prevIconStyle).Children(
-					VIcon("navigate_before").Size(32).Disabled(!canPrev).
-						Attr("@click", web.Plaid().
-							PushState(true).
-							Query("page", currPage-1).
-							MergeQuery(true).
-							Go()),
-				),
-				h.Span("").Style(nextIconStyle).Children(
-					VIcon("navigate_next").Size(32).Disabled(!canNext).
-						Attr("@click", web.Plaid().
-							PushState(true).
-							Query("page", currPage+1).
-							MergeQuery(true).
-							Go()),
-				).Class("ml-3"),
-			).Class("ml-6"),
-		)
 }
 
 func (b *ListingBuilder) getComponents(
@@ -671,13 +571,12 @@ func (b *ListingBuilder) getComponents(
 			Orderable(ok)
 	}
 
-	pagination = vTablePagination(
-		msgr,
-		int64(totalCount),
-		searchParams.Page,
-		searchParams.PerPage,
-		[]int64{b.perPage},
-	)
+	pagination = vuetifyx.VXTablePagination().
+		Total(int64(totalCount)).
+		CurrPage(searchParams.Page).
+		PerPage(searchParams.PerPage).
+		CustomPerPages([]int64{b.perPage}).
+		PerPageText(msgr.PaginationRowsPerPage)
 
 	return
 }
