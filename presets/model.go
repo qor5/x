@@ -32,6 +32,7 @@ type ModelBuilder struct {
 	writeFields      *FieldsBuilder
 	hasDetailing     bool
 	rightDrawerWidth string
+	link             string
 	web.EventsHub
 }
 
@@ -55,6 +56,11 @@ func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
 
 func (b *ModelBuilder) RightDrawerWidth(v string) *ModelBuilder {
 	b.rightDrawerWidth = v
+	return b
+}
+
+func (b *ModelBuilder) Link(v string) *ModelBuilder {
+	b.link = v
 	return b
 }
 

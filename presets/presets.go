@@ -346,6 +346,9 @@ func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (
 	}
 
 	href := m.Info().ListingHref()
+	if m.link != "" {
+		href = m.link
+	}
 	item := VListItem(
 		VListItemAction(
 			VIcon(menuIcon),
@@ -355,7 +358,12 @@ func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (
 				h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, m.label)),
 			),
 		),
-	).Attr("@click", web.Plaid().PushStateURL(href).Go())
+	)
+	if strings.HasPrefix(href, "/") {
+		item.Attr("@click", web.Plaid().PushStateURL(href).Go())
+	} else {
+		item.Href(href)
+	}
 	if b.isMenuItemActive(ctx, m) {
 		item = item.Class("v-list-item--active")
 	}
@@ -364,7 +372,17 @@ func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (
 
 func (b *Builder) isMenuItemActive(ctx *web.EventContext, m *ModelBuilder) bool {
 	href := m.Info().ListingHref()
-	if strings.HasPrefix(ctx.R.URL.Path, href) {
+	if m.link != "" {
+		href = m.link
+	}
+	path := strings.TrimSuffix(ctx.R.URL.Path, "/")
+	if path == href {
+		return true
+	}
+	if href == b.prefix {
+		return false
+	}
+	if strings.HasPrefix(path, href) {
 		return true
 	}
 
