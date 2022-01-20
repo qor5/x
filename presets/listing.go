@@ -102,6 +102,7 @@ const bulkPanelOpenParamName = "bulkOpen"
 const bulkPanelPortalName = "bulkPanel"
 const deleteConfirmPortalName = "deleteConfirm"
 const dataTablePortalName = "dataTable"
+const paginationPortalName = "pagination"
 
 func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
 	if b.mb.Info().Verifier().Do(PermList).WithReq(ctx.R).IsAllowed() != nil {
@@ -128,7 +129,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			).Class("pa-0"),
 		),
 
-		pagination,
+		web.Portal(pagination).Name(paginationPortalName),
 	).Fluid(true)
 
 	return
@@ -593,9 +594,15 @@ func (b *ListingBuilder) ReloadList(
 	r *web.EventResponse,
 	pageURL *url.URL,
 ) {
-	_, _, dataTable, _ := b.getComponents(ctx, pageURL)
-	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-		Name: dataTablePortalName,
-		Body: dataTable,
-	})
+	_, _, dataTable, pagination := b.getComponents(ctx, pageURL)
+	r.UpdatePortals = append(r.UpdatePortals,
+		&web.PortalUpdate{
+			Name: dataTablePortalName,
+			Body: dataTable,
+		},
+		&web.PortalUpdate{
+			Name: paginationPortalName,
+			Body: pagination,
+		},
+	)
 }
