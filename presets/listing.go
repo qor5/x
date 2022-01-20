@@ -98,7 +98,6 @@ func (b *ListingBuilder) GetPageFunc() web.PageFunc {
 	return b.defaultPageFunc
 }
 
-const selectedParamName = "selected"
 const bulkPanelOpenParamName = "bulkOpen"
 const bulkPanelPortalName = "bulkPanel"
 const deleteConfirmPortalName = "deleteConfirm"
@@ -142,7 +141,7 @@ func (b *ListingBuilder) cellComponentFunc(f *FieldBuilder) s.CellComponentFunc 
 }
 
 func getSelectedIds(ctx *web.EventContext) (selected []string) {
-	selectedValue := ctx.R.URL.Query().Get(selectedParamName)
+	selectedValue := ctx.R.URL.Query().Get(ParamSelectedIds)
 	if len(selectedValue) > 0 {
 		selected = strings.Split(selectedValue, ",")
 	}
@@ -173,7 +172,7 @@ func (b *ListingBuilder) bulkPanel(bulk *ActionBuilder, selectedIds []string, ct
 				Dark(true).
 				Attr("@click", web.Plaid().EventFunc(actions.DoBulkAction).
 					Query(ParamBulkActionName, bulk.name).
-					Query(ParamSelectedIds, strings.Join(selectedIds, ",")).
+					MergeQuery(true).
 					Go(),
 				),
 		),
@@ -569,7 +568,7 @@ func (b *ListingBuilder) getComponents(
 		}).
 		RowMenuItemFuncs(b.RowMenu().listingItemFuncs(ctx)...).
 		Selectable(haveCheckboxes).
-		SelectionParamName(selectedParamName)
+		SelectionParamName(ParamSelectedIds)
 
 	for _, f := range b.fields {
 		_, ok := orderableFieldMap[f.name]
