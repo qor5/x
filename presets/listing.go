@@ -227,7 +227,10 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 		return
 	}
 
-	selectedIds := strings.Split(ctx.R.FormValue(ParamSelectedIds), ",")
+	var selectedIds []string
+	if v := ctx.R.FormValue(ParamSelectedIds); v != "" {
+		selectedIds = strings.Split(v, ",")
+	}
 	err1 := bulk.updateFunc(selectedIds, ctx)
 	if err1 != nil || ctx.Flash != nil {
 		r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
