@@ -291,7 +291,12 @@ func (b *EditingBuilder) FetchAndUnmarshal(id string, removeDeletedAndSort bool,
 	return
 }
 
-func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
+func (b *EditingBuilder) doUpdate(
+	ctx *web.EventContext,
+	r *web.EventResponse,
+	// will not close drawer/dialog
+	silent bool,
+) (err error) {
 	id := ctx.R.FormValue(ParamID)
 	usingB := b
 	if b.mb.creating != nil && id == "" {
@@ -300,37 +305,37 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 
 	obj, vErr := usingB.FetchAndUnmarshal(id, true, ctx)
 	if vErr.HaveErrors() {
-		usingB.UpdateOverlayContent(ctx, &r, obj, "", &vErr)
-		return
+		usingB.UpdateOverlayContent(ctx, r, obj, "", &vErr)
+		return &vErr
 	}
 
 	if len(id) > 0 {
 		if b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
-			b.UpdateOverlayContent(ctx, &r, obj, "", perm.PermissionDenied)
-			return
+			b.UpdateOverlayContent(ctx, r, obj, "", perm.PermissionDenied)
+			return perm.PermissionDenied
 		}
 	} else {
 		if b.mb.Info().Verifier().Do(PermCreate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
-			b.UpdateOverlayContent(ctx, &r, obj, "", perm.PermissionDenied)
-			return
+			b.UpdateOverlayContent(ctx, r, obj, "", perm.PermissionDenied)
+			return perm.PermissionDenied
 		}
 	}
 
 	if usingB.Validator != nil {
 		if vErr = usingB.Validator(obj, ctx); vErr.HaveErrors() {
-			usingB.UpdateOverlayContent(ctx, &r, obj, "", &vErr)
-			return
+			usingB.UpdateOverlayContent(ctx, r, obj, "", &vErr)
+			return &vErr
 		}
 	}
 
 	err1 := usingB.Saver(obj, id, ctx)
 	if err1 != nil {
-		usingB.UpdateOverlayContent(ctx, &r, obj, "", err1)
-		return
+		usingB.UpdateOverlayContent(ctx, r, obj, "", err1)
+		return err1
 	}
 
 	msgr := MustGetMessages(ctx.R)
-	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
+	ShowMessage(r, msgr.SuccessfullyUpdated, "")
 
 	overlayType := ctx.R.FormValue(ParamOverlay)
 	afterUpdateScript := ctx.R.FormValue(ParamOverlayAfterUpdateScript)
@@ -347,13 +352,27 @@ func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventRespon
 		return
 	}
 
-	script := closeRightDrawerVarScript
-	if overlayType == actions.Dialog {
-		script = closeDialogVarScript
-	}
 	r.PushState = web.Location(nil)
-	r.VarsScript = r.VarsScript + ";" + script
+	if !silent {
+		script := closeRightDrawerVarScript
+		if overlayType == actions.Dialog {
+			script = closeDialogVarScript
+		}
+		r.VarsScript = r.VarsScript + ";" + script
+	}
 	return
+}
+
+func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
+	b.doUpdate(ctx, &r, false)
+	return r, nil
+}
+
+func (b *EditingBuilder) SaveOverlayContent(
+	ctx *web.EventContext,
+	r *web.EventResponse,
+) (err error) {
+	return b.doUpdate(ctx, r, true)
 }
 
 func (b *EditingBuilder) RunSetterFunc(ctx *web.EventContext, removeDeletedAndSort bool, toObj interface{}) (vErr web.ValidationErrors) {
