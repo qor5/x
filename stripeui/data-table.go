@@ -38,7 +38,7 @@ type DataTableBuilder struct {
 func DataTable(data interface{}) (r *DataTableBuilder) {
 	r = &DataTableBuilder{
 		data:               data,
-		selectionParamName: "selected",
+		selectionParamName: "selected_ids",
 	}
 	return
 }
