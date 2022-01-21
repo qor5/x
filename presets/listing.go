@@ -130,7 +130,8 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 		),
 
 		web.Portal(pagination).Name(paginationPortalName),
-	).Fluid(true)
+	).Fluid(true).
+		Attr(web.InitContextVars, `{currEditingListItemID: ''}`)
 
 	return
 }
@@ -550,7 +551,7 @@ func (b *ListingBuilder) getComponents(
 	}
 
 	dataTable = s.DataTable(objs).
-		CellWrapperFunc(func(cell h.MutableAttrHTMLComponent, id string, obj interface{}) h.HTMLComponent {
+		CellWrapperFunc(func(cell h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent {
 			tdbind := cell
 			if b.mb.hasDetailing {
 				tdbind.SetAttr("@click.self", web.Plaid().
@@ -563,9 +564,13 @@ func (b *ListingBuilder) getComponents(
 					web.Plaid().
 						EventFunc(actions.Edit).
 						Query(ParamID, id).
-						Go())
+						Go()+fmt.Sprintf(`; vars.currEditingListItemID="%s-%s"`, dataTableID, id))
 			}
 			return tdbind
+		}).
+		RowWrapperFunc(func(row h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent {
+			row.SetAttr(":class", fmt.Sprintf(`{"blue lighten-5": vars.presetsRightDrawer && vars.currEditingListItemID==="%s-%s"}`, dataTableID, id))
+			return row
 		}).
 		RowMenuItemFuncs(b.RowMenu().listingItemFuncs(ctx)...).
 		Selectable(haveCheckboxes).

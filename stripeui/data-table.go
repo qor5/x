@@ -15,7 +15,8 @@ import (
 )
 
 type CellComponentFunc func(obj interface{}, fieldName string, ctx *web.EventContext) h.HTMLComponent
-type CellWrapperFunc func(cell h.MutableAttrHTMLComponent, id string, obj interface{}) h.HTMLComponent
+type CellWrapperFunc func(cell h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent
+type RowWrapperFunc func(row h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent
 type RowMenuItemFunc func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent
 type RowComponentFunc func(obj interface{}, ctx *web.EventContext) h.HTMLComponent
 
@@ -25,6 +26,7 @@ type DataTableBuilder struct {
 	withoutHeaders     bool
 	selectionParamName string
 	cellWrapper        CellWrapperFunc
+	rowWrapper         RowWrapperFunc
 	rowMenuItemFuncs   []RowMenuItemFunc
 	rowExpandFunc      RowComponentFunc
 	columns            []*DataTableColumnBuilder
@@ -74,6 +76,11 @@ func (b *DataTableBuilder) WithoutHeader(v bool) (r *DataTableBuilder) {
 
 func (b *DataTableBuilder) CellWrapperFunc(v CellWrapperFunc) (r *DataTableBuilder) {
 	b.cellWrapper = v
+	return b
+}
+
+func (b *DataTableBuilder) RowWrapperFunc(v RowWrapperFunc) (r *DataTableBuilder) {
+	b.rowWrapper = v
 	return b
 }
 
@@ -185,7 +192,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 
 			var tdWrapped h.HTMLComponent = std
 			if b.cellWrapper != nil {
-				tdWrapped = b.cellWrapper(std, id, obj)
+				tdWrapped = b.cellWrapper(std, id, obj, dataTableId)
 			}
 
 			bindTds = append(bindTds, tdWrapped)
@@ -225,7 +232,11 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			haveMoreRecord = true
 		}
 
-		rows = append(rows, row)
+		if b.rowWrapper != nil {
+			rows = append(rows, b.rowWrapper(row, id, obj, dataTableId))
+		} else {
+			rows = append(rows, row)
+		}
 
 		if hasExpand {
 			rows = append(rows,
