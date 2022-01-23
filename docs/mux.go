@@ -541,6 +541,24 @@ func SamplesHandler(prefix string) http.Handler {
 	)
 
 	mux.Handle(
+		e00_basics.EventExamplePagePath,
+		wb.Page(
+			demoVuetifyLayout(
+				e00_basics.ExamplePage,
+			),
+		),
+	)
+
+	mux.Handle(
+		e00_basics.EventHandlingPagePath,
+		wb.Page(
+			demoVuetifyLayout(
+				e00_basics.EventHandlingPage,
+			),
+		),
+	)
+
+	mux.Handle(
 		e00_basics.WebScopeUseLocalsPagePath,
 		wb.Page(
 			demoVuetifyLayout(
