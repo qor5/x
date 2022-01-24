@@ -334,9 +334,6 @@ func (b *EditingBuilder) doUpdate(
 		return err1
 	}
 
-	msgr := MustGetMessages(ctx.R)
-	ShowMessage(r, msgr.SuccessfullyUpdated, "")
-
 	overlayType := ctx.R.FormValue(ParamOverlay)
 	afterUpdateScript := ctx.R.FormValue(ParamOverlayAfterUpdateScript)
 	if afterUpdateScript != "" {
@@ -364,7 +361,11 @@ func (b *EditingBuilder) doUpdate(
 }
 
 func (b *EditingBuilder) defaultUpdate(ctx *web.EventContext) (r web.EventResponse, err error) {
-	b.doUpdate(ctx, &r, false)
+	uErr := b.doUpdate(ctx, &r, false)
+	if uErr == nil {
+		msgr := MustGetMessages(ctx.R)
+		ShowMessage(&r, msgr.SuccessfullyUpdated, "")
+	}
 	return r, nil
 }
 
