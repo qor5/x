@@ -241,6 +241,9 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 		return
 	}
 
+	msgr := MustGetMessages(ctx.R)
+	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
+
 	r.PushState = web.Location(url.Values{bulkPanelOpenParamName: []string{}}).MergeQuery(true)
 
 	return
