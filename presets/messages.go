@@ -42,6 +42,7 @@ type Messages struct {
 	FiltersStringEquals            string
 	FiltersStringContains          string
 	PaginationRowsPerPage          string
+	ListingNoRecordToShow          string
 }
 
 func (msgr *Messages) DeleteConfirmationText(id string) string {
@@ -105,6 +106,7 @@ var Messages_en_US = &Messages{
 	FiltersStringEquals:            "is equal to",
 	FiltersStringContains:          "contains",
 	PaginationRowsPerPage:          "Rows per page: ",
+	ListingNoRecordToShow:          "No records to show",
 }
 
 var Messages_zh_CN = &Messages{
@@ -145,4 +147,5 @@ var Messages_zh_CN = &Messages{
 	FiltersStringEquals:            "等于",
 	FiltersStringContains:          "包含",
 	PaginationRowsPerPage:          "每页: ",
+	ListingNoRecordToShow:          "没有可显示的记录",
 }

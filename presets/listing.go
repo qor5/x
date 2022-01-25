@@ -102,7 +102,7 @@ const bulkPanelOpenParamName = "bulkOpen"
 const bulkPanelPortalName = "bulkPanel"
 const deleteConfirmPortalName = "deleteConfirm"
 const dataTablePortalName = "dataTable"
-const paginationPortalName = "pagination"
+const dataTableAdditionsPortalName = "dataTableAdditions"
 
 func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
 	if b.mb.Info().Verifier().Do(PermList).WithReq(ctx.R).IsAllowed() != nil {
@@ -114,7 +114,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 	title := msgr.ListingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.mb.label))
 	r.PageTitle = title
 
-	bulkPanel, toolbar, dataTable, pagination := b.getComponents(ctx, ctx.R.URL)
+	bulkPanel, toolbar, dataTable, dataTableAdditions := b.getComponents(ctx, ctx.R.URL)
 
 	r.Body = VContainer(
 
@@ -129,7 +129,7 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			).Class("pa-0"),
 		),
 
-		web.Portal(pagination).Name(paginationPortalName),
+		web.Portal(dataTableAdditions).Name(dataTableAdditionsPortalName),
 	).Fluid(true).
 		Attr(web.InitContextVars, `{currEditingListItemID: ''}`)
 
@@ -446,7 +446,8 @@ func (b *ListingBuilder) getComponents(
 	bulkPanel h.HTMLComponent,
 	toolbar h.HTMLComponent,
 	dataTable h.HTMLComponent,
-	pagination h.HTMLComponent,
+	// pagination, no-record message
+	datatableAdditions h.HTMLComponent,
 ) {
 	msgr := MustGetMessages(ctx.R)
 
@@ -587,12 +588,16 @@ func (b *ListingBuilder) getComponents(
 			Orderable(ok)
 	}
 
-	pagination = vuetifyx.VXTablePagination().
-		Total(int64(totalCount)).
-		CurrPage(searchParams.Page).
-		PerPage(searchParams.PerPage).
-		CustomPerPages([]int64{b.perPage}).
-		PerPageText(msgr.PaginationRowsPerPage)
+	if totalCount > 0 {
+		datatableAdditions = vuetifyx.VXTablePagination().
+			Total(int64(totalCount)).
+			CurrPage(searchParams.Page).
+			PerPage(searchParams.PerPage).
+			CustomPerPages([]int64{b.perPage}).
+			PerPageText(msgr.PaginationRowsPerPage)
+	} else {
+		datatableAdditions = h.Div(h.Text(msgr.ListingNoRecordToShow)).Class("mt-10 text-center grey--text text--darken-2")
+	}
 
 	return
 }
@@ -602,15 +607,15 @@ func (b *ListingBuilder) ReloadList(
 	r *web.EventResponse,
 	pageURL *url.URL,
 ) {
-	_, _, dataTable, pagination := b.getComponents(ctx, pageURL)
+	_, _, dataTable, dataTableAdditions := b.getComponents(ctx, pageURL)
 	r.UpdatePortals = append(r.UpdatePortals,
 		&web.PortalUpdate{
 			Name: dataTablePortalName,
 			Body: dataTable,
 		},
 		&web.PortalUpdate{
-			Name: paginationPortalName,
-			Body: pagination,
+			Name: dataTableAdditionsPortalName,
+			Body: dataTableAdditions,
 		},
 	)
 }
