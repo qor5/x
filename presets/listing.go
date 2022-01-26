@@ -284,7 +284,7 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 		return
 	}
 
-	tabs := VTabs().Class("mb-2").Grow(true).ShowArrows(true)
+	tabs := VTabs().Class("mb-3").Grow(true).ShowArrows(true)
 	tabsData := b.filterTabsFunc(ctx)
 	for i, tab := range tabsData {
 		if tab.ID == "" {
@@ -299,7 +299,7 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 		if activeTabValue == td.ID {
 			value = i
 		}
-		
+
 		tabContent := h.Text(td.Label)
 		if td.AdvancedLabel != nil {
 			tabContent = td.AdvancedLabel
