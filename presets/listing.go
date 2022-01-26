@@ -284,7 +284,7 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 		return
 	}
 
-	tabs := VTabs().Class("mb-3").Grow(true).Value(2)
+	tabs := VTabs().Class("mb-2").Grow(true).ShowArrows(true)
 	tabsData := b.filterTabsFunc(ctx)
 	for i, tab := range tabsData {
 		if tab.ID == "" {
