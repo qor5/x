@@ -292,13 +292,14 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 		}
 	}
 	value := -1
-	rawQuery := ctx.R.URL.RawQuery
+	activeTabValue := ctx.R.URL.Query().Get(ActiveFilterTabQueryKey)
 
 	for i, td := range tabsData {
 		// Find selected tab by active_filter_tab=xx in the url query
-		if strings.Index(rawQuery, fmt.Sprintf("%s=%s", ActiveFilterTabQueryKey, td.ID)) >= 0 {
+		if activeTabValue == td.ID {
 			value = i
 		}
+		
 		tabContent := h.Text(td.Label)
 		if td.AdvancedLabel != nil {
 			tabContent = td.AdvancedLabel
