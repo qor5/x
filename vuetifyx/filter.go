@@ -188,7 +188,7 @@ type FilterItem struct {
 	Timezone       FilterItemTimezone      `json:"timezone,omitempty"`
 	SQLCondition   string                  `json:"-"`
 	Options        []*SelectItem           `json:"options,omitempty"`
-	Invisible 	bool `json:"invisible,omitempty"`
+	Invisible      bool                    `json:"invisible,omitempty"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {
