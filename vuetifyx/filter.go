@@ -26,8 +26,15 @@ func VXFilter(value FilterData) (r *VXFilterBuilder) {
 		tag:   h.Tag("vx-filter"),
 	}
 
+	var visibleFilterData FilterData
+	for _, v := range value {
+		if !v.Invisible {
+			visibleFilterData = append(visibleFilterData, v)
+		}
+	}
+
 	//	$plaid().stringLocation(qs).mergeQueryWithoutParams(keysInFilterData).url(window.location.href).pushState(true).go()
-	r.Value(value).Attr("@change", web.GET().
+	r.Value(visibleFilterData).Attr("@change", web.GET().
 		StringQuery(web.Var("$event.encodedFilterData")).
 		ClearMergeQuery(web.Var("$event.filterKeys")).
 		PushState(true).
@@ -181,6 +188,7 @@ type FilterItem struct {
 	Timezone       FilterItemTimezone      `json:"timezone,omitempty"`
 	SQLCondition   string                  `json:"-"`
 	Options        []*SelectItem           `json:"options,omitempty"`
+	Invisible 	bool `json:"invisible,omitempty"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {
