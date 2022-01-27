@@ -24,31 +24,32 @@ import (
 )
 
 type Builder struct {
-	prefix              string
-	models              []*ModelBuilder
-	mux                 *goji.Mux
-	builder             *web.Builder
-	i18nBuilder         *i18n.Builder
-	logger              *zap.Logger
-	permissionBuilder   *perm.Builder
-	verifier            *perm.Verifier
-	layoutFunc          func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)
-	dataOperator        DataOperator
-	messagesFunc        MessagesFunc
-	homePageFunc        web.PageFunc
-	brandFunc           ComponentFunc
-	profileFunc         ComponentFunc
-	brandTitle          string
-	vuetifyOptions      string
-	progressBarColor    string
-	rightDrawerWidth    string
-	writeFieldDefaults  *FieldDefaults
-	listFieldDefaults   *FieldDefaults
-	detailFieldDefaults *FieldDefaults
-	extraAssets         []*extraAsset
-	assetFunc           AssetFunc
-	menuGroups          MenuGroups
-	menuOrder           []interface{}
+	prefix               string
+	models               []*ModelBuilder
+	mux                  *goji.Mux
+	builder              *web.Builder
+	i18nBuilder          *i18n.Builder
+	logger               *zap.Logger
+	permissionBuilder    *perm.Builder
+	verifier             *perm.Verifier
+	layoutFunc           func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)
+	dataOperator         DataOperator
+	messagesFunc         MessagesFunc
+	homePageFunc         web.PageFunc
+	homePageLayoutConfig *LayoutConfig
+	brandFunc            ComponentFunc
+	profileFunc          ComponentFunc
+	brandTitle           string
+	vuetifyOptions       string
+	progressBarColor     string
+	rightDrawerWidth     string
+	writeFieldDefaults   *FieldDefaults
+	listFieldDefaults    *FieldDefaults
+	detailFieldDefaults  *FieldDefaults
+	extraAssets          []*extraAsset
+	assetFunc            AssetFunc
+	menuGroups           MenuGroups
+	menuOrder            []interface{}
 }
 
 type AssetFunc func(ctx *web.EventContext)
@@ -73,13 +74,14 @@ func New() *Builder {
 		i18nBuilder: i18n.New().
 			RegisterForModule(language.English, CoreI18nModuleKey, Messages_en_US).
 			RegisterForModule(language.SimplifiedChinese, CoreI18nModuleKey, Messages_zh_CN),
-		writeFieldDefaults:  NewFieldDefaults(WRITE),
-		listFieldDefaults:   NewFieldDefaults(LIST),
-		detailFieldDefaults: NewFieldDefaults(DETAIL),
-		progressBarColor:    "amber",
-		brandTitle:          "Admin",
-		rightDrawerWidth:    "600",
-		verifier:            perm.NewVerifier(PermModule, nil),
+		writeFieldDefaults:   NewFieldDefaults(WRITE),
+		listFieldDefaults:    NewFieldDefaults(LIST),
+		detailFieldDefaults:  NewFieldDefaults(DETAIL),
+		progressBarColor:     "amber",
+		brandTitle:           "Admin",
+		rightDrawerWidth:     "600",
+		verifier:             perm.NewVerifier(PermModule, nil),
+		homePageLayoutConfig: &LayoutConfig{SearchBoxInvisible: true},
 	}
 
 	r.layoutFunc = r.defaultLayout
@@ -107,6 +109,11 @@ func (b *Builder) URIPrefix(v string) (r *Builder) {
 
 func (b *Builder) LayoutFunc(v func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)) (r *Builder) {
 	b.layoutFunc = v
+	return b
+}
+
+func (b *Builder) HomePageLayoutConfig(v *LayoutConfig) (r *Builder) {
+	b.homePageLayoutConfig = v
 	return b
 }
 
@@ -760,7 +767,7 @@ func (b *Builder) initMux() {
 
 	mux.Handle(
 		pat.New(b.prefix),
-		b.wrap(nil, b.layoutFunc(b.getHomePageFunc(), nil)),
+		b.wrap(nil, b.layoutFunc(b.getHomePageFunc(), b.homePageLayoutConfig)),
 	)
 
 	for _, m := range b.models {
