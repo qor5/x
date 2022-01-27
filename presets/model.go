@@ -33,6 +33,7 @@ type ModelBuilder struct {
 	hasDetailing     bool
 	rightDrawerWidth string
 	link             string
+	layoutConfig     *LayoutConfig
 	web.EventsHub
 }
 
@@ -181,6 +182,11 @@ func (b *ModelBuilder) Label(v string) (r *ModelBuilder) {
 
 func (b *ModelBuilder) Labels(vs ...string) (r *ModelBuilder) {
 	b.fieldLabels = append(b.fieldLabels, vs...)
+	return b
+}
+
+func (b *ModelBuilder) LayoutConfig(v *LayoutConfig) (r *ModelBuilder) {
+	b.layoutConfig = v
 	return b
 }
 

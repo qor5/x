@@ -32,7 +32,7 @@ type Builder struct {
 	logger              *zap.Logger
 	permissionBuilder   *perm.Builder
 	verifier            *perm.Verifier
-	layoutFunc          func(in web.PageFunc) (out web.PageFunc)
+	layoutFunc          func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)
 	dataOperator        DataOperator
 	messagesFunc        MessagesFunc
 	homePageFunc        web.PageFunc
@@ -105,7 +105,7 @@ func (b *Builder) URIPrefix(v string) (r *Builder) {
 	return b
 }
 
-func (b *Builder) LayoutFunc(v func(in web.PageFunc) (out web.PageFunc)) (r *Builder) {
+func (b *Builder) LayoutFunc(v func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)) (r *Builder) {
 	b.layoutFunc = v
 	return b
 }
@@ -562,7 +562,11 @@ func (b *Builder) dialog(r *web.EventResponse, comp h.HTMLComponent, width strin
 	r.VarsScript = "setTimeout(function(){ vars.presetsDialog = true }, 100)"
 }
 
-func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
+type LayoutConfig struct {
+	SearchBoxInvisible bool
+}
+
+func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
 		ctx.Injector.HeadHTML(strings.Replace(`
@@ -609,6 +613,8 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 			profile = b.profileFunc(ctx)
 		}
 
+		showSearchBox := cfg == nil || !cfg.SearchBoxInvisible
+
 		msgr := i18n.MustGetModuleMessages(ctx.R, CoreI18nModuleKey, Messages_en_US).(*Messages)
 
 		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
@@ -628,22 +634,24 @@ func (b *Builder) defaultLayout(in web.PageFunc) (out web.PageFunc) {
 				VAppBarNavIcon().On("click.stop", "vars.navDrawer = !vars.navDrawer"),
 				h.Span(innerPr.PageTitle).Class("text-h6 font-weight-regular"),
 				VSpacer(),
-				VLayout(
-					// h.Form(
-					VTextField().
-						SoloInverted(true).
-						PrependIcon("search").
-						Label(msgr.Search).
-						Flat(true).
-						Clearable(true).
-						HideDetails(true).
-						Value(ctx.R.URL.Query().Get("keyword")).
-						Attr("@keyup.enter", web.Plaid().
-							Query("keyword", web.Var("[$event.target.value]")).
-							PushState(true).
-							Go()),
-					// ).Method("GET"),
-				).AlignCenter(true).Attr("style", "max-width: 650px"),
+				h.If(showSearchBox,
+					VLayout(
+						// h.Form(
+						VTextField().
+							SoloInverted(true).
+							PrependIcon("search").
+							Label(msgr.Search).
+							Flat(true).
+							Clearable(true).
+							HideDetails(true).
+							Value(ctx.R.URL.Query().Get("keyword")).
+							Attr("@keyup.enter", web.Plaid().
+								Query("keyword", web.Var("[$event.target.value]")).
+								PushState(true).
+								Go()),
+						// ).Method("GET"),
+					).AlignCenter(true).Attr("style", "max-width: 650px"),
+				),
 				profile,
 			).Dark(true).
 				Color("primary").
@@ -752,7 +760,7 @@ func (b *Builder) initMux() {
 
 	mux.Handle(
 		pat.New(b.prefix),
-		b.wrap(nil, b.layoutFunc(b.getHomePageFunc())),
+		b.wrap(nil, b.layoutFunc(b.getHomePageFunc(), nil)),
 	)
 
 	for _, m := range b.models {
@@ -761,14 +769,14 @@ func (b *Builder) initMux() {
 		routePath := info.ListingHref()
 		mux.Handle(
 			pat.New(routePath),
-			b.wrap(m, b.layoutFunc(m.listing.GetPageFunc())),
+			b.wrap(m, b.layoutFunc(m.listing.GetPageFunc(), m.layoutConfig)),
 		)
 		log.Println("mounted url", routePath)
 		if m.hasDetailing {
 			routePath = fmt.Sprintf("%s/%s/:id", b.prefix, pluralUri)
 			mux.Handle(
 				pat.New(routePath),
-				b.wrap(m, b.layoutFunc(m.detailing.GetPageFunc())),
+				b.wrap(m, b.layoutFunc(m.detailing.GetPageFunc(), m.layoutConfig)),
 			)
 			log.Println("mounted url", routePath)
 		}
