@@ -1,10 +1,9 @@
 package vuetifyx_test
 
 import (
-	"testing"
-
 	. "github.com/goplaid/x/vuetifyx"
 	"github.com/theplant/testingutils"
+	"testing"
 )
 
 var setByQueryCases = []struct {
@@ -36,7 +35,7 @@ var setByQueryCases = []struct {
 			},
 		}),
 		expectedSQLConds: "created_at >= ? AND created_at < ?",
-		expectedSQLArgs:  []interface{}{"1554825600", "1554912000"},
+		expectedSQLArgs:  []interface{}{"2019-04-10T00:00:00+08:00", "2019-04-11T00:00:00+08:00"},
 	},
 	{
 		name: "between2",
@@ -73,7 +72,7 @@ var setByQueryCases = []struct {
 			},
 		}),
 		expectedSQLConds: "extract(epoch from created_at) >= ? AND extract(epoch from created_at) < ?",
-		expectedSQLArgs:  []interface{}{"1565107200", "1565280000"},
+		expectedSQLArgs:  []interface{}{"2019-08-07T00:00:00+08:00", "2019-08-09T00:00:00+08:00"},
 	},
 	{
 		name: "equals",
@@ -95,7 +94,7 @@ var setByQueryCases = []struct {
 			},
 		}),
 		expectedSQLConds: "created_at = ?",
-		expectedSQLArgs:  []interface{}{"1552320000"},
+		expectedSQLArgs:  []interface{}{"2019-03-12T00:00:00+08:00"},
 	},
 }
 

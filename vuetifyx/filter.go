@@ -207,12 +207,22 @@ func (fd FilterData) Clone() (r FilterData) {
 }
 
 func (fd FilterData) getSQLCondition(key string) string {
+	it := fd.getFilterItem(key)
+	if it == nil {
+		return ""
+	}
+	
+	return it.SQLCondition
+}
+
+func (fd FilterData) getFilterItem(key string) *FilterItem {
 	for _, it := range fd {
 		if it.Key == key {
-			return it.SQLCondition
+			return it
 		}
 	}
-	return ""
+
+	return nil
 }
 
 var sqlOps = map[string]string{
@@ -260,11 +270,18 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 
 		sqlc := fd.getSQLCondition(key)
 		if len(sqlc) > 0 {
+			val := v[0]
+			it := fd.getFilterItem(key)
+			if it.ItemType == ItemTypeDate {
+				val = unixToDatetime(val, it.Timezone == TimezoneUTC, 0)
+			}
+
 			conds = append(conds, fmt.Sprintf(sqlc, sqlOps[mod]))
+
 			if mod == "ilike" {
-				sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", v[0]))
+				sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", val))
 			} else {
-				sqlArgs = append(sqlArgs, v[0])
+				sqlArgs = append(sqlArgs, val)
 			}
 		}
 	}
@@ -352,10 +369,19 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 }
 
 func unixToDate(u string, utc bool, sub int) string {
+	return unixToTime(u, utc, sub).Format("2006-01-02")
+}
+
+func unixToDatetime(u string, utc bool, sub int) string {
+	return unixToTime(u, utc, sub).Format(time.RFC3339)
+}
+
+func unixToTime(u string, utc bool, sub int) time.Time {
 	unix, _ := strconv.ParseInt(u, 10, 64)
 	d := time.Unix(unix, 0).Add(time.Duration(24 * sub * int(time.Hour)))
 	if utc {
 		d = d.UTC()
 	}
-	return d.Format("2006-01-02")
+
+	return d
 }
