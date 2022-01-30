@@ -550,6 +550,15 @@ func SamplesHandler(prefix string) http.Handler {
 	)
 
 	mux.Handle(
+		e00_basics.WebScopeUsePlaidFormPagePath,
+		wb.Page(
+			demoLayout(
+				e00_basics.UsePlaidForm,
+			),
+		),
+	)
+
+	mux.Handle(
 		e11_vuetify_basic_inputs.VuetifyBasicInputsPath,
 		wb.Page(
 			demoVuetifyLayout(
