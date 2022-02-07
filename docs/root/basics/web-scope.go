@@ -29,5 +29,22 @@ In ~VBtn("Test Can Not Change Other Scope")~, values in ~locals~ will not change
 
 Video Tutorial (<https://www.youtube.com/watch?v=UPuBvVRhUr0>)
 `),
+
+	Markdown(`
+
+### Use PlaidForm
+
+The main use of PlaidForm is to submit one form which is inside another form, and the two forms are completely independent forms.
+
+In the following example, each color represents a completely separate form. The ~Material Form~ contains the ~Raw Material Form~. You can submit the ~Raw Material Form~ to the server first. After receiving it, server will save the ~Raw Material data~ and return the ~ID~.
+In this way, you can submit ~Raw Material ID~ directly in the ~Material Form~.
+
+For example:
+`),
+	ch.Code(examples.WebScopeUsePlaidFormSample1).Language("go"),
+	utils.Demo("Web Scope Use PlaidForm", e00_basics.WebScopeUsePlaidFormPagePath, "e00_basics/web-scope.go"),
+	Markdown(`
+Use ~web.Scope().VSlot("{ plaidForm }")~ to determine the scope of a form.
+`),
 ).Title("Scope Component").
 	Slug("basics/scope-component")
