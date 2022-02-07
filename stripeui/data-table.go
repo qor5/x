@@ -33,12 +33,15 @@ type DataTableBuilder struct {
 	loadMoreCount      int
 	loadMoreLabel      string
 	loadMoreURL        string
+	// e.g. {count} records are selected.
+	selectedCountLabel string
 }
 
 func DataTable(data interface{}) (r *DataTableBuilder) {
 	r = &DataTableBuilder{
 		data:               data,
 		selectionParamName: "selected_ids",
+		selectedCountLabel: "{count} records are selected.",
 	}
 	return
 }
@@ -99,6 +102,11 @@ func (b *DataTableBuilder) RowExpandFunc(v RowComponentFunc) (r *DataTableBuilde
 	return b
 }
 
+func (b *DataTableBuilder) SelectedCountLabel(v string) (r *DataTableBuilder) {
+	b.selectedCountLabel = v
+	return b
+}
+
 type primarySlugger interface {
 	PrimarySlug() string
 }
@@ -111,8 +119,11 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 	dataTableId := xid.New().String()
 	loadMoreVarName := fmt.Sprintf("loadmore_%s", dataTableId)
 	expandVarName := fmt.Sprintf("expand_%s", dataTableId)
+	selectedCountVarName := fmt.Sprintf("selected_count_%s", dataTableId)
 
-	initContextVarsMap := map[string]bool{}
+	initContextVarsMap := map[string]interface{}{
+		selectedCountVarName: len(selected),
+	}
 
 	// map[obj_id]{rowMenus}
 	objRowMenusMap := make(map[string][]h.HTMLComponent)
@@ -173,7 +184,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 						MergeQuery(true).
 						Query(b.selectionParamName,
 							web.Var(fmt.Sprintf(`{value: %s, add: $event, remove: !$event}`, h.JSONString(id))),
-						).RunPushState(),
+						).RunPushState()+fmt.Sprintf(";vars.%s+=($event?1:-1)", selectedCountVarName),
 					),
 			).Class("pr-0"))
 		}
@@ -367,10 +378,28 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 		).Attr("v-if", fmt.Sprintf("!vars.%s", loadMoreVarName))
 	}
 
-	table := VSimpleTable(
-		thead,
-		h.Tbody(rows...),
-		tfoot,
+	var selectedCountNotice []h.HTMLComponent
+	{
+		ss := strings.Split(b.selectedCountLabel, "{count}")
+		if len(ss) == 1 {
+			selectedCountNotice = []h.HTMLComponent{h.Text(ss[0])}
+		} else {
+			selectedCountNotice = []h.HTMLComponent{
+				h.Text(ss[0]),
+				h.Strong(fmt.Sprintf("{{vars.%s}}", selectedCountVarName)),
+				h.Text(ss[1]),
+			}
+		}
+	}
+	table := h.Div(
+		h.Div(selectedCountNotice...).
+			Class("grey lighten-3 text-center pt-3 pb-3").
+			Attr("v-show", fmt.Sprintf("vars.%s > 0", selectedCountVarName)),
+		VSimpleTable(
+			thead,
+			h.Tbody(rows...),
+			tfoot,
+		),
 	)
 
 	if inPlaceLoadMore {

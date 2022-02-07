@@ -43,6 +43,7 @@ type Messages struct {
 	FiltersStringContains          string
 	PaginationRowsPerPage          string
 	ListingNoRecordToShow          string
+	ListingSelectedCountNotice     string
 }
 
 func (msgr *Messages) DeleteConfirmationText(id string) string {
@@ -107,6 +108,7 @@ var Messages_en_US = &Messages{
 	FiltersStringContains:          "contains",
 	PaginationRowsPerPage:          "Rows per page: ",
 	ListingNoRecordToShow:          "No records to show",
+	ListingSelectedCountNotice:     "{count} records are selected. ",
 }
 
 var Messages_zh_CN = &Messages{
@@ -148,4 +150,5 @@ var Messages_zh_CN = &Messages{
 	FiltersStringContains:          "包含",
 	PaginationRowsPerPage:          "每页: ",
 	ListingNoRecordToShow:          "没有可显示的记录",
+	ListingSelectedCountNotice:     "{count}条记录被选中。",
 }

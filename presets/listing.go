@@ -579,7 +579,8 @@ func (b *ListingBuilder) getComponents(
 		}).
 		RowMenuItemFuncs(b.RowMenu().listingItemFuncs(ctx)...).
 		Selectable(haveCheckboxes).
-		SelectionParamName(ParamSelectedIds)
+		SelectionParamName(ParamSelectedIds).
+		SelectedCountLabel(msgr.ListingSelectedCountNotice)
 
 	for _, f := range b.fields {
 		_, ok := orderableFieldMap[f.name]
