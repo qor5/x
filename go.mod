@@ -8,7 +8,7 @@ require (
 	github.com/go-chi/chi v1.5.4
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/goplaid/multipartestutils v0.0.3
-	github.com/goplaid/web v1.1.25
+	github.com/goplaid/web v1.1.26
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/iancoleman/strcase v0.2.0
 	github.com/jinzhu/gorm v1.9.16
@@ -22,7 +22,7 @@ require (
 	github.com/russross/blackfriday v1.6.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0
 	github.com/sunfmin/reflectutils v1.0.3
-	github.com/theplant/docgo v0.0.7
+	github.com/theplant/docgo v0.0.9
 	github.com/theplant/gofixtures v1.1.0
 	github.com/theplant/htmlgo v1.0.3
 	github.com/theplant/testingutils v0.0.0-20190603093022-26d8b4d95c61
