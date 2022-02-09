@@ -212,8 +212,6 @@ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/sunfmin/reflectutils v1.0.2/go.mod h1:ckN+r+oXS4OXFEVU+CCRuXBujUPCGlV86oCh/QsS3h4=
 github.com/sunfmin/reflectutils v1.0.3 h1:9crqUv4CdmvPDF4ymxG6sb6EVualibt9pYkTacrP1OM=
 github.com/sunfmin/reflectutils v1.0.3/go.mod h1:ckN+r+oXS4OXFEVU+CCRuXBujUPCGlV86oCh/QsS3h4=
-github.com/theplant/docgo v0.0.7 h1:5EbQTyYVDrBw8GTSdYUv33WH2ES92P//MOc2ZdKKDQk=
-github.com/theplant/docgo v0.0.7/go.mod h1:eVPNAupAgtSM2VLmTj0RmtVYBCAsI3DMkJAmV40P8aw=
 github.com/theplant/docgo v0.0.10 h1:2tTAyhwsrNndrjgl3KLWQ4Ime4Y0OVGySRFEAp0UKvY=
 github.com/theplant/docgo v0.0.10/go.mod h1:noIQApxbPxlNHGoPZCx1VbIS5ndRP+LTBIwGoB3mGTE=
 github.com/theplant/gofixtures v1.1.0 h1:gooxE6aXGn06UnibuUfBYKYiSLEEyk1dOki3MINPfyg=

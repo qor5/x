@@ -468,8 +468,8 @@ func (b *ListingBuilder) getComponents(
 	if perPage == 0 {
 		perPage = 50
 	}
-	if perPage > 100 {
-		perPage = 100
+	if perPage > 1000 {
+		perPage = 1000
 	}
 
 	totalVisible := b.totalVisible
@@ -579,7 +579,8 @@ func (b *ListingBuilder) getComponents(
 		}).
 		RowMenuItemFuncs(b.RowMenu().listingItemFuncs(ctx)...).
 		Selectable(haveCheckboxes).
-		SelectionParamName(ParamSelectedIds)
+		SelectionParamName(ParamSelectedIds).
+		SelectedCountLabel(msgr.ListingSelectedCountNotice)
 
 	for _, f := range b.fields {
 		_, ok := orderableFieldMap[f.name]
