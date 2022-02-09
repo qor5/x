@@ -5,7 +5,6 @@ import (
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/vuetifyx"
-	. "github.com/theplant/htmlgo"
 )
 
 type Post struct {

@@ -9,14 +9,14 @@ import (
 	. "github.com/theplant/docgo"
 )
 
-var FilterAndTab = Doc(
+var Filter = Doc(
 	Markdown(`
 
 To add a basic filter to the list page
 
 For example:
 `),
-	ch.Code(examples.FormHandlingSample).Language("go"),
+	ch.Code(examples.FilterSample).Language("go"),
 	utils.Demo("Basic filter", e00_basics.PresetsBasicFilterPath, "e00_basics/filter.go"),
 	Markdown(`
 	Call ~FilterDataFunc~ on a ~ListingBuilder~
