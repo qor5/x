@@ -22,7 +22,7 @@ require (
 	github.com/russross/blackfriday v1.6.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0
 	github.com/sunfmin/reflectutils v1.0.3
-	github.com/theplant/docgo v0.0.9
+	github.com/theplant/docgo v0.0.10
 	github.com/theplant/gofixtures v1.1.0
 	github.com/theplant/htmlgo v1.0.3
 	github.com/theplant/testingutils v0.0.0-20190603093022-26d8b4d95c61

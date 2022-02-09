@@ -66,6 +66,7 @@ If you wondering why ~H1("Hello World")~ and how this worked, Please go ahead an
 
 			ContentGroup(
 				basics.PageFuncAndEventFunc,
+				basics.Filter,
 				basics.LayoutFunctionAndPageInjector,
 				basics.SwitchPagesWithPushState,
 				basics.ReloadPageWithAFlash,

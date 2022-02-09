@@ -1,4 +1,5 @@
 DIR=$(PWD)
+# go install github.com/sunfmin/snippetgo@latest
 cd $DIR/../ && \
 snippetgo -pkg=examples > ./x/docs/examples/examples-generated.go
 cd $DIR
@@ -15,4 +16,3 @@ function docsRestart() {
 export -f docsRestart
 ulimit -n 1000000
 find . -name "*.go" | entr -r bash -c "docsRestart"
-
