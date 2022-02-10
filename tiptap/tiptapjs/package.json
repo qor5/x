@@ -29,7 +29,7 @@
     "babel-jest": "^27.0.6",
     "eslint": "^7.31.0",
     "eslint-plugin-vue": "^7.14.0",
-    "node-sass": "^6.0.1",
+    "node-sass": "^7.0.0",
     "sass-loader": "^12.1.0",
     "vue-svg-loader": "^0.16.0",
     "vue-template-compiler": "^2.6.14"
