@@ -1,8 +1,8 @@
-package basics
+package presets_guide
 
 import (
 	"github.com/goplaid/x/docs/examples"
-	"github.com/goplaid/x/docs/examples/e00_basics"
+	"github.com/goplaid/x/docs/examples/e21_presents"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/theplant/docgo/ch"
 
@@ -17,7 +17,7 @@ To add a basic filter to the list page
 For example:
 `),
 	ch.Code(examples.FilterSample).Language("go"),
-	utils.Demo("Basic filter", e00_basics.PresetsBasicFilterPath, "e00_basics/filter.go"),
+	utils.Demo("Basic filter", e21_presents.PresetsBasicFilterPath+"/customers", "e21_presents/filter.go"),
 	Markdown(`
 	Call ~FilterDataFunc~ on a ~ListingBuilder~
 `),

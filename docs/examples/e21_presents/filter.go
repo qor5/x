@@ -1,20 +1,19 @@
-package e00_basics
+package e21_presents
 
-//@snippet_begin(FilterSample)
+// @snippet_begin(FilterSample)
 import (
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets"
+	"github.com/goplaid/x/presets/gorm2op"
 	"github.com/goplaid/x/vuetifyx"
 )
 
-type Post struct {
-	Name   string
-	Status string
-}
-
 func PresetsBasicFilter(b *presets.Builder) {
+	b.URIPrefix(PresetsBasicFilterPath).
+		DataOperator(gorm2op.DataOperator(DB))
+
 	// create a ModelBuilder
-	videoBuilder := b.Model(&Post{})
+	videoBuilder := b.Model(&Customer{})
 
 	// get its ListingBuilder
 	listing := videoBuilder.Listing()
@@ -41,6 +40,6 @@ func PresetsBasicFilter(b *presets.Builder) {
 	})
 }
 
-//@snippet_end
+// @snippet_end
 
 const PresetsBasicFilterPath = "/samples/basic_filter"

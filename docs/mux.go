@@ -724,9 +724,9 @@ func SamplesHandler(prefix string) http.Handler {
 	)
 
 	c13 := presets.New().AssetFunc(addGA)
-	e00_basics.PresetsBasicFilter(c13)
+	e21_presents.PresetsBasicFilter(c13)
 	mux.Handle(
-		e00_basics.PresetsBasicFilterPath+"/",
+		e21_presents.PresetsBasicFilterPath+"/",
 		c13,
 	)
 
