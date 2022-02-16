@@ -86,7 +86,7 @@ to:
 	%s
 ----------------------------------------------
 
-`, go_path.Join(f.Name.Name+".go", locale, key.Name), value.Value, "\""+translationValue+"\"")
+`, go_path.Join(go_path.Join(path, f.Name.Name+".go"), locale, key.Name), value.Value, "\""+translationValue+"\"")
 										value.Value = "\"" + translationValue + "\""
 										isModiyiedFile = true
 									}
