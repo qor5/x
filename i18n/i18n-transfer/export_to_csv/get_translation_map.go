@@ -1,17 +1,19 @@
-package parser
+package export_to_csv
 
 import (
 	"go/ast"
-	"go/parser"
+	go_parser "go/parser"
 	"go/token"
 	go_path "path"
 	"strings"
+
+	"github.com/goplaid/x/i18n/i18n-transfer/parser"
 )
 
-func GetTranslationsMap(dir string) (translations map[string]map[string]string, err error) {
+func GetTranslationsMap(projectDir string) (translations map[string]map[string]string, err error) {
 	translations = make(map[string]map[string]string)
 	fset := token.NewFileSet()
-	pkgs, err := ParseDir(fset, dir, nil, parser.AllErrors)
+	pkgs, err := parser.ParseDir(fset, projectDir, nil, go_parser.AllErrors)
 	if err != nil {
 		return
 	}
@@ -73,7 +75,7 @@ func GetTranslationsMap(dir string) (translations map[string]map[string]string, 
 									}
 
 									if isMessage {
-										translation[go_path.Join(path, key.Name)] = value.Value
+										translation[go_path.Join(path, key.Name)] = strings.Trim(value.Value, "\"")
 									}
 								}
 							}
