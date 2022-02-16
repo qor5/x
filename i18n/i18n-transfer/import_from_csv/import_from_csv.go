@@ -1,13 +1,13 @@
 package import_from_csv
 
 import (
-	"bytes"
 	"fmt"
 	"go/ast"
 	"go/format"
 	go_parser "go/parser"
 	"go/token"
-	"log"
+	"os"
+	go_path "path"
 	"strings"
 
 	"github.com/goplaid/x/i18n/i18n-transfer/parser"
@@ -21,7 +21,7 @@ func ImportFromCsv(dir string, translationMap map[string]map[string]string) erro
 	}
 	for path, pkg := range pkgs {
 		for _, f := range pkg.Files {
-			var isMessageFile bool
+			var isModiyiedFile bool
 			for _, decl := range f.Decls {
 				if decl, ok := decl.(*ast.GenDecl); ok {
 					for _, spec := range decl.Specs {
@@ -75,9 +75,20 @@ func ImportFromCsv(dir string, translationMap map[string]map[string]string) erro
 										break
 									}
 
-									if translationValue, exist := translationMap[locale][key.Name]; isMessage && exist {
+									if translationValue, exist := translationMap[locale][go_path.Join(path, key.Name)]; isMessage && exist && value.Value != "\""+translationValue+"\"" {
+										fmt.Printf(`
+----------------------------------------------
+update translation:
+	%s
+from:
+	%s
+to:
+	%s
+----------------------------------------------
+
+`, go_path.Join(f.Name.Name+".go", locale, key.Name), value.Value, "\""+translationValue+"\"")
 										value.Value = "\"" + translationValue + "\""
-										isMessageFile = true
+										isModiyiedFile = true
 									}
 								}
 							}
@@ -86,26 +97,16 @@ func ImportFromCsv(dir string, translationMap map[string]map[string]string) erro
 				}
 			}
 
-			if isMessageFile {
-				//file, err := os.OpenFile(go_path.Join(path, f.Name.Name+".go"), os.O_WRONLY, 0)
-				//defer file.Close()
-				//if err != nil {
-				//	return err
-				//}
-				//err = format.Node(file, fset, f)
-				//if err != nil {
-				//	return err
-				//}
-
-				var output []byte
-				buffer := bytes.NewBuffer(output)
-				err = format.Node(buffer, fset, f)
+			if isModiyiedFile {
+				file, err := os.OpenFile(go_path.Join(path, f.Name.Name+".go"), os.O_WRONLY, 0)
+				defer file.Close()
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
-				// 输出Go代码
-				fmt.Println(path)
-				fmt.Println(buffer.String())
+				err = format.Node(file, fset, f)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}

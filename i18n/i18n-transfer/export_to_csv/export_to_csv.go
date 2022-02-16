@@ -63,5 +63,11 @@ func ExportToCsv(translationsMap map[string]map[string]string) (err error) {
 	}
 	writer.Flush()
 
+	fmt.Printf(`
+----------------------------------------------
+generate translation csv: 
+	%s
+`, filename)
+
 	return
 }

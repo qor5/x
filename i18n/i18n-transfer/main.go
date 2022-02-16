@@ -42,7 +42,12 @@ Usage of import:
 		if err != nil {
 			log.Fatalln(err)
 		}
-		fmt.Printf("%+v\n", translationsMap)
+		for locale, translationMap := range translationsMap {
+			fmt.Println(locale)
+			for k, v := range translationMap {
+				fmt.Printf("    %v: %v\n", k, v)
+			}
+		}
 		err = export_to_csv.ExportToCsv(translationsMap)
 		if err != nil {
 			log.Fatalln(err)
