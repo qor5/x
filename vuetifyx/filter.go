@@ -170,8 +170,9 @@ const (
 type FilterData []*FilterItem
 
 type SelectItem struct {
-	Text  string `json:"text,omitempty"`
-	Value string `json:"value,omitempty"`
+	Text         string `json:"text,omitempty"`
+	Value        string `json:"value,omitempty"`
+	SQLCondition string `json:"-"`
 }
 
 type FilterItem struct {
@@ -206,12 +207,21 @@ func (fd FilterData) Clone() (r FilterData) {
 	return
 }
 
-func (fd FilterData) getSQLCondition(key string) string {
+func (fd FilterData) getSQLCondition(key string, val string) string {
 	it := fd.getFilterItem(key)
 	if it == nil {
 		return ""
 	}
-	
+
+	// If item type is ItemTypeSelect and value is not nil, we use option's SQLCondition instead of item SQLCondition if option's SQLCondition present.
+	if it.ItemType == ItemTypeSelect && val != "" {
+		for _, option := range it.Options {
+			if option.Value == val && option.SQLCondition != "" {
+				return option.SQLCondition
+			}
+		}
+	}
+
 	return it.SQLCondition
 }
 
@@ -234,8 +244,10 @@ var sqlOps = map[string]string{
 	"ilike": "ILIKE",
 }
 
+const SQLOperatorPlaceholder = "{op}"
+
 func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs []interface{}) {
-	m, err := url.ParseQuery(qs)
+	queryMap, err := url.ParseQuery(qs)
 
 	if err != nil {
 		panic(err)
@@ -243,9 +255,9 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 
 	var conds []string
 
-	var keys = make([]string, len(m))
+	var keys = make([]string, len(queryMap))
 	i := 0
-	for k := range m {
+	for k := range queryMap {
 		keys[i] = k
 		i++
 	}
@@ -253,7 +265,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 
 	var keyModValueMap = map[string]map[string]string{}
 	for _, k := range keys {
-		v := m[k]
+		v := queryMap[k]
 		segs := strings.Split(k, ".")
 		var mod = ""
 		key := k
@@ -268,7 +280,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 
 		keyModValueMap[key][mod] = v[0]
 
-		sqlc := fd.getSQLCondition(key)
+		sqlc := fd.getSQLCondition(key, v[0])
 		if len(sqlc) > 0 {
 			val := v[0]
 			it := fd.getFilterItem(key)
@@ -276,12 +288,30 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 				val = unixToDatetime(val, it.Timezone == TimezoneUTC, 0)
 			}
 
-			conds = append(conds, fmt.Sprintf(sqlc, sqlOps[mod]))
-
-			if mod == "ilike" {
-				sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", val))
+			// Compose operator into sql condition. If you want to use multiple operators you have to use {op}, '%s' is not supported
+			// e.g.
+			// "source_b %s ?"                        ==> "source_b = ?"
+			// "source_b {op} ?"                      ==> "source_b = ?"
+			// "source_b {op} ? AND source_c {op} ?"  ==> "source_b = ? AND source_c = ?"
+			if strings.Contains(sqlc, "%s") {
+				// This is for backward compatibility
+				conds = append(conds, fmt.Sprintf(sqlc, sqlOps[mod]))
 			} else {
-				sqlArgs = append(sqlArgs, val)
+				conds = append(conds, strings.NewReplacer(SQLOperatorPlaceholder, sqlOps[mod]).Replace(sqlc))
+			}
+
+			// Prepare value Args for sql condition.
+			// e.g.  assume value is "1"
+			// "source_b = ?"                           ==>   []interface{}{"1"}
+			// "source_b = ? OR source_c = ?"           ==>   []interface{}{"1", "1"}
+			// "source_b ilike ? OR source_c ilike ?"   ==>   []interface{}{"%1%", "%1%"}
+			valCount := strings.Count(sqlc, "?")
+			for i := 0; i < valCount; i++ {
+				if mod == "ilike" {
+					sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", val))
+				} else {
+					sqlArgs = append(sqlArgs, val)
+				}
 			}
 		}
 	}

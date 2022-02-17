@@ -96,24 +96,166 @@ var setByQueryCases = []struct {
 		expectedSQLConds: "created_at = ?",
 		expectedSQLArgs:  []interface{}{"2019-03-12T00:00:00+08:00"},
 	},
+	{
+		name: "customize SQLCondition",
+		data: FilterData([]*FilterItem{
+			{
+				Key:      "missing-source-url",
+				ItemType: ItemTypeSelect,
+				Options: []*SelectItem{
+					{Text: "Yes", Value: "1", SQLCondition: "source_a IS NULL AND source_b IS NULL"},
+					{Text: "No", Value: "0", SQLCondition: "source_a IS NOT NULL OR source_b IS NOT NULL"},
+				},
+			},
+		}),
+		qs: "missing-source-url=1",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:      "missing-source-url",
+				ItemType: ItemTypeSelect,
+				Modifier: ModifierEquals,
+				Selected: true,
+				ValueIs:  "1",
+				Options: []*SelectItem{
+					{Text: "Yes", Value: "1", SQLCondition: "source_a IS NULL AND source_b IS NULL"},
+					{Text: "No", Value: "0", SQLCondition: "source_a IS NOT NULL OR source_b IS NOT NULL"},
+				},
+			},
+		}),
+		expectedSQLConds: "source_a IS NULL AND source_b IS NULL",
+		expectedSQLArgs:  nil,
+	},
+	{
+		name: "customize SQLCondition with single value",
+		data: FilterData([]*FilterItem{
+			{
+				Key:      "missing-source-url",
+				ItemType: ItemTypeSelect,
+				Options: []*SelectItem{
+					{Text: "Yes", Value: "1", SQLCondition: "source_a IS NULL AND source_b = ?"},
+					{Text: "No", Value: "0", SQLCondition: "source_a IS NOT NULL OR source_b IS NOT NULL"},
+				},
+			},
+		}),
+		qs: "missing-source-url=1",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:      "missing-source-url",
+				ItemType: ItemTypeSelect,
+				Modifier: ModifierEquals,
+				Selected: true,
+				ValueIs:  "1",
+				Options: []*SelectItem{
+					{Text: "Yes", Value: "1", SQLCondition: "source_a IS NULL AND source_b = ?"},
+					{Text: "No", Value: "0", SQLCondition: "source_a IS NOT NULL OR source_b IS NOT NULL"},
+				},
+			},
+		}),
+		expectedSQLConds: "source_a IS NULL AND source_b = ?",
+		expectedSQLArgs:  []interface{}{"1"},
+	},
+	{
+		name: "customize SQLCondition with multiple value",
+		data: FilterData([]*FilterItem{
+			{
+				Key:      "missing-source-url",
+				ItemType: ItemTypeSelect,
+				Options: []*SelectItem{
+					{Text: "Yes", Value: "1", SQLCondition: "source_a IS NULL AND (source_b = ? OR source_c = ?)"},
+					{Text: "No", Value: "0", SQLCondition: "source_a IS NOT NULL OR source_b IS NOT NULL"},
+				},
+			},
+		}),
+		qs: "missing-source-url=1",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:      "missing-source-url",
+				ItemType: ItemTypeSelect,
+				Modifier: ModifierEquals,
+				Selected: true,
+				ValueIs:  "1",
+				Options: []*SelectItem{
+					{Text: "Yes", Value: "1", SQLCondition: "source_a IS NULL AND (source_b = ? OR source_c = ?)"},
+					{Text: "No", Value: "0", SQLCondition: "source_a IS NOT NULL OR source_b IS NOT NULL"},
+				},
+			},
+		}),
+		expectedSQLConds: "source_a IS NULL AND (source_b = ? OR source_c = ?)",
+		expectedSQLArgs:  []interface{}{"1", "1"},
+	},
+	{
+		name: "customize SQLCondition with default operator and single value",
+		data: FilterData([]*FilterItem{
+			{
+				Key:      "missing-source-url",
+				ItemType: ItemTypeSelect,
+				Options: []*SelectItem{
+					{Text: "Yes", Value: "1", SQLCondition: "source_a IS NULL AND source_b %s ?"},
+				},
+			},
+		}),
+		qs: "missing-source-url=1",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:      "missing-source-url",
+				ItemType: ItemTypeSelect,
+				Modifier: ModifierEquals,
+				Selected: true,
+				ValueIs:  "1",
+				Options: []*SelectItem{
+					{Text: "Yes", Value: "1", SQLCondition: "source_a IS NULL AND source_b %s ?"},
+				},
+			},
+		}),
+		expectedSQLConds: "source_a IS NULL AND source_b = ?",
+		expectedSQLArgs:  []interface{}{"1"},
+	},
+	{
+		name: "customize SQLCondition with extra operator and multiple value",
+		data: FilterData([]*FilterItem{
+			{
+				Key:      "missing-source-url",
+				ItemType: ItemTypeSelect,
+				Options: []*SelectItem{
+					{Text: "Yes", Value: "1", SQLCondition: "source_a IS NULL AND (source_b {op} ? OR source_c {op} ?)"},
+				},
+			},
+		}),
+		qs: "missing-source-url.gt=1",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:      "missing-source-url",
+				ItemType: ItemTypeSelect,
+				Selected: true,
+				ValueIs:  "1",
+				Options: []*SelectItem{
+					{Text: "Yes", Value: "1", SQLCondition: "source_a IS NULL AND (source_b {op} ? OR source_c {op} ?)"},
+				},
+			},
+		}),
+		expectedSQLConds: "source_a IS NULL AND (source_b > ? OR source_c > ?)",
+		expectedSQLArgs:  []interface{}{"1", "1"},
+	},
 }
 
 func TestSetByQueryString(t *testing.T) {
 	for _, c := range setByQueryCases {
-		conds, args := c.data.SetByQueryString(c.qs)
-		diff := testingutils.PrettyJsonDiff(c.expected, c.data)
-		if len(diff) > 0 {
-			t.Error(c.name, diff)
-		}
+		t.Run(c.name, func(t *testing.T) {
+			conds, args := c.data.SetByQueryString(c.qs)
+			diff := testingutils.PrettyJsonDiff(c.expected, c.data)
+			if len(diff) > 0 {
+				t.Error(c.name, diff)
+			}
 
-		diff1 := testingutils.PrettyJsonDiff(c.expectedSQLConds, conds)
-		if len(diff1) > 0 {
-			t.Error(c.name, "conds", diff1)
-		}
+			diff1 := testingutils.PrettyJsonDiff(c.expectedSQLConds, conds)
+			if len(diff1) > 0 {
+				t.Error(c.name, "conds", diff1)
+			}
 
-		diff2 := testingutils.PrettyJsonDiff(c.expectedSQLArgs, args)
-		if len(diff2) > 0 {
-			t.Error(c.name, "args", diff2)
-		}
+			diff2 := testingutils.PrettyJsonDiff(c.expectedSQLArgs, args)
+			if len(diff2) > 0 {
+				t.Error(c.name, "args", diff2)
+			}
+		})
 	}
 }
