@@ -287,13 +287,23 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 				val = unixToDatetime(val, it.Timezone == TimezoneUTC, 0)
 			}
 
-			// TODO: add comments
+			// Compose operator into sql condition. If you want to use multiple operators you have to use {op}, '%s' is not supported
+			// e.g.
+			// "source_b %s ?"                        ==> "source_b = ?"
+			// "source_b {op} ?"                      ==> "source_b = ?"
+			// "source_b {op} ? AND source_c {op} ?"  ==> "source_b = ? AND source_c = ?"
 			if strings.Contains(sqlc, "%s") {
+				// This is for backward compatibility
 				conds = append(conds, fmt.Sprintf(sqlc, sqlOps[mod]))
 			} else {
 				conds = append(conds, strings.NewReplacer(SQLOperatorPlaceholder, sqlOps[mod]).Replace(sqlc))
 			}
 
+			// Prepare value Args for sql condition.
+			// e.g.  assume value is "1"
+			// "source_b = ?"                           ==>   []interface{}{"1"}
+			// "source_b = ? OR source_c = ?"           ==>   []interface{}{"1", "1"}
+			// "source_b ilike ? OR source_c ilike ?"   ==>   []interface{}{"%1%", "%1%"}
 			valCount := strings.Count(sqlc, "?")
 			for i := 0; i < valCount; i++ {
 				if mod == "ilike" {
