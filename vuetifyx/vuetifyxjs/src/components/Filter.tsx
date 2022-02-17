@@ -499,6 +499,81 @@ export const SelectItem = Vue.extend({
 	},
 });
 
+export const MultipleSelectItem = Vue.extend({
+	components: {
+		vselect: VSelect,
+		vtextfield: VTextField,
+		vicon: VIcon,
+	},
+	props: {
+		value: Object,
+		translations: {
+			type: Object,
+		},
+	},
+
+	data() {
+		return {
+			modifier: this.$props.value.modifier || 'in',
+			valuesAre: this.$props.value.valuesAre || [],
+		};
+	},
+
+	methods: {
+		inputEmit() {
+			this.$emit('input', { ...this.$props.value, ...this.$data });
+		},
+
+		setModifier(e: string) {
+			this.modifier = e;
+			this.inputEmit();
+		},
+
+		setValue(value: any) {
+			this.inputEmit();
+		},
+	},
+
+	render() {
+		const t = this.$props.translations;
+		return (
+			<div>
+				<div>
+					<vselect
+						class='d-inline-block'
+						style='width: 200px'
+						value={this.modifier}
+						items={
+							[
+								{ text: t.in, value: 'in' },
+								{ text: t.notIn, value: 'notIn' },
+							]
+						}
+						on={{ change: this.setModifier }}
+						hideDetails={true}
+					>
+					</vselect>
+				</div>
+				<div style='max-height: 160px; overflow-y: scroll;'>
+                    {this.value.options.map((opt: SelectOption) => {
+                        return (
+                        <v-checkbox
+                            v-model={this.valuesAre}
+                            on={{ change: this.setValue }}
+                            label={opt.text}
+                            value={opt.value}
+                            hideDetails={true}
+                            dense={true}
+                        >
+                        </v-checkbox>
+                        );
+                    })}
+				</div>
+			</div>
+		);
+	},
+});
+
 /*
 data = [
   {
@@ -559,6 +634,7 @@ interface FilterItem {
 	itemType: string;
 	modifier: string;
 	valueIs: string;
+    valuesAre: string[];
 	selected?: boolean;
 	valueFrom?: string;
 	valueTo?: string;
@@ -636,6 +712,10 @@ export const Filter = Vue.extend({
 						equals: 'is equal to',
 						contains: 'contains',
 					},
+                    multipleSelect: {
+                        in: 'in',
+                        notIn: 'not in',
+                    },
 					clear: 'Clear',
 					filters: 'Filters',
 					filter: 'Filter',
@@ -724,6 +804,7 @@ export const Filter = Vue.extend({
 			NumberItem,
 			StringItem,
 			SelectItem,
+            MultipleSelectItem,
 		};
 
 		const t = this.$props.translations;
@@ -733,6 +814,7 @@ export const Filter = Vue.extend({
 			NumberItem: t.number,
 			StringItem: t.string,
 			SelectItem: {},
+            MultipleSelectItem: t.multipleSelect,
 		};
 
 		const body = this.internalValue.map((op: FilterItem, i: number) => {

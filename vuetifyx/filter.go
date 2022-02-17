@@ -127,15 +127,21 @@ type FilterTranslations struct {
 		Equals   string `json:"equals,omitempty"`
 		Contains string `json:"contains,omitempty"`
 	} `json:"string,omitempty"`
+
+	MultipleSelect struct {
+		In    string `json:"in,omitempty"`
+		NotIn string `json:"notIn,omitempty"`
+	} `json:"multipleSelect,omitempty"`
 }
 
 type FilterItemType string
 
 const (
-	ItemTypeDate   FilterItemType = "DateItem"
-	ItemTypeSelect FilterItemType = "SelectItem"
-	ItemTypeNumber FilterItemType = "NumberItem"
-	ItemTypeString FilterItemType = "StringItem"
+	ItemTypeDate           FilterItemType = "DateItem"
+	ItemTypeSelect         FilterItemType = "SelectItem"
+	ItemTypeMultipleSelect FilterItemType = "MultipleSelectItem"
+	ItemTypeNumber         FilterItemType = "NumberItem"
+	ItemTypeString         FilterItemType = "StringItem"
 )
 
 type FilterItemModifier string
@@ -151,6 +157,8 @@ const (
 	ModifierGreaterThan  FilterItemModifier = "greaterThan"  // Number
 	ModifierLessThan     FilterItemModifier = "lessThan"     // Number
 	ModifierContains     FilterItemModifier = "contains"     // String
+	ModifierIn           FilterItemModifier = "in"           // String
+	ModifierNotIn        FilterItemModifier = "notIn"        // String
 )
 
 type FilterItemInTheLastUnit string
@@ -181,6 +189,7 @@ type FilterItem struct {
 	Selected       bool                    `json:"selected,omitempty"`
 	Modifier       FilterItemModifier      `json:"modifier,omitempty"`
 	ValueIs        string                  `json:"valueIs,omitempty"`
+	ValuesAre      []string                `json:"valuesAre,omitempty"`
 	ValueFrom      string                  `json:"valueFrom,omitempty"`
 	ValueTo        string                  `json:"valueTo,omitempty"`
 	InTheLastValue string                  `json:"inTheLastValue,omitempty"`
@@ -211,7 +220,7 @@ func (fd FilterData) getSQLCondition(key string) string {
 	if it == nil {
 		return ""
 	}
-	
+
 	return it.SQLCondition
 }
 
@@ -232,6 +241,8 @@ var sqlOps = map[string]string{
 	"gt":    ">",
 	"lt":    "<",
 	"ilike": "ILIKE",
+	"in":    "IN",
+	"notIn": "NOT IN",
 }
 
 func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs []interface{}) {
@@ -278,9 +289,12 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 
 			conds = append(conds, fmt.Sprintf(sqlc, sqlOps[mod]))
 
-			if mod == "ilike" {
+			switch mod {
+			case "ilike":
 				sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", val))
-			} else {
+			case "in", "notIn":
+				sqlArgs = append(sqlArgs, strings.Split(val, ","))
+			default:
 				sqlArgs = append(sqlArgs, val)
 			}
 		}
@@ -311,6 +325,21 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 				for mod, v := range mv {
 					if mod == "" {
 						it.Modifier = ModifierEquals
+					}
+
+					if it.ItemType == ItemTypeMultipleSelect {
+						switch mod {
+						case "in":
+							it.Modifier = ModifierIn
+						case "notIn":
+							it.Modifier = ModifierNotIn
+						default:
+							it.Modifier = ModifierIn
+						}
+						if v != "" {
+							it.ValuesAre = strings.Split(v, ",")
+						}
+						continue
 					}
 
 					if it.ItemType == ItemTypeDate {

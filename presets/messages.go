@@ -41,6 +41,8 @@ type Messages struct {
 	FiltersNumberAnd               string
 	FiltersStringEquals            string
 	FiltersStringContains          string
+	FiltersMultipleSelectIn        string
+	FiltersMultipleSelectNotIn     string
 	PaginationRowsPerPage          string
 	ListingNoRecordToShow          string
 	ListingSelectedCountNotice     string
@@ -106,6 +108,8 @@ var Messages_en_US = &Messages{
 	FiltersNumberAnd:               "and",
 	FiltersStringEquals:            "is equal to",
 	FiltersStringContains:          "contains",
+	FiltersMultipleSelectIn:        "in",
+	FiltersMultipleSelectNotIn:     "not in",
 	PaginationRowsPerPage:          "Rows per page: ",
 	ListingNoRecordToShow:          "No records to show",
 	ListingSelectedCountNotice:     "{count} records are selected. ",
@@ -148,6 +152,8 @@ var Messages_zh_CN = &Messages{
 	FiltersNumberAnd:               "和",
 	FiltersStringEquals:            "等于",
 	FiltersStringContains:          "包含",
+	FiltersMultipleSelectIn:        "包含",
+	FiltersMultipleSelectNotIn:     "不包含",
 	PaginationRowsPerPage:          "每页: ",
 	ListingNoRecordToShow:          "没有可显示的记录",
 	ListingSelectedCountNotice:     "{count}条记录被选中。",

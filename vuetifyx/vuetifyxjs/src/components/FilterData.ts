@@ -152,6 +152,18 @@ function pushSelectItem(segs: any, op: any) {
 	}
 }
 
+function pushMultipleSelectItem(segs: any, op: any) {
+	const mod = op.modifier || 'in';
+	if (mod === 'in' && op.valuesAre && op.valuesAre.length > 0) {
+        pushKeyVal(segs, op.key, 'in', op.valuesAre);
+		return;
+	}
+	if (mod === 'notIn' && op.valuesAre && op.valuesAre.length > 0) {
+        pushKeyVal(segs, op.key, 'notIn', op.valuesAre);
+		return;
+	}
+}
+
 export function filterData(data: any): any {
 	if (!data) {
 		return [];
@@ -171,6 +183,9 @@ export function filterData(data: any): any {
 			}
 			if (op.itemType === 'SelectItem') {
 				pushSelectItem(r, op);
+			}
+			if (op.itemType === 'MultipleSelectItem') {
+				pushMultipleSelectItem(r, op);
 			}
 			return op;
 		});

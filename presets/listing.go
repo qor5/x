@@ -347,6 +347,9 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 	ft.String.Equals = msgr.FiltersStringEquals
 	ft.String.Contains = msgr.FiltersStringContains
 
+	ft.MultipleSelect.In = msgr.FiltersMultipleSelectIn
+	ft.MultipleSelect.NotIn = msgr.FiltersMultipleSelectNotIn
+
 	disableNewBtn := b.mb.Info().Verifier().Do(PermCreate).WithReq(ctx.R).IsAllowed() != nil
 
 	var toolbar = VToolbar(
