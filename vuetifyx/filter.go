@@ -213,6 +213,7 @@ func (fd FilterData) getSQLCondition(key string, val string) string {
 		return ""
 	}
 
+	// If item type is ItemTypeSelect and value is not nil, we use option's SQLCondition instead of item SQLCondition if option's SQLCondition present.
 	if it.ItemType == ItemTypeSelect && val != "" {
 		for _, option := range it.Options {
 			if option.Value == val && option.SQLCondition != "" {
