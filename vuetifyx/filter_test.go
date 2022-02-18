@@ -1,9 +1,10 @@
 package vuetifyx_test
 
 import (
+	"testing"
+
 	. "github.com/goplaid/x/vuetifyx"
 	"github.com/theplant/testingutils"
-	"testing"
 )
 
 var setByQueryCases = []struct {
@@ -235,6 +236,41 @@ var setByQueryCases = []struct {
 		}),
 		expectedSQLConds: "source_a IS NULL AND (source_b > ? OR source_c > ?)",
 		expectedSQLArgs:  []interface{}{"1", "1"},
+	},
+	{
+		name: "ItemTypeMultipleSelect",
+		data: FilterData([]*FilterItem{
+			{
+				Key:          "state",
+				ItemType:     ItemTypeMultipleSelect,
+				SQLCondition: "state %s ?",
+				Options: []*SelectItem{
+					{Text: "Draft", Value: "draft"},
+					{Text: "Approved", Value: "approved"},
+					{Text: "Rejected", Value: "rejected"},
+				},
+			},
+		}),
+		qs: "state.in=draft,rejected",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:      "state",
+				ItemType: ItemTypeMultipleSelect,
+				Selected: true,
+				Modifier: ModifierIn,
+				ValuesAre: []string{
+					"draft",
+					"rejected",
+				},
+				Options: []*SelectItem{
+					{Text: "Draft", Value: "draft"},
+					{Text: "Approved", Value: "approved"},
+					{Text: "Rejected", Value: "rejected"},
+				},
+			},
+		}),
+		expectedSQLConds: "state IN ?",
+		expectedSQLArgs:  []interface{}{[]string{"draft", "rejected"}},
 	},
 }
 
