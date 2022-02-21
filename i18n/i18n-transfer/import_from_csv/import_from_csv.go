@@ -20,7 +20,7 @@ func ImportFromCsv(dir string, translationMap map[string]map[string]string) erro
 		return err
 	}
 	for path, pkg := range pkgs {
-		for _, f := range pkg.Files {
+		for fileName, f := range pkg.Files {
 			var isModiyiedFile bool
 			for _, decl := range f.Decls {
 				if decl, ok := decl.(*ast.GenDecl); ok {
@@ -86,7 +86,7 @@ to:
 	%s
 ----------------------------------------------
 
-`, go_path.Join(go_path.Join(path, f.Name.Name+".go"), locale, key.Name), value.Value, "\""+translationValue+"\"")
+`, go_path.Join(fileName, locale, key.Name), value.Value, "\""+translationValue+"\"")
 										value.Value = "\"" + translationValue + "\""
 										isModiyiedFile = true
 									}
@@ -98,7 +98,7 @@ to:
 			}
 
 			if isModiyiedFile {
-				file, err := os.OpenFile(go_path.Join(path, f.Name.Name+".go"), os.O_WRONLY, 0)
+				file, err := os.OpenFile(fileName, os.O_WRONLY, 0)
 				defer file.Close()
 				if err != nil {
 					return err
