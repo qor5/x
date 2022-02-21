@@ -1,6 +1,7 @@
 package presets
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -117,7 +118,6 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 	bulkPanel, toolbar, dataTable, dataTableAdditions := b.getComponents(ctx, ctx.R.URL)
 
 	r.Body = VContainer(
-
 		b.filterTabs(msgr, ctx),
 		bulkPanel,
 		VCard(
@@ -153,8 +153,21 @@ func getSelectedIds(ctx *web.EventContext) (selected []string) {
 func (b *ListingBuilder) bulkPanel(bulk *ActionBuilder, selectedIds []string, ctx *web.EventContext) (r h.HTMLComponent) {
 	msgr := MustGetMessages(ctx.R)
 
+	var errComp h.HTMLComponent
+	if vErr, ok := ctx.Flash.(*web.ValidationErrors); ok {
+		errComp = VAlert(h.Text(vErr.GetGlobalError())).
+			Border("left").
+			Type("error").
+			Elevation(2).
+			ColoredBorder(true)
+	}
+
 	return VCard(
+		VCardTitle(
+			h.Text(bulk.NameLabel.label),
+		),
 		VCardText(
+			errComp,
 			bulk.compFunc(selectedIds, ctx),
 		),
 		VCardActions(
@@ -178,7 +191,7 @@ func (b *ListingBuilder) bulkPanel(bulk *ActionBuilder, selectedIds []string, ct
 					Go(),
 				),
 		),
-	).Class("mb-5")
+	)
 }
 
 func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventResponse, err error) {
@@ -217,6 +230,25 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 	return
 }
 
+func (b *ListingBuilder) openBulkActionDialog(ctx *web.EventContext) (r web.EventResponse, err error) {
+	selected := getSelectedIds(ctx)
+	bulkName := ctx.R.URL.Query().Get(bulkPanelOpenParamName)
+	bulk := getAction(b.bulkActions, bulkName)
+
+	if bulk == nil {
+		err = errors.New("cannot find requested action")
+		return
+	}
+
+	if len(selected) == 0 {
+		ShowMessage(&r, "Please select record", "warning")
+		return
+	}
+
+	b.mb.p.dialog(&r, b.bulkPanel(bulk, selected, ctx), bulk.dialogWidth)
+	return
+}
+
 func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventResponse, err error) {
 	bulk := getAction(b.bulkActions, ctx.R.FormValue(ParamBulkActionName))
 	if bulk == nil {
@@ -232,10 +264,21 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 	if v := ctx.R.FormValue(ParamSelectedIds); v != "" {
 		selectedIds = strings.Split(v, ",")
 	}
+
 	err1 := bulk.updateFunc(selectedIds, ctx)
-	if err1 != nil || ctx.Flash != nil {
+	ctx.Flash = err1
+
+	if err1 != nil {
+		if _, ok := err1.(*web.ValidationErrors); !ok {
+			vErr := &web.ValidationErrors{}
+			vErr.GlobalError(err1.Error())
+			ctx.Flash = vErr
+		}
+	}
+
+	if ctx.Flash != nil {
 		r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-			Name: bulkPanelPortalName,
+			Name: dialogContentPortalName,
 			Body: b.bulkPanel(bulk, selectedIds, ctx),
 		})
 		return
@@ -266,7 +309,7 @@ func (b *ListingBuilder) bulkActionsButtons(msgr *Messages, ctx *web.EventContex
 				Depressed(true).
 				Dark(true).
 				Class("ml-2").
-				Attr("@click", web.Plaid().
+				Attr("@click", web.Plaid().EventFunc(actions.OpenBulkActionDialog).
 					Queries(url.Values{bulkPanelOpenParamName: []string{ba.name}}).
 					MergeQuery(true).
 					Go())
@@ -542,16 +585,7 @@ func (b *ListingBuilder) getComponents(
 	}
 
 	haveCheckboxes := len(b.bulkActions) > 0
-
-	selected := getSelectedIds(ctx)
-
-	bulkName := pageURL.Query().Get(bulkPanelOpenParamName)
-	bulk := getAction(b.bulkActions, bulkName)
-	if bulk == nil {
-		toolbar = b.newAndFilterToolbar(msgr, ctx, fd)
-	} else {
-		bulkPanel = web.Portal(b.bulkPanel(bulk, selected, ctx)).Name(bulkPanelPortalName)
-	}
+	toolbar = b.newAndFilterToolbar(msgr, ctx, fd)
 
 	pagesCount := int(int64(totalCount)/searchParams.PerPage + 1)
 	if int64(totalCount)%searchParams.PerPage == 0 {

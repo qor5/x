@@ -72,6 +72,7 @@ func (b *ModelBuilder) registerDefaultEventFuncs() {
 	b.RegisterEventFunc(actions.Update, b.editing.defaultUpdate)
 	b.RegisterEventFunc(actions.DoDelete, b.editing.doDelete)
 	b.RegisterEventFunc(actions.DoBulkAction, b.listing.doBulkAction)
+	b.RegisterEventFunc(actions.OpenBulkActionDialog, b.listing.openBulkActionDialog)
 	b.RegisterEventFunc(actions.Action, b.detailing.formDrawerAction)
 	b.RegisterEventFunc(actions.DoAction, b.detailing.doAction)
 }

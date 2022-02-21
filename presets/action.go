@@ -5,7 +5,10 @@ type ActionBuilder struct {
 	buttonCompFunc ComponentFunc
 	updateFunc     ActionUpdateFunc
 	compFunc       ActionComponentFunc
+	dialogWidth    string
 }
+
+const defaultBulkActionDialogWidth = "600"
 
 func (b *ListingBuilder) BulkAction(name string) (r *ActionBuilder) {
 	builder := getAction(b.bulkActions, name)
@@ -14,6 +17,7 @@ func (b *ListingBuilder) BulkAction(name string) (r *ActionBuilder) {
 	}
 	r = &ActionBuilder{}
 	r.name = name
+	r.dialogWidth = defaultBulkActionDialogWidth
 	b.bulkActions = append(b.bulkActions, r)
 	return
 }
@@ -46,6 +50,11 @@ func (b *ActionBuilder) UpdateFunc(v ActionUpdateFunc) (r *ActionBuilder) {
 
 func (b *ActionBuilder) Label(v string) (r *ActionBuilder) {
 	b.label = v
+	return b
+}
+
+func (b *ActionBuilder) DialogWidth(v string) (r *ActionBuilder) {
+	b.dialogWidth = v
 	return b
 }
 
