@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/goplaid/x/i18n/i18n-transfer/export_to_csv"
-	"github.com/goplaid/x/i18n/i18n-transfer/import_from_csv"
+	"github.com/goplaid/x/i18n/i18n-transfer/csv"
+	"github.com/goplaid/x/i18n/i18n-transfer/parser"
 )
 
 func main() {
@@ -29,16 +29,16 @@ Usage of import:
     	input csv file path`)
 			os.Exit(1)
 		}
-		translationMap, err := import_from_csv.GetTranslationsMap(*importCsv)
+		translationMap, err := csv.GetTranslationsMap(*importCsv)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		err = import_from_csv.ImportFromCsv("./", translationMap)
+		err = parser.ImportFromTranslationsMap("./", translationMap)
 		if err != nil {
 			log.Fatalln(err)
 		}
 	case "export":
-		translationsMap, err := export_to_csv.GetTranslationsMap("./")
+		translationsMap, err := parser.ExportToTranslationsMap("./")
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -48,7 +48,7 @@ Usage of import:
 				fmt.Printf("    %v: %v\n", k, v)
 			}
 		}
-		err = export_to_csv.ExportToCsv(translationsMap)
+		err = csv.ExportToCsv(translationsMap)
 		if err != nil {
 			log.Fatalln(err)
 		}

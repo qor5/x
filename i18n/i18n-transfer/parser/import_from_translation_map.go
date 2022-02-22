@@ -1,34 +1,33 @@
-package export_to_csv
+package parser
 
 import (
+	"fmt"
 	"go/ast"
+	"go/format"
 	go_parser "go/parser"
 	"go/token"
+	"os"
 	go_path "path"
 	"strings"
-
-	"github.com/goplaid/x/i18n/i18n-transfer/parser"
 )
 
-func GetTranslationsMap(projectDir string) (translations map[string]map[string]string, err error) {
-	translations = make(map[string]map[string]string)
+func ImportFromTranslationsMap(dir string, translationsMap map[string]map[string]string) error {
 	fset := token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, projectDir, nil, go_parser.AllErrors)
+	pkgs, err := ParseDir(fset, dir, nil, go_parser.AllErrors)
 	if err != nil {
-		return
+		return err
 	}
-
 	for path, pkg := range pkgs {
-		for _, f := range pkg.Files {
+		for fileName, f := range pkg.Files {
+			var isModiyiedFile bool
 			for _, decl := range f.Decls {
 				if decl, ok := decl.(*ast.GenDecl); ok {
 					for _, spec := range decl.Specs {
 						if spec, ok := spec.(*ast.ValueSpec); ok {
-							var locale string
-							var translation = make(map[string]string)
 							var isMessage bool
+							var locale string
 							for _, name := range spec.Names {
-								if strings.Contains(name.Name, "Message") {
+								if _, exist := translationsMap[name.Name]; exist {
 									locale = name.Name
 									isMessage = true
 								}
@@ -74,25 +73,40 @@ func GetTranslationsMap(projectDir string) (translations map[string]map[string]s
 										break
 									}
 
-									if isMessage {
-										translation[go_path.Join(path, key.Name)] = strings.Trim(value.Value, "\"")
-									}
-								}
-							}
+									if translationValue, exist := translationsMap[locale][go_path.Join(path, key.Name)]; isMessage && exist && value.Value != "\""+translationValue+"\"" {
+										fmt.Printf(`
+----------------------------------------------
+update translation:
+	%s
+from:
+	%s
+to:
+	%s
+----------------------------------------------
 
-							if isMessage {
-								if translations[locale] == nil {
-									translations[locale] = make(map[string]string)
-								}
-								for k, v := range translation {
-									translations[locale][k] = v
+`, go_path.Join(fileName, locale, key.Name), value.Value, "\""+translationValue+"\"")
+										value.Value = "\"" + translationValue + "\""
+										isModiyiedFile = true
+									}
 								}
 							}
 						}
 					}
 				}
 			}
+
+			if isModiyiedFile {
+				file, err := os.OpenFile(fileName, os.O_WRONLY, 0)
+				defer file.Close()
+				if err != nil {
+					return err
+				}
+				err = format.Node(file, fset, f)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
-	return
+	return nil
 }

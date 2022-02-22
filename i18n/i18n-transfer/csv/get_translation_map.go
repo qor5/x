@@ -1,11 +1,11 @@
-package import_from_csv
+package csv
 
 import (
 	"encoding/csv"
 	"os"
 )
 
-func GetTranslationsMap(csvPath string) (translationMap map[string]map[string]string, err error) {
+func GetTranslationsMap(csvPath string) (translationsMap map[string]map[string]string, err error) {
 	f, err := os.Open(csvPath)
 	if err != nil {
 		return
@@ -28,13 +28,13 @@ func GetTranslationsMap(csvPath string) (translationMap map[string]map[string]st
 		}
 	}
 
-	translationMap = make(map[string]map[string]string)
+	translationsMap = make(map[string]map[string]string)
 	for i, record := range records {
 		for j, value := range record {
-			if translationMap[records[0][j]] == nil {
-				translationMap[records[0][j]] = make(map[string]string)
+			if translationsMap[records[0][j]] == nil {
+				translationsMap[records[0][j]] = make(map[string]string)
 			}
-			translationMap[records[0][j]][records[i][0]] = value
+			translationsMap[records[0][j]][records[i][0]] = value
 		}
 	}
 	return
