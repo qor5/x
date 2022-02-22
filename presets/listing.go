@@ -23,6 +23,7 @@ type ListingBuilder struct {
 	mb              *ModelBuilder
 	bulkActions     []*ActionBuilder
 	actions         []*ActionBuilder
+	actionsAsMenu   bool
 	rowMenu         *RowMenuBuilder
 	filterDataFunc  FilterDataFunc
 	filterTabsFunc  FilterTabsFunc
@@ -79,6 +80,11 @@ func (b *ListingBuilder) TotalVisible(v int64) (r *ListingBuilder) {
 
 func (b *ListingBuilder) OrderBy(v string) (r *ListingBuilder) {
 	b.orderBy = v
+	return b
+}
+
+func (b *ListingBuilder) ActionsAsMenu(v bool) (r *ListingBuilder) {
+	b.actionsAsMenu = v
 	return b
 }
 
@@ -292,34 +298,6 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 	return
 }
 
-func (b *ListingBuilder) bulkActionsButtons(msgr *Messages, ctx *web.EventContext) h.HTMLComponent {
-	var bulkButtons []h.HTMLComponent
-
-	for _, ba := range b.bulkActions {
-		if b.mb.Info().Verifier().SnakeDo("bulk_actions", ba.name).WithReq(ctx.R).IsAllowed() != nil {
-			continue
-		}
-
-		var btn h.HTMLComponent
-		if ba.buttonCompFunc != nil {
-			btn = ba.buttonCompFunc(ctx)
-		} else {
-			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
-				Color("secondary").
-				Depressed(true).
-				Dark(true).
-				Class("ml-2").
-				Attr("@click", web.Plaid().EventFunc(actions.OpenBulkActionDialog).
-					Queries(url.Values{bulkPanelOpenParamName: []string{ba.name}}).
-					MergeQuery(true).
-					Go())
-		}
-
-		bulkButtons = append(bulkButtons, btn)
-	}
-	return h.Components(bulkButtons...)
-}
-
 const ActiveFilterTabQueryKey = "active_filter_tab"
 
 func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.HTMLComponent) {
@@ -399,24 +377,7 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 		VSpacer(),
 	).Flat(true)
 
-	toolbar.AppendChildren(b.bulkActionsButtons(msgr, ctx))
-
-	for _, ba := range b.actions {
-		if b.mb.Info().Verifier().SnakeDo("actions", ba.name).WithReq(ctx.R).IsAllowed() != nil {
-			continue
-		}
-
-		var button h.HTMLComponent = VBtn(b.mb.getLabel(ba.NameLabel)).
-			Color("primary").
-			Depressed(true).
-			Dark(true).
-			Class("ml-2")
-		if ba.buttonCompFunc != nil {
-			button = ba.buttonCompFunc(ctx)
-		}
-
-		toolbar.AppendChildren(button)
-	}
+	toolbar.AppendChildren(b.actionsComponent(msgr, ctx))
 
 	if !disableNewBtn {
 		toolbar.AppendChildren(VBtn(msgr.New).
@@ -657,4 +618,64 @@ func (b *ListingBuilder) ReloadList(
 			Body: dataTableAdditions,
 		},
 	)
+}
+
+func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext) h.HTMLComponent {
+	var actionBtns []h.HTMLComponent
+	for _, ba := range b.bulkActions {
+		if b.mb.Info().Verifier().SnakeDo("bulk_actions", ba.name).WithReq(ctx.R).IsAllowed() != nil {
+			continue
+		}
+
+		var btn h.HTMLComponent
+		if ba.buttonCompFunc != nil {
+			btn = ba.buttonCompFunc(ctx)
+		} else {
+			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
+				Color("secondary").
+				Depressed(true).
+				Dark(true).
+				Class("ml-2").
+				Attr("@click", web.Plaid().EventFunc(actions.OpenBulkActionDialog).
+					Queries(url.Values{bulkPanelOpenParamName: []string{ba.name}}).
+					MergeQuery(true).
+					Go())
+		}
+
+		actionBtns = append(actionBtns, btn)
+	}
+
+	for _, ba := range b.actions {
+		if b.mb.Info().Verifier().SnakeDo("actions", ba.name).WithReq(ctx.R).IsAllowed() != nil {
+			continue
+		}
+
+		var button h.HTMLComponent = VBtn(b.mb.getLabel(ba.NameLabel)).
+			Color("primary").
+			Depressed(true).
+			Dark(true).
+			Class("ml-2")
+		if ba.buttonCompFunc != nil {
+			button = ba.buttonCompFunc(ctx)
+		}
+
+		actionBtns = append(actionBtns, button)
+	}
+
+	if b.actionsAsMenu {
+		var listItems []h.HTMLComponent
+		for _, btn := range actionBtns {
+			listItems = append(listItems, VListItem(btn))
+		}
+		return VMenu(
+			web.Slot(
+				VBtn("Actions").
+					Attr("v-bind", "attrs").
+					Attr("v-on", "on"),
+			).Name("activator").Scope("{ on, attrs }"),
+			VList(listItems...),
+		).OpenOnHover(true).
+			OffsetY(true)
+	}
+	return h.Components(actionBtns...)
 }
