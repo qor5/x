@@ -1,35 +1,32 @@
-package import_from_csv
+package parser
 
 import (
-	"fmt"
 	"go/ast"
-	"go/format"
 	go_parser "go/parser"
 	"go/token"
-	"os"
 	go_path "path"
 	"strings"
-
-	"github.com/goplaid/x/i18n/i18n-transfer/parser"
 )
 
-func ImportFromCsv(dir string, translationMap map[string]map[string]string) error {
+func ExportToTranslationsMap(projectDir string) (translationsMap map[string]map[string]string, err error) {
+	translationsMap = make(map[string]map[string]string)
 	fset := token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, dir, nil, go_parser.AllErrors)
+	pkgs, err := ParseDir(fset, projectDir, nil, go_parser.AllErrors)
 	if err != nil {
-		return err
+		return
 	}
+
 	for path, pkg := range pkgs {
-		for fileName, f := range pkg.Files {
-			var isModiyiedFile bool
+		for _, f := range pkg.Files {
 			for _, decl := range f.Decls {
 				if decl, ok := decl.(*ast.GenDecl); ok {
 					for _, spec := range decl.Specs {
 						if spec, ok := spec.(*ast.ValueSpec); ok {
-							var isMessage bool
 							var locale string
+							var translationMap = make(map[string]string)
+							var isMessage bool
 							for _, name := range spec.Names {
-								if _, exist := translationMap[name.Name]; exist {
+								if strings.Contains(name.Name, "Message") {
 									locale = name.Name
 									isMessage = true
 								}
@@ -75,40 +72,25 @@ func ImportFromCsv(dir string, translationMap map[string]map[string]string) erro
 										break
 									}
 
-									if translationValue, exist := translationMap[locale][go_path.Join(path, key.Name)]; isMessage && exist && value.Value != "\""+translationValue+"\"" {
-										fmt.Printf(`
-----------------------------------------------
-update translation:
-	%s
-from:
-	%s
-to:
-	%s
-----------------------------------------------
-
-`, go_path.Join(fileName, locale, key.Name), value.Value, "\""+translationValue+"\"")
-										value.Value = "\"" + translationValue + "\""
-										isModiyiedFile = true
+									if isMessage {
+										translationMap[go_path.Join(path, key.Name)] = strings.Trim(value.Value, "\"")
 									}
+								}
+							}
+
+							if isMessage {
+								if translationsMap[locale] == nil {
+									translationsMap[locale] = make(map[string]string)
+								}
+								for k, v := range translationMap {
+									translationsMap[locale][k] = v
 								}
 							}
 						}
 					}
 				}
 			}
-
-			if isModiyiedFile {
-				file, err := os.OpenFile(fileName, os.O_WRONLY, 0)
-				defer file.Close()
-				if err != nil {
-					return err
-				}
-				err = format.Node(file, fset, f)
-				if err != nil {
-					return err
-				}
-			}
 		}
 	}
-	return nil
+	return
 }
