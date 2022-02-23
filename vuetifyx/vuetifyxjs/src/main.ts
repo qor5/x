@@ -7,7 +7,8 @@ import {Core, SelectedItems} from './components/Helpers';
 import {Filter} from './components/Filter';
 // @ts-ignore
 import DatetimePicker from './components/DateTimePicker.vue';
-import draggable from 'vuedraggable'
+import draggable from 'vuedraggable';
+import SelectMany from './components/SelectMany.vue';
 
 declare var window: any;
 
@@ -18,4 +19,5 @@ declare var window: any;
 	Vue.component('vx-filter', Filter);
 	Vue.component('vx-datetimepicker', DatetimePicker);
 	Vue.component('vx-draggable', draggable);
+	Vue.component('vx-selectmany', SelectMany);
 });
