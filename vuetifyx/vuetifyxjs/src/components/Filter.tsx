@@ -859,6 +859,7 @@ export const Filter = Vue.extend({
 				},
 			}}
 				offsetY={true}
+                allowOverflow={true}
 				// absolute={true}
 				minWidth='400px'
 				maxWidth='400px'

@@ -675,7 +675,8 @@ func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext)
 			).Name("activator").Scope("{ on, attrs }"),
 			VList(listItems...),
 		).OpenOnHover(true).
-			OffsetY(true)
+			OffsetY(true).
+			AllowOverflow(true)
 	}
 	return h.Components(actionBtns...)
 }
