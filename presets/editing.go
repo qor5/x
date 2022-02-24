@@ -261,16 +261,18 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	).VSlot("{ plaidForm }")
 }
 
-func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, err error) {
+func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, err1 error) {
 	id := ctx.R.FormValue(ParamID)
 	var obj = b.mb.NewModel()
 	if len(id) > 0 {
-		err = b.Deleter(obj, id, ctx)
+		err := b.Deleter(obj, id, ctx)
 		if err != nil {
+			ShowMessage(&r, err.Error(), "warning")
 			return
 		}
 	}
 
+	// refresh current page
 	r.PushState = web.Location(nil)
 	return
 }
