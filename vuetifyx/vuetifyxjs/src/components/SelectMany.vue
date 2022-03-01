@@ -117,7 +117,7 @@ export default {
 			}
 			this.isLoading = true;
 			this.searchItemsFunc(val).then(r => {
-				this.internalItems = r.data
+				this.internalItems = r.data || []
 			}).finally(() => {
 				this.isLoading = false
 			});
