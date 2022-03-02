@@ -37,86 +37,87 @@ type ModelBuilder struct {
 	web.EventsHub
 }
 
-func NewModelBuilder(p *Builder, model interface{}) (r *ModelBuilder) {
-	r = &ModelBuilder{p: p, model: model, primaryField: "ID"}
-	r.modelType = reflect.TypeOf(model)
-	if r.modelType.Kind() != reflect.Ptr {
+func NewModelBuilder(p *Builder, model interface{}) (mb *ModelBuilder) {
+	mb = &ModelBuilder{p: p, model: model, primaryField: "ID"}
+	mb.modelType = reflect.TypeOf(model)
+	if mb.modelType.Kind() != reflect.Ptr {
 		panic(fmt.Sprintf("model %#+v must be pointer", model))
 	}
-	modelstr := r.modelType.String()
+	modelstr := mb.modelType.String()
 	modelName := modelstr[strings.LastIndex(modelstr, ".")+1:]
-	r.label = strcase.ToCamel(inflection.Plural(modelName))
-	r.uriName = inflection.Plural(strcase.ToKebab(modelName))
+	mb.label = strcase.ToCamel(inflection.Plural(modelName))
+	mb.uriName = inflection.Plural(strcase.ToKebab(modelName))
 
-	r.newListing()
-	r.newDetailing()
-	r.newEditing()
+	// Be aware the uriName here is still the original struct
+	mb.newListing()
+	mb.newDetailing()
+	mb.newEditing()
 
 	return
 }
 
-func (b *ModelBuilder) RightDrawerWidth(v string) *ModelBuilder {
-	b.rightDrawerWidth = v
-	return b
+func (mb *ModelBuilder) RightDrawerWidth(v string) *ModelBuilder {
+	mb.rightDrawerWidth = v
+	return mb
 }
 
-func (b *ModelBuilder) Link(v string) *ModelBuilder {
-	b.link = v
-	return b
+func (mb *ModelBuilder) Link(v string) *ModelBuilder {
+	mb.link = v
+	return mb
 }
 
-func (b *ModelBuilder) registerDefaultEventFuncs() {
-	b.RegisterEventFunc(actions.New, b.editing.formNew)
-	b.RegisterEventFunc(actions.Edit, b.editing.formEdit)
-	b.RegisterEventFunc(actions.DeleteConfirmation, b.listing.deleteConfirmation)
-	b.RegisterEventFunc(actions.Update, b.editing.defaultUpdate)
-	b.RegisterEventFunc(actions.DoDelete, b.editing.doDelete)
-	b.RegisterEventFunc(actions.DoBulkAction, b.listing.doBulkAction)
-	b.RegisterEventFunc(actions.OpenBulkActionDialog, b.listing.openBulkActionDialog)
-	b.RegisterEventFunc(actions.Action, b.detailing.formDrawerAction)
-	b.RegisterEventFunc(actions.DoAction, b.detailing.doAction)
+func (mb *ModelBuilder) registerDefaultEventFuncs() {
+	mb.RegisterEventFunc(actions.New, mb.editing.formNew)
+	mb.RegisterEventFunc(actions.Edit, mb.editing.formEdit)
+	mb.RegisterEventFunc(actions.DeleteConfirmation, mb.listing.deleteConfirmation)
+	mb.RegisterEventFunc(actions.Update, mb.editing.defaultUpdate)
+	mb.RegisterEventFunc(actions.DoDelete, mb.editing.doDelete)
+	mb.RegisterEventFunc(actions.DoBulkAction, mb.listing.doBulkAction)
+	mb.RegisterEventFunc(actions.OpenBulkActionDialog, mb.listing.openBulkActionDialog)
+	mb.RegisterEventFunc(actions.Action, mb.detailing.formDrawerAction)
+	mb.RegisterEventFunc(actions.DoAction, mb.detailing.doAction)
 }
 
-func (b *ModelBuilder) NewModel() (r interface{}) {
-	return reflect.New(b.modelType.Elem()).Interface()
+func (mb *ModelBuilder) NewModel() (r interface{}) {
+	return reflect.New(mb.modelType.Elem()).Interface()
 }
 
-func (b *ModelBuilder) NewModelSlice() (r interface{}) {
-	return reflect.New(reflect.SliceOf(b.modelType)).Interface()
+func (mb *ModelBuilder) NewModelSlice() (r interface{}) {
+	return reflect.New(reflect.SliceOf(mb.modelType)).Interface()
 }
 
-func (b *ModelBuilder) newListing() (r *ListingBuilder) {
-	b.listing = &ListingBuilder{mb: b, FieldsBuilder: *b.p.listFieldDefaults.InspectFields(b.model)}
-	if b.p.dataOperator != nil {
-		b.listing.Searcher(b.p.dataOperator.Search)
+func (mb *ModelBuilder) newListing() (lb *ListingBuilder) {
+	mb.listing = &ListingBuilder{mb: mb, FieldsBuilder: *mb.p.listFieldDefaults.InspectFields(mb.model)}
+	if mb.p.dataOperator != nil {
+		mb.listing.Searcher(mb.p.dataOperator.Search)
 	}
-	rmb := b.listing.RowMenu("Edit", "Delete")
-	rmb.RowMenuItem("Edit").ComponentFunc(editRowMenuItemFunc(b.Info(), "", url.Values{}))
-	rmb.RowMenuItem("Delete").ComponentFunc(deleteRowMenuItemFunc(b.Info(), "", url.Values{}))
+	rmb := mb.listing.RowMenu("Edit", "Delete")
+	rmb.RowMenuItem("Edit").ComponentFunc(editRowMenuItemFunc(mb, "", url.Values{}))
+	rmb.RowMenuItem("Delete").ComponentFunc(deleteRowMenuItemFunc(mb, "", url.Values{}))
 	return
 }
 
-func (b *ModelBuilder) newEditing() (r *EditingBuilder) {
-	b.writeFields, b.listing.searchColumns = b.p.writeFieldDefaults.inspectFieldsAndCollectName(b.model, reflect.TypeOf(""))
-	b.editing = &EditingBuilder{mb: b, FieldsBuilder: *b.writeFields}
-	if b.p.dataOperator != nil {
-		b.editing.FetchFunc(b.p.dataOperator.Fetch)
-		b.editing.SaveFunc(b.p.dataOperator.Save)
-		b.editing.DeleteFunc(b.p.dataOperator.Delete)
-	}
-	return
-}
-
-func (b *ModelBuilder) newDetailing() (r *DetailingBuilder) {
-	b.detailing = &DetailingBuilder{mb: b, FieldsBuilder: *b.p.detailFieldDefaults.InspectFields(b.model)}
-	if b.p.dataOperator != nil {
-		b.detailing.Fetcher(b.p.dataOperator.Fetch)
+func (mb *ModelBuilder) newEditing() (r *EditingBuilder) {
+	mb.writeFields, mb.listing.searchColumns = mb.p.writeFieldDefaults.inspectFieldsAndCollectName(mb.model, reflect.TypeOf(""))
+	mb.editing = &EditingBuilder{mb: mb, FieldsBuilder: *mb.writeFields}
+	if mb.p.dataOperator != nil {
+		mb.editing.FetchFunc(mb.p.dataOperator.Fetch)
+		mb.editing.SaveFunc(mb.p.dataOperator.Save)
+		mb.editing.DeleteFunc(mb.p.dataOperator.Delete)
 	}
 	return
 }
 
-func (b *ModelBuilder) Info() (r *ModelInfo) {
-	mi := ModelInfo(*b)
+func (mb *ModelBuilder) newDetailing() (r *DetailingBuilder) {
+	mb.detailing = &DetailingBuilder{mb: mb, FieldsBuilder: *mb.p.detailFieldDefaults.InspectFields(mb.model)}
+	if mb.p.dataOperator != nil {
+		mb.detailing.Fetcher(mb.p.dataOperator.Fetch)
+	}
+	return
+}
+
+func (mb *ModelBuilder) Info() (r *ModelInfo) {
+	mi := ModelInfo(*mb)
 	return &mi
 }
 
@@ -156,63 +157,63 @@ func (b *ModelInfo) Verifier() *perm.Verifier {
 		SnakeOn(b.uriName)
 }
 
-func (b *ModelBuilder) URIName(v string) (r *ModelBuilder) {
-	b.uriName = v
-	return b
+func (mb *ModelBuilder) URIName(v string) (r *ModelBuilder) {
+	mb.uriName = v
+	return mb
 }
 
-func (b *ModelBuilder) PrimaryField(v string) (r *ModelBuilder) {
-	b.primaryField = v
-	return b
+func (mb *ModelBuilder) PrimaryField(v string) (r *ModelBuilder) {
+	mb.primaryField = v
+	return mb
 }
 
-func (b *ModelBuilder) InMenu(v bool) (r *ModelBuilder) {
-	b.notInMenu = !v
-	return b
+func (mb *ModelBuilder) InMenu(v bool) (r *ModelBuilder) {
+	mb.notInMenu = !v
+	return mb
 }
 
-func (b *ModelBuilder) MenuIcon(v string) (r *ModelBuilder) {
-	b.menuIcon = v
-	return b
+func (mb *ModelBuilder) MenuIcon(v string) (r *ModelBuilder) {
+	mb.menuIcon = v
+	return mb
 }
 
-func (b *ModelBuilder) Label(v string) (r *ModelBuilder) {
-	b.label = v
-	return b
+func (mb *ModelBuilder) Label(v string) (r *ModelBuilder) {
+	mb.label = v
+	return mb
 }
 
-func (b *ModelBuilder) Labels(vs ...string) (r *ModelBuilder) {
-	b.fieldLabels = append(b.fieldLabels, vs...)
-	return b
+func (mb *ModelBuilder) Labels(vs ...string) (r *ModelBuilder) {
+	mb.fieldLabels = append(mb.fieldLabels, vs...)
+	return mb
 }
 
-func (b *ModelBuilder) LayoutConfig(v *LayoutConfig) (r *ModelBuilder) {
-	b.layoutConfig = v
-	return b
+func (mb *ModelBuilder) LayoutConfig(v *LayoutConfig) (r *ModelBuilder) {
+	mb.layoutConfig = v
+	return mb
 }
 
-func (b *ModelBuilder) Placeholders(vs ...string) (r *ModelBuilder) {
-	b.placeholders = append(b.placeholders, vs...)
-	return b
+func (mb *ModelBuilder) Placeholders(vs ...string) (r *ModelBuilder) {
+	mb.placeholders = append(mb.placeholders, vs...)
+	return mb
 }
 
-func (b *ModelBuilder) getComponentFuncField(field *FieldBuilder) (r *FieldContext) {
+func (mb *ModelBuilder) getComponentFuncField(field *FieldBuilder) (r *FieldContext) {
 	r = &FieldContext{
-		ModelInfo: b.Info(),
+		ModelInfo: mb.Info(),
 		Name:      field.name,
-		Label:     b.getLabel(field.NameLabel),
+		Label:     mb.getLabel(field.NameLabel),
 	}
 	return
 }
 
-func (b *ModelBuilder) getLabel(field NameLabel) (r string) {
+func (mb *ModelBuilder) getLabel(field NameLabel) (r string) {
 	if len(field.label) > 0 {
 		return field.label
 	}
 
-	for i := 0; i < len(b.fieldLabels)-1; i = i + 2 {
-		if b.fieldLabels[i] == field.name {
-			return b.fieldLabels[i+1]
+	for i := 0; i < len(mb.fieldLabels)-1; i = i + 2 {
+		if mb.fieldLabels[i] == field.name {
+			return mb.fieldLabels[i+1]
 		}
 	}
 

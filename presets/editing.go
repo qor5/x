@@ -28,8 +28,8 @@ type EditingBuilder struct {
 	FieldsBuilder
 }
 
-func (b *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
-	r = b.editing
+func (mb *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
+	r = mb.editing
 	if len(vs) == 0 {
 		return
 	}

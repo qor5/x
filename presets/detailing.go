@@ -24,9 +24,9 @@ type pageTitle interface {
 	PageTitle() string
 }
 
-func (b *ModelBuilder) Detailing(vs ...string) (r *DetailingBuilder) {
-	r = b.detailing
-	b.hasDetailing = true
+func (mb *ModelBuilder) Detailing(vs ...string) (r *DetailingBuilder) {
+	r = mb.detailing
+	mb.hasDetailing = true
 	if len(vs) == 0 {
 		return
 	}

@@ -37,8 +37,8 @@ type ListingBuilder struct {
 	FieldsBuilder
 }
 
-func (b *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
-	r = b.listing
+func (mb *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
+	r = mb.listing
 	if len(vs) == 0 {
 		return
 	}
