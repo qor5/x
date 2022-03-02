@@ -25,19 +25,20 @@ func ShowMessage(r *web.EventResponse, msg string, color string) {
 		h.JSONString(msg), h.JSONString(color))
 }
 
-func EditDeleteRowMenuItemFuncs(m *ModelInfo, url string, editExtraParams url.Values) []stripeui.RowMenuItemFunc {
+func EditDeleteRowMenuItemFuncs(mb *ModelBuilder, url string, editExtraParams url.Values) []stripeui.RowMenuItemFunc {
 	return []stripeui.RowMenuItemFunc{
-		editRowMenuItemFunc(m, url, editExtraParams),
-		deleteRowMenuItemFunc(m, url, editExtraParams),
+		editRowMenuItemFunc(mb, url, editExtraParams),
+		deleteRowMenuItemFunc(mb, url, editExtraParams),
 	}
 }
 
-func editRowMenuItemFunc(m *ModelInfo, url string, editExtraParams url.Values) stripeui.RowMenuItemFunc {
+func editRowMenuItemFunc(mb *ModelBuilder, url string, editExtraParams url.Values) stripeui.RowMenuItemFunc {
 	return func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent {
 		msgr := MustGetMessages(ctx.R)
-		if m.Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
+		if mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
 			return nil
 		}
+
 		return VListItem(
 			VListItemIcon(VIcon("edit")),
 			VListItemTitle(h.Text(msgr.Edit)),
@@ -50,10 +51,10 @@ func editRowMenuItemFunc(m *ModelInfo, url string, editExtraParams url.Values) s
 	}
 }
 
-func deleteRowMenuItemFunc(m *ModelInfo, url string, editExtraParams url.Values) stripeui.RowMenuItemFunc {
+func deleteRowMenuItemFunc(mb *ModelBuilder, url string, editExtraParams url.Values) stripeui.RowMenuItemFunc {
 	return func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent {
 		msgr := MustGetMessages(ctx.R)
-		if m.Verifier().Do(PermDelete).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
+		if mb.Info().Verifier().Do(PermDelete).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
 			return nil
 		}
 		return VListItem(
