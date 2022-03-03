@@ -34,6 +34,7 @@ type ModelBuilder struct {
 	rightDrawerWidth string
 	link             string
 	layoutConfig     *LayoutConfig
+	modelInfo        *ModelInfo
 	web.EventsHub
 }
 
@@ -47,7 +48,7 @@ func NewModelBuilder(p *Builder, model interface{}) (mb *ModelBuilder) {
 	modelName := modelstr[strings.LastIndex(modelstr, ".")+1:]
 	mb.label = strcase.ToCamel(inflection.Plural(modelName))
 	mb.uriName = inflection.Plural(strcase.ToKebab(modelName))
-
+	mb.modelInfo = &ModelInfo{mb: mb}
 	// Be aware the uriName here is still the original struct
 	mb.newListing()
 	mb.newDetailing()
@@ -91,9 +92,10 @@ func (mb *ModelBuilder) newListing() (lb *ListingBuilder) {
 	if mb.p.dataOperator != nil {
 		mb.listing.Searcher(mb.p.dataOperator.Search)
 	}
+
 	rmb := mb.listing.RowMenu("Edit", "Delete")
-	rmb.RowMenuItem("Edit").ComponentFunc(editRowMenuItemFunc(mb, "", url.Values{}))
-	rmb.RowMenuItem("Delete").ComponentFunc(deleteRowMenuItemFunc(mb, "", url.Values{}))
+	rmb.RowMenuItem("Edit").ComponentFunc(editRowMenuItemFunc(mb.Info(), "", url.Values{}))
+	rmb.RowMenuItem("Delete").ComponentFunc(deleteRowMenuItemFunc(mb.Info(), "", url.Values{}))
 	return
 }
 
@@ -117,44 +119,45 @@ func (mb *ModelBuilder) newDetailing() (r *DetailingBuilder) {
 }
 
 func (mb *ModelBuilder) Info() (r *ModelInfo) {
-	mi := ModelInfo(*mb)
-	return &mi
+	return mb.modelInfo
 }
 
-type ModelInfo ModelBuilder
-
-func (b *ModelInfo) ListingHref() string {
-	return fmt.Sprintf("%s/%s", b.p.prefix, b.uriName)
+type ModelInfo struct {
+	mb *ModelBuilder
 }
 
-func (b *ModelInfo) EditingHref(id string) string {
-	return fmt.Sprintf("%s/%s/%s/edit", b.p.prefix, b.uriName, id)
+func (b ModelInfo) ListingHref() string {
+	return fmt.Sprintf("%s/%s", b.mb.p.prefix, b.mb.uriName)
 }
 
-func (b *ModelInfo) DetailingHref(id string) string {
-	return fmt.Sprintf("%s/%s/%s", b.p.prefix, b.uriName, id)
+func (b ModelInfo) EditingHref(id string) string {
+	return fmt.Sprintf("%s/%s/%s/edit", b.mb.p.prefix, b.mb.uriName, id)
 }
 
-func (b *ModelInfo) HasDetailing() bool {
-	return b.hasDetailing
+func (b ModelInfo) DetailingHref(id string) string {
+	return fmt.Sprintf("%s/%s/%s", b.mb.p.prefix, b.mb.uriName, id)
 }
 
-func (b *ModelInfo) PresetsPrefix() string {
-	return b.p.prefix
+func (b ModelInfo) HasDetailing() bool {
+	return b.mb.hasDetailing
 }
 
-func (b *ModelInfo) URIName() string {
-	return b.uriName
+func (b ModelInfo) PresetsPrefix() string {
+	return b.mb.p.prefix
 }
 
-func (b *ModelInfo) Label() string {
-	return b.label
+func (b ModelInfo) URIName() string {
+	return b.mb.uriName
 }
 
-func (b *ModelInfo) Verifier() *perm.Verifier {
-	return b.p.verifier.Spawn().
-		SnakeOn(b.menuGroupName).
-		SnakeOn(b.uriName)
+func (b ModelInfo) Label() string {
+	return b.mb.label
+}
+
+func (b ModelInfo) Verifier() *perm.Verifier {
+	return b.mb.p.verifier.Spawn().
+		SnakeOn(b.mb.menuGroupName).
+		SnakeOn(b.mb.uriName)
 }
 
 func (mb *ModelBuilder) URIName(v string) (r *ModelBuilder) {
