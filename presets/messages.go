@@ -5,47 +5,49 @@ import (
 )
 
 type Messages struct {
-	SuccessfullyUpdated            string
-	Search                         string
-	New                            string
-	Update                         string
-	Delete                         string
-	Edit                           string
-	FormTitle                      string
-	OK                             string
-	Cancel                         string
-	Create                         string
-	DeleteConfirmationTextTemplate string
-	CreatingObjectTitleTemplate    string
-	EditingObjectTitleTemplate     string
-	ListingObjectTitleTemplate     string
-	DetailingObjectTitleTemplate   string
-	FiltersClear                   string
-	FiltersDone                    string
-	Filters                        string
-	Filter                         string
-	FiltersDateInTheLast           string
-	FiltersDateEquals              string
-	FiltersDateBetween             string
-	FiltersDateIsAfter             string
-	FiltersDateIsAfterOrOn         string
-	FiltersDateIsBefore            string
-	FiltersDateIsBeforeOrOn        string
-	FiltersDateDays                string
-	FiltersDateMonths              string
-	FiltersDateAnd                 string
-	FiltersNumberEquals            string
-	FiltersNumberBetween           string
-	FiltersNumberGreaterThan       string
-	FiltersNumberLessThan          string
-	FiltersNumberAnd               string
-	FiltersStringEquals            string
-	FiltersStringContains          string
-	FiltersMultipleSelectIn        string
-	FiltersMultipleSelectNotIn     string
-	PaginationRowsPerPage          string
-	ListingNoRecordToShow          string
-	ListingSelectedCountNotice     string
+	SuccessfullyUpdated                        string
+	Search                                     string
+	New                                        string
+	Update                                     string
+	Delete                                     string
+	Edit                                       string
+	FormTitle                                  string
+	OK                                         string
+	Cancel                                     string
+	Create                                     string
+	DeleteConfirmationTextTemplate             string
+	CreatingObjectTitleTemplate                string
+	EditingObjectTitleTemplate                 string
+	ListingObjectTitleTemplate                 string
+	DetailingObjectTitleTemplate               string
+	FiltersClear                               string
+	FiltersDone                                string
+	Filters                                    string
+	Filter                                     string
+	FiltersDateInTheLast                       string
+	FiltersDateEquals                          string
+	FiltersDateBetween                         string
+	FiltersDateIsAfter                         string
+	FiltersDateIsAfterOrOn                     string
+	FiltersDateIsBefore                        string
+	FiltersDateIsBeforeOrOn                    string
+	FiltersDateDays                            string
+	FiltersDateMonths                          string
+	FiltersDateAnd                             string
+	FiltersNumberEquals                        string
+	FiltersNumberBetween                       string
+	FiltersNumberGreaterThan                   string
+	FiltersNumberLessThan                      string
+	FiltersNumberAnd                           string
+	FiltersStringEquals                        string
+	FiltersStringContains                      string
+	FiltersMultipleSelectIn                    string
+	FiltersMultipleSelectNotIn                 string
+	PaginationRowsPerPage                      string
+	ListingNoRecordToShow                      string
+	ListingSelectedCountNotice                 string
+	BulkActionNoAvailableRecords               string
+	BulkActionSelectedIdsProcessNoticeTemplate string
 }
 
 func (msgr *Messages) DeleteConfirmationText(id string) string {
@@ -71,12 +73,12 @@ func (msgr *Messages) DetailingObjectTitle(label string, name string) string {
 		Replace(msgr.DetailingObjectTitleTemplate)
 }
 
+func (msgr *Messages) BulkActionSelectedIdsProcessNotice(ids string) string {
+	return strings.NewReplacer("{ids}", ids).
+		Replace(msgr.BulkActionSelectedIdsProcessNoticeTemplate)
+}
+
 var Messages_en_US = &Messages{
-	DeleteConfirmationTextTemplate: "Are you sure you want to delete object with id: {id}?",
-	CreatingObjectTitleTemplate:    "New {modelName}",
-	EditingObjectTitleTemplate:     "Editing {modelName} {id}",
-	ListingObjectTitleTemplate:     "Listing {modelName}",
-	DetailingObjectTitleTemplate:   "{modelName} {id}",
 	SuccessfullyUpdated:            "Successfully Updated",
 	Search:                         "Search",
 	New:                            "New",
@@ -87,10 +89,15 @@ var Messages_en_US = &Messages{
 	OK:                             "OK",
 	Cancel:                         "Cancel",
 	Create:                         "Create",
-	Filters:                        "Filters",
-	Filter:                         "Filter",
+	DeleteConfirmationTextTemplate: "Are you sure you want to delete object with id: {id}?",
+	CreatingObjectTitleTemplate:    "New {modelName}",
+	EditingObjectTitleTemplate:     "Editing {modelName} {id}",
+	ListingObjectTitleTemplate:     "Listing {modelName}",
+	DetailingObjectTitleTemplate:   "{modelName} {id}",
 	FiltersClear:                   "Clear",
 	FiltersDone:                    "Done",
+	Filters:                        "Filters",
+	Filter:                         "Filter",
 	FiltersDateInTheLast:           "is in the last",
 	FiltersDateEquals:              "is equal to",
 	FiltersDateBetween:             "is between",
@@ -113,6 +120,8 @@ var Messages_en_US = &Messages{
 	PaginationRowsPerPage:          "Rows per page: ",
 	ListingNoRecordToShow:          "No records to show",
 	ListingSelectedCountNotice:     "{count} records are selected. ",
+	BulkActionNoAvailableRecords:   "None of the selected records can be executed with this action.",
+	BulkActionSelectedIdsProcessNoticeTemplate: "Partially selected records cannot be executed with this action: {ids}.",
 }
 
 var Messages_zh_CN = &Messages{
@@ -157,4 +166,6 @@ var Messages_zh_CN = &Messages{
 	PaginationRowsPerPage:          "每页: ",
 	ListingNoRecordToShow:          "没有可显示的记录",
 	ListingSelectedCountNotice:     "{count}条记录被选中。",
+	BulkActionNoAvailableRecords:   "所有选中的记录均无法执行这个操作。",
+	BulkActionSelectedIdsProcessNoticeTemplate: "部分选中的记录无法被执行这个操作: {ids}。",
 }

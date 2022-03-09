@@ -16,6 +16,8 @@ type FieldComponentFunc func(obj interface{}, field *FieldContext, ctx *web.Even
 
 type ActionComponentFunc func(selectedIds []string, ctx *web.EventContext) h.HTMLComponent
 type ActionUpdateFunc func(selectedIds []string, ctx *web.EventContext) (err error)
+type ActionSelectedIdsProcessorFunc func(selectedIds []string, ctx *web.EventContext) (processedSelectedIds []string, err error)
+type ActionSelectedIdsProcessorNoticeFunc func(selectedIds []string, processedSelectedIds []string, unactionableIds []string) string
 
 type MessagesFunc func(r *http.Request) *Messages
 
@@ -39,7 +41,7 @@ type DeleteFunc func(obj interface{}, id string, ctx *web.EventContext) (err err
 type FilterDataFunc func(ctx *web.EventContext) vuetifyx.FilterData
 
 type FilterTab struct {
-	ID string
+	ID    string
 	Label string
 	// render AdvancedLabel if it is not nil
 	AdvancedLabel h.HTMLComponent

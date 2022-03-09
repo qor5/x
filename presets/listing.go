@@ -156,7 +156,12 @@ func getSelectedIds(ctx *web.EventContext) (selected []string) {
 	return selected
 }
 
-func (b *ListingBuilder) bulkPanel(bulk *ActionBuilder, selectedIds []string, ctx *web.EventContext) (r h.HTMLComponent) {
+func (b *ListingBuilder) bulkPanel(
+	bulk *ActionBuilder,
+	selectedIds []string,
+	processedSelectedIds []string,
+	ctx *web.EventContext,
+) (r h.HTMLComponent) {
 	msgr := MustGetMessages(ctx.R)
 
 	var errComp h.HTMLComponent
@@ -167,6 +172,38 @@ func (b *ListingBuilder) bulkPanel(bulk *ActionBuilder, selectedIds []string, ct
 			Elevation(2).
 			ColoredBorder(true)
 	}
+	var processSelectedIdsNotice h.HTMLComponent
+	if len(processedSelectedIds) < len(selectedIds) {
+		unactionables := make([]string, 0, len(selectedIds))
+		{
+			processedSelectedIdsM := make(map[string]struct{})
+			for _, v := range processedSelectedIds {
+				processedSelectedIdsM[v] = struct{}{}
+			}
+			for _, v := range selectedIds {
+				if _, ok := processedSelectedIdsM[v]; !ok {
+					unactionables = append(unactionables, v)
+				}
+			}
+		}
+
+		if len(unactionables) > 0 {
+			var noticeText string
+			if bulk.selectedIdsProcessorNoticeFunc != nil {
+				noticeText = bulk.selectedIdsProcessorNoticeFunc(selectedIds, processedSelectedIds, unactionables)
+			} else {
+				var idsText string
+				if len(unactionables) <= 10 {
+					idsText = strings.Join(unactionables, ", ")
+				} else {
+					idsText = fmt.Sprintf("%s...(+%d)", strings.Join(unactionables[:10], ", "), len(unactionables)-10)
+				}
+				noticeText = msgr.BulkActionSelectedIdsProcessNotice(idsText)
+			}
+			processSelectedIdsNotice = VAlert(h.Text(noticeText)).
+				Type("warning")
+		}
+	}
 
 	return VCard(
 		VCardTitle(
@@ -174,6 +211,7 @@ func (b *ListingBuilder) bulkPanel(bulk *ActionBuilder, selectedIds []string, ct
 		),
 		VCardText(
 			errComp,
+			processSelectedIdsNotice,
 			bulk.compFunc(selectedIds, ctx),
 		),
 		VCardActions(
@@ -237,6 +275,7 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 }
 
 func (b *ListingBuilder) openBulkActionDialog(ctx *web.EventContext) (r web.EventResponse, err error) {
+	msgr := MustGetMessages(ctx.R)
 	selected := getSelectedIds(ctx)
 	bulkName := ctx.R.URL.Query().Get(bulkPanelOpenParamName)
 	bulk := getAction(b.bulkActions, bulkName)
@@ -251,7 +290,29 @@ func (b *ListingBuilder) openBulkActionDialog(ctx *web.EventContext) (r web.Even
 		return
 	}
 
-	b.mb.p.dialog(&r, b.bulkPanel(bulk, selected, ctx), bulk.dialogWidth)
+	var processedSelectedIds []string
+	if bulk.selectedIdsProcessorFunc != nil {
+		processedSelectedIds, err = bulk.selectedIdsProcessorFunc(selected, ctx)
+		if err != nil {
+			return
+		}
+		if len(processedSelectedIds) == 0 {
+			if bulk.selectedIdsProcessorNoticeFunc != nil {
+				ShowMessage(&r, bulk.selectedIdsProcessorNoticeFunc(selected, processedSelectedIds, selected), "warning")
+			} else {
+				ShowMessage(&r, msgr.BulkActionNoAvailableRecords, "warning")
+			}
+			return
+		}
+	} else {
+		processedSelectedIds = selected
+	}
+
+	b.mb.p.dialog(
+		&r,
+		b.bulkPanel(bulk, selected, processedSelectedIds, ctx),
+		bulk.dialogWidth,
+	)
 	return
 }
 
@@ -271,8 +332,17 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 		selectedIds = strings.Split(v, ",")
 	}
 
-	err1 := bulk.updateFunc(selectedIds, ctx)
-	ctx.Flash = err1
+	var err1 error
+	var processedSelectedIds []string
+	if bulk.selectedIdsProcessorFunc != nil {
+		processedSelectedIds, err1 = bulk.selectedIdsProcessorFunc(selectedIds, ctx)
+	} else {
+		processedSelectedIds = selectedIds
+	}
+
+	if err1 == nil {
+		err1 = bulk.updateFunc(processedSelectedIds, ctx)
+	}
 
 	if err1 != nil {
 		if _, ok := err1.(*web.ValidationErrors); !ok {
@@ -285,7 +355,7 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 	if ctx.Flash != nil {
 		r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 			Name: dialogContentPortalName,
-			Body: b.bulkPanel(bulk, selectedIds, ctx),
+			Body: b.bulkPanel(bulk, selectedIds, processedSelectedIds, ctx),
 		})
 		return
 	}

@@ -2,10 +2,12 @@ package presets
 
 type ActionBuilder struct {
 	NameLabel
-	buttonCompFunc ComponentFunc
-	updateFunc     ActionUpdateFunc
-	compFunc       ActionComponentFunc
-	dialogWidth    string
+	buttonCompFunc                 ComponentFunc
+	updateFunc                     ActionUpdateFunc
+	compFunc                       ActionComponentFunc
+	dialogWidth                    string
+	selectedIdsProcessorFunc       ActionSelectedIdsProcessorFunc
+	selectedIdsProcessorNoticeFunc ActionSelectedIdsProcessorNoticeFunc
 }
 
 const defaultBulkActionDialogWidth = "600"
@@ -55,6 +57,16 @@ func (b *ActionBuilder) Label(v string) (r *ActionBuilder) {
 
 func (b *ActionBuilder) DialogWidth(v string) (r *ActionBuilder) {
 	b.dialogWidth = v
+	return b
+}
+
+func (b *ActionBuilder) SelectedIdsProcessorFunc(v ActionSelectedIdsProcessorFunc) (r *ActionBuilder) {
+	b.selectedIdsProcessorFunc = v
+	return b
+}
+
+func (b *ActionBuilder) SelectedIdsProcessorNoticeFunc(v ActionSelectedIdsProcessorNoticeFunc) (r *ActionBuilder) {
+	b.selectedIdsProcessorNoticeFunc = v
 	return b
 }
 
