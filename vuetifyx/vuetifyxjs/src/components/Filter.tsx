@@ -21,15 +21,9 @@ import {
 
 import TextDatePicker from './TextDatePicker';
 
-export function localTimezoneAbbr() {
-	const d = new Date().toString();
-	return d
-		.split('(')[1]
-		.split(' ')
-		.map((w) => {
-			return w.charAt(0);
-		})
-		.join('');
+export function localTimezoneOffset() {
+	const hrs = -(new Date().getTimezoneOffset() / 60);
+	return "GMT+" + hrs;
 }
 
 
@@ -224,7 +218,7 @@ export const DateItem = Vue.extend({
 						label='Timezone'
 						hideDetails={true}
 					>
-						<radio value='local' label={localTimezoneAbbr()}>
+						<radio value='local' label={localTimezoneOffset()}>
 						</radio>
 						<radio value='utc' label='UTC'></radio>
 					</radioGroup>

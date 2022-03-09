@@ -1,12 +1,12 @@
 
-import { localTimezoneAbbr } from '@/components/Filter';
+import { localTimezoneOffset } from '@/components/Filter';
 import { encodeFilterData } from '@/components/FilterData';
 import moment from 'moment';
 import qs from 'query-string';
 
 describe('filter', () => {
-	it('localTimezoneAbbr', () => {
-		expect(localTimezoneAbbr()).toEqual('CST');
+	it('localTimezoneOffset', () => {
+		expect(localTimezoneOffset()).toEqual('GMT+8');
 	});
 
 	describe('encodeFilterData DateItem', () => {
