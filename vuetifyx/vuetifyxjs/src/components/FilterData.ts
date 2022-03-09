@@ -20,6 +20,7 @@ function pushDateItem(segs: any, op: any) {
 		let m = moment().startOf('day');
 		if (op.timezone === 'utc') {
 			m = m.utc().startOf('day');
+			pushKeyVal(segs, op.key, 'tz', 'utc');
 		}
 
 		pushKeyVal(segs, op.key, 'lt', m.add(1, 'days').unix());

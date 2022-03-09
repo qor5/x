@@ -109,7 +109,7 @@ export const DateItem = Vue.extend({
 
 		setTimezone(e: any) {
 			this.timezone = e;
-			this.$emit('input', this.$data);
+			this.inputEmit();
 		},
 
 		getInput(modifier: string): VNode {

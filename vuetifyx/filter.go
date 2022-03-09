@@ -275,6 +275,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 	sort.Strings(keys)
 
 	var keyModValueMap = map[string]map[string]string{}
+
 	for _, k := range keys {
 		v := queryMap[k]
 		segs := strings.Split(k, ".")
@@ -289,43 +290,55 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 			keyModValueMap[key] = map[string]string{}
 		}
 
+		it := fd.getFilterItem(key)
+		if it.ItemType == ItemTypeDate {
+			if mod == "tz" {
+				it.Timezone = FilterItemTimezone(v[0])
+				continue
+			}
+		}
 		keyModValueMap[key][mod] = v[0]
+	}
 
-		sqlc := fd.getSQLCondition(key, v[0])
-		if len(sqlc) > 0 {
-			val := v[0]
-			it := fd.getFilterItem(key)
-			if it.ItemType == ItemTypeDate {
-				val = unixToDatetime(val, it.Timezone == TimezoneUTC, 0)
-			}
-
-			// Compose operator into sql condition. If you want to use multiple operators you have to use {op}, '%s' is not supported
-			// e.g.
-			// "source_b %s ?"                        ==> "source_b = ?"
-			// "source_b {op} ?"                      ==> "source_b = ?"
-			// "source_b {op} ? AND source_c {op} ?"  ==> "source_b = ? AND source_c = ?"
-			if strings.Contains(sqlc, "%s") {
-				// This is for backward compatibility
-				conds = append(conds, fmt.Sprintf(sqlc, sqlOps[mod]))
-			} else {
-				conds = append(conds, strings.NewReplacer(SQLOperatorPlaceholder, sqlOps[mod]).Replace(sqlc))
-			}
-
-			// Prepare value Args for sql condition.
-			// e.g.  assume value is "1"
-			// "source_b = ?"                           ==>   []interface{}{"1"}
-			// "source_b = ? OR source_c = ?"           ==>   []interface{}{"1", "1"}
-			// "source_b ilike ? OR source_c ilike ?"   ==>   []interface{}{"%1%", "%1%"}
-			valCount := strings.Count(sqlc, "?")
-			for i := 0; i < valCount; i++ {
-				switch mod {
-				case "ilike":
-					sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", val))
-				case "in", "notIn":
-					sqlArgs = append(sqlArgs, strings.Split(val, ","))
-				default:
-					sqlArgs = append(sqlArgs, val)
+	for key, mv := range keyModValueMap {
+		for mod, v := range mv {
+			sqlc := fd.getSQLCondition(key, v)
+			if len(sqlc) > 0 {
+				val := v
+				it := fd.getFilterItem(key)
+				if it.ItemType == ItemTypeDate {
+					val = unixToDatetime(val, it.Timezone == TimezoneUTC, 0)
 				}
+
+				// Compose operator into sql condition. If you want to use multiple operators you have to use {op}, '%s' is not supported
+				// e.g.
+				// "source_b %s ?"                        ==> "source_b = ?"
+				// "source_b {op} ?"                      ==> "source_b = ?"
+				// "source_b {op} ? AND source_c {op} ?"  ==> "source_b = ? AND source_c = ?"
+				if strings.Contains(sqlc, "%s") {
+					// This is for backward compatibility
+					conds = append(conds, fmt.Sprintf(sqlc, sqlOps[mod]))
+				} else {
+					conds = append(conds, strings.NewReplacer(SQLOperatorPlaceholder, sqlOps[mod]).Replace(sqlc))
+				}
+
+				// Prepare value Args for sql condition.
+				// e.g.  assume value is "1"
+				// "source_b = ?"                           ==>   []interface{}{"1"}
+				// "source_b = ? OR source_c = ?"           ==>   []interface{}{"1", "1"}
+				// "source_b ilike ? OR source_c ilike ?"   ==>   []interface{}{"%1%", "%1%"}
+				valCount := strings.Count(sqlc, "?")
+				for i := 0; i < valCount; i++ {
+					switch mod {
+					case "ilike":
+						sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", val))
+					case "in", "notIn":
+						sqlArgs = append(sqlArgs, strings.Split(val, ","))
+					default:
+						sqlArgs = append(sqlArgs, val)
+					}
+				}
+
 			}
 		}
 	}

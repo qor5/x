@@ -16,6 +16,30 @@ var setByQueryCases = []struct {
 	expectedSQLArgs  []interface{}
 }{
 	{
+		name: "is in the last (utc)",
+		data: FilterData([]*FilterItem{
+			{
+				Key:          "created",
+				ItemType:     ItemTypeDate,
+				SQLCondition: "created_at %s ?",
+			},
+		}),
+		qs: "created.lt=1554912000&created.gte=1554825600&created.tz=utc",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:       "created",
+				ItemType:  ItemTypeDate,
+				Modifier:  ModifierInTheLast,
+				Selected:  true,
+				ValueFrom: "2019-04-10",
+				// ValueTo:   "2019-04-10",
+				Timezone: TimezoneUTC,
+			},
+		}),
+		expectedSQLConds: "created_at >= ?",
+		expectedSQLArgs:  []interface{}{"2019-04-10T08:00:00+08:00", "2019-04-11T08:00:00+08:00"},
+	},
+	{
 		name: "between",
 		data: FilterData([]*FilterItem{
 			{
@@ -36,7 +60,7 @@ var setByQueryCases = []struct {
 			},
 		}),
 		expectedSQLConds: "created_at >= ? AND created_at < ?",
-		expectedSQLArgs:  []interface{}{"2019-04-10T00:00:00+08:00", "2019-04-11T00:00:00+08:00"},
+		expectedSQLArgs:  []interface{}{"2019-04-09T16:00:00Z", "2019-04-10T16:00:00Z"},
 	},
 	{
 		name: "between2",
