@@ -11,13 +11,6 @@ type VSelectBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VSelect(children ...h.HTMLComponent) (r *VSelectBuilder) {
-	r = &VSelectBuilder{
-		tag: h.Tag("v-select").Children(children...),
-	}
-	return
-}
-
 func (b *VSelectBuilder) AppendIcon(v string) (r *VSelectBuilder) {
 	b.tag.Attr("append-icon", v)
 	return b

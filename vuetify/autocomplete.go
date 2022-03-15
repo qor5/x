@@ -11,13 +11,6 @@ type VAutocompleteBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VAutocomplete(children ...h.HTMLComponent) (r *VAutocompleteBuilder) {
-	r = &VAutocompleteBuilder{
-		tag: h.Tag("v-autocomplete").Children(children...),
-	}
-	return
-}
-
 func (b *VAutocompleteBuilder) AllowOverflow(v bool) (r *VAutocompleteBuilder) {
 	b.tag.Attr(":allow-overflow", fmt.Sprint(v))
 	return b
