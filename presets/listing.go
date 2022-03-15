@@ -20,20 +20,21 @@ import (
 )
 
 type ListingBuilder struct {
-	mb              *ModelBuilder
-	bulkActions     []*ActionBuilder
-	actions         []*ActionBuilder
-	actionsAsMenu   bool
-	rowMenu         *RowMenuBuilder
-	filterDataFunc  FilterDataFunc
-	filterTabsFunc  FilterTabsFunc
-	pageFunc        web.PageFunc
-	searcher        SearchFunc
-	searchColumns   []string
-	perPage         int64
-	totalVisible    int64
-	orderBy         string
-	orderableFields []*OrderableField
+	mb               *ModelBuilder
+	bulkActions      []*ActionBuilder
+	actions          []*ActionBuilder
+	actionsAsMenu    bool
+	rowMenu          *RowMenuBuilder
+	filterDataFunc   FilterDataFunc
+	filterTabsFunc   FilterTabsFunc
+	pageFunc         web.PageFunc
+	searcher         SearchFunc
+	searchColumns    []string
+	perPage          int64
+	totalVisible     int64
+	orderBy          string
+	orderableFields  []*OrderableField
+	customizedColumn bool
 	FieldsBuilder
 }
 
@@ -95,6 +96,11 @@ type OrderableField struct {
 
 func (b *ListingBuilder) OrderableFields(v []*OrderableField) (r *ListingBuilder) {
 	b.orderableFields = v
+	return b
+}
+
+func (b *ListingBuilder) EnableCustomizedColumn() (r *ListingBuilder) {
+	b.customizedColumn = true
 	return b
 }
 
@@ -462,6 +468,7 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 	if fd != nil {
 		toolbar.PrependChildren(vuetifyx.VXFilter(fd).Translations(ft))
 	}
+
 	return toolbar
 }
 
@@ -623,6 +630,81 @@ func (b *ListingBuilder) getComponents(
 		pagesCount--
 	}
 
+	displayFields := b.fields
+	if b.customizedColumn {
+		var customizedColumns []string
+		var customizedFields []*FieldBuilder
+		// get the columns setting from url params or cookie data
+		if urldata := pageURL.Query().Get("columns"); urldata != "" {
+			if urlColumns := strings.Split(urldata, ","); len(urlColumns) > 0 {
+				customizedColumns = urlColumns
+			}
+		}
+
+		if len(customizedColumns) == 0 {
+			cookiedata, err := ctx.R.Cookie(strings.TrimPrefix(strings.ToLower(fmt.Sprintf("%T_columns", b.mb.model)), "*"))
+			if err == nil {
+				if cookieColumns := strings.Split(cookiedata.Value, ","); len(cookieColumns) > 0 {
+					customizedColumns = cookieColumns
+				}
+			}
+		}
+
+		if len(customizedColumns) > 0 {
+			for _, f := range b.fields {
+				for _, customizedColumn := range customizedColumns {
+					if customizedColumn == f.name {
+						customizedFields = append(customizedFields, f)
+					}
+				}
+			}
+
+			// save columns setting on cookie
+			http.SetCookie(ctx.W, &http.Cookie{
+				Name:  strings.TrimPrefix(strings.ToLower(fmt.Sprintf("%T_columns", b.mb.model)), "*"),
+				Value: strings.Join(customizedColumns, ","),
+			})
+		}
+
+		if len(customizedFields) > 0 {
+			displayFields = customizedFields
+		}
+
+		var columns []string
+		for _, f := range displayFields {
+			columns = append(columns, f.name)
+		}
+
+		// add the HTML component of columns setting into toolbar
+		columnList := VList().Dense(true)
+		for _, column := range b.fields {
+			columnList.AppendChildren(
+				VListItem(
+					VSwitch().Label(i18n.PT(ctx.R, ModelsI18nModuleKey, b.mb.label, b.mb.getLabel(column.NameLabel))).
+						Value(column.name).
+						Attr("v-model", "locals.columns").
+						On("click", web.Plaid().
+							PushState(true).
+							Query("columns", web.Var("locals.columns")).
+							MergeQuery(true).
+							Go()),
+				),
+			)
+		}
+
+		toolbar.(*VToolbarBuilder).AppendChildren(
+			VDivider().Vertical(true).Inset(true).Light(true).Attr("style", "margin-left:8px;"),
+			VMenu(
+				web.Slot(
+					VBtn("").Children(
+						VIcon("settings"),
+					).Attr("v-on", "on").Text(true).Fab(true).Small(true),
+				).Name("activator").Scope("{ on }"),
+				web.Scope(columnList).Init(fmt.Sprintf(`{columns: %v}`, h.JSONString(columns))).VSlot("{ locals }"),
+			),
+		)
+	}
+
 	dataTable = s.DataTable(objs).
 		CellWrapperFunc(func(cell h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent {
 			tdbind := cell
@@ -650,7 +732,7 @@ func (b *ListingBuilder) getComponents(
 		SelectionParamName(ParamSelectedIds).
 		SelectedCountLabel(msgr.ListingSelectedCountNotice)
 
-	for _, f := range b.fields {
+	for _, f := range displayFields {
 		_, ok := orderableFieldMap[f.name]
 		dataTable.(*stripeui.DataTableBuilder).Column(f.name).
 			Title(i18n.PT(ctx.R, ModelsI18nModuleKey, b.mb.label, b.mb.getLabel(f.NameLabel))).
