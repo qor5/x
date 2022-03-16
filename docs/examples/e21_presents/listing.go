@@ -91,7 +91,7 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 	b.URIPrefix(PresetsListingCustomizationFieldsPath)
 
 	cl = cust.Listing("ID", "Name", "Company", "Email").
-		SearchColumns("name", "email")
+		SearchColumns("name", "email").SelectableColumns(true)
 	cl.Field("Company").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) HTMLComponent {
 		c := obj.(*Customer)
 		var comp Company

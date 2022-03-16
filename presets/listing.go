@@ -20,21 +20,21 @@ import (
 )
 
 type ListingBuilder struct {
-	mb               *ModelBuilder
-	bulkActions      []*ActionBuilder
-	actions          []*ActionBuilder
-	actionsAsMenu    bool
-	rowMenu          *RowMenuBuilder
-	filterDataFunc   FilterDataFunc
-	filterTabsFunc   FilterTabsFunc
-	pageFunc         web.PageFunc
-	searcher         SearchFunc
-	searchColumns    []string
-	perPage          int64
-	totalVisible     int64
-	orderBy          string
-	orderableFields  []*OrderableField
-	customizedColumn bool
+	mb                *ModelBuilder
+	bulkActions       []*ActionBuilder
+	actions           []*ActionBuilder
+	actionsAsMenu     bool
+	rowMenu           *RowMenuBuilder
+	filterDataFunc    FilterDataFunc
+	filterTabsFunc    FilterTabsFunc
+	pageFunc          web.PageFunc
+	searcher          SearchFunc
+	searchColumns     []string
+	perPage           int64
+	totalVisible      int64
+	orderBy           string
+	orderableFields   []*OrderableField
+	selectableColumns bool
 	FieldsBuilder
 }
 
@@ -99,8 +99,8 @@ func (b *ListingBuilder) OrderableFields(v []*OrderableField) (r *ListingBuilder
 	return b
 }
 
-func (b *ListingBuilder) EnableCustomizedColumn() (r *ListingBuilder) {
-	b.customizedColumn = true
+func (b *ListingBuilder) SelectableColumns(v bool) (r *ListingBuilder) {
+	b.selectableColumns = v
 	return b
 }
 
@@ -417,7 +417,79 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 	return tabs.Value(value)
 }
 
-func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventContext, fd vuetifyx.FilterData) h.HTMLComponent {
+func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContext) (btn h.HTMLComponent, displayFields []*FieldBuilder) {
+	displayFields = b.fields
+	var customizedColumns []string
+	var customizedFields []*FieldBuilder
+	// get the columns setting from url params or cookie data
+	if urldata := pageURL.Query().Get("columns"); urldata != "" {
+		if urlColumns := strings.Split(urldata, ","); len(urlColumns) > 0 {
+			customizedColumns = urlColumns
+		}
+	}
+
+	if len(customizedColumns) == 0 {
+		cookiedata, err := ctx.R.Cookie(strings.TrimPrefix(strings.ToLower(fmt.Sprintf("%T_columns", b.mb.model)), "*"))
+		if err == nil {
+			if cookieColumns := strings.Split(cookiedata.Value, ","); len(cookieColumns) > 0 {
+				customizedColumns = cookieColumns
+			}
+		}
+	}
+
+	if len(customizedColumns) > 0 {
+		for _, f := range b.fields {
+			for _, customizedColumn := range customizedColumns {
+				if customizedColumn == f.name {
+					customizedFields = append(customizedFields, f)
+				}
+			}
+		}
+
+		// save columns setting on cookie
+		http.SetCookie(ctx.W, &http.Cookie{
+			Name:  strings.TrimPrefix(strings.ToLower(fmt.Sprintf("%T_columns", b.mb.model)), "*"),
+			Value: strings.Join(customizedColumns, ","),
+		})
+	}
+
+	if len(customizedFields) > 0 {
+		displayFields = customizedFields
+	}
+
+	var columns []string
+	for _, f := range displayFields {
+		columns = append(columns, f.name)
+	}
+
+	// add the HTML component of columns setting into toolbar
+	columnList := VList().Dense(true)
+	for _, column := range b.fields {
+		columnList.AppendChildren(
+			VListItem(
+				VSwitch().Label(i18n.PT(ctx.R, ModelsI18nModuleKey, b.mb.label, b.mb.getLabel(column.NameLabel))).
+					Value(column.name).
+					Attr("v-model", "locals.columns").
+					On("click", web.Plaid().
+						PushState(true).
+						Query("columns", web.Var("locals.columns")).
+						MergeQuery(true).
+						Go()),
+			),
+		)
+	}
+
+	btn = VMenu(
+		web.Slot(
+			VBtn("").Children(
+				VIcon("settings"),
+			).Attr("v-on", "on").Text(true).Fab(true).Small(true),
+		).Name("activator").Scope("{ on }"),
+		web.Scope(columnList).Init(fmt.Sprintf(`{columns: %v}`, h.JSONString(columns))).VSlot("{ locals }"),
+	)
+	return
+}
+func (b *ListingBuilder) tableToolbar(msgr *Messages, pageURL *url.URL, ctx *web.EventContext, fd vuetifyx.FilterData) (toolbar *VToolbarBuilder, displayFields []*FieldBuilder) {
 	ft := vuetifyx.FilterTranslations{}
 	ft.Filters = msgr.Filters
 	ft.Filter = msgr.Filter
@@ -449,7 +521,7 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 
 	disableNewBtn := b.mb.Info().Verifier().Do(PermCreate).WithReq(ctx.R).IsAllowed() != nil
 
-	var toolbar = VToolbar(
+	toolbar = VToolbar(
 		VSpacer(),
 	).Flat(true)
 
@@ -464,12 +536,20 @@ func (b *ListingBuilder) newAndFilterToolbar(msgr *Messages, ctx *web.EventConte
 			Attr("@click", web.Plaid().EventFunc(actions.New).
 				Go()))
 	}
-
+	displayFields = b.fields
+	if b.selectableColumns {
+		var btn h.HTMLComponent
+		btn, displayFields = b.selectColumnsBtn(pageURL, ctx)
+		toolbar.PrependChildren(btn)
+	}
 	if fd != nil {
-		toolbar.PrependChildren(vuetifyx.VXFilter(fd).Translations(ft))
+		toolbar.PrependChildren(
+			vuetifyx.VXFilter(fd).Translations(ft),
+			h.If(b.selectableColumns, VDivider().Vertical(true).Inset(true).Light(true).Attr("style", "margin-left:8px;")),
+		)
 	}
 
-	return toolbar
+	return
 }
 
 func getLocalPerPage(
@@ -623,86 +703,12 @@ func (b *ListingBuilder) getComponents(
 	}
 
 	haveCheckboxes := len(b.bulkActions) > 0
-	toolbar = b.newAndFilterToolbar(msgr, ctx, fd)
+	var displayFields = b.fields
+	toolbar, displayFields = b.tableToolbar(msgr, pageURL, ctx, fd)
 
 	pagesCount := int(int64(totalCount)/searchParams.PerPage + 1)
 	if int64(totalCount)%searchParams.PerPage == 0 {
 		pagesCount--
-	}
-
-	displayFields := b.fields
-	if b.customizedColumn {
-		var customizedColumns []string
-		var customizedFields []*FieldBuilder
-		// get the columns setting from url params or cookie data
-		if urldata := pageURL.Query().Get("columns"); urldata != "" {
-			if urlColumns := strings.Split(urldata, ","); len(urlColumns) > 0 {
-				customizedColumns = urlColumns
-			}
-		}
-
-		if len(customizedColumns) == 0 {
-			cookiedata, err := ctx.R.Cookie(strings.TrimPrefix(strings.ToLower(fmt.Sprintf("%T_columns", b.mb.model)), "*"))
-			if err == nil {
-				if cookieColumns := strings.Split(cookiedata.Value, ","); len(cookieColumns) > 0 {
-					customizedColumns = cookieColumns
-				}
-			}
-		}
-
-		if len(customizedColumns) > 0 {
-			for _, f := range b.fields {
-				for _, customizedColumn := range customizedColumns {
-					if customizedColumn == f.name {
-						customizedFields = append(customizedFields, f)
-					}
-				}
-			}
-
-			// save columns setting on cookie
-			http.SetCookie(ctx.W, &http.Cookie{
-				Name:  strings.TrimPrefix(strings.ToLower(fmt.Sprintf("%T_columns", b.mb.model)), "*"),
-				Value: strings.Join(customizedColumns, ","),
-			})
-		}
-
-		if len(customizedFields) > 0 {
-			displayFields = customizedFields
-		}
-
-		var columns []string
-		for _, f := range displayFields {
-			columns = append(columns, f.name)
-		}
-
-		// add the HTML component of columns setting into toolbar
-		columnList := VList().Dense(true)
-		for _, column := range b.fields {
-			columnList.AppendChildren(
-				VListItem(
-					VSwitch().Label(i18n.PT(ctx.R, ModelsI18nModuleKey, b.mb.label, b.mb.getLabel(column.NameLabel))).
-						Value(column.name).
-						Attr("v-model", "locals.columns").
-						On("click", web.Plaid().
-							PushState(true).
-							Query("columns", web.Var("locals.columns")).
-							MergeQuery(true).
-							Go()),
-				),
-			)
-		}
-
-		toolbar.(*VToolbarBuilder).AppendChildren(
-			VDivider().Vertical(true).Inset(true).Light(true).Attr("style", "margin-left:8px;"),
-			VMenu(
-				web.Slot(
-					VBtn("").Children(
-						VIcon("settings"),
-					).Attr("v-on", "on").Text(true).Fab(true).Small(true),
-				).Name("activator").Scope("{ on }"),
-				web.Scope(columnList).Init(fmt.Sprintf(`{columns: %v}`, h.JSONString(columns))).VSlot("{ locals }"),
-			),
-		)
 	}
 
 	dataTable = s.DataTable(objs).
