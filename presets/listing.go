@@ -486,7 +486,7 @@ func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContex
 			).Attr("v-on", "on").Text(true).Fab(true).Small(true),
 		).Name("activator").Scope("{ on }"),
 		web.Scope(columnList).Init(fmt.Sprintf(`{columns: %v}`, h.JSONString(columns))).VSlot("{ locals }"),
-	)
+	).OffsetY(true)
 	return
 }
 func (b *ListingBuilder) tableToolbar(msgr *Messages, pageURL *url.URL, ctx *web.EventContext, fd vuetifyx.FilterData) (toolbar *VToolbarBuilder, displayFields []*FieldBuilder) {
