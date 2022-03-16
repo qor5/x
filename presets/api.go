@@ -11,6 +11,7 @@ import (
 
 type ComponentFunc func(ctx *web.EventContext) h.HTMLComponent
 type ObjectComponentFunc func(obj interface{}, ctx *web.EventContext) h.HTMLComponent
+type EditingTitleComponentFunc func(obj interface{}, defaultTitle string, ctx *web.EventContext) h.HTMLComponent
 
 type FieldComponentFunc func(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent
 

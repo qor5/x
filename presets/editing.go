@@ -15,16 +15,17 @@ import (
 )
 
 type EditingBuilder struct {
-	mb          *ModelBuilder
-	Fetcher     FetchFunc
-	Setter      SetterFunc
-	Saver       SaveFunc
-	Deleter     DeleteFunc
-	Validator   ValidateFunc
-	tabPanels   []ObjectComponentFunc
-	hiddenFuncs []ObjectComponentFunc
-	sidePanel   ComponentFunc
-	actionsFunc ObjectComponentFunc
+	mb               *ModelBuilder
+	Fetcher          FetchFunc
+	Setter           SetterFunc
+	Saver            SaveFunc
+	Deleter          DeleteFunc
+	Validator        ValidateFunc
+	tabPanels        []ObjectComponentFunc
+	hiddenFuncs      []ObjectComponentFunc
+	sidePanel        ComponentFunc
+	actionsFunc      ObjectComponentFunc
+	editingTitleFunc EditingTitleComponentFunc
 	FieldsBuilder
 }
 
@@ -107,6 +108,11 @@ func (b *EditingBuilder) ActionsFunc(v ObjectComponentFunc) (r *EditingBuilder) 
 	return b
 }
 
+func (b *EditingBuilder) EditingTitleFunc(v EditingTitleComponentFunc) (r *EditingBuilder) {
+	b.editingTitleFunc = v
+	return b
+}
+
 func (b *EditingBuilder) formNew(ctx *web.EventContext) (r web.EventResponse, err error) {
 	creatingB := b
 	if b.mb.creating != nil {
@@ -129,9 +135,10 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 
 	var buttonLabel = msgr.Create
 	var disableUpdateBtn bool
-	var title = msgr.CreatingObjectTitle(
+	var title h.HTMLComponent
+	title = h.Text(msgr.CreatingObjectTitle(
 		i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Singular(b.mb.label)),
-	)
+	))
 	if len(id) > 0 {
 		if obj == nil {
 			var err error
@@ -142,9 +149,14 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		}
 		disableUpdateBtn = b.mb.Info().Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil
 		buttonLabel = msgr.Update
-		title = msgr.EditingObjectTitle(
+		editingTitleText := msgr.EditingObjectTitle(
 			i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Singular(b.mb.label)),
 			getPageTitle(obj, id))
+		if b.editingTitleFunc != nil {
+			title = b.editingTitleFunc(obj, editingTitleText, ctx)
+		} else {
+			title = h.Text(editingTitleText)
+		}
 	}
 
 	if obj == nil {
@@ -248,7 +260,8 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 
 	return web.Scope(
 		VAppBar(
-			VToolbarTitle(title).Class("pl-2"),
+			VToolbarTitle("").Class("pl-2").
+				Children(title),
 			VSpacer(),
 			VBtn("").Icon(true).Children(
 				VIcon("close"),
