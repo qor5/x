@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path"
 	"strconv"
 	"strings"
 
@@ -417,78 +418,178 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 	return tabs.Value(value)
 }
 
-func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContext) (btn h.HTMLComponent, displayFields []*FieldBuilder) {
-	displayFields = b.fields
-	var customizedColumns []string
-	var customizedFields []*FieldBuilder
+type selectColumns struct {
+	DisplayColumns []string       `json:"displayColumns,omitempty"`
+	SortedColumns  []sortedColumn `json:"sortedColumns,omitempty"`
+}
+type sortedColumn struct {
+	Name  string `json:"name"`
+	Label string `json:"label"`
+}
+
+func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContext) (btn h.HTMLComponent, displaySortedFields []*FieldBuilder) {
+	var (
+		_, respath         = path.Split(pageURL.Path)
+		displayColumnsName = fmt.Sprintf("%s_display_columns", respath)
+		sortedColumnsName  = fmt.Sprintf("%s_sorted_columns", respath)
+		originalColumns    []string
+		displayColumns     []string
+		sortedColumns      []string
+	)
+
+	for _, f := range b.fields {
+		originalColumns = append(originalColumns, f.name)
+	}
+
 	// get the columns setting from url params or cookie data
-	if urldata := pageURL.Query().Get("columns"); urldata != "" {
+	if urldata := pageURL.Query().Get(displayColumnsName); urldata != "" {
 		if urlColumns := strings.Split(urldata, ","); len(urlColumns) > 0 {
-			customizedColumns = urlColumns
+			displayColumns = urlColumns
 		}
 	}
 
-	if len(customizedColumns) == 0 {
-		cookiedata, err := ctx.R.Cookie(strings.TrimPrefix(strings.ToLower(fmt.Sprintf("%T_columns", b.mb.model)), "*"))
+	if urldata := pageURL.Query().Get(sortedColumnsName); urldata != "" {
+		if urlColumns := strings.Split(urldata, ","); len(urlColumns) > 0 {
+			sortedColumns = urlColumns
+		}
+	}
+
+	// get the columns setting from  cookie data
+	if len(displayColumns) == 0 {
+		cookiedata, err := ctx.R.Cookie(displayColumnsName)
 		if err == nil {
 			if cookieColumns := strings.Split(cookiedata.Value, ","); len(cookieColumns) > 0 {
-				customizedColumns = cookieColumns
+				displayColumns = cookieColumns
 			}
 		}
 	}
 
-	if len(customizedColumns) > 0 {
-		for _, f := range b.fields {
-			for _, customizedColumn := range customizedColumns {
-				if customizedColumn == f.name {
-					customizedFields = append(customizedFields, f)
-				}
+	if len(sortedColumns) == 0 {
+		cookiedata, err := ctx.R.Cookie(sortedColumnsName)
+		if err == nil {
+			if cookieColumns := strings.Split(cookiedata.Value, ","); len(cookieColumns) > 0 {
+				sortedColumns = cookieColumns
 			}
 		}
+	}
 
-		// save columns setting on cookie
+	// check if listing fileds is changed. if yes, use the original columns
+	var originalFiledsChanged bool
+
+	if len(sortedColumns) > 0 && len(originalColumns) != len(sortedColumns) {
+		originalFiledsChanged = true
+	}
+
+	if len(sortedColumns) > 0 && !originalFiledsChanged {
+		for _, sortedColumn := range sortedColumns {
+			var find bool
+			for _, originalColumn := range originalColumns {
+				if sortedColumn == originalColumn {
+					find = true
+					break
+				}
+			}
+			if !find {
+				originalFiledsChanged = true
+				break
+			}
+		}
+	}
+
+	if len(displayColumns) > 0 && !originalFiledsChanged {
+		for _, displayColumn := range displayColumns {
+			var find bool
+			for _, originalColumn := range originalColumns {
+				if displayColumn == originalColumn {
+					find = true
+					break
+				}
+			}
+			if !find {
+				originalFiledsChanged = true
+				break
+			}
+		}
+	}
+
+	// save display columns setting on cookie
+	if !originalFiledsChanged && len(displayColumns) > 0 {
 		http.SetCookie(ctx.W, &http.Cookie{
-			Name:  strings.TrimPrefix(strings.ToLower(fmt.Sprintf("%T_columns", b.mb.model)), "*"),
-			Value: strings.Join(customizedColumns, ","),
+			Name:  displayColumnsName,
+			Value: strings.Join(displayColumns, ","),
 		})
 	}
 
-	if len(customizedFields) > 0 {
-		displayFields = customizedFields
+	// save sorted columns setting on cookie
+	if !originalFiledsChanged && len(sortedColumns) > 0 {
+		http.SetCookie(ctx.W, &http.Cookie{
+			Name:  sortedColumnsName,
+			Value: strings.Join(sortedColumns, ","),
+		})
 	}
 
-	var columns []string
-	for _, f := range displayFields {
-		columns = append(columns, f.name)
+	// set the data for displaySortedFields on data table
+	if originalFiledsChanged || (len(sortedColumns) == 0 && len(displayColumns) == 0) {
+		displaySortedFields = b.fields
+	}
+
+	if originalFiledsChanged || len(displayColumns) == 0 {
+		displayColumns = originalColumns
+	}
+
+	if originalFiledsChanged || len(sortedColumns) == 0 {
+		sortedColumns = originalColumns
+	}
+
+	if len(displaySortedFields) == 0 {
+		for _, sortedColumn := range sortedColumns {
+			for _, displayColumn := range displayColumns {
+				if sortedColumn == displayColumn {
+					displaySortedFields = append(displaySortedFields, b.Field(sortedColumn))
+					break
+				}
+			}
+		}
+	}
+
+	// set the data for selected columns on toolbar
+	selectColumns := selectColumns{
+		DisplayColumns: displayColumns,
+	}
+	for _, sc := range sortedColumns {
+		selectColumns.SortedColumns = append(selectColumns.SortedColumns, sortedColumn{
+			Name:  sc,
+			Label: i18n.PT(ctx.R, ModelsI18nModuleKey, b.mb.label, b.mb.getLabel(b.Field(sc).NameLabel)),
+		})
 	}
 
 	// add the HTML component of columns setting into toolbar
-	columnList := VList().Dense(true)
-	for _, column := range b.fields {
-		columnList.AppendChildren(
-			VListItem(
-				VSwitch().Label(i18n.PT(ctx.R, ModelsI18nModuleKey, b.mb.label, b.mb.getLabel(column.NameLabel))).
-					Value(column.name).
-					Attr("v-model", "locals.columns").
-					On("click", web.Plaid().
-						PushState(true).
-						Query("columns", web.Var("locals.columns")).
-						MergeQuery(true).
-						Go()),
-			),
-		)
-	}
-
 	btn = VMenu(
 		web.Slot(
-			VBtn("").Children(
-				VIcon("settings"),
-			).Attr("v-on", "on").Text(true).Fab(true).Small(true),
+			VBtn("").Children(VIcon("settings")).Attr("v-on", "on").Text(true).Fab(true).Small(true),
 		).Name("activator").Scope("{ on }"),
-		web.Scope(columnList).Init(fmt.Sprintf(`{columns: %v}`, h.JSONString(columns))).VSlot("{ locals }"),
+
+		web.Scope(VList(
+			h.Tag("vx-draggable").Attr("v-model", "locals.sortedColumns", "draggable", ".vx_column_item", "animation", "300", "@end", web.Plaid().Query(sortedColumnsName, web.Var("locals.sortedColumns.map(column => column.name )")).MergeQuery(true).Go()).Children(
+				h.Div(
+					VListItem(
+						VSwitch().
+							Attr("v-model", "locals.displayColumns", ":value", "column.name", ":label", "column.label").
+							On("click", web.Plaid().
+								Query(displayColumnsName, web.Var("locals.displayColumns")).
+								MergeQuery(true).
+								Go()),
+					),
+					VDivider().Attr("v-if", "index < locals.sortedColumns.length - 1"),
+				).Attr("v-for", "(column, index) in locals.sortedColumns", ":key", "column.name", "class", "vx_column_item"),
+			),
+		).Dense(true)).
+			Init(h.JSONString(selectColumns)).
+			VSlot("{ locals }"),
 	).OffsetY(true)
 	return
 }
+
 func (b *ListingBuilder) tableToolbar(msgr *Messages, pageURL *url.URL, ctx *web.EventContext, fd vuetifyx.FilterData) (toolbar *VToolbarBuilder, displayFields []*FieldBuilder) {
 	ft := vuetifyx.FilterTranslations{}
 	ft.Filters = msgr.Filters
