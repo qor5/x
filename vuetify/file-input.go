@@ -103,11 +103,6 @@ func (b *VFileInputBuilder) ErrorCount(v int) (r *VFileInputBuilder) {
 	return b
 }
 
-func (b *VFileInputBuilder) ErrorMessages(v string) (r *VFileInputBuilder) {
-	b.tag.Attr("error-messages", v)
-	return b
-}
-
 func (b *VFileInputBuilder) Filled(v bool) (r *VFileInputBuilder) {
 	b.tag.Attr(":filled", fmt.Sprint(v))
 	return b
