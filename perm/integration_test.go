@@ -155,7 +155,7 @@ var cases = []struct {
 	{
 		name: "developer should have permission for upload on any posts media_libraries images category",
 		policies: []*perm.PolicyBuilder{
-			perm.PolicyFor("developer").WhoAre(perm.Allowed).ToDo(Upload).On("*media_libraries:*:images"),
+			perm.PolicyFor("developer").WhoAre(perm.Allowed).ToDo(Upload).On("*media_libraries:*:images:"),
 		},
 		subjects:       []string{"developer"},
 		wantPermission: "upload",
