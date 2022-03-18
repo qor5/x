@@ -167,7 +167,7 @@ func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, 
 	for _, f := range b.fields {
 		info := parent.ModelInfo
 		if info != nil {
-			if info.Verifier().Do(PermUpdate).ObjectOn(toObj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
+			if info.Verifier().Do(PermCreate).ObjectOn(toObj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil && info.Verifier().Do(PermUpdate).ObjectOn(toObj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
 				continue
 			}
 		}
@@ -446,7 +446,7 @@ func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interfa
 
 		disabled := false
 		if info != nil {
-			disabled = info.Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil
+			disabled = info.Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil && info.Verifier().Do(PermCreate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil
 		}
 
 		comps = append(comps, f.compFunc(obj, &FieldContext{

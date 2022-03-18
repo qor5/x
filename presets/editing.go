@@ -114,6 +114,11 @@ func (b *EditingBuilder) EditingTitleFunc(v EditingTitleComponentFunc) (r *Editi
 }
 
 func (b *EditingBuilder) formNew(ctx *web.EventContext) (r web.EventResponse, err error) {
+	if b.mb.Info().Verifier().Do(PermCreate).WithReq(ctx.R).IsAllowed() != nil {
+		err = perm.PermissionDenied
+		return
+	}
+
 	creatingB := b
 	if b.mb.creating != nil {
 		creatingB = b.mb.creating
@@ -124,6 +129,10 @@ func (b *EditingBuilder) formNew(ctx *web.EventContext) (r web.EventResponse, er
 }
 
 func (b *EditingBuilder) formEdit(ctx *web.EventContext) (r web.EventResponse, err error) {
+	if b.mb.Info().Verifier().Do(PermGet).WithReq(ctx.R).IsAllowed() != nil {
+		ShowMessage(&r, perm.PermissionDenied.Error(), "warning")
+		return
+	}
 	b.mb.p.overlay(ctx.R.FormValue(ParamOverlay), &r, b.editFormFor(nil, ctx), b.mb.rightDrawerWidth)
 	return
 }
@@ -275,6 +284,11 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 }
 
 func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, err1 error) {
+	if b.mb.Info().Verifier().Do(PermDelete).WithReq(ctx.R).IsAllowed() != nil {
+		ShowMessage(&r, perm.PermissionDenied.Error(), "warning")
+		return
+	}
+
 	id := ctx.R.FormValue(ParamID)
 	var obj = b.mb.NewModel()
 	if len(id) > 0 {

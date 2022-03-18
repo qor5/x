@@ -1,11 +1,14 @@
 package perm
 
 import (
+	"crypto/md5"
 	"errors"
 	"fmt"
+	"gorm.io/gorm"
 	"net/http"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
@@ -29,6 +32,10 @@ type Conditions = ladon.Conditions
 type SubjectsFunc func(r *http.Request) []string
 type ContextFunc func(r *http.Request, objs []interface{}) Context
 
+type DBPolicy interface {
+	LoadDBPolicies(db *gorm.DB, startFrom *time.Time) ([]*PolicyBuilder, []*PolicyBuilder)
+}
+
 type permRNer interface {
 	PermissionRN() []string
 }
@@ -50,10 +57,11 @@ func ToPermissionRN(v interface{}) []string {
 }
 
 type Builder struct {
-	policies     []*PolicyBuilder
-	ladon        *ladon.Ladon
-	subjectsFunc SubjectsFunc
-	contextFunc  ContextFunc
+	policies      []*PolicyBuilder
+	ladon         *ladon.Ladon
+	subjectsFunc  SubjectsFunc
+	contextFunc   ContextFunc
+	dbPolicyModel DBPolicy
 }
 
 func New() *Builder {
@@ -67,8 +75,10 @@ func New() *Builder {
 
 func (b *Builder) Policies(ps ...*PolicyBuilder) (r *Builder) {
 	b.policies = ps
-	for i, p := range b.policies {
-		p.policy.ID = fmt.Sprint(i)
+	for _, p := range b.policies {
+		if p.policy.ID == "" {
+			p.policy.ID = fmt.Sprintf("%x", md5.Sum(p.Json()))
+		}
 		err := b.ladon.Manager.Create(p.policy)
 		if err != nil {
 			panic(err)
@@ -85,4 +95,53 @@ func (b *Builder) SubjectsFunc(v SubjectsFunc) (r *Builder) {
 func (b *Builder) ContextFunc(v ContextFunc) (r *Builder) {
 	b.contextFunc = v
 	return b
+}
+
+func (b *Builder) EnableDBPolicy(db *gorm.DB, dbPolicyModel DBPolicy) (r *Builder) {
+	if dbPolicyModel == nil {
+		b.dbPolicyModel = DefaultDBPolicy{}
+	} else {
+		b.dbPolicyModel = dbPolicyModel
+	}
+
+	go b.loopLoadDBPolicies(db, 6*time.Second)
+	return b
+}
+
+func (b *Builder) UpdatePolicies(toUpdate ...*PolicyBuilder) {
+	for _, p := range toUpdate {
+		b.ladon.Manager.Update(p.policy)
+	}
+}
+
+func (b *Builder) DeletePolicies(toDelete ...*PolicyBuilder) {
+	for _, p := range toDelete {
+		b.ladon.Manager.Delete(p.GetID())
+	}
+}
+
+func (b *Builder) LoadDBPoliciesToMemory(db *gorm.DB, startFrom *time.Time) {
+	toUpdate, toDelete := b.dbPolicyModel.LoadDBPolicies(db, startFrom)
+	b.DeletePolicies(toDelete...)
+	b.UpdatePolicies(toUpdate...)
+	if Verbose {
+		b.printPolices()
+	}
+}
+
+func (b *Builder) loopLoadDBPolicies(db *gorm.DB, duration time.Duration) {
+	now := time.Now()
+	b.LoadDBPoliciesToMemory(db, nil)
+
+	for next := range time.Tick(duration) {
+		b.LoadDBPoliciesToMemory(db, &now)
+		now = next
+	}
+}
+
+func (b *Builder) printPolices() {
+	allp, _ := b.ladon.Manager.GetAll(100, 0)
+	for _, p := range allp {
+		fmt.Printf("%+v \n", p)
+	}
 }

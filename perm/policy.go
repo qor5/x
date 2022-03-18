@@ -1,6 +1,7 @@
 package perm
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/ory/ladon"
@@ -21,6 +22,11 @@ func PolicyFor(subjects ...string) *PolicyBuilder {
 
 func (b *PolicyBuilder) Module(module string) (r *PolicyBuilder) {
 	b.module = module
+	return b
+}
+
+func (b *PolicyBuilder) ID(id string) (r *PolicyBuilder) {
+	b.policy.ID = id
 	return b
 }
 
@@ -51,4 +57,13 @@ func (b *PolicyBuilder) On(resources ...string) (r *PolicyBuilder) {
 func (b *PolicyBuilder) Given(conditions Conditions) (r *PolicyBuilder) {
 	b.policy.Conditions = conditions
 	return b
+}
+
+func (b PolicyBuilder) Json() []byte {
+	str, _ := json.Marshal(b.policy)
+	return str
+}
+
+func (b *PolicyBuilder) GetID() string {
+	return b.policy.ID
 }
