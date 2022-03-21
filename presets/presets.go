@@ -433,9 +433,10 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 					continue
 				}
 				if ver.SnakeOn(m.uriName).IsAllowed() != nil {
+					ver.RemoveOn(1)
 					continue
 				}
-
+				ver.RemoveOn(1)
 				subMenus = append(subMenus, b.menuItem(ctx, m, true))
 				subCount++
 				inOrderMap[m.uriName] = struct{}{}

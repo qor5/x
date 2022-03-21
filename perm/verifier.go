@@ -115,6 +115,16 @@ func (b *Verifier) ObjectOn(v interface{}) (r *Verifier) {
 	return b
 }
 
+func (b *Verifier) RemoveOn(length int) (r *Verifier) {
+	if b.builder == nil {
+		return b
+	}
+	if len(b.vr.resourcesParts) >= length {
+		b.vr.resourcesParts = b.vr.resourcesParts[:len(b.vr.resourcesParts)-length]
+	}
+	return b
+}
+
 func (b *Verifier) WithReq(v *http.Request) (r *Verifier) {
 	if b.builder == nil {
 		return b
