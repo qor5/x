@@ -563,6 +563,7 @@ func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContex
 		})
 	}
 
+	msgr := MustGetMessages(ctx.R)
 	// add the HTML component of columns setting into toolbar
 	btn = VMenu(
 		web.Slot(
@@ -570,23 +571,28 @@ func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContex
 		).Name("activator").Scope("{ on }"),
 
 		web.Scope(VList(
-			h.Tag("vx-draggable").Attr("v-model", "locals.sortedColumns", "draggable", ".vx_column_item", "animation", "300", "@end", web.Plaid().Query(sortedColumnsName, web.Var("locals.sortedColumns.map(column => column.name )")).MergeQuery(true).Go()).Children(
+			h.Tag("vx-draggable").Attr("v-model", "locals.sortedColumns", "draggable", ".vx_column_item", "animation", "300").Children(
 				h.Div(
 					VListItem(
-						VSwitch().
-							Attr("v-model", "locals.displayColumns", ":value", "column.name", ":label", "column.label").
-							On("click", web.Plaid().
-								Query(displayColumnsName, web.Var("locals.displayColumns")).
-								MergeQuery(true).
-								Go()),
+						VListItemContent(
+							VListItemTitle(
+								VSwitch().Dense(true).Attr("v-model", "locals.displayColumns", ":value", "column.name", ":label", "column.label", "@click", "event.preventDefault()"),
+							),
+						),
+						VListItemIcon(
+							VIcon("reorder"),
+						).Attr("style", "margin-top: 28px"),
 					),
-					VDivider().Attr("v-if", "index < locals.sortedColumns.length - 1"),
+					VDivider(),
 				).Attr("v-for", "(column, index) in locals.sortedColumns", ":key", "column.name", "class", "vx_column_item"),
 			),
+			VListItem(
+				VListItemAction(VBtn(msgr.Cancel).Attr("@click", web.Plaid().Reload().Go())),
+				VListItemAction(VBtn(msgr.OK).Attr("@click", web.Plaid().Query(displayColumnsName, web.Var("locals.displayColumns")).Query(sortedColumnsName, web.Var("locals.sortedColumns.map(column => column.name )")).MergeQuery(true).Go()))),
 		).Dense(true)).
 			Init(h.JSONString(selectColumns)).
 			VSlot("{ locals }"),
-	).OffsetY(true)
+	).OffsetY(true).CloseOnClick(false).CloseOnContentClick(false)
 	return
 }
 
