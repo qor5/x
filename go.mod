@@ -6,10 +6,11 @@ require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/go-chi/chi v1.5.4
 	github.com/goplaid/multipartestutils v0.0.3
-	github.com/goplaid/web v1.1.27
+	github.com/goplaid/web v1.1.28-0.20220324101132-35f4ff477179
 	github.com/iancoleman/strcase v0.2.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/jinzhu/inflection v1.0.0
+	github.com/lib/pq v1.10.3
 	github.com/manifoldco/promptui v0.9.0
 	github.com/ory/ladon v1.2.0
 	github.com/rs/xid v1.3.0
@@ -49,7 +50,6 @@ require (
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/jinzhu/now v1.1.2 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/lib/pq v1.10.3 // indirect
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.16 // indirect
 	github.com/ory/pagination v0.0.1 // indirect

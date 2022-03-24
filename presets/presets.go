@@ -39,8 +39,8 @@ type Builder struct {
 	homePageLayoutConfig    *LayoutConfig
 	brandFunc               ComponentFunc
 	profileFunc             ComponentFunc
+	notificationCountFunc   func(ctx *web.EventContext) int
 	notificationContentFunc ComponentFunc
-	notificationCountFunc   func(ctx *web.EventContext) interface{}
 	brandTitle              string
 	vuetifyOptions          string
 	progressBarColor        string
@@ -153,13 +153,10 @@ func (b *Builder) ProfileFunc(v ComponentFunc) (r *Builder) {
 	return b
 }
 
-func (b *Builder) NotificationContentFunc(v ComponentFunc) (r *Builder) {
-	b.notificationContentFunc = v
-	return b
-}
-
-func (b *Builder) NotificationCountFunc(v func(ctx *web.EventContext) interface{}) (r *Builder) {
-	b.notificationCountFunc = v
+func (b *Builder) NotificationFunc(contentFunc ComponentFunc, countFunc func(ctx *web.EventContext) int) (r *Builder) {
+	b.notificationCountFunc = countFunc
+	b.notificationContentFunc = contentFunc
+	b.GetWebBuilder().RegisterEventFunc(actions.NotificationCenter, b.notificationCenter)
 	return b
 }
 
@@ -525,6 +522,7 @@ const RightDrawerPortalName = "presets_RightDrawerPortalName"
 const rightDrawerContentPortalName = "presets_RightDrawerContentPortalName"
 const dialogPortalName = "presets_DialogPortalName"
 const dialogContentPortalName = "presets_DialogContentPortalName"
+const NotificationCenterPortalName = "notification-center"
 
 const closeRightDrawerVarScript = "vars.presetsRightDrawer = false"
 const closeDialogVarScript = "vars.presetsDialog = false"
@@ -586,13 +584,24 @@ type LayoutConfig struct {
 	SearchBoxInvisible bool
 }
 
-func (b *Builder) notificationCenter(total interface{}, notificationContent h.HTMLComponent) h.HTMLComponent {
-	return VMenu().OffsetY(true).Children(
+func (b *Builder) notificationCenter(ctx *web.EventContext) (er web.EventResponse, err error) {
+	total := b.notificationCountFunc(ctx)
+	content := b.notificationContentFunc(ctx)
+
+	icon := VIcon("notifications").Color("white")
+	er.Body = VMenu().OffsetY(true).Children(
 		h.Template().Attr("v-slot:activator", "{on, attrs}").Children(
-			VBadge(
-				VIcon("notifications").Color("white").Attr("v-bind", "attrs").Attr("v-on", "on"),
-			).Content(total).Overlap(true).Color("red").Attr("style", "margin: 0 10px 0 15px;")),
-		VCard(notificationContent))
+			VBtn("").Icon(true).Children(
+				h.If(total > 0,
+					VBadge(
+						icon,
+					).Content(total).Overlap(true).Color("red"),
+				).Else(icon),
+			).Attr("v-bind", "attrs").Attr("v-on", "on").Class("ml-1"),
+		),
+		VCard(content))
+
+	return
 }
 
 func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc) {
@@ -643,8 +652,8 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 		}
 
 		var notifier h.HTMLComponent
-		if b.notificationContentFunc != nil && b.notificationCountFunc != nil {
-			notifier = b.notificationCenter(b.notificationCountFunc(ctx), b.notificationContentFunc(ctx))
+		if b.notificationCountFunc != nil && b.notificationContentFunc != nil {
+			notifier = web.Portal().Name(NotificationCenterPortalName).Loader(web.GET().EventFunc(actions.NotificationCenter))
 		}
 
 		showSearchBox := cfg == nil || !cfg.SearchBoxInvisible
