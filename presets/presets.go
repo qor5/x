@@ -24,32 +24,34 @@ import (
 )
 
 type Builder struct {
-	prefix               string
-	models               []*ModelBuilder
-	mux                  *goji.Mux
-	builder              *web.Builder
-	i18nBuilder          *i18n.Builder
-	logger               *zap.Logger
-	permissionBuilder    *perm.Builder
-	verifier             *perm.Verifier
-	layoutFunc           func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)
-	dataOperator         DataOperator
-	messagesFunc         MessagesFunc
-	homePageFunc         web.PageFunc
-	homePageLayoutConfig *LayoutConfig
-	brandFunc            ComponentFunc
-	profileFunc          ComponentFunc
-	brandTitle           string
-	vuetifyOptions       string
-	progressBarColor     string
-	rightDrawerWidth     string
-	writeFieldDefaults   *FieldDefaults
-	listFieldDefaults    *FieldDefaults
-	detailFieldDefaults  *FieldDefaults
-	extraAssets          []*extraAsset
-	assetFunc            AssetFunc
-	menuGroups           MenuGroups
-	menuOrder            []interface{}
+	prefix                  string
+	models                  []*ModelBuilder
+	mux                     *goji.Mux
+	builder                 *web.Builder
+	i18nBuilder             *i18n.Builder
+	logger                  *zap.Logger
+	permissionBuilder       *perm.Builder
+	verifier                *perm.Verifier
+	layoutFunc              func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)
+	dataOperator            DataOperator
+	messagesFunc            MessagesFunc
+	homePageFunc            web.PageFunc
+	homePageLayoutConfig    *LayoutConfig
+	brandFunc               ComponentFunc
+	profileFunc             ComponentFunc
+	notificationCountFunc   func(ctx *web.EventContext) int
+	notificationContentFunc ComponentFunc
+	brandTitle              string
+	vuetifyOptions          string
+	progressBarColor        string
+	rightDrawerWidth        string
+	writeFieldDefaults      *FieldDefaults
+	listFieldDefaults       *FieldDefaults
+	detailFieldDefaults     *FieldDefaults
+	extraAssets             []*extraAsset
+	assetFunc               AssetFunc
+	menuGroups              MenuGroups
+	menuOrder               []interface{}
 }
 
 type AssetFunc func(ctx *web.EventContext)
@@ -148,6 +150,13 @@ func (b *Builder) BrandFunc(v ComponentFunc) (r *Builder) {
 
 func (b *Builder) ProfileFunc(v ComponentFunc) (r *Builder) {
 	b.profileFunc = v
+	return b
+}
+
+func (b *Builder) NotificationFunc(contentFunc ComponentFunc, countFunc func(ctx *web.EventContext) int) (r *Builder) {
+	b.notificationCountFunc = countFunc
+	b.notificationContentFunc = contentFunc
+	b.GetWebBuilder().RegisterEventFunc(actions.NotificationCenter, b.notificationCenter)
 	return b
 }
 
@@ -513,6 +522,7 @@ const RightDrawerPortalName = "presets_RightDrawerPortalName"
 const rightDrawerContentPortalName = "presets_RightDrawerContentPortalName"
 const dialogPortalName = "presets_DialogPortalName"
 const dialogContentPortalName = "presets_DialogContentPortalName"
+const NotificationCenterPortalName = "notification-center"
 
 const closeRightDrawerVarScript = "vars.presetsRightDrawer = false"
 const closeDialogVarScript = "vars.presetsDialog = false"
@@ -574,6 +584,26 @@ type LayoutConfig struct {
 	SearchBoxInvisible bool
 }
 
+func (b *Builder) notificationCenter(ctx *web.EventContext) (er web.EventResponse, err error) {
+	total := b.notificationCountFunc(ctx)
+	content := b.notificationContentFunc(ctx)
+
+	icon := VIcon("notifications").Color("white")
+	er.Body = VMenu().OffsetY(true).Children(
+		h.Template().Attr("v-slot:activator", "{on, attrs}").Children(
+			VBtn("").Icon(true).Children(
+				h.If(total > 0,
+					VBadge(
+						icon,
+					).Content(total).Overlap(true).Color("red"),
+				).Else(icon),
+			).Attr("v-bind", "attrs").Attr("v-on", "on").Class("ml-1"),
+		),
+		VCard(content))
+
+	return
+}
+
 func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
@@ -621,13 +651,17 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 			profile = b.profileFunc(ctx)
 		}
 
+		var notifier h.HTMLComponent
+		if b.notificationCountFunc != nil && b.notificationContentFunc != nil {
+			notifier = web.Portal().Name(NotificationCenterPortalName).Loader(web.GET().EventFunc(actions.NotificationCenter))
+		}
+
 		showSearchBox := cfg == nil || !cfg.SearchBoxInvisible
 
 		msgr := i18n.MustGetModuleMessages(ctx.R, CoreI18nModuleKey, Messages_en_US).(*Messages)
 
 		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
 		pr.Body = VApp(
-
 			VNavigationDrawer(
 				b.runBrandFunc(ctx),
 				b.createMenus(ctx),
@@ -660,6 +694,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 						// ).Method("GET"),
 					).AlignCenter(true).Attr("style", "max-width: 650px"),
 				),
+				notifier,
 				profile,
 			).Dark(true).
 				Color("primary").

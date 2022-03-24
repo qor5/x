@@ -10,6 +10,7 @@ const (
 	DoDelete             = "presets_DoDelete"
 	DoBulkAction         = "presets_DoBulkAction"
 	OpenBulkActionDialog = "presets_OpenBulkActionDialog"
+	NotificationCenter   = "presets_NotificationCenter"
 )
 
 const (
