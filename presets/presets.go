@@ -24,32 +24,34 @@ import (
 )
 
 type Builder struct {
-	prefix               string
-	models               []*ModelBuilder
-	mux                  *goji.Mux
-	builder              *web.Builder
-	i18nBuilder          *i18n.Builder
-	logger               *zap.Logger
-	permissionBuilder    *perm.Builder
-	verifier             *perm.Verifier
-	layoutFunc           func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)
-	dataOperator         DataOperator
-	messagesFunc         MessagesFunc
-	homePageFunc         web.PageFunc
-	homePageLayoutConfig *LayoutConfig
-	brandFunc            ComponentFunc
-	profileFunc          ComponentFunc
-	brandTitle           string
-	vuetifyOptions       string
-	progressBarColor     string
-	rightDrawerWidth     string
-	writeFieldDefaults   *FieldDefaults
-	listFieldDefaults    *FieldDefaults
-	detailFieldDefaults  *FieldDefaults
-	extraAssets          []*extraAsset
-	assetFunc            AssetFunc
-	menuGroups           MenuGroups
-	menuOrder            []interface{}
+	prefix                  string
+	models                  []*ModelBuilder
+	mux                     *goji.Mux
+	builder                 *web.Builder
+	i18nBuilder             *i18n.Builder
+	logger                  *zap.Logger
+	permissionBuilder       *perm.Builder
+	verifier                *perm.Verifier
+	layoutFunc              func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)
+	dataOperator            DataOperator
+	messagesFunc            MessagesFunc
+	homePageFunc            web.PageFunc
+	homePageLayoutConfig    *LayoutConfig
+	brandFunc               ComponentFunc
+	profileFunc             ComponentFunc
+	notificationContentFunc ComponentFunc
+	notificationCountFunc   func(ctx *web.EventContext) interface{}
+	brandTitle              string
+	vuetifyOptions          string
+	progressBarColor        string
+	rightDrawerWidth        string
+	writeFieldDefaults      *FieldDefaults
+	listFieldDefaults       *FieldDefaults
+	detailFieldDefaults     *FieldDefaults
+	extraAssets             []*extraAsset
+	assetFunc               AssetFunc
+	menuGroups              MenuGroups
+	menuOrder               []interface{}
 }
 
 type AssetFunc func(ctx *web.EventContext)
@@ -148,6 +150,16 @@ func (b *Builder) BrandFunc(v ComponentFunc) (r *Builder) {
 
 func (b *Builder) ProfileFunc(v ComponentFunc) (r *Builder) {
 	b.profileFunc = v
+	return b
+}
+
+func (b *Builder) NotificationContentFunc(v ComponentFunc) (r *Builder) {
+	b.notificationContentFunc = v
+	return b
+}
+
+func (b *Builder) NotificationCountFunc(v func(ctx *web.EventContext) interface{}) (r *Builder) {
+	b.notificationCountFunc = v
 	return b
 }
 
@@ -574,6 +586,15 @@ type LayoutConfig struct {
 	SearchBoxInvisible bool
 }
 
+func (b *Builder) notificationCenter(total interface{}, notificationContent h.HTMLComponent) h.HTMLComponent {
+	return VMenu().OffsetY(true).Children(
+		h.Template().Attr("v-slot:activator", "{on, attrs}").Children(
+			VBadge(
+				VIcon("notifications").Color("white").Attr("v-bind", "attrs").Attr("v-on", "on"),
+			).Content(total).Overlap(true).Color("red").Attr("style", "margin: 0 10px 0 15px;")),
+		VCard(notificationContent))
+}
+
 func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
@@ -621,13 +642,17 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 			profile = b.profileFunc(ctx)
 		}
 
+		var notifier h.HTMLComponent
+		if b.notificationContentFunc != nil && b.notificationCountFunc != nil {
+			notifier = b.notificationCenter(b.notificationCountFunc(ctx), b.notificationContentFunc(ctx))
+		}
+
 		showSearchBox := cfg == nil || !cfg.SearchBoxInvisible
 
 		msgr := i18n.MustGetModuleMessages(ctx.R, CoreI18nModuleKey, Messages_en_US).(*Messages)
 
 		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
 		pr.Body = VApp(
-
 			VNavigationDrawer(
 				b.runBrandFunc(ctx),
 				b.createMenus(ctx),
@@ -660,6 +685,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 						// ).Method("GET"),
 					).AlignCenter(true).Attr("style", "max-width: 650px"),
 				),
+				notifier,
 				profile,
 			).Dark(true).
 				Color("primary").
