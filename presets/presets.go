@@ -511,7 +511,7 @@ func (b *Builder) runBrandFunc(ctx *web.EventContext) (r h.HTMLComponent) {
 		return b.brandFunc(ctx)
 	}
 
-	return VToolbar(VToolbarTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))).Elevation(1)
+	return VCardTitle(h.H1(i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle)))
 }
 
 func MustGetMessages(r *http.Request) *Messages {
@@ -663,7 +663,16 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
 		pr.Body = VApp(
 			VNavigationDrawer(
-				b.runBrandFunc(ctx),
+				VCard(
+					b.runBrandFunc(ctx),
+					VCardActions(
+						VListItem(
+							profile,
+							VRow(h.Text("switch language")).Justify("end").Align("center"),
+							VSpacer(),
+						),
+					),
+				).Elevation(1),
 				b.createMenus(ctx),
 			).App(true).
 				// Clipped(true).
@@ -695,7 +704,6 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 					).AlignCenter(true).Attr("style", "max-width: 650px"),
 				),
 				notifier,
-				profile,
 			).Dark(true).
 				Color("primary").
 				App(true).
