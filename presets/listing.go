@@ -587,8 +587,8 @@ func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContex
 				).Attr("v-for", "(column, index) in locals.sortedColumns", ":key", "column.name", "class", "vx_column_item"),
 			),
 			VListItem(
-				VListItemAction(VBtn(msgr.Cancel).Attr("@click", web.Plaid().Reload().Go())),
-				VListItemAction(VBtn(msgr.OK).Attr("@click", web.Plaid().Query(displayColumnsName, web.Var("locals.displayColumns")).Query(sortedColumnsName, web.Var("locals.sortedColumns.map(column => column.name )")).MergeQuery(true).Go()))),
+				VListItemAction(VBtn(msgr.Cancel).Elevation(0).Attr("@click", web.Plaid().Reload().Go())),
+				VListItemAction(VBtn(msgr.OK).Elevation(0).Color("primary").Attr("@click", web.Plaid().Query(displayColumnsName, web.Var("locals.displayColumns")).Query(sortedColumnsName, web.Var("locals.sortedColumns.map(column => column.name )")).MergeQuery(true).Go()))),
 		).Dense(true)).
 			Init(h.JSONString(selectColumns)).
 			VSlot("{ locals }"),
