@@ -531,7 +531,43 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 		return b.switchLanguageFunc(ctx)
 	}
 
-	return VRow(h.Text("switch language")).Justify("center").Align("center")
+	if len(b.I18n().GetSupportLanguages()) <= 1 {
+		return nil
+	}
+
+	if ctx.R.FormValue("lang") != "" {
+		http.SetCookie(ctx.W, &http.Cookie{
+			Name:  "lang",
+			Value: ctx.R.FormValue("lang"),
+		})
+	}
+
+	var languages []h.HTMLComponent
+	for _, tag := range b.I18n().GetSupportLanguages() {
+		languages = append(languages,
+			h.Div(
+				VListItem(
+					VListItemContent(
+						VListItemTitle(
+							VBtn(tag.String()).Attr("@click", web.Plaid().Query("lang", tag.String()).Go()),
+						),
+					),
+				),
+			),
+		)
+	}
+
+	return VMenu(
+		web.Slot(
+			VRow(
+				VBtn("").Children(h.Text("switch language")).Attr("v-on", "on").Text(true).Small(true),
+			).Justify("center").Align("center"),
+		).Name("activator").Scope("{ on }"),
+
+		VList(
+			languages...,
+		).Dense(true),
+	).OffsetY(true)
 }
 
 func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage h.HTMLComponent) (r h.HTMLComponent) {
