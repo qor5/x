@@ -24,34 +24,36 @@ import (
 )
 
 type Builder struct {
-	prefix                  string
-	models                  []*ModelBuilder
-	mux                     *goji.Mux
-	builder                 *web.Builder
-	i18nBuilder             *i18n.Builder
-	logger                  *zap.Logger
-	permissionBuilder       *perm.Builder
-	verifier                *perm.Verifier
-	layoutFunc              func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)
-	dataOperator            DataOperator
-	messagesFunc            MessagesFunc
-	homePageFunc            web.PageFunc
-	homePageLayoutConfig    *LayoutConfig
-	brandFunc               ComponentFunc
-	profileFunc             ComponentFunc
-	notificationCountFunc   func(ctx *web.EventContext) int
-	notificationContentFunc ComponentFunc
-	brandTitle              string
-	vuetifyOptions          string
-	progressBarColor        string
-	rightDrawerWidth        string
-	writeFieldDefaults      *FieldDefaults
-	listFieldDefaults       *FieldDefaults
-	detailFieldDefaults     *FieldDefaults
-	extraAssets             []*extraAsset
-	assetFunc               AssetFunc
-	menuGroups              MenuGroups
-	menuOrder               []interface{}
+	prefix                                string
+	models                                []*ModelBuilder
+	mux                                   *goji.Mux
+	builder                               *web.Builder
+	i18nBuilder                           *i18n.Builder
+	logger                                *zap.Logger
+	permissionBuilder                     *perm.Builder
+	verifier                              *perm.Verifier
+	layoutFunc                            func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)
+	dataOperator                          DataOperator
+	messagesFunc                          MessagesFunc
+	homePageFunc                          web.PageFunc
+	homePageLayoutConfig                  *LayoutConfig
+	brandFunc                             ComponentFunc
+	profileFunc                           ComponentFunc
+	switchLanguageFunc                    ComponentFunc
+	brandProfileSwitchLanguageDisplayFunc func(brand, profile, switchLanguage h.HTMLComponent) h.HTMLComponent
+	notificationCountFunc                 func(ctx *web.EventContext) int
+	notificationContentFunc               ComponentFunc
+	brandTitle                            string
+	vuetifyOptions                        string
+	progressBarColor                      string
+	rightDrawerWidth                      string
+	writeFieldDefaults                    *FieldDefaults
+	listFieldDefaults                     *FieldDefaults
+	detailFieldDefaults                   *FieldDefaults
+	extraAssets                           []*extraAsset
+	assetFunc                             AssetFunc
+	menuGroups                            MenuGroups
+	menuOrder                             []interface{}
 }
 
 type AssetFunc func(ctx *web.EventContext)
@@ -150,6 +152,16 @@ func (b *Builder) BrandFunc(v ComponentFunc) (r *Builder) {
 
 func (b *Builder) ProfileFunc(v ComponentFunc) (r *Builder) {
 	b.profileFunc = v
+	return b
+}
+
+func (b *Builder) SwitchLanguageFunc(v ComponentFunc) (r *Builder) {
+	b.switchLanguageFunc = v
+	return b
+}
+
+func (b *Builder) BrandProfileSwitchLanguageDisplayFuncFunc(f func(brand, profile, switchLanguage h.HTMLComponent) h.HTMLComponent) (r *Builder) {
+	b.brandProfileSwitchLanguageDisplayFunc = f
 	return b
 }
 
@@ -511,7 +523,67 @@ func (b *Builder) runBrandFunc(ctx *web.EventContext) (r h.HTMLComponent) {
 		return b.brandFunc(ctx)
 	}
 
-	return VToolbar(VToolbarTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))).Elevation(1)
+	return VCardTitle(h.H1(i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle)))
+}
+
+func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponent) {
+	if b.switchLanguageFunc != nil {
+		return b.switchLanguageFunc(ctx)
+	}
+
+	if len(b.I18n().GetSupportLanguages()) <= 1 {
+		return nil
+	}
+
+	if ctx.R.FormValue("lang") != "" {
+		http.SetCookie(ctx.W, &http.Cookie{
+			Name:  "lang",
+			Value: ctx.R.FormValue("lang"),
+		})
+	}
+
+	var languages []h.HTMLComponent
+	for _, tag := range b.I18n().GetSupportLanguages() {
+		languages = append(languages,
+			h.Div(
+				VListItem(
+					VListItemContent(
+						VListItemTitle(
+							VBtn(i18n.T(ctx.R, ModelsI18nModuleKey, tag.String())).Attr("@click", web.Plaid().Query("lang", tag.String()).Go()),
+						),
+					),
+				),
+			),
+		)
+	}
+
+	return VMenu(
+		web.Slot(
+			VRow(
+				VBtn(i18n.T(ctx.R, ModelsI18nModuleKey, "switch language")).Attr("v-on", "on").Text(true).Small(true),
+			).Justify("center").Align("center"),
+		).Name("activator").Scope("{ on }"),
+
+		VList(
+			languages...,
+		).Dense(true),
+	).OffsetY(true)
+}
+
+func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage h.HTMLComponent) (r h.HTMLComponent) {
+	if b.brandProfileSwitchLanguageDisplayFunc != nil {
+		return b.brandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage)
+	}
+
+	return VCard(
+		brand,
+		VCardActions(
+			VListItem(
+				profile,
+				switchLanguage,
+			),
+		),
+	).Elevation(1)
 }
 
 func MustGetMessages(r *http.Request) *Messages {
@@ -663,7 +735,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
 		pr.Body = VApp(
 			VNavigationDrawer(
-				b.runBrandFunc(ctx),
+				b.runBrandProfileSwitchLanguageDisplayFunc(b.runBrandFunc(ctx), profile, b.runSwitchLanguageFunc(ctx)),
 				b.createMenus(ctx),
 			).App(true).
 				// Clipped(true).
@@ -695,7 +767,6 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 					).AlignCenter(true).Attr("style", "max-width: 650px"),
 				),
 				notifier,
-				profile,
 			).Dark(true).
 				Color("primary").
 				App(true).
