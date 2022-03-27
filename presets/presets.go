@@ -549,7 +549,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 				VListItem(
 					VListItemContent(
 						VListItemTitle(
-							VBtn(tag.String()).Attr("@click", web.Plaid().Query("lang", tag.String()).Go()),
+							VBtn(i18n.T(ctx.R, ModelsI18nModuleKey, tag.String())).Attr("@click", web.Plaid().Query("lang", tag.String()).Go()),
 						),
 					),
 				),
@@ -560,7 +560,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 	return VMenu(
 		web.Slot(
 			VRow(
-				VBtn("").Children(h.Text("switch language")).Attr("v-on", "on").Text(true).Small(true),
+				VBtn(i18n.T(ctx.R, ModelsI18nModuleKey, "switch language")).Attr("v-on", "on").Text(true).Small(true),
 			).Justify("center").Align("center"),
 		).Name("activator").Scope("{ on }"),
 
