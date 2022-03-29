@@ -76,6 +76,7 @@ If you wondering why ~H1("Hello World")~ and how this worked, Please go ahead an
 				basics.WebScope,
 				basics.EventHandling,
 				basics.ShortCut,
+				basics.NotificationCenter,
 			).Title("Basics"),
 
 			ContentGroup(
