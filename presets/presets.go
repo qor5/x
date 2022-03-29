@@ -549,10 +549,10 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 				VListItem(
 					VListItemContent(
 						VListItemTitle(
-							VBtn(i18n.T(ctx.R, ModelsI18nModuleKey, tag.String())).Attr("@click", web.Plaid().Query("lang", tag.String()).Go()),
+							h.Div(h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, tag.String()))).Class("text-button"),
 						),
 					),
-				),
+				).Attr("@click", web.Plaid().Query("lang", tag.String()).Go()),
 			),
 		)
 	}
