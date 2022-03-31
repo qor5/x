@@ -6,6 +6,7 @@ import (
 	"github.com/goplaid/x/docs/utils"
 	. "github.com/theplant/docgo"
 	"github.com/theplant/docgo/ch"
+	. "github.com/theplant/htmlgo"
 )
 
 var FormHandling = Doc(
@@ -23,6 +24,15 @@ Use ~web.Bind(...).FieldName("Abc")~ to set the field name, make the name matche
 So that you can ~ctx.UnmarshalForm(&fv)~ to set the values to data object. value of input must be set manually to set the initial value of form field.
 
 The fields which are bind with ~web.Bind(...).FieldName("Abc")~ are always submitted with every event func. A browser refresh, new page load will clear the form value.
+`),
+
+	utils.Anchor(H2(""), "Select Element"),
+	Markdown(`
+Use ~VSelect()~ to create a drop-down list. This components are used for collecting user provided information from a list of options.
+
+The ~ItemText()~ method accept one string to set property of items’s text value and ~ItemValue()~ method accept one string to set property of items’s value.
+
+Both of strings need to correspond to the object of the ~Items()~ parameter. Vuetify will marshal the object as JSON and get the corresponding value for each item as text and value.
 `),
 ).Title("Form Handling").
 	Slug("basics/form-handling")
