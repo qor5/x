@@ -9,6 +9,7 @@ import {Filter} from './components/Filter';
 import DatetimePicker from './components/DateTimePicker.vue';
 import draggable from 'vuedraggable';
 import SelectMany from './components/SelectMany.vue';
+import LinkageSelect from './components/LinkageSelect.vue';
 
 declare var window: any;
 
@@ -20,4 +21,5 @@ declare var window: any;
 	Vue.component('vx-datetimepicker', DatetimePicker);
 	Vue.component('vx-draggable', draggable);
 	Vue.component('vx-selectmany', SelectMany);
+	Vue.component('vx-linkageselect', LinkageSelect);
 });

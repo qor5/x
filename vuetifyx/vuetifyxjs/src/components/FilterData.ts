@@ -164,6 +164,14 @@ function pushMultipleSelectItem(segs: any, op: any) {
 	}
 }
 
+function pushLinkageSelectItem(segs: any, op: any) {
+	const mod = op.modifier || 'equals';
+	if (mod === 'equals' && op.valuesAre && op.valuesAre.length > 0) {
+        pushKeyVal(segs, op.key, '', op.valuesAre);
+		return;
+	}
+}
+
 export function filterData(data: any): any {
 	if (!data) {
 		return [];
@@ -186,6 +194,9 @@ export function filterData(data: any): any {
 			}
 			if (op.itemType === 'MultipleSelectItem') {
 				pushMultipleSelectItem(r, op);
+			}
+			if (op.itemType === 'LinkageSelectItem') {
+				pushLinkageSelectItem(r, op);
 			}
 			return op;
 		});
