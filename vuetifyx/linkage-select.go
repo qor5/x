@@ -27,7 +27,8 @@ type LinkageSelectData struct {
 	Label string
 	Items []*LinkageSelectItem
 
-	SelectedID string
+	SelectedID    string
+	ErrorMessages []string
 }
 
 type LinkageSelectItem struct {

@@ -10,6 +10,7 @@
             v-model="selectedIDs[i]"
             @change="selectItem($event, i)"
             :clearable=true
+            :error-messages="v.ErrorMessages"
         >
         </v-autocomplete>
     </div>
@@ -23,7 +24,7 @@ export default {
             type: Array,
             default: () => []
         },
-        // [{Label, SelectedID, Items: [{ID, Name, ChildrenIDs}]}]
+        // [{Label, SelectedID, Items: [{ID, Name, ChildrenIDs}], ErrorMessages}]
         data: {
             type: Array,
             default: () => []
