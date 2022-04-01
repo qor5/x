@@ -730,5 +730,21 @@ func SamplesHandler(prefix string) http.Handler {
 		c13,
 	)
 
+	mux.Handle(
+		e00_basics.ShortCutSamplePath,
+		wb.Page(
+			demoVuetifyLayout(
+				e00_basics.ShortCutSample,
+			),
+		),
+	)
+
+	c14 := presets.New().AssetFunc(addGA)
+	e00_basics.PresetsNotificationCenterSample(c14)
+	mux.Handle(
+		e00_basics.NotificationCenterSamplePath+"/",
+		c14,
+	)
+
 	return mux
 }
