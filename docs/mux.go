@@ -730,5 +730,14 @@ func SamplesHandler(prefix string) http.Handler {
 		c13,
 	)
 
+	mux.Handle(
+		e00_basics.ShortCutSamplePath,
+		wb.Page(
+			demoVuetifyLayout(
+				e00_basics.ShortCutSample,
+			),
+		),
+	)
+
 	return mux
 }

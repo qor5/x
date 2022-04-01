@@ -92,9 +92,9 @@ func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error)
 		result,
 		h.H1("VSelect"),
 		VSelect().
-			Items(options1).
-			ItemText("Name").
-			ItemValue("Login").
+			Items(options1). // Items is the data source
+			ItemText("Name"). // ItemText is the value that would be displayed to user. the argument is the corresponding field name in the Items. here is user.Name
+			ItemValue("Login"). // ItemValue is the value that will be passed with the form. same with ItemText, here is user.Login
 			FieldName("Value3").
 			Solo(true).
 			Value(globalState.Value3),
