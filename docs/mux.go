@@ -739,5 +739,12 @@ func SamplesHandler(prefix string) http.Handler {
 		),
 	)
 
+	c14 := presets.New().AssetFunc(addGA)
+	e00_basics.PresetsNotificationCenterSample(c14)
+	mux.Handle(
+		e00_basics.NotificationCenterSamplePath+"/",
+		c14,
+	)
+
 	return mux
 }

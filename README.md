@@ -7,6 +7,14 @@ JavaScript interactions are encapsulated within Go [htmlgo](https://github.com/t
 
 ## Documentation
 
+Online address: <https://docs.goplaid.dev>
+
 Run documentation server in local: `./dev.sh`
 
-https://docs.goplaid.dev
+To write a document with executable example
+
+1. Add a code example under `docs/examples`
+2. Register this example into router in `docs/mux.go`
+3. Call `utils.Demo` with demo path and file path
+4. Add a Slug to the `Doc` NOTE: cannot be same with other docs
+5. Add a Title to the `Doc`
