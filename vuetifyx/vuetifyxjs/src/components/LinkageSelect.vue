@@ -1,6 +1,26 @@
 <template>
     <div>
+        <v-row v-if="row">
+            <v-col v-for="(v, i) in data">
+                <v-autocomplete
+                    :key="v.Label"
+                    :label="v.Label"
+                    :items="levelItems(i)"
+                    item-text="Name"
+                    item-value="ID"
+                    v-model="selectedIDs[i]"
+                    @change="selectItem($event, i)"
+                    :clearable="chips ? false : true"
+                    :error-messages="v.ErrorMessages"
+                    :chips="chips"
+                    :disabled="disabled"
+                    :hide-details="hideDetails"
+                >
+                </v-autocomplete>
+            </v-col>
+        </v-row>
         <v-autocomplete
+            v-else
             v-for="(v, i) in data"
             :key="v.Label"
             :label="v.Label"
@@ -9,8 +29,11 @@
             item-value="ID"
             v-model="selectedIDs[i]"
             @change="selectItem($event, i)"
-            :clearable=true
+            :clearable="chips ? false : true"
             :error-messages="v.ErrorMessages"
+            :chips="chips"
+            :disabled="disabled"
+            :hide-details="hideDetails"
         >
         </v-autocomplete>
     </div>
@@ -29,7 +52,23 @@ export default {
             type: Array,
             default: () => []
         },
+        disabled: {
+            type: Boolean,
+            default: false
+        },
         selectOutOfOrder: {
+            type: Boolean,
+            default: false
+        },
+        chips: {
+            type: Boolean,
+            default: false
+        },
+        row: {
+            type: Boolean,
+            default: false
+        },
+        hideDetails: {
             type: Boolean,
             default: false
         },
@@ -151,6 +190,13 @@ export default {
         }
     },
     mounted() {
+        this.data.forEach(e => {
+            e.Items.forEach(item => {
+                if (!item.Name) {
+                    item.Name = item.ID
+                }
+            })
+        })
         if (this.value.length > 0) {
             this.selectedIDs = [...this.value]
         } else {

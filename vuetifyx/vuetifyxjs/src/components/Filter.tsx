@@ -610,6 +610,8 @@ export const LinkageSelectItem = Vue.extend({
                     selectOutOfOrder={this.value.linkageSelectData.selectOutOfOrder} 
                     v-model={this.valuesAre} 
                     on={{ input: this.setValue }}
+                    row={true}
+                    hideDetails={true}
                 ></vx-linkageselect>
 			</div>
 		);

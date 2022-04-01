@@ -43,8 +43,23 @@ func (b *VXLinkageSelectBuilber) Data(v []*LinkageSelectData) (r *VXLinkageSelec
 	return b
 }
 
+func (b *VXLinkageSelectBuilber) Disabled(v bool) (r *VXLinkageSelectBuilber) {
+	b.tag.Attr(":disabled", h.JSONString(v))
+	return b
+}
+
 func (b *VXLinkageSelectBuilber) SelectOutOfOrder(v bool) (r *VXLinkageSelectBuilber) {
 	b.tag.Attr(":select-out-of-order", h.JSONString(v))
+	return b
+}
+
+func (b *VXLinkageSelectBuilber) Chips(v bool) (r *VXLinkageSelectBuilber) {
+	b.tag.Attr(":chips", h.JSONString(v))
+	return b
+}
+
+func (b *VXLinkageSelectBuilber) Row(v bool) (r *VXLinkageSelectBuilber) {
+	b.tag.Attr(":row", h.JSONString(v))
 	return b
 }
 
