@@ -91,6 +91,7 @@ If you wondering why ~H1("Hello World")~ and how this worked, Please go ahead an
 				vuetify_components.VariantSubForm,
 				vuetify_components.NavigationDrawer,
 				vuetify_components.LazyPortalsAndReload,
+				vuetify_components.LinkageSelect,
 			).Title("Vuetify Components"),
 
 			ContentGroup(

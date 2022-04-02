@@ -13,7 +13,7 @@ import (
 	"github.com/goplaid/x/presets/gorm2op"
 	v "github.com/goplaid/x/vuetify"
 	"github.com/goplaid/x/vuetifyx"
-	. "github.com/theplant/htmlgo"
+	h "github.com/theplant/htmlgo"
 	"golang.org/x/text/language"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -33,6 +33,13 @@ type Customer struct {
 	ApprovalComment string
 }
 
+type Address struct {
+	ID       int
+	Province string
+	City     string
+	District string
+}
+
 var DB *gorm.DB
 
 func init() {
@@ -49,6 +56,7 @@ func setupDB() (db *gorm.DB) {
 	err = db.AutoMigrate(
 		&Customer{},
 		&Company{},
+		&Address{},
 	)
 	if err != nil {
 		panic(err)
@@ -92,23 +100,23 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 
 	cl = cust.Listing("ID", "Name", "Company", "Email").
 		SearchColumns("name", "email").SelectableColumns(true)
-	cl.Field("Company").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) HTMLComponent {
+	cl.Field("Company").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		c := obj.(*Customer)
 		var comp Company
 		if c.CompanyID == 0 {
-			return Td()
+			return h.Td()
 		}
 
 		db.First(&comp, "id = ?", c.CompanyID)
-		return Td(
-			A().Text(comp.Name).
+		return h.Td(
+			h.A().Text(comp.Name).
 				Attr("@click",
 					web.Plaid().EventFunc(actions.Edit).
 						Query(presets.ParamID, fmt.Sprint(comp.ID)).
 						URL(PresetsListingCustomizationFieldsPath+"/companies").
 						Go()),
-			Text("-"),
-			A().Text("(Open in Dialog)").
+			h.Text("-"),
+			h.A().Text("(Open in Dialog)").
 				Attr("@click",
 					web.Plaid().EventFunc(actions.Edit).
 						Query(presets.ParamID, fmt.Sprint(comp.ID)).
@@ -130,7 +138,7 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 		return
 	})
 
-	ce.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) HTMLComponent {
+	ce.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		c := obj.(*Customer)
 		return web.Portal(companyList(ctx, db, c.CompanyID)).Name("companyListPortal")
 	})
@@ -147,11 +155,11 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 	return
 }
 
-func companyList(ctx *web.EventContext, db *gorm.DB, companyID int) HTMLComponent {
+func companyList(ctx *web.EventContext, db *gorm.DB, companyID int) h.HTMLComponent {
 	msgr := i18n.MustGetModuleMessages(ctx.R, presets.ModelsI18nModuleKey, Messages_en_US).(*Messages)
 	var comps []Company
 	db.Find(&comps)
-	return Div(
+	return h.Div(
 		v.VSelect().
 			Label(msgr.CustomersCompanyID).
 			Items(comps).
@@ -160,7 +168,7 @@ func companyList(ctx *web.EventContext, db *gorm.DB, companyID int) HTMLComponen
 			Value(companyID).
 			FieldName("CompanyID"),
 
-		A().Text("Add Company").Attr("@click",
+		h.A().Text("Add Company").Attr("@click",
 			web.Plaid().
 				URL(PresetsListingCustomizationFieldsPath+"/companies").
 				EventFunc(actions.New).
@@ -296,7 +304,7 @@ func PresetsListingCustomizationBulkActions(b *presets.Builder) (
 			}
 			return
 		}).
-		ComponentFunc(func(selectedIds []string, ctx *web.EventContext) HTMLComponent {
+		ComponentFunc(func(selectedIds []string, ctx *web.EventContext) h.HTMLComponent {
 			comment := ctx.R.FormValue("ApprovalComment")
 			errorMessage := ""
 			if ctx.Flash != nil {
@@ -314,8 +322,8 @@ func PresetsListingCustomizationBulkActions(b *presets.Builder) (
 			err = db.Where("id IN (?)", selectedIds).Delete(&Customer{}).Error
 			return
 		}).
-		ComponentFunc(func(selectedIds []string, ctx *web.EventContext) HTMLComponent {
-			return Div().Text(fmt.Sprintf("Are you sure you want to delete %s ?", selectedIds)).Class("title deep-orange--text")
+		ComponentFunc(func(selectedIds []string, ctx *web.EventContext) h.HTMLComponent {
+			return h.Div().Text(fmt.Sprintf("Are you sure you want to delete %s ?", selectedIds)).Class("title deep-orange--text")
 		})
 
 	return

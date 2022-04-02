@@ -18,6 +18,7 @@ import (
 	"github.com/goplaid/x/docs/examples/e21_presents"
 	"github.com/goplaid/x/docs/examples/e22_vuetify_variant_sub_form"
 	"github.com/goplaid/x/docs/examples/e23_vuetify_components_kitchen"
+	"github.com/goplaid/x/docs/examples/e24_vuetify_components_linkage_select"
 	"github.com/goplaid/x/docs/root"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/presets"
@@ -630,6 +631,15 @@ func SamplesHandler(prefix string) http.Handler {
 		),
 	)
 
+	mux.Handle(
+		e24_vuetify_components_linkage_select.VuetifyComponentsLinkageSelectPath,
+		wb.Page(
+			demoVuetifyLayout(
+				e24_vuetify_components_linkage_select.VuetifyComponentsLinkageSelect,
+			),
+		),
+	)
+
 	// @snippet_begin(MountPresetHelloWorldSample)
 	c00 := presets.New().AssetFunc(addGA)
 	e21_presents.PresetsHelloWorld(c00)
@@ -744,6 +754,13 @@ func SamplesHandler(prefix string) http.Handler {
 	mux.Handle(
 		e00_basics.NotificationCenterSamplePath+"/",
 		c14,
+	)
+
+	c15 := presets.New().AssetFunc(addGA)
+	e21_presents.PresetsLinkageSelectFilterItem(c15)
+	mux.Handle(
+		e21_presents.PresetsLinkageSelectFilterItemPath+"/",
+		c15,
 	)
 
 	return mux
