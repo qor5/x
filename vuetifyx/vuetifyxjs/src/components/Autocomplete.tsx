@@ -34,6 +34,7 @@ export default Vue.extend({
 			// console.log('searchKeyword', val);
 			// console.log('this.itemsEventFuncId', this.itemsEventFuncId);
 			if (val === null) {
+				this.searchKeyword = '';
 				return;
 			}
 			// console.log('in search', val);

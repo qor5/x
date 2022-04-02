@@ -429,8 +429,17 @@ func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interfa
 		vErr = &web.ValidationErrors{}
 	}
 
+	id, err := reflectutils.Get(obj, "ID")
+	edit := false
+	if err == nil && len(fmt.Sprint(id)) > 0 && fmt.Sprint(id) != "0" {
+		edit = true
+	}
+
 	for _, f := range b.fields {
 		if f.compFunc == nil {
+			continue
+		}
+		if info != nil && info.Verifier().Do(PermGet).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
 			continue
 		}
 
@@ -446,7 +455,11 @@ func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interfa
 
 		disabled := false
 		if info != nil {
-			disabled = info.Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil && info.Verifier().Do(PermCreate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil
+			if edit {
+				disabled = info.Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil
+			} else {
+				disabled = info.Verifier().Do(PermCreate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil
+			}
 		}
 
 		comps = append(comps, f.compFunc(obj, &FieldContext{

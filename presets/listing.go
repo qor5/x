@@ -438,6 +438,9 @@ func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContex
 	)
 
 	for _, f := range b.fields {
+		if b.mb.Info().Verifier().Do(PermGet).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
+			continue
+		}
 		originalColumns = append(originalColumns, f.name)
 	}
 
@@ -846,6 +849,9 @@ func (b *ListingBuilder) getComponents(
 		SelectedCountLabel(msgr.ListingSelectedCountNotice)
 
 	for _, f := range displayFields {
+		if b.mb.Info().Verifier().Do(PermGet).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
+			continue
+		}
 		_, ok := orderableFieldMap[f.name]
 		dataTable.(*stripeui.DataTableBuilder).Column(f.name).
 			Title(i18n.PT(ctx.R, ModelsI18nModuleKey, b.mb.label, b.mb.getLabel(f.NameLabel))).
