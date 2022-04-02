@@ -104,6 +104,21 @@ export default {
                 }
 
                 if (this.selectOutOfOrder) {
+                    var items = []
+                    for (var i = level - 2; i >= 0; i--) {
+                        if (this.selectedIDs[i]) {
+                            items = this.findNextItems(this.selectedIDs[i], i)
+                            for (var j = i+1; j < level; j++) {
+                                var newItems = []
+                                for (var item of items) {
+                                    newItems = newItems.concat(this.findNextItems(item.ID, j))
+                                }
+                                items = newItems
+                            }
+
+                            return items
+                        }
+                    }
                     return this.data[level].Items
                 }
                 return []
@@ -187,6 +202,28 @@ export default {
                 }
             }
             this.setValue()
+        },
+        findNextItems(selectedID, level) {
+            if (level + 1 >= this.data.length) {
+                return []
+            }
+            var childrenIDs = []
+            for (var item of this.data[level].Items) {
+                if (item.ID === selectedID) {
+                    childrenIDs = item.ChildrenIDs
+                    break
+                }
+            }
+            if (childrenIDs.length == 0) {
+                return []
+            }
+            var items = []
+            for (var item of this.data[level+1].Items) {
+                if (childrenIDs.includes(item.ID)) {
+                    items.push(item)
+                }
+            }
+            return items
         }
     },
     mounted() {
