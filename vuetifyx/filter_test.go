@@ -272,6 +272,87 @@ var setByQueryCases = []struct {
 		expectedSQLConds: "state IN ?",
 		expectedSQLArgs:  []interface{}{[]string{"draft", "rejected"}},
 	},
+	{
+		name: "ItemTypeLinkageSelect",
+		data: FilterData([]*FilterItem{
+			{
+				Key:      "province_city_district",
+				ItemType: ItemTypeLinkageSelect,
+				LinkageSelectData: FilterLinkageSelectData{
+					Items: [][]*LinkageSelectItem{
+						{
+							{ID: "1", Name: "浙江", ChildrenIDs: []string{"1", "2"}},
+							{ID: "2", Name: "江苏", ChildrenIDs: []string{"3", "4"}},
+						},
+						{
+							{ID: "1", Name: "杭州", ChildrenIDs: []string{"1", "2"}},
+							{ID: "2", Name: "宁波", ChildrenIDs: []string{"3", "4"}},
+							{ID: "3", Name: "南京", ChildrenIDs: []string{"5", "6"}},
+							{ID: "4", Name: "苏州", ChildrenIDs: []string{"7", "8"}},
+						},
+						{
+
+							{ID: "1", Name: "拱墅区"},
+							{ID: "2", Name: "西湖区"},
+							{ID: "3", Name: "镇海区"},
+							{ID: "4", Name: "鄞州区"},
+							{ID: "5", Name: "鼓楼区"},
+							{ID: "6", Name: "玄武区"},
+							{ID: "7", Name: "常熟区"},
+							{ID: "8", Name: "吴江区"},
+						},
+					},
+					Labels: []string{"Province", "City", "District"},
+					SQLConditions: []string{
+						"province_id = ?",
+						"city_id = ?",
+						"district_id = ?",
+					},
+				},
+			},
+		}),
+		qs: "province_city_district=2,3,7",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:      "province_city_district",
+				ItemType: ItemTypeLinkageSelect,
+				Selected: true,
+				Modifier: ModifierEquals,
+				ValuesAre: []string{
+					"2",
+					"3",
+					"7",
+				},
+				LinkageSelectData: FilterLinkageSelectData{
+					Items: [][]*LinkageSelectItem{
+						{
+							{ID: "1", Name: "浙江", ChildrenIDs: []string{"1", "2"}},
+							{ID: "2", Name: "江苏", ChildrenIDs: []string{"3", "4"}},
+						},
+						{
+							{ID: "1", Name: "杭州", ChildrenIDs: []string{"1", "2"}},
+							{ID: "2", Name: "宁波", ChildrenIDs: []string{"3", "4"}},
+							{ID: "3", Name: "南京", ChildrenIDs: []string{"5", "6"}},
+							{ID: "4", Name: "苏州", ChildrenIDs: []string{"7", "8"}},
+						},
+						{
+							{ID: "1", Name: "拱墅区"},
+							{ID: "2", Name: "西湖区"},
+							{ID: "3", Name: "镇海区"},
+							{ID: "4", Name: "鄞州区"},
+							{ID: "5", Name: "鼓楼区"},
+							{ID: "6", Name: "玄武区"},
+							{ID: "7", Name: "常熟区"},
+							{ID: "8", Name: "吴江区"},
+						},
+					},
+					Labels: []string{"Province", "City", "District"},
+				},
+			},
+		}),
+		expectedSQLConds: "province_id = ? AND city_id = ? AND district_id = ?",
+		expectedSQLArgs:  []interface{}{"2", "3", "7"},
+	},
 }
 
 func TestSetByQueryString(t *testing.T) {

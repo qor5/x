@@ -20,6 +20,7 @@ import {
 } from 'vuetify/lib';
 
 import TextDatePicker from './TextDatePicker';
+import LinkageSelect from './LinkageSelect.vue';
 
 export function localTimezoneAbbr() {
 	const d = new Date().toString();
@@ -574,6 +575,50 @@ export const MultipleSelectItem = Vue.extend({
 	},
 });
 
+export const LinkageSelectItem = Vue.extend({
+	components: {
+		vselect: VSelect,
+		vtextfield: VTextField,
+		vicon: VIcon,
+        linkageSelect: LinkageSelect,
+	},
+	props: {
+		value: Object,
+	},
+
+	data() {
+		return {
+			valuesAre: this.$props.value.valuesAre || [],
+		};
+	},
+
+	methods: {
+		inputEmit() {
+			this.$emit('input', { ...this.$props.value, ...this.$data });
+		},
+
+		setValue(value: any) {
+			this.inputEmit();
+		},
+	},
+
+	render() {
+		return (
+			<div>
+                <vx-linkageselect 
+                    items={this.value.linkageSelectData.items} 
+                    labels={this.value.linkageSelectData.labels} 
+                    selectOutOfOrder={this.value.linkageSelectData.selectOutOfOrder} 
+                    v-model={this.valuesAre} 
+                    on={{ input: this.setValue }}
+                    row={true}
+                    hideDetails={true}
+                ></vx-linkageselect>
+			</div>
+		);
+	},
+});
+
 /*
 data = [
   {
@@ -805,6 +850,7 @@ export const Filter = Vue.extend({
 			StringItem,
 			SelectItem,
             MultipleSelectItem,
+			LinkageSelectItem,
 		};
 
 		const t = this.$props.translations;
@@ -815,6 +861,7 @@ export const Filter = Vue.extend({
 			StringItem: t.string,
 			SelectItem: {},
             MultipleSelectItem: t.multipleSelect,
+			LinkageSelectItem: {},
 		};
 
 		const body = this.internalValue.map((op: FilterItem, i: number) => {

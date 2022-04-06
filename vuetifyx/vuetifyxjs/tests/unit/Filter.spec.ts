@@ -307,4 +307,27 @@ describe('filter', () => {
 		});
 	});
 
+	describe('encodeFilterData LinkageSelectItem', () => {
+		it('equals', () => {
+			expect(encodeFilterData([
+				{
+					key: 'province_city_district',
+					label: 'Province&City&District',
+					itemType: 'LinkageSelectItem',
+					selected: true,
+					modifier: 'equals',
+					valuesAre: ['2','3','7'],
+				},
+				{
+					key: 'group_channel',
+					label: 'Group&Channel',
+					itemType: 'LinkageSelectItem',
+					selected: true,
+					modifier: 'equals',
+					valuesAre: ['1','2'],
+				},
+			])).toEqual('province_city_district=2%2C3%2C7&group_channel=1%2C2');
+		});
+	});
+
 });

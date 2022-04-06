@@ -140,6 +140,7 @@ const (
 	ItemTypeDate           FilterItemType = "DateItem"
 	ItemTypeSelect         FilterItemType = "SelectItem"
 	ItemTypeMultipleSelect FilterItemType = "MultipleSelectItem"
+	ItemTypeLinkageSelect  FilterItemType = "LinkageSelectItem"
 	ItemTypeNumber         FilterItemType = "NumberItem"
 	ItemTypeString         FilterItemType = "StringItem"
 )
@@ -183,22 +184,30 @@ type SelectItem struct {
 	SQLCondition string `json:"-"`
 }
 
+type FilterLinkageSelectData struct {
+	Items            [][]*LinkageSelectItem `json:"items,omitempty"`
+	Labels           []string               `json:"labels,omitempty"`
+	SelectOutOfOrder bool                   `json:"selectOutOfOrder,omitempty"`
+	SQLConditions    []string               `json:"-"`
+}
+
 type FilterItem struct {
-	Key            string                  `json:"key,omitempty"`
-	Label          string                  `json:"label,omitempty"`
-	ItemType       FilterItemType          `json:"itemType,omitempty"`
-	Selected       bool                    `json:"selected,omitempty"`
-	Modifier       FilterItemModifier      `json:"modifier,omitempty"`
-	ValueIs        string                  `json:"valueIs,omitempty"`
-	ValuesAre      []string                `json:"valuesAre,omitempty"`
-	ValueFrom      string                  `json:"valueFrom,omitempty"`
-	ValueTo        string                  `json:"valueTo,omitempty"`
-	InTheLastValue string                  `json:"inTheLastValue,omitempty"`
-	InTheLastUnit  FilterItemInTheLastUnit `json:"inTheLastUnit,omitempty"`
-	Timezone       FilterItemTimezone      `json:"timezone,omitempty"`
-	SQLCondition   string                  `json:"-"`
-	Options        []*SelectItem           `json:"options,omitempty"`
-	Invisible      bool                    `json:"invisible,omitempty"`
+	Key               string                  `json:"key,omitempty"`
+	Label             string                  `json:"label,omitempty"`
+	ItemType          FilterItemType          `json:"itemType,omitempty"`
+	Selected          bool                    `json:"selected,omitempty"`
+	Modifier          FilterItemModifier      `json:"modifier,omitempty"`
+	ValueIs           string                  `json:"valueIs,omitempty"`
+	ValuesAre         []string                `json:"valuesAre,omitempty"`
+	ValueFrom         string                  `json:"valueFrom,omitempty"`
+	ValueTo           string                  `json:"valueTo,omitempty"`
+	InTheLastValue    string                  `json:"inTheLastValue,omitempty"`
+	InTheLastUnit     FilterItemInTheLastUnit `json:"inTheLastUnit,omitempty"`
+	Timezone          FilterItemTimezone      `json:"timezone,omitempty"`
+	SQLCondition      string                  `json:"-"`
+	Options           []*SelectItem           `json:"options,omitempty"`
+	LinkageSelectData FilterLinkageSelectData `json:"linkageSelectData,omitempty"`
+	Invisible         bool                    `json:"invisible,omitempty"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {
@@ -280,9 +289,14 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 		segs := strings.Split(k, ".")
 		var mod = ""
 		key := k
+		val := v[0]
 		if len(segs) > 1 {
 			key = segs[0]
 			mod = segs[1]
+		}
+		it := fd.getFilterItem(key)
+		if it == nil {
+			continue
 		}
 
 		if _, ok := keyModValueMap[key]; !ok {
@@ -291,40 +305,48 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 
 		keyModValueMap[key][mod] = v[0]
 
-		sqlc := fd.getSQLCondition(key, v[0])
-		if len(sqlc) > 0 {
-			val := v[0]
-			it := fd.getFilterItem(key)
-			if it.ItemType == ItemTypeDate {
-				val = unixToDatetime(val, it.Timezone == TimezoneUTC, 0)
+		if it.ItemType == ItemTypeLinkageSelect {
+			vals := strings.Split(val, ",")
+			for i, v := range vals {
+				if v != "" {
+					conds = append(conds, it.LinkageSelectData.SQLConditions[i])
+					sqlArgs = append(sqlArgs, v)
+				}
 			}
+		} else {
+			sqlc := fd.getSQLCondition(key, v[0])
+			if len(sqlc) > 0 {
+				if it.ItemType == ItemTypeDate {
+					val = unixToDatetime(val, it.Timezone == TimezoneUTC, 0)
+				}
 
-			// Compose operator into sql condition. If you want to use multiple operators you have to use {op}, '%s' is not supported
-			// e.g.
-			// "source_b %s ?"                        ==> "source_b = ?"
-			// "source_b {op} ?"                      ==> "source_b = ?"
-			// "source_b {op} ? AND source_c {op} ?"  ==> "source_b = ? AND source_c = ?"
-			if strings.Contains(sqlc, "%s") {
-				// This is for backward compatibility
-				conds = append(conds, fmt.Sprintf(sqlc, sqlOps[mod]))
-			} else {
-				conds = append(conds, strings.NewReplacer(SQLOperatorPlaceholder, sqlOps[mod]).Replace(sqlc))
-			}
+				// Compose operator into sql condition. If you want to use multiple operators you have to use {op}, '%s' is not supported
+				// e.g.
+				// "source_b %s ?"                        ==> "source_b = ?"
+				// "source_b {op} ?"                      ==> "source_b = ?"
+				// "source_b {op} ? AND source_c {op} ?"  ==> "source_b = ? AND source_c = ?"
+				if strings.Contains(sqlc, "%s") {
+					// This is for backward compatibility
+					conds = append(conds, fmt.Sprintf(sqlc, sqlOps[mod]))
+				} else {
+					conds = append(conds, strings.NewReplacer(SQLOperatorPlaceholder, sqlOps[mod]).Replace(sqlc))
+				}
 
-			// Prepare value Args for sql condition.
-			// e.g.  assume value is "1"
-			// "source_b = ?"                           ==>   []interface{}{"1"}
-			// "source_b = ? OR source_c = ?"           ==>   []interface{}{"1", "1"}
-			// "source_b ilike ? OR source_c ilike ?"   ==>   []interface{}{"%1%", "%1%"}
-			valCount := strings.Count(sqlc, "?")
-			for i := 0; i < valCount; i++ {
-				switch mod {
-				case "ilike":
-					sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", val))
-				case "in", "notIn":
-					sqlArgs = append(sqlArgs, strings.Split(val, ","))
-				default:
-					sqlArgs = append(sqlArgs, val)
+				// Prepare value Args for sql condition.
+				// e.g.  assume value is "1"
+				// "source_b = ?"                           ==>   []interface{}{"1"}
+				// "source_b = ? OR source_c = ?"           ==>   []interface{}{"1", "1"}
+				// "source_b ilike ? OR source_c ilike ?"   ==>   []interface{}{"%1%", "%1%"}
+				valCount := strings.Count(sqlc, "?")
+				for i := 0; i < valCount; i++ {
+					switch mod {
+					case "ilike":
+						sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", val))
+					case "in", "notIn":
+						sqlArgs = append(sqlArgs, strings.Split(val, ","))
+					default:
+						sqlArgs = append(sqlArgs, val)
+					}
 				}
 			}
 		}
@@ -366,6 +388,12 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 						default:
 							it.Modifier = ModifierIn
 						}
+						if v != "" {
+							it.ValuesAre = strings.Split(v, ",")
+						}
+						continue
+					}
+					if it.ItemType == ItemTypeLinkageSelect {
 						if v != "" {
 							it.ValuesAre = strings.Split(v, ",")
 						}
