@@ -438,7 +438,7 @@ func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContex
 	)
 
 	for _, f := range b.fields {
-		if b.mb.Info().Verifier().Do(PermGet).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
+		if b.mb.Info().Verifier().Do(PermList).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
 			continue
 		}
 		originalColumns = append(originalColumns, f.name)
@@ -849,7 +849,7 @@ func (b *ListingBuilder) getComponents(
 		SelectedCountLabel(msgr.ListingSelectedCountNotice)
 
 	for _, f := range displayFields {
-		if b.mb.Info().Verifier().Do(PermGet).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
+		if b.mb.Info().Verifier().Do(PermList).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
 			continue
 		}
 		_, ok := orderableFieldMap[f.name]
