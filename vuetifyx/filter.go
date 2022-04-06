@@ -185,9 +185,10 @@ type SelectItem struct {
 }
 
 type FilterLinkageSelectData struct {
-	Data             []*LinkageSelectData `json:"data,omitempty"`
-	SelectOutOfOrder bool                 `json:"selectOutOfOrder,omitempty"`
-	SQLConditions    []string             `json:"-"`
+	Items            [][]*LinkageSelectItem `json:"items,omitempty"`
+	Labels           []string               `json:"labels,omitempty"`
+	SelectOutOfOrder bool                   `json:"selectOutOfOrder,omitempty"`
+	SQLConditions    []string               `json:"-"`
 }
 
 type FilterItem struct {

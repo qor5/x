@@ -606,7 +606,8 @@ export const LinkageSelectItem = Vue.extend({
 		return (
 			<div>
                 <vx-linkageselect 
-                    data={this.value.linkageSelectData.data} 
+                    items={this.value.linkageSelectData.items} 
+                    labels={this.value.linkageSelectData.labels} 
                     selectOutOfOrder={this.value.linkageSelectData.selectOutOfOrder} 
                     v-model={this.valuesAre} 
                     on={{ input: this.setValue }}

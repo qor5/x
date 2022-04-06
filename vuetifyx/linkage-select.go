@@ -23,23 +23,29 @@ func (b *VXLinkageSelectBuilber) FieldName(v string) (r *VXLinkageSelectBuilber)
 	return b
 }
 
-type LinkageSelectData struct {
-	Label string
-	Items []*LinkageSelectItem
-
-	SelectedID    string
-	ErrorMessages []string
-}
-
 type LinkageSelectItem struct {
 	ID          string
 	Name        string
 	ChildrenIDs []string
 }
 
-// order by level
-func (b *VXLinkageSelectBuilber) Data(v []*LinkageSelectData) (r *VXLinkageSelectBuilber) {
-	b.tag.Attr(":data", v)
+func (b *VXLinkageSelectBuilber) Items(vs ...[]*LinkageSelectItem) (r *VXLinkageSelectBuilber) {
+	b.tag.Attr(":items", vs)
+	return b
+}
+
+func (b *VXLinkageSelectBuilber) Labels(vs ...string) (r *VXLinkageSelectBuilber) {
+	b.tag.Attr(":labels", vs)
+	return b
+}
+
+func (b *VXLinkageSelectBuilber) SelectedIDs(vs ...string) (r *VXLinkageSelectBuilber) {
+	b.tag.Attr(":value", vs)
+	return b
+}
+
+func (b *VXLinkageSelectBuilber) ErrorMessages(vs ...[]string) (r *VXLinkageSelectBuilber) {
+	b.tag.Attr(":error-messages", vs)
 	return b
 }
 

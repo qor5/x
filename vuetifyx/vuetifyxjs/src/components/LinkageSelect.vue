@@ -1,17 +1,17 @@
 <template>
     <div>
         <v-row v-if="row">
-            <v-col v-for="(v, i) in data">
+            <v-col v-for="(v, i) in items">
                 <v-autocomplete
-                    :key="v.Label"
-                    :label="v.Label"
+                    :key="v.ID"
+                    :label="labels[i]"
                     :items="levelItems(i)"
                     item-text="Name"
                     item-value="ID"
                     v-model="selectedIDs[i]"
                     @change="selectItem($event, i)"
                     :clearable="chips ? false : true"
-                    :error-messages="v.ErrorMessages"
+                    :error-messages="errorMessages[i]"
                     :chips="chips"
                     :disabled="disabled"
                     :hide-details="hideDetails"
@@ -21,16 +21,16 @@
         </v-row>
         <v-autocomplete
             v-else
-            v-for="(v, i) in data"
-            :key="v.Label"
-            :label="v.Label"
+            v-for="(v, i) in items"
+            :key="v.ID"
+            :label="labels[i]"
             :items="levelItems(i)"
             item-text="Name"
             item-value="ID"
             v-model="selectedIDs[i]"
             @change="selectItem($event, i)"
             :clearable="chips ? false : true"
-            :error-messages="v.ErrorMessages"
+            :error-messages="errorMessages[i]"
             :chips="chips"
             :disabled="disabled"
             :hide-details="hideDetails"
@@ -47,8 +47,16 @@ export default {
             type: Array,
             default: () => []
         },
-        // [{Label, SelectedID, Items: [{ID, Name, ChildrenIDs}], ErrorMessages}]
-        data: {
+        // [{ID, Name, ChildrenIDs}]
+        items: {
+            type: Array,
+            default: () => []
+        },
+        labels: {
+            type: Array,
+            default: () => []
+        },
+        errorMessages: {
             type: Array,
             default: () => []
         },
@@ -82,11 +90,11 @@ export default {
         levelItems: function() {
             return function(level) {
                 if (level === 0) {
-                    return this.data[0].Items
+                    return this.items[level]
                 }
                 if (this.selectedIDs[level-1]) {
                     var idM = {}
-                    for (var item of this.data[level-1].Items) {
+                    for (var item of this.items[level-1]) {
                         if (item.ID === this.selectedIDs[level-1]) {
                             for (var id of item.ChildrenIDs) {
                                 idM[id] = true
@@ -95,7 +103,7 @@ export default {
                         }
                     }
                     var items = []
-                    for (var item of this.data[level].Items) {
+                    for (var item of this.items[level]) {
                         if (idM[item.ID]) {
                             items.push(item)
                         }
@@ -119,7 +127,7 @@ export default {
                             return items
                         }
                     }
-                    return this.data[level].Items
+                    return this.items[level]
                 }
                 return []
             }
@@ -130,6 +138,11 @@ export default {
             this.$emit("input", this.selectedIDs)
         },
         validateAndResetSelectedIDs() {
+            this.items.forEach((v, i) => {
+                if (!this.selectedIDs[i]) {
+                    this.selectedIDs[i] = ""
+                }
+            })
             this.selectedIDs.forEach((v, i) => {
                 if (!v) {
                     this.selectedIDs[i] = ""
@@ -137,7 +150,7 @@ export default {
                 }
 
                 var exists = false
-                for (var item of this.data[i].Items) {
+                for (var item of this.items[i]) {
                     if (item.ID === v) {
                         exists = true
                         break
@@ -158,7 +171,7 @@ export default {
                     }
                     return
                 } else {
-                    for (var item of this.data[i-1].Items) {
+                    for (var item of this.items[i-1]) {
                         if (item.ID === pID) {
                             for (var id of item.ChildrenIDs) {
                                 if (id === v) {
@@ -176,7 +189,7 @@ export default {
         selectItem(v, level) {
             if (v) {
                 if (this.selectedIDs[level+1]) {
-                    for (var item of this.data[level].Items) {
+                    for (var item of this.items[level]) {
                         if (item.ID === v) {
                             var found = false
                             for (var id of item.ChildrenIDs) {
@@ -204,11 +217,11 @@ export default {
             this.setValue()
         },
         findNextItems(selectedID, level) {
-            if (level + 1 >= this.data.length) {
+            if (level + 1 >= this.items.length) {
                 return []
             }
             var childrenIDs = []
-            for (var item of this.data[level].Items) {
+            for (var item of this.items[level]) {
                 if (item.ID === selectedID) {
                     childrenIDs = item.ChildrenIDs
                     break
@@ -218,7 +231,7 @@ export default {
                 return []
             }
             var items = []
-            for (var item of this.data[level+1].Items) {
+            for (var item of this.items[level+1]) {
                 if (childrenIDs.includes(item.ID)) {
                     items.push(item)
                 }
@@ -227,20 +240,14 @@ export default {
         }
     },
     mounted() {
-        this.data.forEach(e => {
-            e.Items.forEach(item => {
+        this.items.forEach(v => {
+            v.forEach(item => {
                 if (!item.Name) {
                     item.Name = item.ID
                 }
             })
         })
-        if (this.value.length > 0) {
-            this.selectedIDs = [...this.value]
-        } else {
-            this.selectedIDs = this.data.map(e => {
-                return e.SelectedID || ""
-            })
-        }
+        this.selectedIDs = [...this.value]
         this.validateAndResetSelectedIDs()
         this.$nextTick(() => {
             this.setValue();

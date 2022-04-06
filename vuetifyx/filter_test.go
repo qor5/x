@@ -279,37 +279,30 @@ var setByQueryCases = []struct {
 				Key:      "province_city_district",
 				ItemType: ItemTypeLinkageSelect,
 				LinkageSelectData: FilterLinkageSelectData{
-					Data: []*LinkageSelectData{
+					Items: [][]*LinkageSelectItem{
 						{
-							Label: "Province",
-							Items: []*LinkageSelectItem{
-								{ID: "1", Name: "浙江", ChildrenIDs: []string{"1", "2"}},
-								{ID: "2", Name: "江苏", ChildrenIDs: []string{"3", "4"}},
-							},
+							{ID: "1", Name: "浙江", ChildrenIDs: []string{"1", "2"}},
+							{ID: "2", Name: "江苏", ChildrenIDs: []string{"3", "4"}},
 						},
 						{
-							Label: "City",
-							Items: []*LinkageSelectItem{
-								{ID: "1", Name: "杭州", ChildrenIDs: []string{"1", "2"}},
-								{ID: "2", Name: "宁波", ChildrenIDs: []string{"3", "4"}},
-								{ID: "3", Name: "南京", ChildrenIDs: []string{"5", "6"}},
-								{ID: "4", Name: "苏州", ChildrenIDs: []string{"7", "8"}},
-							},
+							{ID: "1", Name: "杭州", ChildrenIDs: []string{"1", "2"}},
+							{ID: "2", Name: "宁波", ChildrenIDs: []string{"3", "4"}},
+							{ID: "3", Name: "南京", ChildrenIDs: []string{"5", "6"}},
+							{ID: "4", Name: "苏州", ChildrenIDs: []string{"7", "8"}},
 						},
 						{
-							Label: "District",
-							Items: []*LinkageSelectItem{
-								{ID: "1", Name: "拱墅区"},
-								{ID: "2", Name: "西湖区"},
-								{ID: "3", Name: "镇海区"},
-								{ID: "4", Name: "鄞州区"},
-								{ID: "5", Name: "鼓楼区"},
-								{ID: "6", Name: "玄武区"},
-								{ID: "7", Name: "常熟区"},
-								{ID: "8", Name: "吴江区"},
-							},
+
+							{ID: "1", Name: "拱墅区"},
+							{ID: "2", Name: "西湖区"},
+							{ID: "3", Name: "镇海区"},
+							{ID: "4", Name: "鄞州区"},
+							{ID: "5", Name: "鼓楼区"},
+							{ID: "6", Name: "玄武区"},
+							{ID: "7", Name: "常熟区"},
+							{ID: "8", Name: "吴江区"},
 						},
 					},
+					Labels: []string{"Province", "City", "District"},
 					SQLConditions: []string{
 						"province_id = ?",
 						"city_id = ?",
@@ -331,37 +324,29 @@ var setByQueryCases = []struct {
 					"7",
 				},
 				LinkageSelectData: FilterLinkageSelectData{
-					Data: []*LinkageSelectData{
+					Items: [][]*LinkageSelectItem{
 						{
-							Label: "Province",
-							Items: []*LinkageSelectItem{
-								{ID: "1", Name: "浙江", ChildrenIDs: []string{"1", "2"}},
-								{ID: "2", Name: "江苏", ChildrenIDs: []string{"3", "4"}},
-							},
+							{ID: "1", Name: "浙江", ChildrenIDs: []string{"1", "2"}},
+							{ID: "2", Name: "江苏", ChildrenIDs: []string{"3", "4"}},
 						},
 						{
-							Label: "City",
-							Items: []*LinkageSelectItem{
-								{ID: "1", Name: "杭州", ChildrenIDs: []string{"1", "2"}},
-								{ID: "2", Name: "宁波", ChildrenIDs: []string{"3", "4"}},
-								{ID: "3", Name: "南京", ChildrenIDs: []string{"5", "6"}},
-								{ID: "4", Name: "苏州", ChildrenIDs: []string{"7", "8"}},
-							},
+							{ID: "1", Name: "杭州", ChildrenIDs: []string{"1", "2"}},
+							{ID: "2", Name: "宁波", ChildrenIDs: []string{"3", "4"}},
+							{ID: "3", Name: "南京", ChildrenIDs: []string{"5", "6"}},
+							{ID: "4", Name: "苏州", ChildrenIDs: []string{"7", "8"}},
 						},
 						{
-							Label: "District",
-							Items: []*LinkageSelectItem{
-								{ID: "1", Name: "拱墅区"},
-								{ID: "2", Name: "西湖区"},
-								{ID: "3", Name: "镇海区"},
-								{ID: "4", Name: "鄞州区"},
-								{ID: "5", Name: "鼓楼区"},
-								{ID: "6", Name: "玄武区"},
-								{ID: "7", Name: "常熟区"},
-								{ID: "8", Name: "吴江区"},
-							},
+							{ID: "1", Name: "拱墅区"},
+							{ID: "2", Name: "西湖区"},
+							{ID: "3", Name: "镇海区"},
+							{ID: "4", Name: "鄞州区"},
+							{ID: "5", Name: "鼓楼区"},
+							{ID: "6", Name: "玄武区"},
+							{ID: "7", Name: "常熟区"},
+							{ID: "8", Name: "吴江区"},
 						},
 					},
+					Labels: []string{"Province", "City", "District"},
 				},
 			},
 		}),
