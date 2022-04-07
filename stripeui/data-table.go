@@ -35,6 +35,7 @@ type DataTableBuilder struct {
 	loadMoreURL        string
 	// e.g. {count} records are selected.
 	selectedCountLabel string
+	tfootChildren      []h.HTMLComponent
 }
 
 func DataTable(data interface{}) (r *DataTableBuilder) {
@@ -54,6 +55,11 @@ func (b *DataTableBuilder) LoadMoreAt(count int, label string) (r *DataTableBuil
 
 func (b *DataTableBuilder) LoadMoreURL(url string) (r *DataTableBuilder) {
 	b.loadMoreURL = url
+	return b
+}
+
+func (b *DataTableBuilder) Tfoot(children ...h.HTMLComponent) (r *DataTableBuilder) {
+	b.tfootChildren = children
 	return b
 }
 
@@ -349,6 +355,9 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 	}
 
 	var tfoot h.HTMLComponent
+	if len(b.tfootChildren) > 0 {
+		tfoot = h.Tfoot(b.tfootChildren...)
+	}
 	if b.loadMoreCount > 0 && haveMoreRecord {
 		var btn h.HTMLComponent
 
