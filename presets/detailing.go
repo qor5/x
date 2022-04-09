@@ -95,7 +95,6 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRes
 
 	r.Body = VContainer(
 		notice,
-		web.Portal().Name(deleteConfirmPortalName),
 	).AppendChildren(comps...).Fluid(true)
 	return
 }

@@ -113,7 +113,6 @@ func (b *ListingBuilder) GetPageFunc() web.PageFunc {
 }
 
 const bulkPanelOpenParamName = "bulkOpen"
-const bulkPanelPortalName = "bulkPanel"
 const deleteConfirmPortalName = "deleteConfirm"
 const dataTablePortalName = "dataTable"
 const dataTableAdditionsPortalName = "dataTableAdditions"
@@ -137,7 +136,6 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 			toolbar,
 			VDivider(),
 			VCardText(
-				web.Portal().Name(deleteConfirmPortalName),
 				web.Portal(dataTable).Name(dataTablePortalName),
 			).Class("pa-0"),
 		),

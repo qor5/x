@@ -775,6 +775,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 
 			web.Portal().Name(RightDrawerPortalName),
 			web.Portal().Name(dialogPortalName),
+			web.Portal().Name(deleteConfirmPortalName),
 
 			VProgressLinear().
 				Attr(":active", "isFetching").
