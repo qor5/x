@@ -28,6 +28,7 @@ type ListingBuilder struct {
 	rowMenu           *RowMenuBuilder
 	filterDataFunc    FilterDataFunc
 	filterTabsFunc    FilterTabsFunc
+	newBtnFunc        ComponentFunc
 	pageFunc          web.PageFunc
 	searcher          SearchFunc
 	searchColumns     []string
@@ -82,6 +83,11 @@ func (b *ListingBuilder) TotalVisible(v int64) (r *ListingBuilder) {
 
 func (b *ListingBuilder) OrderBy(v string) (r *ListingBuilder) {
 	b.orderBy = v
+	return b
+}
+
+func (b *ListingBuilder) NewButtonFunc(v ComponentFunc) (r *ListingBuilder) {
+	b.newBtnFunc = v
 	return b
 }
 
@@ -627,23 +633,27 @@ func (b *ListingBuilder) tableToolbar(msgr *Messages, pageURL *url.URL, ctx *web
 	ft.MultipleSelect.In = msgr.FiltersMultipleSelectIn
 	ft.MultipleSelect.NotIn = msgr.FiltersMultipleSelectNotIn
 
-	disableNewBtn := b.mb.Info().Verifier().Do(PermCreate).WithReq(ctx.R).IsAllowed() != nil
-
 	toolbar = VToolbar(
 		VSpacer(),
 	).Flat(true)
 
 	toolbar.AppendChildren(b.actionsComponent(msgr, ctx))
 
-	if !disableNewBtn {
-		toolbar.AppendChildren(VBtn(msgr.New).
-			Color("primary").
-			Depressed(true).
-			Dark(true).Class("ml-2").
-			Disabled(disableNewBtn).
-			Attr("@click", web.Plaid().EventFunc(actions.New).
-				Go()))
+	if b.newBtnFunc != nil {
+		toolbar.AppendChildren(b.newBtnFunc(ctx))
+	} else {
+		disableNewBtn := b.mb.Info().Verifier().Do(PermCreate).WithReq(ctx.R).IsAllowed() != nil
+		if !disableNewBtn {
+			toolbar.AppendChildren(VBtn(msgr.New).
+				Color("primary").
+				Depressed(true).
+				Dark(true).Class("ml-2").
+				Disabled(disableNewBtn).
+				Attr("@click", web.Plaid().EventFunc(actions.New).
+					Go()))
+		}
 	}
+
 	displayFields = b.fields
 	if b.selectableColumns {
 		var btn h.HTMLComponent
