@@ -188,21 +188,22 @@ export default {
         },
         selectItem(v, level) {
             if (v) {
-                if (this.selectedIDs[level+1]) {
-                    for (var item of this.items[level]) {
-                        if (item.ID === v) {
-                            var found = false
-                            for (var id of item.ChildrenIDs) {
-                                if (id === this.selectedIDs[level+1]) {
-                                    found = true
-                                    break
-                                }
+                for (var i = level+1; i < this.selectedIDs.length; i++) {
+                    if (this.selectedIDs[i]) {
+                        var levelItems = this.levelItems[i]
+                        if (!levelItems || levelItems.length === 0) {
+                            this.selectedIDs[i] = ""
+                            continue
+                        }
+                        var found = false
+                        for (var item of levelItems) {
+                            if (item.ID === this.selectedIDs[i]) {
+                                found = true
+                                break
                             }
-                            if (!found) {
-                                for (var i = level+1; i < this.selectedIDs.length; i++) {
-                                    this.selectedIDs[i] = ""
-                                }
-                            }
+                        }
+                        if (!found) {
+                            this.selectedIDs[i] = ""
                         }
                     }
                 }
