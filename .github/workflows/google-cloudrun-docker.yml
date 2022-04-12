@@ -47,7 +47,7 @@ name: Build and Deploy to Cloud Run
 on:
   push:
     branches:
-      - demo
+      - master
 
 env:
   PROJECT_ID: sunfmin
