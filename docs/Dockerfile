@@ -3,7 +3,7 @@ RUN apk update && apk add git gcc libc-dev sqlite sqlite-dev && rm -rf /var/cach
 ARG GITHUB_TOKEN
 WORKDIR /go/src/github.com/goplaid/x
 COPY . .
-RUN set -x && go get -d -v ./docs/docsmain/...
+RUN set -x && go mod download
 RUN GOOS=linux GOARCH=amd64 go build -o /app/entry ./docs/docsmain/
 
 FROM alpine
