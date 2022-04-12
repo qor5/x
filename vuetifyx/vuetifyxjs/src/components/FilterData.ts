@@ -45,11 +45,11 @@ function pushDateItem(segs: any, op: any) {
 				segs,
 				op.key,
 				'gte',
-				convertUTC(op, op.valueFrom).unix(),
+				moment(op.valueFrom).unix(),
 			);
 		}
 		if (op.valueTo) {
-			pushKeyVal(segs, op.key, 'lt', convertUTC(op, op.valueTo).add(1, 'days').unix());
+			pushKeyVal(segs, op.key, 'lt', moment(op.valueTo).unix());
 		}
 		return;
 	}
@@ -155,11 +155,11 @@ function pushSelectItem(segs: any, op: any) {
 function pushMultipleSelectItem(segs: any, op: any) {
 	const mod = op.modifier || 'in';
 	if (mod === 'in' && op.valuesAre && op.valuesAre.length > 0) {
-        pushKeyVal(segs, op.key, 'in', op.valuesAre);
+		pushKeyVal(segs, op.key, 'in', op.valuesAre);
 		return;
 	}
 	if (mod === 'notIn' && op.valuesAre && op.valuesAre.length > 0) {
-        pushKeyVal(segs, op.key, 'notIn', op.valuesAre);
+		pushKeyVal(segs, op.key, 'notIn', op.valuesAre);
 		return;
 	}
 }
@@ -167,7 +167,7 @@ function pushMultipleSelectItem(segs: any, op: any) {
 function pushLinkageSelectItem(segs: any, op: any) {
 	const mod = op.modifier || 'equals';
 	if (mod === 'equals' && op.valuesAre && op.valuesAre.length > 0) {
-        pushKeyVal(segs, op.key, '', op.valuesAre);
+		pushKeyVal(segs, op.key, '', op.valuesAre);
 		return;
 	}
 }

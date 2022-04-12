@@ -614,6 +614,7 @@ func (b *ListingBuilder) tableToolbar(msgr *Messages, pageURL *url.URL, ctx *web
 	ft.Date.Days = msgr.FiltersDateDays
 	ft.Date.Months = msgr.FiltersDateMonths
 	ft.Date.And = msgr.FiltersDateAnd
+	ft.Date.To = msgr.FiltersDateTo
 	ft.Date.Between = msgr.FiltersDateBetween
 	ft.Date.Equals = msgr.FiltersDateEquals
 	ft.Date.IsAfter = msgr.FiltersDateIsAfter

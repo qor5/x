@@ -113,6 +113,7 @@ type FilterTranslations struct {
 		Days         string `json:"days,omitempty"`
 		Months       string `json:"months,omitempty"`
 		And          string `json:"and,omitempty"`
+		To           string `json:"to,omitempty"`
 	} `json:"date,omitempty"`
 
 	Number struct {
@@ -363,8 +364,8 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 				it.Selected = true
 				it.Modifier = ModifierBetween
 				if it.ItemType == ItemTypeDate {
-					it.ValueFrom = unixToDate(mv["gte"], it.Timezone == TimezoneUTC, 0)
-					it.ValueTo = unixToDate(mv["lt"], it.Timezone == TimezoneUTC, -1)
+					it.ValueFrom = unixToDatetimeWithFormat(mv["gte"], it.Timezone == TimezoneUTC, 0, "2006-01-02 15:04")
+					it.ValueTo = unixToDatetimeWithFormat(mv["lt"], it.Timezone == TimezoneUTC, 0, "2006-01-02 15:04")
 				}
 
 				if it.ItemType == ItemTypeNumber {
@@ -456,11 +457,15 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 }
 
 func unixToDate(u string, utc bool, sub int) string {
-	return unixToTime(u, utc, sub).Format("2006-01-02")
+	return unixToDatetimeWithFormat(u, utc, sub, "2006-01-02")
 }
 
 func unixToDatetime(u string, utc bool, sub int) string {
-	return unixToTime(u, utc, sub).Format(time.RFC3339)
+	return unixToDatetimeWithFormat(u, utc, sub, time.RFC3339)
+}
+
+func unixToDatetimeWithFormat(u string, utc bool, sub int, format string) string {
+	return unixToTime(u, utc, sub).Format(format)
 }
 
 func unixToTime(u string, utc bool, sub int) time.Time {
