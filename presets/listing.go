@@ -610,17 +610,7 @@ func (b *ListingBuilder) tableToolbar(msgr *Messages, pageURL *url.URL, ctx *web
 	ft.Done = msgr.FiltersDone
 	ft.Clear = msgr.FiltersClear
 
-	ft.Date.InTheLast = msgr.FiltersDateInTheLast
-	ft.Date.Days = msgr.FiltersDateDays
-	ft.Date.Months = msgr.FiltersDateMonths
-	ft.Date.And = msgr.FiltersDateAnd
 	ft.Date.To = msgr.FiltersDateTo
-	ft.Date.Between = msgr.FiltersDateBetween
-	ft.Date.Equals = msgr.FiltersDateEquals
-	ft.Date.IsAfter = msgr.FiltersDateIsAfter
-	ft.Date.IsAfterOrOn = msgr.FiltersDateIsAfterOrOn
-	ft.Date.IsBeforeOrOn = msgr.FiltersDateIsBeforeOrOn
-	ft.Date.IsBefore = msgr.FiltersDateIsBefore
 
 	ft.Number.And = msgr.FiltersNumberAnd
 	ft.Number.Equals = msgr.FiltersNumberEquals

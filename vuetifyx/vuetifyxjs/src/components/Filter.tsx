@@ -21,6 +21,7 @@ import {
 
 import DateTimePicker from './DateTimePicker.vue';
 import LinkageSelect from './LinkageSelect.vue';
+import * as constants from './Constants'
 
 export function localTimezoneAbbr() {
 	const d = new Date().toString();
@@ -52,7 +53,7 @@ export const DateItem = Vue.extend({
 
 	data() {
 		return {
-			modifier: this.$props.value.modifier || 'inTheLast',
+			modifier: this.$props.value.modifier || constants.ModifierBetween,
 			valueIs: this.$props.value.valueIs,
 			valueFrom: this.$props.value.valueFrom,
 			valueTo: this.$props.value.valueTo,
@@ -108,8 +109,8 @@ export const DateItem = Vue.extend({
 
 	render(h: CreateElement): VNode {
 		const t = this.$props.translations;
-		const modifier = 'between';
-
+		const modifier = constants.ModifierBetween;
+		
 		return (
 			<div>
 				<v-row>
@@ -639,16 +640,6 @@ export const Filter = Vue.extend({
 			default: () => {
 				return {
 					date: {
-						inTheLast: 'is in the last',
-						equals: 'is equal to',
-						between: 'is between',
-						isAfter: 'is after',
-						isAfterOrOn: 'is on or after',
-						isBefore: 'is before',
-						isBeforeOrOn: 'is before or on',
-						days: 'days',
-						months: 'months',
-						and: 'and',
 						to: 'to',
 					},
 					number: {

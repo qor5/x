@@ -68,16 +68,7 @@ func (b *VXFilterBuilder) MarshalHTML(ctx context.Context) (r []byte, err error)
 		default: () => {
 			return {
 				date: {
-					inTheLast: 'is in the last',
-					equals: 'is equal to',
-					between: 'is between',
-					isAfter: 'is after',
-					isAfterOrOn: 'is on or after',
-					isBefore: 'is before',
-					isBeforeOrOn: 'is before or on',
-					days: 'days',
-					months: 'months',
-					and: 'and',
+					to: 'to',
 				},
 				number: {
 					equals: 'is equal to',
@@ -103,16 +94,6 @@ type FilterTranslations struct {
 	Filters string `json:"filters,omitempty"`
 	Filter  string `json:"filter,omitempty"`
 	Date    struct {
-		InTheLast    string `json:"inTheLast,omitempty"`
-		Equals       string `json:"equals,omitempty"`
-		Between      string `json:"between,omitempty"`
-		IsAfter      string `json:"isAfter,omitempty"`
-		IsAfterOrOn  string `json:"isAfterOrOn,omitempty"`
-		IsBefore     string `json:"isBefore,omitempty"`
-		IsBeforeOrOn string `json:"isBeforeOrOn,omitempty"`
-		Days         string `json:"days,omitempty"`
-		Months       string `json:"months,omitempty"`
-		And          string `json:"and,omitempty"`
 		To           string `json:"to,omitempty"`
 	} `json:"date,omitempty"`
 
