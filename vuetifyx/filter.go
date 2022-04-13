@@ -130,27 +130,16 @@ const (
 type FilterItemModifier string
 
 const (
-	ModifierInTheLast    FilterItemModifier = "inTheLast"    // Date
-	ModifierEquals       FilterItemModifier = "equals"       // Date, String, Number
-	ModifierBetween      FilterItemModifier = "between"      // Date, Number
-	ModifierIsAfter      FilterItemModifier = "isAfter"      // Date
-	ModifierIsAfterOrOn  FilterItemModifier = "isAfterOrOn"  // Date
-	ModifierIsBefore     FilterItemModifier = "isBefore"     // Date
-	ModifierIsBeforeOrOn FilterItemModifier = "isBeforeOrOn" // Date
-	ModifierGreaterThan  FilterItemModifier = "greaterThan"  // Number
-	ModifierLessThan     FilterItemModifier = "lessThan"     // Number
-	ModifierContains     FilterItemModifier = "contains"     // String
-	ModifierIn           FilterItemModifier = "in"           // String
-	ModifierNotIn        FilterItemModifier = "notIn"        // String
+	ModifierEquals      FilterItemModifier = "equals"      // String, Number
+	ModifierBetween     FilterItemModifier = "between"     // Date, Number
+	ModifierGreaterThan FilterItemModifier = "greaterThan" // Number
+	ModifierLessThan    FilterItemModifier = "lessThan"    // Number
+	ModifierContains    FilterItemModifier = "contains"    // String
+	ModifierIn          FilterItemModifier = "in"          // String
+	ModifierNotIn       FilterItemModifier = "notIn"       // String
 )
 
 type FilterItemInTheLastUnit string
-
-const (
-	InTheLastUnitDays   FilterItemInTheLastUnit = "days"
-	InTheLastUnitMonths FilterItemInTheLastUnit = "months"
-)
-
 type FilterItemTimezone string
 
 const (
@@ -183,8 +172,6 @@ type FilterItem struct {
 	ValuesAre         []string                `json:"valuesAre,omitempty"`
 	ValueFrom         string                  `json:"valueFrom,omitempty"`
 	ValueTo           string                  `json:"valueTo,omitempty"`
-	InTheLastValue    string                  `json:"inTheLastValue,omitempty"`
-	InTheLastUnit     FilterItemInTheLastUnit `json:"inTheLastUnit,omitempty"`
 	Timezone          FilterItemTimezone      `json:"timezone,omitempty"`
 	SQLCondition      string                  `json:"-"`
 	Options           []*SelectItem           `json:"options,omitempty"`
@@ -269,6 +256,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 	for _, k := range keys {
 		v := queryMap[k]
 		segs := strings.Split(k, ".")
+
 		var mod = ""
 		key := k
 		val := v[0]
@@ -384,22 +372,6 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 
 					if it.ItemType == ItemTypeDate {
 						it.ValueIs = unixToDate(v, it.Timezone == TimezoneUTC, 0)
-						if mod == "gte" {
-							it.Modifier = ModifierIsAfterOrOn
-							it.ValueIs = unixToDate(v, it.Timezone == TimezoneUTC, 0)
-						}
-						if mod == "gt" {
-							it.Modifier = ModifierIsAfter
-							it.ValueIs = unixToDate(v, it.Timezone == TimezoneUTC, -1)
-						}
-						if mod == "lt" {
-							it.Modifier = ModifierIsBefore
-							it.ValueIs = unixToDate(v, it.Timezone == TimezoneUTC, 0)
-						}
-						if mod == "lte" {
-							it.Modifier = ModifierIsBeforeOrOn
-							it.ValueIs = unixToDate(v, it.Timezone == TimezoneUTC, -1)
-						}
 						continue
 					}
 
