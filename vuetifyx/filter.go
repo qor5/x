@@ -140,12 +140,6 @@ const (
 )
 
 type FilterItemInTheLastUnit string
-type FilterItemTimezone string
-
-const (
-	TimezoneLocal FilterItemTimezone = "local"
-	TimezoneUTC   FilterItemTimezone = "utc"
-)
 
 type FilterData []*FilterItem
 
@@ -172,7 +166,6 @@ type FilterItem struct {
 	ValuesAre         []string                `json:"valuesAre,omitempty"`
 	ValueFrom         string                  `json:"valueFrom,omitempty"`
 	ValueTo           string                  `json:"valueTo,omitempty"`
-	Timezone          FilterItemTimezone      `json:"timezone,omitempty"`
 	SQLCondition      string                  `json:"-"`
 	Options           []*SelectItem           `json:"options,omitempty"`
 	LinkageSelectData FilterLinkageSelectData `json:"linkageSelectData,omitempty"`
@@ -287,7 +280,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 			sqlc := fd.getSQLCondition(key, v[0])
 			if len(sqlc) > 0 {
 				if it.ItemType == ItemTypeDate {
-					val = unixToDatetime(val, it.Timezone == TimezoneUTC, 0)
+					val = unixToDatetime(val)
 				}
 
 				// Compose operator into sql condition. If you want to use multiple operators you have to use {op}, '%s' is not supported
@@ -333,8 +326,8 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 				it.Selected = true
 				it.Modifier = ModifierBetween
 				if it.ItemType == ItemTypeDate {
-					it.ValueFrom = unixToDatetimeWithFormat(mv["gte"], it.Timezone == TimezoneUTC, 0, "2006-01-02 15:04")
-					it.ValueTo = unixToDatetimeWithFormat(mv["lt"], it.Timezone == TimezoneUTC, 0, "2006-01-02 15:04")
+					it.ValueFrom = unixToDatetimeWithFormat(mv["gte"], "2006-01-02 15:04")
+					it.ValueTo = unixToDatetimeWithFormat(mv["lt"], "2006-01-02 15:04")
 				}
 
 				if it.ItemType == ItemTypeNumber {
@@ -371,7 +364,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 					}
 
 					if it.ItemType == ItemTypeDate {
-						it.ValueIs = unixToDate(v, it.Timezone == TimezoneUTC, 0)
+						it.ValueIs = unixToDate(v)
 						continue
 					}
 
@@ -409,24 +402,27 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 	return
 }
 
-func unixToDate(u string, utc bool, sub int) string {
-	return unixToDatetimeWithFormat(u, utc, sub, "2006-01-02")
+func unixToDate(u string) string {
+	return unixToDatetimeWithFormat(u, "2006-01-02")
 }
 
-func unixToDatetime(u string, utc bool, sub int) string {
-	return unixToDatetimeWithFormat(u, utc, sub, time.RFC3339)
+func unixToDatetime(u string) string {
+	return unixToDatetimeWithFormat(u, time.RFC3339)
 }
 
-func unixToDatetimeWithFormat(u string, utc bool, sub int, format string) string {
-	return unixToTime(u, utc, sub).Format(format)
+func unixToDatetimeWithFormat(u string, format string) string {
+	return unixToTime(u).Format(format)
 }
 
-func unixToTime(u string, utc bool, sub int) time.Time {
+// We always use local timezone(server timezone) to parse time.
+// e.g.
+// Server timezone: UTC+8
+// Client timezone: UTC+10
+// Client send 2022-4-15 12:00:00 UTC+10
+// Server would parse it as 2022-4-15 10:00:00 UTC+8
+func unixToTime(u string) time.Time {
 	unix, _ := strconv.ParseInt(u, 10, 64)
-	d := time.Unix(unix, 0).Add(time.Duration(24 * sub * int(time.Hour)))
-	if utc {
-		d = d.UTC()
-	}
+	d := time.Unix(unix, 0)
 
 	return d
 }

@@ -23,18 +23,6 @@ import DateTimePicker from './DateTimePicker.vue';
 import LinkageSelect from './LinkageSelect.vue';
 import * as constants from './Constants'
 
-export function localTimezoneAbbr() {
-	const d = new Date().toString();
-	return d
-		.split('(')[1]
-		.split(' ')
-		.map((w) => {
-			return w.charAt(0);
-		})
-		.join('');
-}
-
-
 export const DateItem = Vue.extend({
 	components: {
 		datePicker: DateTimePicker,
@@ -59,7 +47,6 @@ export const DateItem = Vue.extend({
 			valueTo: this.$props.value.valueTo,
 			inTheLastUnit: this.$props.value.inTheLastUnit,
 			inTheLastValue: this.$props.value.inTheLastValue,
-			timezone: this.$props.value.timezone,
 			datePickerVisible: false,
 		};
 	},
@@ -100,17 +87,12 @@ export const DateItem = Vue.extend({
 			this.inTheLastUnit = e;
 			this.inputEmit();
 		},
-
-		setTimezone(e: any) {
-			this.timezone = e;
-			this.$emit('input', this.$data);
-		},
 	},
 
 	render(h: CreateElement): VNode {
 		const t = this.$props.translations;
 		const modifier = constants.ModifierBetween;
-		
+
 		return (
 			<div>
 				<v-row>
@@ -590,7 +572,6 @@ interface FilterItem {
 	valueTo?: string;
 	inTheLastValue?: string;
 	inTheLastUnit?: string;
-	timezone?: string;
 	options?: SelectOption[];
 }
 
