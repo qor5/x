@@ -21,6 +21,7 @@ import (
 	goji "goji.io"
 	"goji.io/pat"
 	"golang.org/x/text/language"
+	"golang.org/x/text/language/display"
 )
 
 type Builder struct {
@@ -535,12 +536,20 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 		return nil
 	}
 
-	if ctx.R.FormValue("lang") != "" {
-		http.SetCookie(ctx.W, &http.Cookie{
-			Name:  "lang",
-			Value: ctx.R.FormValue("lang"),
-		})
+	var matcher = language.NewMatcher(b.I18n().GetSupportLanguages())
+	var displayLanguage language.Tag
+
+	lang := ctx.R.FormValue("lang")
+	if lang != "" {
+		http.SetCookie(ctx.W, &http.Cookie{Name: "lang", Value: lang})
+	} else {
+		langCookie, _ := ctx.R.Cookie("lang")
+		if langCookie != nil {
+			lang = langCookie.Value
+		}
 	}
+
+	displayLanguage, _ = language.MatchStrings(matcher, lang)
 
 	var languages []h.HTMLComponent
 	for _, tag := range b.I18n().GetSupportLanguages() {
@@ -549,7 +558,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 				VListItem(
 					VListItemContent(
 						VListItemTitle(
-							h.Div(h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, tag.String()))).Class("text-button"),
+							h.Div(h.Text(display.Self.Name(tag))).Class("text-button"),
 						),
 					),
 				).Attr("@click", web.Plaid().Query("lang", tag.String()).Go()),
@@ -560,7 +569,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 	return VMenu(
 		web.Slot(
 			VRow(
-				VBtn(i18n.T(ctx.R, ModelsI18nModuleKey, "switch language")).Attr("v-on", "on").Text(true).Small(true),
+				VBtn(display.Self.Name(displayLanguage)).Attr("v-on", "on").Text(true),
 			).Justify("center").Align("center"),
 		).Name("activator").Scope("{ on }"),
 
