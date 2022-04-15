@@ -714,6 +714,10 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 
 		var innerPr web.PageResponse
 		innerPr, err = in(ctx)
+		if err == perm.PermissionDenied {
+			pr.Body = h.Text(perm.PermissionDenied.Error())
+			return pr, nil
+		}
 		if err != nil {
 			panic(err)
 		}

@@ -115,7 +115,7 @@ func (b *EditingBuilder) EditingTitleFunc(v EditingTitleComponentFunc) (r *Editi
 
 func (b *EditingBuilder) formNew(ctx *web.EventContext) (r web.EventResponse, err error) {
 	if b.mb.Info().Verifier().Do(PermCreate).WithReq(ctx.R).IsAllowed() != nil {
-		err = perm.PermissionDenied
+		ShowMessage(&r, perm.PermissionDenied.Error(), "warning")
 		return
 	}
 
