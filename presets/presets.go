@@ -524,7 +524,7 @@ func (b *Builder) runBrandFunc(ctx *web.EventContext) (r h.HTMLComponent) {
 		return b.brandFunc(ctx)
 	}
 
-	return VCardTitle(h.H1(i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle)))
+	return VRow(h.H1(i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))).Class("text-button")
 }
 
 func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponent) {
@@ -539,9 +539,14 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 	}
 
 	if len(supportLanguages) == 1 {
-		return VRow(
-			VBtn(display.Self.Name(supportLanguages[0])).Text(true).Attr("@click", web.Plaid().Query("lang", supportLanguages[0].String()).Go()),
-		).Justify("center").Align("center")
+		return h.Template().Children(
+			h.Div(
+				VRow(
+					VIcon("language"),
+					h.Div(h.Text(display.Self.Name(supportLanguages[0]))).Class("text-button"),
+				),
+			).Attr("@click", web.Plaid().Query("lang", supportLanguages[0].String()).Go()),
+		)
 	}
 
 	var matcher = language.NewMatcher(supportLanguages)
@@ -575,11 +580,14 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 	}
 
 	return VMenu(
-		web.Slot(
-			VRow(
-				VBtn(display.Self.Name(displayLanguage)).Attr("v-on", "on").Text(true),
-			).Justify("center").Align("center"),
-		).Name("activator").Scope("{ on }"),
+		h.Template().Attr("v-slot:activator", "{on, attrs}").Children(
+			h.Div(
+				VRow(
+					VIcon("language"),
+					h.Div(h.Text(display.Self.Name(displayLanguage))).Class("text-button"),
+				),
+			).Attr("v-bind", "attrs").Attr("v-on", "on"),
+		),
 
 		VList(
 			languages...,
@@ -593,12 +601,14 @@ func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switc
 	}
 
 	return VCard(
-		brand,
-		VCardActions(
-			VListItem(
-				profile,
-				switchLanguage,
-			),
+		VListItem(
+			VCardText(brand),
+		),
+		VListItem(
+			VCardText(switchLanguage),
+		),
+		VListItem(
+			VCardText(profile),
 		),
 	).Elevation(1)
 }
