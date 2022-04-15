@@ -532,12 +532,13 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 		return b.switchLanguageFunc(ctx)
 	}
 
-	if len(b.I18n().GetSupportLanguages()) <= 1 {
+	var supportLanguages = b.I18n().GetSupportLanguagesFromRequest(ctx.R)
+
+	if len(supportLanguages) <= 1 {
 		return nil
 	}
 
-	var matcher = language.NewMatcher(b.I18n().GetSupportLanguages())
-	var displayLanguage language.Tag
+	var matcher = language.NewMatcher(supportLanguages)
 
 	lang := ctx.R.FormValue("lang")
 	if lang != "" {
@@ -549,10 +550,11 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 		}
 	}
 
+	var displayLanguage language.Tag
 	displayLanguage, _ = language.MatchStrings(matcher, lang)
 
 	var languages []h.HTMLComponent
-	for _, tag := range b.I18n().GetSupportLanguages() {
+	for _, tag := range supportLanguages {
 		languages = append(languages,
 			h.Div(
 				VListItem(

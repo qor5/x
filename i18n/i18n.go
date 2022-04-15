@@ -12,11 +12,12 @@ import (
 type ModuleKey string
 
 type Builder struct {
-	supportLanguages []language.Tag
-	moduleMessages   map[language.Tag]context.Context
-	matcher          language.Matcher
-	cookieName       string
-	queryName        string
+	supportLanguages                   []language.Tag
+	getSupportLanguagesFromRequestFunc func(R *http.Request) []language.Tag
+	moduleMessages                     map[language.Tag]context.Context
+	matcher                            language.Matcher
+	cookieName                         string
+	queryName                          string
 }
 
 type Messages interface {
@@ -55,6 +56,18 @@ func (b *Builder) SupportLanguages(vs ...language.Tag) (r *Builder) {
 
 func (b *Builder) GetSupportLanguages() []language.Tag {
 	return b.supportLanguages
+}
+
+func (b *Builder) GetSupportLanguagesFromRequest(R *http.Request) []language.Tag {
+	if b.getSupportLanguagesFromRequestFunc != nil {
+		return b.getSupportLanguagesFromRequestFunc(R)
+	}
+	return b.GetSupportLanguages()
+}
+
+func (b *Builder) GetSupportLanguagesFromRequestFunc(v func(R *http.Request) []language.Tag) (r *Builder) {
+	b.getSupportLanguagesFromRequestFunc = v
+	return b
 }
 
 func (b *Builder) RegisterForModule(lang language.Tag, module ModuleKey, msg Messages) (r *Builder) {
@@ -100,8 +113,15 @@ func (b *Builder) EnsureLanguage(in http.Handler) (out http.Handler) {
 				lang = langCookie.Value
 			}
 		}
-		accept := r.Header.Get("Accept-Language")
-		tag, _ := language.MatchStrings(b.matcher, lang, accept)
+
+		var tag language.Tag
+		if len(lang) > 0 {
+			accept := r.Header.Get("Accept-Language")
+			tag, _ = language.MatchStrings(b.matcher, lang, accept)
+		} else {
+			var matcher = language.NewMatcher(b.GetSupportLanguagesFromRequest(r))
+			tag, _ = language.MatchStrings(matcher, lang)
+		}
 
 		moduleMsgs := b.moduleMessages[tag]
 		if moduleMsgs == nil {
