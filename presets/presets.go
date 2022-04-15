@@ -534,8 +534,14 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 
 	var supportLanguages = b.I18n().GetSupportLanguagesFromRequest(ctx.R)
 
-	if len(supportLanguages) <= 1 {
+	if len(supportLanguages) == 0 {
 		return nil
+	}
+
+	if len(supportLanguages) == 1 {
+		return VRow(
+			VBtn(display.Self.Name(supportLanguages[0])).Text(true).Attr("@click", web.Plaid().Query("lang", supportLanguages[0].String()).Go()),
+		).Justify("center").Align("center")
 	}
 
 	var matcher = language.NewMatcher(supportLanguages)
