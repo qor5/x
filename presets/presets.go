@@ -366,7 +366,7 @@ func defaultMenuIcon(mLabel string) string {
 func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (r h.HTMLComponent) {
 	menuIcon := m.menuIcon
 	if isSub {
-		menuIcon = ""
+		// menuIcon = ""
 	} else {
 		if menuIcon == "" {
 			menuIcon = defaultMenuIcon(m.label)
