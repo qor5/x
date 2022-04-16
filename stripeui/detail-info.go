@@ -2,6 +2,7 @@ package stripeui
 
 import (
 	"context"
+	"fmt"
 
 	. "github.com/goplaid/x/vuetify"
 	h "github.com/theplant/htmlgo"
@@ -33,13 +34,16 @@ func (b *DetailInfoBuilder) Class(v ...string) (r *DetailInfoBuilder) {
 }
 
 type DetailFieldBuilder struct {
-	label    string
-	icon     h.HTMLComponent
-	children []h.HTMLComponent
+	label         string
+	labelMinWidth string
+	icon          h.HTMLComponent
+	children      []h.HTMLComponent
 }
 
 func DetailField(children ...h.HTMLComponent) (r *DetailFieldBuilder) {
-	r = &DetailFieldBuilder{}
+	r = &DetailFieldBuilder{
+		labelMinWidth: "180px",
+	}
 	r.Children(children...)
 	return
 }
@@ -54,6 +58,11 @@ func (b *DetailFieldBuilder) Label(v string) (r *DetailFieldBuilder) {
 	return b
 }
 
+func (b *DetailFieldBuilder) LabelMinWidth(v string) (r *DetailFieldBuilder) {
+	b.labelMinWidth = v
+	return b
+}
+
 func (b *DetailFieldBuilder) Icon(v h.HTMLComponent) (r *DetailFieldBuilder) {
 	b.icon = v
 	return b
@@ -61,8 +70,8 @@ func (b *DetailFieldBuilder) Icon(v h.HTMLComponent) (r *DetailFieldBuilder) {
 
 func (b *DetailFieldBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	ki := h.Tag("div").Children(
-		h.Tag("label").Text(b.label).Class("blue-grey--text lighten-3").Style("min-width: 180px"),
-	).Class("d-flex pa-1")
+		h.Tag("label").Text(b.label).Class("blue-grey--text lighten-3").Style(fmt.Sprintf("min-width: %s", b.labelMinWidth)),
+	).Class("d-flex pb-2")
 
 	if b.icon != nil {
 		ki.AppendChildren(b.icon)
