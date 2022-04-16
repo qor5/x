@@ -601,14 +601,20 @@ func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switc
 	}
 
 	return VCard(
-		VListItem(
-			VCardText(brand),
+		h.If(brand != nil,
+			VListItem(
+				VCardText(brand),
+			),
 		),
-		VListItem(
-			VCardText(switchLanguage),
+		h.If(switchLanguage != nil,
+			VListItem(
+				VCardText(switchLanguage),
+			),
 		),
-		VListItem(
-			VCardText(profile),
+		h.If(profile != nil,
+			VListItem(
+				VCardText(profile),
+			),
 		),
 	).Elevation(1)
 }
