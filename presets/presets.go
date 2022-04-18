@@ -919,5 +919,22 @@ func (b *Builder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if b.mux == nil {
 		b.initMux()
 	}
-	b.mux.ServeHTTP(w, r)
+	RedirectSlashes(b.mux).ServeHTTP(w, r)
+}
+
+func RedirectSlashes(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		if len(path) > 1 && path[len(path)-1] == '/' {
+			if r.URL.RawQuery != "" {
+				path = fmt.Sprintf("%s?%s", path[:len(path)-1], r.URL.RawQuery)
+			} else {
+				path = path[:len(path)-1]
+			}
+			redirectURL := fmt.Sprintf("//%s%s", r.Host, path)
+			http.Redirect(w, r, redirectURL, 301)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
