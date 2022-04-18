@@ -296,7 +296,7 @@ func (b *ListingBuilder) openBulkActionDialog(ctx *web.EventContext) (r web.Even
 		return
 	}
 
-	if len(selected) == 0 {
+	if len(selected) == 0 && !bulk.skipRecordSelect {
 		ShowMessage(&r, "Please select record", "warning")
 		return
 	}
