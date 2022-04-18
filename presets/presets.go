@@ -766,6 +766,10 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 							Attr("@keyup.enter", web.Plaid().
 								Query("keyword", web.Var("[$event.target.value]")).
 								PushState(true).
+								Go()).
+							Attr("@click:clear", web.Plaid().
+								Query("keyword", "").
+								PushState(true).
 								Go()),
 						// ).Method("GET"),
 					).AlignCenter(true).Attr("style", "max-width: 650px"),
