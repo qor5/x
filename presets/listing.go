@@ -119,6 +119,7 @@ func (b *ListingBuilder) GetPageFunc() web.PageFunc {
 }
 
 const bulkPanelOpenParamName = "bulkOpen"
+const actionPanelOpenParamName = "actionOpen"
 const deleteConfirmPortalName = "deleteConfirm"
 const dataTablePortalName = "dataTable"
 const dataTableAdditionsPortalName = "dataTableAdditions"
@@ -249,6 +250,50 @@ func (b *ListingBuilder) bulkPanel(
 	)
 }
 
+func (b *ListingBuilder) actionPanel(action *ActionBuilder, ctx *web.EventContext, ) (r h.HTMLComponent) {
+	msgr := MustGetMessages(ctx.R)
+
+	var errComp h.HTMLComponent
+	if vErr, ok := ctx.Flash.(*web.ValidationErrors); ok {
+		errComp = VAlert(h.Text(vErr.GetGlobalError())).
+			Border("left").
+			Type("error").
+			Elevation(2).
+			ColoredBorder(true)
+	}
+
+	return VCard(
+		VCardTitle(
+			h.Text(action.NameLabel.label),
+		),
+		VCardText(
+			errComp,
+			action.compFunc([]string{}, ctx), // because action and bulk action shared the same func, so pass blank slice here
+		),
+		VCardActions(
+			VSpacer(),
+			VBtn(msgr.Cancel).
+				Depressed(true).
+				Class("ml-2").
+				Attr("@click", web.Plaid().
+					Queries(url.Values{actionPanelOpenParamName: []string{""}}).
+					MergeQuery(true).
+					PushState(true).
+					Go()),
+
+			VBtn(msgr.OK).
+				Color("primary").
+				Depressed(true).
+				Dark(true).
+				Attr("@click", web.Plaid().EventFunc(actions.DoBulkAction).
+					Query(ParamBulkActionName, bulk.name).
+					MergeQuery(true).
+					Go(),
+				),
+		),
+	)
+}
+
 func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventResponse, err error) {
 	msgr := MustGetMessages(ctx.R)
 	id := ctx.R.FormValue(ParamID)
@@ -285,6 +330,22 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 	return
 }
 
+func (b *ListingBuilder) openActionDialog(ctx *web.EventContext) (r web.EventResponse, err error) {
+	actionName := ctx.R.URL.Query().Get(actionPanelOpenParamName)
+	action := getAction(b.actions, actionName)
+	if action == nil {
+		err = errors.New("cannot find requested action")
+		return
+	}
+
+	b.mb.p.dialog(
+		&r,
+		b.actionPanel(action, ctx),
+		action.dialogWidth,
+	)
+	return
+}
+
 func (b *ListingBuilder) openBulkActionDialog(ctx *web.EventContext) (r web.EventResponse, err error) {
 	msgr := MustGetMessages(ctx.R)
 	selected := getSelectedIds(ctx)
@@ -301,6 +362,7 @@ func (b *ListingBuilder) openBulkActionDialog(ctx *web.EventContext) (r web.Even
 		return
 	}
 
+	// If selectedIdsProcessorFunc is not nil, process the request in it and skip the confirmation dialog
 	var processedSelectedIds []string
 	if bulk.selectedIdsProcessorFunc != nil {
 		processedSelectedIds, err = bulk.selectedIdsProcessorFunc(selected, ctx)
@@ -901,6 +963,8 @@ func (b *ListingBuilder) ReloadList(
 
 func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext) h.HTMLComponent {
 	var actionBtns []h.HTMLComponent
+
+	// Render bulk actions
 	for _, ba := range b.bulkActions {
 		if b.mb.Info().Verifier().SnakeDo("bulk_actions", ba.name).WithReq(ctx.R).IsAllowed() != nil {
 			continue
@@ -924,6 +988,7 @@ func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext)
 		actionBtns = append(actionBtns, btn)
 	}
 
+	// Render actions
 	for _, ba := range b.actions {
 		if b.mb.Info().Verifier().SnakeDo("actions", ba.name).WithReq(ctx.R).IsAllowed() != nil {
 			continue
