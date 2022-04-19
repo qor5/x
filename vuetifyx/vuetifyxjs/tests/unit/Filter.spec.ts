@@ -1,124 +1,8 @@
 import {encodeFilterData} from '@/components/FilterData';
 import moment from 'moment';
-import qs from 'query-string';
 
 describe('filter', () => {
 	describe('encodeFilterData DateItem', () => {
-		it('equals', () => {
-			expect(encodeFilterData([
-				{
-					key: 'created',
-					label: 'Created',
-					itemType: 'DateItem',
-					selected: true,
-					modifier: 'equals',
-					valueIs: '2018-04-09',
-					timezone: 'utc',
-				},
-				{
-					key: 'updated',
-					label: 'Updated',
-					itemType: 'DateItem',
-					selected: true,
-					modifier: 'equals',
-					valueIs: '2018-04-09',
-				},
-			])).toEqual('created=1523232000&updated=1523203200');
-		});
-
-		it('inTheLast days', () => {
-			const v = encodeFilterData([
-				{
-					key: 'created',
-					label: 'Created',
-					itemType: 'DateItem',
-					selected: true,
-					modifier: 'inTheLast',
-					inTheLastValue: '3',
-					inTheLastUnit: 'days',
-				},
-			]);
-
-			expect(qs.parse(v)).toMatchObject({
-				'created.lt': expect.stringMatching(/.+/),
-				'created.gte': expect.stringMatching(/.+/),
-			});
-		});
-
-		it('inTheLast months', () => {
-			const v = encodeFilterData([
-				{
-					key: 'created',
-					label: 'Created',
-					itemType: 'DateItem',
-					selected: true,
-					modifier: 'inTheLast',
-					inTheLastValue: '3',
-					inTheLastUnit: 'months',
-				},
-			]);
-
-			expect(qs.parse(v)).toMatchObject({
-				'created.lt': expect.stringMatching(/.+/),
-				'created.gte': expect.stringMatching(/.+/),
-			});
-		});
-
-		it('isAfterOrOn', () => {
-			expect(encodeFilterData([
-				{
-					key: 'created',
-					label: 'Created',
-					itemType: 'DateItem',
-					selected: true,
-					modifier: 'isAfterOrOn',
-					valueIs: moment('2018-04-09'),
-					timezone: 'utc',
-				},
-			])).toEqual('created.gte=1523232000');
-		});
-
-		it('isAfter', () => {
-			expect(encodeFilterData([
-				{
-					key: 'created',
-					label: 'Created',
-					itemType: 'DateItem',
-					selected: true,
-					modifier: 'isAfter',
-					valueIs: moment('2018-04-09'),
-				},
-			])).toEqual('created.gt=1523289599');
-		});
-
-		it('isBefore', () => {
-			expect(encodeFilterData([
-				{
-					key: 'created',
-					label: 'Created',
-					itemType: 'DateItem',
-					selected: true,
-					modifier: 'isBefore',
-					valueIs: moment('2018-04-09'),
-					timezone: 'utc',
-				},
-			])).toEqual('created.lt=1523232000');
-		});
-
-		it('isBeforeOrOn', () => {
-			expect(encodeFilterData([
-				{
-					key: 'created',
-					label: 'Created',
-					itemType: 'DateItem',
-					selected: true,
-					modifier: 'isBeforeOrOn',
-					valueIs: moment('2018-04-09'),
-					timezone: 'utc',
-				},
-			])).toEqual('created.lte=1523318399');
-		});
-
 		it('between', () => {
 			expect(encodeFilterData([
 				{
@@ -127,8 +11,8 @@ describe('filter', () => {
 					itemType: 'DateItem',
 					selected: true,
 					modifier: 'between',
-					valueFrom: moment('2018-04-09'),
-					valueTo: moment('2018-04-10'),
+					valueFrom: moment('2018-04-09 00:00'),
+					valueTo: moment('2018-04-10 00:00'),
 				},
 				{
 					key: 'created1',
@@ -136,7 +20,7 @@ describe('filter', () => {
 					itemType: 'DateItem',
 					selected: true,
 					modifier: 'between',
-					valueFrom: moment('2018-04-09'),
+					valueFrom: moment('2018-04-09 00:00'),
 				},
 				{
 					key: 'created2',
@@ -144,7 +28,7 @@ describe('filter', () => {
 					itemType: 'DateItem',
 					selected: true,
 					modifier: 'between',
-					valueTo: moment('2018-04-09'),
+					valueTo: moment('2018-04-09 00:00'),
 				},
 				{
 					key: 'created3',
@@ -159,13 +43,12 @@ describe('filter', () => {
 					itemType: 'DateItem',
 					selected: true,
 					modifier: 'between',
-					valueFrom: moment('2018-04-09'),
-					valueTo: moment('2018-04-10'),
-					timezone: 'utc',
+					valueFrom: moment('2018-04-09 00:00'),
+					valueTo: moment('2018-04-10 00:00'),
 				},
 			])).toEqual(
 				// tslint:disable-next-line: max-line-length
-				'created.gte=1523203200&created.lt=1523376000&created1.gte=1523203200&created2.lt=1523289600&confirmed.gte=1523232000&confirmed.lt=1523404800',
+				'created.gte=1523203200&created.lt=1523289600&created1.gte=1523203200&created2.lt=1523203200&confirmed.gte=1523203200&confirmed.lt=1523289600',
 			);
 		});
 	});
