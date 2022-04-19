@@ -296,7 +296,7 @@ func (b *ListingBuilder) openBulkActionDialog(ctx *web.EventContext) (r web.Even
 		return
 	}
 
-	if len(selected) == 0 {
+	if len(selected) == 0 && !bulk.skipRecordSelect {
 		ShowMessage(&r, "Please select record", "warning")
 		return
 	}
@@ -334,7 +334,7 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 	}
 
 	if b.mb.Info().Verifier().SnakeDo("bulk_actions", bulk.name).WithReq(ctx.R).IsAllowed() != nil {
-		err = perm.PermissionDenied
+		ShowMessage(&r, perm.PermissionDenied.Error(), "warning")
 		return
 	}
 

@@ -8,6 +8,7 @@ type ActionBuilder struct {
 	dialogWidth                    string
 	selectedIdsProcessorFunc       ActionSelectedIdsProcessorFunc
 	selectedIdsProcessorNoticeFunc ActionSelectedIdsProcessorNoticeFunc
+	skipRecordSelect               bool
 }
 
 const defaultBulkActionDialogWidth = "600"
@@ -52,6 +53,11 @@ func (b *ActionBuilder) UpdateFunc(v ActionUpdateFunc) (r *ActionBuilder) {
 
 func (b *ActionBuilder) Label(v string) (r *ActionBuilder) {
 	b.label = v
+	return b
+}
+
+func (b *ActionBuilder) SkipRecordSelect(v bool) (r *ActionBuilder) {
+	b.skipRecordSelect = v
 	return b
 }
 

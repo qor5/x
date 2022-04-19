@@ -366,7 +366,7 @@ func defaultMenuIcon(mLabel string) string {
 func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (r h.HTMLComponent) {
 	menuIcon := m.menuIcon
 	if isSub {
-		menuIcon = ""
+		// menuIcon = ""
 	} else {
 		if menuIcon == "" {
 			menuIcon = defaultMenuIcon(m.label)
@@ -714,6 +714,10 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 
 		var innerPr web.PageResponse
 		innerPr, err = in(ctx)
+		if err == perm.PermissionDenied {
+			pr.Body = h.Text(perm.PermissionDenied.Error())
+			return pr, nil
+		}
 		if err != nil {
 			panic(err)
 		}
@@ -761,6 +765,10 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 							Value(ctx.R.URL.Query().Get("keyword")).
 							Attr("@keyup.enter", web.Plaid().
 								Query("keyword", web.Var("[$event.target.value]")).
+								PushState(true).
+								Go()).
+							Attr("@click:clear", web.Plaid().
+								Query("keyword", "").
 								PushState(true).
 								Go()),
 						// ).Method("GET"),
@@ -915,5 +923,22 @@ func (b *Builder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if b.mux == nil {
 		b.initMux()
 	}
-	b.mux.ServeHTTP(w, r)
+	RedirectSlashes(b.mux).ServeHTTP(w, r)
+}
+
+func RedirectSlashes(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		if len(path) > 1 && path[len(path)-1] == '/' {
+			if r.URL.RawQuery != "" {
+				path = fmt.Sprintf("%s?%s", path[:len(path)-1], r.URL.RawQuery)
+			} else {
+				path = path[:len(path)-1]
+			}
+			redirectURL := fmt.Sprintf("//%s%s", r.Host, path)
+			http.Redirect(w, r, redirectURL, 301)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }

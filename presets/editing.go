@@ -115,7 +115,7 @@ func (b *EditingBuilder) EditingTitleFunc(v EditingTitleComponentFunc) (r *Editi
 
 func (b *EditingBuilder) formNew(ctx *web.EventContext) (r web.EventResponse, err error) {
 	if b.mb.Info().Verifier().Do(PermCreate).WithReq(ctx.R).IsAllowed() != nil {
-		err = perm.PermissionDenied
+		ShowMessage(&r, perm.PermissionDenied.Error(), "warning")
 		return
 	}
 
@@ -237,7 +237,10 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		var tabs []h.HTMLComponent
 
 		for _, panelFunc := range b.tabPanels {
-			tabs = append(tabs, panelFunc(obj, ctx))
+			value := panelFunc(obj, ctx)
+			if value != nil{
+				tabs = append(tabs, value)
+			}
 		}
 
 		if len(tabs) != 0 {
