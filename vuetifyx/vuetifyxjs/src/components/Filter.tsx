@@ -95,20 +95,18 @@ export const DateItem = Vue.extend({
 
 		return (
 			<div>
-				<div>
-					<datePicker
-						value={this.valueFrom}
-						on={{input: this.setDateFrom}}
-						key={modifier + 'from'}
-						visible={this.datePickerVisible}
-					/>
-					<span>To</span>
-					<datePicker
-						value={this.valueTo}
-						on={{input: this.setDateTo}}
-						key={modifier + 'to'}
-					/>
-				</div>
+				<datePicker
+					value={this.valueFrom}
+					on={{input: this.setDateFrom}}
+					key={modifier + 'from'}
+					visible={this.datePickerVisible}
+				/>
+				<span>{t.to}</span>
+				<datePicker
+					value={this.valueTo}
+					on={{input: this.setDateTo}}
+					key={modifier + 'to'}
+				/>
 			</div>
 		);
 	},
