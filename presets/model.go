@@ -74,6 +74,7 @@ func (mb *ModelBuilder) registerDefaultEventFuncs() {
 	mb.RegisterEventFunc(actions.Update, mb.editing.defaultUpdate)
 	mb.RegisterEventFunc(actions.DoDelete, mb.editing.doDelete)
 	mb.RegisterEventFunc(actions.DoBulkAction, mb.listing.doBulkAction)
+	mb.RegisterEventFunc(actions.DoListingAction, mb.listing.doListingAction)
 	mb.RegisterEventFunc(actions.OpenBulkActionDialog, mb.listing.openBulkActionDialog)
 	mb.RegisterEventFunc(actions.OpenActionDialog, mb.listing.openActionDialog)
 	mb.RegisterEventFunc(actions.Action, mb.detailing.formDrawerAction)

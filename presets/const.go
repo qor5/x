@@ -21,5 +21,6 @@ const (
 	ParamOverlayAfterUpdateScript = "overlay_after_update_script"
 	ParamOverlayUpdateID          = "overlay_update_id"
 	ParamBulkActionName           = "bulk_action"
+	ParamListingActionName        = "listing_action"
 	ParamSelectedIds              = "selected_ids"
 )

@@ -285,8 +285,8 @@ func (b *ListingBuilder) actionPanel(action *ActionBuilder, ctx *web.EventContex
 				Color("primary").
 				Depressed(true).
 				Dark(true).
-				Attr("@click", web.Plaid().EventFunc(actions.DoBulkAction).
-					Query(ParamBulkActionName, action.name).
+				Attr("@click", web.Plaid().EventFunc(actions.DoListingAction).
+					Query(ParamListingActionName, action.name).
 					MergeQuery(true).
 					Go(),
 				),
@@ -437,6 +437,44 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
 
 	r.PushState = web.Location(url.Values{bulkPanelOpenParamName: []string{}}).MergeQuery(true)
+
+	return
+}
+
+func (b ListingBuilder) doListingAction(ctx *web.EventContext) (r web.EventResponse, err error) {
+	action := getAction(b.actions, ctx.R.FormValue(ParamListingActionName))
+	if action == nil {
+		panic("action required")
+	}
+
+	// Todo
+	if b.mb.Info().Verifier().SnakeDo("listing_actions", action.name).WithReq(ctx.R).IsAllowed() != nil {
+		ShowMessage(&r, perm.PermissionDenied.Error(), "warning")
+		return
+	}
+
+	err1 := action.updateFunc([]string{}, ctx)
+
+	if err1 != nil {
+		if _, ok := err1.(*web.ValidationErrors); !ok {
+			vErr := &web.ValidationErrors{}
+			vErr.GlobalError(err1.Error())
+			ctx.Flash = vErr
+		}
+	}
+
+	if ctx.Flash != nil {
+		r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
+			Name: dialogContentPortalName,
+			Body: b.actionPanel(action, ctx),
+		})
+		return
+	}
+
+	msgr := MustGetMessages(ctx.R)
+	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
+
+	r.PushState = web.Location(url.Values{actionPanelOpenParamName: []string{}}).MergeQuery(true)
 
 	return
 }

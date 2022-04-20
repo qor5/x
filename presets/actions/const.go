@@ -9,6 +9,7 @@ const (
 	DoAction             = "presets_DoAction"
 	DoDelete             = "presets_DoDelete"
 	DoBulkAction         = "presets_DoBulkAction"
+	DoListingAction      = "presets_DoListingAction"
 	OpenBulkActionDialog = "presets_OpenBulkActionDialog"
 	OpenActionDialog     = "presets_OpenActionDialog"
 	NotificationCenter   = "presets_NotificationCenter"
