@@ -250,7 +250,7 @@ func (b *ListingBuilder) bulkPanel(
 	)
 }
 
-func (b *ListingBuilder) actionPanel(action *ActionBuilder, ctx *web.EventContext, ) (r h.HTMLComponent) {
+func (b *ListingBuilder) actionPanel(action *ActionBuilder, ctx *web.EventContext) (r h.HTMLComponent) {
 	msgr := MustGetMessages(ctx.R)
 
 	var errComp h.HTMLComponent
@@ -286,7 +286,7 @@ func (b *ListingBuilder) actionPanel(action *ActionBuilder, ctx *web.EventContex
 				Depressed(true).
 				Dark(true).
 				Attr("@click", web.Plaid().EventFunc(actions.DoBulkAction).
-					Query(ParamBulkActionName, bulk.name).
+					Query(ParamBulkActionName, action.name).
 					MergeQuery(true).
 					Go(),
 				),
@@ -994,16 +994,22 @@ func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext)
 			continue
 		}
 
-		var button h.HTMLComponent = VBtn(b.mb.getLabel(ba.NameLabel)).
-			Color("primary").
-			Depressed(true).
-			Dark(true).
-			Class("ml-2")
+		var btn h.HTMLComponent
 		if ba.buttonCompFunc != nil {
-			button = ba.buttonCompFunc(ctx)
+			btn = ba.buttonCompFunc(ctx)
+		} else {
+			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
+				Color("primary").
+				Depressed(true).
+				Dark(true).
+				Class("ml-2").
+				Attr("@click", web.Plaid().EventFunc(actions.OpenActionDialog).
+					Queries(url.Values{actionPanelOpenParamName: []string{ba.name}}).
+					MergeQuery(true).
+					Go())
 		}
 
-		actionBtns = append(actionBtns, button)
+		actionBtns = append(actionBtns, btn)
 	}
 
 	if b.actionsAsMenu {
