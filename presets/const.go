@@ -7,6 +7,10 @@ const (
 	PermCreate = "presets:create"
 	PermUpdate = "presets:update"
 	PermDelete = "presets:delete"
+
+	PermListingActions = "listing_actions"
+	PermActions        = "actions"
+	PermBulkActions    = "bulk_actions"
 )
 
 var (
