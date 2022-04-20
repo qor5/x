@@ -9,8 +9,12 @@ import (
 )
 
 var Permissions = Doc(
+	Markdown(`## To list all the permissions in your project`),
+	ch.Code(`perm.Verbose = true`).Language("go"),
+	Markdown(`Then reboot your app, you can see all the permissions in the console`),
+
 	Markdown(`
-Permissions sample:
+## Permissions sample:
 `),
 	ch.Code(examples.PresetsPermissionsSample).Language("go"),
 	utils.Demo("Permissions Demo", e21_presents.PresetsPermissionsPath+"/customers", "e21_presents/permissions.go"),
