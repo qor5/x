@@ -7,6 +7,10 @@ const (
 	PermCreate = "presets:create"
 	PermUpdate = "presets:update"
 	PermDelete = "presets:delete"
+
+	PermListingActions = "listing_actions"
+	PermActions        = "actions"
+	PermBulkActions    = "bulk_actions"
 )
 
 var (
@@ -21,5 +25,11 @@ const (
 	ParamOverlayAfterUpdateScript = "overlay_after_update_script"
 	ParamOverlayUpdateID          = "overlay_update_id"
 	ParamBulkActionName           = "bulk_action"
+	ParamListingActionName        = "listing_action"
 	ParamSelectedIds              = "selected_ids"
+)
+
+const (
+	ColorPrimary   = "primary"
+	ColorSecondary = "secondary"
 )

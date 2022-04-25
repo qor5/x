@@ -119,6 +119,7 @@ func (b *ListingBuilder) GetPageFunc() web.PageFunc {
 }
 
 const bulkPanelOpenParamName = "bulkOpen"
+const actionPanelOpenParamName = "actionOpen"
 const deleteConfirmPortalName = "deleteConfirm"
 const dataTablePortalName = "dataTable"
 const dataTableAdditionsPortalName = "dataTableAdditions"
@@ -249,6 +250,50 @@ func (b *ListingBuilder) bulkPanel(
 	)
 }
 
+func (b *ListingBuilder) actionPanel(action *ActionBuilder, ctx *web.EventContext) (r h.HTMLComponent) {
+	msgr := MustGetMessages(ctx.R)
+
+	var errComp h.HTMLComponent
+	if vErr, ok := ctx.Flash.(*web.ValidationErrors); ok {
+		errComp = VAlert(h.Text(vErr.GetGlobalError())).
+			Border("left").
+			Type("error").
+			Elevation(2).
+			ColoredBorder(true)
+	}
+
+	return VCard(
+		VCardTitle(
+			h.Text(action.NameLabel.label),
+		),
+		VCardText(
+			errComp,
+			action.compFunc([]string{}, ctx), // because action and bulk action shared the same func, so pass blank slice here
+		),
+		VCardActions(
+			VSpacer(),
+			VBtn(msgr.Cancel).
+				Depressed(true).
+				Class("ml-2").
+				Attr("@click", web.Plaid().
+					Queries(url.Values{actionPanelOpenParamName: []string{""}}).
+					MergeQuery(true).
+					PushState(true).
+					Go()),
+
+			VBtn(msgr.OK).
+				Color("primary").
+				Depressed(true).
+				Dark(true).
+				Attr("@click", web.Plaid().EventFunc(actions.DoListingAction).
+					Query(ParamListingActionName, action.name).
+					MergeQuery(true).
+					Go(),
+				),
+		),
+	)
+}
+
 func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventResponse, err error) {
 	msgr := MustGetMessages(ctx.R)
 	id := ctx.R.FormValue(ParamID)
@@ -285,6 +330,22 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 	return
 }
 
+func (b *ListingBuilder) openActionDialog(ctx *web.EventContext) (r web.EventResponse, err error) {
+	actionName := ctx.R.URL.Query().Get(actionPanelOpenParamName)
+	action := getAction(b.actions, actionName)
+	if action == nil {
+		err = errors.New("cannot find requested action")
+		return
+	}
+
+	b.mb.p.dialog(
+		&r,
+		b.actionPanel(action, ctx),
+		action.dialogWidth,
+	)
+	return
+}
+
 func (b *ListingBuilder) openBulkActionDialog(ctx *web.EventContext) (r web.EventResponse, err error) {
 	msgr := MustGetMessages(ctx.R)
 	selected := getSelectedIds(ctx)
@@ -296,11 +357,12 @@ func (b *ListingBuilder) openBulkActionDialog(ctx *web.EventContext) (r web.Even
 		return
 	}
 
-	if len(selected) == 0 && !bulk.skipRecordSelect {
+	if len(selected) == 0 {
 		ShowMessage(&r, "Please select record", "warning")
 		return
 	}
 
+	// If selectedIdsProcessorFunc is not nil, process the request in it and skip the confirmation dialog
 	var processedSelectedIds []string
 	if bulk.selectedIdsProcessorFunc != nil {
 		processedSelectedIds, err = bulk.selectedIdsProcessorFunc(selected, ctx)
@@ -333,7 +395,7 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 		panic("bulk required")
 	}
 
-	if b.mb.Info().Verifier().SnakeDo("bulk_actions", bulk.name).WithReq(ctx.R).IsAllowed() != nil {
+	if b.mb.Info().Verifier().SnakeDo(PermBulkActions, bulk.name).WithReq(ctx.R).IsAllowed() != nil {
 		ShowMessage(&r, perm.PermissionDenied.Error(), "warning")
 		return
 	}
@@ -375,6 +437,43 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
 
 	r.PushState = web.Location(url.Values{bulkPanelOpenParamName: []string{}}).MergeQuery(true)
+
+	return
+}
+
+func (b ListingBuilder) doListingAction(ctx *web.EventContext) (r web.EventResponse, err error) {
+	action := getAction(b.actions, ctx.R.FormValue(ParamListingActionName))
+	if action == nil {
+		panic("action required")
+	}
+
+	if b.mb.Info().Verifier().SnakeDo(PermListingActions, action.name).WithReq(ctx.R).IsAllowed() != nil {
+		ShowMessage(&r, perm.PermissionDenied.Error(), "warning")
+		return
+	}
+
+	err1 := action.updateFunc([]string{}, ctx)
+
+	if err1 != nil {
+		if _, ok := err1.(*web.ValidationErrors); !ok {
+			vErr := &web.ValidationErrors{}
+			vErr.GlobalError(err1.Error())
+			ctx.Flash = vErr
+		}
+	}
+
+	if ctx.Flash != nil {
+		r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
+			Name: dialogContentPortalName,
+			Body: b.actionPanel(action, ctx),
+		})
+		return
+	}
+
+	msgr := MustGetMessages(ctx.R)
+	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
+
+	r.PushState = web.Location(url.Values{actionPanelOpenParamName: []string{}}).MergeQuery(true)
 
 	return
 }
@@ -901,8 +1000,10 @@ func (b *ListingBuilder) ReloadList(
 
 func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext) h.HTMLComponent {
 	var actionBtns []h.HTMLComponent
+
+	// Render bulk actions
 	for _, ba := range b.bulkActions {
-		if b.mb.Info().Verifier().SnakeDo("bulk_actions", ba.name).WithReq(ctx.R).IsAllowed() != nil {
+		if b.mb.Info().Verifier().SnakeDo(PermBulkActions, ba.name).WithReq(ctx.R).IsAllowed() != nil {
 			continue
 		}
 
@@ -910,8 +1011,12 @@ func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext)
 		if ba.buttonCompFunc != nil {
 			btn = ba.buttonCompFunc(ctx)
 		} else {
+			buttonColor := ba.buttonColor
+			if buttonColor == "" {
+				buttonColor = ColorSecondary
+			}
 			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
-				Color("secondary").
+				Color(buttonColor).
 				Depressed(true).
 				Dark(true).
 				Class("ml-2").
@@ -924,21 +1029,33 @@ func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext)
 		actionBtns = append(actionBtns, btn)
 	}
 
+	// Render actions
 	for _, ba := range b.actions {
-		if b.mb.Info().Verifier().SnakeDo("actions", ba.name).WithReq(ctx.R).IsAllowed() != nil {
+		if b.mb.Info().Verifier().SnakeDo(PermActions, ba.name).WithReq(ctx.R).IsAllowed() != nil {
 			continue
 		}
 
-		var button h.HTMLComponent = VBtn(b.mb.getLabel(ba.NameLabel)).
-			Color("primary").
-			Depressed(true).
-			Dark(true).
-			Class("ml-2")
+		var btn h.HTMLComponent
 		if ba.buttonCompFunc != nil {
-			button = ba.buttonCompFunc(ctx)
+			btn = ba.buttonCompFunc(ctx)
+		} else {
+			buttonColor := ba.buttonColor
+			if buttonColor == "" {
+				buttonColor = ColorPrimary
+			}
+
+			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
+				Color(buttonColor).
+				Depressed(true).
+				Dark(true).
+				Class("ml-2").
+				Attr("@click", web.Plaid().EventFunc(actions.OpenActionDialog).
+					Queries(url.Values{actionPanelOpenParamName: []string{ba.name}}).
+					MergeQuery(true).
+					Go())
 		}
 
-		actionBtns = append(actionBtns, button)
+		actionBtns = append(actionBtns, btn)
 	}
 
 	if b.actionsAsMenu {

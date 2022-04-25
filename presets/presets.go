@@ -811,7 +811,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 				),
 				notifier,
 			).Dark(true).
-				Color("primary").
+				Color(ColorPrimary).
 				App(true).
 				Fixed(true),
 			// ClippedLeft(true),

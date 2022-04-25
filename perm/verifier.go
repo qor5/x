@@ -71,6 +71,8 @@ func (b *Verifier) Do(v string) (r *Verifier) {
 	return
 }
 
+// SnakeDo convert string to snake form.
+// e.g. "SnakeDo" -> "snake_do"
 func (b *Verifier) SnakeDo(actions ...string) (r *Verifier) {
 	var fixed = []string{b.module}
 	for _, a := range actions {
