@@ -21,6 +21,7 @@ import (
 	goji "goji.io"
 	"goji.io/pat"
 	"golang.org/x/text/language"
+	"golang.org/x/text/language/display"
 )
 
 type Builder struct {
@@ -523,7 +524,7 @@ func (b *Builder) runBrandFunc(ctx *web.EventContext) (r h.HTMLComponent) {
 		return b.brandFunc(ctx)
 	}
 
-	return VCardTitle(h.H1(i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle)))
+	return VRow(h.H1(i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))).Class("text-button")
 }
 
 func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponent) {
@@ -531,38 +532,64 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 		return b.switchLanguageFunc(ctx)
 	}
 
-	if len(b.I18n().GetSupportLanguages()) <= 1 {
+	var supportLanguages = b.I18n().GetSupportLanguagesFromRequest(ctx.R)
+
+	if len(b.I18n().GetSupportLanguages()) <= 1 || len(supportLanguages) == 0 {
 		return nil
 	}
 
-	if ctx.R.FormValue("lang") != "" {
-		http.SetCookie(ctx.W, &http.Cookie{
-			Name:  "lang",
-			Value: ctx.R.FormValue("lang"),
-		})
+	cookieName := b.I18n().GetCookieName()
+	queryName := b.I18n().GetQueryName()
+
+	if len(supportLanguages) == 1 {
+		return h.Template().Children(
+			h.Div(
+				VRow(
+					VIcon("language"),
+					h.Div(h.Text(display.Self.Name(supportLanguages[0]))).Class("text-button"),
+				),
+			).Attr("@click", web.Plaid().Query(queryName, supportLanguages[0].String()).Go()),
+		)
 	}
 
+	var matcher = language.NewMatcher(supportLanguages)
+
+	lang := ctx.R.FormValue(queryName)
+	if lang == "" {
+		langCookie, _ := ctx.R.Cookie(cookieName)
+		if langCookie != nil {
+			lang = langCookie.Value
+		}
+	}
+
+	var displayLanguage language.Tag
+	_, i := language.MatchStrings(matcher, lang)
+	displayLanguage = supportLanguages[i]
+
 	var languages []h.HTMLComponent
-	for _, tag := range b.I18n().GetSupportLanguages() {
+	for _, tag := range supportLanguages {
 		languages = append(languages,
 			h.Div(
 				VListItem(
 					VListItemContent(
 						VListItemTitle(
-							h.Div(h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, tag.String()))).Class("text-button"),
+							h.Div(h.Text(display.Self.Name(tag))).Class("text-button"),
 						),
 					),
-				).Attr("@click", web.Plaid().Query("lang", tag.String()).Go()),
+				).Attr("@click", web.Plaid().Query(queryName, tag.String()).Go()),
 			),
 		)
 	}
 
 	return VMenu(
-		web.Slot(
-			VRow(
-				VBtn(i18n.T(ctx.R, ModelsI18nModuleKey, "switch language")).Attr("v-on", "on").Text(true).Small(true),
-			).Justify("center").Align("center"),
-		).Name("activator").Scope("{ on }"),
+		h.Template().Attr("v-slot:activator", "{on, attrs}").Children(
+			h.Div(
+				VRow(
+					VIcon("language"),
+					h.Div(h.Text(display.Self.Name(displayLanguage))).Class("text-button"),
+				),
+			).Attr("v-bind", "attrs").Attr("v-on", "on"),
+		),
 
 		VList(
 			languages...,
@@ -576,11 +603,19 @@ func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switc
 	}
 
 	return VCard(
-		brand,
-		VCardActions(
+		h.If(brand != nil,
 			VListItem(
-				profile,
-				switchLanguage,
+				VCardText(brand),
+			),
+		),
+		h.If(switchLanguage != nil,
+			VListItem(
+				VCardText(switchLanguage),
+			),
+		),
+		h.If(profile != nil,
+			VListItem(
+				VCardText(profile),
 			),
 		),
 	).Elevation(1)
