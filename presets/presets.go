@@ -552,9 +552,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 	var matcher = language.NewMatcher(supportLanguages)
 
 	lang := ctx.R.FormValue("lang")
-	if lang != "" {
-		http.SetCookie(ctx.W, &http.Cookie{Name: "lang", Value: lang})
-	} else {
+	if lang == "" {
 		langCookie, _ := ctx.R.Cookie("lang")
 		if langCookie != nil {
 			lang = langCookie.Value
@@ -562,7 +560,8 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 	}
 
 	var displayLanguage language.Tag
-	displayLanguage, _ = language.MatchStrings(matcher, lang)
+	_, i := language.MatchStrings(matcher, lang)
+	displayLanguage = supportLanguages[i]
 
 	var languages []h.HTMLComponent
 	for _, tag := range supportLanguages {

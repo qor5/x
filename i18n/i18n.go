@@ -114,14 +114,17 @@ func (b *Builder) EnsureLanguage(in http.Handler) (out http.Handler) {
 			}
 		}
 
-		var tag language.Tag
+		accept := r.Header.Get("Accept-Language")
+
+		var availableLanguages []language.Tag
 		if len(lang) > 0 {
-			accept := r.Header.Get("Accept-Language")
-			tag, _ = language.MatchStrings(b.matcher, lang, accept)
+			availableLanguages = b.GetSupportLanguages()
 		} else {
-			var matcher = language.NewMatcher(b.GetSupportLanguagesFromRequest(r))
-			tag, _ = language.MatchStrings(matcher, lang)
+			availableLanguages = b.GetSupportLanguagesFromRequest(r)
 		}
+		matcher := language.NewMatcher(availableLanguages)
+		_, i := language.MatchStrings(matcher, lang, accept)
+		tag := availableLanguages[i]
 
 		moduleMsgs := b.moduleMessages[tag]
 		if moduleMsgs == nil {
