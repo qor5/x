@@ -2,13 +2,15 @@ package presets
 
 type ActionBuilder struct {
 	NameLabel
+
 	buttonCompFunc                 ComponentFunc
 	updateFunc                     ActionUpdateFunc
 	compFunc                       ActionComponentFunc
-	dialogWidth                    string
 	selectedIdsProcessorFunc       ActionSelectedIdsProcessorFunc
 	selectedIdsProcessorNoticeFunc ActionSelectedIdsProcessorNoticeFunc
-	skipRecordSelect               bool
+
+	dialogWidth string
+	buttonColor string
 }
 
 const defaultBulkActionDialogWidth = "600"
@@ -56,8 +58,8 @@ func (b *ActionBuilder) Label(v string) (r *ActionBuilder) {
 	return b
 }
 
-func (b *ActionBuilder) SkipRecordSelect(v bool) (r *ActionBuilder) {
-	b.skipRecordSelect = v
+func (b *ActionBuilder) ButtonColor(v string) (r *ActionBuilder) {
+	b.buttonColor = v
 	return b
 }
 

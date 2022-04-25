@@ -159,7 +159,7 @@ func (b *DetailingBuilder) actionForm(action *ActionBuilder, ctx *web.EventConte
 				VSpacer(),
 				VBtn(msgr.Update).
 					Dark(true).
-					Color("primary").
+					Color(ColorPrimary).
 					Attr("@click", web.Plaid().
 						EventFunc(actions.DoAction).
 						Query(ParamID, id).

@@ -28,3 +28,8 @@ const (
 	ParamListingActionName        = "listing_action"
 	ParamSelectedIds              = "selected_ids"
 )
+
+const (
+	ColorPrimary   = "primary"
+	ColorSecondary = "secondary"
+)

@@ -357,7 +357,7 @@ func (b *ListingBuilder) openBulkActionDialog(ctx *web.EventContext) (r web.Even
 		return
 	}
 
-	if len(selected) == 0 && !bulk.skipRecordSelect {
+	if len(selected) == 0 {
 		ShowMessage(&r, "Please select record", "warning")
 		return
 	}
@@ -1011,8 +1011,12 @@ func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext)
 		if ba.buttonCompFunc != nil {
 			btn = ba.buttonCompFunc(ctx)
 		} else {
+			buttonColor := ba.buttonColor
+			if buttonColor == "" {
+				buttonColor = ColorSecondary
+			}
 			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
-				Color("secondary").
+				Color(buttonColor).
 				Depressed(true).
 				Dark(true).
 				Class("ml-2").
@@ -1035,8 +1039,13 @@ func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext)
 		if ba.buttonCompFunc != nil {
 			btn = ba.buttonCompFunc(ctx)
 		} else {
+			buttonColor := ba.buttonColor
+			if buttonColor == "" {
+				buttonColor = ColorPrimary
+			}
+
 			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
-				Color("primary").
+				Color(buttonColor).
 				Depressed(true).
 				Dark(true).
 				Class("ml-2").
