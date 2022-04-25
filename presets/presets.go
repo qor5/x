@@ -534,7 +534,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 
 	var supportLanguages = b.I18n().GetSupportLanguagesFromRequest(ctx.R)
 
-	if len(supportLanguages) == 0 {
+	if len(b.I18n().GetSupportLanguages()) <= 1 || len(supportLanguages) == 0 {
 		return nil
 	}
 
