@@ -538,6 +538,9 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 		return nil
 	}
 
+	cookieName := b.I18n().GetCookieName()
+	queryName := b.I18n().GetQueryName()
+
 	if len(supportLanguages) == 1 {
 		return h.Template().Children(
 			h.Div(
@@ -545,15 +548,15 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 					VIcon("language"),
 					h.Div(h.Text(display.Self.Name(supportLanguages[0]))).Class("text-button"),
 				),
-			).Attr("@click", web.Plaid().Query("lang", supportLanguages[0].String()).Go()),
+			).Attr("@click", web.Plaid().Query(queryName, supportLanguages[0].String()).Go()),
 		)
 	}
 
 	var matcher = language.NewMatcher(supportLanguages)
 
-	lang := ctx.R.FormValue("lang")
+	lang := ctx.R.FormValue(queryName)
 	if lang == "" {
-		langCookie, _ := ctx.R.Cookie("lang")
+		langCookie, _ := ctx.R.Cookie(cookieName)
 		if langCookie != nil {
 			lang = langCookie.Value
 		}
@@ -573,7 +576,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 							h.Div(h.Text(display.Self.Name(tag))).Class("text-button"),
 						),
 					),
-				).Attr("@click", web.Plaid().Query("lang", tag.String()).Go()),
+				).Attr("@click", web.Plaid().Query(queryName, tag.String()).Go()),
 			),
 		)
 	}

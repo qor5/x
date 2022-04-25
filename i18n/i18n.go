@@ -40,6 +40,14 @@ func (b *Builder) defaultLanguage() language.Tag {
 	return b.supportLanguages[0]
 }
 
+func (b *Builder) GetCookieName() string {
+	return b.cookieName
+}
+
+func (b *Builder) GetQueryName() string {
+	return b.queryName
+}
+
 func (b *Builder) SupportLanguages(vs ...language.Tag) (r *Builder) {
 	if len(vs) == 0 {
 		panic("have to support at least one language")
@@ -117,12 +125,14 @@ func (b *Builder) EnsureLanguage(in http.Handler) (out http.Handler) {
 		accept := r.Header.Get("Accept-Language")
 
 		var availableLanguages []language.Tag
+		var matcher language.Matcher
 		if len(lang) > 0 {
 			availableLanguages = b.GetSupportLanguages()
+			matcher = b.matcher
 		} else {
 			availableLanguages = b.GetSupportLanguagesFromRequest(r)
+			matcher = language.NewMatcher(availableLanguages)
 		}
-		matcher := language.NewMatcher(availableLanguages)
 		_, i := language.MatchStrings(matcher, lang, accept)
 		tag := availableLanguages[i]
 
