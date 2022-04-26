@@ -23,28 +23,29 @@ type Messages struct {
 	FiltersClear                               string
 	FiltersDone                                string
 	Filters                                    string
-	Filter                                     string
-	FiltersDateInTheLast                       string
-	FiltersDateEquals                          string
-	FiltersDateBetween                         string
-	FiltersDateIsAfter                         string
-	FiltersDateIsAfterOrOn                     string
-	FiltersDateIsBefore                        string
-	FiltersDateIsBeforeOrOn                    string
-	FiltersDateDays                            string
-	FiltersDateMonths                          string
-	FiltersDateAnd                             string
-	FiltersNumberEquals                        string
-	FiltersNumberBetween                       string
-	FiltersNumberGreaterThan                   string
-	FiltersNumberLessThan                      string
-	FiltersNumberAnd                           string
-	FiltersStringEquals                        string
-	FiltersStringContains                      string
-	FiltersMultipleSelectIn                    string
-	FiltersMultipleSelectNotIn                 string
-	PaginationRowsPerPage                      string
-	ListingNoRecordToShow                      string
+	Filter                     string
+	FiltersDateInTheLast       string
+	FiltersDateEquals          string
+	FiltersDateBetween         string
+	FiltersDateIsAfter         string
+	FiltersDateIsAfterOrOn     string
+	FiltersDateIsBefore        string
+	FiltersDateIsBeforeOrOn    string
+	FiltersDateDays            string
+	FiltersDateMonths          string
+	FiltersDateAnd             string
+	FiltersDateTo              string
+	FiltersNumberEquals        string
+	FiltersNumberBetween       string
+	FiltersNumberGreaterThan   string
+	FiltersNumberLessThan      string
+	FiltersNumberAnd           string
+	FiltersStringEquals        string
+	FiltersStringContains      string
+	FiltersMultipleSelectIn    string
+	FiltersMultipleSelectNotIn string
+	PaginationRowsPerPage      string
+	ListingNoRecordToShow      string
 	ListingSelectedCountNotice                 string
 	BulkActionNoAvailableRecords               string
 	BulkActionSelectedIdsProcessNoticeTemplate string
@@ -108,6 +109,7 @@ var Messages_en_US = &Messages{
 	FiltersDateDays:                "days",
 	FiltersDateMonths:              "months",
 	FiltersDateAnd:                 "and",
+	FiltersDateTo:                  "to",
 	FiltersNumberEquals:            "is equal to",
 	FiltersNumberBetween:           "between",
 	FiltersNumberGreaterThan:       "is greater than",

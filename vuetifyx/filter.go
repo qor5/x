@@ -68,16 +68,7 @@ func (b *VXFilterBuilder) MarshalHTML(ctx context.Context) (r []byte, err error)
 		default: () => {
 			return {
 				date: {
-					inTheLast: 'is in the last',
-					equals: 'is equal to',
-					between: 'is between',
-					isAfter: 'is after',
-					isAfterOrOn: 'is on or after',
-					isBefore: 'is before',
-					isBeforeOrOn: 'is before or on',
-					days: 'days',
-					months: 'months',
-					and: 'and',
+					to: 'to',
 				},
 				number: {
 					equals: 'is equal to',
@@ -103,16 +94,7 @@ type FilterTranslations struct {
 	Filters string `json:"filters,omitempty"`
 	Filter  string `json:"filter,omitempty"`
 	Date    struct {
-		InTheLast    string `json:"inTheLast,omitempty"`
-		Equals       string `json:"equals,omitempty"`
-		Between      string `json:"between,omitempty"`
-		IsAfter      string `json:"isAfter,omitempty"`
-		IsAfterOrOn  string `json:"isAfterOrOn,omitempty"`
-		IsBefore     string `json:"isBefore,omitempty"`
-		IsBeforeOrOn string `json:"isBeforeOrOn,omitempty"`
-		Days         string `json:"days,omitempty"`
-		Months       string `json:"months,omitempty"`
-		And          string `json:"and,omitempty"`
+		To           string `json:"to,omitempty"`
 	} `json:"date,omitempty"`
 
 	Number struct {
@@ -148,33 +130,16 @@ const (
 type FilterItemModifier string
 
 const (
-	ModifierInTheLast    FilterItemModifier = "inTheLast"    // Date
-	ModifierEquals       FilterItemModifier = "equals"       // Date, String, Number
-	ModifierBetween      FilterItemModifier = "between"      // Date, Number
-	ModifierIsAfter      FilterItemModifier = "isAfter"      // Date
-	ModifierIsAfterOrOn  FilterItemModifier = "isAfterOrOn"  // Date
-	ModifierIsBefore     FilterItemModifier = "isBefore"     // Date
-	ModifierIsBeforeOrOn FilterItemModifier = "isBeforeOrOn" // Date
-	ModifierGreaterThan  FilterItemModifier = "greaterThan"  // Number
-	ModifierLessThan     FilterItemModifier = "lessThan"     // Number
-	ModifierContains     FilterItemModifier = "contains"     // String
-	ModifierIn           FilterItemModifier = "in"           // String
-	ModifierNotIn        FilterItemModifier = "notIn"        // String
+	ModifierEquals      FilterItemModifier = "equals"      // String, Number
+	ModifierBetween     FilterItemModifier = "between"     // Date, Number
+	ModifierGreaterThan FilterItemModifier = "greaterThan" // Number
+	ModifierLessThan    FilterItemModifier = "lessThan"    // Number
+	ModifierContains    FilterItemModifier = "contains"    // String
+	ModifierIn          FilterItemModifier = "in"          // String
+	ModifierNotIn       FilterItemModifier = "notIn"       // String
 )
 
 type FilterItemInTheLastUnit string
-
-const (
-	InTheLastUnitDays   FilterItemInTheLastUnit = "days"
-	InTheLastUnitMonths FilterItemInTheLastUnit = "months"
-)
-
-type FilterItemTimezone string
-
-const (
-	TimezoneLocal FilterItemTimezone = "local"
-	TimezoneUTC   FilterItemTimezone = "utc"
-)
 
 type FilterData []*FilterItem
 
@@ -201,9 +166,6 @@ type FilterItem struct {
 	ValuesAre         []string                `json:"valuesAre,omitempty"`
 	ValueFrom         string                  `json:"valueFrom,omitempty"`
 	ValueTo           string                  `json:"valueTo,omitempty"`
-	InTheLastValue    string                  `json:"inTheLastValue,omitempty"`
-	InTheLastUnit     FilterItemInTheLastUnit `json:"inTheLastUnit,omitempty"`
-	Timezone          FilterItemTimezone      `json:"timezone,omitempty"`
 	SQLCondition      string                  `json:"-"`
 	Options           []*SelectItem           `json:"options,omitempty"`
 	LinkageSelectData FilterLinkageSelectData `json:"linkageSelectData,omitempty"`
@@ -287,6 +249,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 	for _, k := range keys {
 		v := queryMap[k]
 		segs := strings.Split(k, ".")
+
 		var mod = ""
 		key := k
 		val := v[0]
@@ -317,7 +280,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 			sqlc := fd.getSQLCondition(key, v[0])
 			if len(sqlc) > 0 {
 				if it.ItemType == ItemTypeDate {
-					val = unixToDatetime(val, it.Timezone == TimezoneUTC, 0)
+					val = unixToDatetime(val)
 				}
 
 				// Compose operator into sql condition. If you want to use multiple operators you have to use {op}, '%s' is not supported
@@ -363,8 +326,8 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 				it.Selected = true
 				it.Modifier = ModifierBetween
 				if it.ItemType == ItemTypeDate {
-					it.ValueFrom = unixToDate(mv["gte"], it.Timezone == TimezoneUTC, 0)
-					it.ValueTo = unixToDate(mv["lt"], it.Timezone == TimezoneUTC, -1)
+					it.ValueFrom = unixToDatetimeWithFormat(mv["gte"], "2006-01-02 15:04")
+					it.ValueTo = unixToDatetimeWithFormat(mv["lt"], "2006-01-02 15:04")
 				}
 
 				if it.ItemType == ItemTypeNumber {
@@ -401,23 +364,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 					}
 
 					if it.ItemType == ItemTypeDate {
-						it.ValueIs = unixToDate(v, it.Timezone == TimezoneUTC, 0)
-						if mod == "gte" {
-							it.Modifier = ModifierIsAfterOrOn
-							it.ValueIs = unixToDate(v, it.Timezone == TimezoneUTC, 0)
-						}
-						if mod == "gt" {
-							it.Modifier = ModifierIsAfter
-							it.ValueIs = unixToDate(v, it.Timezone == TimezoneUTC, -1)
-						}
-						if mod == "lt" {
-							it.Modifier = ModifierIsBefore
-							it.ValueIs = unixToDate(v, it.Timezone == TimezoneUTC, 0)
-						}
-						if mod == "lte" {
-							it.Modifier = ModifierIsBeforeOrOn
-							it.ValueIs = unixToDate(v, it.Timezone == TimezoneUTC, -1)
-						}
+						it.ValueIs = unixToDate(v)
 						continue
 					}
 
@@ -455,20 +402,27 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 	return
 }
 
-func unixToDate(u string, utc bool, sub int) string {
-	return unixToTime(u, utc, sub).Format("2006-01-02")
+func unixToDate(u string) string {
+	return unixToDatetimeWithFormat(u, "2006-01-02")
 }
 
-func unixToDatetime(u string, utc bool, sub int) string {
-	return unixToTime(u, utc, sub).Format(time.RFC3339)
+func unixToDatetime(u string) string {
+	return unixToDatetimeWithFormat(u, time.RFC3339)
 }
 
-func unixToTime(u string, utc bool, sub int) time.Time {
+func unixToDatetimeWithFormat(u string, format string) string {
+	return unixToTime(u).Format(format)
+}
+
+// We always use local timezone(server timezone) to parse time.
+// e.g.
+// Server timezone: UTC+8
+// Client timezone: UTC+10
+// Client send 2022-4-15 12:00:00 UTC+10
+// Server would parse it as 2022-4-15 10:00:00 UTC+8
+func unixToTime(u string) time.Time {
 	unix, _ := strconv.ParseInt(u, 10, 64)
-	d := time.Unix(unix, 0).Add(time.Duration(24 * sub * int(time.Hour)))
-	if utc {
-		d = d.UTC()
-	}
+	d := time.Unix(unix, 0)
 
 	return d
 }

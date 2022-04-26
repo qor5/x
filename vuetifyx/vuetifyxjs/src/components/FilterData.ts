@@ -1,4 +1,5 @@
 import moment from 'moment';
+import * as constants from './Constants'
 
 function pushKeyVal(segs: any, key: string, mod: string, val: any) {
 	const modWithDot = mod ? `.${mod}` : '';
@@ -14,79 +15,21 @@ function convertUTC(op: any, date: any) {
 }
 
 function pushDateItem(segs: any, op: any) {
-	const mod = op.modifier || 'inTheLast';
+	// Now we only have 'between' modifier, but consider extendability, we keep the modifier system for now.
+	const mod = op.modifier || constants.ModifierBetween;
 
-	if (mod === 'inTheLast') {
-		let m = moment().startOf('day');
-		if (op.timezone === 'utc') {
-			m = m.utc().startOf('day');
-		}
-
-		pushKeyVal(segs, op.key, 'lt', m.add(1, 'days').unix());
-		const unit = op.inTheLastUnit || 'days';
-
-		pushKeyVal(
-			segs,
-			op.key,
-			'gte',
-			m.subtract(parseInt(op.inTheLastValue || '1', 10), unit).unix(),
-		);
-		return;
-	}
-
-	if (mod === 'equals' && op.valueIs) {
-		pushKeyVal(segs, op.key, '', convertUTC(op, op.valueIs).unix());
-		return;
-	}
-
-	if (mod === 'between') {
+	if (mod === constants.ModifierBetween) {
 		if (op.valueFrom) {
 			pushKeyVal(
 				segs,
 				op.key,
 				'gte',
-				convertUTC(op, op.valueFrom).unix(),
+				moment(op.valueFrom).unix(),
 			);
 		}
 		if (op.valueTo) {
-			pushKeyVal(segs, op.key, 'lt', convertUTC(op, op.valueTo).add(1, 'days').unix());
+			pushKeyVal(segs, op.key, 'lt', moment(op.valueTo).unix());
 		}
-		return;
-	}
-
-	if (mod === 'isAfter' && op.valueIs) {
-		pushKeyVal(
-			segs,
-			op.key,
-			'gt',
-			convertUTC(op, op.valueIs)
-				.add(1, 'days')
-				.subtract(1, 'seconds')
-				.unix(),
-		);
-		return;
-	}
-
-	if (mod === 'isAfterOrOn') {
-		pushKeyVal(segs, op.key, 'gte', convertUTC(op, op.valueIs).unix());
-		return;
-	}
-
-	if (mod === 'isBefore') {
-		pushKeyVal(segs, op.key, 'lt', convertUTC(op, op.valueIs).unix());
-		return;
-	}
-
-	if (mod === 'isBeforeOrOn') {
-		pushKeyVal(
-			segs,
-			op.key,
-			'lte',
-			convertUTC(op, op.valueIs)
-				.add(1, 'days')
-				.subtract(1, 'seconds')
-				.unix(),
-		);
 		return;
 	}
 }
@@ -155,11 +98,11 @@ function pushSelectItem(segs: any, op: any) {
 function pushMultipleSelectItem(segs: any, op: any) {
 	const mod = op.modifier || 'in';
 	if (mod === 'in' && op.valuesAre && op.valuesAre.length > 0) {
-        pushKeyVal(segs, op.key, 'in', op.valuesAre);
+		pushKeyVal(segs, op.key, 'in', op.valuesAre);
 		return;
 	}
 	if (mod === 'notIn' && op.valuesAre && op.valuesAre.length > 0) {
-        pushKeyVal(segs, op.key, 'notIn', op.valuesAre);
+		pushKeyVal(segs, op.key, 'notIn', op.valuesAre);
 		return;
 	}
 }
@@ -167,7 +110,7 @@ function pushMultipleSelectItem(segs: any, op: any) {
 function pushLinkageSelectItem(segs: any, op: any) {
 	const mod = op.modifier || 'equals';
 	if (mod === 'equals' && op.valuesAre && op.valuesAre.length > 0) {
-        pushKeyVal(segs, op.key, '', op.valuesAre);
+		pushKeyVal(segs, op.key, '', op.valuesAre);
 		return;
 	}
 }
