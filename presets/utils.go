@@ -20,9 +20,9 @@ func ShowMessage(r *web.EventResponse, msg string, color string) {
 		color = "success"
 	}
 
-	r.VarsScript = fmt.Sprintf(
+	web.AppendVarsScripts(r, fmt.Sprintf(
 		`vars.presetsMessage = { show: true, message: %s, color: %s}`,
-		h.JSONString(msg), h.JSONString(color))
+		h.JSONString(msg), h.JSONString(color)))
 }
 
 func EditDeleteRowMenuItemFuncs(mi *ModelInfo, url string, editExtraParams url.Values) []stripeui.RowMenuItemFunc {

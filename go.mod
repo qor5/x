@@ -6,7 +6,7 @@ require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/go-chi/chi v1.5.4
 	github.com/goplaid/multipartestutils v0.0.3
-	github.com/goplaid/web v1.1.28-0.20220324101132-35f4ff477179
+	github.com/goplaid/web v1.1.30
 	github.com/iancoleman/strcase v0.2.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/jinzhu/inflection v1.0.0

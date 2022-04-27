@@ -238,7 +238,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 
 		for _, panelFunc := range b.tabPanels {
 			value := panelFunc(obj, ctx)
-			if value != nil{
+			if value != nil {
 				tabs = append(tabs, value)
 			}
 		}
@@ -367,28 +367,28 @@ func (b *EditingBuilder) doUpdate(
 	}
 
 	overlayType := ctx.R.FormValue(ParamOverlay)
+	script := closeRightDrawerVarScript
+	if overlayType == actions.Dialog {
+		script = closeDialogVarScript
+	}
+	if silent {
+		script = ""
+	}
+
 	afterUpdateScript := ctx.R.FormValue(ParamOverlayAfterUpdateScript)
 	if afterUpdateScript != "" {
-		r.VarsScript = strings.Join([]string{
-			r.VarsScript,
-			closeDialogVarScript,
-			strings.NewReplacer(".go()",
-				fmt.Sprintf(".query(%s, %s).go()",
-					h.JSONString(ParamOverlayUpdateID),
-					h.JSONString(stripeui.ObjectID(obj)),
-				)).Replace(afterUpdateScript),
-		}, "; ")
+		web.AppendVarsScripts(r, script, strings.NewReplacer(".go()",
+			fmt.Sprintf(".query(%s, %s).go()",
+				h.JSONString(ParamOverlayUpdateID),
+				h.JSONString(stripeui.ObjectID(obj)),
+			)).Replace(afterUpdateScript),
+		)
+
 		return
 	}
 
 	r.PushState = web.Location(nil)
-	if !silent {
-		script := closeRightDrawerVarScript
-		if overlayType == actions.Dialog {
-			script = closeDialogVarScript
-		}
-		r.VarsScript = r.VarsScript + ";" + script
-	}
+	web.AppendVarsScripts(r, script)
 	return
 }
 
