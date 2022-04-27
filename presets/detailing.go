@@ -1,6 +1,7 @@
 package presets
 
 import (
+	"github.com/goplaid/x/perm"
 	"net/url"
 
 	"github.com/goplaid/web"
@@ -58,44 +59,11 @@ func (b *DetailingBuilder) GetPageFunc() web.PageFunc {
 }
 
 func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
-
-	id := pat.Param(ctx.R, "id")
-	r.Body = VContainer(h.Text(id))
-
-	var obj = b.mb.NewModel()
-
-	if id == "" {
-		panic("not found")
-	}
-
-	obj, err = b.fetcher(obj, id, ctx)
-	if err != nil {
-		return
-	}
-
 	msgr := MustGetMessages(ctx.R)
+	id := pat.Param(ctx.R, ParamID)
+	c, obj := b.showFor(id, ctx)
 	r.PageTitle = msgr.DetailingObjectTitle(inflection.Singular(b.mb.label), getPageTitle(obj, id))
-
-	var notice h.HTMLComponent
-	if msg, ok := ctx.Flash.(string); ok {
-		notice = VSnackbar(h.Text(msg)).Value(true).Top(true).Color("success").Value(true)
-	}
-
-	var comps []h.HTMLComponent
-	for _, f := range b.fields {
-		if f.compFunc == nil {
-			continue
-		}
-		comps = append(comps, f.compFunc(obj, &FieldContext{
-			ModelInfo: b.mb.Info(),
-			Name:      f.name,
-			Label:     b.mb.getLabel(f.NameLabel),
-		}, ctx))
-	}
-
-	r.Body = VContainer(
-		notice,
-	).AppendChildren(comps...).Fluid(true)
+	r.Body = c
 	return
 }
 
@@ -169,4 +137,49 @@ func (b *DetailingBuilder) actionForm(action *ActionBuilder, ctx *web.EventConte
 			),
 		).Flat(true),
 	).Fluid(true)
+}
+
+func (b *DetailingBuilder) show(ctx *web.EventContext) (r web.EventResponse, err error) {
+	if b.mb.Info().Verifier().Do(PermGet).WithReq(ctx.R).IsAllowed() != nil {
+		ShowMessage(&r, perm.PermissionDenied.Error(), "warning")
+		return
+	}
+	id := ctx.R.FormValue(ParamID)
+	c, _ := b.showFor(id, ctx)
+	b.mb.p.overlay(ctx.R.FormValue(ParamOverlay), &r, c, b.mb.rightDrawerWidth)
+	return
+}
+
+func (b *DetailingBuilder) showFor(id string, ctx *web.EventContext) (r h.HTMLComponent, obj interface{}) {
+	obj = b.mb.NewModel()
+
+	if id == "" {
+		panic("not found")
+	}
+	var err error
+	obj, err = b.fetcher(obj, id, ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	var notice h.HTMLComponent
+	if msg, ok := ctx.Flash.(string); ok {
+		notice = VSnackbar(h.Text(msg)).Value(true).Top(true).Color("success").Value(true)
+	}
+
+	var comps []h.HTMLComponent
+	for _, f := range b.fields {
+		if f.compFunc == nil {
+			continue
+		}
+		comps = append(comps, f.compFunc(obj, &FieldContext{
+			ModelInfo: b.mb.Info(),
+			Name:      f.name,
+			Label:     b.mb.getLabel(f.NameLabel),
+		}, ctx))
+	}
+	r = VCard(VContainer(
+		notice,
+	).AppendChildren(comps...).Fluid(true))
+	return
 }
