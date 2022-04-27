@@ -79,5 +79,17 @@ Here is how to use it:
 - ~ComponentFunc~ of the bulk action configure the component that will show to user to input after user clicked the bulk action button
 - ~UpdateFunc~ configure the logic that the bulk action execute
 `),
+
+	utils.Anchor(H2(""), "Actions"),
+	Markdown(`
+Action allows you to update database or do anything else with a button.
+
+Here is how to use it:
+`),
+	ch.Code(examples.PresetsListingCustomizationActionsSample).Language("go"),
+	utils.Demo("Presets Listing Actions", e21_presents.PresetsListingCustomizationActionsPath+"/customers", "e21_presents/listing.go"),
+	Markdown(`
+- ~ComponentFunc~ and ~UpdateFunc~ does the same thing in Actions as in Bulk Actions.
+`),
 ).Title("Listing Customizations").
 	Slug("presets-guide/listing-customizations")

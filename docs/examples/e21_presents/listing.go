@@ -332,3 +332,30 @@ func PresetsListingCustomizationBulkActions(b *presets.Builder) (
 const PresetsListingCustomizationBulkActionsPath = "/samples/presets-listing-customization-bulk-actions"
 
 // @snippet_end
+
+// @snippet_begin(PresetsListingCustomizationActionsSample)
+
+func PresetsListingCustomizationActions(b *presets.Builder) (
+	cust *presets.ModelBuilder,
+	cl *presets.ListingBuilder,
+	ce *presets.EditingBuilder,
+	db *gorm.DB,
+) {
+	cust, cl, ce, db = PresetsListingCustomizationTabs(b)
+	b.URIPrefix(PresetsListingCustomizationActionsPath)
+
+	cl.Action("Test").Label("Test").
+		UpdateFunc(func(selectedIds []string, ctx *web.EventContext) (err error) {
+			// You can operate DB here
+			return
+		}).
+		ComponentFunc(func(selectedIds []string, ctx *web.EventContext) h.HTMLComponent {
+			return h.Div().Text("Are you sure you want to do?").Class("title deep-orange--text")
+		})
+
+	return
+}
+
+const PresetsListingCustomizationActionsPath = "/samples/presets-listing-customization-actions"
+
+// @snippet_end
