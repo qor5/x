@@ -1,6 +1,6 @@
 package e00_basics
 
-//@snippet_begin(HelloWorldTipTapSample)
+// @snippet_begin(HelloWorldTipTapSample)
 import (
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/tiptap"
@@ -9,7 +9,6 @@ import (
 )
 
 func HelloWorldTipTap(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("refresh", refresh)
 
 	defaultValue := ctx.R.FormValue("Content1")
 	if len(defaultValue) == 0 {
@@ -47,7 +46,7 @@ func HelloWorldTipTap(ctx *web.EventContext) (pr web.PageResponse, err error) {
 			gohtml.Format(ctx.R.FormValue("Content1")),
 		).Style("background-color: #f8f8f8; padding: 20px;"),
 		Button("Submit").Style("font-size: 24px").
-			Attr("@click", web.Plaid().EventFunc("refresh").Go()),
+			Attr("@click", web.POST().EventFunc("refresh").Go()),
 	)
 
 	return
@@ -58,6 +57,9 @@ func refresh(ctx *web.EventContext) (er web.EventResponse, err error) {
 	return
 }
 
-//@snippet_end
+var HelloWorldTipTapPB = web.Page(HelloWorldTipTap).
+	EventFunc("refresh", refresh)
 
 const HelloWorldTipTapPath = "/samples/hello_world_tiptap"
+
+// @snippet_end

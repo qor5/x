@@ -111,14 +111,14 @@ func PresetsListingCustomizationFields(b *presets.Builder) (
 		return h.Td(
 			h.A().Text(comp.Name).
 				Attr("@click",
-					web.Plaid().EventFunc(actions.Edit).
+					web.POST().EventFunc(actions.Edit).
 						Query(presets.ParamID, fmt.Sprint(comp.ID)).
 						URL(PresetsListingCustomizationFieldsPath+"/companies").
 						Go()),
 			h.Text("-"),
 			h.A().Text("(Open in Dialog)").
 				Attr("@click",
-					web.Plaid().EventFunc(actions.Edit).
+					web.POST().EventFunc(actions.Edit).
 						Query(presets.ParamID, fmt.Sprint(comp.ID)).
 						Query(presets.ParamOverlay, actions.Dialog).
 						URL(PresetsListingCustomizationFieldsPath+"/companies").
@@ -169,12 +169,12 @@ func companyList(ctx *web.EventContext, db *gorm.DB, companyID int) h.HTMLCompon
 			FieldName("CompanyID"),
 
 		h.A().Text("Add Company").Attr("@click",
-			web.Plaid().
+			web.POST().
 				URL(PresetsListingCustomizationFieldsPath+"/companies").
 				EventFunc(actions.New).
 				Query(presets.ParamOverlay, actions.Dialog).
 				Query(presets.ParamOverlayAfterUpdateScript,
-					web.Plaid().EventFunc("updateCompanyList").Go()).
+					web.POST().EventFunc("updateCompanyList").Go()).
 				Go(),
 		),
 	)

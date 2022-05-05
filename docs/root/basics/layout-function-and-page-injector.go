@@ -27,11 +27,11 @@ It does the basic functions like render server side returned html as vue templat
 Provide basic event functions that call to server, and manage push state 
 (change browser address urls before or after do ajax requests). do page partial refresh etc.
 
-the javascript or css code are packed by using the wonderful [packr](github.com/gobuffalo/packr).
+the javascript or css code are packed by using [embed](https://pkg.go.dev/embed).
 `),
 	ch.Code(examples.PackrSample).Language("go"),
 	Markdown(`
-And with ~ub.PacksHandler~, You can merge multiple javascript or css assets together into one url.
+And with ~web.PacksHandler~, You can merge multiple javascript or css assets together into one url.
 So that browser only need to request them one time. and cache them. The cache is set to the start
 time of the process. So next time the app restarts, it invalid the cache.
 `),
@@ -39,8 +39,8 @@ time of the process. So next time the app restarts, it invalid the cache.
 	Markdown(`
 For a new project:
 
-- Use [@vue/cli](https://cli.vuejs.org/guide/creating-a-project.html) to create a asset project that manage your javascript and css. and compile them for production use
-- Use [packr](github.com/gobuffalo/packr) to pack them into Go code as ~ComponentPack~, which is a string
+- Use [@vue/cli](https://cli.vuejs.org/guide/creating-a-project.html) to create an asset project that manage your javascript and css. and compile them for production use
+- Use [embed](https://pkg.go.dev/embed) to pack them into Go code as ~ComponentPack~, which is a string
 - Use ~PacksHandler~ to mount them as available http urls
 - Write Layout function to reference them inside head, or bottom of body
 `),

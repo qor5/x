@@ -20,7 +20,7 @@ func HelloVuetifyList(ctx *web.EventContext) (pr web.PageResponse, err error) {
 
 	pr.Body = wrapper(
 		VToolbar(
-			//VToolbarSideIcon(),
+			// VToolbarSideIcon(),
 			VToolbarTitle("Inbox"),
 			VSpacer(),
 			VBtn("").Icon(true).Children(
@@ -67,6 +67,8 @@ func HelloVuetifyList(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	return
 }
 
-// @snippet_end
+var HelloVuetifyListPB = web.Page(HelloVuetifyList)
 
 const HelloVuetifyListPath = "/samples/hello-vuetify-list"
+
+// @snippet_end

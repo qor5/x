@@ -41,5 +41,8 @@ func ShortCutSample(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	return
 }
 
-// @snippet_end
+var ShortCutSamplePB = web.Page(ShortCutSample)
+
 const ShortCutSamplePath = "/samples/shortcut-sample"
+
+// @snippet_end

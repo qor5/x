@@ -11,8 +11,6 @@ import (
 )
 
 func VuetifyNavigationDrawer(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("showDrawer", showDrawer)
-	ctx.Hub.RegisterEventFunc("updateParentAndClose", updateParentAndClose)
 
 	pr.Body = VContainer(
 		h.H2("A drawer that has close button"),
@@ -91,5 +89,10 @@ func updateParentAndClose(ctx *web.EventContext) (er web.EventResponse, err erro
 	return
 }
 
-// @snippet_end
+var VuetifyNavigationDrawerPB = web.Page(VuetifyNavigationDrawer).
+	EventFunc("showDrawer", showDrawer).
+	EventFunc("updateParentAndClose", updateParentAndClose)
+
 const VuetifyNavigationDrawerPath = "/samples/vuetify-navigation-drawer"
+
+// @snippet_end

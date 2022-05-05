@@ -58,8 +58,6 @@ var globalState = &myFormValue{
 }
 
 func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("update", update)
-	ctx.Hub.RegisterEventFunc("users", users)
 
 	result := h.Ul()
 	for _, v := range globalState.Values1 {
@@ -92,8 +90,8 @@ func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error)
 		result,
 		h.H1("VSelect"),
 		VSelect().
-			Items(options1). // Items is the data source
-			ItemText("Name"). // ItemText is the value that would be displayed to user. the argument is the corresponding field name in the Items. here is user.Name
+			Items(options1).    // Items is the data source
+			ItemText("Name").   // ItemText is the value that would be displayed to user. the argument is the corresponding field name in the Items. here is user.Name
 			ItemValue("Login"). // ItemValue is the value that will be passed with the form. same with ItemText, here is user.Login
 			FieldName("Value3").
 			Solo(true).
@@ -158,6 +156,10 @@ func update(ctx *web.EventContext) (r web.EventResponse, err error) {
 	return
 }
 
-// @snippet_end
+var VuetifyAutocompletePB = web.Page(VuetifyAutocomplete).
+	EventFunc("update", update).
+	EventFunc("users", users)
 
 const VuetifyAutoCompletePath = "/samples/vuetify-auto-complete"
+
+// @snippet_end

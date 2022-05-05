@@ -19,8 +19,6 @@ var globalFavored bool
 const favoredIconPortalName = "favoredIcon"
 
 func HelloVuetifyMenu(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("submit", submit)
-	ctx.Hub.RegisterEventFunc("toggleFavored", toggleFavored)
 
 	var fv formData
 	err = ctx.UnmarshalForm(&fv)
@@ -119,5 +117,10 @@ func submit(ctx *web.EventContext) (er web.EventResponse, err error) {
 	return
 }
 
-// @snippet_end
+var HelloVuetifyMenuPB = web.Page(HelloVuetifyMenu).
+	EventFunc("submit", submit).
+	EventFunc("toggleFavored", toggleFavored)
+
 const HelloVuetifyMenuPath = "/samples/hello-vuetify-menu"
+
+// @snippet_end

@@ -84,7 +84,7 @@ func PresetsDetailPageTopNotes(b *presets.Builder) (
 				VBtn("Add Note").
 					Depressed(true).
 					Attr("@click",
-						web.Plaid().EventFunc(actions.New).
+						web.POST().EventFunc(actions.New).
 							Query("model", "Customer").
 							Query("model_id", cusID).
 							URL(mi.PresetsPrefix()+"/notes").
@@ -151,7 +151,7 @@ func PresetsDetailPageDetails(b *presets.Builder) (
 			Actions(
 				VBtn("Agree Terms").
 					Depressed(true).Class("mr-2").
-					Attr("@click", web.Plaid().
+					Attr("@click", web.POST().
 						EventFunc(actions.Action).
 						Query(presets.ParamAction, "AgreeTerms").
 						Query(presets.ParamID, cusID).
@@ -160,7 +160,7 @@ func PresetsDetailPageDetails(b *presets.Builder) (
 
 				VBtn("Update details").
 					Depressed(true).
-					Attr("@click", web.Plaid().
+					Attr("@click", web.POST().
 						EventFunc(actions.Edit).
 						Query(presets.ParamOverlay, actions.Dialog).
 						Query(presets.ParamID, cusID).
@@ -267,7 +267,7 @@ func PresetsDetailPageCards(b *presets.Builder) (
 				VBtn("Add Card").
 					Depressed(true).
 					Attr("@click",
-						web.Plaid().
+						web.POST().
 							EventFunc(actions.New).
 							Query("customerID", cusID).
 							URL(mi.PresetsPrefix()+"/credit-cards").

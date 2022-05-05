@@ -9,11 +9,12 @@ import (
 )
 
 func HelloWorldReload(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("reload", update)
 	pr.Body = Div(
 		H1("Hello World"),
 		Text(time.Now().Format(time.RFC3339Nano)),
-		Button("Reload Page").Attr("@click", web.GET().EventFunc("reload").Go()),
+		Button("Reload Page").Attr("@click", web.GET().
+			EventFunc(reloadEvent).
+			Go()),
 	)
 	return
 }
@@ -23,6 +24,11 @@ func update(ctx *web.EventContext) (er web.EventResponse, err error) {
 	return
 }
 
-// @snippet_end
+const reloadEvent = "reload"
+
+var HelloWorldReloadPB = web.Page(HelloWorldReload).
+	EventFunc(reloadEvent, update)
 
 const HelloWorldReloadPath = "/samples/hello_world_reload"
+
+// @snippet_end

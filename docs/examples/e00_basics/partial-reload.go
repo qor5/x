@@ -11,10 +11,7 @@ import (
 
 func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	reloadCount = 0
-	ctx.Hub.RegisterEventFunc("related", related)
-	ctx.Hub.RegisterEventFunc("reload3", reload3)
-	ctx.Hub.RegisterEventFunc("autoReload", autoReload)
-	ctx.Hub.RegisterEventFunc("loadData", loadData)
+
 	ctx.Injector.HeadHTML(`
 <style>
 .rp {
@@ -31,7 +28,7 @@ func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		H1("Portal Reload Automatically"),
 
 		web.Scope(
-			web.Portal().Loader(web.Plaid().EventFunc("autoReload")).AutoReloadInterval("locals.interval"),
+			web.Portal().Loader(web.POST().EventFunc("autoReload")).AutoReloadInterval("locals.interval"),
 			Button("stop").Attr("@click", "locals.interval = 0"),
 		).Init(`{interval: 2000}`).VSlot("{ locals }"),
 
@@ -51,9 +48,9 @@ func PartialReloadPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 			H2("Product 1"),
 		).Style("height: 200px; background-color: grey;"),
 		H2("Related Products"),
-		web.Portal().Name("related_products").Loader(web.Plaid().EventFunc("related").Query("productCode", "AH123")),
+		web.Portal().Name("related_products").Loader(web.POST().EventFunc("related").Query("productCode", "AH123")),
 		A().Href("javascript:;").Text("Reload Related Products").
-			Attr("@click", web.Plaid().EventFunc("reload3").Go()),
+			Attr("@click", web.POST().EventFunc("reload3").Go()),
 	)
 	return
 }
@@ -104,6 +101,12 @@ func loadData(ctx *web.EventContext) (er web.EventResponse, err error) {
 	return
 }
 
-// @snippet_end
+var PartialReloadPagePB = web.Page(PartialReloadPage).
+	EventFunc("related", related).
+	EventFunc("reload3", reload3).
+	EventFunc("autoReload", autoReload).
+	EventFunc("loadData", loadData)
 
 const PartialReloadPagePath = "/samples/partial_reload"
+
+// @snippet_end

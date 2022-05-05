@@ -1,4 +1,4 @@
-package e00_basics
+package e21_presents
 
 // @snippet_begin(NotificationCenterSample)
 import (

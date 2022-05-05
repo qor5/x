@@ -42,7 +42,7 @@ func EventHandlingReload(ctx *web.EventContext) (pr web.PageResponse, err error)
 		VCard(
 			VCardTitle(Text("Reload")),
 			Text(fmt.Sprintf("Now: %s", time.Now().Format(time.RFC3339Nano))),
-			VCardActions(VBtn("Reload").Attr("@click", web.Plaid().Reload().Go())),
+			VCardActions(VBtn("Reload").Attr("@click", web.POST().Reload().Go())),
 		),
 	)
 	return
@@ -133,7 +133,7 @@ func EventHandlingLocation(ctx *web.EventContext) (pr web.PageResponse, err erro
 	pr.Body = Div(
 		VCard(
 			VCardTitle(Text("Location")),
-			VCardActions(VBtn("Go").Attr("@click", web.Plaid().PushState(true).Location(&web.LocationBuilder{MyURL: EventExamplePagePath, MyStringQuery: "address=test"}).Go())),
+			VCardActions(VBtn("Go").Attr("@click", web.POST().PushState(true).Location(&web.LocationBuilder{MyURL: EventExamplePagePath, MyStringQuery: "address=test"}).Go())),
 		),
 	)
 	return
@@ -143,15 +143,11 @@ func EventHandlingLocation(ctx *web.EventContext) (pr web.PageResponse, err erro
 
 // @snippet_begin(EventHandlingFieldValueSample)
 func EventHandlingFileValue(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("form", func(ctx *web.EventContext) (r web.EventResponse, err error) {
-		r.VarsScript = fmt.Sprintf(`alert("form data is %s")`, ctx.R.FormValue("name"))
-		return
-	})
 
 	pr.Body = Div(
 		VCard(
 			VCardTitle(Text("FieldValue")),
-			VCardActions(VBtn("Go").Attr("@click", web.Plaid().EventFunc("form").FieldValue("name", "qor5").Go())),
+			VCardActions(VBtn("Go").Attr("@click", web.POST().EventFunc("form").FieldValue("name", "qor5").Go())),
 		),
 	)
 	return
@@ -161,15 +157,11 @@ func EventHandlingFileValue(ctx *web.EventContext) (pr web.PageResponse, err err
 
 // @snippet_begin(EventHandlingFormClearSample)
 func EventHandlingFormClear(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("form", func(ctx *web.EventContext) (r web.EventResponse, err error) {
-		r.VarsScript = fmt.Sprintf(`alert("form data is %s")`, ctx.R.FormValue("name"))
-		return
-	})
 
 	pr.Body = Div(
 		VCard(
 			VCardTitle(Text("FormClear")),
-			VCardActions(VBtn("Go").Attr("@click", web.Plaid().EventFunc("form").FieldValue("name", "qor5").FormClear().Go())),
+			VCardActions(VBtn("Go").Attr("@click", web.POST().EventFunc("form").FieldValue("name", "qor5").FormClear().Go())),
 		),
 	)
 	return
@@ -179,13 +171,9 @@ func EventHandlingFormClear(ctx *web.EventContext) (pr web.PageResponse, err err
 
 // @snippet_begin(EventHandlingEventFuncSample)
 func EventHandlingEventFunc(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("hello", func(ctx *web.EventContext) (r web.EventResponse, err error) {
-		r.VarsScript = `alert("Hello World")`
-		return
-	})
 
 	pr.Body = Div(
-		VBtn("Go").Attr("@click", web.Plaid().EventFunc("hello").Go()),
+		VBtn("Go").Attr("@click", web.POST().EventFunc("hello").Go()),
 	)
 	return
 }
@@ -197,7 +185,7 @@ func EventHandlingScript(ctx *web.EventContext) (pr web.PageResponse, err error)
 	pr.Body = Div(
 		VCard(
 			VCardTitle(Text("Script")),
-			VCardActions(VBtn("Go").Attr("@click", web.Plaid().ThenScript(`alert("this is then script")`).AfterScript(`alert("this is after script")`).BeforeScript(`alert("this is before script")`).Go())),
+			VCardActions(VBtn("Go").Attr("@click", web.POST().ThenScript(`alert("this is then script")`).AfterScript(`alert("this is after script")`).BeforeScript(`alert("this is before script")`).Go())),
 		),
 	)
 	return
@@ -210,7 +198,7 @@ func EventHandlingRaw(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	pr.Body = Div(
 		VCard(
 			VCardTitle(Text("Raw")),
-			VCardActions(VBtn("Go").Attr("@click", web.Plaid().Raw(`pushStateURL("/samples/event_handling/example")`).Go())),
+			VCardActions(VBtn("Go").Attr("@click", web.POST().Raw(`pushStateURL("/samples/event_handling/example")`).Go())),
 		),
 	)
 	return
@@ -263,6 +251,18 @@ func ExamplePage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	)
 	return
 }
+
+var ExamplePagePB = web.Page(ExamplePage).
+	EventFunc("form", func(ctx *web.EventContext) (r web.EventResponse, err error) {
+		r.VarsScript = fmt.Sprintf(`alert("form data is %s")`, ctx.R.FormValue("name"))
+		return
+	}).
+	EventFunc("hello", func(ctx *web.EventContext) (r web.EventResponse, err error) {
+		r.VarsScript = `alert("Hello World")`
+		return
+	})
+
+var EventHandlingPagePB = web.Page(EventHandlingPage)
 
 const EventHandlingPagePath = "/samples/event_handling"
 const EventExamplePagePath = "/samples/event_handling/example"

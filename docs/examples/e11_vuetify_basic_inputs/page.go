@@ -33,8 +33,6 @@ var s = &myFormValue{
 }
 
 func VuetifyBasicInputs(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("update", update)
-	ctx.Hub.RegisterEventFunc("addPortal", addPortal)
 
 	var verr web.ValidationErrors
 	if ve, ok := ctx.Flash.(web.ValidationErrors); ok {
@@ -70,14 +68,14 @@ func VuetifyBasicInputs(ctx *web.EventContext) (pr web.PageResponse, err error) 
 		VFileInput().FieldName("Files1"),
 
 		VFileInput().Label("Auto post to server after select file").Multiple(true).
-			Attr("@change", web.Plaid().
+			Attr("@change", web.POST().
 				EventFunc("update").
 				FieldValue("Files2", web.Var("$event")).
 				Go()),
 
 		h.Div(
 			h.Input("Files3").Type("file").
-				Attr("@input", web.Plaid().
+				Attr("@input", web.POST().
 					EventFunc("update").
 					FieldValue("Files3", web.Var("$event")).
 					Go()),
@@ -124,6 +122,10 @@ func update(ctx *web.EventContext) (r web.EventResponse, err error) {
 
 	return
 }
+
+var VuetifyBasicInputsPB = web.Page(VuetifyBasicInputs).
+	EventFunc("update", update).
+	EventFunc("addPortal", addPortal)
 
 // @snippet_end
 

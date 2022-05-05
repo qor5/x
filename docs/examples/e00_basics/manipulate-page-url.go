@@ -1,6 +1,6 @@
 package e00_basics
 
-//@snippet_begin(MultiStatePageSample)
+// @snippet_begin(MultiStatePageSample)
 import (
 	"net/url"
 
@@ -9,8 +9,6 @@ import (
 )
 
 func MultiStatePage(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("openPanel", openPanel)
-	ctx.Hub.RegisterEventFunc("update5", update5)
 
 	title := "Multi State Page"
 	if len(ctx.R.URL.Query().Get("title")) > 0 {
@@ -29,7 +27,7 @@ func MultiStatePage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 					Input("").Type("date"),
 				),
 			),
-			Button("Update").Attr("@click", web.Plaid().EventFunc("update5").Go()),
+			Button("Update").Attr("@click", web.POST().EventFunc("update5").Go()),
 		).Style("border: 5px solid orange; height: 200px;")
 	}
 
@@ -38,10 +36,10 @@ func MultiStatePage(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		Ol(
 			Li(
 				A().Text("change page title").Href("javascript:;").
-					Attr("@click", web.Plaid().Queries(url.Values{"title": []string{"Hello"}}).Go()),
+					Attr("@click", web.POST().Queries(url.Values{"title": []string{"Hello"}}).Go()),
 			),
 			Li(
-				A().Text("show panel").Href("javascript:;").Attr("@click", web.Plaid().EventFunc("openPanel").Go()),
+				A().Text("show panel").Href("javascript:;").Attr("@click", web.POST().EventFunc("openPanel").Go()),
 			),
 		),
 		panel,
@@ -72,6 +70,10 @@ func update5(ctx *web.EventContext) (er web.EventResponse, err error) {
 	return
 }
 
-//@snippet_end
+var MultiStatePagePB = web.Page(MultiStatePage).
+	EventFunc("openPanel", openPanel).
+	EventFunc("update5", update5)
 
 const MultiStatePagePath = "/samples/multi_state_page"
+
+// @snippet_end

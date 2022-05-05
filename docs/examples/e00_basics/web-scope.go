@@ -7,7 +7,7 @@ import (
 	. "github.com/theplant/htmlgo"
 )
 
-//@snippet_begin(WebScopeUseLocalsSample1)
+// @snippet_begin(WebScopeUseLocalsSample1)
 func UseLocals(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	pr.Body = VCard(
 		VBtn("Test Can Not Change Other Scope").Attr("@click", `locals.btnLabel = "YES"`),
@@ -50,13 +50,14 @@ if (locals.btnLabel == "Add") {
 	return
 }
 
-//@snippet_end
+var UseLocalsPB = web.Page(UseLocals)
 
-//@snippet_begin(WebScopeUsePlaidFormSample1)
+// @snippet_end
+
+// @snippet_begin(WebScopeUsePlaidFormSample1)
 var materialID, materialName, rawMaterialID, rawMaterialName, countryID, countryName, productName string
 
 func UsePlaidForm(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("updateValue", updateValue)
 
 	pr.Body = Div(
 		H3("Form Content"),
@@ -96,11 +97,11 @@ func UsePlaidForm(ctx *web.EventContext) (pr web.PageResponse, err error) {
 										Input("").Value(rawMaterialName).Type("text").Attr(web.VFieldName("RawMaterialName")...),
 									),
 
-									Button("Send").Style(`background: orange;`).Attr("@click", web.Plaid().EventFunc("updateValue").Go()),
+									Button("Send").Style(`background: orange;`).Attr("@click", web.POST().EventFunc("updateValue").Go()),
 								).Style(`background: orange;`),
 							).VSlot("{ plaidForm }"),
 
-							Button("Send").Style(`background: brown;`).Attr("@click", web.Plaid().EventFunc("updateValue").Go()),
+							Button("Send").Style(`background: brown;`).Attr("@click", web.POST().EventFunc("updateValue").Go()),
 						).Style(`background: brown;`),
 					).VSlot("{ plaidForm }"),
 
@@ -118,12 +119,12 @@ func UsePlaidForm(ctx *web.EventContext) (pr web.PageResponse, err error) {
 								Input("").Value(countryName).Type("text").Attr(web.VFieldName("CountryName")...),
 							),
 
-							Button("Send").Style(`background: red;`).Attr("@click", web.Plaid().EventFunc("updateValue").Go()),
+							Button("Send").Style(`background: red;`).Attr("@click", web.POST().EventFunc("updateValue").Go()),
 						).Style(`background: red;`),
 					).VSlot("{ plaidForm }"),
 
 					Div(
-						Button("Send").Style(`background: grey;`).Attr("@click", web.Plaid().EventFunc("updateValue").Go())),
+						Button("Send").Style(`background: grey;`).Attr("@click", web.POST().EventFunc("updateValue").Go())),
 				).Style(`background: grey;`)),
 		).Style(`width:600px;`),
 	)
@@ -152,7 +153,10 @@ func updateValue(ctx *web.EventContext) (er web.EventResponse, err error) {
 	return
 }
 
-//@snippet_end
+var UsePlaidFormPB = web.Page(UsePlaidForm).
+	EventFunc("updateValue", updateValue)
+
+// @snippet_end
 
 const WebScopeUseLocalsPagePath = "/samples/web-scope-use-locals"
 const WebScopeUsePlaidFormPagePath = "/samples/web-scope-use-plaid-form"

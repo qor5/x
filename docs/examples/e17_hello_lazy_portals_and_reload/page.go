@@ -19,12 +19,6 @@ type mystate struct {
 var listItems = []string{"Apple", "Microsoft", "Google"}
 
 func LazyPortalsAndReload(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("addItem", addItem)
-	ctx.Hub.RegisterEventFunc("menuItems", menuItems)
-	ctx.Hub.RegisterEventFunc("addItemForm", addItemForm)
-	ctx.Hub.RegisterEventFunc("portal1", portal1)
-	ctx.Hub.RegisterEventFunc("reloadAB", reloadAB)
-	ctx.Hub.RegisterEventFunc("updateCD", updateCD)
 
 	pr.Body = VApp(
 		VMain(
@@ -33,17 +27,17 @@ func LazyPortalsAndReload(ctx *web.EventContext) (pr web.PageResponse, err error
 					web.Slot(
 						VBtn("Select").Color("primary").Attr("v-on", "on"),
 					).Name("activator").Scope("{ on }"),
-					web.Portal().Loader(web.Plaid().EventFunc("menuItems")).Name("menuContent"),
+					web.Portal().Loader(web.POST().EventFunc("menuItems")).Name("menuContent"),
 				),
 
 				h.Div(
 					h.H1("Portal A"),
-					web.Portal().Loader(web.Plaid().EventFunc("portal1")).Name("portalA"),
+					web.Portal().Loader(web.POST().EventFunc("portal1")).Name("portalA"),
 				).Style("border: 2px solid blue;"),
 
 				h.Div(
 					h.H1("Portal B"),
-					web.Portal().Loader(web.Plaid().EventFunc("portal1")).Name("portalB"),
+					web.Portal().Loader(web.POST().EventFunc("portal1")).Name("portalB"),
 				).Style("border: 2px solid red;"),
 
 				VBtn("Reload Portal A and B").OnClick("reloadAB").Color("orange").Dark(true),
@@ -83,7 +77,7 @@ func menuItems(ctx *web.EventContext) (r web.EventResponse, err error) {
 					VBtn("Create New").Text(true).Attr("v-on", "on"),
 				),
 			).Name("activator").Scope("{ on }"),
-			web.Portal().Loader(web.Plaid().EventFunc("addItemForm")).Name("addItemForm").Visible("true"),
+			web.Portal().Loader(web.POST().EventFunc("addItemForm")).Name("addItemForm").Visible("true"),
 		).Width("500"),
 	)
 
@@ -153,6 +147,14 @@ func updateCD(ctx *web.EventContext) (r web.EventResponse, err error) {
 	return
 }
 
-// @snippet_end
+var LazyPortalsAndReloadPB = web.Page(LazyPortalsAndReload).
+	EventFunc("addItem", addItem).
+	EventFunc("menuItems", menuItems).
+	EventFunc("addItemForm", addItemForm).
+	EventFunc("portal1", portal1).
+	EventFunc("reloadAB", reloadAB).
+	EventFunc("updateCD", updateCD)
 
 const LazyPortalsAndReloadPath = "/samples/lazy-portals-and-reload"
+
+// @snippet_end

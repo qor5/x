@@ -52,6 +52,8 @@ func VuetifyComponentsLinkageSelect(ctx *web.EventContext) (pr web.PageResponse,
 	return pr, nil
 }
 
-// @snippet_end
+var VuetifyComponentsLinkageSelectPB = web.Page(VuetifyComponentsLinkageSelect)
 
 const VuetifyComponentsLinkageSelectPath = "/samples/vuetify-components-linkage-select"
+
+// @snippet_end

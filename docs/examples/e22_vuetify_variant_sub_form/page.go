@@ -21,8 +21,6 @@ type myFormValue struct {
 }
 
 func VuetifyVariantSubForm(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("switchForm", switchForm)
-	ctx.Hub.RegisterEventFunc("submit", submit)
 
 	var fv myFormValue
 	ctx.MustUnmarshalForm(&fv)
@@ -40,7 +38,7 @@ func VuetifyVariantSubForm(ctx *web.EventContext) (pr web.PageResponse, err erro
 				"Type2",
 			}).
 			Value(fv.Type).
-			Attr("@change", web.Plaid().
+			Attr("@change", web.POST().
 				FieldValue("Type", web.Var("$event")).
 				EventFunc("switchForm").
 				Go()),
@@ -110,6 +108,10 @@ func switchForm(ctx *web.EventContext) (r web.EventResponse, err error) {
 	return
 }
 
-// @snippet_end
+var VuetifyVariantSubFormPB = web.Page(VuetifyVariantSubForm).
+	EventFunc("switchForm", switchForm).
+	EventFunc("submit", submit)
 
 const VuetifyVariantSubFormPath = "/samples/vuetify-variant-sub-form"
+
+// @snippet_end

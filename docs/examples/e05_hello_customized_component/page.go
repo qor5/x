@@ -49,8 +49,8 @@ func contains(k string, in []string) bool {
 }
 
 func (b *TagsInputBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	//ui.Injector(ctx).PutScript(tagsInputScript)
-	//ui.Injector(ctx).PutStyle(tagsInputStyles)
+	// ui.Injector(ctx).PutScript(tagsInputScript)
+	// ui.Injector(ctx).PutStyle(tagsInputStyles)
 
 	selectedComps := []HTMLComponent{}
 	optionComps := []HTMLComponent{}
@@ -80,7 +80,7 @@ func (b *TagsInputBuilder) MarshalHTML(ctx context.Context) (r []byte, err error
 	return root.MarshalHTML(ctx)
 }
 
-//const tagsInputScript = `
+// const tagsInputScript = `
 //	(window.__goplaidVueComponentRegisters = (window.__goplaidVueComponentRegisters || [])).push(function(Vue){
 //		Vue.component("tags-input", {
 //			data: function() {
@@ -96,17 +96,17 @@ func (b *TagsInputBuilder) MarshalHTML(ctx context.Context) (r []byte, err error
 //			template: "<div><slot v-bind:parent='this'/></div>"
 //		});
 //	})
-//`
+// `
 //
-//const tagsInputStyles = `
-//.tagsInput .tagsInputOptions {
+// const tagsInputStyles = `
+// .tagsInput .tagsInputOptions {
 //	display: none;
-//}
+// }
 //
-//.tagsInput .tagsInputOptions.tagsInputOptionsOpen {
+// .tagsInput .tagsInputOptions.tagsInputOptionsOpen {
 //	display: block;
-//}
-//`
+// }
+// `
 
 // Above is component code
 
@@ -128,7 +128,7 @@ func HelloCustomziedComponent(ctx *web.EventContext) (pr web.PageResponse, err e
 	pr.Body = Div(
 		TagsInput().Selected([]string{"1", "2", "3"}).Options(opts...),
 		Button("Refresh").Attr("@click",
-			web.Plaid().EventFunc("refresh").Go(),
+			web.POST().EventFunc("refresh").Go(),
 		),
 	)
 	return

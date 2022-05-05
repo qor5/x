@@ -29,7 +29,6 @@ type MyData struct {
 }
 
 func FormHandlingPage(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("checkvalue", checkvalue)
 
 	var fv MyData
 	err = ctx.UnmarshalForm(&fv)
@@ -78,7 +77,7 @@ World`
 
 				Button("Uncheck it").Attr("@click", "locals.checked = false"),
 				Hr(),
-				Button("Send").Attr("@click", web.Plaid().
+				Button("Send").Attr("@click", web.POST().
 					EventFunc("checkvalue").
 					Query("id", 123).
 					FieldValue("name", "azuma").
@@ -94,7 +93,7 @@ World`
 					Input("").Type("email").Value(fv.Email1).Attr(web.VFieldName("Email1")...),
 				),
 
-				Button("Send").Attr("@click", web.Plaid().
+				Button("Send").Attr("@click", web.POST().
 					EventFunc("checkvalue").
 					Go()),
 			),
@@ -152,7 +151,7 @@ World`
 '123`).Attr(web.VFieldName("HiddenValue1")...),
 		),
 		Div(
-			Button("Submit").Attr("@click", web.Plaid().EventFunc("checkvalue").Go()),
+			Button("Submit").Attr("@click", web.POST().EventFunc("checkvalue").Go()),
 		),
 	)
 	return
@@ -179,6 +178,9 @@ func (m *MyData) File1Bytes() string {
 	return fmt.Sprintf("%+v ...", b)
 }
 
-// @snippet_end
+var FormHandlingPagePB = web.Page(FormHandlingPage).
+	EventFunc("checkvalue", checkvalue)
 
 const FormHandlingPagePath = "/samples/form_handling"
+
+// @snippet_end

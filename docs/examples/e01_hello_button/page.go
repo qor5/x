@@ -10,7 +10,6 @@ type mystate struct {
 }
 
 func HelloButton(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("reload", reload)
 
 	var s = &mystate{}
 	if ctx.Flash != nil {
@@ -18,11 +17,11 @@ func HelloButton(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	}
 
 	pr.Body = Div(
-		Button("Hello").Attr("@click", web.Plaid().EventFunc("reload").Go()),
+		Button("Hello").Attr("@click", web.POST().EventFunc("reload").Go()),
 		Tag("input").
 			Attr("type", "text").
 			Attr("value", s.Message).
-			Attr("@input", web.Plaid().
+			Attr("@input", web.POST().
 				EventFunc("reload").
 				FieldValue("Message", web.Var("$event.target.value")).
 				Go()),
@@ -41,3 +40,6 @@ func reload(ctx *web.EventContext) (r web.EventResponse, err error) {
 	r.Reload = true
 	return
 }
+
+var HelloButtonPB = web.Page(HelloButton).
+	EventFunc("reload", reload)

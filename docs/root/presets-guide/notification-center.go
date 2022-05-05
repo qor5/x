@@ -1,8 +1,8 @@
-package basics
+package presets_guide
 
 import (
 	"github.com/goplaid/x/docs/examples"
-	"github.com/goplaid/x/docs/examples/e00_basics"
+	"github.com/goplaid/x/docs/examples/e21_presents"
 	"github.com/goplaid/x/docs/utils"
 	. "github.com/theplant/docgo"
 	"github.com/theplant/docgo/ch"
@@ -18,5 +18,5 @@ The second function is for rendering the number at the top right corner of the "
 `),
 
 	ch.Code(examples.NotificationCenterSample).Language("go"),
-	utils.Demo("Notification Center", e00_basics.NotificationCenterSamplePath+"/pages", "e00_basics/notification-center.go"),
+	utils.Demo("Notification Center", e21_presents.NotificationCenterSamplePath+"/pages", "e00_basics/notification-center.go"),
 ).Slug("basics/notification-center").Title("Notification Center")

@@ -28,7 +28,7 @@ func PresetsModelBuilderExtensions(b *presets.Builder) (
 			VBtn("Action 2"),
 			VBtn("Update").
 				Color("primary").
-				Attr("@click", web.Plaid().
+				Attr("@click", web.POST().
 					EventFunc(actions.Update).
 					Queries(ctx.Queries()).
 					URL(mb.Info().ListingHref()).
@@ -39,7 +39,7 @@ func PresetsModelBuilderExtensions(b *presets.Builder) (
 	eb.Field("Actions").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		cust := obj.(*Customer)
 		return VBtn("Change Name").Attr("@click",
-			web.Plaid().
+			web.POST().
 				EventFunc("changeName").
 				Query(presets.ParamID, fmt.Sprint(cust.ID)).
 				Go(),

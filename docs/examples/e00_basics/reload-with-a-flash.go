@@ -1,6 +1,6 @@
 package e00_basics
 
-//@snippet_begin(ReloadWithFlashSample)
+// @snippet_begin(ReloadWithFlashSample)
 import (
 	"fmt"
 	"time"
@@ -12,8 +12,6 @@ import (
 var count int
 
 func ReloadWithFlash(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("update2", update2)
-
 	var msg HTMLComponent
 
 	if d, ok := ctx.Flash.(*Data1); ok {
@@ -27,7 +25,7 @@ func ReloadWithFlash(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		msg,
 		Div().Text(time.Now().Format(time.RFC3339Nano)),
 		Button("Do Something").
-			Attr("@click", web.Plaid().EventFunc("update2").Go()),
+			Attr("@click", web.POST().EventFunc("update2").Go()),
 	)
 	return
 }
@@ -43,6 +41,8 @@ func update2(ctx *web.EventContext) (er web.EventResponse, err error) {
 	return
 }
 
-//@snippet_end
+var ReloadWithFlashPB = web.Page(ReloadWithFlash).EventFunc("update2", update2)
 
 const ReloadWithFlashPath = "/samples/reload_with_flash"
+
+// @snippet_end

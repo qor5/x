@@ -1,6 +1,6 @@
 package e00_basics
 
-//@snippet_begin(CompositeComponentSample1)
+// @snippet_begin(CompositeComponentSample1)
 import (
 	"fmt"
 
@@ -146,9 +146,11 @@ func CompositeComponentSample1Page(ctx *web.EventContext) (pr web.PageResponse, 
 	return
 }
 
-//@snippet_end
+var CompositeComponentSample1PagePB = web.Page(CompositeComponentSample1Page)
 
 const CompositeComponentSample1PagePath = "/samples/composite-component-sample1"
+
+// @snippet_end
 
 func fakeImage(title string) HTMLComponent {
 	return RawHTML(fmt.Sprintf(`

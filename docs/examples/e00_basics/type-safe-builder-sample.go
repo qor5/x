@@ -40,6 +40,8 @@ func TypeSafeBuilderSamplePF(ctx *web.EventContext) (pr web.PageResponse, err er
 	return
 }
 
-// @snippet_end
+var TypeSafeBuilderSamplePFPB = web.Page(TypeSafeBuilderSamplePF)
 
 const TypeSafeBuilderSamplePath = "/samples/type_safe_builder_sample"
+
+// @snippet_end

@@ -351,15 +351,14 @@ func Mux(prefix string) http.Handler {
 	// @snippet_end
 
 	// @snippet_begin(ComponentsPackSample)
-	ub := web.New()
 	mux.Handle("/assets/main.js",
-		ub.PacksHandler("text/javascript",
+		web.PacksHandler("text/javascript",
 			web.JSComponentsPack(),
 		),
 	)
 
 	mux.Handle("/assets/vue.js",
-		ub.PacksHandler("text/javascript",
+		web.PacksHandler("text/javascript",
 			web.JSVueComponentsPack(),
 		),
 	)
@@ -368,13 +367,13 @@ func Mux(prefix string) http.Handler {
 
 	// @snippet_begin(TipTapComponentsPackSample)
 	mux.Handle("/assets/tiptap.js",
-		ub.PacksHandler("text/javascript",
+		web.PacksHandler("text/javascript",
 			tiptap.JSComponentsPack(),
 		),
 	)
 
 	mux.Handle("/assets/tiptap.css",
-		ub.PacksHandler("text/css",
+		web.PacksHandler("text/css",
 			tiptap.CSSComponentsPack(),
 		),
 	)
@@ -382,7 +381,7 @@ func Mux(prefix string) http.Handler {
 
 	// @snippet_begin(VuetifyComponentsPackSample)
 	mux.Handle("/assets/vuetify.js",
-		ub.PacksHandler("text/javascript",
+		web.PacksHandler("text/javascript",
 			v.Vuetify(""),
 			v.JSComponentsPack(),
 			vuetifyx.JSComponentsPack(),
@@ -390,7 +389,7 @@ func Mux(prefix string) http.Handler {
 	)
 
 	mux.Handle("/assets/vuetify.css",
-		ub.PacksHandler("text/css",
+		web.PacksHandler("text/css",
 			v.CSSComponentsPack(),
 		),
 	)
@@ -425,219 +424,131 @@ func SamplesHandler(prefix string) http.Handler {
 	mux := http.NewServeMux()
 	emptyUb := web.New().LayoutFunc(web.NoopLayoutFunc)
 
-	mux.Handle(e00_basics.TypeSafeBuilderSamplePath, emptyUb.Page(e00_basics.TypeSafeBuilderSamplePF))
+	mux.Handle(e00_basics.TypeSafeBuilderSamplePath, e00_basics.TypeSafeBuilderSamplePFPB.Builder(emptyUb))
 
 	// @snippet_begin(HelloWorldMuxSample2)
-	wb := web.New()
-	mux.Handle(e00_basics.HelloWorldPath, wb.Page(e00_basics.HelloWorld))
+	mux.Handle(e00_basics.HelloWorldPath, e00_basics.HelloWorldPB)
 	// @snippet_end
 
 	// @snippet_begin(HelloWorldReloadMuxSample1)
 	mux.Handle(
 		e00_basics.HelloWorldReloadPath,
-		wb.Page(
-			demoLayout(
-				e00_basics.HelloWorldReload,
-			),
-		),
+		e00_basics.HelloWorldReloadPB.Wrap(demoLayout),
 	)
 	// @snippet_end
 
 	mux.Handle(
 		e00_basics.Page1Path,
-		wb.Page(
-			demoLayout(
-				e00_basics.Page1,
-			),
-		),
+		e00_basics.Page1PB.Wrap(demoLayout),
 	)
 	mux.Handle(
 		e00_basics.Page2Path,
-		wb.Page(
-			demoLayout(
-				e00_basics.Page2,
-			),
-		),
+		e00_basics.Page2PB.Wrap(demoLayout),
 	)
 
 	mux.Handle(
 		e00_basics.ReloadWithFlashPath,
-		wb.Page(
-			demoLayout(
-				e00_basics.ReloadWithFlash,
-			),
-		),
+		e00_basics.ReloadWithFlashPB.Wrap(demoLayout),
 	)
 
 	mux.Handle(
 		e00_basics.PartialUpdatePagePath,
-		wb.Page(
-			demoLayout(
-				e00_basics.PartialUpdatePage,
-			),
-		),
+		e00_basics.PartialUpdatePagePB.Wrap(demoLayout),
 	)
 
 	mux.Handle(
 		e00_basics.PartialReloadPagePath,
-		wb.Page(
-			demoLayout(
-				e00_basics.PartialReloadPage,
-			),
-		),
+		e00_basics.PartialReloadPagePB.Wrap(demoLayout),
 	)
 
 	mux.Handle(
 		e00_basics.MultiStatePagePath,
-		wb.Page(
-			demoLayout(
-				e00_basics.MultiStatePage,
-			),
-		),
+		e00_basics.MultiStatePagePB.Wrap(demoLayout),
 	)
 
 	mux.Handle(
 		e00_basics.FormHandlingPagePath,
-		wb.Page(
-			demoLayout(
-				e00_basics.FormHandlingPage,
-			),
-		),
+		e00_basics.FormHandlingPagePB.Wrap(demoLayout),
 	)
 
 	mux.Handle(
 		e00_basics.CompositeComponentSample1PagePath,
-		wb.Page(
-			demoBootstrapLayout(
-				e00_basics.CompositeComponentSample1Page,
-			),
-		),
+		e00_basics.CompositeComponentSample1PagePB.Wrap(demoBootstrapLayout),
 	)
 
 	mux.Handle(
 		e00_basics.HelloWorldTipTapPath,
-		wb.Page(
-			tiptapLayout(
-				e00_basics.HelloWorldTipTap,
-			),
-		),
+		e00_basics.HelloWorldTipTapPB.Wrap(tiptapLayout),
 	)
 
 	mux.Handle(
 		e13_vuetify_list.HelloVuetifyListPath,
-		wb.Page(
-			demoVuetifyLayout(
-				e13_vuetify_list.HelloVuetifyList,
-			),
-		),
+		e13_vuetify_list.HelloVuetifyListPB.Wrap(demoVuetifyLayout),
 	)
 
 	mux.Handle(
 		e14_vuetify_menu.HelloVuetifyMenuPath,
-		wb.Page(
-			demoVuetifyLayout(
-				e14_vuetify_menu.HelloVuetifyMenu,
-			),
-		),
+		e14_vuetify_menu.HelloVuetifyMenuPB.Wrap(demoVuetifyLayout),
 	)
 
 	mux.Handle(
 		e00_basics.EventExamplePagePath,
-		wb.Page(
-			demoVuetifyLayout(
-				e00_basics.ExamplePage,
-			),
-		),
+		e00_basics.ExamplePagePB.Wrap(demoVuetifyLayout),
 	)
 
 	mux.Handle(
 		e00_basics.EventHandlingPagePath,
-		wb.Page(
-			demoVuetifyLayout(
-				e00_basics.EventHandlingPage,
-			),
-		),
+		e00_basics.EventHandlingPagePB.Wrap(demoVuetifyLayout),
 	)
 
 	mux.Handle(
 		e00_basics.WebScopeUseLocalsPagePath,
-		wb.Page(
-			demoVuetifyLayout(
-				e00_basics.UseLocals,
-			),
-		),
+		e00_basics.UseLocalsPB.Wrap(demoVuetifyLayout),
 	)
 
 	mux.Handle(
 		e00_basics.WebScopeUsePlaidFormPagePath,
-		wb.Page(
-			demoLayout(
-				e00_basics.UsePlaidForm,
-			),
-		),
+		e00_basics.UsePlaidFormPB.Wrap(demoVuetifyLayout),
+	)
+
+	mux.Handle(
+		e00_basics.ShortCutSamplePath,
+		e00_basics.ShortCutSamplePB.Wrap(demoVuetifyLayout),
 	)
 
 	mux.Handle(
 		e11_vuetify_basic_inputs.VuetifyBasicInputsPath,
-		wb.Page(
-			demoVuetifyLayout(
-				e11_vuetify_basic_inputs.VuetifyBasicInputs,
-			),
-		),
+		e11_vuetify_basic_inputs.VuetifyBasicInputsPB.Wrap(demoVuetifyLayout),
 	)
 
 	mux.Handle(
 		e10_vuetify_autocomplete.VuetifyAutoCompletePath,
-		wb.Page(
-			demoVuetifyLayout(
-				e10_vuetify_autocomplete.VuetifyAutocomplete,
-			),
-		),
+		e10_vuetify_autocomplete.VuetifyAutocompletePB.Wrap(demoVuetifyLayout),
 	)
 
 	mux.Handle(
 		e22_vuetify_variant_sub_form.VuetifyVariantSubFormPath,
-		wb.Page(
-			demoVuetifyLayout(
-				e22_vuetify_variant_sub_form.VuetifyVariantSubForm,
-			),
-		),
+		e22_vuetify_variant_sub_form.VuetifyVariantSubFormPB.Wrap(demoVuetifyLayout),
 	)
 
 	mux.Handle(
 		e23_vuetify_components_kitchen.VuetifyComponentsKitchenPath,
-		wb.Page(
-			demoVuetifyLayout(
-				e23_vuetify_components_kitchen.VuetifyComponentsKitchen,
-			),
-		),
+		e23_vuetify_components_kitchen.VuetifyComponentsKitchenPB.Wrap(demoVuetifyLayout),
 	)
 
 	mux.Handle(
 		e15_vuetify_navigation_drawer.VuetifyNavigationDrawerPath,
-		wb.Page(
-			demoVuetifyLayout(
-				e15_vuetify_navigation_drawer.VuetifyNavigationDrawer,
-			),
-		),
+		e15_vuetify_navigation_drawer.VuetifyNavigationDrawerPB.Wrap(demoVuetifyLayout),
 	)
 
 	mux.Handle(
 		e17_hello_lazy_portals_and_reload.LazyPortalsAndReloadPath,
-		wb.Page(
-			demoVuetifyLayout(
-				e17_hello_lazy_portals_and_reload.LazyPortalsAndReload,
-			),
-		),
+		e17_hello_lazy_portals_and_reload.LazyPortalsAndReloadPB.Wrap(demoVuetifyLayout),
 	)
 
 	mux.Handle(
 		e24_vuetify_components_linkage_select.VuetifyComponentsLinkageSelectPath,
-		wb.Page(
-			demoVuetifyLayout(
-				e24_vuetify_components_linkage_select.VuetifyComponentsLinkageSelect,
-			),
-		),
+		e24_vuetify_components_linkage_select.VuetifyComponentsLinkageSelectPB.Wrap(demoVuetifyLayout),
 	)
 
 	// @snippet_begin(MountPresetHelloWorldSample)
@@ -740,19 +651,10 @@ func SamplesHandler(prefix string) http.Handler {
 		c13,
 	)
 
-	mux.Handle(
-		e00_basics.ShortCutSamplePath,
-		wb.Page(
-			demoVuetifyLayout(
-				e00_basics.ShortCutSample,
-			),
-		),
-	)
-
 	c14 := presets.New().AssetFunc(addGA)
-	e00_basics.PresetsNotificationCenterSample(c14)
+	e21_presents.PresetsNotificationCenterSample(c14)
 	mux.Handle(
-		e00_basics.NotificationCenterSamplePath+"/",
+		e21_presents.NotificationCenterSamplePath+"/",
 		c14,
 	)
 

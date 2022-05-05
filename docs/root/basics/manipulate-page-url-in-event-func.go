@@ -31,9 +31,8 @@ In ~update5~ event func, which is when you click the update button after open th
 Don't have to be in event func to use push state query, can use a simple ~web.Bind~ to directly change the query string like:
 
 ~~~go
-web.Bind(
-	A().Text("change page title").Href("javascript:;"),
-).Queries(url.Values{"title": []string{"Hello"}}),
+A().Text("change page title").Href("javascript:;").
+	Attr("@click", web.POST().Queries(url.Values{"title": []string{"Hello"}}).Go()),
 ~~~
 
 This don't have ~.MergeQuery(true)~, So it will replace the whole query string to only ~title=Hello~ 

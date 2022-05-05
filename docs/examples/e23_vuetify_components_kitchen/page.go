@@ -33,15 +33,13 @@ var fv = formVals{
 }
 
 func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err error) {
-	ctx.Hub.RegisterEventFunc("removeCity", removeCity)
-	ctx.Hub.RegisterEventFunc("submit", submit)
 
 	var chips h.HTMLComponents
 	for _, city := range globalCities {
 		chips = append(chips,
 			VChip(h.Text(city)).
 				Close(true).
-				Attr("@click:close", web.Plaid().EventFunc("removeCity").Query("city", city).Go()),
+				Attr("@click:close", web.POST().EventFunc("removeCity").Query("city", city).Go()),
 		)
 	}
 
@@ -62,7 +60,7 @@ func VuetifyComponentsKitchen(ctx *web.EventContext) (pr web.PageResponse, err e
 			VChip(h.Text("New York")).Value("NY"),
 			VChip(h.Text("London")).Value("LD"),
 		).ActiveClass("indigo darken-3 white--text").
-			//Mandatory(true).
+			// Mandatory(true).
 			FieldName("Cities1").
 			Value(fv.Cities1).
 			Multiple(true),
@@ -125,6 +123,10 @@ func removeCity(ctx *web.EventContext) (r web.EventResponse, err error) {
 	return
 }
 
-// @snippet_end
+var VuetifyComponentsKitchenPB = web.Page(VuetifyComponentsKitchen).
+	EventFunc("removeCity", removeCity).
+	EventFunc("submit", submit)
 
 const VuetifyComponentsKitchenPath = "/samples/vuetify-components-kitchen"
+
+// @snippet_end
