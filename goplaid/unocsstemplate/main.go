@@ -26,7 +26,7 @@ func Home(ctx *web.EventContext) (r web.PageResponse, err error) {
 				Span("{{locals.count}}"),
 			).Attr("v-init-context:locals", "{count: 0}"),
 		).Class("p-5 w-80 bg-white rounded-lg shadow-lg hover:shadow-2xl cursor-pointer"),
-	).Class("min-h-screen bg-gray-100 flex items-center justify-center")
+	).Class("flex items-center justify-center")
 	return
 }
 
@@ -69,7 +69,6 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/main.js",
 		w.PacksHandler("text/javascript",
-			js(),
 			web.JSVueComponentsPack(),
 			web.JSComponentsPack()))
 	mux.Handle("/main.css",
@@ -87,20 +86,11 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
 
-//go:embed front/public
+//go:embed *.css
 var front embed.FS
 
-func js() web.ComponentsPack {
-	v, err := front.ReadFile("front/public/index.js")
-	if err != nil {
-		panic(err)
-	}
-
-	return web.ComponentsPack(v)
-}
-
 func css() web.ComponentsPack {
-	v, err := front.ReadFile("front/public/index.css")
+	v, err := front.ReadFile("uno.css")
 	if err != nil {
 		panic(err)
 	}

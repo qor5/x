@@ -1,7 +1,7 @@
 function appRestart() {
   echo "=================>"
   killall GoplaidPackageName
-  cd front && npm run build && cd .. && \
+  unocss **/*.go && \
   go build -o /tmp/GoplaidPackageName main.go && /tmp/GoplaidPackageName
 }
 

@@ -19,7 +19,7 @@ var adminBox embed.FS
 //go:embed baretemplate
 var bareBox embed.FS
 
-//go:embed tailwindtemplate
+//go:embed unocsstemplate
 var tailwindBox embed.FS
 
 func main() {
@@ -63,7 +63,7 @@ func main() {
 		Label: "Select a template",
 		Items: []string{
 			"Admin: Deep Customizable Database CRUD UI",
-			"Tailwind: Tailwind CSS Powered Web App",
+			"UnoCSS: UnoCSS Powered Web App",
 			"Bare: Simplest Workable Web App",
 		},
 	}
@@ -81,9 +81,8 @@ func main() {
 		copyAndReplaceFiles(adminBox, dir, "admintemplate", pkg)
 		fmt.Printf("\ncd %s && docker-compose up -d && source dev_env && go run main.go\nto start your project\n", dir)
 	} else if result == 1 {
-		copyAndReplaceFiles(tailwindBox, dir, "tailwindtemplate", pkg)
+		copyAndReplaceFiles(tailwindBox, dir, "unocsstemplate", pkg)
 		runCmd(dir, "chmod", "+x", "./dev.sh")
-		runCmd(filepath.Join(dir, "front"), "npm", "install")
 		fmt.Printf("\ncd %s && ./dev.sh \nto start your project\n", dir)
 	} else {
 		copyAndReplaceFiles(bareBox, dir, "baretemplate", pkg)
