@@ -13,7 +13,8 @@ import (
 
 var Home = Doc(
 	Markdown(`
-## What is GoPlaid
+
+**Join the Discord community**: https://discord.gg/76YPsVBE4E
 
 GoPlaid is yet another Go library to build web applications. 
 different from other MVC frameworks. the concepts in GoPlaid is **Page**, **Event**, **Component**. 
@@ -50,7 +51,7 @@ The above is the code you mostly writing. the following is the boilerplate code 
 	Markdown(`
 If you wondering why ~H1("Hello World")~ and how this worked, Please go ahead and checkout next page
 `),
-).Title("GoPlaid").
+).Title("What is GoPlaid").
 	Slug("/")
 
 //go:embed assets/**.*
