@@ -20,6 +20,11 @@ import (
 	"github.com/goplaid/x/docs/examples/e23_vuetify_components_kitchen"
 	"github.com/goplaid/x/docs/examples/e24_vuetify_components_linkage_select"
 	"github.com/goplaid/x/docs/root"
+	"github.com/goplaid/x/docs/root/basics"
+	components_guide "github.com/goplaid/x/docs/root/components-guide"
+	getting_started "github.com/goplaid/x/docs/root/getting-started"
+	presets_guide "github.com/goplaid/x/docs/root/presets-guide"
+	vuetify_components "github.com/goplaid/x/docs/root/vuetify-components"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/tiptap"
@@ -412,7 +417,72 @@ func Mux(prefix string) http.Handler {
 				docgo.New().
 					SitePrefix(prefix).
 					Assets("/assets/", root.Assets).
-					Home(root.Home).
+					MainPageTitle("GoPlaid Document").
+					DocTree(
+						root.Home,
+						&docgo.DocsGroup{
+							Title: "Getting Started",
+							Docs: []*docgo.DocBuilder{
+								getting_started.OneMinuteQuickStart,
+								getting_started.TheGoHTMLBuilder,
+							},
+						},
+						&docgo.DocsGroup{
+							Title: "Basics",
+							Docs: []*docgo.DocBuilder{
+								basics.PageFuncAndEventFunc,
+								basics.LayoutFunctionAndPageInjector,
+								basics.SwitchPagesWithPushState,
+								basics.ReloadPageWithAFlash,
+								basics.PartialRefreshWithPortal,
+								basics.ManipulatePageURLInEventFunc,
+								basics.FormHandling,
+								basics.SummaryOfEventResponse,
+								basics.WebScope,
+								basics.EventHandling,
+								basics.ShortCut,
+							},
+						},
+						&docgo.DocsGroup{
+							Title: "Components Guide",
+							Docs: []*docgo.DocBuilder{
+								components_guide.CompositeNewComponentWithGo,
+								components_guide.IntegrateAHeavyVueComponent,
+							},
+						},
+						&docgo.DocsGroup{
+							Title: "Vuetify Components",
+							Docs: []*docgo.DocBuilder{
+								vuetify_components.ATasteOfUsingVuetifyInGo,
+								vuetify_components.BasicInputs,
+								vuetify_components.AutoComplete,
+								vuetify_components.VariantSubForm,
+								vuetify_components.NavigationDrawer,
+								vuetify_components.LazyPortalsAndReload,
+								vuetify_components.LinkageSelect,
+							},
+						},
+						&docgo.DocsGroup{
+							Title: "Presets Guide",
+							Docs: []*docgo.DocBuilder{
+								presets_guide.ItsTheWholeHouse,
+								presets_guide.ListingCustomizations,
+								presets_guide.Filter,
+								presets_guide.EditingCustomizations,
+								presets_guide.DetailPageForComplexObject,
+								presets_guide.Permissions,
+								presets_guide.NotificationCenter,
+							},
+						},
+						&docgo.DocsGroup{
+							Title: "Appendix",
+							Docs: []*docgo.DocBuilder{
+								docgo.Doc(utils.ExamplesDoc()).
+									Title("All Demo Examples").
+									Slug("appendix/all-demo-examples"),
+							},
+						},
+					).
 					Build(),
 			),
 		),
