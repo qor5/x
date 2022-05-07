@@ -13,7 +13,7 @@ One of the GoPlaid module called ~presets~ that can quickly create admin interfa
 Install the command line tool with:
 
 ~~~
-$ go get -v github.com/goplaid/x/goplaid
+$ go install github.com/goplaid/x/goplaid@master
 ~~~
 
 And run:
