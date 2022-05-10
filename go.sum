@@ -213,8 +213,8 @@ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/sunfmin/reflectutils v1.0.2/go.mod h1:ckN+r+oXS4OXFEVU+CCRuXBujUPCGlV86oCh/QsS3h4=
 github.com/sunfmin/reflectutils v1.0.3 h1:9crqUv4CdmvPDF4ymxG6sb6EVualibt9pYkTacrP1OM=
 github.com/sunfmin/reflectutils v1.0.3/go.mod h1:ckN+r+oXS4OXFEVU+CCRuXBujUPCGlV86oCh/QsS3h4=
-github.com/theplant/docgo v0.0.11 h1:diKEUT/YKbjsKpN3wBbP7snnBJBYEC4JrSaGgAIZMiA=
-github.com/theplant/docgo v0.0.11/go.mod h1:bhuce/CAR82WjqeMX3NMZjybiJa2hjj+3YTBAqX4DjY=
+github.com/theplant/docgo v0.0.12 h1:6Zyd4Zk0hCeHkjcDcUtOabmIpyk9dy/uitPhqFkkgSY=
+github.com/theplant/docgo v0.0.12/go.mod h1:bhuce/CAR82WjqeMX3NMZjybiJa2hjj+3YTBAqX4DjY=
 github.com/theplant/gofixtures v1.1.0 h1:gooxE6aXGn06UnibuUfBYKYiSLEEyk1dOki3MINPfyg=
 github.com/theplant/gofixtures v1.1.0/go.mod h1:FJoYzhg16y7kk+bn92a8mJ5ytpFT3Owb6VkEYA+0saQ=
 github.com/theplant/htmlgo v1.0.3 h1:G7/YSf8OrOIRHVQ13avd78T/GV1kDl/jMwpQURrXB0o=
