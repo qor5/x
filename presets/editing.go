@@ -137,10 +137,36 @@ func (b *EditingBuilder) formEdit(ctx *web.EventContext) (r web.EventResponse, e
 	return
 }
 
+func (b *EditingBuilder) singletonPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
+	if b.mb.Info().Verifier().Do(PermUpdate).WithReq(ctx.R).IsAllowed() != nil {
+		err = perm.PermissionDenied
+		return
+	}
+
+	msgr := MustGetMessages(ctx.R)
+	title := msgr.EditingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, inflection.Singular(b.mb.label)), "")
+	r.PageTitle = title
+	obj, err := b.Fetcher(b.mb.NewModel(), "", ctx)
+	if err == ErrRecordNotFound {
+		if err = b.Saver(b.mb.NewModel(), "", ctx); err != nil {
+			return
+		}
+		obj, err = b.Fetcher(b.mb.NewModel(), "", ctx)
+	}
+	if err != nil {
+		return
+	}
+	r.Body = b.editFormFor(obj, ctx)
+	return
+}
+
 func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.HTMLComponent {
 	msgr := MustGetMessages(ctx.R)
 
 	id := ctx.R.FormValue(ParamID)
+	if b.mb.singleton {
+		id = stripeui.ObjectID(obj)
+	}
 
 	var buttonLabel = msgr.Create
 	var disableUpdateBtn bool
@@ -195,11 +221,15 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 		}
 	}
 
+	queries := ctx.Queries()
+	if b.mb.singleton {
+		queries.Add(ParamID, id)
+	}
 	updateBtn := VBtn(buttonLabel).
 		Color("primary").
 		Attr("@click", web.Plaid().
 			EventFunc(actions.Update).
-			Queries(ctx.Queries()).
+			Queries(queries).
 			URL(b.mb.Info().ListingHref()).
 			Go())
 	if disableUpdateBtn {
@@ -271,14 +301,16 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	}
 
 	return web.Scope(
-		VAppBar(
-			VToolbarTitle("").Class("pl-2").
-				Children(title),
-			VSpacer(),
-			VBtn("").Icon(true).Children(
-				VIcon("close"),
-			).Attr("@click.stop", closeBtnVarScript),
-		).Color("white").Elevation(0).Dense(true),
+		h.If(!b.mb.singleton,
+			VAppBar(
+				VToolbarTitle("").Class("pl-2").
+					Children(title),
+				VSpacer(),
+				VBtn("").Icon(true).Children(
+					VIcon("close"),
+				).Attr("@click.stop", closeBtnVarScript),
+			).Color("white").Elevation(0).Dense(true),
+		),
 
 		VSheet(
 			VCard(asideContent).Flat(true),

@@ -926,9 +926,17 @@ func (b *Builder) initMux() {
 		pluralUri := inflection.Plural(m.uriName)
 		info := m.Info()
 		routePath := info.ListingHref()
+		inPageFunc := m.listing.GetPageFunc()
+		if m.singleton {
+			inPageFunc = m.editing.singletonPageFunc
+			if m.layoutConfig == nil {
+				m.layoutConfig = &LayoutConfig{}
+			}
+			m.layoutConfig.SearchBoxInvisible = true
+		}
 		mux.Handle(
 			pat.New(routePath),
-			b.wrap(m, b.layoutFunc(m.listing.GetPageFunc(), m.layoutConfig)),
+			b.wrap(m, b.layoutFunc(inPageFunc, m.layoutConfig)),
 		)
 		log.Println("mounted url", routePath)
 		if m.hasDetailing {
