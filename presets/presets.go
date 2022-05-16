@@ -800,7 +800,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 							Value(ctx.R.URL.Query().Get("keyword")).
 							Attr("@keyup.enter", web.Plaid().
 								Query("keyword", web.Var("[$event.target.value]")).
-							     	MergeQuery(true).
+								MergeQuery(true).
 								PushState(true).
 								Go()).
 							Attr("@click:clear", web.Plaid().

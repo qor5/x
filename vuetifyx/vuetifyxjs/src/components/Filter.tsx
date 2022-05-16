@@ -1,6 +1,7 @@
 import {encodeFilterData, filterData} from './FilterData';
 import Vue, {CreateElement, VNode} from 'vue';
 import {
+	VAutocomplete,
 	VBtn,
 	VCheckbox,
 	VChip,
@@ -335,7 +336,7 @@ export const StringItem = Vue.extend({
 
 export const SelectItem = Vue.extend({
 	components: {
-		vselect: VSelect,
+		vautocomplete: VAutocomplete,
 		vtextfield: VTextField,
 		vicon: VIcon,
 	},
@@ -363,7 +364,7 @@ export const SelectItem = Vue.extend({
 	render() {
 		return (
 			<div>
-				<vselect
+				<vautocomplete
 					class='d-inline-block'
 					style='width: 200px'
 					hideDetails={true}
@@ -371,7 +372,7 @@ export const SelectItem = Vue.extend({
 					value={this.valueIs}
 					items={this.value.options}
 				>
-				</vselect>
+				</vautocomplete>
 			</div>
 		);
 	},
@@ -588,6 +589,7 @@ function initInternalValue(items: FilterItem[]): FilterItem[] {
 export const Filter = Vue.extend({
 	components: {
 		vselect: VSelect,
+		vautocomplete: VAutocomplete,
 		vtextfield: VTextField,
 		vicon: VIcon,
 		vbtn: VBtn,
