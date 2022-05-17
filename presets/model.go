@@ -35,6 +35,7 @@ type ModelBuilder struct {
 	link             string
 	layoutConfig     *LayoutConfig
 	modelInfo        *ModelInfo
+	singleton        bool
 	web.EventsHub
 }
 
@@ -199,6 +200,11 @@ func (mb *ModelBuilder) LayoutConfig(v *LayoutConfig) (r *ModelBuilder) {
 
 func (mb *ModelBuilder) Placeholders(vs ...string) (r *ModelBuilder) {
 	mb.placeholders = append(mb.placeholders, vs...)
+	return mb
+}
+
+func (mb *ModelBuilder) Singleton(v bool) (r *ModelBuilder) {
+	mb.singleton = v
 	return mb
 }
 

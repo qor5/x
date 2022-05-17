@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/presets/gorm2op"
 	"github.com/theplant/gofixtures"
-	"gorm.io/gorm"
 )
 
 type TestVariant struct {
@@ -67,7 +67,7 @@ func TestPrimarySlugger(t *testing.T) {
 	}
 
 	tv, err = op.Fetch(&TestVariant{}, "P01_C01", ctx)
-	if err != gorm.ErrRecordNotFound {
+	if err != presets.ErrRecordNotFound {
 		t.Error("didn't return not found after delete", tv, err)
 	}
 

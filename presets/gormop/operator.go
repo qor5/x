@@ -94,6 +94,9 @@ func (op *DataOperatorBuilder) primarySluggerWhere(obj interface{}, id string) *
 func (op *DataOperatorBuilder) Fetch(obj interface{}, id string, ctx *web.EventContext) (r interface{}, err error) {
 	err = op.primarySluggerWhere(obj, id).Find(obj).Error
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, presets.ErrRecordNotFound
+		}
 		return
 	}
 	r = obj
