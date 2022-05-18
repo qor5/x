@@ -13,6 +13,7 @@ const (
 	OpenBulkActionDialog = "presets_OpenBulkActionDialog"
 	OpenActionDialog     = "presets_OpenActionDialog"
 	NotificationCenter   = "presets_NotificationCenter"
+	DetailingDrawer      = "presets_DetailingDrawer"
 )
 
 const (

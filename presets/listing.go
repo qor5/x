@@ -922,16 +922,20 @@ func (b *ListingBuilder) getComponents(
 	dataTable = s.DataTable(objs).
 		CellWrapperFunc(func(cell h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent {
 			tdbind := cell
-			if b.mb.hasDetailing {
+			if b.mb.hasDetailing && !b.mb.detailing.drawer {
 				tdbind.SetAttr("@click.self", web.Plaid().
 					PushStateURL(
 						b.mb.Info().
 							DetailingHref(id)).
 					Go())
 			} else {
+				event := actions.Edit
+				if b.mb.hasDetailing {
+					event = actions.DetailingDrawer
+				}
 				tdbind.SetAttr("@click.self",
 					web.Plaid().
-						EventFunc(actions.Edit).
+						EventFunc(event).
 						Query(ParamID, id).
 						Go()+fmt.Sprintf(`; vars.currEditingListItemID="%s-%s"`, dataTableID, id))
 			}

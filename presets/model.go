@@ -80,6 +80,7 @@ func (mb *ModelBuilder) registerDefaultEventFuncs() {
 	mb.RegisterEventFunc(actions.OpenActionDialog, mb.listing.openActionDialog)
 	mb.RegisterEventFunc(actions.Action, mb.detailing.formDrawerAction)
 	mb.RegisterEventFunc(actions.DoAction, mb.detailing.doAction)
+	mb.RegisterEventFunc(actions.DetailingDrawer, mb.detailing.showInDrawer)
 }
 
 func (mb *ModelBuilder) NewModel() (r interface{}) {
