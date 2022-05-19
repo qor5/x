@@ -29,7 +29,8 @@ type EditingBuilder struct {
 	FieldsBuilder
 }
 
-func (mb *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
+// string / []string / *FieldsSection
+func (mb *ModelBuilder) Editing(vs ...interface{}) (r *EditingBuilder) {
 	r = mb.editing
 	if len(vs) == 0 {
 		return
@@ -39,13 +40,14 @@ func (mb *ModelBuilder) Editing(vs ...string) (r *EditingBuilder) {
 	return r
 }
 
-func (b *EditingBuilder) Only(vs ...string) (r *EditingBuilder) {
+// string / []string / *FieldsSection
+func (b *EditingBuilder) Only(vs ...interface{}) (r *EditingBuilder) {
 	r = b
 	r.FieldsBuilder = *r.FieldsBuilder.Only(vs...)
 	return
 }
 
-func (b *EditingBuilder) Creating(vs ...string) (r *EditingBuilder) {
+func (b *EditingBuilder) Creating(vs ...interface{}) (r *EditingBuilder) {
 	if b.mb.creating == nil {
 		b.mb.creating = &EditingBuilder{
 			mb:        b.mb,

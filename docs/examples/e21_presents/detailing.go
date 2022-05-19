@@ -39,7 +39,7 @@ func PresetsDetailPageTopNotes(b *presets.Builder) (
 		panic(err)
 	}
 
-	dp = cust.Detailing("TopNotes", "Details", "Cards")
+	dp = cust.Detailing("TopNotes")
 
 	dp.Field("TopNotes").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		mi := field.ModelInfo
@@ -123,7 +123,7 @@ func PresetsDetailPageDetails(b *presets.Builder) (
 	if err != nil {
 		panic(err)
 	}
-
+	dp = cust.Detailing("TopNotes", "Details")
 	dp.Field("Details").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		mi := field.ModelInfo
 		cu := obj.(*Customer)
@@ -230,6 +230,7 @@ func PresetsDetailPageCards(b *presets.Builder) (
 	if err != nil {
 		panic(err)
 	}
+	dp = cust.Detailing("TopNotes", "Details", "Cards")
 
 	dp.Field("Cards").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		mi := field.ModelInfo
