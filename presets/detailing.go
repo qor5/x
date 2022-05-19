@@ -4,6 +4,7 @@ import (
 	"net/url"
 
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/perm"
 	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/jinzhu/inflection"
@@ -16,6 +17,7 @@ type DetailingBuilder struct {
 	actions  []*ActionBuilder
 	pageFunc web.PageFunc
 	fetcher  FetchFunc
+	drawer   bool
 	FieldsBuilder
 }
 
@@ -52,6 +54,11 @@ func (b *DetailingBuilder) Fetcher(v FetchFunc) (r *DetailingBuilder) {
 	return b
 }
 
+func (b *DetailingBuilder) Drawer(v bool) (r *DetailingBuilder) {
+	b.drawer = v
+	return b
+}
+
 func (b *DetailingBuilder) GetPageFunc() web.PageFunc {
 	if b.pageFunc != nil {
 		return b.pageFunc
@@ -61,7 +68,12 @@ func (b *DetailingBuilder) GetPageFunc() web.PageFunc {
 
 func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
 
-	id := pat.Param(ctx.R, "id")
+	var id string
+	if b.drawer {
+		id = ctx.R.FormValue(ParamID)
+	} else {
+		id = pat.Param(ctx.R, "id")
+	}
 	r.Body = VContainer(h.Text(id))
 
 	var obj = b.mb.NewModel()
@@ -88,6 +100,41 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRes
 	r.Body = VContainer(
 		notice,
 	).AppendChildren(comp).Fluid(true)
+	return
+}
+
+func (b *DetailingBuilder) showInDrawer(ctx *web.EventContext) (r web.EventResponse, err error) {
+	if b.mb.Info().Verifier().Do(PermGet).WithReq(ctx.R).IsAllowed() != nil {
+		ShowMessage(&r, perm.PermissionDenied.Error(), "warning")
+		return
+	}
+
+	pr, err := b.GetPageFunc()(ctx)
+	if err != nil {
+		return
+	}
+
+	overlayType := ctx.R.FormValue(ParamOverlay)
+	closeBtnVarScript := closeRightDrawerVarScript
+	if overlayType == actions.Dialog {
+		closeBtnVarScript = closeDialogVarScript
+	}
+	comp := web.Scope(
+		VAppBar(
+			VToolbarTitle("").Class("pl-2").
+				Children(h.Text(pr.PageTitle)),
+			VSpacer(),
+			VBtn("").Icon(true).Children(
+				VIcon("close"),
+			).Attr("@click.stop", closeBtnVarScript),
+		).Color("white").Elevation(0).Dense(true),
+
+		VSheet(
+			VCard(pr.Body).Flat(true).Class("pa-1"),
+		).Class("pa-2"),
+	).VSlot("{ plaidForm }")
+
+	b.mb.p.overlay(overlayType, &r, comp, b.mb.rightDrawerWidth)
 	return
 }
 

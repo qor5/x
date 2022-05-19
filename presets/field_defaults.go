@@ -223,6 +223,29 @@ func cfTextField(obj interface{}, field *FieldContext, ctx *web.EventContext) h.
 		Disabled(field.Disabled)
 }
 
+func cfReadonlyText(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
+	return h.Div(
+		h.Div(h.Text(field.Label)).
+			Class("font-weight-medium mb-1"),
+		h.Div(h.Text(fmt.Sprint(reflectutils.MustGet(obj, field.Name)))).
+			Class("grey--text text--darken-2"),
+	).Class("mb-5")
+}
+
+func cfReadonlyCheckbox(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
+	return h.Div(
+		h.Div(h.Text(field.Label)).
+			Class("font-weight-medium mb-1"),
+		h.Div(
+			VCheckbox().InputValue(reflectutils.MustGet(obj, field.Name).(bool)).
+				Readonly(true).
+				Ripple(false).
+				HideDetails(true).
+				Class("my-0 py-0"),
+		),
+	).Class("mb-5")
+}
+
 func (b *FieldDefaults) builtInFieldTypes() {
 
 	if b.mode == LIST {
@@ -237,6 +260,22 @@ func (b *FieldDefaults) builtInFieldTypes() {
 		for _, v := range stringVals {
 			b.FieldType(v).
 				ComponentFunc(cfTextTd)
+		}
+		return
+	}
+
+	if b.mode == DETAIL {
+		b.FieldType(true).
+			ComponentFunc(cfReadonlyCheckbox)
+
+		for _, v := range numberVals {
+			b.FieldType(v).
+				ComponentFunc(cfReadonlyText)
+		}
+
+		for _, v := range stringVals {
+			b.FieldType(v).
+				ComponentFunc(cfReadonlyText)
 		}
 		return
 	}
