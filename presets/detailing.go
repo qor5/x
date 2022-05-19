@@ -12,11 +12,10 @@ import (
 )
 
 type DetailingBuilder struct {
-	mb         *ModelBuilder
-	fieldNames []string
-	actions    []*ActionBuilder
-	pageFunc   web.PageFunc
-	fetcher    FetchFunc
+	mb       *ModelBuilder
+	actions  []*ActionBuilder
+	pageFunc web.PageFunc
+	fetcher  FetchFunc
 	FieldsBuilder
 }
 
@@ -24,20 +23,23 @@ type pageTitle interface {
 	PageTitle() string
 }
 
-func (mb *ModelBuilder) Detailing(vs ...string) (r *DetailingBuilder) {
+// string / []string / *FieldsSection
+func (mb *ModelBuilder) Detailing(vs ...interface{}) (r *DetailingBuilder) {
 	r = mb.detailing
 	mb.hasDetailing = true
 	if len(vs) == 0 {
 		return
 	}
 
-	r.fieldNames = vs
-	var newfields []*FieldBuilder
-	for _, f := range vs {
-		newfields = append(newfields, r.Field(f))
-	}
-	r.fields = newfields
+	r.Only(vs...)
 	return r
+}
+
+// string / []string / *FieldsSection
+func (b *DetailingBuilder) Only(vs ...interface{}) (r *DetailingBuilder) {
+	r = b
+	r.FieldsBuilder = *r.FieldsBuilder.Only(vs...)
+	return
 }
 
 func (b *DetailingBuilder) PageFunc(pf web.PageFunc) (r *DetailingBuilder) {
@@ -81,21 +83,11 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRes
 		notice = VSnackbar(h.Text(msg)).Value(true).Top(true).Color("success").Value(true)
 	}
 
-	var comps []h.HTMLComponent
-	for _, f := range b.fields {
-		if f.compFunc == nil {
-			continue
-		}
-		comps = append(comps, f.compFunc(obj, &FieldContext{
-			ModelInfo: b.mb.Info(),
-			Name:      f.name,
-			Label:     b.mb.getLabel(f.NameLabel),
-		}, ctx))
-	}
+	comp := b.ToComponent(b.mb.Info(), obj, ctx)
 
 	r.Body = VContainer(
 		notice,
-	).AppendChildren(comps...).Fluid(true)
+	).AppendChildren(comp).Fluid(true)
 	return
 }
 

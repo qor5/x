@@ -12,6 +12,7 @@ import (
 
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
+	v "github.com/goplaid/x/vuetify"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
 	"github.com/thoas/go-funk"
@@ -133,6 +134,13 @@ type FieldsBuilder struct {
 	defaults    *FieldDefaults
 	fieldLabels []string
 	fields      []*FieldBuilder
+	// string / []string / *FieldsSection
+	fieldsLayout []interface{}
+}
+
+type FieldsSection struct {
+	Title string
+	Rows  [][]string
 }
 
 func NewFieldsBuilder() *FieldsBuilder {
@@ -370,23 +378,43 @@ func (b *FieldsBuilder) getField(name string) (r *FieldBuilder) {
 	return
 }
 
-func (b *FieldsBuilder) Only(names ...string) (r *FieldsBuilder) {
-	if len(names) == 0 {
+func (b *FieldsBuilder) Only(vs ...interface{}) (r *FieldsBuilder) {
+	if len(vs) == 0 {
 		return b
 	}
 
 	r = b.Clone()
 
-	for _, n := range names {
-		f := b.getField(n)
-		if f == nil {
-			r.appendNewFieldWithDefault(n)
-		} else {
-			r.fields = append(r.fields, f.Clone())
+	r.fieldsLayout = vs
+	for _, iv := range vs {
+		switch t := iv.(type) {
+		case string:
+			r.appendField(t)
+		case []string:
+			for _, n := range t {
+				r.appendField(n)
+			}
+		case *FieldsSection:
+			for _, row := range t.Rows {
+				for _, n := range row {
+					r.appendField(n)
+				}
+			}
+		default:
+			panic("unknown fields layout, must be string/[]string/*FieldsSection")
 		}
 	}
 
 	return
+}
+
+func (b *FieldsBuilder) appendField(name string) {
+	f := b.getField(name)
+	if f == nil {
+		b.appendNewFieldWithDefault(name)
+	} else {
+		b.fields = append(b.fields, f.Clone())
+	}
 }
 
 func (b *FieldsBuilder) Except(patterns ...string) (r *FieldsBuilder) {
@@ -435,46 +463,102 @@ func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interfa
 		edit = true
 	}
 
-	for _, f := range b.fields {
-		if f.compFunc == nil {
-			continue
+	layout := b.fieldsLayout
+	if layout == nil {
+		layout = make([]interface{}, 0, len(b.fields))
+		for _, f := range b.fields {
+			layout = append(layout, f.name)
 		}
-		if info != nil && info.Verifier().Do(PermGet).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
-			continue
-		}
-
-		label := b.getLabel(f.NameLabel)
-		if info != nil {
-			label = i18n.PT(ctx.R, ModelsI18nModuleKey, info.Label(), b.getLabel(f.NameLabel))
-		}
-
-		contextKeyPath := f.name
-		if parentFormValueKey != "" {
-			contextKeyPath = fmt.Sprintf("%s.%s", parentFormValueKey, f.name)
-		}
-
-		disabled := false
-		if info != nil {
-			if edit {
-				disabled = info.Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil
-			} else {
-				disabled = info.Verifier().Do(PermCreate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil
+	}
+	for _, iv := range layout {
+		var comp h.HTMLComponent
+		switch t := iv.(type) {
+		case string:
+			comp = b.fieldToComponentWithFormValueKey(info, obj, parentFormValueKey, ctx, t, id, edit, vErr)
+		case []string:
+			colsComp := make([]h.HTMLComponent, 0, len(t))
+			for _, n := range t {
+				fComp := b.fieldToComponentWithFormValueKey(info, obj, parentFormValueKey, ctx, n, id, edit, vErr)
+				if fComp == nil {
+					continue
+				}
+				colsComp = append(colsComp, v.VCol(fComp).Class("pr-4"))
 			}
+			if len(colsComp) > 0 {
+				comp = v.VRow(colsComp...).NoGutters(true)
+			}
+		case *FieldsSection:
+			rowsComp := make([]h.HTMLComponent, 0, len(t.Rows))
+			for _, row := range t.Rows {
+				colsComp := make([]h.HTMLComponent, 0, len(row))
+				for _, n := range row {
+					fComp := b.fieldToComponentWithFormValueKey(info, obj, parentFormValueKey, ctx, n, id, edit, vErr)
+					if fComp == nil {
+						continue
+					}
+					colsComp = append(colsComp, v.VCol(fComp).Class("pr-4"))
+				}
+				if len(colsComp) > 0 {
+					rowsComp = append(rowsComp, v.VRow(colsComp...).NoGutters(true))
+				}
+			}
+			childs := []h.HTMLComponent{}
+			if t.Title != "" {
+				childs = append(childs, v.VCardTitle(h.Text(t.Title)).Class("px-0 py-2"))
+			}
+			childs = append(childs, rowsComp...)
+			if len(childs) > 0 {
+				comp = v.VCard(childs...).Class("mx-0 my-2 px-4 py-0")
+			}
+		default:
+			panic("unknown fields layout, must be string/[]string/*FieldsSection")
 		}
-
-		comps = append(comps, f.compFunc(obj, &FieldContext{
-			ModelInfo:       info,
-			Name:            f.name,
-			FormKey:         contextKeyPath,
-			Label:           label,
-			Errors:          vErr.GetFieldErrors(f.name),
-			ListItemBuilder: f.listItemBuilder,
-			Context:         f.context,
-			Disabled:        disabled,
-		}, ctx))
+		if comp == nil {
+			continue
+		}
+		comps = append(comps, comp)
 	}
 
 	return h.Components(comps...)
+}
+
+func (b *FieldsBuilder) fieldToComponentWithFormValueKey(info *ModelInfo, obj interface{}, parentFormValueKey string, ctx *web.EventContext, name string, id interface{}, edit bool, vErr *web.ValidationErrors) h.HTMLComponent {
+	f := b.getField(name)
+	if f.compFunc == nil {
+		return nil
+	}
+	if info != nil && info.Verifier().Do(PermGet).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
+		return nil
+	}
+
+	label := b.getLabel(f.NameLabel)
+	if info != nil {
+		label = i18n.PT(ctx.R, ModelsI18nModuleKey, info.Label(), b.getLabel(f.NameLabel))
+	}
+
+	contextKeyPath := f.name
+	if parentFormValueKey != "" {
+		contextKeyPath = fmt.Sprintf("%s.%s", parentFormValueKey, f.name)
+	}
+
+	disabled := false
+	if info != nil {
+		if edit {
+			disabled = info.Verifier().Do(PermUpdate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil
+		} else {
+			disabled = info.Verifier().Do(PermCreate).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil
+		}
+	}
+	return f.compFunc(obj, &FieldContext{
+		ModelInfo:       info,
+		Name:            f.name,
+		FormKey:         contextKeyPath,
+		Label:           label,
+		Errors:          vErr.GetFieldErrors(f.name),
+		ListItemBuilder: f.listItemBuilder,
+		Context:         f.context,
+		Disabled:        disabled,
+	}, ctx)
 }
 
 type RowFunc func(obj interface{}, formKey string, content h.HTMLComponent, ctx *web.EventContext) h.HTMLComponent
