@@ -52,7 +52,11 @@ func (mb *ModelBuilder) Listing(vs ...string) (r *ListingBuilder) {
 
 func (b *ListingBuilder) Only(vs ...string) (r *ListingBuilder) {
 	r = b
-	r.FieldsBuilder = *r.FieldsBuilder.Only(vs...)
+	ivs := make([]interface{}, 0, len(vs))
+	for _, v := range vs {
+		ivs = append(ivs, v)
+	}
+	r.FieldsBuilder = *r.FieldsBuilder.Only(ivs...)
 	return
 }
 
