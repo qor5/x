@@ -130,7 +130,7 @@ func (b *DetailingBuilder) showInDrawer(ctx *web.EventContext) (r web.EventRespo
 		).Color("white").Elevation(0).Dense(true),
 
 		VSheet(
-			VCard(pr.Body).Flat(true),
+			VCard(pr.Body).Flat(true).Class("pa-1"),
 		).Class("pa-2"),
 	).VSlot("{ plaidForm }")
 
