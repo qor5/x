@@ -334,7 +334,7 @@ func TestFieldsBuilder(t *testing.T) {
 <button>Add Department</button>
 </div>
 
-<v-text-field type='number' v-field-name='[plaidForm, "PeopleCount"]' label='PeopleCount' :value='"0"' :disabled='false'></v-text-field>
+<v-text-field type='number' v-field-name='[plaidForm, "PeopleCount"]' label='People Count' :value='"0"' :disabled='false'></v-text-field>
 `,
 		},
 
@@ -415,7 +415,7 @@ func TestFieldsBuilder(t *testing.T) {
 <button>Add Department</button>
 </div>
 
-<v-text-field type='number' v-field-name='[plaidForm, "PeopleCount"]' label='PeopleCount' :value='"0"' :disabled='false'></v-text-field>
+<v-text-field type='number' v-field-name='[plaidForm, "PeopleCount"]' label='People Count' :value='"0"' :disabled='false'></v-text-field>
 `,
 		},
 	}
