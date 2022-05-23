@@ -389,15 +389,15 @@ func (b *FieldsBuilder) Only(vs ...interface{}) (r *FieldsBuilder) {
 	for _, iv := range vs {
 		switch t := iv.(type) {
 		case string:
-			r.appendField(t)
+			r.appendFieldAfterClone(b, t)
 		case []string:
 			for _, n := range t {
-				r.appendField(n)
+				r.appendFieldAfterClone(b, n)
 			}
 		case *FieldsSection:
 			for _, row := range t.Rows {
 				for _, n := range row {
-					r.appendField(n)
+					r.appendFieldAfterClone(b, n)
 				}
 			}
 		default:
@@ -408,8 +408,8 @@ func (b *FieldsBuilder) Only(vs ...interface{}) (r *FieldsBuilder) {
 	return
 }
 
-func (b *FieldsBuilder) appendField(name string) {
-	f := b.getField(name)
+func (b *FieldsBuilder) appendFieldAfterClone(ob *FieldsBuilder, name string) {
+	f := ob.getField(name)
 	if f == nil {
 		b.appendNewFieldWithDefault(name)
 	} else {
