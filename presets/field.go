@@ -355,6 +355,25 @@ func (b *FieldsBuilder) Labels(vs ...string) (r *FieldsBuilder) {
 	return b
 }
 
+func isUppercase(char byte) bool {
+	return 'A' <= char && char <= 'Z'
+}
+
+// humanizeString humanize separates string based on capitalizd letters
+// e.g. "OrderItem" -> "Order Item"
+func humanizeString(str string) string {
+	var human []rune
+	for i, l := range str {
+		if i > 0 && isUppercase(byte(l)) {
+			if (!isUppercase(str[i-1]) && str[i-1] != ' ') || (i+1 < len(str) && !isUppercase(str[i+1]) && str[i+1] != ' ' && str[i-1] != ' ') {
+				human = append(human, rune(' '))
+			}
+		}
+		human = append(human, l)
+	}
+	return strings.Title(string(human))
+}
+
 func (b *FieldsBuilder) getLabel(field NameLabel) (r string) {
 	if len(field.label) > 0 {
 		return field.label
@@ -366,7 +385,7 @@ func (b *FieldsBuilder) getLabel(field NameLabel) (r string) {
 		}
 	}
 
-	return field.name
+	return humanizeString(field.name)
 }
 
 func (b *FieldsBuilder) getField(name string) (r *FieldBuilder) {
