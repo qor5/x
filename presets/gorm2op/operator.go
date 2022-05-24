@@ -15,10 +15,6 @@ func DataOperator(db *gorm.DB) (r *DataOperatorBuilder) {
 	return
 }
 
-type primarySluggerValues interface {
-	PrimaryColumnValuesBySlug(slug string) [][]string
-}
-
 type DataOperatorBuilder struct {
 	db *gorm.DB
 }
@@ -81,7 +77,7 @@ func (op *DataOperatorBuilder) primarySluggerWhere(obj interface{}, id string) *
 		return wh
 	}
 
-	if slugger, ok := obj.(primarySluggerValues); ok {
+	if slugger, ok := obj.(presets.SlugDecoder); ok {
 		cs := slugger.PrimaryColumnValuesBySlug(id)
 		for _, cond := range cs {
 			wh = wh.Where(fmt.Sprintf("%s = ?", cond[0]), cond[1])

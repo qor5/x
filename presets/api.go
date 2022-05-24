@@ -40,18 +40,6 @@ type FetchFunc func(obj interface{}, id string, ctx *web.EventContext) (r interf
 type SaveFunc func(obj interface{}, id string, ctx *web.EventContext) (err error)
 type DeleteFunc func(obj interface{}, id string, ctx *web.EventContext) (err error)
 
-type FilterDataFunc func(ctx *web.EventContext) vuetifyx.FilterData
-
-type FilterTab struct {
-	ID    string
-	Label string
-	// render AdvancedLabel if it is not nil
-	AdvancedLabel h.HTMLComponent
-	Query         url.Values
-}
-
-type FilterTabsFunc func(ctx *web.EventContext) []*FilterTab
-
 type SQLCondition struct {
 	Query string
 	Args  []interface{}
@@ -65,3 +53,19 @@ type SearchParams struct {
 	Page           int64
 	OrderBy        string
 }
+
+type SlugDecoder interface {
+	PrimaryColumnValuesBySlug(slug string) [][]string
+}
+
+type FilterDataFunc func(ctx *web.EventContext) vuetifyx.FilterData
+
+type FilterTab struct {
+	ID    string
+	Label string
+	// render AdvancedLabel if it is not nil
+	AdvancedLabel h.HTMLComponent
+	Query         url.Values
+}
+
+type FilterTabsFunc func(ctx *web.EventContext) []*FilterTab
