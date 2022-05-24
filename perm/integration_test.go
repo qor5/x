@@ -215,4 +215,11 @@ var cases = []struct {
 		subjects:       []string{"developer"},
 		wantPermission: "upload",
 	},
+
+	{
+		name:               "empty policies should not allowed to do everything",
+		policies:           []*perm.PolicyBuilder{},
+		subjects:           []string{"developer"},
+		dontWantPermission: "upload",
+	},
 }
