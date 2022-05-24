@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
@@ -355,17 +356,14 @@ func (b *FieldsBuilder) Labels(vs ...string) (r *FieldsBuilder) {
 	return b
 }
 
-func isUppercase(char byte) bool {
-	return 'A' <= char && char <= 'Z'
-}
-
 // humanizeString humanize separates string based on capitalizd letters
-// e.g. "OrderItem" -> "Order Item"
+// e.g. "OrderItem" -> "Order Item, CNNName to CNN Name"
 func humanizeString(str string) string {
 	var human []rune
-	for i, l := range str {
-		if i > 0 && isUppercase(byte(l)) {
-			if (!isUppercase(str[i-1]) && str[i-1] != ' ') || (i+1 < len(str) && !isUppercase(str[i+1]) && str[i+1] != ' ' && str[i-1] != ' ') {
+	input := []rune(str)
+	for i, l := range input {
+		if i > 0 && unicode.IsUpper(l) {
+			if (!unicode.IsUpper(input[i-1]) && input[i-1] != ' ') || (i+1 < len(input) && !unicode.IsUpper(input[i+1]) && input[i+1] != ' ' && input[i-1] != ' ') {
 				human = append(human, rune(' '))
 			}
 		}
