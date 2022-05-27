@@ -229,5 +229,5 @@ func (mb *ModelBuilder) getLabel(field NameLabel) (r string) {
 		}
 	}
 
-	return field.name
+	return humanizeString(field.name)
 }
