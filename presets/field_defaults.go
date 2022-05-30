@@ -8,6 +8,7 @@ import (
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
+	"github.com/goplaid/x/vuetifyx"
 	"github.com/iancoleman/strcase"
 	"github.com/sunfmin/reflectutils"
 	h "github.com/theplant/htmlgo"
@@ -224,26 +225,16 @@ func cfTextField(obj interface{}, field *FieldContext, ctx *web.EventContext) h.
 }
 
 func cfReadonlyText(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
-	return h.Div(
-		h.Div(h.Text(field.Label)).
-			Class("font-weight-medium mb-1"),
-		h.Div(h.Text(fmt.Sprint(reflectutils.MustGet(obj, field.Name)))).
-			Class("grey--text text--darken-2"),
-	).Class("mb-5")
+	return vuetifyx.VXReadonlyField().
+		Label(field.Label).
+		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name)))
 }
 
 func cfReadonlyCheckbox(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
-	return h.Div(
-		h.Div(h.Text(field.Label)).
-			Class("font-weight-medium mb-1"),
-		h.Div(
-			VCheckbox().InputValue(reflectutils.MustGet(obj, field.Name).(bool)).
-				Readonly(true).
-				Ripple(false).
-				HideDetails(true).
-				Class("my-0 py-0"),
-		),
-	).Class("mb-5")
+	return vuetifyx.VXReadonlyField().
+		Label(field.Label).
+		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name))).
+		Checkbox(true)
 }
 
 func (b *FieldDefaults) builtInFieldTypes() {

@@ -519,13 +519,15 @@ func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interfa
 					rowsComp = append(rowsComp, v.VRow(colsComp...).NoGutters(true))
 				}
 			}
-			childs := []h.HTMLComponent{}
-			if t.Title != "" {
-				childs = append(childs, v.VCardTitle(h.Text(t.Title)).Class("px-0 py-2"))
-			}
-			childs = append(childs, rowsComp...)
-			if len(childs) > 0 {
-				comp = v.VCard(childs...).Class("mx-0 my-2 px-4 py-0")
+			if len(rowsComp) > 0 {
+				var titleComp h.HTMLComponent
+				if t.Title != "" {
+					titleComp = h.Label(t.Title).Class("v-label theme--light text-caption")
+				}
+				comp = h.Div(
+					titleComp,
+					v.VCard(rowsComp...).Elevation(1).Class("mx-0 my-2 px-4 pb-0 pt-4"),
+				)
 			}
 		default:
 			panic("unknown fields layout, must be string/[]string/*FieldsSection")
