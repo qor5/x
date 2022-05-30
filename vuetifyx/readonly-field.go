@@ -9,14 +9,18 @@ import (
 )
 
 type VXReadonlyFieldBuilder struct {
-	label     string
-	value     interface{}
-	valueComp h.HTMLComponent
-	checkbox  bool
+	label    string
+	value    interface{}
+	children h.HTMLComponents
+	checkbox bool
 }
 
-func VXReadonlyField() *VXReadonlyFieldBuilder {
-	return &VXReadonlyFieldBuilder{}
+func VXReadonlyField(children ...h.HTMLComponent) *VXReadonlyFieldBuilder {
+	b := &VXReadonlyFieldBuilder{}
+	if len(children) > 0 {
+		b.children = children
+	}
+	return b
 }
 
 func (b *VXReadonlyFieldBuilder) Label(v string) *VXReadonlyFieldBuilder {
@@ -29,8 +33,8 @@ func (b *VXReadonlyFieldBuilder) Value(v interface{}) *VXReadonlyFieldBuilder {
 	return b
 }
 
-func (b *VXReadonlyFieldBuilder) ValueComponent(v h.HTMLComponent) *VXReadonlyFieldBuilder {
-	b.valueComp = v
+func (b *VXReadonlyFieldBuilder) Children(children ...h.HTMLComponent) *VXReadonlyFieldBuilder {
+	b.children = children
 	return b
 }
 
@@ -41,8 +45,8 @@ func (b *VXReadonlyFieldBuilder) Checkbox(v bool) *VXReadonlyFieldBuilder {
 
 func (b *VXReadonlyFieldBuilder) MarshalHTML(ctx context.Context) ([]byte, error) {
 	var vComp h.HTMLComponent
-	if b.valueComp != nil {
-		vComp = b.valueComp
+	if b.children != nil {
+		vComp = b.children
 	} else {
 		if b.checkbox {
 			vComp = vuetify.VCheckbox().InputValue(b.value).
