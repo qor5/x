@@ -233,7 +233,7 @@ func cfReadonlyText(obj interface{}, field *FieldContext, ctx *web.EventContext)
 func cfReadonlyCheckbox(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
 	return vuetifyx.VXReadonlyField().
 		Label(field.Label).
-		Value(fmt.Sprint(reflectutils.MustGet(obj, field.Name))).
+		Value(reflectutils.MustGet(obj, field.Name)).
 		Checkbox(true)
 }
 
