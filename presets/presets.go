@@ -71,6 +71,10 @@ const (
 	ModelsI18nModuleKey i18n.ModuleKey = "ModelsI18nModuleKey"
 )
 
+const (
+	OpenConfirmationDialogEvent = "presets_ConfirmationDialogEvent"
+)
+
 func New() *Builder {
 	l, _ := zap.NewDevelopment()
 	r := &Builder{
@@ -88,6 +92,8 @@ func New() *Builder {
 		verifier:             perm.NewVerifier(PermModule, nil),
 		homePageLayoutConfig: &LayoutConfig{SearchBoxInvisible: true},
 	}
+
+	r.GetWebBuilder().RegisterEventFunc(OpenConfirmationDialogEvent, r.openConfirmationDialog)
 
 	r.layoutFunc = r.defaultLayout
 	return r
@@ -630,6 +636,7 @@ const rightDrawerContentPortalName = "presets_RightDrawerContentPortalName"
 const dialogPortalName = "presets_DialogPortalName"
 const dialogContentPortalName = "presets_DialogContentPortalName"
 const NotificationCenterPortalName = "notification-center"
+const confirmationDialogPortalName = "presets_confirmationDialogPortalName"
 
 const closeRightDrawerVarScript = "vars.presetsRightDrawer = false"
 const closeDialogVarScript = "vars.presetsDialog = false"
@@ -708,6 +715,55 @@ func (b *Builder) notificationCenter(ctx *web.EventContext) (er web.EventRespons
 		),
 		VCard(content))
 
+	return
+}
+
+const (
+	ConfirmationDialogConfirmEventKey = "presets_ConfirmationDialogConfirmEventKey"
+	ConfirmationDialogTextKey         = "presets_ConfirmationDialogTextKey"
+)
+
+func (b *Builder) openConfirmationDialog(ctx *web.EventContext) (er web.EventResponse, err error) {
+	confirmEvent := ctx.R.FormValue(ConfirmationDialogConfirmEventKey)
+	if confirmEvent == "" {
+		ShowMessage(&er, "confirm event is empty", "error")
+		return
+	}
+
+	msgr := MustGetMessages(ctx.R)
+	text := msgr.ConfirmationDialogText
+	if v := ctx.R.FormValue(ConfirmationDialogTextKey); v != "" {
+		text = v
+	}
+
+	er.UpdatePortals = append(er.UpdatePortals, &web.PortalUpdate{
+		Name: confirmationDialogPortalName,
+		Body: VDialog(
+			VCard(
+				VCardTitle(VIcon("warning").Class("red--text mr-4"), h.Text(text)),
+				VCardActions(
+					VSpacer(),
+					VBtn(msgr.Cancel).
+						Depressed(true).
+						Class("ml-2").
+						On("click", "vars.presetsShowConfirmationDialog = false"),
+
+					VBtn(msgr.OK).
+						Color("primary").
+						Depressed(true).
+						Dark(true).
+						Attr("@click", web.Plaid().
+							EventFunc(confirmEvent).
+							Queries(ctx.Queries()).
+							Go()+";vars.presetsShowConfirmationDialog = false"),
+				),
+			),
+		).MaxWidth("600px").
+			Attr("v-model", "vars.presetsShowConfirmationDialog").
+			Attr(web.InitContextVars, `{presetsShowConfirmationDialog: false}`),
+	})
+
+	er.VarsScript = "setTimeout(function(){ vars.presetsShowConfirmationDialog = true }, 100)"
 	return
 }
 
@@ -820,6 +876,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 			web.Portal().Name(RightDrawerPortalName),
 			web.Portal().Name(dialogPortalName),
 			web.Portal().Name(deleteConfirmPortalName),
+			web.Portal().Name(confirmationDialogPortalName),
 
 			VProgressLinear().
 				Attr(":active", "isFetching").

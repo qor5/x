@@ -23,32 +23,33 @@ type Messages struct {
 	FiltersClear                               string
 	FiltersDone                                string
 	Filters                                    string
-	Filter                     string
-	FiltersDateInTheLast       string
-	FiltersDateEquals          string
-	FiltersDateBetween         string
-	FiltersDateIsAfter         string
-	FiltersDateIsAfterOrOn     string
-	FiltersDateIsBefore        string
-	FiltersDateIsBeforeOrOn    string
-	FiltersDateDays            string
-	FiltersDateMonths          string
-	FiltersDateAnd             string
-	FiltersDateTo              string
-	FiltersNumberEquals        string
-	FiltersNumberBetween       string
-	FiltersNumberGreaterThan   string
-	FiltersNumberLessThan      string
-	FiltersNumberAnd           string
-	FiltersStringEquals        string
-	FiltersStringContains      string
-	FiltersMultipleSelectIn    string
-	FiltersMultipleSelectNotIn string
-	PaginationRowsPerPage      string
-	ListingNoRecordToShow      string
+	Filter                                     string
+	FiltersDateInTheLast                       string
+	FiltersDateEquals                          string
+	FiltersDateBetween                         string
+	FiltersDateIsAfter                         string
+	FiltersDateIsAfterOrOn                     string
+	FiltersDateIsBefore                        string
+	FiltersDateIsBeforeOrOn                    string
+	FiltersDateDays                            string
+	FiltersDateMonths                          string
+	FiltersDateAnd                             string
+	FiltersDateTo                              string
+	FiltersNumberEquals                        string
+	FiltersNumberBetween                       string
+	FiltersNumberGreaterThan                   string
+	FiltersNumberLessThan                      string
+	FiltersNumberAnd                           string
+	FiltersStringEquals                        string
+	FiltersStringContains                      string
+	FiltersMultipleSelectIn                    string
+	FiltersMultipleSelectNotIn                 string
+	PaginationRowsPerPage                      string
+	ListingNoRecordToShow                      string
 	ListingSelectedCountNotice                 string
 	BulkActionNoAvailableRecords               string
 	BulkActionSelectedIdsProcessNoticeTemplate string
+	ConfirmationDialogText                     string
 }
 
 func (msgr *Messages) DeleteConfirmationText(id string) string {
@@ -124,6 +125,7 @@ var Messages_en_US = &Messages{
 	ListingSelectedCountNotice:     "{count} records are selected. ",
 	BulkActionNoAvailableRecords:   "None of the selected records can be executed with this action.",
 	BulkActionSelectedIdsProcessNoticeTemplate: "Partially selected records cannot be executed with this action: {ids}.",
+	ConfirmationDialogText:                     "Are you sure?",
 }
 
 var Messages_zh_CN = &Messages{
@@ -170,4 +172,5 @@ var Messages_zh_CN = &Messages{
 	ListingSelectedCountNotice:     "{count}条记录被选中。",
 	BulkActionNoAvailableRecords:   "所有选中的记录均无法执行这个操作。",
 	BulkActionSelectedIdsProcessNoticeTemplate: "部分选中的记录无法被执行这个操作: {ids}。",
+	ConfirmationDialogText:                     "你确定吗?",
 }
