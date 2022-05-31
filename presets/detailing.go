@@ -13,11 +13,12 @@ import (
 )
 
 type DetailingBuilder struct {
-	mb       *ModelBuilder
-	actions  []*ActionBuilder
-	pageFunc web.PageFunc
-	fetcher  FetchFunc
-	drawer   bool
+	mb        *ModelBuilder
+	actions   []*ActionBuilder
+	pageFunc  web.PageFunc
+	fetcher   FetchFunc
+	tabPanels []ObjectComponentFunc
+	drawer    bool
 	FieldsBuilder
 }
 
@@ -66,6 +67,11 @@ func (b *DetailingBuilder) GetPageFunc() web.PageFunc {
 	return b.defaultPageFunc
 }
 
+func (b *DetailingBuilder) AppendTabsPanelFunc(v ObjectComponentFunc) (r *DetailingBuilder) {
+	b.tabPanels = append(b.tabPanels, v)
+	return b
+}
+
 func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
 
 	var id string
@@ -97,9 +103,30 @@ func (b *DetailingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRes
 
 	comp := b.ToComponent(b.mb.Info(), obj, ctx)
 
+	var tabsContent h.HTMLComponent = comp
+
+	if len(b.tabPanels) != 0 {
+		var tabs []h.HTMLComponent
+		for _, panelFunc := range b.tabPanels {
+			value := panelFunc(obj, ctx)
+			if value != nil {
+				tabs = append(tabs, value)
+			}
+		}
+
+		if len(tabs) != 0 {
+			tabsContent = VTabs(
+				VTab(h.Text(msgr.FormTitle)),
+				VTabItem(web.Scope(comp).VSlot("{plaidForm}")),
+				h.Components(tabs...),
+			).Class("v-tabs--fixed-tabs")
+		}
+	}
+
 	r.Body = VContainer(
 		notice,
-	).AppendChildren(comp).Fluid(true)
+	).AppendChildren(tabsContent).Fluid(true)
+
 	return
 }
 
