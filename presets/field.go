@@ -526,7 +526,7 @@ func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interfa
 				}
 				comp = h.Div(
 					titleComp,
-					v.VCard(rowsComp...).Elevation(1).Class("mx-0 mt-1 mb-4 px-4 pb-0 pt-4"),
+					v.VCard(rowsComp...).Elevation(1).Class("mx-1 mt-1 mb-4 px-4 pb-0 pt-4"),
 				)
 			}
 		default:
