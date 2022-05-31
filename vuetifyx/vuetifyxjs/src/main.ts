@@ -5,13 +5,12 @@ import Autocomplete from './components/Autocomplete';
 import {WithField} from './components/WithField';
 import {Core, SelectedItems} from './components/Helpers';
 import {Filter} from './components/Filter';
-// @ts-ignore
 import DatetimePicker from './components/DateTimePicker.vue';
 import draggable from 'vuedraggable';
 import SelectMany from './components/SelectMany.vue';
 import LinkageSelect from './components/LinkageSelect.vue';
 
-declare var window: any;
+declare const window: any;
 
 (window.__goplaidVueComponentRegisters =
 	window.__goplaidVueComponentRegisters || []).push((Vue: VueConstructor, vueOptions: any): any => {

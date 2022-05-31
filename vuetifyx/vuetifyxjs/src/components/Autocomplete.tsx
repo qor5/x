@@ -1,6 +1,6 @@
 import {VAutocomplete} from 'vuetify/lib';
 
-import Vue, {CreateElement, VNode, VNodeData, Component, PropType} from 'vue';
+import Vue, {Component, CreateElement, VNode, VNodeData} from 'vue';
 import {Core, SelectedItems, slotTemplates} from './Helpers';
 
 export default Vue.extend({
@@ -10,19 +10,19 @@ export default Vue.extend({
 		items: {
 			type: Array,
 			default: () => ([]),
-		} as any,
+		},
 	},
 
 	data() {
 		return {
 			isLoading: false,
-			_items: [],
+			cached_items: [],
 			searchKeyword: '',
 		};
 	},
 
 	created() {
-		this._items = this.$props.items;
+		this.cached_items = this.$props.items;
 	},
 
 	mounted() {
@@ -42,9 +42,9 @@ export default Vue.extend({
 			this.isLoading = true;
 
 			(this as any).$plaid().eventFuncID(this.itemsEventFuncId).query("keyword", val).go().then((r: any) => {
-				let v = [].concat((this as any).selectedItems || [], r.data || []);
+				const v = [].concat((this as any).selectedItems || [], r.data || []);
 				// console.log("after concat", v);
-				this._items = v
+				this.cached_items = v
 			})
 				// .catch((err: any) => {
 				// 	console.log('debounceFetchEvent', err);
@@ -58,20 +58,19 @@ export default Vue.extend({
 	render(h: CreateElement): VNode {
 		// console.log('this.$attrs', this.$attrs);
 		// console.log('render', this);
-		const self = this;
 
 		const {
 			fieldName,
 			itemsEventFuncId,
 			multiple,
-		} = self.$props;
+		} = this.$props;
 
 		let onSearchInput = {};
 		let hideSelected = false;
 		if (itemsEventFuncId) {
 			onSearchInput = {
 				'update:search-input': (val: string) => {
-					self.searchKeyword = val;
+					this.searchKeyword = val;
 				},
 			};
 			hideSelected = true;
@@ -87,20 +86,20 @@ export default Vue.extend({
 					clearable: true,
 					hideSelected,
 				},
-				...self.$attrs,
+				...this.$attrs,
 				...{
-					items: self._items,
-					loading: self.isLoading,
+					items: this.cached_items,
+					loading: this.isLoading,
 				},
 			},
 
 			on: {
 				...{
 					change: (vals: any) => {
-						self.$emit("change", vals);
+						this.$emit("change", vals);
 					},
 					focus: (e: any) => {
-						self.searchKeyword = '';
+						this.searchKeyword = '';
 					},
 				},
 				...onSearchInput,

@@ -1,4 +1,4 @@
-import Vue, { VNode, CreateElement } from 'vue';
+import Vue, {CreateElement, VNode} from 'vue';
 
 export const Core = Vue.extend({
 	props: {
@@ -24,7 +24,7 @@ export const slotTemplates = (h: CreateElement, slots: Slots): VNode[] => {
 	const templates: VNode[] = [];
 
 	for (const name in slots) {
-		if (!slots.hasOwnProperty(name)) {
+		if (!Object.getOwnPropertyDescriptor(slots, name)) {
 			continue;
 		}
 		templates.push(

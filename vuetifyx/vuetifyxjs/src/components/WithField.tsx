@@ -24,14 +24,13 @@ export const WithField = (
 		},
 
 		render(h: CreateElement): VNode {
-			const self = this;
 			const {
 				fieldName,
-			} = self.$props;
+			} = this.$props;
 
-			const ch = self.$listeners["change"];
+			const ch = this.$listeners["change"];
 
-			let chs: Function[] = [];
+			let chs: any[] = [];
 			if (ch) {
 				if (Array.isArray(ch)) {
 					chs = ch;
@@ -41,14 +40,14 @@ export const WithField = (
 			}
 			const data: VNodeData = {
 				props: {
-					...self.$attrs,
+					...this.$attrs,
 				},
 
 				on: {
 					...this.$listeners,
 					...{
 						change: [(val: any) => {
-							(self as any).$plaid().fieldValue(fieldName, val);
+							(this as any).$plaid().fieldValue(fieldName, val);
 						}, ...chs],
 					},
 				},
@@ -57,7 +56,7 @@ export const WithField = (
 			};
 			return (
 				<comp {...data}>
-					{slotTemplates(h, self.$slots)}
+					{slotTemplates(h, this.$slots)}
 				</comp>
 			);
 		},

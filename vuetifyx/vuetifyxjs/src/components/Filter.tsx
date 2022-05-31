@@ -653,7 +653,7 @@ export const Filter = Vue.extend({
 
 			// collect all query keys in the filter, remove them from location search first. then add it by selecting status
 			// but keep original search conditions
-			let filterKeys = (this.internalValue).map((op: FilterItem, i: number) => {
+			const filterKeys = (this.internalValue).map((op: FilterItem, i: number) => {
 				return op.key;
 			});
 
@@ -703,10 +703,9 @@ export const Filter = Vue.extend({
 		},
 
 		newUpdateFilterItem(i: number): (val: FilterItem) => void {
-			const self = this;
 			return (val: FilterItem) => {
-				self.internalValue[i] = val;
-				self.internalValue[i].selected = true;
+				this.internalValue[i] = val;
+				this.internalValue[i].selected = true;
 			};
 		},
 	},
@@ -762,31 +761,31 @@ export const Filter = Vue.extend({
 				</vexpPanel>
 			);
 		});
-		const self = this;
 		return (
-			<vmenu props={{value: self.visible}} scopedSlots={{
+			<vmenu
+				props={{value: this.visible}} scopedSlots={{
 				activator: ({on}: any) => {
 					return (<vbtn on={on} depressed>
 						<vicon>filter_list</vicon>
 						<span class='px-2'>{t.filter}</span>
 						{this.filterCount()}
 					</vbtn>);
-				},
+				}
 			}}
-				   offsetY={true}
-				   allowOverflow={true}
+				offsetY={true}
+				allowOverflow={true}
 				// absolute={true}
-				   minWidth='400px'
-				   maxWidth='400px'
-				   closeOnContentClick={false}
-				   on={
-					   {
-						   input: (value: any) => {
-							   self.togglePopup();
-						   },
-					   }
-				   }
-				   zIndex='2'
+				minWidth='400px'
+				maxWidth='400px'
+				closeOnContentClick={false}
+				on={
+					{
+						input: (value: any) => {
+							this.togglePopup();
+						},
+					}
+				}
+				zIndex='2'
 			>
 				<vtoolbar class='pb-1' color='grey lighten-5' flat={true}>
 					<vbtn on={{click: this.clear}} depressed={true}>{t.clear}</vbtn>
