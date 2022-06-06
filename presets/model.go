@@ -146,6 +146,10 @@ func (b ModelInfo) HasDetailing() bool {
 	return b.mb.hasDetailing
 }
 
+func (b ModelInfo) DetailingInDrawer() bool {
+	return b.mb.detailing.drawer
+}
+
 func (b ModelInfo) PresetsPrefix() string {
 	return b.mb.p.prefix
 }

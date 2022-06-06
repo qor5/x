@@ -174,7 +174,7 @@ func cfTextTd(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTM
 			}
 
 			var a h.HTMLComponent
-			if mi.HasDetailing() && !mi.mb.detailing.drawer {
+			if mi.HasDetailing() && !mi.DetailingInDrawer() {
 				a = h.A().Text(id).Attr("@click", web.Plaid().
 					PushStateURL(mi.DetailingHref(id)).
 					Go(),
