@@ -52,6 +52,7 @@ type SearchParams struct {
 	PerPage        int64
 	Page           int64
 	OrderBy        string
+	PageURL        *url.URL
 }
 
 type SlugDecoder interface {

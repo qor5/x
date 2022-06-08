@@ -882,6 +882,7 @@ func (b *ListingBuilder) getComponents(
 		Keyword:        pageURL.Query().Get("keyword"),
 		PerPage:        perPage,
 		OrderBy:        orderBySQL,
+		PageURL:        pageURL,
 	}
 
 	searchParams.Page, _ = strconv.ParseInt(pageURL.Query().Get("page"), 10, 64)
