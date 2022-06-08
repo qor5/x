@@ -389,6 +389,10 @@ func (b *FieldsBuilder) getLabel(field NameLabel) (r string) {
 func (b *FieldsBuilder) getFieldOrDefault(name string) (r *FieldBuilder) {
 	r = b.getField(name)
 	if r.compFunc == nil {
+		if b.defaults == nil {
+			panic("field defaults must be provided")
+		}
+
 		fType := reflectutils.GetType(b.model, name)
 		if fType == nil {
 			fType = reflect.TypeOf("")
