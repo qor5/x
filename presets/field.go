@@ -61,7 +61,7 @@ type FieldBuilder struct {
 	listItemBuilder *FieldsBuilder
 }
 
-func (b *FieldsBuilder) appendNewFieldWithDefault(name string) (r *FieldBuilder) {
+func (b *FieldsBuilder) appendNewFieldWithName(name string) (r *FieldBuilder) {
 	r = &FieldBuilder{}
 
 	if b.model == nil {
@@ -73,14 +73,14 @@ func (b *FieldsBuilder) appendNewFieldWithDefault(name string) (r *FieldBuilder)
 		fType = reflect.TypeOf("")
 	}
 
-	if b.defaults == nil {
-		panic("field defaults must be provided")
-	}
+	// if b.defaults == nil {
+	// 	panic("field defaults must be provided")
+	// }
 
-	ft := b.defaults.fieldTypeByTypeOrCreate(fType)
+	// ft := b.defaults.fieldTypeByTypeOrCreate(fType)
 	r.name = name
-	r.ComponentFunc(ft.compFunc).
-		SetterFunc(ft.setterFunc)
+	// r.ComponentFunc(ft.compFunc).
+	// 	SetterFunc(ft.setterFunc)
 	b.fields = append(b.fields, r)
 	return
 }
@@ -338,7 +338,7 @@ func (b *FieldsBuilder) Field(name string) (r *FieldBuilder) {
 		return
 	}
 
-	r = b.appendNewFieldWithDefault(name)
+	r = b.appendNewFieldWithName(name)
 	return
 }
 
@@ -386,6 +386,21 @@ func (b *FieldsBuilder) getLabel(field NameLabel) (r string) {
 	return humanizeString(field.name)
 }
 
+func (b *FieldsBuilder) getFieldOrDefault(name string) (r *FieldBuilder) {
+	r = b.getField(name)
+	if r.compFunc == nil {
+		fType := reflectutils.GetType(b.model, name)
+		if fType == nil {
+			fType = reflect.TypeOf("")
+		}
+
+		ft := b.defaults.fieldTypeByTypeOrCreate(fType)
+		r.ComponentFunc(ft.compFunc).
+			SetterFunc(ft.setterFunc)
+	}
+	return
+}
+
 func (b *FieldsBuilder) getField(name string) (r *FieldBuilder) {
 	for _, f := range b.fields {
 		if f.name == name {
@@ -428,7 +443,7 @@ func (b *FieldsBuilder) Only(vs ...interface{}) (r *FieldsBuilder) {
 func (b *FieldsBuilder) appendFieldAfterClone(ob *FieldsBuilder, name string) {
 	f := ob.getField(name)
 	if f == nil {
-		b.appendNewFieldWithDefault(name)
+		b.appendNewFieldWithName(name)
 	} else {
 		b.fields = append(b.fields, f.Clone())
 	}
@@ -542,10 +557,10 @@ func (b *FieldsBuilder) toComponentWithFormValueKey(info *ModelInfo, obj interfa
 }
 
 func (b *FieldsBuilder) fieldToComponentWithFormValueKey(info *ModelInfo, obj interface{}, parentFormValueKey string, ctx *web.EventContext, name string, id interface{}, edit bool, vErr *web.ValidationErrors) h.HTMLComponent {
-	f := b.getField(name)
-	if f.compFunc == nil {
-		return nil
-	}
+	f := b.getFieldOrDefault(name)
+	// if f.compFunc == nil {
+	// 	return nil
+	// }
 	if info != nil && info.Verifier().Do(PermGet).ObjectOn(obj).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
 		return nil
 	}

@@ -958,6 +958,7 @@ func (b *ListingBuilder) getComponents(
 		if b.mb.Info().Verifier().Do(PermList).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
 			continue
 		}
+		f = b.getFieldOrDefault(f.name) // fill in empty compFunc and setter func with default
 		_, ok := orderableFieldMap[f.name]
 		dataTable.(*stripeui.DataTableBuilder).Column(f.name).
 			Title(i18n.PT(ctx.R, ModelsI18nModuleKey, b.mb.label, b.mb.getLabel(f.NameLabel))).
