@@ -6,7 +6,6 @@ import (
 	"reflect"
 
 	"github.com/goplaid/web"
-	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/goplaid/x/vuetifyx"
 	"github.com/iancoleman/strcase"
@@ -165,33 +164,6 @@ func (b *FieldDefaults) fieldTypeByTypeOrCreate(tv reflect.Type) (r *FieldDefaul
 }
 
 func cfTextTd(obj interface{}, field *FieldContext, ctx *web.EventContext) h.HTMLComponent {
-	if field.Name == "ID" {
-		id := field.StringValue(obj)
-		if len(id) > 0 {
-			mi := field.ModelInfo
-			if mi == nil {
-				return h.Td().Text(id)
-			}
-
-			var a h.HTMLComponent
-			if mi.HasDetailing() && !mi.DetailingInDrawer() {
-				a = h.A().Text(id).Attr("@click", web.Plaid().
-					PushStateURL(mi.DetailingHref(id)).
-					Go(),
-				)
-			} else {
-				if field.ModelInfo.Verifier().Do(PermUpdate).ObjectOn(obj).WithReq(ctx.R).IsAllowed() == nil {
-					a = h.A().Text(id).Attr("@click",
-						web.Plaid().EventFunc(actions.Edit).
-							Query(ParamID, id).
-							Go())
-				} else {
-					a = h.Text(id)
-				}
-			}
-			return h.Td(a)
-		}
-	}
 	return h.Td(h.Text(field.StringValue(obj)))
 }
 
