@@ -1,12 +1,13 @@
-import {VAutocomplete} from 'vuetify/lib';
+import Vue, { Component, CreateElement, VNode, VNodeData } from 'vue';
+import { VAutocomplete } from 'vuetify/lib';
+import { Core, SelectedItems, slotTemplates } from './Helpers';
 
-import Vue, {Component, CreateElement, VNode, VNodeData} from 'vue';
-import {Core, SelectedItems, slotTemplates} from './Helpers';
 
 export default Vue.extend({
 	mixins: [Core, SelectedItems],
 	props: {
 		itemsEventFuncId: Object,
+		remoteRes:  String,
 		items: {
 			type: Array,
 			default: () => ([]),
@@ -18,6 +19,11 @@ export default Vue.extend({
 			isLoading: false,
 			cached_items: [],
 			searchKeyword: '',
+			remote: {
+				total: 0,
+				current: 0,
+				pages: 0,
+			},
 		};
 	},
 
