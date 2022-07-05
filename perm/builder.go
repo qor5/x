@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"net/http"
 	"reflect"
 	"strings"
@@ -15,6 +14,7 @@ import (
 	"github.com/ory/ladon"
 	"github.com/ory/ladon/manager/memory"
 	"github.com/sunfmin/reflectutils"
+	"gorm.io/gorm"
 )
 
 const (
@@ -97,14 +97,14 @@ func (b *Builder) ContextFunc(v ContextFunc) (r *Builder) {
 	return b
 }
 
-func (b *Builder) EnableDBPolicy(db *gorm.DB, dbPolicyModel DBPolicy) (r *Builder) {
+func (b *Builder) EnableDBPolicy(db *gorm.DB, dbPolicyModel DBPolicy, loadDuration time.Duration) (r *Builder) {
 	if dbPolicyModel == nil {
 		b.dbPolicyModel = DefaultDBPolicy{}
 	} else {
 		b.dbPolicyModel = dbPolicyModel
 	}
 
-	go b.loopLoadDBPolicies(db, 6*time.Second)
+	go b.loopLoadDBPolicies(db, loadDuration)
 	return b
 }
 
