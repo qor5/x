@@ -194,7 +194,7 @@ func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, 
 		}
 
 		if f.setterFunc == nil {
-			if len(ctx.R.Form[formKey]) == 0 {
+			if ctx.R.Form == nil || len(ctx.R.Form[formKey]) == 0 {
 				continue
 			}
 			val, err1 := reflectutils.Get(fromObj, f.name)
