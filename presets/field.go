@@ -180,13 +180,12 @@ func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, 
 				continue
 			}
 		}
+		formKey := f.name
+		if parent != nil && parent.FormKey != "" {
+			formKey = fmt.Sprintf("%s.%s", parent.FormKey, f.name)
+		}
 
 		if f.listItemBuilder != nil {
-			formKey := f.name
-			if parent != nil && parent.FormKey != "" {
-				formKey = fmt.Sprintf("%s.%s", parent.FormKey, f.name)
-			}
-
 			b.setWithChildFromObjs(fromObj, formKey, f, info, modifiedIndexes, toObj, removeDeletedAndSort, ctx)
 
 			b.setToObjNilOrDelete(toObj, formKey, f, modifiedIndexes, removeDeletedAndSort)
@@ -195,6 +194,9 @@ func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, 
 		}
 
 		if f.setterFunc == nil {
+			if ctx.R.Form == nil || len(ctx.R.Form[formKey]) == 0 {
+				continue
+			}
 			val, err1 := reflectutils.Get(fromObj, f.name)
 			if err1 != nil {
 				continue
