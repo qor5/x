@@ -1,13 +1,20 @@
-import Vue, { Component, CreateElement, VNode, VNodeData } from 'vue';
-import { VAutocomplete } from 'vuetify/lib';
+import Vue, { CreateElement, VNode, VNodeData } from 'vue';
+import { VAutocomplete, VPagination } from 'vuetify/lib';
 import { Core, SelectedItems, slotTemplates } from './Helpers';
-
 
 export default Vue.extend({
 	mixins: [Core, SelectedItems],
+	components: {
+		vpagination: VPagination,
+		vautocomplete: VAutocomplete,
+	},
+
 	props: {
-		itemsEventFuncId: Object,
+		remoteUrl: String,
 		remoteRes:  String,
+		cacheItems: Boolean,
+		hideSelected: Boolean,
+		isPaging: Boolean,
 		items: {
 			type: Array,
 			default: () => ([]),
@@ -16,19 +23,48 @@ export default Vue.extend({
 
 	data() {
 		return {
+			listItems: [],
+			cachedSelectedItems: [],
+			value: [],
 			isLoading: false,
-			cached_items: [],
 			searchKeyword: '',
 			remote: {
 				total: 0,
 				current: 0,
-				pages: 0,
+				disabled: false,
 			},
 		};
 	},
 
+	methods: {
+		loadRemoteItems() {
+			if (!this.remoteUrl || !this.remoteRes) {
+				return;
+			}
+
+			this.isLoading = true;
+			(this as any).$plaid().url(this.remoteUrl).eventFunc("autocomplete-remote-res-event").query("keyword", this.searchKeyword).query("name", this.remoteRes).query("current", this.remote.current).go().then((r: any) => {
+				this.remote.current = r.data.current;
+				this.remote.total = r.data.total;
+				if (this.isPaging) {
+					this.listItems = [].concat(this.cachedSelectedItems || [], r.data.items || []);
+				}else{
+					if (this.remote.current >= this.remote.total) {
+						this.remote.disabled = true;
+					}else{
+						this.remote.disabled = false;
+					}
+					this.listItems = [].concat(this.listItems || [], r.data.items || []);
+				}
+			});
+			this.isLoading = false;
+		}
+	},
+
 	created() {
-		this.cached_items = this.$props.items;
+		this.listItems =  this.$props.items || this.$props.selectedItems || [];
+		this.cachedSelectedItems = this.$props.selectedItems || [];
+		this.value = (this.$attrs.value) as any || [];
 	},
 
 	mounted() {
@@ -37,49 +73,81 @@ export default Vue.extend({
 
 	watch: {
 		searchKeyword(val: string) {
-			// console.log('searchKeyword', val);
-			// console.log('this.itemsEventFuncId', this.itemsEventFuncId);
 			if (val === null) {
 				this.searchKeyword = '';
 				return;
 			}
-			// console.log('in search', val);
-			// if (this._items && this._items.length > 0) { return; }
-			this.isLoading = true;
 
-			(this as any).$plaid().eventFuncID(this.itemsEventFuncId).query("keyword", val).go().then((r: any) => {
-				const v = [].concat((this as any).selectedItems || [], r.data || []);
-				// console.log("after concat", v);
-				this.cached_items = v
-			})
-				// .catch((err: any) => {
-				// 	console.log('debounceFetchEvent', err);
-				// })
-				.finally(() => {
-					this.isLoading = false
-				});
+			if (this.isPaging) {
+				this.remote.current = 1;
+			}else{
+				this.listItems  = this.cachedSelectedItems
+				this.remote.current = 0;
+			}
+
+			this.loadRemoteItems();
 		},
 	},
 
 	render(h: CreateElement): VNode {
-		// console.log('this.$attrs', this.$attrs);
-		// console.log('render', this);
-
 		const {
-			fieldName,
-			itemsEventFuncId,
+			remoteRes,
 			multiple,
 		} = this.$props;
 
-		let onSearchInput = {};
-		let hideSelected = false;
-		if (itemsEventFuncId) {
-			onSearchInput = {
-				'update:search-input': (val: string) => {
-					this.searchKeyword = val;
-				},
-			};
+		let {
+			hideSelected,
+			cacheItems,
+		} = this.$props
+
+		if (remoteRes) {
 			hideSelected = true;
+			cacheItems = false;
+			const loadmoreNode: VNode[] = [];
+
+			if (this.isPaging){
+				const loadmoreNodeData: VNodeData = {
+					props: {
+						circle: true,
+						length: this.remote.total,
+						value: this.remote.current,
+						totalVisible: 3,
+					},
+					on: {
+						"input": (v: number) => {
+							this.remote.current = v;
+							this.loadRemoteItems();
+						},
+					},
+				}
+
+				loadmoreNode.push(
+					<div class="text-center">
+						<vpagination {...loadmoreNodeData}></vpagination>
+					</div>
+				);
+			}else{
+				const loadmoreNodeData: VNodeData = {
+					props: {
+						class: "ma-2",
+						color: "primary",
+						disabled: this.remote.disabled,
+						loading: this.isLoading,
+					},
+					on: {
+						"click": () => {
+							this.loadRemoteItems();
+						},
+					},
+				}
+
+				loadmoreNode.push(
+					<div class="text-center">
+						<v-btn {...loadmoreNodeData}>Load more</v-btn> <v-divider vertical></v-divider> <span>{this.remote.current}/{this.remote.total}</span>
+					</div>
+				);
+			}
+			this.$slots["append-item"] = loadmoreNode;
 		}
 
 		const data: VNodeData = {
@@ -91,10 +159,12 @@ export default Vue.extend({
 					deletableChips: multiple,
 					clearable: true,
 					hideSelected,
+					cacheItems,
 				},
 				...this.$attrs,
 				...{
-					items: this.cached_items,
+					items: this.listItems,
+					value: this.value,
 					loading: this.isLoading,
 				},
 			},
@@ -102,20 +172,29 @@ export default Vue.extend({
 			on: {
 				...{
 					change: (vals: any) => {
+						const items: any[] = [];
+						this.listItems.forEach((item: any) => {
+							if (vals.includes(item.value)) {
+								items.push(item);
+							}
+						})
+						this.cachedSelectedItems = (items) as [];
+						this.value = vals;
 						this.$emit("change", vals);
 					},
 					focus: (e: any) => {
 						this.searchKeyword = '';
 					},
+					'update:search-input': (val: string) => {
+						this.searchKeyword = val;
+					},
 				},
-				...onSearchInput,
 			},
 		};
-		const comp: Component = VAutocomplete;
 		return (
-			<comp {...data}>
+			<vautocomplete {...data}>
 				{slotTemplates(h, this.$slots)}
-			</comp>
+			</vautocomplete>
 		);
 	},
 });
