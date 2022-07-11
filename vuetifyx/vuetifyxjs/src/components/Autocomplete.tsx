@@ -56,8 +56,9 @@ export default Vue.extend({
 					}
 					this.listItems = [].concat(this.listItems || [], r.data.items || []);
 				}
+			}).finally(() => {
+				this.isLoading = false;
 			});
-			this.isLoading = false;
 		},
 		endIntersect(entrie: any, observer: any, isIntersecting: any) {
 			if (isIntersecting && !this.remote.disabled) {
