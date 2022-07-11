@@ -94,7 +94,7 @@ type FilterTranslations struct {
 	Filters string `json:"filters,omitempty"`
 	Filter  string `json:"filter,omitempty"`
 	Date    struct {
-		To           string `json:"to,omitempty"`
+		To string `json:"to,omitempty"`
 	} `json:"date,omitempty"`
 
 	Number struct {
@@ -170,6 +170,7 @@ type FilterItem struct {
 	Options           []*SelectItem           `json:"options,omitempty"`
 	LinkageSelectData FilterLinkageSelectData `json:"linkageSelectData,omitempty"`
 	Invisible         bool                    `json:"invisible,omitempty"`
+	RemoteResource    *RemoteResource         `json:"remoteResource,omitempty"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {
