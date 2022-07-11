@@ -58,7 +58,12 @@ export default Vue.extend({
 				}
 			});
 			this.isLoading = false;
-		}
+		},
+		endIntersect(entrie: any, observer: any, isIntersecting: any) {
+			if (isIntersecting && !this.remote.disabled) {
+				this.loadRemoteItems();
+			}
+		},
 	},
 
 	created() {
@@ -139,6 +144,10 @@ export default Vue.extend({
 							this.loadRemoteItems();
 						},
 					},
+					directives: [{
+						name: "intersect",
+						value: this.endIntersect,
+					}],
 				}
 
 				loadmoreNode.push(
