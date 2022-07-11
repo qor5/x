@@ -73,9 +73,9 @@ type RemoteResource struct {
 	DB    *gorm.DB                             `json:"-"`
 	NewDB func(ctx *web.EventContext) *gorm.DB `json:"-"`
 
-	Name         string                   `json:"name"`
-	RemoteURL    string                   `json:"remote_url"`
-	IsPaging     bool                     `json:"is_paging"`
+	Name         string                   `json:"remote-res"`
+	RemoteURL    string                   `json:"remote-url"`
+	IsPaging     bool                     `json:"is-paging"`
 	SizePerPage  int                      `json:"-"`
 	SearchFields []string                 `json:"-"`
 	OptionIcon   func(interface{}) string `json:"-"`
