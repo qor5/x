@@ -52,6 +52,9 @@ func (b *VXAutocompleteBuilder) SetRemoteResource(res *RemoteResource) (r *VXAut
 	b.tag.Attr("remote-res", res.Name)
 	b.tag.Attr("remote-url", res.RemoteURL)
 	b.tag.Attr("is-paging", res.IsPaging)
+	if res.OptionIcon != nil {
+		b.tag.Attr("has-icon", true)
+	}
 	return b
 }
 

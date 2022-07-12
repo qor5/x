@@ -15,6 +15,7 @@ export default Vue.extend({
 		cacheItems: Boolean,
 		hideSelected: Boolean,
 		isPaging: Boolean,
+		hasIcon: Boolean,
 		items: {
 			type: Array,
 			default: () => ([]),
@@ -106,11 +107,10 @@ export default Vue.extend({
 			cacheItems,
 		} = this.$props
 
+		const slots: VNode[] = slotTemplates(h, this.$slots);
 		if (remoteRes) {
 			hideSelected = true;
 			cacheItems = false;
-			const loadmoreNode: VNode[] = [];
-
 			if (this.isPaging){
 				const loadmoreNodeData: VNodeData = {
 					props: {
@@ -127,11 +127,13 @@ export default Vue.extend({
 					},
 				}
 
-				loadmoreNode.push(
-					<div class="text-center">
-						<vpagination {...loadmoreNodeData}></vpagination>
-					</div>
-				);
+				slots.push(
+					<template slot="append-item">
+						<div class="text-center">
+							<vpagination {...loadmoreNodeData}></vpagination>
+						</div>
+					</template>
+				)
 			}else{
 				const loadmoreNodeData: VNodeData = {
 					props: {
@@ -151,13 +153,57 @@ export default Vue.extend({
 					}],
 				}
 
-				loadmoreNode.push(
-					<div class="text-center">
-						<v-btn {...loadmoreNodeData}>Load more</v-btn> <v-divider vertical></v-divider> <span>{this.remote.current}/{this.remote.total}</span>
-					</div>
-				);
+				slots.push(
+					<template slot="append-item">
+						<div class="text-center">
+							<v-btn {...loadmoreNodeData}>Load more</v-btn> <v-divider vertical></v-divider> <span>{this.remote.current}/{this.remote.total}</span>
+						</div>
+					</template>
+				)
 			}
-			this.$slots["append-item"] = loadmoreNode;
+
+			if (this.hasIcon){
+				this.$scopedSlots["item"] = (props: any)  => {
+					const nodes: VNode[] = [];
+					nodes.push(
+						<v-list-item-avatar tile>
+							<img src={props.item.icon}/>
+						</v-list-item-avatar>
+					)
+					nodes.push(
+						<v-list-item-content>
+							<v-list-item-title v-html={props.item.text}>{props.item.text}</v-list-item-title>
+						</v-list-item-content>
+					)
+					return nodes;
+				}
+
+				this.$scopedSlots["selection"] = (props: any)  => {
+					const nodes: VNode[] = [];
+					const nodeData: VNodeData = {
+						props: {
+							...props.attrs,
+							close: true,
+						},
+						on: {
+							"click:close": () => {
+								this.value.splice(this.value.indexOf(props.item.value as never), 1)
+								this.$emit("change", this.value);
+							},
+						},
+
+					}
+					nodes.push(
+					<v-chip {...nodeData}>
+						<v-avatar left>
+							<v-img src={props.item.icon}></v-img>
+						</v-avatar>
+						{props.item.text}
+					</v-chip>
+					)
+					return nodes;
+				}
+			}
 		}
 
 		const data: VNodeData = {
@@ -200,10 +246,13 @@ export default Vue.extend({
 					},
 				},
 			},
+			scopedSlots: {
+				...this.$scopedSlots,
+			}
 		};
 		return (
 			<vautocomplete {...data}>
-				{slotTemplates(h, this.$slots)}
+				{slots}
 			</vautocomplete>
 		);
 	},
