@@ -4,8 +4,6 @@ package e10_vuetify_autocomplete
 
 import (
 	"fmt"
-	"os"
-	"path"
 	"reflect"
 	"strconv"
 	"strings"
@@ -73,10 +71,16 @@ type Product struct {
 var remoteRes *vuetifyx.RemoteResource
 
 func init() {
-	pwd, _ := os.Getwd()
-	db, err := gorm.Open(sqlite.Open(path.Join(pwd, "docs/examples/e10_vuetify_autocomplete/my.db")), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("/tmp/my.db"), &gorm.Config{})
 	if err != nil {
 		panic(err)
+	}
+
+	db.AutoMigrate(&Product{})
+	db.Where("1=1").Delete(&Product{})
+
+	for i := 1; i < 300; i++ {
+		db.Create(&Product{Name: fmt.Sprintf("Product %d", i)})
 	}
 
 	remoteRes = vuetifyx.RegisterRemoteResource(
