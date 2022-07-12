@@ -30,6 +30,7 @@ type ListingBuilder struct {
 	filterTabsFunc    FilterTabsFunc
 	newBtnFunc        ComponentFunc
 	pageFunc          web.PageFunc
+	cellWrapperFunc   stripeui.CellWrapperFunc
 	searcher          SearchFunc
 	searchColumns     []string
 	perPage           int64
@@ -62,6 +63,11 @@ func (b *ListingBuilder) Only(vs ...string) (r *ListingBuilder) {
 
 func (b *ListingBuilder) PageFunc(pf web.PageFunc) (r *ListingBuilder) {
 	b.pageFunc = pf
+	return b
+}
+
+func (b *ListingBuilder) CellWrapperFunc(cwf stripeui.CellWrapperFunc) (r *ListingBuilder) {
+	b.cellWrapperFunc = cwf
 	return b
 }
 
@@ -924,28 +930,33 @@ func (b *ListingBuilder) getComponents(
 		pagesCount--
 	}
 
-	dataTable = s.DataTable(objs).
-		CellWrapperFunc(func(cell h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent {
-			tdbind := cell
-			if b.mb.hasDetailing && !b.mb.detailing.drawer {
-				tdbind.SetAttr("@click.self", web.Plaid().
-					PushStateURL(
-						b.mb.Info().
-							DetailingHref(id)).
-					Go())
-			} else {
-				event := actions.Edit
-				if b.mb.hasDetailing {
-					event = actions.DetailingDrawer
-				}
-				tdbind.SetAttr("@click.self",
-					web.Plaid().
-						EventFunc(event).
-						Query(ParamID, id).
-						Go()+fmt.Sprintf(`; vars.currEditingListItemID="%s-%s"`, dataTableID, id))
+	var cellWraperFunc = func(cell h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent {
+		tdbind := cell
+		if b.mb.hasDetailing && !b.mb.detailing.drawer {
+			tdbind.SetAttr("@click.self", web.Plaid().
+				PushStateURL(
+					b.mb.Info().
+						DetailingHref(id)).
+				Go())
+		} else {
+			event := actions.Edit
+			if b.mb.hasDetailing {
+				event = actions.DetailingDrawer
 			}
-			return tdbind
-		}).
+			tdbind.SetAttr("@click.self",
+				web.Plaid().
+					EventFunc(event).
+					Query(ParamID, id).
+					Go()+fmt.Sprintf(`; vars.currEditingListItemID="%s-%s"`, dataTableID, id))
+		}
+		return tdbind
+	}
+	if b.cellWrapperFunc != nil {
+		cellWraperFunc = b.cellWrapperFunc
+	}
+
+	dataTable = s.DataTable(objs).
+		CellWrapperFunc(cellWraperFunc).
 		RowWrapperFunc(func(row h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent {
 			row.SetAttr(":class", fmt.Sprintf(`{"blue lighten-5": vars.presetsRightDrawer && vars.currEditingListItemID==="%s-%s"}`, dataTableID, id))
 			return row
