@@ -38,6 +38,7 @@ type ListingBuilder struct {
 	orderBy           string
 	orderableFields   []*OrderableField
 	selectableColumns bool
+	conditions        []*SQLCondition
 	FieldsBuilder
 }
 
@@ -118,6 +119,11 @@ func (b *ListingBuilder) OrderableFields(v []*OrderableField) (r *ListingBuilder
 
 func (b *ListingBuilder) SelectableColumns(v bool) (r *ListingBuilder) {
 	b.selectableColumns = v
+	return b
+}
+
+func (b *ListingBuilder) Conditions(v []*SQLCondition) (r *ListingBuilder) {
+	b.conditions = v
 	return b
 }
 
@@ -889,6 +895,7 @@ func (b *ListingBuilder) getComponents(
 		PerPage:        perPage,
 		OrderBy:        orderBySQL,
 		PageURL:        pageURL,
+		SQLConditions:  b.conditions,
 	}
 
 	searchParams.Page, _ = strconv.ParseInt(pageURL.Query().Get("page"), 10, 64)
