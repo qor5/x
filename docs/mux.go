@@ -597,6 +597,11 @@ func SamplesHandler(prefix string) http.Handler {
 	)
 
 	mux.Handle(
+		e10_vuetify_autocomplete.VuetifyAutoCompletePresetPath+"/",
+		e10_vuetify_autocomplete.ExamplePreset,
+	)
+
+	mux.Handle(
 		e22_vuetify_variant_sub_form.VuetifyVariantSubFormPath,
 		e22_vuetify_variant_sub_form.VuetifyVariantSubFormPB.Wrap(demoVuetifyLayout),
 	)

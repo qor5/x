@@ -94,8 +94,6 @@ func New() *Builder {
 	}
 
 	r.GetWebBuilder().RegisterEventFunc(OpenConfirmationDialogEvent, r.openConfirmationDialog)
-	r.GetWebBuilder().RegisterEventFunc(vuetifyx.AutocompleteRemoteResEvent, vuetifyx.FetchItemsFromRemoteResource)
-
 	r.layoutFunc = r.defaultLayout
 	return r
 }

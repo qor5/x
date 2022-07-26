@@ -11,11 +11,11 @@ export default Vue.extend({
 
 	props: {
 		remoteUrl: String,
-		remoteRes:  String,
-		cacheItems: Boolean,
-		hideSelected: Boolean,
+		eventName:  String,
 		isPaging: Boolean,
 		hasIcon: Boolean,
+		cacheItems: Boolean,
+		hideSelected: Boolean,
 		items: {
 			type: Array,
 			default: () => ([]),
@@ -32,6 +32,8 @@ export default Vue.extend({
 			remote: {
 				total: 0,
 				current: 0,
+				pages: 0,
+				page: 0,
 				disabled: false,
 			},
 		};
@@ -39,14 +41,15 @@ export default Vue.extend({
 
 	methods: {
 		loadRemoteItems() {
-			if (!this.remoteUrl || !this.remoteRes) {
+			if (!this.remoteUrl || !this.eventName) {
 				return;
 			}
 
 			this.isLoading = true;
-			(this as any).$plaid().url(this.remoteUrl).eventFunc("autocomplete-remote-res-event").query("keyword", this.searchKeyword).query("name", this.remoteRes).query("current", this.remote.current).go().then((r: any) => {
+			(this as any).$plaid().url(this.remoteUrl).eventFunc(this.eventName).query("keyword", this.searchKeyword).query("page", this.remote.page).go().then((r: any) => {
 				this.remote.current = r.data.current;
 				this.remote.total = r.data.total;
+				this.remote.pages = r.data.pages;				
 				if (this.isPaging) {
 					this.listItems = [].concat(this.cachedSelectedItems || [], r.data.items || []);
 				}else{
@@ -63,6 +66,7 @@ export default Vue.extend({
 		},
 		endIntersect(entrie: any, observer: any, isIntersecting: any) {
 			if (isIntersecting && !this.remote.disabled) {
+				this.remote.page += 1;
 				this.loadRemoteItems();
 			}
 		},
@@ -85,11 +89,9 @@ export default Vue.extend({
 				return;
 			}
 
-			if (this.isPaging) {
-				this.remote.current = 1;
-			}else{
+			this.remote.page = 1;
+			if (!this.isPaging) {
 				this.listItems  = this.cachedSelectedItems
-				this.remote.current = 0;
 			}
 
 			this.loadRemoteItems();
@@ -98,7 +100,7 @@ export default Vue.extend({
 
 	render(h: CreateElement): VNode {
 		const {
-			remoteRes,
+			remoteUrl,
 			multiple,
 		} = this.$props;
 
@@ -108,20 +110,20 @@ export default Vue.extend({
 		} = this.$props
 
 		const slots: VNode[] = slotTemplates(h, this.$slots);
-		if (remoteRes) {
+		if (remoteUrl) {
 			hideSelected = true;
 			cacheItems = false;
 			if (this.isPaging){
 				const loadmoreNodeData: VNodeData = {
 					props: {
 						circle: true,
-						length: this.remote.total,
-						value: this.remote.current,
-						totalVisible: 3,
+						length: this.remote.pages,
+						value: this.remote.page,
+						totalVisible: 5,
 					},
 					on: {
 						"input": (v: number) => {
-							this.remote.current = v;
+							this.remote.page = v;
 							this.loadRemoteItems();
 						},
 					},
@@ -144,6 +146,7 @@ export default Vue.extend({
 					},
 					on: {
 						"click": () => {
+							this.remote.page += 1;
 							this.loadRemoteItems();
 						},
 					},

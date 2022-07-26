@@ -170,7 +170,7 @@ type FilterItem struct {
 	Options           []*SelectItem           `json:"options,omitempty"`
 	LinkageSelectData FilterLinkageSelectData `json:"linkageSelectData,omitempty"`
 	Invisible         bool                    `json:"invisible,omitempty"`
-	RemoteResource    *RemoteResource         `json:"remoteResource,omitempty"`
+	RemoteResource    map[string]interface{}  `json:"remoteResource,omitempty"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {
