@@ -31,7 +31,7 @@ type ListingBuilder struct {
 	newBtnFunc        ComponentFunc
 	pageFunc          web.PageFunc
 	cellWrapperFunc   stripeui.CellWrapperFunc
-	searcher          SearchFunc
+	Searcher          SearchFunc
 	searchColumns     []string
 	perPage           int64
 	totalVisible      int64
@@ -72,8 +72,8 @@ func (b *ListingBuilder) CellWrapperFunc(cwf stripeui.CellWrapperFunc) (r *Listi
 	return b
 }
 
-func (b *ListingBuilder) Searcher(v SearchFunc) (r *ListingBuilder) {
-	b.searcher = v
+func (b *ListingBuilder) SearchFunc(v SearchFunc) (r *ListingBuilder) {
+	b.Searcher = v
 	return b
 }
 
@@ -914,7 +914,7 @@ func (b *ListingBuilder) getComponents(
 		})
 	}
 
-	if b.searcher == nil || b.mb.p.dataOperator == nil {
+	if b.Searcher == nil || b.mb.p.dataOperator == nil {
 		panic("presets.New().DataOperator(...) required")
 	}
 
@@ -922,7 +922,7 @@ func (b *ListingBuilder) getComponents(
 	var totalCount int
 	var err error
 
-	objs, totalCount, err = b.searcher(b.mb.NewModelSlice(), searchParams, ctx)
+	objs, totalCount, err = b.Searcher(b.mb.NewModelSlice(), searchParams, ctx)
 
 	if err != nil {
 		panic(err)
