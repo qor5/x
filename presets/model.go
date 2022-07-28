@@ -94,7 +94,7 @@ func (mb *ModelBuilder) NewModelSlice() (r interface{}) {
 func (mb *ModelBuilder) newListing() (lb *ListingBuilder) {
 	mb.listing = &ListingBuilder{mb: mb, FieldsBuilder: *mb.p.listFieldDefaults.InspectFields(mb.model)}
 	if mb.p.dataOperator != nil {
-		mb.listing.Searcher(mb.p.dataOperator.Search)
+		mb.listing.SearchFunc(mb.p.dataOperator.Search)
 	}
 
 	rmb := mb.listing.RowMenu("Edit", "Delete")
