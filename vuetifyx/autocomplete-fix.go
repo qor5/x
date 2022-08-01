@@ -43,7 +43,7 @@ func (b *VXAutocompleteBuilder) SelectedItems(v interface{}) (r *VXAutocompleteB
 	return b
 }
 
-func (b *VXAutocompleteBuilder) SetRemoteResource(ds *AutocompleteDataSource) (r *VXAutocompleteBuilder) {
+func (b *VXAutocompleteBuilder) SetDataSource(ds *AutocompleteDataSource) (r *VXAutocompleteBuilder) {
 	b.tag.Attr("remote-url", ds.RemoteURL)
 	b.tag.Attr("event-name", ds.EventName)
 	b.tag.Attr("is-paging", ds.IsPaging)

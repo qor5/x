@@ -125,14 +125,19 @@ func (b *ListingBuilder) ConfigureAutocompleteDataSource(config *AutocompleteDat
 			})
 		}
 
-		current := int((page - 1) * config.PerPage)
+		current := int((page-1)*config.PerPage) + len(items)
+		if current > totalCount {
+			current = totalCount
+		}
+
 		pages := totalCount / int(config.PerPage)
 		if totalCount%int(config.PerPage) > 0 {
 			pages++
 		}
+
 		r.Data = AutocompleteDataResult{
 			Total:   totalCount,
-			Current: current + len(items),
+			Current: current,
 			Pages:   pages,
 			Items:   items,
 		}

@@ -121,7 +121,7 @@ func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error)
 		result.AppendChildren(h.Li().Text(v))
 	}
 	pr.Body = VContainer(
-		h.H1("An auto complete that you can select multiple with static data"),
+		h.H1("An auto complete that you can select multiple options with static data"),
 		VAutocomplete().
 			Items(options1).
 			FieldName("Values1").
@@ -131,17 +131,17 @@ func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error)
 			Value(globalState.Values1),
 		result,
 
-		h.H1("An auto complete that you can select multiple with remote resource by load more"),
+		h.H1("An auto complete that you can select multiple options from data source by loading more"),
 		vuetifyx.VXAutocomplete().
 			FieldName("Values2").
-			Label("Load Options from Remote").
-			SetRemoteResource(loadMoreRes),
+			Label("Load options from data source").
+			SetDataSource(loadMoreRes),
 
-		h.H1("An auto complete that you can select multiple with remote resource by paging"),
+		h.H1("An auto complete that you can select multiple options from data source resource by paging"),
 		vuetifyx.VXAutocomplete().
 			FieldName("Values2").
-			Label("Load Options from Remote").
-			SetRemoteResource(pagingRes),
+			Label("Load options from data source").
+			SetDataSource(pagingRes),
 
 		h.H1("VSelect"),
 		VSelect().
