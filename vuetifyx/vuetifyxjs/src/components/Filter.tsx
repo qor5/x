@@ -370,7 +370,7 @@ export const SelectItem = Vue.extend({
 				items: this.value.option,
 				value: this.valueIs,
 				hideDetails: true,
-				...this.$props.value.remoteResource,
+				...this.$props.value.autocompleteDataSource,
 			},
 
 			on: {

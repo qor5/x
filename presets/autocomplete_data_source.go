@@ -7,11 +7,12 @@ import (
 	"strings"
 
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/vuetifyx"
 )
 
-const remoteResEvent = "remote-res-event"
+const autocompleteDataSourceEvent = "autocomplete-data-source-event"
 
-type RemoteResResult struct {
+type AutocompleteDataResult struct {
 	Items   []OptionItem `json:"items"`
 	Total   int          `json:"total"`
 	Current int          `json:"current"`
@@ -24,7 +25,7 @@ type OptionItem struct {
 	Icon  string `json:"icon,omitempty"`
 }
 
-type RemoteResConfig struct {
+type AutocompleteDataSourceConfig struct {
 	OptionValue string
 	OptionText  interface{} //func(interface{}) string or string
 	OptionIcon  func(interface{}) string
@@ -37,7 +38,7 @@ type RemoteResConfig struct {
 	PerPage        int64
 }
 
-func (b *ListingBuilder) ConfigureRemoteRes(config *RemoteResConfig, name ...string) map[string]interface{} {
+func (b *ListingBuilder) ConfigureAutocompleteDataSource(config *AutocompleteDataSourceConfig, name ...string) *vuetifyx.AutocompleteDataSource {
 	if config == nil {
 		panic("config is required")
 	}
@@ -66,7 +67,7 @@ func (b *ListingBuilder) ConfigureRemoteRes(config *RemoteResConfig, name ...str
 		config.PerPage = 20
 	}
 
-	eventName := remoteResEvent
+	eventName := autocompleteDataSourceEvent
 	if len(name) > 0 {
 		eventName = eventName + "-" + strings.ToLower(name[0])
 	}
@@ -129,7 +130,7 @@ func (b *ListingBuilder) ConfigureRemoteRes(config *RemoteResConfig, name ...str
 		if totalCount%int(config.PerPage) > 0 {
 			pages++
 		}
-		r.Data = RemoteResResult{
+		r.Data = AutocompleteDataResult{
 			Total:   totalCount,
 			Current: current + len(items),
 			Pages:   pages,
@@ -138,10 +139,10 @@ func (b *ListingBuilder) ConfigureRemoteRes(config *RemoteResConfig, name ...str
 		return
 	})
 
-	return map[string]interface{}{
-		"remote-url": b.mb.Info().ListingHref(),
-		"event-name": eventName,
-		"is-paging":  config.IsPaging,
-		"has-icon":   config.OptionIcon != nil,
+	return &vuetifyx.AutocompleteDataSource{
+		RemoteURL: b.mb.Info().ListingHref(),
+		EventName: eventName,
+		IsPaging:  config.IsPaging,
+		HasIcon:   config.OptionIcon != nil,
 	}
 }

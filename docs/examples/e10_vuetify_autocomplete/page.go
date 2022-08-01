@@ -67,8 +67,8 @@ type Product struct {
 	Name string
 }
 
-var loadMoreRes map[string]interface{}
-var pagingRes map[string]interface{}
+var loadMoreRes *vuetifyx.AutocompleteDataSource
+var pagingRes *vuetifyx.AutocompleteDataSource
 var ExamplePreset *presets.Builder
 
 func init() {
@@ -87,8 +87,8 @@ func init() {
 	ExamplePreset = presets.New()
 	ExamplePreset.URIPrefix(VuetifyAutoCompletePresetPath).DataOperator(gorm2op.DataOperator(db))
 	listing := ExamplePreset.Model(&Product{}).Listing()
-	loadMoreRes = listing.ConfigureRemoteRes(
-		&presets.RemoteResConfig{
+	loadMoreRes = listing.ConfigureAutocompleteDataSource(
+		&presets.AutocompleteDataSourceConfig{
 			OptionValue: "ID",
 			OptionText:  "Name",
 			KeywordColumns: []string{
@@ -99,8 +99,8 @@ func init() {
 		"loadMore",
 	)
 
-	pagingRes = listing.ConfigureRemoteRes(
-		&presets.RemoteResConfig{
+	pagingRes = listing.ConfigureAutocompleteDataSource(
+		&presets.AutocompleteDataSourceConfig{
 			OptionValue: "ID",
 			OptionText:  "Name",
 			KeywordColumns: []string{

@@ -157,20 +157,20 @@ type FilterLinkageSelectData struct {
 }
 
 type FilterItem struct {
-	Key               string                  `json:"key,omitempty"`
-	Label             string                  `json:"label,omitempty"`
-	ItemType          FilterItemType          `json:"itemType,omitempty"`
-	Selected          bool                    `json:"selected,omitempty"`
-	Modifier          FilterItemModifier      `json:"modifier,omitempty"`
-	ValueIs           string                  `json:"valueIs,omitempty"`
-	ValuesAre         []string                `json:"valuesAre,omitempty"`
-	ValueFrom         string                  `json:"valueFrom,omitempty"`
-	ValueTo           string                  `json:"valueTo,omitempty"`
-	SQLCondition      string                  `json:"-"`
-	Options           []*SelectItem           `json:"options,omitempty"`
-	LinkageSelectData FilterLinkageSelectData `json:"linkageSelectData,omitempty"`
-	Invisible         bool                    `json:"invisible,omitempty"`
-	RemoteResource    map[string]interface{}  `json:"remoteResource,omitempty"`
+	Key                    string                  `json:"key,omitempty"`
+	Label                  string                  `json:"label,omitempty"`
+	ItemType               FilterItemType          `json:"itemType,omitempty"`
+	Selected               bool                    `json:"selected,omitempty"`
+	Modifier               FilterItemModifier      `json:"modifier,omitempty"`
+	ValueIs                string                  `json:"valueIs,omitempty"`
+	ValuesAre              []string                `json:"valuesAre,omitempty"`
+	ValueFrom              string                  `json:"valueFrom,omitempty"`
+	ValueTo                string                  `json:"valueTo,omitempty"`
+	SQLCondition           string                  `json:"-"`
+	Options                []*SelectItem           `json:"options,omitempty"`
+	LinkageSelectData      FilterLinkageSelectData `json:"linkageSelectData,omitempty"`
+	Invisible              bool                    `json:"invisible,omitempty"`
+	AutocompleteDataSource *AutocompleteDataSource `json:"autocompleteDataSource,omitempty"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {
