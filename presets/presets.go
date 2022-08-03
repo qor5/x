@@ -879,7 +879,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 
 			web.Portal().Name(RightDrawerPortalName),
 			web.Portal().Name(DialogPortalName),
-			web.Portal().Name(deleteConfirmPortalName),
+			web.Portal().Name(DeleteConfirmPortalName),
 			web.Portal().Name(defaultConfirmationDialogPortalName),
 
 			VProgressLinear().

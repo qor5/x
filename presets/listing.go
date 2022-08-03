@@ -136,7 +136,7 @@ func (b *ListingBuilder) GetPageFunc() web.PageFunc {
 
 const bulkPanelOpenParamName = "bulkOpen"
 const actionPanelOpenParamName = "actionOpen"
-const deleteConfirmPortalName = "deleteConfirm"
+const DeleteConfirmPortalName = "deleteConfirm"
 const dataTablePortalName = "dataTable"
 const dataTableAdditionsPortalName = "dataTableAdditions"
 
@@ -315,7 +315,7 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 	id := ctx.R.FormValue(ParamID)
 
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-		Name: deleteConfirmPortalName,
+		Name: DeleteConfirmPortalName,
 		Body: VDialog(
 			VCard(
 				VCardTitle(h.Text(msgr.DeleteConfirmationText(id))),
