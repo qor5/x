@@ -632,7 +632,7 @@ func MustGetMessages(r *http.Request) *Messages {
 
 const RightDrawerPortalName = "presets_RightDrawerPortalName"
 const rightDrawerContentPortalName = "presets_RightDrawerContentPortalName"
-const dialogPortalName = "presets_DialogPortalName"
+const DialogPortalName = "presets_DialogPortalName"
 const dialogContentPortalName = "presets_DialogContentPortalName"
 const NotificationCenterPortalName = "notification-center"
 const defaultConfirmationDialogPortalName = "presets_confirmationDialogPortalName"
@@ -681,7 +681,7 @@ func (b *Builder) dialog(r *web.EventResponse, comp h.HTMLComponent, width strin
 		width = b.rightDrawerWidth
 	}
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-		Name: dialogPortalName,
+		Name: DialogPortalName,
 		Body: web.Scope(
 			VDialog(
 				web.Portal(comp).Name(dialogContentPortalName),
@@ -877,8 +877,8 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 			// ClippedLeft(true),
 
 			web.Portal().Name(RightDrawerPortalName),
-			web.Portal().Name(dialogPortalName),
-			web.Portal().Name(deleteConfirmPortalName),
+			web.Portal().Name(DialogPortalName),
+			web.Portal().Name(DeleteConfirmPortalName),
 			web.Portal().Name(defaultConfirmationDialogPortalName),
 
 			VProgressLinear().

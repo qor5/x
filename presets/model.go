@@ -94,7 +94,7 @@ func (mb *ModelBuilder) NewModelSlice() (r interface{}) {
 func (mb *ModelBuilder) newListing() (lb *ListingBuilder) {
 	mb.listing = &ListingBuilder{mb: mb, FieldsBuilder: *mb.p.listFieldDefaults.InspectFields(mb.model)}
 	if mb.p.dataOperator != nil {
-		mb.listing.Searcher(mb.p.dataOperator.Search)
+		mb.listing.SearchFunc(mb.p.dataOperator.Search)
 	}
 
 	rmb := mb.listing.RowMenu("Edit", "Delete")
@@ -117,7 +117,7 @@ func (mb *ModelBuilder) newEditing() (r *EditingBuilder) {
 func (mb *ModelBuilder) newDetailing() (r *DetailingBuilder) {
 	mb.detailing = &DetailingBuilder{mb: mb, FieldsBuilder: *mb.p.detailFieldDefaults.InspectFields(mb.model)}
 	if mb.p.dataOperator != nil {
-		mb.detailing.Fetcher(mb.p.dataOperator.Fetch)
+		mb.detailing.FetchFunc(mb.p.dataOperator.Fetch)
 	}
 	return
 }

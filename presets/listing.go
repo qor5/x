@@ -30,13 +30,15 @@ type ListingBuilder struct {
 	filterTabsFunc    FilterTabsFunc
 	newBtnFunc        ComponentFunc
 	pageFunc          web.PageFunc
-	searcher          SearchFunc
+	cellWrapperFunc   stripeui.CellWrapperFunc
+	Searcher          SearchFunc
 	searchColumns     []string
 	perPage           int64
 	totalVisible      int64
 	orderBy           string
 	orderableFields   []*OrderableField
 	selectableColumns bool
+	conditions        []*SQLCondition
 	FieldsBuilder
 }
 
@@ -65,8 +67,13 @@ func (b *ListingBuilder) PageFunc(pf web.PageFunc) (r *ListingBuilder) {
 	return b
 }
 
-func (b *ListingBuilder) Searcher(v SearchFunc) (r *ListingBuilder) {
-	b.searcher = v
+func (b *ListingBuilder) CellWrapperFunc(cwf stripeui.CellWrapperFunc) (r *ListingBuilder) {
+	b.cellWrapperFunc = cwf
+	return b
+}
+
+func (b *ListingBuilder) SearchFunc(v SearchFunc) (r *ListingBuilder) {
+	b.Searcher = v
 	return b
 }
 
@@ -115,6 +122,11 @@ func (b *ListingBuilder) SelectableColumns(v bool) (r *ListingBuilder) {
 	return b
 }
 
+func (b *ListingBuilder) Conditions(v []*SQLCondition) (r *ListingBuilder) {
+	b.conditions = v
+	return b
+}
+
 func (b *ListingBuilder) GetPageFunc() web.PageFunc {
 	if b.pageFunc != nil {
 		return b.pageFunc
@@ -124,7 +136,7 @@ func (b *ListingBuilder) GetPageFunc() web.PageFunc {
 
 const bulkPanelOpenParamName = "bulkOpen"
 const actionPanelOpenParamName = "actionOpen"
-const deleteConfirmPortalName = "deleteConfirm"
+const DeleteConfirmPortalName = "deleteConfirm"
 const dataTablePortalName = "dataTable"
 const dataTableAdditionsPortalName = "dataTableAdditions"
 
@@ -303,7 +315,7 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 	id := ctx.R.FormValue(ParamID)
 
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-		Name: deleteConfirmPortalName,
+		Name: DeleteConfirmPortalName,
 		Body: VDialog(
 			VCard(
 				VCardTitle(h.Text(msgr.DeleteConfirmationText(id))),
@@ -883,6 +895,7 @@ func (b *ListingBuilder) getComponents(
 		PerPage:        perPage,
 		OrderBy:        orderBySQL,
 		PageURL:        pageURL,
+		SQLConditions:  b.conditions,
 	}
 
 	searchParams.Page, _ = strconv.ParseInt(pageURL.Query().Get("page"), 10, 64)
@@ -901,7 +914,7 @@ func (b *ListingBuilder) getComponents(
 		})
 	}
 
-	if b.searcher == nil || b.mb.p.dataOperator == nil {
+	if b.Searcher == nil || b.mb.p.dataOperator == nil {
 		panic("presets.New().DataOperator(...) required")
 	}
 
@@ -909,7 +922,7 @@ func (b *ListingBuilder) getComponents(
 	var totalCount int
 	var err error
 
-	objs, totalCount, err = b.searcher(b.mb.NewModelSlice(), searchParams, ctx)
+	objs, totalCount, err = b.Searcher(b.mb.NewModelSlice(), searchParams, ctx)
 
 	if err != nil {
 		panic(err)
@@ -924,28 +937,33 @@ func (b *ListingBuilder) getComponents(
 		pagesCount--
 	}
 
-	dataTable = s.DataTable(objs).
-		CellWrapperFunc(func(cell h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent {
-			tdbind := cell
-			if b.mb.hasDetailing && !b.mb.detailing.drawer {
-				tdbind.SetAttr("@click.self", web.Plaid().
-					PushStateURL(
-						b.mb.Info().
-							DetailingHref(id)).
-					Go())
-			} else {
-				event := actions.Edit
-				if b.mb.hasDetailing {
-					event = actions.DetailingDrawer
-				}
-				tdbind.SetAttr("@click.self",
-					web.Plaid().
-						EventFunc(event).
-						Query(ParamID, id).
-						Go()+fmt.Sprintf(`; vars.currEditingListItemID="%s-%s"`, dataTableID, id))
+	var cellWraperFunc = func(cell h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent {
+		tdbind := cell
+		if b.mb.hasDetailing && !b.mb.detailing.drawer {
+			tdbind.SetAttr("@click.self", web.Plaid().
+				PushStateURL(
+					b.mb.Info().
+						DetailingHref(id)).
+				Go())
+		} else {
+			event := actions.Edit
+			if b.mb.hasDetailing {
+				event = actions.DetailingDrawer
 			}
-			return tdbind
-		}).
+			tdbind.SetAttr("@click.self",
+				web.Plaid().
+					EventFunc(event).
+					Query(ParamID, id).
+					Go()+fmt.Sprintf(`; vars.currEditingListItemID="%s-%s"`, dataTableID, id))
+		}
+		return tdbind
+	}
+	if b.cellWrapperFunc != nil {
+		cellWraperFunc = b.cellWrapperFunc
+	}
+
+	dataTable = s.DataTable(objs).
+		CellWrapperFunc(cellWraperFunc).
 		RowWrapperFunc(func(row h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent {
 			row.SetAttr(":class", fmt.Sprintf(`{"blue lighten-5": vars.presetsRightDrawer && vars.currEditingListItemID==="%s-%s"}`, dataTableID, id))
 			return row

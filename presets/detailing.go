@@ -50,7 +50,7 @@ func (b *DetailingBuilder) PageFunc(pf web.PageFunc) (r *DetailingBuilder) {
 	return b
 }
 
-func (b *DetailingBuilder) Fetcher(v FetchFunc) (r *DetailingBuilder) {
+func (b *DetailingBuilder) FetchFunc(v FetchFunc) (r *DetailingBuilder) {
 	b.fetcher = v
 	return b
 }
