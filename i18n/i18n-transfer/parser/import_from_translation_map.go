@@ -17,9 +17,10 @@ func ImportFromTranslationsMap(dir string, translationsMap map[string]map[string
 	if err != nil {
 		return err
 	}
+	var isChanged bool
 	for path, pkg := range pkgs {
 		for fileName, f := range pkg.Files {
-			var isModiyiedFile bool
+			var isModifiedFile bool
 			for _, decl := range f.Decls {
 				if decl, ok := decl.(*ast.GenDecl); ok {
 					for _, spec := range decl.Specs {
@@ -86,7 +87,8 @@ to:
 
 `, go_path.Join(fileName, locale, key.Name), value.Value, "\""+translationValue+"\"")
 										value.Value = "\"" + translationValue + "\""
-										isModiyiedFile = true
+										isModifiedFile = true
+										isChanged = true
 									}
 								}
 							}
@@ -95,7 +97,7 @@ to:
 				}
 			}
 
-			if isModiyiedFile {
+			if isModifiedFile {
 				file, err := os.OpenFile(fileName, os.O_WRONLY, 0)
 				defer file.Close()
 				if err != nil {
@@ -107,6 +109,13 @@ to:
 				}
 			}
 		}
+	}
+	if !isChanged {
+		fmt.Printf(`
+----------------------------------------------
+update translation:
+	nothing changed
+`)
 	}
 	return nil
 }
