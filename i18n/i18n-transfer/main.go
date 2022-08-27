@@ -45,7 +45,7 @@ func main() {
 			return
 		}
 
-		translationMap, err := csv.GetTranslationsMap(result)
+		translationMap, err := csv.CsvToTranslationsMap(result)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -63,45 +63,10 @@ func main() {
 	}
 
 	if result == "Export" {
-		validate := func(input string) error {
-			if input == "" {
-				return nil
-			}
-			s, err := os.Stat(input)
-			if err != nil || !s.IsDir() {
-				return errors.New("Please input correct project path\n")
-			}
-			return nil
-		}
+		projectPath, _ := os.Getwd()
+		projectPath, _ = filepath.Abs(projectPath)
 
-		prompt := promptui.Prompt{
-			Label:    "Project dir path( press enter \"↵\" to continue with current path)",
-			Validate: validate,
-		}
-
-		result, err := prompt.Run()
-
-		if err != nil {
-			fmt.Printf("Please input correct project path\n")
-			return
-		}
-
-		if result == "" {
-			projectPath, err := os.Getwd()
-			if err != nil {
-				fmt.Printf("Please input correct project path\n")
-				return
-			}
-
-			result = projectPath
-		}
-		result, err = filepath.Abs(result)
-		if err != nil {
-			fmt.Printf("Please input correct project path\n")
-			return
-		}
-
-		translationsMap, err := parser.ExportToTranslationsMap(result)
+		translationsMap, err := parser.ExportToTranslationsMap(projectPath)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -111,7 +76,7 @@ func main() {
 				fmt.Printf("    %v: %v\n", k, v)
 			}
 		}
-		err = csv.ExportToCsv(translationsMap)
+		err = csv.TranslationsMapToCsv(translationsMap)
 		if err != nil {
 			log.Fatalln(err)
 		}

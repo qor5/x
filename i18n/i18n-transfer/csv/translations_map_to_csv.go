@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func ExportToCsv(translationsMap map[string]map[string]string) (err error) {
+func TranslationsMapToCsv(translationsMap map[string]map[string]string) (err error) {
 	var (
 		locales             []string
 		translationKeys     []string
