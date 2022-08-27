@@ -8,15 +8,22 @@ import (
 	"go/token"
 	"os"
 	go_path "path"
-	"strings"
 )
 
-func ImportFromTranslationsMap(projectPath string, translationsMap map[string]map[string]string) error {
+// compare the translation structs and translationsMap
+// update the new value from translationsMap
+// overwrite new content to files
+func ImportFromTranslationsMap(projectPath string, translationsMap map[string]map[string]string) (err error) {
 	fset := token.NewFileSet()
 	pkgs, err := ParseDir(fset, projectPath, nil, go_parser.AllErrors)
 	if err != nil {
-		return err
+		return
 	}
+	visitor, err := newVisitorAndWalk(fset, pkgs, projectPath)
+	if err != nil {
+		return
+	}
+
 	var isChanged bool
 	for path, pkg := range pkgs {
 		for fileName, f := range pkg.Files {
@@ -27,11 +34,16 @@ func ImportFromTranslationsMap(projectPath string, translationsMap map[string]ma
 						if spec, ok := spec.(*ast.ValueSpec); ok {
 							var isMessage bool
 							var locale string
+							var structName string
 							for _, name := range spec.Names {
-								if _, exist := translationsMap[name.Name]; exist {
-									locale = name.Name
-									isMessage = true
+								if l, exist := visitor.LocalesMap[name.Name]; exist {
+									if _, exist := translationsMap[l]; exist {
+										locale = l
+										structName = name.Name
+										isMessage = true
+									}
 								}
+
 							}
 							if !isMessage {
 								continue
@@ -49,8 +61,8 @@ func ImportFromTranslationsMap(projectPath string, translationsMap map[string]ma
 									break
 								}
 
-								xType, ok := x.Type.(*ast.Ident)
-								if !ok || !strings.Contains(xType.Name, "Message") {
+								_, ok = x.Type.(*ast.Ident)
+								if !ok {
 									isMessage = false
 									break
 								}
@@ -85,7 +97,7 @@ to:
 	%s
 ----------------------------------------------
 
-`, go_path.Join(fileName, locale, key.Name), value.Value, "\""+translationValue+"\"")
+`, go_path.Join(fileName, structName, key.Name), value.Value, "\""+translationValue+"\"")
 										value.Value = "\"" + translationValue + "\""
 										isModifiedFile = true
 										isChanged = true
@@ -97,12 +109,14 @@ to:
 				}
 			}
 
+			// overwrite new content to file
 			if isModifiedFile {
-				file, err := os.OpenFile(fileName, os.O_WRONLY, 0)
+				file, err := os.Create(fileName)
 				defer file.Close()
 				if err != nil {
 					return err
 				}
+
 				err = format.Node(file, fset, f)
 				if err != nil {
 					return err
