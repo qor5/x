@@ -11,9 +11,9 @@ import (
 	"strings"
 )
 
-func ImportFromTranslationsMap(dir string, translationsMap map[string]map[string]string) error {
+func ImportFromTranslationsMap(projectPath string, translationsMap map[string]map[string]string) error {
 	fset := token.NewFileSet()
-	pkgs, err := ParseDir(fset, dir, nil, go_parser.AllErrors)
+	pkgs, err := ParseDir(fset, projectPath, nil, go_parser.AllErrors)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func ImportFromTranslationsMap(dir string, translationsMap map[string]map[string
 										break
 									}
 
-									if translationValue, exist := translationsMap[locale][go_path.Join(path, key.Name)]; isMessage && exist && value.Value != "\""+translationValue+"\"" {
+									if translationValue, exist := translationsMap[locale][getTranslationMapKey(path, key.Name, projectPath)]; isMessage && exist && value.Value != "\""+translationValue+"\"" {
 										fmt.Printf(`
 ----------------------------------------------
 update translation:

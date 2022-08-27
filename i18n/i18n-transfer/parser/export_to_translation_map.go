@@ -4,7 +4,6 @@ import (
 	"go/ast"
 	go_parser "go/parser"
 	"go/token"
-	go_path "path"
 	"strings"
 )
 
@@ -73,7 +72,7 @@ func ExportToTranslationsMap(projectDir string) (translationsMap map[string]map[
 									}
 
 									if isMessage {
-										translationMap[go_path.Join(path, key.Name)] = strings.Trim(value.Value, "\"")
+										translationMap[getTranslationMapKey(path, key.Name, projectDir)] = strings.Trim(value.Value, "\"")
 									}
 								}
 							}

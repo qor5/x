@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/goplaid/x/i18n/i18n-transfer/csv"
 	"github.com/goplaid/x/i18n/i18n-transfer/parser"
@@ -26,11 +27,10 @@ func main() {
 
 	if result == "Import" {
 		validate := func(input string) error {
-			f, err := os.Open(input)
-			if err != nil {
+			s, err := os.Stat(input)
+			if err != nil || s.IsDir() {
 				return errors.New("Please input correct csv file path")
 			}
-			f.Close()
 			return nil
 		}
 
@@ -40,7 +40,6 @@ func main() {
 		}
 
 		result, err := prompt.Run()
-
 		if err != nil {
 			fmt.Printf("Please input correct csv file path\n")
 			return
@@ -50,14 +49,59 @@ func main() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		err = parser.ImportFromTranslationsMap("./", translationMap)
+
+		projectPath, err := os.Getwd()
+		if err != nil {
+			fmt.Printf("Please run i18n-transfer in a correct project path\n")
+			return
+		}
+
+		err = parser.ImportFromTranslationsMap(projectPath, translationMap)
 		if err != nil {
 			log.Fatalln(err)
 		}
 	}
 
 	if result == "Export" {
-		translationsMap, err := parser.ExportToTranslationsMap("./")
+		validate := func(input string) error {
+			if input == "" {
+				return nil
+			}
+			s, err := os.Stat(input)
+			if err != nil || !s.IsDir() {
+				return errors.New("Please input correct project path\n")
+			}
+			return nil
+		}
+
+		prompt := promptui.Prompt{
+			Label:    "Project dir path( press enter \"↵\" to continue with current path)",
+			Validate: validate,
+		}
+
+		result, err := prompt.Run()
+
+		if err != nil {
+			fmt.Printf("Please input correct project path\n")
+			return
+		}
+
+		if result == "" {
+			projectPath, err := os.Getwd()
+			if err != nil {
+				fmt.Printf("Please input correct project path\n")
+				return
+			}
+
+			result = projectPath
+		}
+		result, err = filepath.Abs(result)
+		if err != nil {
+			fmt.Printf("Please input correct project path\n")
+			return
+		}
+
+		translationsMap, err := parser.ExportToTranslationsMap(result)
 		if err != nil {
 			log.Fatalln(err)
 		}
