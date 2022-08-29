@@ -586,20 +586,31 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 		)
 	}
 
-	return VMenu(
+	return VMenu().OffsetY(true).Children(
 		h.Template().Attr("v-slot:activator", "{on, attrs}").Children(
 			h.Div(
-				VRow(
-					VIcon("language"),
-					h.Div(h.Text(display.Self.Name(displayLanguage))).Class("text-button"),
-				),
+				VList(
+					VListItem(
+						VListItemIcon(
+							VIcon("language").Small(true).Class("ml-1"),
+						),
+						VListItemContent(
+							VListItemTitle(
+								h.Text(display.Self.Name(displayLanguage)),
+							),
+						),
+						VListItemIcon(
+							VIcon("arrow_drop_down").Small(false).Class("mr-1"),
+						),
+					).Class("pa-0").Dense(true),
+				).Class("pa-0 ma-n4 mt-n6"),
 			).Attr("v-bind", "attrs").Attr("v-on", "on"),
 		),
 
 		VList(
 			languages...,
 		).Dense(true),
-	).OffsetY(true)
+	)
 }
 
 func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage h.HTMLComponent) (r h.HTMLComponent) {
@@ -613,17 +624,17 @@ func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switc
 				VCardText(brand),
 			),
 		),
-		h.If(switchLanguage != nil,
-			VListItem(
-				VCardText(switchLanguage),
-			),
-		),
 		h.If(profile != nil,
 			VListItem(
 				VCardText(profile),
 			),
 		),
-	).Elevation(1)
+		h.If(switchLanguage != nil,
+			VListItem(
+				VCardText(switchLanguage),
+			).Dense(true),
+		),
+	).Elevation(1).Tile(true)
 }
 
 func MustGetMessages(r *http.Request) *Messages {
