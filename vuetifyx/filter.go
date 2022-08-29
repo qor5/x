@@ -94,7 +94,7 @@ type FilterTranslations struct {
 	Filters string `json:"filters,omitempty"`
 	Filter  string `json:"filter,omitempty"`
 	Date    struct {
-		To           string `json:"to,omitempty"`
+		To string `json:"to,omitempty"`
 	} `json:"date,omitempty"`
 
 	Number struct {
@@ -157,19 +157,20 @@ type FilterLinkageSelectData struct {
 }
 
 type FilterItem struct {
-	Key               string                  `json:"key,omitempty"`
-	Label             string                  `json:"label,omitempty"`
-	ItemType          FilterItemType          `json:"itemType,omitempty"`
-	Selected          bool                    `json:"selected,omitempty"`
-	Modifier          FilterItemModifier      `json:"modifier,omitempty"`
-	ValueIs           string                  `json:"valueIs,omitempty"`
-	ValuesAre         []string                `json:"valuesAre,omitempty"`
-	ValueFrom         string                  `json:"valueFrom,omitempty"`
-	ValueTo           string                  `json:"valueTo,omitempty"`
-	SQLCondition      string                  `json:"-"`
-	Options           []*SelectItem           `json:"options,omitempty"`
-	LinkageSelectData FilterLinkageSelectData `json:"linkageSelectData,omitempty"`
-	Invisible         bool                    `json:"invisible,omitempty"`
+	Key                    string                  `json:"key,omitempty"`
+	Label                  string                  `json:"label,omitempty"`
+	ItemType               FilterItemType          `json:"itemType,omitempty"`
+	Selected               bool                    `json:"selected,omitempty"`
+	Modifier               FilterItemModifier      `json:"modifier,omitempty"`
+	ValueIs                string                  `json:"valueIs,omitempty"`
+	ValuesAre              []string                `json:"valuesAre,omitempty"`
+	ValueFrom              string                  `json:"valueFrom,omitempty"`
+	ValueTo                string                  `json:"valueTo,omitempty"`
+	SQLCondition           string                  `json:"-"`
+	Options                []*SelectItem           `json:"options,omitempty"`
+	LinkageSelectData      FilterLinkageSelectData `json:"linkageSelectData,omitempty"`
+	Invisible              bool                    `json:"invisible,omitempty"`
+	AutocompleteDataSource *AutocompleteDataSource `json:"autocompleteDataSource,omitempty"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {

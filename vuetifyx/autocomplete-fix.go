@@ -43,11 +43,11 @@ func (b *VXAutocompleteBuilder) SelectedItems(v interface{}) (r *VXAutocompleteB
 	return b
 }
 
-func (b *VXAutocompleteBuilder) ItemsEventFunc(eventFuncId string) (r *VXAutocompleteBuilder) {
-
-	b.tag.Attr(":items-event-func-id", &web.EventFuncID{
-		ID: eventFuncId,
-	})
+func (b *VXAutocompleteBuilder) SetDataSource(ds *AutocompleteDataSource) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("remote-url", ds.RemoteURL)
+	b.tag.Attr("event-name", ds.EventName)
+	b.tag.Attr("is-paging", ds.IsPaging)
+	b.tag.Attr("has-icon", ds.HasIcon)
 	return b
 }
 
@@ -58,4 +58,11 @@ func (b *VXAutocompleteBuilder) MarshalHTML(ctx context.Context) (r []byte, err 
 	b.tag.Attr(":items", b.items)
 	b.tag.Attr(":selected-items", b.selectedItems)
 	return b.tag.MarshalHTML(ctx)
+}
+
+type AutocompleteDataSource struct {
+	RemoteURL string `json:"remote-url"`
+	EventName string `json:"event-name"`
+	IsPaging  bool   `json:"is-paging"`
+	HasIcon   bool   `json:"has-icon"`
 }

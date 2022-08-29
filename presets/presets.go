@@ -94,7 +94,6 @@ func New() *Builder {
 	}
 
 	r.GetWebBuilder().RegisterEventFunc(OpenConfirmationDialogEvent, r.openConfirmationDialog)
-
 	r.layoutFunc = r.defaultLayout
 	return r
 }

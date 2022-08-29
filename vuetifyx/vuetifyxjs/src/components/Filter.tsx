@@ -1,7 +1,5 @@
-import {encodeFilterData, filterData} from './FilterData';
-import Vue, {CreateElement, VNode} from 'vue';
+import Vue, { CreateElement, VNode, VNodeData } from 'vue';
 import {
-	VAutocomplete,
 	VBtn,
 	VCheckbox,
 	VChip,
@@ -17,12 +15,15 @@ import {
 	VSpacer,
 	VTextField,
 	VToolbar,
-	VToolbarTitle,
+	VToolbarTitle
 } from 'vuetify/lib';
-
+import VAutocomplete from './Autocomplete';
+import * as constants from './Constants';
 import DateTimePicker from './DateTimePicker.vue';
+import { encodeFilterData, filterData } from './FilterData';
 import LinkageSelect from './LinkageSelect.vue';
-import * as constants from './Constants'
+
+
 
 export const DateItem = Vue.extend({
 	components: {
@@ -362,16 +363,23 @@ export const SelectItem = Vue.extend({
 	},
 
 	render() {
+		const data: VNodeData = {
+			props: {
+				class:'d-inline-block',
+				style:'width: 200px',
+				items: this.value.option,
+				value: this.valueIs,
+				hideDetails: true,
+				...this.$props.value.autocompleteDataSource,
+			},
+
+			on: {
+				change: this.setValue,
+			},
+		};
 		return (
 			<div>
-				<vautocomplete
-					class='d-inline-block'
-					style='width: 200px'
-					hideDetails={true}
-					on={{change: this.setValue}}
-					value={this.valueIs}
-					items={this.value.options}
-				>
+				<vautocomplete {...data}>
 				</vautocomplete>
 			</div>
 		);

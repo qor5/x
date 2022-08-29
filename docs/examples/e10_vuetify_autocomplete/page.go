@@ -3,11 +3,16 @@ package e10_vuetify_autocomplete
 // @snippet_begin(VuetifyAutoCompleteSample)
 
 import (
-	"github.com/Pallinder/go-randomdata"
+	"fmt"
+
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/presets"
+	"github.com/goplaid/x/presets/gorm2op"
 	. "github.com/goplaid/x/vuetify"
 	"github.com/goplaid/x/vuetifyx"
 	h "github.com/theplant/htmlgo"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type myFormValue struct {
@@ -57,19 +62,66 @@ var globalState = &myFormValue{
 	Value3: "charles",
 }
 
-func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error) {
+type Product struct {
+	ID   uint `gorm:"primarykey"`
+	Name string
+}
 
+var loadMoreRes *vuetifyx.AutocompleteDataSource
+var pagingRes *vuetifyx.AutocompleteDataSource
+var ExamplePreset *presets.Builder
+
+func init() {
+	db, err := gorm.Open(sqlite.Open("/tmp/my.db"), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+
+	db.AutoMigrate(&Product{})
+	db.Where("1=1").Delete(&Product{})
+
+	for i := 1; i < 300; i++ {
+		db.Create(&Product{Name: fmt.Sprintf("Product %d", i)})
+	}
+
+	ExamplePreset = presets.New()
+	ExamplePreset.URIPrefix(VuetifyAutoCompletePresetPath).DataOperator(gorm2op.DataOperator(db))
+	listing := ExamplePreset.Model(&Product{}).Listing()
+	loadMoreRes = listing.ConfigureAutocompleteDataSource(
+		&presets.AutocompleteDataSourceConfig{
+			OptionValue: "ID",
+			OptionText:  "Name",
+			KeywordColumns: []string{
+				"Name",
+			},
+			PerPage: 50,
+		},
+		"loadMore",
+	)
+
+	pagingRes = listing.ConfigureAutocompleteDataSource(
+		&presets.AutocompleteDataSourceConfig{
+			OptionValue: "ID",
+			OptionText:  "Name",
+			KeywordColumns: []string{
+				"Name",
+			},
+			PerPage:  20,
+			IsPaging: true,
+			OrderBy:  "Name",
+		},
+		"paging",
+	)
+
+}
+
+func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error) {
 	result := h.Ul()
 	for _, v := range globalState.Values1 {
 		result.AppendChildren(h.Li().Text(v))
 	}
-	result.AppendChildren(h.Li().Text("======"))
-	for _, v := range globalState.Values2 {
-		result.AppendChildren(h.Li().Text(v))
-	}
-
 	pr.Body = VContainer(
-		h.H1("VAutocomplete"),
+		h.H1("An auto complete that you can select multiple options with static data"),
 		VAutocomplete().
 			Items(options1).
 			FieldName("Values1").
@@ -77,17 +129,20 @@ func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error)
 			ItemValue("Login").
 			Label("Static Options").
 			Value(globalState.Values1),
-
-		vuetifyx.VXAutocomplete().
-			ItemsEventFunc("users").
-			ItemText("Name").
-			ItemValue("Login").
-			SelectedItems(selectedItems2).
-			FieldName("Values2").
-			Label("Load Options from Remote").
-			Value(globalState.Values2),
-
 		result,
+
+		h.H1("An auto complete that you can select multiple options from data source by loading more"),
+		vuetifyx.VXAutocomplete().
+			FieldName("Values2").
+			Label("Load options from data source").
+			SetDataSource(loadMoreRes),
+
+		h.H1("An auto complete that you can select multiple options from data source resource by paging"),
+		vuetifyx.VXAutocomplete().
+			FieldName("Values2").
+			Label("Load options from data source").
+			SetDataSource(pagingRes),
+
 		h.H1("VSelect"),
 		VSelect().
 			Items(options1).    // Items is the data source
@@ -101,25 +156,6 @@ func VuetifyAutocomplete(ctx *web.EventContext) (pr web.PageResponse, err error)
 			Color("success").
 			OnClick("update"),
 	)
-	return
-}
-
-func users(ctx *web.EventContext) (r web.EventResponse, err error) {
-	us := []*User{}
-	for _, u := range options1 {
-		us = append(us, u)
-	}
-	if len(options2) <= 100 {
-		for i := 0; i < 200; i++ {
-			us = append(us, &User{
-				Login: randomdata.Email(),
-				Name:  randomdata.SillyName(),
-			})
-		}
-		options2 = us
-	}
-
-	r.Data = options2
 	return
 }
 
@@ -157,9 +193,9 @@ func update(ctx *web.EventContext) (r web.EventResponse, err error) {
 }
 
 var VuetifyAutocompletePB = web.Page(VuetifyAutocomplete).
-	EventFunc("update", update).
-	EventFunc("users", users)
+	EventFunc("update", update)
 
 const VuetifyAutoCompletePath = "/samples/vuetify-auto-complete"
+const VuetifyAutoCompletePresetPath = "/samples/vuetify-auto-complete-preset"
 
 // @snippet_end
