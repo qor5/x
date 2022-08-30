@@ -543,7 +543,6 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 		return nil
 	}
 
-	cookieName := b.I18n().GetCookieName()
 	queryName := b.I18n().GetQueryName()
 
 	if len(supportLanguages) == 1 {
@@ -561,10 +560,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 
 	lang := ctx.R.FormValue(queryName)
 	if lang == "" {
-		langCookie, _ := ctx.R.Cookie(cookieName)
-		if langCookie != nil {
-			lang = langCookie.Value
-		}
+		lang = b.i18nBuilder.GetCurrentLangFromCookie(ctx.R)
 	}
 
 	var displayLanguage language.Tag

@@ -116,10 +116,7 @@ func (b *Builder) EnsureLanguage(in http.Handler) (out http.Handler) {
 		if len(lang) > 0 {
 			http.SetCookie(w, &http.Cookie{Name: b.cookieName, Value: lang})
 		} else {
-			langCookie, _ := r.Cookie(b.cookieName)
-			if langCookie != nil {
-				lang = langCookie.Value
-			}
+			lang = b.GetCurrentLangFromCookie(r)
 		}
 
 		accept := r.Header.Get("Accept-Language")
@@ -151,4 +148,12 @@ func (b *Builder) EnsureLanguage(in http.Handler) (out http.Handler) {
 			log.Println(dyna.PrettyMissingKeys())
 		}
 	})
+}
+
+func (b *Builder) GetCurrentLangFromCookie(r *http.Request) (lang string) {
+	langCookie, _ := r.Cookie(b.cookieName)
+	if langCookie != nil {
+		lang = langCookie.Value
+	}
+	return
 }
