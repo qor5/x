@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"os"
 	go_path "path"
+	"strings"
 )
 
 // compare the translation structs and translationsMap
@@ -26,6 +27,7 @@ func ImportFromTranslationsMap(projectPath string, translationsMap map[string]ma
 
 	var isChanged bool
 	for path, pkg := range pkgs {
+		pkgName := strings.TrimPrefix(path, strings.TrimSuffix(visitor.projectParentPath, "/")+"/")
 		for fileName, f := range pkg.Files {
 			var isModifiedFile bool
 			for _, decl := range f.Decls {
@@ -41,10 +43,20 @@ func ImportFromTranslationsMap(projectPath string, translationsMap map[string]ma
 										locale = l
 										structName = name.Name
 										isMessage = true
+										break
 									}
 								}
-
 							}
+							if isMessage {
+								isMessage = false
+								for _, messageStruct := range visitor.RigisterMap[locale] {
+									if messageStruct.PkgName == pkgName && messageStruct.StructName == structName {
+										isMessage = true
+										break
+									}
+								}
+							}
+
 							if !isMessage {
 								continue
 							}
