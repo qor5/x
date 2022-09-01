@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"golang.org/x/text/language"
 )
@@ -114,7 +115,14 @@ func (b *Builder) EnsureLanguage(in http.Handler) (out http.Handler) {
 		var lang = ""
 		lang = r.FormValue(b.queryName)
 		if len(lang) > 0 {
-			http.SetCookie(w, &http.Cookie{Name: b.cookieName, Value: lang})
+			maxAge := 365 * 24 * 60 * 60
+			http.SetCookie(w, &http.Cookie{
+				Name:    b.cookieName,
+				Value:   lang,
+				Path:    "/",
+				MaxAge:  maxAge,
+				Expires: time.Now().Add(time.Duration(maxAge) * time.Second),
+			})
 		} else {
 			lang = b.GetCurrentLangFromCookie(r)
 		}
