@@ -563,8 +563,10 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 		lang = b.i18nBuilder.GetCurrentLangFromCookie(ctx.R)
 	}
 
+	accept := ctx.R.Header.Get("Accept-Language")
+
 	var displayLanguage language.Tag
-	_, i := language.MatchStrings(matcher, lang)
+	_, i := language.MatchStrings(matcher, lang, accept)
 	displayLanguage = supportLanguages[i]
 
 	var languages []h.HTMLComponent
