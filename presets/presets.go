@@ -38,7 +38,9 @@ type Builder struct {
 	dataOperator                          DataOperator
 	messagesFunc                          MessagesFunc
 	homePageFunc                          web.PageFunc
+	notFoundFunc                          web.PageFunc
 	homePageLayoutConfig                  *LayoutConfig
+	notFoundPageLayoutConfig              *LayoutConfig
 	brandFunc                             ComponentFunc
 	profileFunc                           ComponentFunc
 	switchLanguageFunc                    ComponentFunc
@@ -128,6 +130,11 @@ func (b *Builder) HomePageLayoutConfig(v *LayoutConfig) (r *Builder) {
 	return b
 }
 
+func (b *Builder) NotFoundPageLayoutConfig(v *LayoutConfig) (r *Builder) {
+	b.notFoundPageLayoutConfig = v
+	return b
+}
+
 func (b *Builder) Builder(v *web.Builder) (r *Builder) {
 	b.builder = v
 	return b
@@ -149,6 +156,11 @@ func (b *Builder) MessagesFunc(v MessagesFunc) (r *Builder) {
 
 func (b *Builder) HomePageFunc(v web.PageFunc) (r *Builder) {
 	b.homePageFunc = v
+	return b
+}
+
+func (b *Builder) NotFoundFunc(v web.PageFunc) (r *Builder) {
+	b.notFoundFunc = v
 	return b
 }
 
@@ -942,6 +954,21 @@ func (b *Builder) getHomePageFunc() web.PageFunc {
 	return b.defaultHomePageFunc
 }
 
+func (b *Builder) defaultNotFoundPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
+	r.Body = h.Div(
+		h.H1("404"),
+		h.Text("Sorry, we couldn't find this page."),
+	).Class("text-center mt-8")
+	return
+}
+
+func (b *Builder) getNotFoundPageFunc() web.PageFunc {
+	if b.notFoundFunc != nil {
+		return b.notFoundFunc
+	}
+	return b.defaultNotFoundPageFunc
+}
+
 func (b *Builder) extraFullPath(ea *extraAsset) string {
 	return b.prefix + "/extra" + ea.path
 }
@@ -1027,10 +1054,11 @@ func (b *Builder) initMux() {
 				return
 			}
 
-			// Handler not found
-			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(w, "404")
+			b.wrap(
+				nil,
+				b.layoutFunc(b.getNotFoundPageFunc(), b.notFoundPageLayoutConfig),
+			).ServeHTTP(w, r)
 			return
 		})
 	})
