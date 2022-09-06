@@ -19,6 +19,7 @@ import (
 	h "github.com/theplant/htmlgo"
 	"go.uber.org/zap"
 	goji "goji.io"
+	"goji.io/middleware"
 	"goji.io/pat"
 	"golang.org/x/text/language"
 	"golang.org/x/text/language/display"
@@ -1021,9 +1022,16 @@ func (b *Builder) initMux() {
 	// Handle 404
 	mux.Use(func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if middleware.Handler(r.Context()) != nil {
+				handler.ServeHTTP(w, r)
+				return
+			}
+
+			// Handler not found
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprintf(w, "404")
+			return
 		})
 	})
 
