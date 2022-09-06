@@ -1018,6 +1018,15 @@ func (b *Builder) initMux() {
 		}
 	}
 
+	// Handle 404
+	mux.Use(func(handler http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, "404")
+		})
+	})
+
 	b.mux = mux
 }
 
