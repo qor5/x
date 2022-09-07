@@ -367,7 +367,7 @@ export const SelectItem = Vue.extend({
 			props: {
 				class:'d-inline-block',
 				style:'width: 200px',
-				items: this.value.option,
+				items: this.value.options,
 				value: this.valueIs,
 				hideDetails: true,
 				...this.$props.value.autocompleteDataSource,

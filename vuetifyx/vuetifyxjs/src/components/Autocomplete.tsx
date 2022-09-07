@@ -49,7 +49,7 @@ export default Vue.extend({
 			(this as any).$plaid().url(this.remoteUrl).eventFunc(this.eventName).query("keyword", this.searchKeyword).query("page", this.remote.page).go().then((r: any) => {
 				this.remote.current = r.data.current;
 				this.remote.total = r.data.total;
-				this.remote.pages = r.data.pages;				
+				this.remote.pages = r.data.pages;
 				if (this.isPaging) {
 					this.listItems = [].concat(this.cachedSelectedItems || [], r.data.items || []);
 				}else{
@@ -84,6 +84,10 @@ export default Vue.extend({
 
 	watch: {
 		searchKeyword(val: string) {
+			if (!this.remoteUrl || !this.eventName) {
+				return;
+			}
+
 			if (val === null) {
 				this.searchKeyword = '';
 				return;
