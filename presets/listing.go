@@ -194,11 +194,13 @@ func (b *ListingBuilder) bulkPanel(
 
 	var errComp h.HTMLComponent
 	if vErr, ok := ctx.Flash.(*web.ValidationErrors); ok {
-		errComp = VAlert(h.Text(vErr.GetGlobalError())).
-			Border("left").
-			Type("error").
-			Elevation(2).
-			ColoredBorder(true)
+		if gErr := vErr.GetGlobalError(); gErr != "" {
+			errComp = VAlert(h.Text(gErr)).
+				Border("left").
+				Type("error").
+				Elevation(2).
+				ColoredBorder(true)
+		}
 	}
 	var processSelectedIdsNotice h.HTMLComponent
 	if len(processedSelectedIds) < len(selectedIds) {
@@ -271,11 +273,13 @@ func (b *ListingBuilder) actionPanel(action *ActionBuilder, ctx *web.EventContex
 
 	var errComp h.HTMLComponent
 	if vErr, ok := ctx.Flash.(*web.ValidationErrors); ok {
-		errComp = VAlert(h.Text(vErr.GetGlobalError())).
-			Border("left").
-			Type("error").
-			Elevation(2).
-			ColoredBorder(true)
+		if gErr := vErr.GetGlobalError(); gErr != "" {
+			errComp = VAlert(h.Text(gErr)).
+				Border("left").
+				Type("error").
+				Elevation(2).
+				ColoredBorder(true)
+		}
 	}
 
 	return VCard(
