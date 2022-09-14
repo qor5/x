@@ -716,7 +716,8 @@ func (b *Builder) dialog(r *web.EventResponse, comp h.HTMLComponent, width strin
 }
 
 type LayoutConfig struct {
-	SearchBoxInvisible bool
+	SearchBoxInvisible          bool
+	NotificationCenterInvisible bool
 }
 
 func (b *Builder) notificationCenter(ctx *web.EventContext) (er web.EventResponse, err error) {
@@ -843,6 +844,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 			profile = b.profileFunc(ctx)
 		}
 
+		showNotificationCenter := cfg == nil || !cfg.NotificationCenterInvisible
 		var notifier h.HTMLComponent
 		if b.notificationCountFunc != nil && b.notificationContentFunc != nil {
 			notifier = web.Portal().Name(NotificationCenterPortalName).Loader(web.GET().EventFunc(actions.NotificationCenter))
@@ -891,7 +893,9 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 						// ).Method("GET"),
 					).AlignCenter(true).Attr("style", "max-width: 650px"),
 				),
-				notifier,
+				h.If(showNotificationCenter,
+					notifier,
+				),
 			).Dark(true).
 				Color(ColorPrimary).
 				App(true).
