@@ -5,7 +5,7 @@
 - Install the i18n-transfer.
 
   ``` 
-  $ go install github.com/goplaid/x/i18n/i18n-transfer@i18n-transfer
+  $ go install github.com/goplaid/x/i18n/i18n-transfer@latest
   ```
 
 - Must cd root dir of the project.
