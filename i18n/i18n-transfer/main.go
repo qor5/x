@@ -1,44 +1,72 @@
 package main
 
 import (
-	"flag"
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/goplaid/x/i18n/i18n-transfer/csv"
 	"github.com/goplaid/x/i18n/i18n-transfer/parser"
+	"github.com/manifoldco/promptui"
 )
 
 func main() {
-	importCmd := flag.NewFlagSet("import", flag.ExitOnError)
-	importCsv := importCmd.String("csv", "", "input csv file path")
-
-	if len(os.Args) < 2 {
-		fmt.Println("expected 'import' or 'export' subcommands")
-		os.Exit(1)
+	prompt := promptui.Select{
+		Label: "Import Or Export",
+		Items: []string{"Import", "Export"},
 	}
 
-	switch os.Args[1] {
-	case "import":
-		importCmd.Parse(os.Args[2:])
-		if *importCsv == "" {
-			fmt.Println(`flag needs an argument: -csv
-Usage of import:
-  -csv string
-    	input csv file path`)
-			os.Exit(1)
+	_, result, err := prompt.Run()
+
+	if err != nil || (result != "Import" && result != "Export") {
+		fmt.Printf("Please select \"Import\" or \"Export\"\n")
+		return
+	}
+
+	if result == "Import" {
+		validate := func(input string) error {
+			s, err := os.Stat(input)
+			if err != nil || s.IsDir() {
+				return errors.New("Please input correct csv file path")
+			}
+			return nil
 		}
-		translationMap, err := csv.GetTranslationsMap(*importCsv)
+
+		prompt := promptui.Prompt{
+			Label:    "Csv File Path",
+			Validate: validate,
+		}
+
+		result, err := prompt.Run()
+		if err != nil {
+			fmt.Printf("Please input correct csv file path\n")
+			return
+		}
+
+		translationMap, err := csv.CsvToTranslationsMap(result)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		err = parser.ImportFromTranslationsMap("./", translationMap)
+
+		projectPath, err := os.Getwd()
+		if err != nil {
+			fmt.Printf("Please run i18n-transfer in a correct project path\n")
+			return
+		}
+
+		err = parser.ImportFromTranslationsMap(projectPath, translationMap)
 		if err != nil {
 			log.Fatalln(err)
 		}
-	case "export":
-		translationsMap, err := parser.ExportToTranslationsMap("./")
+	}
+
+	if result == "Export" {
+		projectPath, _ := os.Getwd()
+		projectPath, _ = filepath.Abs(projectPath)
+
+		translationsMap, err := parser.ExportToTranslationsMap(projectPath)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -48,12 +76,10 @@ Usage of import:
 				fmt.Printf("    %v: %v\n", k, v)
 			}
 		}
-		err = csv.ExportToCsv(translationsMap)
+		err = csv.TranslationsMapToCsv(translationsMap)
 		if err != nil {
 			log.Fatalln(err)
 		}
-	default:
-		fmt.Println("expected 'import' or 'export' subcommands")
-		os.Exit(1)
 	}
+
 }

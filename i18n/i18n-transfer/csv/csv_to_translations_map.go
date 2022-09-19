@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func GetTranslationsMap(csvPath string) (translationsMap map[string]map[string]string, err error) {
+func CsvToTranslationsMap(csvPath string) (translationsMap map[string]map[string]string, err error) {
 	f, err := os.Open(csvPath)
 	if err != nil {
 		return

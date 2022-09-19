@@ -11,27 +11,52 @@ import (
 	"strings"
 )
 
-func ImportFromTranslationsMap(dir string, translationsMap map[string]map[string]string) error {
+// compare the translation structs and translationsMap
+// update the new value from translationsMap
+// overwrite new content to files
+func ImportFromTranslationsMap(projectPath string, translationsMap map[string]map[string]string) (err error) {
 	fset := token.NewFileSet()
-	pkgs, err := ParseDir(fset, dir, nil, go_parser.AllErrors)
+	pkgs, err := ParseDir(fset, projectPath, nil, go_parser.AllErrors)
 	if err != nil {
-		return err
+		return
 	}
+	visitor, err := newVisitorAndWalk(fset, pkgs, projectPath)
+	if err != nil {
+		return
+	}
+
+	var isChanged bool
 	for path, pkg := range pkgs {
+		pkgName := strings.TrimPrefix(path, strings.TrimSuffix(visitor.projectParentPath, "/")+"/")
 		for fileName, f := range pkg.Files {
-			var isModiyiedFile bool
+			var isModifiedFile bool
 			for _, decl := range f.Decls {
 				if decl, ok := decl.(*ast.GenDecl); ok {
 					for _, spec := range decl.Specs {
 						if spec, ok := spec.(*ast.ValueSpec); ok {
 							var isMessage bool
 							var locale string
+							var structName string
 							for _, name := range spec.Names {
-								if _, exist := translationsMap[name.Name]; exist {
-									locale = name.Name
-									isMessage = true
+								if l, exist := visitor.LocalesMap[name.Name]; exist {
+									if _, exist := translationsMap[l]; exist {
+										locale = l
+										structName = name.Name
+										isMessage = true
+										break
+									}
 								}
 							}
+							if isMessage {
+								isMessage = false
+								for _, messageStruct := range visitor.RigisterMap[locale] {
+									if messageStruct.PkgName == pkgName && messageStruct.StructName == structName {
+										isMessage = true
+										break
+									}
+								}
+							}
+
 							if !isMessage {
 								continue
 							}
@@ -48,8 +73,8 @@ func ImportFromTranslationsMap(dir string, translationsMap map[string]map[string
 									break
 								}
 
-								xType, ok := x.Type.(*ast.Ident)
-								if !ok || !strings.Contains(xType.Name, "Message") {
+								_, ok = x.Type.(*ast.Ident)
+								if !ok {
 									isMessage = false
 									break
 								}
@@ -73,7 +98,7 @@ func ImportFromTranslationsMap(dir string, translationsMap map[string]map[string
 										break
 									}
 
-									if translationValue, exist := translationsMap[locale][go_path.Join(path, key.Name)]; isMessage && exist && value.Value != "\""+translationValue+"\"" {
+									if translationValue, exist := translationsMap[locale][getTranslationMapKey(path, key.Name, projectPath)]; isMessage && exist && value.Value != "\""+translationValue+"\"" {
 										fmt.Printf(`
 ----------------------------------------------
 update translation:
@@ -84,9 +109,10 @@ to:
 	%s
 ----------------------------------------------
 
-`, go_path.Join(fileName, locale, key.Name), value.Value, "\""+translationValue+"\"")
+`, go_path.Join(fileName, structName, key.Name), value.Value, "\""+translationValue+"\"")
 										value.Value = "\"" + translationValue + "\""
-										isModiyiedFile = true
+										isModifiedFile = true
+										isChanged = true
 									}
 								}
 							}
@@ -95,18 +121,27 @@ to:
 				}
 			}
 
-			if isModiyiedFile {
-				file, err := os.OpenFile(fileName, os.O_WRONLY, 0)
+			// overwrite new content to file
+			if isModifiedFile {
+				file, err := os.Create(fileName)
 				defer file.Close()
 				if err != nil {
 					return err
 				}
+
 				err = format.Node(file, fset, f)
 				if err != nil {
 					return err
 				}
 			}
 		}
+	}
+	if !isChanged {
+		fmt.Printf(`
+----------------------------------------------
+update translation:
+	nothing changed
+`)
 	}
 	return nil
 }
