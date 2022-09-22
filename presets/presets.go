@@ -94,6 +94,10 @@ func New() *Builder {
 		rightDrawerWidth:     "600",
 		verifier:             perm.NewVerifier(PermModule, nil),
 		homePageLayoutConfig: &LayoutConfig{SearchBoxInvisible: true},
+		notFoundPageLayoutConfig: &LayoutConfig{
+			SearchBoxInvisible:          true,
+			NotificationCenterInvisible: true,
+		},
 	}
 
 	r.GetWebBuilder().RegisterEventFunc(OpenConfirmationDialogEvent, r.openConfirmationDialog)
