@@ -367,18 +367,20 @@ export const SelectItem = Vue.extend({
 	render() {
 		const data: VNodeData = {
 			props: {
-				class:'d-inline-block',
-				style:'width: 200px',
 				items: this.value.options,
-				value: this.valueIs,
-				hideDetails: true,
 				...this.$props.value.autocompleteDataSource,
 			},
-
+			attrs: {
+				value: this.valueIs,
+				hideDetails: true,
+				class:'d-inline-block',
+				style:'width: 200px',
+			},
 			on: {
 				change: this.setValue,
 			},
 		};
+
 		return (
 			<div>
 				<vautocomplete {...data}>
