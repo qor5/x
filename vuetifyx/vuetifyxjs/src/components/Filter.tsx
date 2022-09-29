@@ -870,7 +870,12 @@ export const Filter = Vue.extend({
 				)
 			}
 			return (
-				<vchip on={on} outlined={true} class={'mr-2 my-1'}>{body}</vchip>
+				<vchip
+					on={on}
+					outlined={true}
+					class={`mr-2 my-1 ${op.selected ? '' : 'grey--text text--darken-1'}`}
+					style={{borderStyle: op.selected ? 'solid' : 'dashed'}}
+				>{body}</vchip>
 			)
 		},
 
