@@ -349,7 +349,7 @@ export const SelectItem = Vue.extend({
 
 	data() {
 		return {
-			valueIs: this.$props.value.valueIs || (this.$props.value.options && this.$props.value.options.length > 0 && this.$props.value.options[0].value),
+			valueIs: this.$props.value.valueIs,
 		};
 	},
 
@@ -594,13 +594,6 @@ function getSelectedIndexes(value: FilterItem[]): number[] {
 }
 
 function initInternalValue(items: FilterItem[]): FilterItem[] {
-	for (const item of items) {
-		if (item.itemType === 'SelectItem') {
-			if (!item.valueIs && item.options) {
-				item.valueIs = item.options[0].value;
-			}
-		}
-	}
 	return items;
 }
 
@@ -815,10 +808,10 @@ export const Filter = Vue.extend({
 						const mod = op.modifier || 'in';
 						const textsAre = op.options!.filter(o => op.valuesAre.includes(o.value)).map(o => o.text)
 						if (mod === 'in' && op.valuesAre && op.valuesAre.length > 0) {
-							showValue = ' in ' + '[ ' + textsAre.join(',') + ' ]'
+							showValue = ' in ' + '[ ' + textsAre.join(', ') + ' ]'
 						}
 						if (mod === 'notIn' && op.valuesAre && op.valuesAre.length > 0) {
-							showValue = ' not in ' + '[ ' + textsAre.join(',') + ' ]'
+							showValue = ' not in ' + '[ ' + textsAre.join(', ') + ' ]'
 						}
 						break
 					}
@@ -826,7 +819,7 @@ export const Filter = Vue.extend({
 						const mod = op.modifier || 'equals';
 						const textsAre = op.options!.filter(o => op.valuesAre.includes(o.value)).map(o => o.text)
 						if (mod === 'equals' && op.valuesAre && op.valuesAre.length > 0) {
-							showValue = textsAre.join(',')
+							showValue = textsAre.join(', ')
 						}
 						break
 					}
