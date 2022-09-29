@@ -196,7 +196,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 		"Name", "请输入你的名字",
 	)
 
-	l := m.Listing("Name", "CompanyID", "ApprovalComment").SearchColumns("name", "email", "description").PerPage(5)
+	l := m.Listing("Name", "CompanyID", "ApprovalComment").SearchColumns("name", "email", "description").PerPage(5).SelectableColumns(true)
 	l.Field("Name").Label("列表的名字")
 	l.Field("CompanyID").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		u := obj.(*Customer)
@@ -259,6 +259,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			{
 				Key:          "created",
 				Label:        "Created",
+				Folded:       true,
 				ItemType:     vuetifyx.ItemTypeDate,
 				SQLCondition: `extract(epoch from created_at) %s ?`,
 			},
@@ -271,6 +272,7 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 			{
 				Key:          "name",
 				Label:        "Name",
+				Folded:       true,
 				ItemType:     vuetifyx.ItemTypeString,
 				SQLCondition: `name %s ?`,
 			},

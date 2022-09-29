@@ -16,6 +16,7 @@ export default Vue.extend({
 		hasIcon: Boolean,
 		cacheItems: Boolean,
 		hideSelected: Boolean,
+		hideDetails: Boolean,
 		items: {
 			type: Array,
 			default: () => ([]),
@@ -106,6 +107,7 @@ export default Vue.extend({
 		const {
 			remoteUrl,
 			multiple,
+			hideDetails,
 		} = this.$props;
 
 		let {
@@ -223,6 +225,7 @@ export default Vue.extend({
 					clearable: true,
 					hideSelected,
 					cacheItems,
+					hideDetails,
 				},
 				...this.$attrs,
 				...{

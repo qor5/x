@@ -2,6 +2,7 @@ package vuetifyx
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/goplaid/web"
 	h "github.com/theplant/htmlgo"
@@ -87,6 +88,11 @@ func (b *VXDateTimePickerBuilder) SetAttr(k string, v interface{}) {
 
 func (b *VXDateTimePickerBuilder) Attr(vs ...interface{}) (r *VXDateTimePickerBuilder) {
 	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VXDateTimePickerBuilder) HideDetails(v bool) (r *VXDateTimePickerBuilder) {
+	b.tag.Attr(":hide-details", fmt.Sprint(v))
 	return b
 }
 

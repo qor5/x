@@ -7,6 +7,7 @@
 				:loading="loading"
 				:label="label"
 				:value="formattedDatetime"
+				:hide-details="hideDetails"
 				v-on="on"
 				prepend-icon="edit_calendar"
 				readonly
@@ -114,7 +115,10 @@ export default {
 		},
 		timePickerProps: {
 			type: Object
-		}
+		},
+		hideDetails: {
+			type: Boolean
+		},
 	},
 	data() {
 		return {

@@ -150,20 +150,53 @@ func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageRespo
 	title := msgr.ListingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.mb.label))
 	r.PageTitle = title
 
-	bulkPanel, toolbar, dataTable, dataTableAdditions := b.getComponents(ctx, ctx.R.URL)
+	bulkPanel, filterBar, dataTable, dataTableAdditions := b.getComponents(ctx, ctx.R.URL)
+
+	var tabsAndActionsBar h.HTMLComponent
+	{
+		filterTabs := b.filterTabs(msgr, ctx)
+
+		var actionsComponent h.HTMLComponents
+		if v := b.actionsComponent(msgr, ctx); v != nil {
+			actionsComponent = append(actionsComponent, v)
+		}
+		if b.newBtnFunc != nil {
+			actionsComponent = append(actionsComponent, b.newBtnFunc(ctx))
+		} else {
+			disableNewBtn := b.mb.Info().Verifier().Do(PermCreate).WithReq(ctx.R).IsAllowed() != nil
+			if !disableNewBtn {
+				actionsComponent = append(actionsComponent, VBtn(msgr.New).
+					Color("primary").
+					Depressed(true).
+					Dark(true).Class("ml-2").
+					Disabled(disableNewBtn).
+					Attr("@click", web.Plaid().EventFunc(actions.New).
+						Go()))
+			}
+		}
+
+		if filterTabs != nil || len(actionsComponent) > 0 {
+			tabsAndActionsBar = VToolbar(
+				filterTabs,
+				VSpacer(),
+				actionsComponent,
+			).Flat(true)
+		}
+	}
 
 	r.Body = VContainer(
-		b.filterTabs(msgr, ctx),
-		bulkPanel,
-		VCard(
-			toolbar,
-			VDivider(),
-			VCardText(
-				web.Portal(dataTable).Name(dataTablePortalName),
-			).Class("pa-0"),
-		),
-
-		web.Portal(dataTableAdditions).Name(dataTableAdditionsPortalName),
+		tabsAndActionsBar,
+		h.Div(
+			bulkPanel,
+			VCard(
+				filterBar,
+				VDivider(),
+				VCardText(
+					web.Portal(dataTable).Name(dataTablePortalName),
+				).Class("pa-0"),
+			),
+			web.Portal(dataTableAdditions).Name(dataTableAdditionsPortalName),
+		).Class("mt-2"),
 	).Fluid(true).
 		Attr(web.InitContextVars, `{currEditingListItemID: ''}`)
 
@@ -505,7 +538,7 @@ func (b *ListingBuilder) filterTabs(msgr *Messages, ctx *web.EventContext) (r h.
 		return
 	}
 
-	tabs := VTabs().Class("mb-3").Grow(true).ShowArrows(true)
+	tabs := VTabs().ShowArrows(true)
 	tabsData := b.filterTabsFunc(ctx)
 	for i, tab := range tabsData {
 		if tab.ID == "" {
@@ -722,12 +755,30 @@ func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContex
 	return
 }
 
-func (b *ListingBuilder) tableToolbar(msgr *Messages, pageURL *url.URL, ctx *web.EventContext, fd vuetifyx.FilterData) (toolbar *VToolbarBuilder, displayFields []*FieldBuilder) {
+func (b *ListingBuilder) filterBar(msgr *Messages, fd vuetifyx.FilterData) (filterBar h.HTMLComponent) {
+	if fd == nil {
+		return nil
+	}
+	noVisiableItem := true
+	for _, d := range fd {
+		if !d.Invisible {
+			noVisiableItem = false
+			break
+		}
+	}
+	if noVisiableItem {
+		return nil
+	}
+
 	ft := vuetifyx.FilterTranslations{}
-	ft.Filters = msgr.Filters
-	ft.Filter = msgr.Filter
-	ft.Done = msgr.FiltersDone
 	ft.Clear = msgr.FiltersClear
+	ft.Add = msgr.FiltersAdd
+	ft.Apply = msgr.FilterApply
+	for _, d := range fd {
+		d.Translations = vuetifyx.FilterIndependentTranslations{
+			FilterBy: msgr.FilterBy(d.Label),
+		}
+	}
 
 	ft.Date.To = msgr.FiltersDateTo
 
@@ -743,41 +794,9 @@ func (b *ListingBuilder) tableToolbar(msgr *Messages, pageURL *url.URL, ctx *web
 	ft.MultipleSelect.In = msgr.FiltersMultipleSelectIn
 	ft.MultipleSelect.NotIn = msgr.FiltersMultipleSelectNotIn
 
-	toolbar = VToolbar(
-		VSpacer(),
-	).Flat(true)
-
-	toolbar.AppendChildren(b.actionsComponent(msgr, ctx))
-
-	if b.newBtnFunc != nil {
-		toolbar.AppendChildren(b.newBtnFunc(ctx))
-	} else {
-		disableNewBtn := b.mb.Info().Verifier().Do(PermCreate).WithReq(ctx.R).IsAllowed() != nil
-		if !disableNewBtn {
-			toolbar.AppendChildren(VBtn(msgr.New).
-				Color("primary").
-				Depressed(true).
-				Dark(true).Class("ml-2").
-				Disabled(disableNewBtn).
-				Attr("@click", web.Plaid().EventFunc(actions.New).
-					Go()))
-		}
-	}
-
-	displayFields = b.fields
-	if b.selectableColumns {
-		var btn h.HTMLComponent
-		btn, displayFields = b.selectColumnsBtn(pageURL, ctx)
-		toolbar.PrependChildren(btn)
-	}
-	if fd != nil {
-		toolbar.PrependChildren(
-			vuetifyx.VXFilter(fd).Translations(ft),
-			h.If(b.selectableColumns, VDivider().Vertical(true).Inset(true).Light(true).Attr("style", "margin-left:8px;")),
-		)
-	}
-
-	return
+	return VToolbar(
+		vuetifyx.VXFilter(fd).Translations(ft),
+	).Flat(true).AutoHeight(true).Class("py-2")
 }
 
 func getLocalPerPage(
@@ -837,7 +856,7 @@ func (b *ListingBuilder) getComponents(
 	pageURL *url.URL,
 ) (
 	bulkPanel h.HTMLComponent,
-	toolbar h.HTMLComponent,
+	filterBar h.HTMLComponent,
 	dataTable h.HTMLComponent,
 	// pagination, no-record message
 	datatableAdditions h.HTMLComponent,
@@ -933,8 +952,7 @@ func (b *ListingBuilder) getComponents(
 	}
 
 	haveCheckboxes := len(b.bulkActions) > 0
-	var displayFields = b.fields
-	toolbar, displayFields = b.tableToolbar(msgr, pageURL, ctx, fd)
+	filterBar = b.filterBar(msgr, fd)
 
 	pagesCount := int(int64(totalCount)/searchParams.PerPage + 1)
 	if int64(totalCount)%searchParams.PerPage == 0 {
@@ -966,6 +984,12 @@ func (b *ListingBuilder) getComponents(
 		cellWraperFunc = b.cellWrapperFunc
 	}
 
+	var displayFields = b.fields
+	var selectColumnsBtn h.HTMLComponent
+	if b.selectableColumns {
+		selectColumnsBtn, displayFields = b.selectColumnsBtn(pageURL, ctx)
+	}
+
 	dataTable = s.DataTable(objs).
 		CellWrapperFunc(cellWraperFunc).
 		RowWrapperFunc(func(row h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent {
@@ -975,7 +999,8 @@ func (b *ListingBuilder) getComponents(
 		RowMenuItemFuncs(b.RowMenu().listingItemFuncs(ctx)...).
 		Selectable(haveCheckboxes).
 		SelectionParamName(ParamSelectedIds).
-		SelectedCountLabel(msgr.ListingSelectedCountNotice)
+		SelectedCountLabel(msgr.ListingSelectedCountNotice).
+		SelectableColumnsBtn(selectColumnsBtn)
 
 	for _, f := range displayFields {
 		if b.mb.Info().Verifier().Do(PermList).SnakeOn(f.name).WithReq(ctx.R).IsAllowed() != nil {
@@ -1081,12 +1106,16 @@ func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext)
 		actionBtns = append(actionBtns, btn)
 	}
 
+	if len(actionBtns) == 0 {
+		return nil
+	}
+
 	if b.actionsAsMenu {
 		var listItems []h.HTMLComponent
 		for _, btn := range actionBtns {
 			listItems = append(listItems, VListItem(btn))
 		}
-		return VMenu(
+		return h.Components(VMenu(
 			web.Slot(
 				VBtn("Actions").
 					Attr("v-bind", "attrs").
@@ -1095,7 +1124,7 @@ func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext)
 			VList(listItems...),
 		).OpenOnHover(true).
 			OffsetY(true).
-			AllowOverflow(true)
+			AllowOverflow(true))
 	}
 	return h.Components(actionBtns...)
 }

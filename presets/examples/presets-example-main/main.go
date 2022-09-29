@@ -21,7 +21,7 @@ func main() {
 
 	p := examples.Preset1(db)
 
-	log.Println("serving on :7000")
-	log.Fatal(http.ListenAndServe(":7000", middleware.Logger(
+	log.Println("serving on :7001")
+	log.Fatal(http.ListenAndServe(":7001", middleware.Logger(
 		middleware.RequestID(p))))
 }

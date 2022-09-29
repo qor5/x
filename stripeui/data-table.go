@@ -34,8 +34,9 @@ type DataTableBuilder struct {
 	loadMoreLabel      string
 	loadMoreURL        string
 	// e.g. {count} records are selected.
-	selectedCountLabel string
-	tfootChildren      []h.HTMLComponent
+	selectedCountLabel   string
+	tfootChildren        []h.HTMLComponent
+	selectableColumnsBtn h.HTMLComponent
 }
 
 func DataTable(data interface{}) (r *DataTableBuilder) {
@@ -113,6 +114,11 @@ func (b *DataTableBuilder) SelectedCountLabel(v string) (r *DataTableBuilder) {
 	return b
 }
 
+func (b *DataTableBuilder) SelectableColumnsBtn(v h.HTMLComponent) (r *DataTableBuilder) {
+	b.selectableColumnsBtn = v
+	return b
+}
+
 type primarySlugger interface {
 	PrimarySlug() string
 }
@@ -147,6 +153,8 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			objRowMenusMap[id] = opMenuItems
 		}
 	})
+
+	hasRowMenuCol := len(objRowMenusMap) > 0 || b.selectableColumnsBtn != nil
 
 	var rows []h.HTMLComponent
 	var idsOfPage []string
@@ -215,7 +223,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			bindTds = append(bindTds, tdWrapped)
 		}
 
-		if len(objRowMenusMap) > 0 {
+		if hasRowMenuCol {
 			var td h.HTMLComponent
 			rowMenus, ok := objRowMenusMap[id]
 			if ok {
@@ -346,8 +354,8 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			heads = append(heads, head)
 		}
 
-		if len(objRowMenusMap) > 0 {
-			heads = append(heads, h.Th(" ").Style("width: 56px;")) // Edit, Delete menu
+		if hasRowMenuCol {
+			heads = append(heads, h.Th("").Children(b.selectableColumnsBtn).Style("width: 64px;").Class("pl-0")) // Edit, Delete menu
 		}
 		thead = h.Thead(
 			h.Tr(heads...),
