@@ -740,11 +740,15 @@ export const Filter = Vue.extend({
 
 						if (mod === constants.ModifierBetween) {
 							if (op.valueFrom) {
-								showValue += op.valueFrom
-							}
-							showValue += ' - '
-							if (op.valueTo) {
-								showValue += op.valueTo
+								if (op.valueTo) {
+									showValue = `${op.valueFrom} - ${op.valueTo}`
+								} else {
+									showValue = ` >= ${op.valueFrom}`
+								}
+							} else {
+								if (op.valueTo) {
+									showValue = ` < ${op.valueTo}`
+								}
 							}
 						}
 						break
@@ -762,19 +766,25 @@ export const Filter = Vue.extend({
 						if (mod === 'between') {
 							const floatFrom = parseFloat(op.valueFrom || '');
 							const floatTo = parseFloat(op.valueTo || '');
-							if (!isNaN(floatFrom)) {
-								showValue += op.valueFrom
-							}
-							showValue += ' - '
-							if (!isNaN(floatTo)) {
-								showValue += op.valueTo
+							const fromValid = !isNaN(floatFrom)
+							const toValid = !isNaN(floatTo)
+							if (fromValid) {
+								if (toValid) {
+									showValue = `${op.valueFrom} - ${op.valueTo}`
+								} else {
+									showValue = ` >= ${op.valueFrom}`
+								}
+							} else {
+								if (toValid) {
+									showValue = ` <= ${op.valueTo}`
+								}
 							}
 						}
 
 						if (mod === 'greaterThan') {
 							const floatValue = parseFloat(op.valueIs);
 							if (!isNaN(floatValue)) {
-								showValue += ' > ' +  op.valueTo
+								showValue += ' > ' +  op.valueFrom
 							}
 						}
 
