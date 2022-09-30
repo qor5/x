@@ -22,6 +22,7 @@ import * as constants from './Constants';
 import DateTimePicker from './DateTimePicker.vue';
 import { encodeFilterData, filterData } from './FilterData';
 import LinkageSelect from './LinkageSelect.vue';
+import { format } from 'date-fns';
 
 
 
@@ -739,15 +740,23 @@ export const Filter = Vue.extend({
 						const mod = op.modifier || constants.ModifierBetween;
 
 						if (mod === constants.ModifierBetween) {
+							let from = null
+							let to  = null
 							if (op.valueFrom) {
-								if (op.valueTo) {
-									showValue = `${op.valueFrom} - ${op.valueTo}`
+                                from = format(new Date(+op.valueFrom * 1000), 'yyyy-MM-dd HH:mm')
+							}
+							if (op.valueTo) {
+                                to = format(new Date(+op.valueTo * 1000), 'yyyy-MM-dd HH:mm')
+							}
+							if (from) {
+								if (to) {
+									showValue = `${from} - ${to}`
 								} else {
-									showValue = ` >= ${op.valueFrom}`
+									showValue = ` >= ${from}`
 								}
 							} else {
-								if (op.valueTo) {
-									showValue = ` < ${op.valueTo}`
+								if (to) {
+									showValue = ` < ${to}`
 								}
 							}
 						}

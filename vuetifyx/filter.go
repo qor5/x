@@ -373,10 +373,10 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 					if it.ItemType == ItemTypeDate {
 						it.ValueIs = v
 						if mod == "gte" {
-							it.ValueFrom = unixToDatetimeWithFormat(mv["gte"], "2006-01-02 15:04")
+							it.ValueFrom = mv["gte"]
 						}
 						if mod == "lt" {
-							it.ValueTo = unixToDatetimeWithFormat(mv["lt"], "2006-01-02 15:04")
+							it.ValueTo = mv["lt"]
 						}
 						continue
 					}
