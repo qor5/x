@@ -29,8 +29,11 @@ type TimePickerProps struct {
 	NoTitle    bool   `json:"no-title"`
 }
 
-func (b *VXDateTimePickerBuilder) Value(v string) (r *VXDateTimePickerBuilder) {
-	b.tag.Attr(":value", h.JSONString(v))
+func (b *VXDateTimePickerBuilder) Value(unixTimestamp int64) (r *VXDateTimePickerBuilder) {
+	if unixTimestamp <= 0 {
+		return b
+	}
+	b.tag.Attr(":value", h.JSONString(unixTimestamp))
 	return b
 }
 

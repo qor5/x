@@ -11,8 +11,8 @@ describe('filter', () => {
 					itemType: 'DateItem',
 					selected: true,
 					modifier: 'between',
-					valueFrom: moment('2018-04-09 00:00'),
-					valueTo: moment('2018-04-10 00:00'),
+					valueFrom: moment('2018-04-09 00:00').unix(),
+					valueTo: moment('2018-04-10 00:00').unix(),
 				},
 				{
 					key: 'created1',
@@ -20,7 +20,7 @@ describe('filter', () => {
 					itemType: 'DateItem',
 					selected: true,
 					modifier: 'between',
-					valueFrom: moment('2018-04-09 00:00'),
+					valueFrom: moment('2018-04-09 00:00').unix(),
 				},
 				{
 					key: 'created2',
@@ -28,7 +28,7 @@ describe('filter', () => {
 					itemType: 'DateItem',
 					selected: true,
 					modifier: 'between',
-					valueTo: moment('2018-04-09 00:00'),
+					valueTo: moment('2018-04-09 00:00').unix(),
 				},
 				{
 					key: 'created3',
@@ -43,8 +43,8 @@ describe('filter', () => {
 					itemType: 'DateItem',
 					selected: true,
 					modifier: 'between',
-					valueFrom: moment('2018-04-09 00:00'),
-					valueTo: moment('2018-04-10 00:00'),
+					valueFrom: moment('2018-04-09 00:00').unix(),
+					valueTo: moment('2018-04-10 00:00').unix(),
 				},
 			])).toEqual(
 				// tslint:disable-next-line: max-line-length

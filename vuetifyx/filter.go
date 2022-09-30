@@ -333,8 +333,8 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 				it.Selected = true
 				it.Modifier = ModifierBetween
 				if it.ItemType == ItemTypeDate {
-					it.ValueFrom = unixToDatetimeWithFormat(mv["gte"], "2006-01-02 15:04")
-					it.ValueTo = unixToDatetimeWithFormat(mv["lt"], "2006-01-02 15:04")
+					it.ValueFrom = mv["gte"]
+					it.ValueTo = mv["lt"]
 				}
 
 				if it.ItemType == ItemTypeNumber {
@@ -371,7 +371,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 					}
 
 					if it.ItemType == ItemTypeDate {
-						it.ValueIs = unixToDate(v)
+						it.ValueIs = v
 						if mod == "gte" {
 							it.ValueFrom = unixToDatetimeWithFormat(mv["gte"], "2006-01-02 15:04")
 						}
