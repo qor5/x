@@ -72,8 +72,9 @@ export default {
 		event: 'input'
 	},
 	props: {
+		// unix timestamp
 		value: {
-			type: String,
+			type: Number,
 			default: null
 		},
 		disabled: {
@@ -149,16 +150,22 @@ export default {
 		},
 		dateSelected() {
 			return !this.date
+		},
+		unixTS() {
+			if (!this.formattedDatetime) {
+				return ''
+			}
+			return Math.floor(+new Date(this.formattedDatetime) / 1000)
 		}
 	},
 	methods: {
 		init() {
-			if (!this.value) {
+			if (!this.value || this.value <= 0) {
 				return
 			}
 
 			// see https://stackoverflow.com/a/9436948
-			let initDateTime = parse(this.value, this.dateTimeFormat, new Date())
+			let initDateTime = new Date(this.value * 1000)
 
 			this.date = format(initDateTime, DEFAULT_DATE_FORMAT)
 			this.time = format(initDateTime, DEFAULT_TIME_FORMAT)
@@ -168,7 +175,7 @@ export default {
 			if (!this.date) {
 				this.date = format(new Date(), DEFAULT_DATE_FORMAT)
 			}
-			this.$emit('input', this.formattedDatetime)
+			this.$emit('input', this.unixTS)
 		},
 		clearHandler() {
 			this.resetPicker()
