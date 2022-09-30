@@ -1,4 +1,4 @@
-package vuetify_components
+package basics
 
 import (
 	"github.com/goplaid/x/docs/examples"

@@ -1,4 +1,4 @@
-package components_guide
+package digging_deeper
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -24,14 +24,14 @@ to be used as any ~htmlgo.HTMLComponent~.
 $ vue create tiptapjs
 ~~~
 
-Modify or add a separate ~vue.config.js~ config file, 
+Modify or add a separate ~vue.config.js~ config file,
 
 `),
 	ch.Code(examples.TipTapVueConfig).Language("javascript"),
 
 	Markdown(`
 - Enable ~runtimeCompiler~ so that vue can parse template html generate from server.
-- Made ~Vue~ as externals so that it won't be packed to the dist production js file, 
+- Made ~Vue~ as externals so that it won't be packed to the dist production js file,
   Since we will be sharing one Vue.js for in one page with other libraries.
 - Config svg module to inline the svg icons used by tiptap
 
@@ -42,7 +42,7 @@ Install ~tiptap~ and ~tiptap-extensions~ first
 $ yarn add tiptap tiptap-extensions
 ~~~
 
-And write the ~editor.vue~ something like this, We omitted the template at here. 
+And write the ~editor.vue~ something like this, We omitted the template at here.
 
 `),
 	ch.Code(examples.TipTapEditorVueComponent).Language("javascript"),
@@ -66,8 +66,8 @@ We edited the ~index.html~ inside public to be the following:
 `),
 	ch.Code(examples.TipTapDemoHTML).Language("html"),
 	Markdown(`
-- For ~http://localhost:3500/app.js~ to be able to serve. you have to run ~yarn serve~ in 
-tiptapjs directory. 
+- For ~http://localhost:3500/app.js~ to be able to serve. you have to run ~yarn serve~ in
+tiptapjs directory.
 - ~http://localhost:3100/app.js~ is goplaid web corejs vue project.
   So go to that directory and run ~yarn serve~ to start it. and then in
 - Run a web server inside tiptapjs directory like ~python -m SimpleHTTPServer~ and point your
@@ -85,7 +85,7 @@ them into ~a_tiptap-packr.go~ file.
 	ch.Code(examples.TiptapBuilderSH).Language("bash"),
 
 	Markdown(`
-**Step 6**: Write a Go wrapper to wrap it to be a ~HTMLComponent~ 
+**Step 6**: Write a Go wrapper to wrap it to be a ~HTMLComponent~
 `),
 	ch.Code(examples.TipTapEditorHTMLComponent).Language("go"),
 

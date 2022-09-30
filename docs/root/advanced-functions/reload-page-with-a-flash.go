@@ -1,4 +1,4 @@
-package basics
+package advanced_functions
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -16,7 +16,7 @@ The results of an ~web.EventFunc~ could be:
 - Reload the whole current page
 - Refresh part of the current page
 
-Let's demonstrate reload the whole current page: 
+Let's demonstrate reload the whole current page:
 `),
 	ch.Code(examples.ReloadWithFlashSample).Language("go"),
 	utils.Demo("Reload Page With a Flash", e00_basics.ReloadWithFlashPath, "e00_basics/reload-with-a-flash.go"),

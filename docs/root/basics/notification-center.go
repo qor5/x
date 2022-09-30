@@ -1,4 +1,4 @@
-package presets_guide
+package basics
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -13,7 +13,7 @@ var NotificationCenter = Doc(
 To enable notification center: Call ~NotificationFunc~ on ~presets.Builder~ With 2 function parameters
 like this ~builder.NotificationFunc(NotifierComponent(), NotifierCount())~
 
-The first function is for rendering the content of the popup after user clicked the "bell icon". 
+The first function is for rendering the content of the popup after user clicked the "bell icon".
 The second function is for rendering the number at the top right corner of the "bell icon".
 `),
 

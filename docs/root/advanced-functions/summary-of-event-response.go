@@ -1,4 +1,4 @@
-package basics
+package advanced_functions
 
 import (
 	"github.com/goplaid/x/docs/examples"

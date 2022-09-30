@@ -1,4 +1,4 @@
-package presets_guide
+package basics
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -12,7 +12,7 @@ import (
 var EditingCustomizations = Doc(
 	Markdown(`
 Editing an object will be always in a drawer popup. select which fields can edit for each model
-by using the ~.Only~ func of ~EditingBuilder~, There are different ways to configure the type 
+by using the ~.Only~ func of ~EditingBuilder~, There are different ways to configure the type
 of component that is used to do the editing.
 
 `),

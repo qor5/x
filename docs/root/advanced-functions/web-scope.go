@@ -1,4 +1,4 @@
-package basics
+package advanced_functions
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -21,7 +21,7 @@ For example:
 	ch.Code(examples.WebScopeUseLocalsSample1).Language("go"),
 	utils.Demo("Web Scope Use Locals", e00_basics.WebScopeUseLocalsPagePath, "e00_basics/web-scope.go"),
 	Markdown(`
-Use ~web.Scope()~ to determine the effective scope of the variable, then use ~.Init(...).VSlot("{ locals }")~ to initialize the variable and slot it into the ~locals~ object. 
+Use ~web.Scope()~ to determine the effective scope of the variable, then use ~.Init(...).VSlot("{ locals }")~ to initialize the variable and slot it into the ~locals~ object.
 
 In ~VBtn("")~, you can use the ~click~ event to change the variable value in ~locals~ to achieve the effect that the page changes with the click.
 

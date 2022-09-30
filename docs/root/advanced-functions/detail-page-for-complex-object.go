@@ -1,4 +1,4 @@
-package presets_guide
+package advanced_functions
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -12,7 +12,7 @@ import (
 var DetailPageForComplexObject = Doc(
 	Markdown(`
 By default, presets will only generate the listing page, editing page for a model,
-It's for simple objects. But for a complicated object with a lots of relationships and connections, 
+It's for simple objects. But for a complicated object with a lots of relationships and connections,
 and as the main data model of your system, It's better to have detail page for them. In there
 You can add all kinds of operations conveniently.
 `),
@@ -42,7 +42,7 @@ And you can add any actions to the detail page with ease:
 
 	utils.Anchor(H2(""), "More Usage for Data Table"),
 	Markdown(`
-A ~stripeui.DataTable~ component is very featured rich, Here check out the row expandable example: 
+A ~stripeui.DataTable~ component is very featured rich, Here check out the row expandable example:
 `),
 	ch.Code(examples.PresetsDetailPageCardsSample).Language("go"),
 	utils.Demo("Presets Detail Page Credit Cards", e21_presents.PresetsDetailPageCardsPath+"/customers", "e21_presents/detailing.go"),

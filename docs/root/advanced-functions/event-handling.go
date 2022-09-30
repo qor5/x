@@ -1,4 +1,4 @@
-package basics
+package advanced_functions
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -13,7 +13,7 @@ var EventHandling = Doc(
 	Markdown(`
 We extend vue to support the following types of event handling, so you can simply use go code to implement some complex logic.
 
-Using the ~~~Plaid()~~~ method will create an event handler that defaults to using the current ~~~vars~~~ and ~~~plaidForm~~~. 
+Using the ~~~Plaid()~~~ method will create an event handler that defaults to using the current ~~~vars~~~ and ~~~plaidForm~~~.
 The default http request method is ~~~Post~~~, if you want to use the ~~~Get~~~ method, you can also use the ~~~Get()~~~ method directly to create an event handler
 	`),
 

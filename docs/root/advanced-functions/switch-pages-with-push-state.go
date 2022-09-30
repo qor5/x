@@ -1,4 +1,4 @@
-package basics
+package advanced_functions
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -18,7 +18,7 @@ var SwitchPagesWithPushState = Doc(
 
 Inside ~web.EventFunc~, two ways go to a new page:
 
-- Use [push state](https://developer.mozilla.org/en-US/docs/Web/API/History_API#Examples) to only reload the body of the new page, This won't reload javascript and css assets. 
+- Use [push state](https://developer.mozilla.org/en-US/docs/Web/API/History_API#Examples) to only reload the body of the new page, This won't reload javascript and css assets.
 - Use redirect url to reload the whole new page, This will reload target new page's javascript and css assets.
 
 This example demonstrated the above:
@@ -26,7 +26,7 @@ This example demonstrated the above:
 	ch.Code(examples.PageTransitionSample).Language("go"),
 	utils.Demo("Switch Pages With Push State", e00_basics.Page1Path, "e00_basics/page-transition.go"),
 	Markdown(`
-When running the above demo, If you check Chrome Developer Tools about Network requests, 
+When running the above demo, If you check Chrome Developer Tools about Network requests,
 You will see that the Location link and the Button is actually doing an AJAX request to the other page.
 
 Look like this:
@@ -34,8 +34,8 @@ Look like this:
 POST /samples/page_2?__execute_event__=__reload__ HTTP/1.1
 ~~~
 
-The result is an JSON object with page's html inside. 
-~__reload__~ is another ~web.EventFunc~ that is the same as ~doAction2~, 
+The result is an JSON object with page's html inside.
+~__reload__~ is another ~web.EventFunc~ that is the same as ~doAction2~,
 But it is default added to every ~web.PageFunc~. So that the web page can
 both respond to normal HTTP request from Browser, Search Engine, Or from
 other pages in the same web app that can do push state link.
@@ -43,7 +43,7 @@ other pages in the same web app that can do push state link.
 	utils.Anchor(H2(""), "Summary"),
 	Markdown(`
 - Write once with PageFunc, you get both normal html page render, and AJAX JSON page render
-- EventFunc is always called with AJAX request, and you can return to a different page, or rerender the current page, 
+- EventFunc is always called with AJAX request, and you can return to a different page, or rerender the current page,
 - EventFunc is not wrapped with layout function.
 - EventFunc is used to do data operations, triggered by page's html element. and it's result can be:
 	1. Go to a new page

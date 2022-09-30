@@ -1,4 +1,4 @@
-package components_guide
+package digging_deeper
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -12,17 +12,17 @@ var CompositeNewComponentWithGo = Doc(
 	Markdown(`
 Any Go function that returns an ~htmlgo.HTMLComponent~ is a component,
 Any Go struct that implements ~MarshalHTML(ctx context.Context) ([]byte, error)~ function is an component.
-They can be composite into a new component very easy. 
+They can be composite into a new component very easy.
 
 This example is ported from [Bootstrap4 Navbar](https://getbootstrap.com/docs/4.3/components/navbar/):
 `),
 	ch.Code(examples.CompositeComponentSample1).Language("go"),
 	utils.Demo("Composite New Component With Go", e00_basics.CompositeComponentSample1PagePath, "e00_basics/composite-components.go"),
 	Markdown(`
-You can see from the example, We have created ~Navbar~ and ~Carousel~ components by 
-simply create Go func that returns ~htmlgo.HTMLComponent~. 
+You can see from the example, We have created ~Navbar~ and ~Carousel~ components by
+simply create Go func that returns ~htmlgo.HTMLComponent~.
 It is easy to pass in components as parameter, and wrap components.
-By utilizing the power of Go language, Any component can be abstracted and reused with enough parameters. 
+By utilizing the power of Go language, Any component can be abstracted and reused with enough parameters.
 
 The ~Navbar~ is a responsive navigation header, Resizing your window, the nav bar will react to device window size and change to nav bar popup and hide search form.
 

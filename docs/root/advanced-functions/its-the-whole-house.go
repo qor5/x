@@ -1,4 +1,4 @@
-package presets_guide
+package advanced_functions
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -10,8 +10,8 @@ import (
 
 var ItsTheWholeHouse = Doc(
 	Markdown(`
-Presets let you config generalized data management UI interface for database. 
-It's not a scaffolding to generate source code. But provide more abstract and 
+Presets let you config generalized data management UI interface for database.
+It's not a scaffolding to generate source code. But provide more abstract and
 flexible API to enrich features along the way.
 
 `),

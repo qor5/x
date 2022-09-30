@@ -1,4 +1,4 @@
-package presets_guide
+package basics
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -41,7 +41,7 @@ Here we continue to add filters for the list
 	utils.Demo("Presets Listing Filters", e21_presents.PresetsListingCustomizationFiltersPath+"/customers", "e21_presents/listing.go"),
 	Markdown(`
 ~FilterDataFunc~ of ~presets.ListingBuilder~ setup to have the filter menu or not.
-And how it will combine the sql conditions when doing query. the filter menu will 
+And how it will combine the sql conditions when doing query. the filter menu will
 change the url query strings with the filter values, and for date type in url query
 string it uses unix epoch int value. So the sql condition has to convert the database
 column data to unix epoch in order to compare with the value in url query string.
@@ -57,7 +57,7 @@ Current we support these types
 	utils.Anchor(H2(""), "Filter Tabs"),
 	Markdown(`
 Filter tabs is based on Filters configuration. But display as tabs above the list,
-You can think it as a short cut that used very frequently to filter something instead of 
+You can think it as a short cut that used very frequently to filter something instead of
 use the pop up panel of filter.
 `),
 	ch.Code(examples.PresetsListingCustomizationTabsSample).Language("go"),

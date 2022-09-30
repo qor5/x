@@ -1,4 +1,4 @@
-package basics
+package advanced_functions
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -21,10 +21,10 @@ Next part describe about these asset references:
 	ch.Code(examples.ComponentsPackSample).Language("go"),
 
 	Markdown(`
-~web.JSComponentsPack~ is the production version of GoPlaid core javascript code. 
+~web.JSComponentsPack~ is the production version of GoPlaid core javascript code.
 Created by using [@vue/cli](https://cli.vuejs.org/guide/creating-a-project.html),
 It does the basic functions like render server side returned html as vue templates.
-Provide basic event functions that call to server, and manage push state 
+Provide basic event functions that call to server, and manage push state
 (change browser address urls before or after do ajax requests). do page partial refresh etc.
 
 the javascript or css code are packed by using [embed](https://pkg.go.dev/embed).

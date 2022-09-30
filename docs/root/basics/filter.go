@@ -1,4 +1,4 @@
-package presets_guide
+package basics
 
 import (
 	"github.com/goplaid/x/docs/examples"

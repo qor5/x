@@ -1,4 +1,4 @@
-package basics
+package advanced_functions
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -17,7 +17,7 @@ As said before, The results of an ~web.EventFunc~ could be:
 - Reload the whole current page
 - Refresh part of the current page
 
-We have covered two. Now let's demonstrate refresh part of the current page: 
+We have covered two. Now let's demonstrate refresh part of the current page:
 `),
 	ch.Code(examples.PartialUpdateSample).Language("go"),
 	utils.Demo("Partial Update", e00_basics.PartialUpdatePagePath, "e00_basics/partial-update.go"),
@@ -36,7 +36,7 @@ quite heavy. Like related products of a product detail page of a ECommerce site.
 	Markdown(`
 It is not only load the portal in separate AJAX request, Also you can reload it with ease ~er.ReloadPortals = []string{"related_products"}~ in an event func.
 
-Under the hood, We use Vue's [Dynamic & Async Components](https://vuejs.org/v2/guide/components-dynamic-async.html), to load Go generated html (vue runtime templates) 
+Under the hood, We use Vue's [Dynamic & Async Components](https://vuejs.org/v2/guide/components-dynamic-async.html), to load Go generated html (vue runtime templates)
 from the server and mount those vue components into the page. It works the same way for reload the whole page, push state page switch, and refresh part of the current page.
 `),
 ).Title("Partial Refresh with Portal").

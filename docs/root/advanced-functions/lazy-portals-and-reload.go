@@ -1,4 +1,4 @@
-package vuetify_components
+package advanced_functions
 
 import (
 	"github.com/goplaid/x/docs/examples"
