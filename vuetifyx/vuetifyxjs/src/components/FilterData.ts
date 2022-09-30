@@ -1,17 +1,8 @@
-import moment from 'moment';
 import * as constants from './Constants'
 
 function pushKeyVal(segs: any, key: string, mod: string, val: any) {
 	const modWithDot = mod ? `.${mod}` : '';
 	segs.push([`${key}${modWithDot}`, val.toString()]);
-}
-
-function convertUTC(op: any, date: any) {
-	const s = moment(date).format('YYYY-MM-DD');
-	if (op.timezone === 'utc') {
-		return moment.utc(s);
-	}
-	return moment(s);
 }
 
 function pushDateItem(segs: any, op: any) {
@@ -24,11 +15,11 @@ function pushDateItem(segs: any, op: any) {
 				segs,
 				op.key,
 				'gte',
-				moment(op.valueFrom).unix(),
+				op.valueFrom,
 			);
 		}
 		if (op.valueTo) {
-			pushKeyVal(segs, op.key, 'lt', moment(op.valueTo).unix());
+			pushKeyVal(segs, op.key, 'lt', op.valueTo);
 		}
 		return;
 	}
