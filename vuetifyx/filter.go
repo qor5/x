@@ -89,11 +89,11 @@ func (b *VXFilterBuilder) MarshalHTML(ctx context.Context) (r []byte, err error)
 		},
 */
 type FilterTranslations struct {
-	Clear   string `json:"clear,omitempty"`
-	Done    string `json:"done,omitempty"`
-	Filters string `json:"filters,omitempty"`
-	Filter  string `json:"filter,omitempty"`
-	Date    struct {
+	Clear string `json:"clear,omitempty"`
+	Add   string `json:"add,omitempty"`
+	Apply string `json:"apply,omitempty"`
+
+	Date struct {
 		To string `json:"to,omitempty"`
 	} `json:"date,omitempty"`
 
@@ -114,6 +114,10 @@ type FilterTranslations struct {
 		In    string `json:"in,omitempty"`
 		NotIn string `json:"notIn,omitempty"`
 	} `json:"multipleSelect,omitempty"`
+}
+
+type FilterIndependentTranslations struct {
+	FilterBy string `json:"filterBy,omitempty"`
 }
 
 type FilterItemType string
@@ -157,20 +161,22 @@ type FilterLinkageSelectData struct {
 }
 
 type FilterItem struct {
-	Key                    string                  `json:"key,omitempty"`
-	Label                  string                  `json:"label,omitempty"`
-	ItemType               FilterItemType          `json:"itemType,omitempty"`
-	Selected               bool                    `json:"selected,omitempty"`
-	Modifier               FilterItemModifier      `json:"modifier,omitempty"`
-	ValueIs                string                  `json:"valueIs,omitempty"`
-	ValuesAre              []string                `json:"valuesAre,omitempty"`
-	ValueFrom              string                  `json:"valueFrom,omitempty"`
-	ValueTo                string                  `json:"valueTo,omitempty"`
-	SQLCondition           string                  `json:"-"`
-	Options                []*SelectItem           `json:"options,omitempty"`
-	LinkageSelectData      FilterLinkageSelectData `json:"linkageSelectData,omitempty"`
-	Invisible              bool                    `json:"invisible,omitempty"`
-	AutocompleteDataSource *AutocompleteDataSource `json:"autocompleteDataSource,omitempty"`
+	Key                    string                        `json:"key,omitempty"`
+	Label                  string                        `json:"label,omitempty"`
+	Folded                 bool                          `json:"folded,omitempty"`
+	ItemType               FilterItemType                `json:"itemType,omitempty"`
+	Selected               bool                          `json:"selected,omitempty"`
+	Modifier               FilterItemModifier            `json:"modifier,omitempty"`
+	ValueIs                string                        `json:"valueIs,omitempty"`
+	ValuesAre              []string                      `json:"valuesAre,omitempty"`
+	ValueFrom              string                        `json:"valueFrom,omitempty"`
+	ValueTo                string                        `json:"valueTo,omitempty"`
+	SQLCondition           string                        `json:"-"`
+	Options                []*SelectItem                 `json:"options,omitempty"`
+	LinkageSelectData      FilterLinkageSelectData       `json:"linkageSelectData,omitempty"`
+	Invisible              bool                          `json:"invisible,omitempty"`
+	AutocompleteDataSource *AutocompleteDataSource       `json:"autocompleteDataSource,omitempty"`
+	Translations           FilterIndependentTranslations `json:"translations,omitempty"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {
@@ -366,6 +372,12 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 
 					if it.ItemType == ItemTypeDate {
 						it.ValueIs = v
+						if mod == "gte" {
+							it.ValueFrom = mv["gte"]
+						}
+						if mod == "lt" {
+							it.ValueTo = mv["lt"]
+						}
 						continue
 					}
 
@@ -381,9 +393,11 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 						}
 						if mod == "gt" {
 							it.Modifier = ModifierGreaterThan
+							it.ValueFrom = v
 						}
 						if mod == "lt" {
 							it.Modifier = ModifierLessThan
+							it.ValueTo = v
 						}
 						continue
 					}
