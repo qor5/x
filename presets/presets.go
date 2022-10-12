@@ -124,6 +124,10 @@ func (b *Builder) URIPrefix(v string) (r *Builder) {
 	return b
 }
 
+func (b *Builder) GetURIPrefix() string {
+	return b.prefix
+}
+
 func (b *Builder) LayoutFunc(v func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)) (r *Builder) {
 	b.layoutFunc = v
 	return b
