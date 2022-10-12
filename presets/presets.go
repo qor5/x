@@ -323,11 +323,13 @@ func (b *Builder) removeMenuGroupInOrder(mgb *MenuGroupBuilder) {
 // so if the Slug name is customized, item must be the Slug name
 // example:
 // b.MenuOrder(
-// 	b.MenuGroup("Product Management").SubItems(
-// 		"products",
-// 		"Variant",
-// 	),
-// 	"customized-uri",
+//
+//	b.MenuGroup("Product Management").SubItems(
+//		"products",
+//		"Variant",
+//	),
+//	"customized-uri",
+//
 // )
 func (b *Builder) MenuOrder(items ...interface{}) {
 	for _, item := range items {
@@ -799,39 +801,7 @@ func (b *Builder) openConfirmationDialog(ctx *web.EventContext) (er web.EventRes
 
 func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
-
-		ctx.Injector.HeadHTML(strings.Replace(`
-			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
-			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
-			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-			<link rel="stylesheet" href="{{prefix}}/assets/main.css">
-			<script src='{{prefix}}/assets/vue.js'></script>
-			<style>
-				[v-cloak] {
-					display: none;
-				}
-			</style>
-		`, "{{prefix}}", b.prefix, -1))
-
-		b.InjectExtraAssets(ctx)
-
-		if len(os.Getenv("DEV_PRESETS")) > 0 {
-			ctx.Injector.TailHTML(`
-<script src='http://localhost:3080/js/chunk-vendors.js'></script>
-<script src='http://localhost:3080/js/app.js'></script>
-<script src='http://localhost:3100/js/chunk-vendors.js'></script>
-<script src='http://localhost:3100/js/app.js'></script>
-			`)
-
-		} else {
-			ctx.Injector.TailHTML(strings.Replace(`
-			<script src='{{prefix}}/assets/main.js'></script>
-			`, "{{prefix}}", b.prefix, -1))
-		}
-
-		if b.assetFunc != nil {
-			b.assetFunc(ctx)
-		}
+		b.InjectAssets(ctx)
 
 		var innerPr web.PageResponse
 		innerPr, err = in(ctx)
@@ -931,6 +901,85 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 			Attr(web.InitContextVars, `{presetsRightDrawer: false, presetsDialog: false, presetsMessage: {show: false, color: "success", message: ""}}`)
 
 		return
+	}
+}
+
+// for pages outside the default presets layout
+func (b *Builder) PlainLayout(in web.PageFunc) (out web.PageFunc) {
+	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
+		b.InjectAssets(ctx)
+
+		var innerPr web.PageResponse
+		innerPr, err = in(ctx)
+		if err == perm.PermissionDenied {
+			pr.Body = h.Text(perm.PermissionDenied.Error())
+			return pr, nil
+		}
+		if err != nil {
+			panic(err)
+		}
+
+		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
+		pr.Body = VApp(
+			web.Portal().Name(DialogPortalName),
+			web.Portal().Name(DeleteConfirmPortalName),
+			web.Portal().Name(defaultConfirmationDialogPortalName),
+
+			VProgressLinear().
+				Attr(":active", "isFetching").
+				Attr("style", "position: fixed; z-index: 99").
+				Indeterminate(true).
+				Height(2).
+				Color(b.progressBarColor),
+			h.Template(
+				VSnackbar(h.Text("{{vars.presetsMessage.message}}")).
+					Attr("v-model", "vars.presetsMessage.show").
+					Attr(":color", "vars.presetsMessage.color").
+					Timeout(2000).
+					Top(true),
+			).Attr("v-if", "vars.presetsMessage"),
+			VMain(
+				innerPr.Body.(h.HTMLComponent),
+			),
+		).Id("vt-app").
+			Attr(web.InitContextVars, `{presetsDialog: false, presetsMessage: {show: false, color: "success", message: ""}}`)
+
+		return
+	}
+}
+
+func (b *Builder) InjectAssets(ctx *web.EventContext) {
+	ctx.Injector.HeadHTML(strings.Replace(`
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+			<link rel="stylesheet" href="{{prefix}}/assets/main.css">
+			<script src='{{prefix}}/assets/vue.js'></script>
+			<style>
+				[v-cloak] {
+					display: none;
+				}
+			</style>
+		`, "{{prefix}}", b.prefix, -1))
+
+	b.InjectExtraAssets(ctx)
+
+	if len(os.Getenv("DEV_PRESETS")) > 0 {
+		ctx.Injector.TailHTML(`
+<script src='http://localhost:3080/js/chunk-vendors.js'></script>
+<script src='http://localhost:3080/js/app.js'></script>
+<script src='http://localhost:3100/js/chunk-vendors.js'></script>
+<script src='http://localhost:3100/js/app.js'></script>
+			`)
+
+	} else {
+		ctx.Injector.TailHTML(strings.Replace(`
+			<script src='{{prefix}}/assets/main.js'></script>
+			`, "{{prefix}}", b.prefix, -1))
+	}
+
+	if b.assetFunc != nil {
+		b.assetFunc(ctx)
 	}
 }
 
