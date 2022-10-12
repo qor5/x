@@ -1,4 +1,4 @@
-package getting_started
+package advanced_functions
 
 import (
 	"github.com/goplaid/x/docs/examples"
@@ -32,4 +32,4 @@ It's basically assembled what Kotlin can do, Also is legitimate Go code.
 `),
 	utils.Demo("The Go HTML Builder", e00_basics.TypeSafeBuilderSamplePath, "e00_basics/type-safe-builder-sample.go"),
 ).Title("The Go HTML builder").
-	Slug("getting-started/the-go-html-builder")
+	Slug("advanced-functions/the-go-html-builder")

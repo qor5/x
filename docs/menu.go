@@ -23,7 +23,6 @@ func DocMenu(prefix string) http.Handler {
 				Title: "Getting Started",
 				Docs: []*docgo.DocBuilder{
 					getting_started.OneMinuteQuickStart,
-					getting_started.TheGoHTMLBuilder,
 				},
 			},
 			&docgo.DocsGroup{
@@ -48,6 +47,7 @@ func DocMenu(prefix string) http.Handler {
 				Title: "Advanced Functions",
 				Docs: []*docgo.DocBuilder{
 					advanced_functions.PageFuncAndEventFunc,
+					advanced_functions.TheGoHTMLBuilder,
 					advanced_functions.ATasteOfUsingVuetifyInGo,
 					advanced_functions.ItsTheWholeHouse,
 
