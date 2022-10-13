@@ -552,7 +552,9 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 		menus = append(menus, b.menuItem(ctx, m, false))
 	}
 
-	r = VList(menus...).Class("primary--text")
+	r = h.Div(
+		VList(menus...).Class("primary--text").Dense(true),
+	)
 	return
 }
 
@@ -648,7 +650,7 @@ func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switc
 		return b.brandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage)
 	}
 
-	return VCard(
+	return h.Div(
 		h.If(brand != nil,
 			VListItem(
 				VCardText(brand),
@@ -664,7 +666,7 @@ func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switc
 				VCardText(switchLanguage),
 			).Dense(true),
 		),
-	).Elevation(1).Tile(true)
+	)
 }
 
 func MustGetMessages(r *http.Request) *Messages {
@@ -845,6 +847,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 		pr.Body = VApp(
 			VNavigationDrawer(
 				b.runBrandProfileSwitchLanguageDisplayFunc(b.runBrandFunc(ctx), profile, b.runSwitchLanguageFunc(ctx)),
+				VDivider(),
 				b.createMenus(ctx),
 			).App(true).
 				// Clipped(true).
