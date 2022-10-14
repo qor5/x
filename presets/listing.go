@@ -151,7 +151,7 @@ const actionPanelOpenParamName = "actionOpen"
 const DeleteConfirmPortalName = "deleteConfirm"
 const dataTablePortalName = "dataTable"
 const dataTableAdditionsPortalName = "dataTableAdditions"
-const listingDialogPortalName = "listingDialogPortal"
+const listingDialogContentPortalName = "listingDialogContentPortal"
 
 func (b *ListingBuilder) defaultPageFunc(ctx *web.EventContext) (r web.PageResponse, err error) {
 	if b.mb.Info().Verifier().Do(PermList).WithReq(ctx.R).IsAllowed() != nil {
@@ -1334,22 +1334,29 @@ func (b *ListingBuilder) actionsComponent(msgr *Messages, ctx *web.EventContext)
 }
 
 func (b *ListingBuilder) openListingDialog(ctx *web.EventContext) (r web.EventResponse, err error) {
-	content := VCard(web.Portal(b.listingComponent(ctx, true)).
-		Name(listingDialogPortalName))
+	content := VCard(
+		web.Portal(b.listingComponent(ctx, true)).
+			Name(listingDialogContentPortalName),
+	)
 	if b.dialogHeight != "" {
 		content.Attr("height", b.dialogHeight)
 	}
-	b.mb.p.dialog(
-		&r,
-		content,
-		b.dialogWidth,
-	)
+	dialog := VDialog(content).
+		Attr("v-model", "vars.presetsListingDialog")
+	if b.dialogWidth != "" {
+		dialog.Width(b.dialogWidth)
+	}
+	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
+		Name: listingDialogPortalName,
+		Body: web.Scope(dialog).VSlot("{ plaidForm }"),
+	})
+	r.VarsScript = "setTimeout(function(){ vars.presetsListingDialog = true }, 100)"
 	return
 }
 
 func (b *ListingBuilder) updateListingDialog(ctx *web.EventContext) (r web.EventResponse, err error) {
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
-		Name: listingDialogPortalName,
+		Name: listingDialogContentPortalName,
 		Body: b.listingComponent(ctx, true),
 	})
 

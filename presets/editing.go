@@ -299,7 +299,7 @@ func (b *EditingBuilder) editFormFor(obj interface{}, ctx *web.EventContext) h.H
 	overlayType := ctx.R.FormValue(ParamOverlay)
 	closeBtnVarScript := closeRightDrawerVarScript
 	if overlayType == actions.Dialog {
-		closeBtnVarScript = CloseDialogVarScript
+		closeBtnVarScript = closeDialogVarScript
 	}
 
 	return web.Scope(
@@ -403,7 +403,7 @@ func (b *EditingBuilder) doUpdate(
 	overlayType := ctx.R.FormValue(ParamOverlay)
 	script := closeRightDrawerVarScript
 	if overlayType == actions.Dialog {
-		script = CloseDialogVarScript
+		script = closeDialogVarScript
 	}
 	if silent {
 		script = ""
