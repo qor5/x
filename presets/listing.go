@@ -652,7 +652,11 @@ type sortedColumn struct {
 	Label string `json:"label"`
 }
 
-func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContext) (btn h.HTMLComponent, displaySortedFields []*FieldBuilder) {
+func (b *ListingBuilder) selectColumnsBtn(
+	pageURL *url.URL,
+	ctx *web.EventContext,
+	inDialog bool,
+) (btn h.HTMLComponent, displaySortedFields []*FieldBuilder) {
 	var (
 		_, respath         = path.Split(pageURL.Path)
 		displayColumnsName = fmt.Sprintf("%s_display_columns", respath)
@@ -792,6 +796,20 @@ func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContex
 	}
 
 	msgr := MustGetMessages(ctx.R)
+	onOK := web.Plaid().
+		Query(displayColumnsName, web.Var("locals.displayColumns")).
+		Query(sortedColumnsName, web.Var("locals.sortedColumns.map(column => column.name )")).
+		MergeQuery(true).
+		Go()
+	if inDialog {
+		onOK = web.Plaid().
+			URL(copyURLWithQueriesRemoved(ctx.R.URL, "__execute_event__").String()).
+			Query(displayColumnsName, web.Var("locals.displayColumns")).
+			Query(sortedColumnsName, web.Var("locals.sortedColumns.map(column => column.name )")).
+			MergeQuery(true).
+			EventFunc(actions.UpdateListingDialog).
+			Go()
+	}
 	// add the HTML component of columns setting into toolbar
 	btn = VMenu(
 		web.Slot(
@@ -815,12 +833,14 @@ func (b *ListingBuilder) selectColumnsBtn(pageURL *url.URL, ctx *web.EventContex
 				).Attr("v-for", "(column, index) in locals.sortedColumns", ":key", "column.name", "class", "vx_column_item"),
 			),
 			VListItem(
-				VListItemAction(VBtn(msgr.Cancel).Elevation(0).Attr("@click", web.Plaid().Reload().Go())),
-				VListItemAction(VBtn(msgr.OK).Elevation(0).Color("primary").Attr("@click", web.Plaid().Query(displayColumnsName, web.Var("locals.displayColumns")).Query(sortedColumnsName, web.Var("locals.sortedColumns.map(column => column.name )")).MergeQuery(true).Go()))),
+				VListItemAction(VBtn(msgr.Cancel).Elevation(0).Attr("@click", `vars.selectColumnsMenu = false`)),
+				VListItemAction(VBtn(msgr.OK).Elevation(0).Color("primary").Attr("@click", `vars.selectColumnsMenu = false;`+onOK))),
 		).Dense(true)).
 			Init(h.JSONString(selectColumns)).
 			VSlot("{ locals }"),
-	).OffsetY(true).CloseOnClick(false).CloseOnContentClick(false)
+	).OffsetY(true).CloseOnClick(false).CloseOnContentClick(false).
+		Attr(web.InitContextVars, `{selectColumnsMenu: false}`).
+		Attr("v-model", "vars.selectColumnsMenu")
 	return
 }
 
@@ -1122,7 +1142,7 @@ func (b *ListingBuilder) getTableComponents(
 	var displayFields = b.fields
 	var selectColumnsBtn h.HTMLComponent
 	if b.selectableColumns {
-		selectColumnsBtn, displayFields = b.selectColumnsBtn(ctx.R.URL, ctx)
+		selectColumnsBtn, displayFields = b.selectColumnsBtn(ctx.R.URL, ctx, inDialog)
 	}
 
 	dataTable = s.DataTable(objs).
