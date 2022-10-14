@@ -183,7 +183,9 @@ func (b *ListingBuilder) listingComponent(
 			actionsComponent = append(actionsComponent, v)
 		}
 		if b.newBtnFunc != nil {
-			actionsComponent = append(actionsComponent, b.newBtnFunc(ctx))
+			if btn := b.newBtnFunc(ctx); btn != nil {
+				actionsComponent = append(actionsComponent, b.newBtnFunc(ctx))
+			}
 		} else {
 			disableNewBtn := b.mb.Info().Verifier().Do(PermCreate).WithReq(ctx.R).IsAllowed() != nil
 			if !disableNewBtn {
