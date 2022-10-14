@@ -670,7 +670,7 @@ const NotificationCenterPortalName = "notification-center"
 const defaultConfirmationDialogPortalName = "presets_confirmationDialogPortalName"
 
 const closeRightDrawerVarScript = "vars.presetsRightDrawer = false"
-const closeDialogVarScript = "vars.presetsDialog = false"
+const CloseDialogVarScript = "vars.presetsDialog = false"
 
 func (b *Builder) overlay(overlayType string, r *web.EventResponse, comp h.HTMLComponent, width string) {
 	if overlayType == actions.Dialog {

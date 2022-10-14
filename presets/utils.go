@@ -68,3 +68,13 @@ func deleteRowMenuItemFunc(mi *ModelInfo, url string, editExtraParams url.Values
 			Go())
 	}
 }
+
+func copyURLWithQueriesRemoved(u *url.URL, qs ...string) *url.URL {
+	newU, _ := url.Parse(u.String())
+	newQuery := newU.Query()
+	for _, k := range qs {
+		newQuery.Del(k)
+	}
+	newU.RawQuery = newQuery.Encode()
+	return newU
+}

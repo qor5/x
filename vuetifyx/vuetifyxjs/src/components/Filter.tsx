@@ -926,7 +926,6 @@ export const Filter = Vue.extend({
 							}}
 							offsetY={true}
 							closeOnContentClick={false}
-							zIndex='2'
 							rounded={'md'}
 						>
 							<div class={'pa-3 white'}>
@@ -1008,7 +1007,6 @@ export const Filter = Vue.extend({
 						}}
 						offsetY={true}
 						closeOnContentClick={false}
-						zIndex='1'
 						rounded={'md'}
 					>
 						<div class={'pa-2 white'}>{foldedFilters}</div>

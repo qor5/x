@@ -144,7 +144,7 @@ func (b *DetailingBuilder) showInDrawer(ctx *web.EventContext) (r web.EventRespo
 	overlayType := ctx.R.FormValue(ParamOverlay)
 	closeBtnVarScript := closeRightDrawerVarScript
 	if overlayType == actions.Dialog {
-		closeBtnVarScript = closeDialogVarScript
+		closeBtnVarScript = CloseDialogVarScript
 	}
 	comp := web.Scope(
 		VAppBar(

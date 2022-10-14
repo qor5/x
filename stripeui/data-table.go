@@ -3,7 +3,6 @@ package stripeui
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"strings"
 
 	"github.com/goplaid/web"
@@ -16,6 +15,7 @@ import (
 
 type CellComponentFunc func(obj interface{}, fieldName string, ctx *web.EventContext) h.HTMLComponent
 type CellWrapperFunc func(cell h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent
+type HeadCellWrapperFunc func(cell h.MutableAttrHTMLComponent, field string, title string) h.HTMLComponent
 type RowWrapperFunc func(row h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent
 type RowMenuItemFunc func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent
 type RowComponentFunc func(obj interface{}, ctx *web.EventContext) h.HTMLComponent
@@ -26,6 +26,7 @@ type DataTableBuilder struct {
 	withoutHeaders     bool
 	selectionParamName string
 	cellWrapper        CellWrapperFunc
+	headCellWrapper    HeadCellWrapperFunc
 	rowWrapper         RowWrapperFunc
 	rowMenuItemFuncs   []RowMenuItemFunc
 	rowExpandFunc      RowComponentFunc
@@ -86,6 +87,11 @@ func (b *DataTableBuilder) WithoutHeader(v bool) (r *DataTableBuilder) {
 
 func (b *DataTableBuilder) CellWrapperFunc(v CellWrapperFunc) (r *DataTableBuilder) {
 	b.cellWrapper = v
+	return b
+}
+
+func (b *DataTableBuilder) HeadCellWrapperFunc(v HeadCellWrapperFunc) (r *DataTableBuilder) {
+	b.headCellWrapper = v
 	return b
 }
 
@@ -315,41 +321,16 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			).Style("width: 48px;").Class("pr-0"))
 		}
 
-		orderBys := GetOrderBysFromQuery(ctx.R.URL.Query())
 		for _, f := range b.columns {
-			head := h.Th(f.title)
-			if b.Column(f.name).orderable {
-				var orderBy string
-				var orderByIdx int
-				for i, ob := range orderBys {
-					if ob.FieldName == f.name {
-						orderBy = ob.OrderBy
-						orderByIdx = i + 1
-						break
-					}
-				}
-				head = h.Th("").Style("cursor: pointer; white-space: nowrap;").
-					Children(
-						h.Span(f.title).
-							Style("text-decoration: underline;"),
-						h.If(orderBy == "ASC",
-							VIcon("arrow_drop_up").Small(true),
-							h.Span(fmt.Sprint(orderByIdx)),
-						).ElseIf(orderBy == "DESC",
-							VIcon("arrow_drop_down").Small(true),
-							h.Span(fmt.Sprint(orderByIdx)),
-						).Else(
-							// take up place
-							h.Span("").Style("visibility: hidden;").Children(
-								VIcon("arrow_drop_down").Small(true),
-								h.Span(fmt.Sprint(orderByIdx)),
-							),
-						),
-					).
-					Attr("@click", web.Plaid().
-						PushState(true).
-						Queries(newQueryWithFieldToggleOrderBy(ctx.R.URL.Query(), f.name)).
-						Go())
+			var head h.HTMLComponent
+			th := h.Th(f.title)
+			head = th
+			if b.headCellWrapper != nil {
+				head = b.headCellWrapper(
+					(h.MutableAttrHTMLComponent)(th),
+					f.name,
+					f.title,
+				)
 			}
 			heads = append(heads, head)
 		}
@@ -478,7 +459,6 @@ type DataTableColumnBuilder struct {
 	name              string
 	title             string
 	cellComponentFunc CellComponentFunc
-	orderable         bool
 }
 
 func (b *DataTableColumnBuilder) Name(v string) (r *DataTableColumnBuilder) {
@@ -491,68 +471,7 @@ func (b *DataTableColumnBuilder) Title(v string) (r *DataTableColumnBuilder) {
 	return b
 }
 
-func (b *DataTableColumnBuilder) Orderable(v bool) (r *DataTableColumnBuilder) {
-	b.orderable = v
-	return b
-}
-
 func (b *DataTableColumnBuilder) CellComponentFunc(v CellComponentFunc) (r *DataTableColumnBuilder) {
 	b.cellComponentFunc = v
 	return b
-}
-
-type ColOrderBy struct {
-	FieldName string
-	// ASC, DESC
-	OrderBy string
-}
-
-func GetOrderBysFromQuery(query url.Values) []*ColOrderBy {
-	r := make([]*ColOrderBy, 0)
-	qs := strings.Split(query.Get("order_by"), ",")
-	for _, q := range qs {
-		ss := strings.Split(q, "_")
-		ssl := len(ss)
-		if ssl == 1 {
-			continue
-		}
-		if ss[ssl-1] != "ASC" && ss[ssl-1] != "DESC" {
-			continue
-		}
-		r = append(r, &ColOrderBy{
-			FieldName: strings.Join(ss[:ssl-1], "_"),
-			OrderBy:   ss[ssl-1],
-		})
-	}
-
-	return r
-}
-
-func newQueryWithFieldToggleOrderBy(query url.Values, fieldName string) url.Values {
-	oldOrderBys := GetOrderBysFromQuery(query)
-	newOrderBysQueryValue := []string{}
-	existed := false
-	for _, oob := range oldOrderBys {
-		if oob.FieldName == fieldName {
-			existed = true
-			if oob.OrderBy == "ASC" {
-				newOrderBysQueryValue = append(newOrderBysQueryValue, oob.FieldName+"_DESC")
-			}
-			continue
-		}
-		newOrderBysQueryValue = append(newOrderBysQueryValue, oob.FieldName+"_"+oob.OrderBy)
-	}
-	if !existed {
-		newOrderBysQueryValue = append(newOrderBysQueryValue, fieldName+"_ASC")
-	}
-
-	newQuery := make(url.Values)
-	for k, v := range query {
-		if k == "__execute_event__" {
-			continue
-		}
-		newQuery[k] = v
-	}
-	newQuery.Set("order_by", strings.Join(newOrderBysQueryValue, ","))
-	return newQuery
 }
