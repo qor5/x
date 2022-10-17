@@ -158,6 +158,8 @@ func (tpb *VXTablePaginationBuilder) MarshalHTML(ctx context.Context) ([]byte, e
 				),
 				h.Div(
 					vuetify.VSelect().Items(sItems).Value(fmt.Sprint(tpb.perPage)).
+						Attach(false).
+						HideDetails(true).Class("pt-0 mt-0").
 						Attr("@input", tpb.onSelectPerPage),
 				).Style("width: 60px;").Class("ml-6"),
 			),

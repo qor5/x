@@ -14,6 +14,9 @@ const (
 	OpenActionDialog     = "presets_OpenActionDialog"
 	NotificationCenter   = "presets_NotificationCenter"
 	DetailingDrawer      = "presets_DetailingDrawer"
+	ReloadList           = "presets_ReloadList"
+	OpenListingDialog    = "presets_OpenListingDialog"
+	UpdateListingDialog  = "presets_UpdateListingDialog"
 )
 
 const (

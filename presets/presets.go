@@ -668,9 +668,11 @@ const DialogPortalName = "presets_DialogPortalName"
 const dialogContentPortalName = "presets_DialogContentPortalName"
 const NotificationCenterPortalName = "notification-center"
 const defaultConfirmationDialogPortalName = "presets_confirmationDialogPortalName"
+const listingDialogPortalName = "presets_listingDialogPortalName"
 
 const closeRightDrawerVarScript = "vars.presetsRightDrawer = false"
 const closeDialogVarScript = "vars.presetsDialog = false"
+const CloseListingDialogVarScript = "vars.presetsListingDialog = false"
 
 func (b *Builder) overlay(overlayType string, r *web.EventResponse, comp h.HTMLComponent, width string) {
 	if overlayType == actions.Dialog {
@@ -884,6 +886,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 			web.Portal().Name(DialogPortalName),
 			web.Portal().Name(DeleteConfirmPortalName),
 			web.Portal().Name(defaultConfirmationDialogPortalName),
+			web.Portal().Name(listingDialogPortalName),
 
 			VProgressLinear().
 				Attr(":active", "isFetching").
@@ -902,7 +905,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 				innerPr.Body.(h.HTMLComponent),
 			),
 		).Id("vt-app").
-			Attr(web.InitContextVars, `{presetsRightDrawer: false, presetsDialog: false, presetsMessage: {show: false, color: "success", message: ""}}`)
+			Attr(web.InitContextVars, `{presetsRightDrawer: false, presetsDialog: false, presetsListingDialog: false, presetsMessage: {show: false, color: "success", message: ""}}`)
 
 		return
 	}

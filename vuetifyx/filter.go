@@ -16,8 +16,9 @@ import (
 )
 
 type VXFilterBuilder struct {
-	value FilterData
-	tag   *h.HTMLTagBuilder
+	value    FilterData
+	tag      *h.HTMLTagBuilder
+	onChange interface{}
 }
 
 func VXFilter(value FilterData) (r *VXFilterBuilder) {
@@ -25,20 +26,6 @@ func VXFilter(value FilterData) (r *VXFilterBuilder) {
 		value: value,
 		tag:   h.Tag("vx-filter"),
 	}
-
-	var visibleFilterData FilterData
-	for _, v := range value {
-		if !v.Invisible {
-			visibleFilterData = append(visibleFilterData, v)
-		}
-	}
-
-	//	$plaid().stringLocation(qs).mergeQueryWithoutParams(keysInFilterData).url(window.location.href).pushState(true).go()
-	r.Value(visibleFilterData).Attr("@change", web.GET().
-		StringQuery(web.Var("$event.encodedFilterData")).
-		ClearMergeQuery(web.Var("$event.filterKeys")).
-		PushState(true).
-		Go())
 
 	return
 }
@@ -58,7 +45,30 @@ func (b *VXFilterBuilder) Translations(v FilterTranslations) (r *VXFilterBuilder
 	return b
 }
 
+func (b *VXFilterBuilder) OnChange(v interface{}) (r *VXFilterBuilder) {
+	b.onChange = v
+	return b
+}
+
 func (b *VXFilterBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	var visibleFilterData FilterData
+	for _, v := range b.value {
+		if !v.Invisible {
+			visibleFilterData = append(visibleFilterData, v)
+		}
+	}
+
+	if b.onChange == nil {
+		//	$plaid().stringLocation(qs).mergeQueryWithoutParams(keysInFilterData).url(window.location.href).pushState(true).go()
+		b.onChange = web.GET().
+			StringQuery(web.Var("$event.encodedFilterData")).
+			ClearMergeQuery(web.Var("$event.filterKeys")).
+			PushState(true).
+			Go()
+	}
+
+	b = b.Value(visibleFilterData).Attr("@change", b.onChange)
+
 	return b.tag.MarshalHTML(ctx)
 }
 
