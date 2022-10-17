@@ -392,11 +392,16 @@ func defaultMenuIcon(mLabel string) string {
 	return "widgets"
 }
 
+const menuFontWeight = "500"
+const subMenuFontWeight = "400"
+
 func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (r h.HTMLComponent) {
 	menuIcon := m.menuIcon
+	fontWeight := subMenuFontWeight
 	if isSub {
 		// menuIcon = ""
 	} else {
+		fontWeight = menuFontWeight
 		if menuIcon == "" {
 			menuIcon = defaultMenuIcon(m.label)
 		}
@@ -409,11 +414,11 @@ func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (
 	item := VListItem(
 		VListItemAction(
 			VIcon(menuIcon),
-		),
+		).Attr("style", "margin-right: 16px"),
 		VListItemContent(
 			VListItemTitle(
 				h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, m.label)),
-			),
+			).Attr("style", fmt.Sprintf("white-space: normal; font-weight: %s;font-size: 14px;", fontWeight)),
 		),
 	)
 	if strings.HasPrefix(href, "/") {
@@ -461,10 +466,18 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 			if ver.IsAllowed() != nil {
 				continue
 			}
+			groupIcon := v.icon
+			if groupIcon == "" {
+				groupIcon = defaultMenuIcon(v.name)
+			}
 			var subMenus = []h.HTMLComponent{
 				VListItem(
+					VListItemAction(
+						VIcon(groupIcon),
+					).Attr("style", "margin-right: 16px;"),
 					VListItemContent(
-						VListItemTitle(h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, v.name))),
+						VListItemTitle(h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, v.name))).
+							Attr("style", fmt.Sprintf("white-space: normal; font-weight: %s;font-size: 14px;", menuFontWeight)),
 					),
 				).Slot("activator").Class("pa-0"),
 			}
@@ -497,13 +510,9 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 			if subCount == 0 {
 				continue
 			}
-			groupIcon := v.icon
-			if groupIcon == "" {
-				groupIcon = defaultMenuIcon(v.name)
-			}
+
 			menus = append(menus, VListGroup(
 				subMenus...).
-				PrependIcon(groupIcon).
 				Value(hasActiveMenuItem),
 			)
 		case string:
@@ -543,7 +552,9 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 		menus = append(menus, b.menuItem(ctx, m, false))
 	}
 
-	r = VList(menus...).Class("primary--text")
+	r = h.Div(
+		VList(menus...).Class("primary--text").Dense(true),
+	)
 	return
 }
 
@@ -639,7 +650,7 @@ func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switc
 		return b.brandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage)
 	}
 
-	return VCard(
+	return h.Div(
 		h.If(brand != nil,
 			VListItem(
 				VCardText(brand),
@@ -655,7 +666,7 @@ func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switc
 				VCardText(switchLanguage),
 			).Dense(true),
 		),
-	).Elevation(1).Tile(true)
+	)
 }
 
 func MustGetMessages(r *http.Request) *Messages {
@@ -838,6 +849,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 		pr.Body = VApp(
 			VNavigationDrawer(
 				b.runBrandProfileSwitchLanguageDisplayFunc(b.runBrandFunc(ctx), profile, b.runSwitchLanguageFunc(ctx)),
+				VDivider(),
 				b.createMenus(ctx),
 			).App(true).
 				// Clipped(true).
