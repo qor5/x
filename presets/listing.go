@@ -217,10 +217,10 @@ func (b *ListingBuilder) listingComponent(
 
 	dataTable, dataTableAdditions := b.getTableComponents(ctx, inDialog)
 
-	var searchBox h.HTMLComponent
+	var dialogSearchBox h.HTMLComponent
 	if inDialog {
 		u := copyURLWithQueriesRemoved(ctx.R.URL, "__execute_event__").String()
-		searchBox = VTextField().
+		dialogSearchBox = VTextField().
 			PrependInnerIcon("search").
 			Placeholder(msgr.Search).
 			Clearable(true).
@@ -242,7 +242,7 @@ func (b *ListingBuilder) listingComponent(
 	}
 
 	return VContainer(
-		searchBox,
+		dialogSearchBox,
 		tabsAndActionsBar,
 		h.Div(
 			VCard(
@@ -626,18 +626,16 @@ func (b *ListingBuilder) filterTabs(
 			totalQuery[k] = v
 		}
 
-		onclick := web.Plaid().Queries(totalQuery).
-			PushState(true).Go()
+		onclick := web.Plaid().Queries(totalQuery)
 		if inDialog {
-			onclick = web.Plaid().
-				URL(ctx.R.RequestURI).
-				Queries(totalQuery).
-				EventFunc(actions.UpdateListingDialog).
-				Go()
+			onclick.URL(ctx.R.RequestURI).
+				EventFunc(actions.UpdateListingDialog)
+		} else {
+			onclick.PushState(true)
 		}
 		tabs.AppendChildren(
 			VTab(tabContent).
-				Attr("@click", onclick),
+				Attr("@click", onclick.Go()),
 		)
 	}
 	return tabs.Value(value)
@@ -799,16 +797,10 @@ func (b *ListingBuilder) selectColumnsBtn(
 	onOK := web.Plaid().
 		Query(displayColumnsName, web.Var("locals.displayColumns")).
 		Query(sortedColumnsName, web.Var("locals.sortedColumns.map(column => column.name )")).
-		MergeQuery(true).
-		Go()
+		MergeQuery(true)
 	if inDialog {
-		onOK = web.Plaid().
-			URL(copyURLWithQueriesRemoved(ctx.R.URL, "__execute_event__").String()).
-			Query(displayColumnsName, web.Var("locals.displayColumns")).
-			Query(sortedColumnsName, web.Var("locals.sortedColumns.map(column => column.name )")).
-			MergeQuery(true).
-			EventFunc(actions.UpdateListingDialog).
-			Go()
+		onOK.URL(copyURLWithQueriesRemoved(ctx.R.URL, "__execute_event__").String()).
+			EventFunc(actions.UpdateListingDialog)
 	}
 	// add the HTML component of columns setting into toolbar
 	btn = VMenu(
@@ -834,7 +826,7 @@ func (b *ListingBuilder) selectColumnsBtn(
 			),
 			VListItem(
 				VListItemAction(VBtn(msgr.Cancel).Elevation(0).Attr("@click", `vars.selectColumnsMenu = false`)),
-				VListItemAction(VBtn(msgr.OK).Elevation(0).Color("primary").Attr("@click", `vars.selectColumnsMenu = false;`+onOK))),
+				VListItemAction(VBtn(msgr.OK).Elevation(0).Color("primary").Attr("@click", `vars.selectColumnsMenu = false;`+onOK.Go()))),
 		).Dense(true)).
 			Init(h.JSONString(selectColumns)).
 			VSlot("{ locals }"),
@@ -1179,17 +1171,14 @@ func (b *ListingBuilder) getTableComponents(
 				qs.Del("__execute_event__")
 				newQuery := newQueryWithFieldToggleOrderBy(qs, field)
 				onclick := web.Plaid().
-					PushState(true).
-					Queries(newQuery).
-					Go()
+					Queries(newQuery)
 				if inDialog {
-					onclick = web.Plaid().
-						URL(copyURLWithQueriesRemoved(ctx.R.URL, "__execute_event__").String()).
-						Queries(newQuery).
-						EventFunc(actions.UpdateListingDialog).
-						Go()
+					onclick.URL(copyURLWithQueriesRemoved(ctx.R.URL, "__execute_event__").String()).
+						EventFunc(actions.UpdateListingDialog)
+				} else {
+					onclick.PushState(true)
 				}
-				th.Attr("@click", onclick)
+				th.Attr("@click", onclick.Go())
 
 				cell = th
 			}
@@ -1358,13 +1347,13 @@ func (b *ListingBuilder) openListingDialog(ctx *web.EventContext) (r web.EventRe
 		web.Portal(b.listingComponent(ctx, true)).
 			Name(listingDialogContentPortalName),
 	)
-	if b.dialogHeight != "" {
-		content.Attr("height", b.dialogHeight)
-	}
 	dialog := VDialog(content).
 		Attr("v-model", "vars.presetsListingDialog")
 	if b.dialogWidth != "" {
 		dialog.Width(b.dialogWidth)
+	}
+	if b.dialogHeight != "" {
+		content.Attr("height", b.dialogHeight)
 	}
 	r.UpdatePortals = append(r.UpdatePortals, &web.PortalUpdate{
 		Name: listingDialogPortalName,
