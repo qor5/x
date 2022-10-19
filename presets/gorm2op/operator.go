@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/goplaid/web"
+	"github.com/goplaid/x/l10n"
 	"github.com/goplaid/x/presets"
 	"gorm.io/gorm"
 )
@@ -26,6 +27,12 @@ func (op *DataOperatorBuilder) Search(obj interface{}, params *presets.SearchPar
 	}
 
 	wh := op.db.Model(obj)
+	if localeCode := ctx.R.Context().Value(l10n.LocaleCode); localeCode != nil {
+		if l10n.IsLocalizable(obj) {
+			wh = wh.Where("locale_code = ?", localeCode)
+		}
+	}
+
 	if len(params.KeywordColumns) > 0 && len(params.Keyword) > 0 {
 		var segs []string
 		var args []interface{}
@@ -70,7 +77,7 @@ func (op *DataOperatorBuilder) Search(obj interface{}, params *presets.SearchPar
 	return
 }
 
-func (op *DataOperatorBuilder) primarySluggerWhere(obj interface{}, id string) *gorm.DB {
+func (op *DataOperatorBuilder) primarySluggerWhere(obj interface{}, id string, ctx *web.EventContext) *gorm.DB {
 	wh := op.db.Model(obj)
 
 	if id == "" {
@@ -86,11 +93,17 @@ func (op *DataOperatorBuilder) primarySluggerWhere(obj interface{}, id string) *
 		wh = wh.Where("id =  ?", id)
 	}
 
+	if localeCode := ctx.R.Context().Value(l10n.LocaleCode); localeCode != nil {
+		if l10n.IsLocalizable(obj) {
+			wh = wh.Where("locale_code = ?", localeCode)
+		}
+	}
+
 	return wh
 }
 
 func (op *DataOperatorBuilder) Fetch(obj interface{}, id string, ctx *web.EventContext) (r interface{}, err error) {
-	err = op.primarySluggerWhere(obj, id).First(obj).Error
+	err = op.primarySluggerWhere(obj, id, ctx).First(obj).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, presets.ErrRecordNotFound
@@ -102,15 +115,21 @@ func (op *DataOperatorBuilder) Fetch(obj interface{}, id string, ctx *web.EventC
 }
 
 func (op *DataOperatorBuilder) Save(obj interface{}, id string, ctx *web.EventContext) (err error) {
+	if localeCode := ctx.R.Context().Value(l10n.LocaleCode); localeCode != nil {
+		if l10n.IsLocalizable(obj) {
+			obj := obj.(l10n.L10nInterface)
+			obj.SetLocale(localeCode.(string))
+		}
+	}
 	if id == "" {
 		err = op.db.Create(obj).Error
 		return
 	}
-	err = op.primarySluggerWhere(obj, id).Save(obj).Error
+	err = op.primarySluggerWhere(obj, id, ctx).Save(obj).Error
 	return
 }
 
 func (op *DataOperatorBuilder) Delete(obj interface{}, id string, ctx *web.EventContext) (err error) {
-	err = op.primarySluggerWhere(obj, id).Delete(obj).Error
+	err = op.primarySluggerWhere(obj, id, ctx).Delete(obj).Error
 	return
 }

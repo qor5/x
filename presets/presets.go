@@ -10,6 +10,7 @@ import (
 
 	"github.com/goplaid/web"
 	"github.com/goplaid/x/i18n"
+	"github.com/goplaid/x/l10n"
 	"github.com/goplaid/x/perm"
 	"github.com/goplaid/x/presets/actions"
 	. "github.com/goplaid/x/vuetify"
@@ -31,6 +32,7 @@ type Builder struct {
 	mux                                   *goji.Mux
 	builder                               *web.Builder
 	i18nBuilder                           *i18n.Builder
+	l10nBuilder                           *l10n.Builder
 	logger                                *zap.Logger
 	permissionBuilder                     *perm.Builder
 	verifier                              *perm.Verifier
@@ -44,6 +46,7 @@ type Builder struct {
 	brandFunc                             ComponentFunc
 	profileFunc                           ComponentFunc
 	switchLanguageFunc                    ComponentFunc
+	switchLocaleFunc                      ComponentFunc
 	brandProfileSwitchLanguageDisplayFunc func(brand, profile, switchLanguage h.HTMLComponent) h.HTMLComponent
 	notificationCountFunc                 func(ctx *web.EventContext) int
 	notificationContentFunc               ComponentFunc
@@ -86,6 +89,7 @@ func New() *Builder {
 		i18nBuilder: i18n.New().
 			RegisterForModule(language.English, CoreI18nModuleKey, Messages_en_US).
 			RegisterForModule(language.SimplifiedChinese, CoreI18nModuleKey, Messages_zh_CN),
+		l10nBuilder:          l10n.New(),
 		writeFieldDefaults:   NewFieldDefaults(WRITE),
 		listFieldDefaults:    NewFieldDefaults(LIST),
 		detailFieldDefaults:  NewFieldDefaults(DETAIL),
@@ -107,6 +111,10 @@ func New() *Builder {
 
 func (b *Builder) I18n() (r *i18n.Builder) {
 	return b.i18nBuilder
+}
+
+func (b *Builder) L10n() (r *l10n.Builder) {
+	return b.l10nBuilder
 }
 
 func (b *Builder) Permission(v *perm.Builder) (r *Builder) {
@@ -184,6 +192,11 @@ func (b *Builder) ProfileFunc(v ComponentFunc) (r *Builder) {
 
 func (b *Builder) SwitchLanguageFunc(v ComponentFunc) (r *Builder) {
 	b.switchLanguageFunc = v
+	return b
+}
+
+func (b *Builder) SwitchLocaleFunc(v ComponentFunc) (r *Builder) {
+	b.switchLocaleFunc = v
 	return b
 }
 
@@ -582,10 +595,18 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 	if len(supportLanguages) == 1 {
 		return h.Template().Children(
 			h.Div(
-				VRow(
-					VIcon("language"),
-					h.Div(h.Text(display.Self.Name(supportLanguages[0]))).Class("text-button"),
-				),
+				VList(
+					VListItem(
+						VListItemIcon(
+							VIcon("translate").Small(true).Class("ml-1"),
+						).Attr("style", "margin-right: 16px"),
+						VListItemContent(
+							VListItemTitle(
+								h.Div(h.Text(fmt.Sprintf("Language: %s", display.Self.Name(supportLanguages[0])))).Role("button"),
+							),
+						),
+					).Class("pa-0").Dense(true),
+				).Class("pa-0 ma-n4 mt-n6"),
 			).Attr("@click", web.Plaid().Query(queryName, supportLanguages[0].String()).Go()),
 		)
 	}
@@ -610,7 +631,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 				VListItem(
 					VListItemContent(
 						VListItemTitle(
-							h.Div(h.Text(display.Self.Name(tag))).Class("text-button"),
+							h.Div(h.Text(display.Self.Name(tag))),
 						),
 					),
 				).Attr("@click", web.Plaid().Query(queryName, tag.String()).Go()),
@@ -624,11 +645,11 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 				VList(
 					VListItem(
 						VListItemIcon(
-							VIcon("language").Small(true).Class("ml-1"),
-						),
+							VIcon("translate").Small(true).Class("ml-1"),
+						).Attr("style", "margin-right: 16px"),
 						VListItemContent(
 							VListItemTitle(
-								h.Text(display.Self.Name(displayLanguage)),
+								h.Text(fmt.Sprintf("Language: %s", display.Self.Name(displayLanguage))),
 							),
 						),
 						VListItemIcon(
@@ -645,7 +666,82 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 	)
 }
 
-func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage h.HTMLComponent) (r h.HTMLComponent) {
+func (b *Builder) runSwitchLocaleFunc(ctx *web.EventContext) (r h.HTMLComponent) {
+	if b.switchLocaleFunc != nil {
+		return b.switchLocaleFunc(ctx)
+	}
+	var supportLocales = b.L10n().GetSupportLocalesFromRequest(ctx.R)
+
+	if len(b.L10n().GetSupportLocales()) <= 1 || len(supportLocales) == 0 {
+		return nil
+	}
+
+	localeQueryName := b.L10n().GetQueryName()
+
+	if len(supportLocales) == 1 {
+		return h.Template().Children(
+			h.Div(
+				VList(
+					VListItem(
+						VListItemIcon(
+							VIcon("language").Small(true).Class("ml-1"),
+						).Attr("style", "margin-right: 16px"),
+						VListItemContent(
+							VListItemTitle(
+								h.Div(h.Text(fmt.Sprintf("Location: %s", supportLocales[0].String()))).Role("button"),
+							),
+						),
+					).Class("pa-0").Dense(true),
+				).Class("pa-0 ma-n4 mt-n6"),
+			).Attr("@click", web.Plaid().Query(localeQueryName, supportLocales[0].String()).Go()),
+		)
+	}
+
+	locale := b.L10n().GetCorrectLocale(ctx.R)
+
+	var locales []h.HTMLComponent
+	for _, contry := range supportLocales {
+		locales = append(locales,
+			h.Div(
+				VListItem(
+					VListItemContent(
+						VListItemTitle(
+							h.Div(h.Text(contry.String())),
+						),
+					),
+				).Attr("@click", web.Plaid().Query(localeQueryName, contry.String()).Go()),
+			),
+		)
+	}
+
+	return VMenu().OffsetY(true).Children(
+		h.Template().Attr("v-slot:activator", "{on, attrs}").Children(
+			h.Div(
+				VList(
+					VListItem(
+						VListItemIcon(
+							VIcon("language").Small(true).Class("ml-1"),
+						).Attr("style", "margin-right: 16px"),
+						VListItemContent(
+							VListItemTitle(
+								h.Text(fmt.Sprintf("Location: %s", locale)),
+							),
+						),
+						VListItemIcon(
+							VIcon("arrow_drop_down").Small(false).Class("mr-1"),
+						),
+					).Class("pa-0").Dense(true),
+				).Class("pa-0 ma-n4 mt-n6"),
+			).Attr("v-bind", "attrs").Attr("v-on", "on"),
+		),
+
+		VList(
+			locales...,
+		).Dense(true),
+	)
+}
+
+func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage, switchLocale h.HTMLComponent) (r h.HTMLComponent) {
 	if b.brandProfileSwitchLanguageDisplayFunc != nil {
 		return b.brandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage)
 	}
@@ -664,6 +760,11 @@ func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switc
 		h.If(switchLanguage != nil,
 			VListItem(
 				VCardText(switchLanguage),
+			).Dense(true),
+		),
+		h.If(switchLocale != nil,
+			VListItem(
+				VCardText(switchLocale),
 			).Dense(true),
 		),
 	)
@@ -848,7 +949,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
 		pr.Body = VApp(
 			VNavigationDrawer(
-				b.runBrandProfileSwitchLanguageDisplayFunc(b.runBrandFunc(ctx), profile, b.runSwitchLanguageFunc(ctx)),
+				b.runBrandProfileSwitchLanguageDisplayFunc(b.runBrandFunc(ctx), profile, b.runSwitchLanguageFunc(ctx), b.runSwitchLocaleFunc(ctx)),
 				VDivider(),
 				b.createMenus(ctx),
 			).App(true).
@@ -1148,6 +1249,12 @@ func (b *Builder) wrap(m *ModelBuilder, pf web.PageFunc) http.Handler {
 		m.registerDefaultEventFuncs()
 		p.MergeHub(&m.EventsHub)
 	}
+	if b.L10n().IsTurnedOn() {
+		return b.L10n().EnsureLocale(b.I18n().EnsureLanguage(
+			p,
+		))
+	}
+
 	return b.I18n().EnsureLanguage(
 		p,
 	)
