@@ -39,15 +39,21 @@ func editRowMenuItemFunc(mi *ModelInfo, url string, editExtraParams url.Values) 
 			return nil
 		}
 
-		return VListItem(
-			VListItemIcon(VIcon("edit")),
-			VListItemTitle(h.Text(msgr.Edit)),
-		).Attr("@click", web.Plaid().
+		onclick := web.Plaid().
 			EventFunc(actions.Edit).
 			Queries(editExtraParams).
 			Query(ParamID, id).
-			URL(url).
-			Go())
+			URL(url)
+		if IsInDialog(ctx.R.Context()) {
+			onclick.URL(ctx.R.RequestURI).
+				Query(ParamOverlay, actions.Dialog).
+				Query(ParamInDialog, true).
+				Query(ParamListingQueries, ctx.Queries().Encode())
+		}
+		return VListItem(
+			VListItemIcon(VIcon("edit")),
+			VListItemTitle(h.Text(msgr.Edit)),
+		).Attr("@click", onclick.Go())
 	}
 }
 
@@ -57,15 +63,22 @@ func deleteRowMenuItemFunc(mi *ModelInfo, url string, editExtraParams url.Values
 		if mi.mb.Info().Verifier().Do(PermDelete).ObjectOn(obj).WithReq(ctx.R).IsAllowed() != nil {
 			return nil
 		}
-		return VListItem(
-			VListItemIcon(VIcon("delete")),
-			VListItemTitle(h.Text(msgr.Delete)),
-		).Attr("@click", web.Plaid().
+
+		onclick := web.Plaid().
 			EventFunc(actions.DeleteConfirmation).
 			Queries(editExtraParams).
 			Query(ParamID, id).
-			URL(url).
-			Go())
+			URL(url)
+		if IsInDialog(ctx.R.Context()) {
+			onclick.URL(ctx.R.RequestURI).
+				Query(ParamOverlay, actions.Dialog).
+				Query(ParamInDialog, true).
+				Query(ParamListingQueries, ctx.Queries().Encode())
+		}
+		return VListItem(
+			VListItemIcon(VIcon("delete")),
+			VListItemTitle(h.Text(msgr.Delete)),
+		).Attr("@click", onclick.Go())
 	}
 }
 
@@ -77,4 +90,8 @@ func copyURLWithQueriesRemoved(u *url.URL, qs ...string) *url.URL {
 	}
 	newU.RawQuery = newQuery.Encode()
 	return newU
+}
+
+func isInDialogFromQuery(ctx *web.EventContext) bool {
+	return ctx.R.URL.Query().Get(ParamInDialog) == "true"
 }

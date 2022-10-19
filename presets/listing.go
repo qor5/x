@@ -1,6 +1,7 @@
 package presets
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -148,7 +149,6 @@ func (b *ListingBuilder) GetPageFunc() web.PageFunc {
 
 const bulkPanelOpenParamName = "bulkOpen"
 const actionPanelOpenParamName = "actionOpen"
-const inDialogParamName = "inDialog"
 const DeleteConfirmPortalName = "deleteConfirm"
 const dataTablePortalName = "dataTable"
 const dataTableAdditionsPortalName = "dataTableAdditions"
@@ -173,6 +173,8 @@ func (b *ListingBuilder) listingComponent(
 	ctx *web.EventContext,
 	inDialog bool,
 ) h.HTMLComponent {
+	ctx.R = ctx.R.WithContext(context.WithValue(ctx.R.Context(), ctxInDialog, inDialog))
+
 	msgr := MustGetMessages(ctx.R)
 
 	var tabsAndActionsBar h.HTMLComponent
@@ -190,13 +192,19 @@ func (b *ListingBuilder) listingComponent(
 		} else {
 			disableNewBtn := b.mb.Info().Verifier().Do(PermCreate).WithReq(ctx.R).IsAllowed() != nil
 			if !disableNewBtn {
+				onclick := web.Plaid().EventFunc(actions.New)
+				if inDialog {
+					onclick.URL(ctx.R.RequestURI).
+						Query(ParamOverlay, actions.Dialog).
+						Query(ParamInDialog, true).
+						Query(ParamListingQueries, ctx.Queries().Encode())
+				}
 				actionsComponent = append(actionsComponent, VBtn(msgr.New).
 					Color("primary").
 					Depressed(true).
 					Dark(true).Class("ml-2").
 					Disabled(disableNewBtn).
-					Attr("@click", web.Plaid().EventFunc(actions.New).
-						Go()))
+					Attr("@click", onclick.Go()))
 			}
 		}
 
@@ -325,11 +333,10 @@ func (b *ListingBuilder) bulkPanel(
 		}
 	}
 
-	inDialog := ctx.R.URL.Query().Get(inDialogParamName) == "true"
 	onOK := web.Plaid().EventFunc(actions.DoBulkAction).
 		Query(ParamBulkActionName, bulk.name).
 		MergeQuery(true)
-	if inDialog {
+	if isInDialogFromQuery(ctx) {
 		onOK.URL(ctx.R.RequestURI)
 	}
 	return VCard(
@@ -371,11 +378,10 @@ func (b *ListingBuilder) actionPanel(action *ActionBuilder, ctx *web.EventContex
 		}
 	}
 
-	inDialog := ctx.R.URL.Query().Get(inDialogParamName) == "true"
 	onOK := web.Plaid().EventFunc(actions.DoListingAction).
 		Query(ParamListingActionName, action.name).
 		MergeQuery(true)
-	if inDialog {
+	if isInDialogFromQuery(ctx) {
 		onOK.URL(ctx.R.RequestURI)
 	}
 
@@ -425,7 +431,7 @@ func (b *ListingBuilder) deleteConfirmation(ctx *web.EventContext) (r web.EventR
 						Dark(true).
 						Attr("@click", web.Plaid().
 							EventFunc(actions.DoDelete).
-							Query(ParamID, id).
+							Queries(ctx.Queries()).
 							URL(ctx.R.URL.Path).
 							Go()),
 				),
@@ -541,13 +547,16 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 
 	msgr := MustGetMessages(ctx.R)
 	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
-	if ctx.R.URL.Query().Get(inDialogParamName) == "true" {
+	if isInDialogFromQuery(ctx) {
+		qs := ctx.Queries()
+		qs.Del(bulkPanelOpenParamName)
+		qs.Del(ParamBulkActionName)
 		web.AppendVarsScripts(&r,
 			closeDialogVarScript,
 			web.Plaid().
 				URL(ctx.R.RequestURI).
 				EventFunc(actions.UpdateListingDialog).
-				MergeQuery(true).
+				Queries(qs).
 				Go(),
 		)
 	} else {
@@ -589,13 +598,16 @@ func (b ListingBuilder) doListingAction(ctx *web.EventContext) (r web.EventRespo
 	msgr := MustGetMessages(ctx.R)
 	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
 
-	if ctx.R.URL.Query().Get(inDialogParamName) == "true" {
+	if isInDialogFromQuery(ctx) {
+		qs := ctx.Queries()
+		qs.Del(actionPanelOpenParamName)
+		qs.Del(ParamListingActionName)
 		web.AppendVarsScripts(&r,
 			closeDialogVarScript,
 			web.Plaid().
 				URL(ctx.R.RequestURI).
 				EventFunc(actions.UpdateListingDialog).
-				MergeQuery(true).
+				Queries(qs).
 				Go(),
 		)
 	} else {
@@ -1137,11 +1149,17 @@ func (b *ListingBuilder) getTableComponents(
 			if b.mb.hasDetailing {
 				event = actions.DetailingDrawer
 			}
+			onclick := web.Plaid().
+				EventFunc(event).
+				Query(ParamID, id)
+			if inDialog {
+				onclick.URL(ctx.R.RequestURI).
+					Query(ParamOverlay, actions.Dialog).
+					Query(ParamInDialog, true).
+					Query(ParamListingQueries, ctx.Queries().Encode())
+			}
 			tdbind.SetAttr("@click.self",
-				web.Plaid().
-					EventFunc(event).
-					Query(ParamID, id).
-					Go()+fmt.Sprintf(`; vars.currEditingListItemID="%s-%s"`, dataTableID, id))
+				onclick.Go()+fmt.Sprintf(`; vars.currEditingListItemID="%s-%s"`, dataTableID, id))
 		}
 		return tdbind
 	}
@@ -1325,7 +1343,7 @@ func (b *ListingBuilder) actionsComponent(
 				MergeQuery(true)
 			if inDialog {
 				onclick.URL(ctx.R.RequestURI).
-					Query(inDialogParamName, inDialog)
+					Query(ParamInDialog, inDialog)
 			}
 			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
 				Color(buttonColor).
@@ -1358,7 +1376,7 @@ func (b *ListingBuilder) actionsComponent(
 				MergeQuery(true)
 			if inDialog {
 				onclick.URL(ctx.R.RequestURI).
-					Query(inDialogParamName, inDialog)
+					Query(ParamInDialog, inDialog)
 			}
 			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
 				Color(buttonColor).
