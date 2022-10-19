@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -41,7 +42,10 @@ func TestPrimarySlugger(t *testing.T) {
 	rawDB, _ := db.DB()
 	emptyData.TruncatePut(rawDB)
 	op := gorm2op.DataOperator(db)
+	r := http.Request{}
 	ctx := new(web.EventContext)
+	ctx.R = &r
+
 	err := op.Save(&TestVariant{ProductCode: "P01", ColorCode: "C01", Name: "Product 1"}, "", ctx)
 	if err != nil {
 		panic(err)
