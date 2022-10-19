@@ -10,6 +10,8 @@ import (
 
 type Builder struct {
 	supportLocales                   []countries.CountryCode
+	localesLabels                    map[countries.CountryCode]string
+	localesCodes                     map[countries.CountryCode]string
 	getSupportLocalesFromRequestFunc func(R *http.Request) []countries.CountryCode
 	cookieName                       string
 	queryName                        string
@@ -18,6 +20,8 @@ type Builder struct {
 func New() *Builder {
 	b := &Builder{
 		supportLocales: []countries.CountryCode{},
+		localesLabels:  make(map[countries.CountryCode]string),
+		localesCodes:   make(map[countries.CountryCode]string),
 		cookieName:     "locale",
 		queryName:      "locale",
 	}
@@ -36,12 +40,27 @@ func (b *Builder) GetQueryName() string {
 	return b.queryName
 }
 
-func (b *Builder) SupportLocales(vs ...countries.CountryCode) (r *Builder) {
-	if len(vs) == 0 {
-		panic("have to support at least one language")
-	}
-	b.supportLocales = vs
+func (b *Builder) RegisterLocales(locale countries.CountryCode, localeCode string, label string) (r *Builder) {
+	b.supportLocales = append(b.supportLocales, locale)
+	b.localesCodes[locale] = localeCode
+	b.localesLabels[locale] = label
 	return b
+}
+
+func (b *Builder) GetLocaleLabel(locale countries.CountryCode) string {
+	label, exist := b.localesLabels[locale]
+	if exist {
+		return label
+	}
+	return "Unkonw"
+}
+
+func (b *Builder) GetLocaleCode(locale countries.CountryCode) string {
+	code, exist := b.localesCodes[locale]
+	if exist {
+		return code
+	}
+	return "Unkonw"
 }
 
 func (b *Builder) GetSupportLocales() []countries.CountryCode {
@@ -68,7 +87,7 @@ func (b *Builder) GetCurrentLocaleFromCookie(r *http.Request) (locale string) {
 	return
 }
 
-func (b *Builder) GetCorrectLocale(r *http.Request) string {
+func (b *Builder) GetCorrectLocale(r *http.Request) countries.CountryCode {
 	locale := r.FormValue(b.queryName)
 	if locale == "" {
 		locale = b.GetCurrentLocaleFromCookie(r)
@@ -77,19 +96,16 @@ func (b *Builder) GetCorrectLocale(r *http.Request) string {
 	supportLocales := b.GetSupportLocalesFromRequest(r)
 	for _, v := range supportLocales {
 		if locale == v.String() {
-			return locale
+			return v
 		}
 	}
 
-	return supportLocales[0].String()
+	return supportLocales[0]
 }
 
 type l10nContextKey int
 
-const (
-	HasLocaleKey l10nContextKey = iota
-	LocaleCode
-)
+const LocaleCode l10nContextKey = iota
 
 func (b *Builder) EnsureLocale(in http.Handler) (out http.Handler) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -99,18 +115,21 @@ func (b *Builder) EnsureLocale(in http.Handler) (out http.Handler) {
 		}
 
 		var locale = b.GetCorrectLocale(r)
-		if len(locale) > 0 {
-			maxAge := 365 * 24 * 60 * 60
-			http.SetCookie(w, &http.Cookie{
-				Name:    b.cookieName,
-				Value:   locale,
-				Path:    "/",
-				MaxAge:  maxAge,
-				Expires: time.Now().Add(time.Duration(maxAge) * time.Second),
-			})
+
+		if !locale.IsValid() {
+			in.ServeHTTP(w, r)
+			return
 		}
 
-		ctx := context.WithValue(r.Context(), LocaleCode, locale)
+		maxAge := 365 * 24 * 60 * 60
+		http.SetCookie(w, &http.Cookie{
+			Name:    b.cookieName,
+			Value:   locale.String(),
+			Path:    "/",
+			MaxAge:  maxAge,
+			Expires: time.Now().Add(time.Duration(maxAge) * time.Second),
+		})
+		ctx := context.WithValue(r.Context(), LocaleCode, b.GetLocaleCode(locale))
 
 		in.ServeHTTP(w, r.WithContext(ctx))
 	})

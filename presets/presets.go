@@ -591,6 +591,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 	}
 
 	queryName := b.I18n().GetQueryName()
+	msgr := MustGetMessages(ctx.R)
 
 	if len(supportLanguages) == 1 {
 		return h.Template().Children(
@@ -602,7 +603,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 						).Attr("style", "margin-right: 16px"),
 						VListItemContent(
 							VListItemTitle(
-								h.Div(h.Text(fmt.Sprintf("Language: %s", display.Self.Name(supportLanguages[0])))).Role("button"),
+								h.Div(h.Text(fmt.Sprintf("%s%s %s", msgr.Language, msgr.Colon, display.Self.Name(supportLanguages[0])))).Role("button"),
 							),
 						),
 					).Class("pa-0").Dense(true),
@@ -649,7 +650,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 						).Attr("style", "margin-right: 16px"),
 						VListItemContent(
 							VListItemTitle(
-								h.Text(fmt.Sprintf("Language: %s", display.Self.Name(displayLanguage))),
+								h.Text(fmt.Sprintf("%s%s %s", msgr.Language, msgr.Colon, display.Self.Name(displayLanguage))),
 							),
 						),
 						VListItemIcon(
@@ -677,6 +678,7 @@ func (b *Builder) runSwitchLocaleFunc(ctx *web.EventContext) (r h.HTMLComponent)
 	}
 
 	localeQueryName := b.L10n().GetQueryName()
+	msgr := MustGetMessages(ctx.R)
 
 	if len(supportLocales) == 1 {
 		return h.Template().Children(
@@ -688,12 +690,12 @@ func (b *Builder) runSwitchLocaleFunc(ctx *web.EventContext) (r h.HTMLComponent)
 						).Attr("style", "margin-right: 16px"),
 						VListItemContent(
 							VListItemTitle(
-								h.Div(h.Text(fmt.Sprintf("Location: %s", supportLocales[0].String()))).Role("button"),
+								h.Div(h.Text(fmt.Sprintf("%s%s %s", msgr.Location, msgr.Colon, i18n.T(ctx.R, ModelsI18nModuleKey, b.L10n().GetLocaleLabel(supportLocales[0]))))).Role("button"),
 							),
 						),
 					).Class("pa-0").Dense(true),
 				).Class("pa-0 ma-n4 mt-n6"),
-			).Attr("@click", web.Plaid().Query(localeQueryName, supportLocales[0].String()).Go()),
+			).Attr("@click", web.Plaid().Query(localeQueryName, b.L10n().GetLocaleCode(supportLocales[0])).Go()),
 		)
 	}
 
@@ -706,10 +708,10 @@ func (b *Builder) runSwitchLocaleFunc(ctx *web.EventContext) (r h.HTMLComponent)
 				VListItem(
 					VListItemContent(
 						VListItemTitle(
-							h.Div(h.Text(contry.String())),
+							h.Div(h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, b.L10n().GetLocaleLabel(contry)))),
 						),
 					),
-				).Attr("@click", web.Plaid().Query(localeQueryName, contry.String()).Go()),
+				).Attr("@click", web.Plaid().Query(localeQueryName, b.L10n().GetLocaleCode(contry)).Go()),
 			),
 		)
 	}
@@ -724,7 +726,7 @@ func (b *Builder) runSwitchLocaleFunc(ctx *web.EventContext) (r h.HTMLComponent)
 						).Attr("style", "margin-right: 16px"),
 						VListItemContent(
 							VListItemTitle(
-								h.Text(fmt.Sprintf("Location: %s", locale)),
+								h.Text(fmt.Sprintf("%s%s %s", msgr.Location, msgr.Colon, i18n.T(ctx.R, ModelsI18nModuleKey, b.L10n().GetLocaleLabel(locale)))),
 							),
 						),
 						VListItemIcon(
