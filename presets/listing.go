@@ -371,6 +371,14 @@ func (b *ListingBuilder) actionPanel(action *ActionBuilder, ctx *web.EventContex
 		}
 	}
 
+	inDialog := ctx.R.URL.Query().Get(inDialogParamName) == "true"
+	onOK := web.Plaid().EventFunc(actions.DoListingAction).
+		Query(ParamListingActionName, action.name).
+		MergeQuery(true)
+	if inDialog {
+		onOK.URL(ctx.R.RequestURI)
+	}
+
 	return VCard(
 		VCardTitle(
 			h.Text(action.NameLabel.label),
@@ -384,21 +392,13 @@ func (b *ListingBuilder) actionPanel(action *ActionBuilder, ctx *web.EventContex
 			VBtn(msgr.Cancel).
 				Depressed(true).
 				Class("ml-2").
-				Attr("@click", web.Plaid().
-					Queries(url.Values{actionPanelOpenParamName: []string{""}}).
-					MergeQuery(true).
-					PushState(true).
-					Go()),
+				Attr("@click", closeDialogVarScript),
 
 			VBtn(msgr.OK).
 				Color("primary").
 				Depressed(true).
 				Dark(true).
-				Attr("@click", web.Plaid().EventFunc(actions.DoListingAction).
-					Query(ParamListingActionName, action.name).
-					MergeQuery(true).
-					Go(),
-				),
+				Attr("@click", onOK.Go()),
 		),
 	)
 }
@@ -589,7 +589,18 @@ func (b ListingBuilder) doListingAction(ctx *web.EventContext) (r web.EventRespo
 	msgr := MustGetMessages(ctx.R)
 	ShowMessage(&r, msgr.SuccessfullyUpdated, "")
 
-	r.PushState = web.Location(url.Values{actionPanelOpenParamName: []string{}}).MergeQuery(true)
+	if ctx.R.URL.Query().Get(inDialogParamName) == "true" {
+		web.AppendVarsScripts(&r,
+			closeDialogVarScript,
+			web.Plaid().
+				URL(ctx.R.RequestURI).
+				EventFunc(actions.UpdateListingDialog).
+				MergeQuery(true).
+				Go(),
+		)
+	} else {
+		r.PushState = web.Location(url.Values{actionPanelOpenParamName: []string{}}).MergeQuery(true)
+	}
 
 	return
 }
@@ -1342,15 +1353,19 @@ func (b *ListingBuilder) actionsComponent(
 				buttonColor = ColorPrimary
 			}
 
+			onclick := web.Plaid().EventFunc(actions.OpenActionDialog).
+				Queries(url.Values{actionPanelOpenParamName: []string{ba.name}}).
+				MergeQuery(true)
+			if inDialog {
+				onclick.URL(ctx.R.RequestURI).
+					Query(inDialogParamName, inDialog)
+			}
 			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
 				Color(buttonColor).
 				Depressed(true).
 				Dark(true).
 				Class("ml-2").
-				Attr("@click", web.Plaid().EventFunc(actions.OpenActionDialog).
-					Queries(url.Values{actionPanelOpenParamName: []string{ba.name}}).
-					MergeQuery(true).
-					Go())
+				Attr("@click", onclick.Go())
 		}
 
 		actionBtns = append(actionBtns, btn)
