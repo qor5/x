@@ -78,7 +78,3 @@ func copyURLWithQueriesRemoved(u *url.URL, qs ...string) *url.URL {
 	newU.RawQuery = newQuery.Encode()
 	return newU
 }
-
-func urlStrWithoutEventQuery(u *url.URL) string {
-	return copyURLWithQueriesRemoved(u, "__execute_event__").String()
-}

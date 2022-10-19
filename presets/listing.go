@@ -220,7 +220,7 @@ func (b *ListingBuilder) listingComponent(
 
 	var dialogSearchBox h.HTMLComponent
 	if inDialog {
-		u := urlStrWithoutEventQuery(ctx.R.URL)
+		u := ctx.R.RequestURI
 		dialogSearchBox = VTextField().
 			PrependInnerIcon("search").
 			Placeholder(msgr.Search).
@@ -330,7 +330,7 @@ func (b *ListingBuilder) bulkPanel(
 		Query(ParamBulkActionName, bulk.name).
 		MergeQuery(true)
 	if inDialog {
-		onOK.URL(urlStrWithoutEventQuery(ctx.R.URL))
+		onOK.URL(ctx.R.RequestURI)
 	}
 	return VCard(
 		VCardTitle(
@@ -545,7 +545,7 @@ func (b *ListingBuilder) doBulkAction(ctx *web.EventContext) (r web.EventRespons
 		web.AppendVarsScripts(&r,
 			closeDialogVarScript,
 			web.Plaid().
-				URL(urlStrWithoutEventQuery(ctx.R.URL)).
+				URL(ctx.R.RequestURI).
 				EventFunc(actions.UpdateListingDialog).
 				MergeQuery(true).
 				Go(),
@@ -806,7 +806,7 @@ func (b *ListingBuilder) selectColumnsBtn(
 		Query(sortedColumnsName, web.Var("locals.sortedColumns.map(column => column.name )")).
 		MergeQuery(true)
 	if inDialog {
-		onOK.URL(urlStrWithoutEventQuery(ctx.R.URL)).
+		onOK.URL(ctx.R.RequestURI).
 			EventFunc(actions.UpdateListingDialog)
 	}
 	// add the HTML component of columns setting into toolbar
@@ -890,7 +890,7 @@ func (b *ListingBuilder) filterBar(
 	filter := vuetifyx.VXFilter(fd).Translations(ft)
 	if inDialog {
 		filter.OnChange(web.Plaid().
-			URL(urlStrWithoutEventQuery(ctx.R.URL)).
+			URL(ctx.R.RequestURI).
 			StringQuery(web.Var("$event.encodedFilterData")).
 			ClearMergeQuery(web.Var("$event.filterKeys")).
 			EventFunc(actions.UpdateListingDialog).
@@ -1180,7 +1180,7 @@ func (b *ListingBuilder) getTableComponents(
 				onclick := web.Plaid().
 					Queries(newQuery)
 				if inDialog {
-					onclick.URL(urlStrWithoutEventQuery(ctx.R.URL)).
+					onclick.URL(ctx.R.RequestURI).
 						EventFunc(actions.UpdateListingDialog)
 				} else {
 					onclick.PushState(true)
@@ -1204,7 +1204,7 @@ func (b *ListingBuilder) getTableComponents(
 	if inDialog {
 		sDataTable.OnSelectAllFunc(func(idsOfPage []string, ctx *web.EventContext) string {
 			return web.Plaid().
-				URL(urlStrWithoutEventQuery(ctx.R.URL)).
+				URL(ctx.R.RequestURI).
 				EventFunc(actions.UpdateListingDialog).
 				Query(ParamSelectedIds,
 					web.Var(fmt.Sprintf(`{value: %s, add: $event, remove: !$event}`, h.JSONString(idsOfPage))),
@@ -1214,7 +1214,7 @@ func (b *ListingBuilder) getTableComponents(
 		})
 		sDataTable.OnSelectFunc(func(id string, ctx *web.EventContext) string {
 			return web.Plaid().
-				URL(urlStrWithoutEventQuery(ctx.R.URL)).
+				URL(ctx.R.RequestURI).
 				EventFunc(actions.UpdateListingDialog).
 				Query(ParamSelectedIds,
 					web.Var(fmt.Sprintf(`{value: %s, add: $event, remove: !$event}`, h.JSONString(id))),
@@ -1244,21 +1244,20 @@ func (b *ListingBuilder) getTableComponents(
 			PerPageText(msgr.PaginationRowsPerPage)
 
 		if inDialog {
-			u := urlStrWithoutEventQuery(ctx.R.URL)
 			tpb.OnSelectPerPage(web.Plaid().
-				URL(u).
+				URL(ctx.R.RequestURI).
 				Query("per_page", web.Var("[$event]")).
 				MergeQuery(true).
 				EventFunc(actions.UpdateListingDialog).
 				Go())
 			tpb.OnPrevPage(web.Plaid().
-				URL(u).
+				URL(ctx.R.RequestURI).
 				Query("page", searchParams.Page-1).
 				MergeQuery(true).
 				EventFunc(actions.UpdateListingDialog).
 				Go())
 			tpb.OnNextPage(web.Plaid().
-				URL(u).
+				URL(ctx.R.RequestURI).
 				Query("page", searchParams.Page+1).
 				MergeQuery(true).
 				EventFunc(actions.UpdateListingDialog).
@@ -1314,7 +1313,7 @@ func (b *ListingBuilder) actionsComponent(
 				Queries(url.Values{bulkPanelOpenParamName: []string{ba.name}}).
 				MergeQuery(true)
 			if inDialog {
-				onclick.URL(urlStrWithoutEventQuery(ctx.R.URL)).
+				onclick.URL(ctx.R.RequestURI).
 					Query(inDialogParamName, inDialog)
 			}
 			btn = VBtn(b.mb.getLabel(ba.NameLabel)).
