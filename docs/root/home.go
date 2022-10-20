@@ -19,6 +19,8 @@ GoPlaid is yet another Go library to build web applications. We aim to accelerat
 
 	utils.Anchor(H2(""), "How is this document organized"),
 	Markdown(`
+Most of latter examples are based on the initial sample project. In another word, we will demonstrate how to build a rich functioned website by this document.
+
 - First, we will start with a quick sample project that would give you a rough but visual idea of what GoPlaid can do.
 - Second, we will introduce the basic functions, The sequence is from listing page to editing page. You can find all commonly used Admin website features in this section.
 - Third, we will introduce the essentials of GoPlaid and advanced functions, You would understand how GoPlaid render a page and advanced features like "how to partially refresh a page".

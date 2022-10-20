@@ -80,4 +80,4 @@ Here is how to use it:
 - ~UpdateFunc~ configure the logic that the bulk action execute
 `),
 ).Title("Listing Customizations").
-	Slug("presets-guide/listing-customizations")
+	Slug("basics/listing-customizations")
