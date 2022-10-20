@@ -1428,7 +1428,7 @@ func (b *ListingBuilder) openListingDialog(ctx *web.EventContext) (r web.EventRe
 	content := VCard(
 		web.Portal(b.listingComponent(ctx, true)).
 			Name(listingDialogContentPortalName),
-	)
+	).Attr("id", "listingDialog")
 	dialog := VDialog(content).
 		Attr("v-model", "vars.presetsListingDialog")
 	if b.dialogWidth != "" {
@@ -1450,6 +1450,12 @@ func (b *ListingBuilder) updateListingDialog(ctx *web.EventContext) (r web.Event
 		Name: listingDialogContentPortalName,
 		Body: b.listingComponent(ctx, true),
 	})
+
+	web.AppendVarsScripts(&r, `
+var listingDialogElem = document.getElementById('listingDialog'); 
+if (listingDialogElem.offsetHeight > parseInt(listingDialogElem.style.minHeight || '0', 10)) {
+    listingDialogElem.style.minHeight = listingDialogElem.offsetHeight+'px';
+};`)
 
 	return
 }
