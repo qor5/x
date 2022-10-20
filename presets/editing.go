@@ -336,8 +336,19 @@ func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, e
 		}
 	}
 
-	// refresh current page
-	r.PushState = web.Location(nil)
+	if isInDialogFromQuery(ctx) {
+		web.AppendVarsScripts(&r,
+			"vars.deleteConfirmation = false",
+			web.Plaid().
+				URL(ctx.R.RequestURI).
+				EventFunc(actions.UpdateListingDialog).
+				StringQuery(ctx.R.URL.Query().Get(ParamListingQueries)).
+				Go(),
+		)
+	} else {
+		// refresh current page
+		r.PushState = web.Location(nil)
+	}
 	return
 }
 
@@ -421,7 +432,17 @@ func (b *EditingBuilder) doUpdate(
 		return
 	}
 
-	r.PushState = web.Location(nil)
+	if isInDialogFromQuery(ctx) {
+		web.AppendVarsScripts(r,
+			web.Plaid().
+				URL(ctx.R.RequestURI).
+				EventFunc(actions.UpdateListingDialog).
+				StringQuery(ctx.R.URL.Query().Get(ParamListingQueries)).
+				Go(),
+		)
+	} else {
+		r.PushState = web.Location(nil)
+	}
 	web.AppendVarsScripts(r, script)
 	return
 }

@@ -19,6 +19,8 @@ type HeadCellWrapperFunc func(cell h.MutableAttrHTMLComponent, field string, tit
 type RowWrapperFunc func(row h.MutableAttrHTMLComponent, id string, obj interface{}, dataTableID string) h.HTMLComponent
 type RowMenuItemFunc func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent
 type RowComponentFunc func(obj interface{}, ctx *web.EventContext) h.HTMLComponent
+type OnSelectFunc func(id string, ctx *web.EventContext) string
+type OnSelectAllFunc func(idsOfPage []string, ctx *web.EventContext) string
 
 type DataTableBuilder struct {
 	data               interface{}
@@ -38,6 +40,8 @@ type DataTableBuilder struct {
 	selectedCountLabel   string
 	tfootChildren        []h.HTMLComponent
 	selectableColumnsBtn h.HTMLComponent
+	onSelectFunc         OnSelectFunc
+	onSelectAllFunc      OnSelectAllFunc
 }
 
 func DataTable(data interface{}) (r *DataTableBuilder) {
@@ -125,6 +129,16 @@ func (b *DataTableBuilder) SelectableColumnsBtn(v h.HTMLComponent) (r *DataTable
 	return b
 }
 
+func (b *DataTableBuilder) OnSelectAllFunc(v OnSelectAllFunc) (r *DataTableBuilder) {
+	b.onSelectAllFunc = v
+	return b
+}
+
+func (b *DataTableBuilder) OnSelectFunc(v OnSelectFunc) (r *DataTableBuilder) {
+	b.onSelectFunc = v
+	return b
+}
+
 type primarySlugger interface {
 	PrimarySlug() string
 }
@@ -192,6 +206,15 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 		}
 
 		if b.selectable {
+			onChange := web.Plaid().
+				PushState(true).
+				MergeQuery(true).
+				Query(b.selectionParamName,
+					web.Var(fmt.Sprintf(`{value: %s, add: $event, remove: !$event}`, h.JSONString(id))),
+				).RunPushState()
+			if b.onSelectFunc != nil {
+				onChange = b.onSelectFunc(id, ctx)
+			}
 			tds = append(tds, h.Td(
 				VCheckbox().
 					Class("mt-0").
@@ -199,13 +222,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 					TrueValue(id).
 					FalseValue("").
 					HideDetails(true).
-					Attr("@change", web.Plaid().
-						PushState(true).
-						MergeQuery(true).
-						Query(b.selectionParamName,
-							web.Var(fmt.Sprintf(`{value: %s, add: $event, remove: !$event}`, h.JSONString(id))),
-						).RunPushState()+fmt.Sprintf(";vars.%s+=($event?1:-1)", selectedCountVarName),
-					),
+					Attr("@change", onChange+fmt.Sprintf(";vars.%s+=($event?1:-1)", selectedCountVarName)),
 			).Class("pr-0"))
 		}
 
@@ -304,20 +321,23 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 				allInputValue = idsOfPageComma
 			}
 
+			onChange := web.Plaid().
+				PushState(true).
+				MergeQuery(true).
+				Query(b.selectionParamName,
+					web.Var(fmt.Sprintf(`{value: %s, add: $event, remove: !$event}`,
+						h.JSONString(idsOfPage))),
+				).Go()
+			if b.onSelectAllFunc != nil {
+				onChange = b.onSelectAllFunc(idsOfPage, ctx)
+			}
 			heads = append(heads, h.Th("").Children(
 				VCheckbox().
 					Class("mt-0").
 					TrueValue(idsOfPageComma).
 					InputValue(allInputValue).
 					HideDetails(true).
-					Attr("@change", web.Plaid().
-						PushState(true).
-						MergeQuery(true).
-						Query(b.selectionParamName,
-							web.Var(fmt.Sprintf(`{value: %s, add: $event, remove: !$event}`,
-								h.JSONString(idsOfPage))),
-						).Go(),
-					),
+					Attr("@change", onChange),
 			).Style("width: 48px;").Class("pr-0"))
 		}
 
