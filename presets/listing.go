@@ -226,32 +226,44 @@ func (b *ListingBuilder) listingComponent(
 
 	dataTable, dataTableAdditions := b.getTableComponents(ctx, inDialog)
 
-	var dialogSearchBox h.HTMLComponent
+	var dialogHeadbar h.HTMLComponent
 	if inDialog {
-		u := ctx.R.RequestURI
-		dialogSearchBox = VTextField().
-			PrependInnerIcon("search").
-			Placeholder(msgr.Search).
-			Clearable(true).
-			HideDetails(true).
-			Class("mb-2").
-			Value(ctx.R.URL.Query().Get("keyword")).
-			Attr("@keyup.enter", web.Plaid().
-				URL(u).
-				Query("keyword", web.Var("[$event.target.value]")).
-				MergeQuery(true).
-				EventFunc(actions.UpdateListingDialog).
-				Go()).
-			Attr("@click:clear", web.Plaid().
-				URL(u).
-				Query("keyword", "").
-				MergeQuery(true).
-				EventFunc(actions.UpdateListingDialog).
-				Go())
+		title := msgr.ListingObjectTitle(i18n.T(ctx.R, ModelsI18nModuleKey, b.mb.label))
+		var searchBox h.HTMLComponent
+		if b.mb.layoutConfig == nil || !b.mb.layoutConfig.SearchBoxInvisible {
+			searchBox = VTextField().
+				PrependInnerIcon("search").
+				Placeholder(msgr.Search).
+				HideDetails(true).
+				Value(ctx.R.URL.Query().Get("keyword")).
+				Attr("@keyup.enter", web.Plaid().
+					URL(ctx.R.RequestURI).
+					Query("keyword", web.Var("[$event.target.value]")).
+					MergeQuery(true).
+					EventFunc(actions.UpdateListingDialog).
+					Go()).
+				Attr("@click:clear", web.Plaid().
+					URL(ctx.R.RequestURI).
+					Query("keyword", "").
+					MergeQuery(true).
+					EventFunc(actions.UpdateListingDialog).
+					Go()).
+				Class("ma-0 pa-0 mr-6")
+		}
+		dialogHeadbar = VAppBar(
+			VToolbarTitle("").
+				Children(h.Text(title)),
+			VSpacer(),
+			searchBox,
+			VBtn("").Icon(true).
+				Children(VIcon("close")).
+				Large(true).
+				Attr("@click.stop", CloseListingDialogVarScript),
+		).Color("white").Elevation(0).Dense(true)
 	}
 
 	return VContainer(
-		dialogSearchBox,
+		dialogHeadbar,
 		tabsAndActionsBar,
 		h.Div(
 			VCard(
