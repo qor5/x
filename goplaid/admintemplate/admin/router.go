@@ -1,12 +1,12 @@
 package admin
 
 import (
+	"github.com/goplaid/x/presets"
 	"net/http"
 )
 
-func Router() (mux *http.ServeMux) {
+func SetupRouter(b *presets.Builder) (mux *http.ServeMux) {
 	mux = http.NewServeMux()
-	b := NewConfig()
 	mux.Handle("/", b)
 	return
 }

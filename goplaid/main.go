@@ -23,7 +23,6 @@ var bareBox embed.FS
 var tailwindBox embed.FS
 
 func main() {
-
 	validateFileExists := func(input string) error {
 		dir := filepath.Base(input)
 		_, err := os.Stat(dir)
@@ -40,7 +39,6 @@ func main() {
 	}
 
 	pkg, err := prompt.Run()
-
 	if err != nil {
 		panic(err)
 	}

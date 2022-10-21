@@ -9,12 +9,16 @@ import (
 )
 
 func main() {
-	mux := admin.Router()
+	// Setup project
+	mux := admin.Initialize()
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "9000"
 	}
+
 	fmt.Println("Served at http://localhost:" + port + "/admin")
+
 	http.Handle("/", mux)
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
