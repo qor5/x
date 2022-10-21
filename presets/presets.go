@@ -45,6 +45,7 @@ type Builder struct {
 	profileFunc                           ComponentFunc
 	switchLanguageFunc                    ComponentFunc
 	brandProfileSwitchLanguageDisplayFunc func(brand, profile, switchLanguage h.HTMLComponent) h.HTMLComponent
+	menuTopItems                          []ComponentFunc
 	notificationCountFunc                 func(ctx *web.EventContext) int
 	notificationContentFunc               ComponentFunc
 	brandTitle                            string
@@ -578,14 +579,23 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 	}
 
 	queryName := b.I18n().GetQueryName()
+	msgr := MustGetMessages(ctx.R)
 
 	if len(supportLanguages) == 1 {
 		return h.Template().Children(
 			h.Div(
-				VRow(
-					VIcon("language"),
-					h.Div(h.Text(display.Self.Name(supportLanguages[0]))).Class("text-button"),
-				),
+				VList(
+					VListItem(
+						VListItemIcon(
+							VIcon("translate").Small(true).Class("ml-1"),
+						).Attr("style", "margin-right: 16px"),
+						VListItemContent(
+							VListItemTitle(
+								h.Div(h.Text(fmt.Sprintf("%s%s %s", msgr.Language, msgr.Colon, display.Self.Name(supportLanguages[0])))).Role("button"),
+							),
+						),
+					).Class("pa-0").Dense(true),
+				).Class("pa-0 ma-n4 mt-n6"),
 			).Attr("@click", web.Plaid().Query(queryName, supportLanguages[0].String()).Go()),
 		)
 	}
@@ -610,7 +620,7 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 				VListItem(
 					VListItemContent(
 						VListItemTitle(
-							h.Div(h.Text(display.Self.Name(tag))).Class("text-button"),
+							h.Div(h.Text(display.Self.Name(tag))),
 						),
 					),
 				).Attr("@click", web.Plaid().Query(queryName, tag.String()).Go()),
@@ -624,11 +634,11 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 				VList(
 					VListItem(
 						VListItemIcon(
-							VIcon("language").Small(true).Class("ml-1"),
-						),
+							VIcon("translate").Small(true).Class("ml-1"),
+						).Attr("style", "margin-right: 16px"),
 						VListItemContent(
 							VListItemTitle(
-								h.Text(display.Self.Name(displayLanguage)),
+								h.Text(fmt.Sprintf("%s%s %s", msgr.Language, msgr.Colon, display.Self.Name(displayLanguage))),
 							),
 						),
 						VListItemIcon(
@@ -645,12 +655,18 @@ func (b *Builder) runSwitchLanguageFunc(ctx *web.EventContext) (r h.HTMLComponen
 	)
 }
 
-func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage h.HTMLComponent) (r h.HTMLComponent) {
+func (b *Builder) AddMenuTopItemFunc(v ComponentFunc) (r *Builder) {
+	b.menuTopItems = append(b.menuTopItems, v)
+	return b
+}
+
+func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage h.HTMLComponent, ctx *web.EventContext) (r h.HTMLComponent) {
 	if b.brandProfileSwitchLanguageDisplayFunc != nil {
 		return b.brandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage)
 	}
 
-	return h.Div(
+	var items []h.HTMLComponent
+	items = append(items,
 		h.If(brand != nil,
 			VListItem(
 				VCardText(brand),
@@ -666,6 +682,18 @@ func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switc
 				VCardText(switchLanguage),
 			).Dense(true),
 		),
+	)
+	for _, v := range b.menuTopItems {
+		items = append(items,
+			h.If(v(ctx) != nil,
+				VListItem(
+					VCardText(v(ctx)),
+				),
+			))
+	}
+
+	return h.Div(
+		items...,
 	)
 }
 
@@ -848,7 +876,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
 		pr.Body = VApp(
 			VNavigationDrawer(
-				b.runBrandProfileSwitchLanguageDisplayFunc(b.runBrandFunc(ctx), profile, b.runSwitchLanguageFunc(ctx)),
+				b.runBrandProfileSwitchLanguageDisplayFunc(b.runBrandFunc(ctx), profile, b.runSwitchLanguageFunc(ctx), ctx),
 				VDivider(),
 				b.createMenus(ctx),
 			).App(true).
