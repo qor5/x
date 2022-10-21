@@ -336,18 +336,32 @@ func (b *EditingBuilder) doDelete(ctx *web.EventContext) (r web.EventResponse, e
 		}
 	}
 
+	removeSelectQuery := web.Var(fmt.Sprintf(`{value: %s, add: false, remove: true}`, h.JSONString(id)))
 	if isInDialogFromQuery(ctx) {
+		u := fmt.Sprintf("%s?%s", b.mb.Info().ListingHref(), ctx.Queries().Get(ParamListingQueries))
 		web.AppendVarsScripts(&r,
 			"vars.deleteConfirmation = false",
 			web.Plaid().
-				URL(ctx.R.RequestURI).
+				URL(u).
 				EventFunc(actions.UpdateListingDialog).
-				StringQuery(ctx.R.URL.Query().Get(ParamListingQueries)).
+				MergeQuery(true).
+				Query(ParamSelectedIds, removeSelectQuery).
 				Go(),
 		)
 	} else {
 		// refresh current page
-		r.PushState = web.Location(nil)
+
+		// TODO: response location does not support `valueOp`
+		// r.PushState = web.Location(nil).
+		// 	MergeQuery(true).
+		//  Query(ParamSelectedIds, removeSelectQuery)
+		web.AppendVarsScripts(&r,
+			web.Plaid().
+				PushState(true).
+				MergeQuery(true).
+				Query(ParamSelectedIds, removeSelectQuery).
+				Go(),
+		)
 	}
 	return
 }
