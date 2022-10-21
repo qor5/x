@@ -1,25 +1,31 @@
 package admin
 
 import (
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm/logger"
 	"os"
 
 	"github.com/goplaid/x/goplaid/admintemplate/models"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"gorm.io/gorm"
 )
 
 func ConnectDB() (db *gorm.DB) {
 	var err error
-	db, err = gorm.Open("postgres", os.Getenv("DB_PARAMS"))
+	// Create database connection
+	db, err = gorm.Open(postgres.Open(os.Getenv("DB_PARAMS")))
 	if err != nil {
 		panic(err)
 	}
-	db.LogMode(true)
-	err = db.AutoMigrate(
-		&models.Post{},
-	).Error
+
+	// Set db log level
+	db.Logger = db.Logger.LogMode(logger.Info)
+
+	// Create data table in the database
+	err = db.AutoMigrate(models.Post{})
 	if err != nil {
 		panic(err)
 	}
+
 	return
 }
