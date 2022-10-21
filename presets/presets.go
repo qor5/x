@@ -59,6 +59,7 @@ type Builder struct {
 	assetFunc                             AssetFunc
 	menuGroups                            MenuGroups
 	menuOrder                             []interface{}
+	wrapHandlers                          []func(in http.Handler) (out http.Handler)
 }
 
 type AssetFunc func(ctx *web.EventContext)
@@ -1169,6 +1170,9 @@ func (b *Builder) initMux() {
 
 	b.mux = mux
 }
+func (b *Builder) AddWrapHandler(f func(in http.Handler) (out http.Handler)) {
+	b.wrapHandlers = append(b.wrapHandlers, f)
+}
 
 func (b *Builder) wrap(m *ModelBuilder, pf web.PageFunc) http.Handler {
 	p := b.builder.Page(pf)
@@ -1176,9 +1180,15 @@ func (b *Builder) wrap(m *ModelBuilder, pf web.PageFunc) http.Handler {
 		m.registerDefaultEventFuncs()
 		p.MergeHub(&m.EventsHub)
 	}
-	return b.I18n().EnsureLanguage(
+
+	handlers := b.I18n().EnsureLanguage(
 		p,
 	)
+	for _, wrapHandler := range b.wrapHandlers {
+		handlers = wrapHandler(handlers)
+	}
+
+	return handlers
 }
 
 func (b *Builder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
