@@ -21,9 +21,9 @@ type Messages struct {
 	ListingObjectTitleTemplate                 string
 	DetailingObjectTitleTemplate               string
 	FiltersClear                               string
-	FiltersDone                                string
-	Filters                                    string
-	Filter                                     string
+	FiltersAdd                                 string
+	FilterApply                                string
+	FilterByTemplate                           string
 	FiltersDateInTheLast                       string
 	FiltersDateEquals                          string
 	FiltersDateBetween                         string
@@ -80,6 +80,11 @@ func (msgr *Messages) BulkActionSelectedIdsProcessNotice(ids string) string {
 		Replace(msgr.BulkActionSelectedIdsProcessNoticeTemplate)
 }
 
+func (msgr *Messages) FilterBy(filter string) string {
+	return strings.NewReplacer("{filter}", filter).
+		Replace(msgr.FilterByTemplate)
+}
+
 var Messages_en_US = &Messages{
 	SuccessfullyUpdated:            "Successfully Updated",
 	Search:                         "Search",
@@ -96,10 +101,10 @@ var Messages_en_US = &Messages{
 	EditingObjectTitleTemplate:     "Editing {modelName} {id}",
 	ListingObjectTitleTemplate:     "Listing {modelName}",
 	DetailingObjectTitleTemplate:   "{modelName} {id}",
-	FiltersClear:                   "Clear",
-	FiltersDone:                    "Done",
-	Filters:                        "Filters",
-	Filter:                         "Filter",
+	FiltersClear:                   "Clear Filters",
+	FiltersAdd:                     "Add Filters",
+	FilterApply:                    "Apply",
+	FilterByTemplate:               "Filter by {filter}",
 	FiltersDateInTheLast:           "is in the last",
 	FiltersDateEquals:              "is equal to",
 	FiltersDateBetween:             "is between",
@@ -129,11 +134,6 @@ var Messages_en_US = &Messages{
 }
 
 var Messages_zh_CN = &Messages{
-	DeleteConfirmationTextTemplate: "你确定你要删除这个对象吗，对象ID: {id}?",
-	CreatingObjectTitleTemplate:    "新建{modelName}",
-	EditingObjectTitleTemplate:     "编辑{modelName} {id}",
-	ListingObjectTitleTemplate:     "{modelName}列表",
-	DetailingObjectTitleTemplate:   "{modelName} {id}",
 	SuccessfullyUpdated:            "成功更新了",
 	Search:                         "搜索",
 	New:                            "新建",
@@ -144,10 +144,15 @@ var Messages_zh_CN = &Messages{
 	OK:                             "确定",
 	Cancel:                         "取消",
 	Create:                         "创建",
-	Filters:                        "筛选",
-	Filter:                         "筛选",
-	FiltersClear:                   "清除",
-	FiltersDone:                    "确定",
+	DeleteConfirmationTextTemplate: "你确定你要删除这个对象吗，对象ID: {id}?",
+	CreatingObjectTitleTemplate:    "新建{modelName}",
+	EditingObjectTitleTemplate:     "编辑{modelName} {id}",
+	ListingObjectTitleTemplate:     "{modelName}列表",
+	DetailingObjectTitleTemplate:   "{modelName} {id}",
+	FiltersClear:                   "清空筛选器",
+	FiltersAdd:                     "添加筛选器",
+	FilterApply:                    "应用",
+	FilterByTemplate:               "按{filter}筛选",
 	FiltersDateInTheLast:           "过去",
 	FiltersDateEquals:              "等于",
 	FiltersDateBetween:             "之间",
@@ -158,6 +163,7 @@ var Messages_zh_CN = &Messages{
 	FiltersDateDays:                "天",
 	FiltersDateMonths:              "月",
 	FiltersDateAnd:                 "和",
+	FiltersDateTo:                  "至",
 	FiltersNumberEquals:            "等于",
 	FiltersNumberBetween:           "之间",
 	FiltersNumberGreaterThan:       "大于",

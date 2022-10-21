@@ -16,8 +16,9 @@ import (
 )
 
 type VXFilterBuilder struct {
-	value FilterData
-	tag   *h.HTMLTagBuilder
+	value    FilterData
+	tag      *h.HTMLTagBuilder
+	onChange interface{}
 }
 
 func VXFilter(value FilterData) (r *VXFilterBuilder) {
@@ -25,20 +26,6 @@ func VXFilter(value FilterData) (r *VXFilterBuilder) {
 		value: value,
 		tag:   h.Tag("vx-filter"),
 	}
-
-	var visibleFilterData FilterData
-	for _, v := range value {
-		if !v.Invisible {
-			visibleFilterData = append(visibleFilterData, v)
-		}
-	}
-
-	//	$plaid().stringLocation(qs).mergeQueryWithoutParams(keysInFilterData).url(window.location.href).pushState(true).go()
-	r.Value(visibleFilterData).Attr("@change", web.GET().
-		StringQuery(web.Var("$event.encodedFilterData")).
-		ClearMergeQuery(web.Var("$event.filterKeys")).
-		PushState(true).
-		Go())
 
 	return
 }
@@ -58,7 +45,30 @@ func (b *VXFilterBuilder) Translations(v FilterTranslations) (r *VXFilterBuilder
 	return b
 }
 
+func (b *VXFilterBuilder) OnChange(v interface{}) (r *VXFilterBuilder) {
+	b.onChange = v
+	return b
+}
+
 func (b *VXFilterBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	var visibleFilterData FilterData
+	for _, v := range b.value {
+		if !v.Invisible {
+			visibleFilterData = append(visibleFilterData, v)
+		}
+	}
+
+	if b.onChange == nil {
+		//	$plaid().stringLocation(qs).mergeQueryWithoutParams(keysInFilterData).url(window.location.href).pushState(true).go()
+		b.onChange = web.GET().
+			StringQuery(web.Var("$event.encodedFilterData")).
+			ClearMergeQuery(web.Var("$event.filterKeys")).
+			PushState(true).
+			Go()
+	}
+
+	b = b.Value(visibleFilterData).Attr("@change", b.onChange)
+
 	return b.tag.MarshalHTML(ctx)
 }
 
@@ -89,11 +99,11 @@ func (b *VXFilterBuilder) MarshalHTML(ctx context.Context) (r []byte, err error)
 		},
 */
 type FilterTranslations struct {
-	Clear   string `json:"clear,omitempty"`
-	Done    string `json:"done,omitempty"`
-	Filters string `json:"filters,omitempty"`
-	Filter  string `json:"filter,omitempty"`
-	Date    struct {
+	Clear string `json:"clear,omitempty"`
+	Add   string `json:"add,omitempty"`
+	Apply string `json:"apply,omitempty"`
+
+	Date struct {
 		To string `json:"to,omitempty"`
 	} `json:"date,omitempty"`
 
@@ -114,6 +124,10 @@ type FilterTranslations struct {
 		In    string `json:"in,omitempty"`
 		NotIn string `json:"notIn,omitempty"`
 	} `json:"multipleSelect,omitempty"`
+}
+
+type FilterIndependentTranslations struct {
+	FilterBy string `json:"filterBy,omitempty"`
 }
 
 type FilterItemType string
@@ -157,20 +171,22 @@ type FilterLinkageSelectData struct {
 }
 
 type FilterItem struct {
-	Key                    string                  `json:"key,omitempty"`
-	Label                  string                  `json:"label,omitempty"`
-	ItemType               FilterItemType          `json:"itemType,omitempty"`
-	Selected               bool                    `json:"selected,omitempty"`
-	Modifier               FilterItemModifier      `json:"modifier,omitempty"`
-	ValueIs                string                  `json:"valueIs,omitempty"`
-	ValuesAre              []string                `json:"valuesAre,omitempty"`
-	ValueFrom              string                  `json:"valueFrom,omitempty"`
-	ValueTo                string                  `json:"valueTo,omitempty"`
-	SQLCondition           string                  `json:"-"`
-	Options                []*SelectItem           `json:"options,omitempty"`
-	LinkageSelectData      FilterLinkageSelectData `json:"linkageSelectData,omitempty"`
-	Invisible              bool                    `json:"invisible,omitempty"`
-	AutocompleteDataSource *AutocompleteDataSource `json:"autocompleteDataSource,omitempty"`
+	Key                    string                        `json:"key,omitempty"`
+	Label                  string                        `json:"label,omitempty"`
+	Folded                 bool                          `json:"folded,omitempty"`
+	ItemType               FilterItemType                `json:"itemType,omitempty"`
+	Selected               bool                          `json:"selected,omitempty"`
+	Modifier               FilterItemModifier            `json:"modifier,omitempty"`
+	ValueIs                string                        `json:"valueIs,omitempty"`
+	ValuesAre              []string                      `json:"valuesAre,omitempty"`
+	ValueFrom              string                        `json:"valueFrom,omitempty"`
+	ValueTo                string                        `json:"valueTo,omitempty"`
+	SQLCondition           string                        `json:"-"`
+	Options                []*SelectItem                 `json:"options,omitempty"`
+	LinkageSelectData      FilterLinkageSelectData       `json:"linkageSelectData,omitempty"`
+	Invisible              bool                          `json:"invisible,omitempty"`
+	AutocompleteDataSource *AutocompleteDataSource       `json:"autocompleteDataSource,omitempty"`
+	Translations           FilterIndependentTranslations `json:"translations,omitempty"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {
@@ -327,8 +343,8 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 				it.Selected = true
 				it.Modifier = ModifierBetween
 				if it.ItemType == ItemTypeDate {
-					it.ValueFrom = unixToDatetimeWithFormat(mv["gte"], "2006-01-02 15:04")
-					it.ValueTo = unixToDatetimeWithFormat(mv["lt"], "2006-01-02 15:04")
+					it.ValueFrom = mv["gte"]
+					it.ValueTo = mv["lt"]
 				}
 
 				if it.ItemType == ItemTypeNumber {
@@ -365,7 +381,13 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 					}
 
 					if it.ItemType == ItemTypeDate {
-						it.ValueIs = unixToDate(v)
+						it.ValueIs = v
+						if mod == "gte" {
+							it.ValueFrom = mv["gte"]
+						}
+						if mod == "lt" {
+							it.ValueTo = mv["lt"]
+						}
 						continue
 					}
 
@@ -381,9 +403,11 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 						}
 						if mod == "gt" {
 							it.Modifier = ModifierGreaterThan
+							it.ValueFrom = v
 						}
 						if mod == "lt" {
 							it.Modifier = ModifierLessThan
+							it.ValueTo = v
 						}
 						continue
 					}

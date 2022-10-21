@@ -16,3 +16,8 @@ func (b *VBtnBuilder) OnClick(eventFuncId string) (r *VBtnBuilder) {
 	b.tag.Attr("@click", web.Plaid().EventFunc(eventFuncId).Go())
 	return b
 }
+
+func (b *VBtnBuilder) AttrIf(key, value interface{}, add bool) (r *VBtnBuilder) {
+	b.tag.AttrIf(key, value, add)
+	return b
+}

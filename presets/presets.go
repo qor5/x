@@ -124,6 +124,10 @@ func (b *Builder) URIPrefix(v string) (r *Builder) {
 	return b
 }
 
+func (b *Builder) GetURIPrefix() string {
+	return b.prefix
+}
+
 func (b *Builder) LayoutFunc(v func(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc)) (r *Builder) {
 	b.layoutFunc = v
 	return b
@@ -323,11 +327,13 @@ func (b *Builder) removeMenuGroupInOrder(mgb *MenuGroupBuilder) {
 // so if the Slug name is customized, item must be the Slug name
 // example:
 // b.MenuOrder(
-// 	b.MenuGroup("Product Management").SubItems(
-// 		"products",
-// 		"Variant",
-// 	),
-// 	"customized-uri",
+//
+//	b.MenuGroup("Product Management").SubItems(
+//		"products",
+//		"Variant",
+//	),
+//	"customized-uri",
+//
 // )
 func (b *Builder) MenuOrder(items ...interface{}) {
 	for _, item := range items {
@@ -386,11 +392,16 @@ func defaultMenuIcon(mLabel string) string {
 	return "widgets"
 }
 
+const menuFontWeight = "500"
+const subMenuFontWeight = "400"
+
 func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (r h.HTMLComponent) {
 	menuIcon := m.menuIcon
+	fontWeight := subMenuFontWeight
 	if isSub {
 		// menuIcon = ""
 	} else {
+		fontWeight = menuFontWeight
 		if menuIcon == "" {
 			menuIcon = defaultMenuIcon(m.label)
 		}
@@ -403,11 +414,11 @@ func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (
 	item := VListItem(
 		VListItemAction(
 			VIcon(menuIcon),
-		),
+		).Attr("style", "margin-right: 16px"),
 		VListItemContent(
 			VListItemTitle(
 				h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, m.label)),
-			),
+			).Attr("style", fmt.Sprintf("white-space: normal; font-weight: %s;font-size: 14px;", fontWeight)),
 		),
 	)
 	if strings.HasPrefix(href, "/") {
@@ -455,10 +466,18 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 			if ver.IsAllowed() != nil {
 				continue
 			}
+			groupIcon := v.icon
+			if groupIcon == "" {
+				groupIcon = defaultMenuIcon(v.name)
+			}
 			var subMenus = []h.HTMLComponent{
 				VListItem(
+					VListItemAction(
+						VIcon(groupIcon),
+					).Attr("style", "margin-right: 16px;"),
 					VListItemContent(
-						VListItemTitle(h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, v.name))),
+						VListItemTitle(h.Text(i18n.T(ctx.R, ModelsI18nModuleKey, v.name))).
+							Attr("style", fmt.Sprintf("white-space: normal; font-weight: %s;font-size: 14px;", menuFontWeight)),
 					),
 				).Slot("activator").Class("pa-0"),
 			}
@@ -491,13 +510,9 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 			if subCount == 0 {
 				continue
 			}
-			groupIcon := v.icon
-			if groupIcon == "" {
-				groupIcon = defaultMenuIcon(v.name)
-			}
+
 			menus = append(menus, VListGroup(
 				subMenus...).
-				PrependIcon(groupIcon).
 				Value(hasActiveMenuItem),
 			)
 		case string:
@@ -537,7 +552,9 @@ func (b *Builder) createMenus(ctx *web.EventContext) (r h.HTMLComponent) {
 		menus = append(menus, b.menuItem(ctx, m, false))
 	}
 
-	r = VList(menus...).Class("primary--text")
+	r = h.Div(
+		VList(menus...).Class("primary--text").Dense(true),
+	)
 	return
 }
 
@@ -633,7 +650,7 @@ func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switc
 		return b.brandProfileSwitchLanguageDisplayFunc(brand, profile, switchLanguage)
 	}
 
-	return VCard(
+	return h.Div(
 		h.If(brand != nil,
 			VListItem(
 				VCardText(brand),
@@ -649,7 +666,7 @@ func (b *Builder) runBrandProfileSwitchLanguageDisplayFunc(brand, profile, switc
 				VCardText(switchLanguage),
 			).Dense(true),
 		),
-	).Elevation(1).Tile(true)
+	)
 }
 
 func MustGetMessages(r *http.Request) *Messages {
@@ -662,9 +679,11 @@ const DialogPortalName = "presets_DialogPortalName"
 const dialogContentPortalName = "presets_DialogContentPortalName"
 const NotificationCenterPortalName = "notification-center"
 const defaultConfirmationDialogPortalName = "presets_confirmationDialogPortalName"
+const listingDialogPortalName = "presets_listingDialogPortalName"
 
 const closeRightDrawerVarScript = "vars.presetsRightDrawer = false"
 const closeDialogVarScript = "vars.presetsDialog = false"
+const CloseListingDialogVarScript = "vars.presetsListingDialog = false"
 
 func (b *Builder) overlay(overlayType string, r *web.EventResponse, comp h.HTMLComponent, width string) {
 	if overlayType == actions.Dialog {
@@ -799,39 +818,7 @@ func (b *Builder) openConfirmationDialog(ctx *web.EventContext) (er web.EventRes
 
 func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.PageFunc) {
 	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
-
-		ctx.Injector.HeadHTML(strings.Replace(`
-			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
-			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
-			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-			<link rel="stylesheet" href="{{prefix}}/assets/main.css">
-			<script src='{{prefix}}/assets/vue.js'></script>
-			<style>
-				[v-cloak] {
-					display: none;
-				}
-			</style>
-		`, "{{prefix}}", b.prefix, -1))
-
-		b.InjectExtraAssets(ctx)
-
-		if len(os.Getenv("DEV_PRESETS")) > 0 {
-			ctx.Injector.TailHTML(`
-<script src='http://localhost:3080/js/chunk-vendors.js'></script>
-<script src='http://localhost:3080/js/app.js'></script>
-<script src='http://localhost:3100/js/chunk-vendors.js'></script>
-<script src='http://localhost:3100/js/app.js'></script>
-			`)
-
-		} else {
-			ctx.Injector.TailHTML(strings.Replace(`
-			<script src='{{prefix}}/assets/main.js'></script>
-			`, "{{prefix}}", b.prefix, -1))
-		}
-
-		if b.assetFunc != nil {
-			b.assetFunc(ctx)
-		}
+		b.InjectAssets(ctx)
 
 		var innerPr web.PageResponse
 		innerPr, err = in(ctx)
@@ -862,6 +849,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 		pr.Body = VApp(
 			VNavigationDrawer(
 				b.runBrandProfileSwitchLanguageDisplayFunc(b.runBrandFunc(ctx), profile, b.runSwitchLanguageFunc(ctx)),
+				VDivider(),
 				b.createMenus(ctx),
 			).App(true).
 				// Clipped(true).
@@ -910,6 +898,7 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 			web.Portal().Name(DialogPortalName),
 			web.Portal().Name(DeleteConfirmPortalName),
 			web.Portal().Name(defaultConfirmationDialogPortalName),
+			web.Portal().Name(listingDialogPortalName),
 
 			VProgressLinear().
 				Attr(":active", "isFetching").
@@ -928,9 +917,88 @@ func (b *Builder) defaultLayout(in web.PageFunc, cfg *LayoutConfig) (out web.Pag
 				innerPr.Body.(h.HTMLComponent),
 			),
 		).Id("vt-app").
-			Attr(web.InitContextVars, `{presetsRightDrawer: false, presetsDialog: false, presetsMessage: {show: false, color: "success", message: ""}}`)
+			Attr(web.InitContextVars, `{presetsRightDrawer: false, presetsDialog: false, presetsListingDialog: false, presetsMessage: {show: false, color: "success", message: ""}}`)
 
 		return
+	}
+}
+
+// for pages outside the default presets layout
+func (b *Builder) PlainLayout(in web.PageFunc) (out web.PageFunc) {
+	return func(ctx *web.EventContext) (pr web.PageResponse, err error) {
+		b.InjectAssets(ctx)
+
+		var innerPr web.PageResponse
+		innerPr, err = in(ctx)
+		if err == perm.PermissionDenied {
+			pr.Body = h.Text(perm.PermissionDenied.Error())
+			return pr, nil
+		}
+		if err != nil {
+			panic(err)
+		}
+
+		pr.PageTitle = fmt.Sprintf("%s - %s", innerPr.PageTitle, i18n.T(ctx.R, ModelsI18nModuleKey, b.brandTitle))
+		pr.Body = VApp(
+			web.Portal().Name(DialogPortalName),
+			web.Portal().Name(DeleteConfirmPortalName),
+			web.Portal().Name(defaultConfirmationDialogPortalName),
+
+			VProgressLinear().
+				Attr(":active", "isFetching").
+				Attr("style", "position: fixed; z-index: 99").
+				Indeterminate(true).
+				Height(2).
+				Color(b.progressBarColor),
+			h.Template(
+				VSnackbar(h.Text("{{vars.presetsMessage.message}}")).
+					Attr("v-model", "vars.presetsMessage.show").
+					Attr(":color", "vars.presetsMessage.color").
+					Timeout(2000).
+					Top(true),
+			).Attr("v-if", "vars.presetsMessage"),
+			VMain(
+				innerPr.Body.(h.HTMLComponent),
+			),
+		).Id("vt-app").
+			Attr(web.InitContextVars, `{presetsDialog: false, presetsMessage: {show: false, color: "success", message: ""}}`)
+
+		return
+	}
+}
+
+func (b *Builder) InjectAssets(ctx *web.EventContext) {
+	ctx.Injector.HeadHTML(strings.Replace(`
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
+			<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+			<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+			<link rel="stylesheet" href="{{prefix}}/assets/main.css">
+			<script src='{{prefix}}/assets/vue.js'></script>
+			<style>
+				[v-cloak] {
+					display: none;
+				}
+			</style>
+		`, "{{prefix}}", b.prefix, -1))
+
+	b.InjectExtraAssets(ctx)
+
+	if len(os.Getenv("DEV_PRESETS")) > 0 {
+		ctx.Injector.TailHTML(`
+<script src='http://localhost:3080/js/chunk-vendors.js'></script>
+<script src='http://localhost:3080/js/app.js'></script>
+<script src='http://localhost:3100/js/chunk-vendors.js'></script>
+<script src='http://localhost:3100/js/app.js'></script>
+			`)
+
+	} else {
+		ctx.Injector.TailHTML(strings.Replace(`
+			<script src='{{prefix}}/assets/main.js'></script>
+			`, "{{prefix}}", b.prefix, -1))
+	}
+
+	if b.assetFunc != nil {
+		b.assetFunc(ctx)
 	}
 }
 

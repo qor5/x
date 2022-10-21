@@ -2,6 +2,7 @@ package vuetifyx
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/goplaid/web"
 	h "github.com/theplant/htmlgo"
@@ -28,8 +29,11 @@ type TimePickerProps struct {
 	NoTitle    bool   `json:"no-title"`
 }
 
-func (b *VXDateTimePickerBuilder) Value(v string) (r *VXDateTimePickerBuilder) {
-	b.tag.Attr(":value", h.JSONString(v))
+func (b *VXDateTimePickerBuilder) Value(unixTimestamp int64) (r *VXDateTimePickerBuilder) {
+	if unixTimestamp <= 0 {
+		return b
+	}
+	b.tag.Attr(":value", h.JSONString(unixTimestamp))
 	return b
 }
 
@@ -87,6 +91,11 @@ func (b *VXDateTimePickerBuilder) SetAttr(k string, v interface{}) {
 
 func (b *VXDateTimePickerBuilder) Attr(vs ...interface{}) (r *VXDateTimePickerBuilder) {
 	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VXDateTimePickerBuilder) HideDetails(v bool) (r *VXDateTimePickerBuilder) {
+	b.tag.Attr(":hide-details", fmt.Sprint(v))
 	return b
 }
 

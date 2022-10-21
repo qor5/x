@@ -22,6 +22,7 @@ import * as constants from './Constants';
 import DateTimePicker from './DateTimePicker.vue';
 import { encodeFilterData, filterData } from './FilterData';
 import LinkageSelect from './LinkageSelect.vue';
+import { format } from 'date-fns';
 
 
 
@@ -102,12 +103,14 @@ export const DateItem = Vue.extend({
 					on={{input: this.setDateFrom}}
 					key={modifier + 'from'}
 					visible={this.datePickerVisible}
+					hideDetails={true}
 				/>
 				<span>{t.to}</span>
 				<datePicker
 					value={this.valueTo}
 					on={{input: this.setDateTo}}
 					key={modifier + 'to'}
+					hideDetails={true}
 				/>
 			</div>
 		);
@@ -347,7 +350,7 @@ export const SelectItem = Vue.extend({
 
 	data() {
 		return {
-			valueIs: this.$props.value.valueIs || (this.$props.value.options && this.$props.value.options.length > 0 && this.$props.value.options[0].value),
+			valueIs: this.$props.value.valueIs,
 		};
 	},
 
@@ -561,9 +564,14 @@ interface SelectOption {
 	value: string;
 }
 
+interface IndependentTranslations {
+	filterBy: string;
+}
+
 interface FilterItem {
 	key: string;
 	label: string;
+	folded: boolean;
 	itemType: string;
 	modifier: string;
 	valueIs: string;
@@ -574,6 +582,7 @@ interface FilterItem {
 	inTheLastValue?: string;
 	inTheLastUnit?: string;
 	options?: SelectOption[];
+	translations?: IndependentTranslations;
 }
 
 function getSelectedIndexes(value: FilterItem[]): number[] {
@@ -586,13 +595,6 @@ function getSelectedIndexes(value: FilterItem[]): number[] {
 }
 
 function initInternalValue(items: FilterItem[]): FilterItem[] {
-	for (const item of items) {
-		if (item.itemType === 'SelectItem') {
-			if (!item.valueIs && item.options) {
-				item.valueIs = item.options[0].value;
-			}
-		}
-	}
 	return items;
 }
 
@@ -640,10 +642,9 @@ export const Filter = Vue.extend({
 						in: 'in',
 						notIn: 'not in',
 					},
-					clear: 'Clear',
-					filters: 'Filters',
-					filter: 'Filter',
-					done: 'Done',
+					clear: 'Clear Filters',
+					add: 'Add Filters',
+					apply: 'Apply',
 				};
 			},
 		} as any,
@@ -678,11 +679,23 @@ export const Filter = Vue.extend({
 		},
 
 
-		clear(e: any) {
+		clearAll(e: any) {
 			this.internalValue.map((op: any) => {
 				op.selected = false;
 			});
 			this.selectedIndexs = getSelectedIndexes(this.internalValue);
+			this.clickDone(e);
+		},
+
+		clear(e: any, op: FilterItem) {
+			if (!op.selected) {
+				return
+			}
+
+			op.selected = false
+			this.selectedIndexs = getSelectedIndexes(this.internalValue);
+			this.clickDone(e);
+			e.stopPropagation()
 		},
 
 		togglePopup() {
@@ -718,6 +731,222 @@ export const Filter = Vue.extend({
 				this.internalValue[i].selected = true;
 			};
 		},
+
+		filterButton(op: FilterItem, on: any, isFoldedItem: boolean) {
+			let showValue = '';
+			if (op.selected) {
+				switch (op.itemType) {
+					case 'DateItem': {
+						const mod = op.modifier || constants.ModifierBetween;
+
+						if (mod === constants.ModifierBetween) {
+							let from = null
+							let to  = null
+							if (op.valueFrom) {
+                                from = format(new Date(+op.valueFrom * 1000), 'yyyy-MM-dd HH:mm')
+							}
+							if (op.valueTo) {
+                                to = format(new Date(+op.valueTo * 1000), 'yyyy-MM-dd HH:mm')
+							}
+							if (from) {
+								if (to) {
+									showValue = `${from} - ${to}`
+								} else {
+									showValue = ` >= ${from}`
+								}
+							} else {
+								if (to) {
+									showValue = ` < ${to}`
+								}
+							}
+						}
+						break
+					}
+					case 'NumberItem': {
+						const mod = op.modifier || 'equals';
+
+						if (mod === 'equals') {
+							const floatValue = parseFloat(op.valueIs);
+							if (!isNaN(floatValue)) {
+								showValue += floatValue
+							}
+						}
+
+						if (mod === 'between') {
+							const floatFrom = parseFloat(op.valueFrom || '');
+							const floatTo = parseFloat(op.valueTo || '');
+							const fromValid = !isNaN(floatFrom)
+							const toValid = !isNaN(floatTo)
+							if (fromValid) {
+								if (toValid) {
+									showValue = `${op.valueFrom} - ${op.valueTo}`
+								} else {
+									showValue = ` >= ${op.valueFrom}`
+								}
+							} else {
+								if (toValid) {
+									showValue = ` <= ${op.valueTo}`
+								}
+							}
+						}
+
+						if (mod === 'greaterThan') {
+							const floatValue = parseFloat(op.valueIs);
+							if (!isNaN(floatValue)) {
+								showValue += ' > ' +  op.valueFrom
+							}
+						}
+
+						if (mod === 'lessThan') {
+							const floatValue = parseFloat(op.valueIs);
+							if (!isNaN(floatValue)) {
+								showValue += ' < ' +  op.valueTo
+							}
+						}
+						break
+					}
+					case 'StringItem': {
+						const mod = op.modifier || 'equals';
+						if (mod === 'equals' && op.valueIs) {
+							showValue = op.valueIs
+						}
+
+						if (mod === 'contains' && op.valueIs) {
+							showValue = ' ~ ' + op.valueIs
+						}
+						break
+					}
+					case 'SelectItem': {
+						const mod = op.modifier || 'equals';
+						if (mod === 'equals' && op.valueIs) {
+							showValue = op.options!.find(o => o.value === op.valueIs)!.text
+						}
+						break
+					}
+					case 'MultipleSelectItem': {
+						const mod = op.modifier || 'in';
+						const textsAre = op.options!.filter(o => op.valuesAre.includes(o.value)).map(o => o.text)
+						if (mod === 'in' && op.valuesAre && op.valuesAre.length > 0) {
+							showValue = ' in ' + '[ ' + textsAre.join(', ') + ' ]'
+						}
+						if (mod === 'notIn' && op.valuesAre && op.valuesAre.length > 0) {
+							showValue = ' not in ' + '[ ' + textsAre.join(', ') + ' ]'
+						}
+						break
+					}
+					case 'LinkageSelectItem': {
+						const mod = op.modifier || 'equals';
+						const textsAre = op.options!.filter(o => op.valuesAre.includes(o.value)).map(o => o.text)
+						if (mod === 'equals' && op.valuesAre && op.valuesAre.length > 0) {
+							showValue = textsAre.join(', ')
+						}
+						break
+					}
+					default:
+						throw new Error(`itemType '${op.itemType}' not supported`);
+				}
+			}
+
+			const showValueCopy = showValue
+			showValue = ""
+			let showLen = 0
+			for (let i = 0; i < showValueCopy.length; i++) {
+				showValue += showValueCopy.charAt(i)
+				if (showValueCopy.charCodeAt(i) > 127) {
+					showLen += 2
+				} else {
+					showLen++
+				}
+				if (showLen > 66) {
+					showValue += '...'
+					break
+				}
+			}
+
+			const body = (
+				<span>
+					<vicon
+						left={true}
+						on={{click: (e: any) => this.clear(e, op)}}
+					>
+						{op.selected ? 'cancel' : 'add_circle'}
+					</vicon>
+					{/*`overflow hidden` cases vertical align issue*/}
+					{/*<span class={'d-inline-block text-truncate'} style={'max-width: 500px;'}>*/}
+					<span>
+						{op.label}
+						{op.selected ?
+							<span> | <span class={'primary--text'}>{showValue}</span></span>
+							: null
+						}
+					</span>
+				</span>
+			)
+
+			if (isFoldedItem) {
+				return (
+					<div on={on} class={'my-1 pa-1'} style={'cursor: pointer; user-select: none;'}>{body}</div>
+				)
+			}
+			return (
+				<vchip
+					on={on}
+					outlined={true}
+					class={`mr-2 my-1 ${op.selected ? '' : 'grey--text text--darken-1'}`}
+					style={{borderStyle: op.selected ? 'solid' : 'dashed'}}
+				>{body}</vchip>
+			)
+		},
+
+		filtersGetFunc(f: (item: FilterItem) => boolean, isFoldedItem: boolean) {
+			return (itemTypes: any, trans: any) => {
+				return this.internalValue.map((op: FilterItem, i: number) => {
+					if (!f(op)) {
+						return null
+					}
+
+					if (!itemTypes[op.itemType]) {
+						throw new Error(`itemType '${op.itemType}' not supported`);
+					}
+
+					const itemComp = itemTypes[op.itemType];
+
+					const comp = <itemComp
+						translations={trans[op.itemType]}
+						value={op}
+						on={{input: this.newUpdateFilterItem(i)}}
+					/>;
+
+					return (
+						<vmenu
+							scopedSlots={{
+								activator: ({on}: any) => {
+									return this.filterButton(op, on, isFoldedItem)
+								}
+							}}
+							offsetY={true}
+							closeOnContentClick={false}
+							rounded={'md'}
+						>
+							<div class={'pa-3 white'}>
+								<div>{op.translations?.filterBy}</div>
+								{comp}
+								<vbtn
+									class={'mt-3'}
+									color='primary'
+									depressed={true}
+									on={{click: this.clickDone}}
+								>
+									{this.$props.translations.apply}
+								</vbtn>
+							</div>
+						</vmenu>
+					);
+				}).filter(v => {
+					return v != null
+				});
+			}
+		},
 	},
 
 	render() {
@@ -741,81 +970,51 @@ export const Filter = Vue.extend({
 			LinkageSelectItem: {},
 		};
 
-		const body = this.internalValue.map((op: FilterItem, i: number) => {
-			if (!itemTypes[op.itemType]) {
-				throw new Error(`itemType '${op.itemType}' not supported`);
-			}
+		const fixedFilters = this.filtersGetFunc(item => !item.folded, false)(itemTypes, trans)
+		const otherSelectedFilters = this.filtersGetFunc(item => item.folded && !!item.selected, false)(itemTypes, trans)
+		const foldedFilters = this.filtersGetFunc(item => item.folded && !item.selected, true)(itemTypes, trans)
 
-			const itemComp = itemTypes[op.itemType];
-
-			const comp = <itemComp
-				translations={trans[op.itemType]}
-				value={op}
-				on={{input: this.newUpdateFilterItem(i)}}
-			/>;
-
-			return (
-				<vexpPanel
-					value={op}
-					key={op.key}
-				>
-					<vexpPanelHeader ripple={true}>
-						<vcheckbox
-							hideDetails={true}
-							inputValue={this.selectedIndexs.includes(i)}
-							label={op.label} class='ma-0'></vcheckbox>
-					</vexpPanelHeader>
-					<vexpPanelContent eager={false}>
-						{comp}
-					</vexpPanelContent>
-				</vexpPanel>
-			);
-		});
 		return (
-			<vmenu
-				props={{value: this.visible}} scopedSlots={{
-				activator: ({on}: any) => {
-					return (<vbtn on={on} depressed>
-						<vicon>filter_list</vicon>
-						<span class='px-2'>{t.filter}</span>
-						{this.filterCount()}
-					</vbtn>);
+            <div class={'d-flex flex-grow-1'}>
+				<div>
+					{fixedFilters}
+					{otherSelectedFilters}
+				</div>
+				<vspacer/>
+				<vbtn
+					on={{click: this.clearAll}}
+					plain={true}
+					small={true}
+					disabled={this.internalValue.findIndex(item => item.selected) < 0}
+					class={'my-1'}
+				>
+					<vicon small={true}>close</vicon> {t.clear}
+				</vbtn>
+				{foldedFilters.length > 0 ?
+					<vmenu
+						scopedSlots={{
+							activator: ({on}: any) => {
+								return <vbtn
+									on={on}
+									plain={true}
+									small={true}
+									color={'primary'}
+									class={'my-1'}
+								>
+									<vicon small={true}>filter_alt</vicon> {t.add}
+								</vbtn>
+							}
+						}}
+						offsetY={true}
+						closeOnContentClick={false}
+						rounded={'md'}
+					>
+						<div class={'pa-2 white'}>{foldedFilters}</div>
+					</vmenu>
+					: null
 				}
-			}}
-				offsetY={true}
-				allowOverflow={true}
-				// absolute={true}
-				minWidth='400px'
-				maxWidth='400px'
-				closeOnContentClick={false}
-				on={
-					{
-						input: (value: any) => {
-							this.togglePopup();
-						},
-					}
-				}
-				zIndex='2'
-			>
-				<vtoolbar class='pb-1' color='grey lighten-5' flat={true}>
-					<vbtn on={{click: this.clear}} depressed={true}>{t.clear}</vbtn>
-					<vspacer/>
-					<vtoolbarTitle class=''>
-						{t.filters}
-					</vtoolbarTitle>
-					<vspacer/>
-					<vbtn color='primary' depressed={true} on={{click: this.clickDone}}>
-						{t.done}
-					</vbtn>
-				</vtoolbar>
-				<vexpPanels
-					on={{change: this.onPanelExpand}}
-					focusable={true}
-					accordion={true}
-					multiple={true}
-					value={this.selectedIndexs}
-				>{body}</vexpPanels>
-			</vmenu>
+
+            </div>
 		);
 	},
 });

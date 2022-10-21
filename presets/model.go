@@ -81,6 +81,9 @@ func (mb *ModelBuilder) registerDefaultEventFuncs() {
 	mb.RegisterEventFunc(actions.Action, mb.detailing.formDrawerAction)
 	mb.RegisterEventFunc(actions.DoAction, mb.detailing.doAction)
 	mb.RegisterEventFunc(actions.DetailingDrawer, mb.detailing.showInDrawer)
+	mb.RegisterEventFunc(actions.ReloadList, mb.listing.reloadList)
+	mb.RegisterEventFunc(actions.OpenListingDialog, mb.listing.openListingDialog)
+	mb.RegisterEventFunc(actions.UpdateListingDialog, mb.listing.updateListingDialog)
 }
 
 func (mb *ModelBuilder) NewModel() (r interface{}) {
@@ -92,7 +95,11 @@ func (mb *ModelBuilder) NewModelSlice() (r interface{}) {
 }
 
 func (mb *ModelBuilder) newListing() (lb *ListingBuilder) {
-	mb.listing = &ListingBuilder{mb: mb, FieldsBuilder: *mb.p.listFieldDefaults.InspectFields(mb.model)}
+	mb.listing = &ListingBuilder{
+		mb:            mb,
+		FieldsBuilder: *mb.p.listFieldDefaults.InspectFields(mb.model),
+		dialogWidth:   "1200px",
+	}
 	if mb.p.dataOperator != nil {
 		mb.listing.SearchFunc(mb.p.dataOperator.Search)
 	}
