@@ -1241,7 +1241,8 @@ func (b *ListingBuilder) getTableComponents(
 		Selectable(haveCheckboxes).
 		SelectionParamName(ParamSelectedIds).
 		SelectedCountLabel(msgr.ListingSelectedCountNotice).
-		SelectableColumnsBtn(selectColumnsBtn)
+		SelectableColumnsBtn(selectColumnsBtn).
+		ClearSelectionLabel(msgr.ListingClearSelection)
 	if inDialog {
 		sDataTable.OnSelectAllFunc(func(idsOfPage []string, ctx *web.EventContext) string {
 			return web.Plaid().
@@ -1260,6 +1261,14 @@ func (b *ListingBuilder) getTableComponents(
 				Query(ParamSelectedIds,
 					web.Var(fmt.Sprintf(`{value: %s, add: $event, remove: !$event}`, h.JSONString(id))),
 				).
+				MergeQuery(true).
+				Go()
+		})
+		sDataTable.OnClearSelectionFunc(func(ctx *web.EventContext) string {
+			return web.Plaid().
+				URL(ctx.R.RequestURI).
+				EventFunc(actions.UpdateListingDialog).
+				Query(ParamSelectedIds, "").
 				MergeQuery(true).
 				Go()
 		})

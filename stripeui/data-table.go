@@ -21,6 +21,7 @@ type RowMenuItemFunc func(obj interface{}, id string, ctx *web.EventContext) h.H
 type RowComponentFunc func(obj interface{}, ctx *web.EventContext) h.HTMLComponent
 type OnSelectFunc func(id string, ctx *web.EventContext) string
 type OnSelectAllFunc func(idsOfPage []string, ctx *web.EventContext) string
+type OnClearSelectionFunc func(ctx *web.EventContext) string
 
 type DataTableBuilder struct {
 	data               interface{}
@@ -38,6 +39,8 @@ type DataTableBuilder struct {
 	loadMoreURL        string
 	// e.g. {count} records are selected.
 	selectedCountLabel   string
+	clearSelectionLabel  string
+	onClearSelectionFunc OnClearSelectionFunc
 	tfootChildren        []h.HTMLComponent
 	selectableColumnsBtn h.HTMLComponent
 	onSelectFunc         OnSelectFunc
@@ -46,9 +49,10 @@ type DataTableBuilder struct {
 
 func DataTable(data interface{}) (r *DataTableBuilder) {
 	r = &DataTableBuilder{
-		data:               data,
-		selectionParamName: "selected_ids",
-		selectedCountLabel: "{count} records are selected.",
+		data:                data,
+		selectionParamName:  "selected_ids",
+		selectedCountLabel:  "{count} records are selected.",
+		clearSelectionLabel: "clear selection",
 	}
 	return
 }
@@ -121,6 +125,16 @@ func (b *DataTableBuilder) RowExpandFunc(v RowComponentFunc) (r *DataTableBuilde
 
 func (b *DataTableBuilder) SelectedCountLabel(v string) (r *DataTableBuilder) {
 	b.selectedCountLabel = v
+	return b
+}
+
+func (b *DataTableBuilder) ClearSelectionLabel(v string) (r *DataTableBuilder) {
+	b.clearSelectionLabel = v
+	return b
+}
+
+func (b *DataTableBuilder) OnClearSelectionFunc(v OnClearSelectionFunc) (r *DataTableBuilder) {
+	b.onClearSelectionFunc = v
 	return b
 }
 
@@ -396,22 +410,37 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 		).Attr("v-if", fmt.Sprintf("!vars.%s", loadMoreVarName))
 	}
 
-	var selectedCountNotice []h.HTMLComponent
+	var selectedCountNotice h.HTMLComponents
+	onClearSelection := web.Plaid().
+		MergeQuery(true).
+		Query(b.selectionParamName, "").
+		PushState(true).
+		Go()
+	if b.onClearSelectionFunc != nil {
+		onClearSelection = b.onClearSelectionFunc(ctx)
+	}
 	{
 		ss := strings.Split(b.selectedCountLabel, "{count}")
 		if len(ss) == 1 {
-			selectedCountNotice = []h.HTMLComponent{h.Text(ss[0])}
+			selectedCountNotice = append(selectedCountNotice, h.Text(ss[0]))
 		} else {
-			selectedCountNotice = []h.HTMLComponent{
+			selectedCountNotice = append(selectedCountNotice,
 				h.Text(ss[0]),
 				h.Strong(fmt.Sprintf("{{vars.%s}}", selectedCountVarName)),
 				h.Text(ss[1]),
-			}
+			)
 		}
 	}
 	table := h.Div(
-		h.Div(selectedCountNotice...).
-			Class("grey lighten-3 text-center pt-3 pb-3").
+		h.Div(
+			selectedCountNotice,
+			VBtn(b.clearSelectionLabel).
+				Plain(true).
+				Text(true).
+				Small(true).
+				On("click", onClearSelection),
+		).
+			Class("grey lighten-3 text-center pt-2 pb-2").
 			Attr("v-show", fmt.Sprintf("vars.%s > 0", selectedCountVarName)),
 		VSimpleTable(
 			thead,
