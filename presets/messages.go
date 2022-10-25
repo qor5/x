@@ -51,6 +51,8 @@ type Messages struct {
 	BulkActionNoAvailableRecords               string
 	BulkActionSelectedIdsProcessNoticeTemplate string
 	ConfirmationDialogText                     string
+	Language                                   string
+	Colon                                      string
 }
 
 func (msgr *Messages) DeleteConfirmationText(id string) string {
@@ -133,6 +135,8 @@ var Messages_en_US = &Messages{
 	BulkActionNoAvailableRecords:   "None of the selected records can be executed with this action.",
 	BulkActionSelectedIdsProcessNoticeTemplate: "Partially selected records cannot be executed with this action: {ids}.",
 	ConfirmationDialogText:                     "Are you sure?",
+	Language:                                   "Language",
+	Colon:                                      ":",
 }
 
 var Messages_zh_CN = &Messages{
@@ -182,4 +186,6 @@ var Messages_zh_CN = &Messages{
 	BulkActionNoAvailableRecords:   "所有选中的记录均无法执行这个操作。",
 	BulkActionSelectedIdsProcessNoticeTemplate: "部分选中的记录无法被执行这个操作: {ids}。",
 	ConfirmationDialogText:                     "你确定吗?",
+	Language:                                   "语言",
+	Colon:                                      "：",
 }
