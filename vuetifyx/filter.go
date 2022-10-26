@@ -296,10 +296,6 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 		} else {
 			sqlc := fd.getSQLCondition(key, v[0])
 			if len(sqlc) > 0 {
-				if it.ItemType == ItemTypeDate {
-					val = unixToDatetime(val)
-				}
-
 				// Compose operator into sql condition. If you want to use multiple operators you have to use {op}, '%s' is not supported
 				// e.g.
 				// "source_b %s ?"                        ==> "source_b = ?"
