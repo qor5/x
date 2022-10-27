@@ -63,12 +63,6 @@ func getTranslationsMapFromVistor(v *Visitor) map[string]map[string]string {
 							break
 						}
 
-						_, ok = x.Type.(*ast.Ident)
-						if !ok {
-							isMessage = false
-							break
-						}
-
 						for _, elt := range x.Elts {
 							keyValueExpr, ok := elt.(*ast.KeyValueExpr)
 							if !ok {
