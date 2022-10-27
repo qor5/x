@@ -25,9 +25,9 @@ import LinkageSelect from './LinkageSelect.vue';
 
 
 
-export const DateItem = Vue.extend({
+export const DatetimeRangeItem = Vue.extend({
 	components: {
-		datePicker: DateTimePicker,
+		datetimePicker: DateTimePicker,
 		radioGroup: VRadioGroup,
 		radio: VRadio,
 		vselect: VSelect,
@@ -97,7 +97,7 @@ export const DateItem = Vue.extend({
 
 		return (
 			<div>
-				<datePicker
+				<datetimePicker
 					value={this.valueFrom}
 					on={{input: this.setDateFrom}}
 					key={modifier + 'from'}
@@ -105,7 +105,7 @@ export const DateItem = Vue.extend({
 					hideDetails={true}
 				/>
 				<span>{t.to}</span>
-				<datePicker
+				<datetimePicker
 					value={this.valueTo}
 					on={{input: this.setDateTo}}
 					key={modifier + 'to'}
@@ -514,7 +514,7 @@ data = [
   {
     key: "created",
     label: "Created",
-    itemType: "DateItem",
+    itemType: "DatetimeRangeItem",
     selected: false,
     modifier: "between",
     valueFrom: new Date(),
@@ -523,7 +523,7 @@ data = [
   {
     key: "updated",
     label: "Updated",
-    itemType: "DateItem",
+    itemType: "DatetimeRangeItem",
     selected: true,
     modifier: "inTheLast",
     inTheLastValue: 4,
@@ -735,7 +735,7 @@ export const Filter = Vue.extend({
 			let showValue = '';
 			if (op.selected) {
 				switch (op.itemType) {
-					case 'DateItem': {
+					case 'DatetimeRangeItem': {
 						const mod = op.modifier || constants.ModifierBetween;
 
 						if (mod === constants.ModifierBetween) {
@@ -943,7 +943,7 @@ export const Filter = Vue.extend({
 	render() {
 
 		const itemTypes: any = {
-			DateItem,
+			DatetimeRangeItem,
 			NumberItem,
 			StringItem,
 			SelectItem,
@@ -953,7 +953,7 @@ export const Filter = Vue.extend({
 
 		const t = this.$props.translations;
 		const trans: any = {
-			DateItem: t.date,
+			DatetimeRangeItem: t.date,
 			NumberItem: t.number,
 			StringItem: t.string,
 			SelectItem: {},

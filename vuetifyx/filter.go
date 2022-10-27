@@ -133,7 +133,7 @@ type FilterIndependentTranslations struct {
 type FilterItemType string
 
 const (
-	ItemTypeDate           FilterItemType = "DateItem"
+	ItemTypeDatetimeRange  FilterItemType = "DatetimeRangeItem"
 	ItemTypeSelect         FilterItemType = "SelectItem"
 	ItemTypeMultipleSelect FilterItemType = "MultipleSelectItem"
 	ItemTypeLinkageSelect  FilterItemType = "LinkageSelectItem"
@@ -145,7 +145,7 @@ type FilterItemModifier string
 
 const (
 	ModifierEquals      FilterItemModifier = "equals"      // String, Number
-	ModifierBetween     FilterItemModifier = "between"     // Date, Number
+	ModifierBetween     FilterItemModifier = "between"     // DatetimeRange, Number
 	ModifierGreaterThan FilterItemModifier = "greaterThan" // Number
 	ModifierLessThan    FilterItemModifier = "lessThan"    // Number
 	ModifierContains    FilterItemModifier = "contains"    // String
@@ -297,7 +297,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 			sqlc := fd.getSQLCondition(key, v[0])
 			if len(sqlc) > 0 {
 				var ival interface{} = val
-				if it.ItemType == ItemTypeDate {
+				if it.ItemType == ItemTypeDatetimeRange {
 					var err error
 					ival, err = time.ParseInLocation("2006-01-02 15:04", val, time.Local)
 					if err != nil {
@@ -346,7 +346,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 			if len(mv) == 2 {
 				it.Selected = true
 				it.Modifier = ModifierBetween
-				if it.ItemType == ItemTypeDate {
+				if it.ItemType == ItemTypeDatetimeRange {
 					it.ValueFrom = mv["gte"]
 					it.ValueTo = mv["lt"]
 				}
@@ -384,7 +384,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 						continue
 					}
 
-					if it.ItemType == ItemTypeDate {
+					if it.ItemType == ItemTypeDatetimeRange {
 						it.ValueIs = v
 						if mod == "gte" {
 							it.ValueFrom = mv["gte"]
