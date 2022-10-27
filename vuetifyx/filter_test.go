@@ -2,10 +2,19 @@ package vuetifyx_test
 
 import (
 	"testing"
+	"time"
 
 	. "github.com/goplaid/x/vuetifyx"
 	"github.com/theplant/testingutils"
 )
+
+func mustParseDatetimePickerValue(v string) time.Time {
+	t, err := time.ParseInLocation("2006-01-02 15:04", v, time.Local)
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
 
 var setByQueryCases = []struct {
 	name             string
@@ -24,7 +33,7 @@ var setByQueryCases = []struct {
 				SQLCondition: "created_at %s ?",
 			},
 		}),
-		qs: "created.lt=1554912000&created.gte=1554825600",
+		qs: "created.lt=2019-04-11 00:00&created.gte=2019-04-10 00:00",
 		expected: FilterData([]*FilterItem{
 			{
 				Key:       "created",
@@ -36,7 +45,7 @@ var setByQueryCases = []struct {
 			},
 		}),
 		expectedSQLConds: "created_at >= ? AND created_at < ?",
-		expectedSQLArgs:  []interface{}{"2019-04-10T00:00:00+08:00", "2019-04-11T00:00:00+08:00"},
+		expectedSQLArgs:  []interface{}{mustParseDatetimePickerValue("2019-04-10 00:00"), mustParseDatetimePickerValue("2019-04-11 00:00")},
 	},
 	{
 		name: "between2",
@@ -54,7 +63,7 @@ var setByQueryCases = []struct {
 				SQLCondition: `name %s ?`,
 			},
 		}),
-		qs: "created.lt=1565280000&created.gte=1565107200",
+		qs: "created.lt=2019-08-09 00:00&created.gte=2019-08-07 00:00",
 		expected: FilterData([]*FilterItem{
 			{
 				Key:       "created",
@@ -62,8 +71,8 @@ var setByQueryCases = []struct {
 				ItemType:  ItemTypeDate,
 				Modifier:  ModifierBetween,
 				Selected:  true,
-				ValueFrom: "1565107200",
-				ValueTo:   "1565280000",
+				ValueFrom: "2019-08-07 00:00",
+				ValueTo:   "2019-08-09 00:00",
 			},
 			{
 				Key:          "name",
@@ -73,7 +82,7 @@ var setByQueryCases = []struct {
 			},
 		}),
 		expectedSQLConds: "extract(epoch from created_at) >= ? AND extract(epoch from created_at) < ?",
-		expectedSQLArgs:  []interface{}{"2019-08-07T00:00:00+08:00", "2019-08-09T00:00:00+08:00"},
+		expectedSQLArgs:  []interface{}{mustParseDatetimePickerValue("2019-08-07 00:00"), mustParseDatetimePickerValue("2019-08-09 00:00")},
 	},
 	{
 		name: "customize SQLCondition",

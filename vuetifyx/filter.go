@@ -296,6 +296,14 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 		} else {
 			sqlc := fd.getSQLCondition(key, v[0])
 			if len(sqlc) > 0 {
+				var ival interface{} = val
+				if it.ItemType == ItemTypeDate {
+					var err error
+					ival, err = time.ParseInLocation("2006-01-02 15:04", val, time.Local)
+					if err != nil {
+						continue
+					}
+				}
 				// Compose operator into sql condition. If you want to use multiple operators you have to use {op}, '%s' is not supported
 				// e.g.
 				// "source_b %s ?"                        ==> "source_b = ?"
@@ -321,7 +329,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 					case "in", "notIn":
 						sqlArgs = append(sqlArgs, strings.Split(val, ","))
 					default:
-						sqlArgs = append(sqlArgs, val)
+						sqlArgs = append(sqlArgs, ival)
 					}
 				}
 			}
