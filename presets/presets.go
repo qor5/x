@@ -111,6 +111,11 @@ func (b *Builder) I18n() (r *i18n.Builder) {
 	return b.i18nBuilder
 }
 
+func (b *Builder) SetI18n(v *i18n.Builder) (r *Builder) {
+	b.i18nBuilder = v
+	return b
+}
+
 func (b *Builder) Permission(v *perm.Builder) (r *Builder) {
 	b.permissionBuilder = v
 	b.verifier = perm.NewVerifier(PermModule, v)
