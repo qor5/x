@@ -1,5 +1,4 @@
 import {encodeFilterData} from '@/components/FilterData';
-import moment from 'moment';
 
 describe('filter', () => {
 	describe('encodeFilterData DateItem', () => {
@@ -11,8 +10,8 @@ describe('filter', () => {
 					itemType: 'DateItem',
 					selected: true,
 					modifier: 'between',
-					valueFrom: moment('2018-04-09 00:00').unix(),
-					valueTo: moment('2018-04-10 00:00').unix(),
+					valueFrom: '2018-04-09 00:00',
+					valueTo: '2018-04-10 00:00',
 				},
 				{
 					key: 'created1',
@@ -20,7 +19,7 @@ describe('filter', () => {
 					itemType: 'DateItem',
 					selected: true,
 					modifier: 'between',
-					valueFrom: moment('2018-04-09 00:00').unix(),
+					valueFrom: '2018-04-09 00:00',
 				},
 				{
 					key: 'created2',
@@ -28,7 +27,7 @@ describe('filter', () => {
 					itemType: 'DateItem',
 					selected: true,
 					modifier: 'between',
-					valueTo: moment('2018-04-09 00:00').unix(),
+					valueTo: '2018-04-09 00:00',
 				},
 				{
 					key: 'created3',
@@ -43,12 +42,12 @@ describe('filter', () => {
 					itemType: 'DateItem',
 					selected: true,
 					modifier: 'between',
-					valueFrom: moment('2018-04-09 00:00').unix(),
-					valueTo: moment('2018-04-10 00:00').unix(),
+					valueFrom: '2018-04-09 00:00',
+					valueTo: '2018-04-10 00:00',
 				},
 			])).toEqual(
 				// tslint:disable-next-line: max-line-length
-				'created.gte=1523203200&created.lt=1523289600&created1.gte=1523203200&created2.lt=1523203200&confirmed.gte=1523203200&confirmed.lt=1523289600',
+				'created.gte=2018-04-09%2000%3A00&created.lt=2018-04-10%2000%3A00&created1.gte=2018-04-09%2000%3A00&created2.lt=2018-04-09%2000%3A00&confirmed.gte=2018-04-09%2000%3A00&confirmed.lt=2018-04-10%2000%3A00',
 			);
 		});
 	});
