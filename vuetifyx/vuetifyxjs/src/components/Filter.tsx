@@ -15,7 +15,8 @@ import {
 	VSpacer,
 	VTextField,
 	VToolbar,
-	VToolbarTitle
+	VToolbarTitle,
+	VDatePicker
 } from 'vuetify/lib';
 import VAutocomplete from './Autocomplete';
 import * as constants from './Constants';
@@ -25,9 +26,9 @@ import LinkageSelect from './LinkageSelect.vue';
 
 
 
-export const DateItem = Vue.extend({
+export const DatetimeRangeItem = Vue.extend({
 	components: {
-		datePicker: DateTimePicker,
+		datetimePicker: DateTimePicker,
 		radioGroup: VRadioGroup,
 		radio: VRadio,
 		vselect: VSelect,
@@ -97,7 +98,7 @@ export const DateItem = Vue.extend({
 
 		return (
 			<div>
-				<datePicker
+				<datetimePicker
 					value={this.valueFrom}
 					on={{input: this.setDateFrom}}
 					key={modifier + 'from'}
@@ -105,7 +106,7 @@ export const DateItem = Vue.extend({
 					hideDetails={true}
 				/>
 				<span>{t.to}</span>
-				<datePicker
+				<datetimePicker
 					value={this.valueTo}
 					on={{input: this.setDateTo}}
 					key={modifier + 'to'}
@@ -116,6 +117,44 @@ export const DateItem = Vue.extend({
 	},
 });
 
+export const DateItem = Vue.extend({
+	components: {
+		datePicker: VDatePicker,
+	},
+	props: {
+		value: Object,
+	},
+
+	data() {
+		return {
+			valueIs: this.$props.value.valueIs,
+		};
+	},
+
+	methods: {
+		inputEmit() {
+			this.$emit('input', {...this.$props.value, ...this.$data});
+		},
+
+		setValue(value: any) {
+			this.valueIs = value;
+			this.inputEmit();
+		},
+	},
+
+	render() {
+		return (
+			<div class="pt-3">
+				<datePicker
+					value={this.valueIs}
+					on={{change: this.setValue}}
+					noTitle={true}
+					hideDetails={true}
+				/>
+			</div>
+		);
+	},
+});
 
 export const NumberItem = Vue.extend({
 	components: {
@@ -514,7 +553,7 @@ data = [
   {
     key: "created",
     label: "Created",
-    itemType: "DateItem",
+    itemType: "DatetimeRangeItem",
     selected: false,
     modifier: "between",
     valueFrom: new Date(),
@@ -523,7 +562,7 @@ data = [
   {
     key: "updated",
     label: "Updated",
-    itemType: "DateItem",
+    itemType: "DatetimeRangeItem",
     selected: true,
     modifier: "inTheLast",
     inTheLastValue: 4,
@@ -735,7 +774,7 @@ export const Filter = Vue.extend({
 			let showValue = '';
 			if (op.selected) {
 				switch (op.itemType) {
-					case 'DateItem': {
+					case 'DatetimeRangeItem': {
 						const mod = op.modifier || constants.ModifierBetween;
 
 						if (mod === constants.ModifierBetween) {
@@ -751,6 +790,10 @@ export const Filter = Vue.extend({
 								}
 							}
 						}
+						break
+					}
+					case 'DateItem': {
+						showValue = op.valueIs;
 						break
 					}
 					case 'NumberItem': {
@@ -943,6 +986,7 @@ export const Filter = Vue.extend({
 	render() {
 
 		const itemTypes: any = {
+			DatetimeRangeItem,
 			DateItem,
 			NumberItem,
 			StringItem,
@@ -953,6 +997,7 @@ export const Filter = Vue.extend({
 
 		const t = this.$props.translations;
 		const trans: any = {
+			DatetimeRangeItem: t.date,
 			DateItem: t.date,
 			NumberItem: t.number,
 			StringItem: t.string,

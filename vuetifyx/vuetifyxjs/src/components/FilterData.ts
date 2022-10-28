@@ -5,7 +5,7 @@ function pushKeyVal(segs: any, key: string, mod: string, val: any) {
 	segs.push([`${key}${modWithDot}`, val.toString()]);
 }
 
-function pushDateItem(segs: any, op: any) {
+function pushDatetimeRangeItem(segs: any, op: any) {
 	// Now we only have 'between' modifier, but consider extendability, we keep the modifier system for now.
 	const mod = op.modifier || constants.ModifierBetween;
 
@@ -23,6 +23,14 @@ function pushDateItem(segs: any, op: any) {
 		}
 		return;
 	}
+}
+
+function pushDateItem(segs: any, op: any) {
+	if (!op.valueIs) {
+		return
+	}
+
+	pushKeyVal(segs, op.key, '', op.valueIs);
 }
 
 function pushNumberItem(segs: any, op: any) {
@@ -114,6 +122,9 @@ export function filterData(data: any): any {
 	const r: any = [];
 	data.filter((op: any) => op.selected)
 		.map((op: any) => {
+			if (op.itemType === 'DatetimeRangeItem') {
+				pushDatetimeRangeItem(r, op);
+			}
 			if (op.itemType === 'DateItem') {
 				pushDateItem(r, op);
 			}

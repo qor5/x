@@ -133,6 +133,8 @@ type FilterIndependentTranslations struct {
 type FilterItemType string
 
 const (
+	ItemTypeDatetimeRange FilterItemType = "DatetimeRangeItem"
+	// TODO: add ItemTypeDateRange
 	ItemTypeDate           FilterItemType = "DateItem"
 	ItemTypeSelect         FilterItemType = "SelectItem"
 	ItemTypeMultipleSelect FilterItemType = "MultipleSelectItem"
@@ -145,7 +147,7 @@ type FilterItemModifier string
 
 const (
 	ModifierEquals      FilterItemModifier = "equals"      // String, Number
-	ModifierBetween     FilterItemModifier = "between"     // Date, Number
+	ModifierBetween     FilterItemModifier = "between"     // DatetimeRange, Number
 	ModifierGreaterThan FilterItemModifier = "greaterThan" // Number
 	ModifierLessThan    FilterItemModifier = "lessThan"    // Number
 	ModifierContains    FilterItemModifier = "contains"    // String
@@ -297,39 +299,41 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 			sqlc := fd.getSQLCondition(key, v[0])
 			if len(sqlc) > 0 {
 				var ival interface{} = val
-				if it.ItemType == ItemTypeDate {
+				if it.ItemType == ItemTypeDatetimeRange {
 					var err error
 					ival, err = time.ParseInLocation("2006-01-02 15:04", val, time.Local)
 					if err != nil {
 						continue
 					}
-				}
-				// Compose operator into sql condition. If you want to use multiple operators you have to use {op}, '%s' is not supported
-				// e.g.
-				// "source_b %s ?"                        ==> "source_b = ?"
-				// "source_b {op} ?"                      ==> "source_b = ?"
-				// "source_b {op} ? AND source_c {op} ?"  ==> "source_b = ? AND source_c = ?"
-				if strings.Contains(sqlc, "%s") {
-					// This is for backward compatibility
-					conds = append(conds, fmt.Sprintf(sqlc, sqlOps[mod]))
-				} else {
-					conds = append(conds, strings.NewReplacer(SQLOperatorPlaceholder, sqlOps[mod]).Replace(sqlc))
+				} else if it.ItemType == ItemTypeDate {
+					var err error
+					ival, err = time.ParseInLocation("2006-01-02", val, time.Local)
+					if err != nil {
+						continue
+					}
 				}
 
-				// Prepare value Args for sql condition.
-				// e.g.  assume value is "1"
-				// "source_b = ?"                           ==>   []interface{}{"1"}
-				// "source_b = ? OR source_c = ?"           ==>   []interface{}{"1", "1"}
-				// "source_b ilike ? OR source_c ilike ?"   ==>   []interface{}{"%1%", "%1%"}
-				valCount := strings.Count(sqlc, "?")
-				for i := 0; i < valCount; i++ {
-					switch mod {
-					case "ilike":
-						sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", val))
-					case "in", "notIn":
-						sqlArgs = append(sqlArgs, strings.Split(val, ","))
-					default:
-						sqlArgs = append(sqlArgs, ival)
+				if it.ItemType == ItemTypeDate {
+					conds = append(conds, sqlcToCond(sqlc, "gte"), sqlcToCond(sqlc, "lt"))
+					sqlArgs = append(sqlArgs, ival, ival.(time.Time).Add(24*time.Hour))
+				} else {
+					conds = append(conds, sqlcToCond(sqlc, mod))
+
+					// Prepare value Args for sql condition.
+					// e.g.  assume value is "1"
+					// "source_b = ?"                           ==>   []interface{}{"1"}
+					// "source_b = ? OR source_c = ?"           ==>   []interface{}{"1", "1"}
+					// "source_b ilike ? OR source_c ilike ?"   ==>   []interface{}{"%1%", "%1%"}
+					valCount := strings.Count(sqlc, "?")
+					for i := 0; i < valCount; i++ {
+						switch mod {
+						case "ilike":
+							sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", val))
+						case "in", "notIn":
+							sqlArgs = append(sqlArgs, strings.Split(val, ","))
+						default:
+							sqlArgs = append(sqlArgs, ival)
+						}
 					}
 				}
 			}
@@ -346,7 +350,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 			if len(mv) == 2 {
 				it.Selected = true
 				it.Modifier = ModifierBetween
-				if it.ItemType == ItemTypeDate {
+				if it.ItemType == ItemTypeDatetimeRange {
 					it.ValueFrom = mv["gte"]
 					it.ValueTo = mv["lt"]
 				}
@@ -384,7 +388,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 						continue
 					}
 
-					if it.ItemType == ItemTypeDate {
+					if it.ItemType == ItemTypeDatetimeRange {
 						it.ValueIs = v
 						if mod == "gte" {
 							it.ValueFrom = mv["gte"]
@@ -454,4 +458,17 @@ func unixToTime(u string) time.Time {
 	d := time.Unix(unix, 0)
 
 	return d
+}
+
+func sqlcToCond(sqlc string, mod string) string {
+	// Compose operator into sql condition. If you want to use multiple operators you have to use {op}, '%s' is not supported
+	// e.g.
+	// "source_b %s ?"                        ==> "source_b = ?"
+	// "source_b {op} ?"                      ==> "source_b = ?"
+	// "source_b {op} ? AND source_c {op} ?"  ==> "source_b = ? AND source_c = ?"
+	if strings.Contains(sqlc, "%s") {
+		// This is for backward compatibility
+		return fmt.Sprintf(sqlc, sqlOps[mod])
+	}
+	return strings.NewReplacer(SQLOperatorPlaceholder, sqlOps[mod]).Replace(sqlc)
 }

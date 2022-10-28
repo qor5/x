@@ -1,13 +1,13 @@
 import {encodeFilterData} from '@/components/FilterData';
 
 describe('filter', () => {
-	describe('encodeFilterData DateItem', () => {
+	describe('encodeFilterData DatetimeRangeItem', () => {
 		it('between', () => {
 			expect(encodeFilterData([
 				{
 					key: 'created',
 					label: 'Created',
-					itemType: 'DateItem',
+					itemType: 'DatetimeRangeItem',
 					selected: true,
 					modifier: 'between',
 					valueFrom: '2018-04-09 00:00',
@@ -16,7 +16,7 @@ describe('filter', () => {
 				{
 					key: 'created1',
 					label: 'Created1',
-					itemType: 'DateItem',
+					itemType: 'DatetimeRangeItem',
 					selected: true,
 					modifier: 'between',
 					valueFrom: '2018-04-09 00:00',
@@ -24,7 +24,7 @@ describe('filter', () => {
 				{
 					key: 'created2',
 					label: 'Created2',
-					itemType: 'DateItem',
+					itemType: 'DatetimeRangeItem',
 					selected: true,
 					modifier: 'between',
 					valueTo: '2018-04-09 00:00',
@@ -32,14 +32,14 @@ describe('filter', () => {
 				{
 					key: 'created3',
 					label: 'Created3',
-					itemType: 'DateItem',
+					itemType: 'DatetimeRangeItem',
 					selected: true,
 					modifier: 'between',
 				},
 				{
 					key: 'confirmed',
 					label: 'Confirmed',
-					itemType: 'DateItem',
+					itemType: 'DatetimeRangeItem',
 					selected: true,
 					modifier: 'between',
 					valueFrom: '2018-04-09 00:00',
@@ -48,6 +48,23 @@ describe('filter', () => {
 			])).toEqual(
 				// tslint:disable-next-line: max-line-length
 				'created.gte=2018-04-09%2000%3A00&created.lt=2018-04-10%2000%3A00&created1.gte=2018-04-09%2000%3A00&created2.lt=2018-04-09%2000%3A00&confirmed.gte=2018-04-09%2000%3A00&confirmed.lt=2018-04-10%2000%3A00',
+			);
+		});
+	});
+
+	describe('encodeFilterData DateItem', () => {
+		it('equals', () => {
+			expect(encodeFilterData([
+				{
+					key: 'created',
+					label: 'Created',
+					itemType: 'DateItem',
+					selected: true,
+					modifier: 'equals',
+					valueIs: '2018-04-09',
+				},
+			])).toEqual(
+				'created=2018-04-09',
 			);
 		});
 	});

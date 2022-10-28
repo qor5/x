@@ -29,7 +29,7 @@ var setByQueryCases = []struct {
 		data: FilterData([]*FilterItem{
 			{
 				Key:          "created",
-				ItemType:     ItemTypeDate,
+				ItemType:     ItemTypeDatetimeRange,
 				SQLCondition: "created_at %s ?",
 			},
 		}),
@@ -37,7 +37,7 @@ var setByQueryCases = []struct {
 		expected: FilterData([]*FilterItem{
 			{
 				Key:       "created",
-				ItemType:  ItemTypeDate,
+				ItemType:  ItemTypeDatetimeRange,
 				Modifier:  ModifierBetween,
 				Selected:  true,
 				ValueFrom: "2019-04-10 00:00",
@@ -53,7 +53,7 @@ var setByQueryCases = []struct {
 			{
 				Key:          "created",
 				Label:        "Created",
-				ItemType:     ItemTypeDate,
+				ItemType:     ItemTypeDatetimeRange,
 				SQLCondition: `extract(epoch from created_at) %s ?`,
 			},
 			{
@@ -68,7 +68,7 @@ var setByQueryCases = []struct {
 			{
 				Key:       "created",
 				Label:     "Created",
-				ItemType:  ItemTypeDate,
+				ItemType:  ItemTypeDatetimeRange,
 				Modifier:  ModifierBetween,
 				Selected:  true,
 				ValueFrom: "2019-08-07 00:00",
@@ -339,6 +339,28 @@ var setByQueryCases = []struct {
 		}),
 		expectedSQLConds: "province_id = ? AND city_id = ? AND district_id = ?",
 		expectedSQLArgs:  []interface{}{"2", "3", "7"},
+	},
+	{
+		name: "ItemTypeDate",
+		data: FilterData([]*FilterItem{
+			{
+				Key:          "created",
+				ItemType:     ItemTypeDate,
+				SQLCondition: "created_at %s ?",
+			},
+		}),
+		qs: "created=2019-04-10",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:      "created",
+				ItemType: ItemTypeDate,
+				Modifier: ModifierEquals,
+				Selected: true,
+				ValueIs:  "2019-04-10",
+			},
+		}),
+		expectedSQLConds: "created_at >= ? AND created_at < ?",
+		expectedSQLArgs:  []interface{}{mustParseDatetimePickerValue("2019-04-10 00:00"), mustParseDatetimePickerValue("2019-04-11 00:00")},
 	},
 }
 
