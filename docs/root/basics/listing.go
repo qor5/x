@@ -1,6 +1,9 @@
 package basics
 
 import (
+	"github.com/goplaid/x/docs/examples"
+	"github.com/goplaid/x/docs/examples/example_basics"
+	"github.com/goplaid/x/docs/utils"
 	. "github.com/theplant/docgo"
 	"github.com/theplant/docgo/ch"
 )
@@ -10,9 +13,9 @@ var Listing = Doc(
 By the [1 Minute Quick Start](/getting-started/one-minute-quick-start.html), We get a default listing page with default columns, But default columns from database columns rarely fit the needs for any real application. Here we will introduce common customizations on the list page.
 
 - Configure fields that displayed on the page
-- Modify the display value of a cell
+- Modify the display value
 - Display a virtual field
-- Add default query conditions to the dataset
+- Default scope
 - Extend the dot menu
 
 There would be a runable example at the last.
@@ -45,7 +48,7 @@ postModelBuilder.Listing("ID", "Title", "Body", "CategoryID")
 `),
 
 	Markdown(`
-## Modify the display value of a cell
+## Modify the display value
 To display the category name rather than category id in the post listing page. The ~ComponentFunc~ would do the work.
 The ~obj~ is the ~Post~ record, and ~field~ is the ~CategoryID~ field of this ~Post~ record. You can get the value by ~field.Value(obj)~ function.
 `),
@@ -64,11 +67,35 @@ The ~obj~ is the ~Post~ record, and ~field~ is the ~CategoryID~ field of this ~P
 	Markdown(`
 ## Display virtual fields
 `),
-	ch.Code(`
-	postModelBuilder.Listing("ID", "Title", "Body", "CategoryID", "VirtualValue")
+	ch.Code(`postModelBuilder.Listing("ID", "Title", "Body", "CategoryID", "VirtualValue")
 	postModelBuilder.Listing().Field("VirtualField").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
 		return h.Td(h.Text("virtual field"))
 	})
 `),
+
+	Markdown(`
+## DefaultScope
+If we want to display ~Post~ with ~category_id~ only. Use the ~Listing().Searcher~ to apply SQL conditions.
+`),
+	ch.Code(`postModelBuilder.Listing().Searcher = func(model interface{}, params *presets.SearchParams, ctx *web.EventContext) (r interface{}, totalCount int, err error){
+		qdb := db.Where("category_id != 0")
+		return gorm2op.DataOperator(qdb).Search(model, params, ctx)
+	}
+`),
+
+	Markdown(`
+## Extend the dot menu
+TODO, the func would change
+`),
+	ch.Code(`postModelBuilder.Listing().RowMenu("Edit", "Delete", "Show").RowMenuItem("Show").ComponentFunc(func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent {
+		return h.Text("Fake Show")
+	})
+`),
+
+	Markdown(`
+## Full Example
+`),
+	ch.Code(examples.PresetsListingSample).Language("go"),
+	utils.Demo("Presets Listing Customization Fields", example_basics.ListingSamplePath+"/posts", "example_basics/listing.go"),
 ).Title("Listing").
-	Slug("basics/listing-customizations")
+	Slug("basics/listing")

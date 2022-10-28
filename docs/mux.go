@@ -19,6 +19,7 @@ import (
 	"github.com/goplaid/x/docs/examples/e22_vuetify_variant_sub_form"
 	"github.com/goplaid/x/docs/examples/e23_vuetify_components_kitchen"
 	"github.com/goplaid/x/docs/examples/e24_vuetify_components_linkage_select"
+	"github.com/goplaid/x/docs/examples/example_basics"
 	"github.com/goplaid/x/docs/utils"
 	"github.com/goplaid/x/presets"
 	"github.com/goplaid/x/tiptap"
@@ -662,6 +663,14 @@ func SamplesHandler(prefix string) http.Handler {
 	mux.Handle(
 		e21_presents.PresetsLinkageSelectFilterItemPath+"/",
 		c15,
+	)
+
+	c16 := presets.New().AssetFunc(addGA)
+	example_basics.ListingSample(c16)
+
+	mux.Handle(
+		example_basics.ListingSamplePath+"/",
+		c16,
 	)
 
 	return mux
