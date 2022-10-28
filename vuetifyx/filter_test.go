@@ -340,6 +340,28 @@ var setByQueryCases = []struct {
 		expectedSQLConds: "province_id = ? AND city_id = ? AND district_id = ?",
 		expectedSQLArgs:  []interface{}{"2", "3", "7"},
 	},
+	{
+		name: "ItemTypeDate",
+		data: FilterData([]*FilterItem{
+			{
+				Key:          "created",
+				ItemType:     ItemTypeDate,
+				SQLCondition: "created_at %s ?",
+			},
+		}),
+		qs: "created=2019-04-10",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:      "created",
+				ItemType: ItemTypeDate,
+				Modifier: ModifierEquals,
+				Selected: true,
+				ValueIs:  "2019-04-10",
+			},
+		}),
+		expectedSQLConds: "created_at >= ? AND created_at < ?",
+		expectedSQLArgs:  []interface{}{mustParseDatetimePickerValue("2019-04-10 00:00"), mustParseDatetimePickerValue("2019-04-11 00:00")},
+	},
 }
 
 func TestSetByQueryString(t *testing.T) {

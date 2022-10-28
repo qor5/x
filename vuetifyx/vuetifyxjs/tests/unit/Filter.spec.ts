@@ -52,6 +52,23 @@ describe('filter', () => {
 		});
 	});
 
+	describe('encodeFilterData DateItem', () => {
+		it('equals', () => {
+			expect(encodeFilterData([
+				{
+					key: 'created',
+					label: 'Created',
+					itemType: 'DateItem',
+					selected: true,
+					modifier: 'equals',
+					valueIs: '2018-04-09',
+				},
+			])).toEqual(
+				'created=2018-04-09',
+			);
+		});
+	});
+
 	describe('encodeFilterData NumberItem', () => {
 		it('equals', () => {
 			expect(encodeFilterData([

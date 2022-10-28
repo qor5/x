@@ -15,7 +15,8 @@ import {
 	VSpacer,
 	VTextField,
 	VToolbar,
-	VToolbarTitle
+	VToolbarTitle,
+	VDatePicker
 } from 'vuetify/lib';
 import VAutocomplete from './Autocomplete';
 import * as constants from './Constants';
@@ -116,6 +117,44 @@ export const DatetimeRangeItem = Vue.extend({
 	},
 });
 
+export const DateItem = Vue.extend({
+	components: {
+		datePicker: VDatePicker,
+	},
+	props: {
+		value: Object,
+	},
+
+	data() {
+		return {
+			valueIs: this.$props.value.valueIs,
+		};
+	},
+
+	methods: {
+		inputEmit() {
+			this.$emit('input', {...this.$props.value, ...this.$data});
+		},
+
+		setValue(value: any) {
+			this.valueIs = value;
+			this.inputEmit();
+		},
+	},
+
+	render() {
+		return (
+			<div class="pt-3">
+				<datePicker
+					value={this.valueIs}
+					on={{change: this.setValue}}
+					noTitle={true}
+					hideDetails={true}
+				/>
+			</div>
+		);
+	},
+});
 
 export const NumberItem = Vue.extend({
 	components: {
@@ -753,6 +792,10 @@ export const Filter = Vue.extend({
 						}
 						break
 					}
+					case 'DateItem': {
+						showValue = op.valueIs;
+						break
+					}
 					case 'NumberItem': {
 						const mod = op.modifier || 'equals';
 
@@ -944,6 +987,7 @@ export const Filter = Vue.extend({
 
 		const itemTypes: any = {
 			DatetimeRangeItem,
+			DateItem,
 			NumberItem,
 			StringItem,
 			SelectItem,
@@ -954,6 +998,7 @@ export const Filter = Vue.extend({
 		const t = this.$props.translations;
 		const trans: any = {
 			DatetimeRangeItem: t.date,
+			DateItem: t.date,
 			NumberItem: t.number,
 			StringItem: t.string,
 			SelectItem: {},

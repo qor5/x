@@ -25,6 +25,14 @@ function pushDatetimeRangeItem(segs: any, op: any) {
 	}
 }
 
+function pushDateItem(segs: any, op: any) {
+	if (!op.valueIs) {
+		return
+	}
+
+	pushKeyVal(segs, op.key, '', op.valueIs);
+}
+
 function pushNumberItem(segs: any, op: any) {
 	const mod = op.modifier || 'equals';
 
@@ -116,6 +124,9 @@ export function filterData(data: any): any {
 		.map((op: any) => {
 			if (op.itemType === 'DatetimeRangeItem') {
 				pushDatetimeRangeItem(r, op);
+			}
+			if (op.itemType === 'DateItem') {
+				pushDateItem(r, op);
 			}
 			if (op.itemType === 'NumberItem') {
 				pushNumberItem(r, op);
