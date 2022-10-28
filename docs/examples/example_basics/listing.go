@@ -74,7 +74,8 @@ func ListingSample(b *presets.Builder) {
 		return gorm2op.DataOperator(qdb).Search(model, params, ctx)
 	}
 
-	postModelBuilder.Listing().RowMenu("Edit", "Delete", "Show").RowMenuItem("Show").ComponentFunc(func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent {
+	rmn := postModelBuilder.Listing().RowMenu()
+	rmn.RowMenuItem("Show").ComponentFunc(func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent {
 		return h.Text("Fake Show")
 	})
 

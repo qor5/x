@@ -54,23 +54,22 @@ The ~obj~ is the ~Post~ record, and ~field~ is the ~CategoryID~ field of this ~P
 `),
 
 	ch.Code(`postModelBuilder.Listing().Field("CategoryID").Label("Category").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
-		c := models.Category{}
-		cid, _ := field.Value(obj).(uint)
-		if err := db.Where("id = ?", cid).Find(&c).Error; err != nil {
-			// ignore err in the example
-		}
-
-		return h.Td(h.Text(c.Name))
-	})
+	c := models.Category{}
+	cid, _ := field.Value(obj).(uint)
+	if err := db.Where("id = ?", cid).Find(&c).Error; err != nil {
+		// ignore err in the example
+	}
+	return h.Td(h.Text(c.Name))
+})
 `).Language("go"),
 
 	Markdown(`
 ## Display virtual fields
 `),
 	ch.Code(`postModelBuilder.Listing("ID", "Title", "Body", "CategoryID", "VirtualValue")
-	postModelBuilder.Listing().Field("VirtualField").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
-		return h.Td(h.Text("virtual field"))
-	})
+postModelBuilder.Listing().Field("VirtualField").ComponentFunc(func(obj interface{}, field *presets.FieldContext, ctx *web.EventContext) h.HTMLComponent {
+	return h.Td(h.Text("virtual field"))
+})
 `),
 
 	Markdown(`
@@ -78,18 +77,19 @@ The ~obj~ is the ~Post~ record, and ~field~ is the ~CategoryID~ field of this ~P
 If we want to display ~Post~ with ~category_id~ only. Use the ~Listing().Searcher~ to apply SQL conditions.
 `),
 	ch.Code(`postModelBuilder.Listing().Searcher = func(model interface{}, params *presets.SearchParams, ctx *web.EventContext) (r interface{}, totalCount int, err error){
-		qdb := db.Where("category_id != 0")
-		return gorm2op.DataOperator(qdb).Search(model, params, ctx)
-	}
+	qdb := db.Where("category_id != 0")
+	return gorm2op.DataOperator(qdb).Search(model, params, ctx)
+}
 `),
 
 	Markdown(`
 ## Extend the dot menu
-TODO, the func would change
+You can extend the dot menu by calling the ~RowMenuItem~ function. If you want to overwrite the default ~Edit~ and ~Delete~ link, you can pass the items you wanted to ~Listing().RowMenu()~
 `),
-	ch.Code(`postModelBuilder.Listing().RowMenu("Edit", "Delete", "Show").RowMenuItem("Show").ComponentFunc(func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent {
-		return h.Text("Fake Show")
-	})
+	ch.Code(`rmn := postModelBuilder.Listing().RowMenu()
+rmn.RowMenuItem("Show").ComponentFunc(func(obj interface{}, id string, ctx *web.EventContext) h.HTMLComponent {
+	return h.Text("Fake Show")
+})
 `),
 
 	Markdown(`
@@ -97,5 +97,5 @@ TODO, the func would change
 `),
 	ch.Code(examples.PresetsListingSample).Language("go"),
 	utils.Demo("Presets Listing Customization Fields", example_basics.ListingSamplePath+"/posts", "example_basics/listing.go"),
-).Title("Listing").
+).Title("Listing Page").
 	Slug("basics/listing")
