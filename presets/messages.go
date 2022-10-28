@@ -47,9 +47,12 @@ type Messages struct {
 	PaginationRowsPerPage                      string
 	ListingNoRecordToShow                      string
 	ListingSelectedCountNotice                 string
+	ListingClearSelection                      string
 	BulkActionNoAvailableRecords               string
 	BulkActionSelectedIdsProcessNoticeTemplate string
 	ConfirmationDialogText                     string
+	Language                                   string
+	Colon                                      string
 }
 
 func (msgr *Messages) DeleteConfirmationText(id string) string {
@@ -128,9 +131,12 @@ var Messages_en_US = &Messages{
 	PaginationRowsPerPage:          "Rows per page: ",
 	ListingNoRecordToShow:          "No records to show",
 	ListingSelectedCountNotice:     "{count} records are selected. ",
+	ListingClearSelection:          "clear selection",
 	BulkActionNoAvailableRecords:   "None of the selected records can be executed with this action.",
 	BulkActionSelectedIdsProcessNoticeTemplate: "Partially selected records cannot be executed with this action: {ids}.",
 	ConfirmationDialogText:                     "Are you sure?",
+	Language:                                   "Language",
+	Colon:                                      ":",
 }
 
 var Messages_zh_CN = &Messages{
@@ -176,7 +182,10 @@ var Messages_zh_CN = &Messages{
 	PaginationRowsPerPage:          "每页: ",
 	ListingNoRecordToShow:          "没有可显示的记录",
 	ListingSelectedCountNotice:     "{count}条记录被选中。",
+	ListingClearSelection:          "清除选择",
 	BulkActionNoAvailableRecords:   "所有选中的记录均无法执行这个操作。",
 	BulkActionSelectedIdsProcessNoticeTemplate: "部分选中的记录无法被执行这个操作: {ids}。",
 	ConfirmationDialogText:                     "你确定吗?",
+	Language:                                   "语言",
+	Colon:                                      "：",
 }

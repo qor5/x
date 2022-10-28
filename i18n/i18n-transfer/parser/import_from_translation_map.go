@@ -73,12 +73,6 @@ func ImportFromTranslationsMap(projectPath string, translationsMap map[string]ma
 									break
 								}
 
-								_, ok = x.Type.(*ast.Ident)
-								if !ok {
-									isMessage = false
-									break
-								}
-
 								for _, elt := range x.Elts {
 									keyValueExpr, ok := elt.(*ast.KeyValueExpr)
 									if !ok {

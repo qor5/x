@@ -207,13 +207,13 @@ func PresetsListingCustomizationFilters(b *presets.Builder) (
 			{
 				Key:          "created",
 				Label:        msgr.CustomersFilterCreated,
-				ItemType:     vuetifyx.ItemTypeDate,
+				ItemType:     vuetifyx.ItemTypeDatetimeRange,
 				SQLCondition: `cast(strftime('%%s', created_at) as INTEGER) %s ?`,
 			},
 			{
 				Key:          "approved",
 				Label:        msgr.CustomersFilterApproved,
-				ItemType:     vuetifyx.ItemTypeDate,
+				ItemType:     vuetifyx.ItemTypeDatetimeRange,
 				SQLCondition: `cast(strftime('%%s', approved_at) as INTEGER) %s ?`,
 			},
 			{

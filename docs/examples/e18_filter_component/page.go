@@ -12,7 +12,7 @@ func FilterComponent(ctx *web.EventContext) (pr web.PageResponse, err error) {
 		{
 			Key:          "invoiceDate",
 			Label:        "Invoice Date",
-			ItemType:     vuetifyx.ItemTypeDate,
+			ItemType:     vuetifyx.ItemTypeDatetimeRange,
 			SQLCondition: "InvoiceDate %s datetime(?, 'unixepoch')",
 			Selected:     true,
 		},

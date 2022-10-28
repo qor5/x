@@ -13,9 +13,10 @@ import (
 )
 
 type RowMenuBuilder struct {
-	lb       *ListingBuilder
-	listings []string
-	items    map[string]*RowMenuItemBuilder
+	lb              *ListingBuilder
+	listings        []string
+	defaultListings []string
+	items           map[string]*RowMenuItemBuilder
 }
 
 func (b *ListingBuilder) RowMenu(listings ...string) *RowMenuBuilder {
@@ -45,7 +46,11 @@ func (b *RowMenuBuilder) Empty() {
 }
 
 func (b *RowMenuBuilder) listingItemFuncs(ctx *web.EventContext) (fs []s.RowMenuItemFunc) {
-	for _, li := range b.listings {
+	listings := b.defaultListings
+	if len(b.listings) > 0 {
+		listings = b.listings
+	}
+	for _, li := range listings {
 		if ib, ok := b.items[strcase.ToSnake(li)]; ok {
 			fs = append(fs, ib.getComponentFunc(ctx))
 		}
@@ -74,6 +79,7 @@ func (b *RowMenuBuilder) RowMenuItem(name string) *RowMenuItemBuilder {
 		eventID: fmt.Sprintf("%s_rowMenuItemFunc_%s", b.lb.mb.uriName, name),
 	}
 	b.items[strcase.ToSnake(name)] = ib
+	b.defaultListings = append(b.defaultListings, name)
 
 	b.lb.mb.RegisterEventFunc(ib.eventID, func(ctx *web.EventContext) (r web.EventResponse, err error) {
 		id := ctx.R.FormValue(ParamID)

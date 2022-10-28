@@ -1,54 +1,70 @@
 import {encodeFilterData} from '@/components/FilterData';
-import moment from 'moment';
 
 describe('filter', () => {
-	describe('encodeFilterData DateItem', () => {
+	describe('encodeFilterData DatetimeRangeItem', () => {
 		it('between', () => {
 			expect(encodeFilterData([
 				{
 					key: 'created',
 					label: 'Created',
-					itemType: 'DateItem',
+					itemType: 'DatetimeRangeItem',
 					selected: true,
 					modifier: 'between',
-					valueFrom: moment('2018-04-09 00:00').unix(),
-					valueTo: moment('2018-04-10 00:00').unix(),
+					valueFrom: '2018-04-09 00:00',
+					valueTo: '2018-04-10 00:00',
 				},
 				{
 					key: 'created1',
 					label: 'Created1',
-					itemType: 'DateItem',
+					itemType: 'DatetimeRangeItem',
 					selected: true,
 					modifier: 'between',
-					valueFrom: moment('2018-04-09 00:00').unix(),
+					valueFrom: '2018-04-09 00:00',
 				},
 				{
 					key: 'created2',
 					label: 'Created2',
-					itemType: 'DateItem',
+					itemType: 'DatetimeRangeItem',
 					selected: true,
 					modifier: 'between',
-					valueTo: moment('2018-04-09 00:00').unix(),
+					valueTo: '2018-04-09 00:00',
 				},
 				{
 					key: 'created3',
 					label: 'Created3',
-					itemType: 'DateItem',
+					itemType: 'DatetimeRangeItem',
 					selected: true,
 					modifier: 'between',
 				},
 				{
 					key: 'confirmed',
 					label: 'Confirmed',
-					itemType: 'DateItem',
+					itemType: 'DatetimeRangeItem',
 					selected: true,
 					modifier: 'between',
-					valueFrom: moment('2018-04-09 00:00').unix(),
-					valueTo: moment('2018-04-10 00:00').unix(),
+					valueFrom: '2018-04-09 00:00',
+					valueTo: '2018-04-10 00:00',
 				},
 			])).toEqual(
 				// tslint:disable-next-line: max-line-length
-				'created.gte=1523203200&created.lt=1523289600&created1.gte=1523203200&created2.lt=1523203200&confirmed.gte=1523203200&confirmed.lt=1523289600',
+				'created.gte=2018-04-09%2000%3A00&created.lt=2018-04-10%2000%3A00&created1.gte=2018-04-09%2000%3A00&created2.lt=2018-04-09%2000%3A00&confirmed.gte=2018-04-09%2000%3A00&confirmed.lt=2018-04-10%2000%3A00',
+			);
+		});
+	});
+
+	describe('encodeFilterData DateItem', () => {
+		it('equals', () => {
+			expect(encodeFilterData([
+				{
+					key: 'created',
+					label: 'Created',
+					itemType: 'DateItem',
+					selected: true,
+					modifier: 'equals',
+					valueIs: '2018-04-09',
+				},
+			])).toEqual(
+				'created=2018-04-09',
 			);
 		});
 	});

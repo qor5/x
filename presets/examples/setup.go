@@ -260,13 +260,13 @@ func Preset1(db *gorm.DB) (r *presets.Builder) {
 				Key:          "created",
 				Label:        "Created",
 				Folded:       true,
-				ItemType:     vuetifyx.ItemTypeDate,
+				ItemType:     vuetifyx.ItemTypeDatetimeRange,
 				SQLCondition: `extract(epoch from created_at) %s ?`,
 			},
 			{
 				Key:          "approved",
 				Label:        "Approved",
-				ItemType:     vuetifyx.ItemTypeDate,
+				ItemType:     vuetifyx.ItemTypeDatetimeRange,
 				SQLCondition: `extract(epoch from approved_at) %s ?`,
 			},
 			{
