@@ -16,6 +16,14 @@ func mustParseDatetimePickerValue(v string) time.Time {
 	return t
 }
 
+func mustParseDatePickerValue(v string) time.Time {
+	t, err := time.ParseInLocation("2006-01-02", v, time.Local)
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
 var setByQueryCases = []struct {
 	name             string
 	data             FilterData
@@ -83,6 +91,73 @@ var setByQueryCases = []struct {
 		}),
 		expectedSQLConds: "extract(epoch from created_at) >= ? AND extract(epoch from created_at) < ?",
 		expectedSQLArgs:  []interface{}{mustParseDatetimePickerValue("2019-08-07 00:00"), mustParseDatetimePickerValue("2019-08-09 00:00")},
+	},
+	{
+		name: "date_range_has_two_params",
+		data: FilterData([]*FilterItem{
+			{
+				Key:          "created",
+				ItemType:     ItemTypeDateRange,
+				SQLCondition: "created_at %s ?",
+			},
+		}),
+		qs: "created.lte=2019-04-11&created.gte=2019-04-10",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:       "created",
+				ItemType:  ItemTypeDateRange,
+				Modifier:  ModifierBetween,
+				Selected:  true,
+				ValueFrom: "2019-04-10",
+				ValueTo:   "2019-04-11",
+			},
+		}),
+		expectedSQLConds: "created_at >= ? AND created_at <= ?",
+		expectedSQLArgs:  []interface{}{mustParseDatePickerValue("2019-04-10"), mustParseDatePickerValue("2019-04-11")},
+	},
+	{
+		name: "date_range_has_left_param",
+		data: FilterData([]*FilterItem{
+			{
+				Key:          "created",
+				ItemType:     ItemTypeDateRange,
+				SQLCondition: "created_at %s ?",
+			},
+		}),
+		qs: "created.gte=2019-04-10",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:       "created",
+				ItemType:  ItemTypeDateRange,
+				Selected:  true,
+				ValueIs:   "2019-04-10",
+				ValueFrom: "2019-04-10",
+			},
+		}),
+		expectedSQLConds: "created_at >= ?",
+		expectedSQLArgs:  []interface{}{mustParseDatePickerValue("2019-04-10")},
+	},
+	{
+		name: "date_range_has_right_param",
+		data: FilterData([]*FilterItem{
+			{
+				Key:          "created",
+				ItemType:     ItemTypeDateRange,
+				SQLCondition: "created_at %s ?",
+			},
+		}),
+		qs: "created.lte=2019-04-10",
+		expected: FilterData([]*FilterItem{
+			{
+				Key:      "created",
+				ItemType: ItemTypeDateRange,
+				Selected: true,
+				ValueIs:  "2019-04-10",
+				ValueTo:  "2019-04-10",
+			},
+		}),
+		expectedSQLConds: "created_at <= ?",
+		expectedSQLArgs:  []interface{}{mustParseDatePickerValue("2019-04-10")},
 	},
 	{
 		name: "customize SQLCondition",

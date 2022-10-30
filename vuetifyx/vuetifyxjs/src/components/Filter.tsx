@@ -21,8 +21,10 @@ import {
 import VAutocomplete from './Autocomplete';
 import * as constants from './Constants';
 import DateTimePicker from './DateTimePicker.vue';
+import DatePicker from './DatePicker.vue';
 import { encodeFilterData, filterData } from './FilterData';
 import LinkageSelect from './LinkageSelect.vue';
+import dateTimePicker from "@/components/DateTimePicker.vue";
 
 
 
@@ -107,6 +109,97 @@ export const DatetimeRangeItem = Vue.extend({
 				/>
 				<span>{t.to}</span>
 				<datetimePicker
+					value={this.valueTo}
+					on={{input: this.setDateTo}}
+					key={modifier + 'to'}
+					hideDetails={true}
+				/>
+			</div>
+		);
+	},
+});
+
+export const DateRangeItem = Vue.extend({
+	components: {
+		datePicker: DatePicker,
+		radioGroup: VRadioGroup,
+		radio: VRadio,
+		vselect: VSelect,
+		vtextfield: VTextField,
+		vicon: VIcon,
+	},
+	props: {
+		value: Object,
+		translations: {
+			type: Object,
+		},
+	},
+
+	data() {
+		return {
+			modifier: this.$props.value.modifier || constants.ModifierBetween,
+			valueIs: this.$props.value.valueIs,
+			valueFrom: this.$props.value.valueFrom,
+			valueTo: this.$props.value.valueTo,
+			inTheLastUnit: this.$props.value.inTheLastUnit,
+			inTheLastValue: this.$props.value.inTheLastValue,
+			datePickerVisible: false,
+		};
+	},
+
+	methods: {
+		inputEmit() {
+			this.$emit('input', {...this.$props.value, ...this.$data});
+		},
+
+		setModifier(e: string) {
+			this.modifier = e;
+			this.inputEmit();
+			this.datePickerVisible = true;
+			this.$forceUpdate();
+		},
+
+		setDate(e: any) {
+			this.valueIs = e;
+			this.inputEmit();
+		},
+
+		setDateFrom(e: any) {
+			this.valueFrom = e;
+			this.inputEmit();
+		},
+
+		setDateTo(e: any) {
+			this.valueTo = e;
+			this.inputEmit();
+		},
+
+		setInTheLastValue(e: any) {
+			this.inTheLastValue = e;
+			this.inputEmit();
+		},
+
+		setInTheLastUnit(e: any) {
+			this.inTheLastUnit = e;
+			this.inputEmit();
+		},
+	},
+
+	render(h: CreateElement): VNode {
+		const t = this.$props.translations;
+		const modifier = constants.ModifierBetween;
+
+		return (
+			<div>
+				<datePicker
+					value={this.valueFrom}
+					on={{input: this.setDateFrom}}
+					key={modifier + 'from'}
+					visible={this.datePickerVisible}
+					hideDetails={true}
+				/>
+				<span>{t.to}</span>
+				<datePicker
 					value={this.valueTo}
 					on={{input: this.setDateTo}}
 					key={modifier + 'to'}
@@ -774,7 +867,8 @@ export const Filter = Vue.extend({
 			let showValue = '';
 			if (op.selected) {
 				switch (op.itemType) {
-					case 'DatetimeRangeItem': {
+					case 'DatetimeRangeItem':
+					case 'DateRangeItem': {
 						const mod = op.modifier || constants.ModifierBetween;
 
 						if (mod === constants.ModifierBetween) {
@@ -987,6 +1081,7 @@ export const Filter = Vue.extend({
 
 		const itemTypes: any = {
 			DatetimeRangeItem,
+			DateRangeItem,
 			DateItem,
 			NumberItem,
 			StringItem,
@@ -998,6 +1093,7 @@ export const Filter = Vue.extend({
 		const t = this.$props.translations;
 		const trans: any = {
 			DatetimeRangeItem: t.date,
+			DateRangeItem: t.date,
 			DateItem: t.date,
 			NumberItem: t.number,
 			StringItem: t.string,

@@ -52,6 +52,24 @@ describe('filter', () => {
 		});
 	});
 
+	describe('encodeFilterData DateRangeItem', () => {
+		it('equals', () => {
+			expect(encodeFilterData([
+				{
+					key: 'created',
+					label: 'Created',
+					itemType: 'DateRangeItem',
+					selected: true,
+					modifier: 'between',
+					valueFrom: '2019-09-10',
+					valueTo: '2019-09-20',
+				},
+			])).toEqual(
+				'created.gte=2019-09-10&created.lte=2019-09-20',
+			);
+		});
+	});
+
 	describe('encodeFilterData DateItem', () => {
 		it('equals', () => {
 			expect(encodeFilterData([
@@ -156,7 +174,6 @@ describe('filter', () => {
 	});
 
 
-
 	describe('encodeFilterData StringItem', () => {
 		it('equals', () => {
 			expect(encodeFilterData([
@@ -209,7 +226,7 @@ describe('filter', () => {
 					itemType: 'LinkageSelectItem',
 					selected: true,
 					modifier: 'equals',
-					valuesAre: ['2','3','7'],
+					valuesAre: ['2', '3', '7'],
 				},
 				{
 					key: 'group_channel',
@@ -217,7 +234,7 @@ describe('filter', () => {
 					itemType: 'LinkageSelectItem',
 					selected: true,
 					modifier: 'equals',
-					valuesAre: ['1','2'],
+					valuesAre: ['1', '2'],
 				},
 			])).toEqual('province_city_district=2%2C3%2C7&group_channel=1%2C2');
 		});
