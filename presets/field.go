@@ -166,12 +166,12 @@ func (b *FieldsBuilder) Unmarshal(toObj interface{}, info *ModelInfo, removeDele
 
 	modifiedIndexes := ContextModifiedIndexesBuilder(ctx).FromHidden(ctx.R)
 
-	return b.setObjectFields(fromObj, toObj, &FieldContext{
+	return b.SetObjectFields(fromObj, toObj, &FieldContext{
 		ModelInfo: info,
 	}, removeDeletedAndSort, modifiedIndexes, ctx)
 }
 
-func (b *FieldsBuilder) setObjectFields(fromObj interface{}, toObj interface{}, parent *FieldContext, removeDeletedAndSort bool, modifiedIndexes *ModifiedIndexesBuilder, ctx *web.EventContext) (vErr web.ValidationErrors) {
+func (b *FieldsBuilder) SetObjectFields(fromObj interface{}, toObj interface{}, parent *FieldContext, removeDeletedAndSort bool, modifiedIndexes *ModifiedIndexesBuilder, ctx *web.EventContext) (vErr web.ValidationErrors) {
 
 	for _, f := range b.fields {
 		info := parent.ModelInfo
@@ -313,7 +313,7 @@ func (b *FieldsBuilder) setWithChildFromObjs(
 		// fmt.Printf("childFromObj %#+v\n", childFromObj)
 		// fmt.Printf("childToObj %#+v\n", childToObj)
 		// fmt.Printf("fieldContext %#+v\n", pf)
-		f.listItemBuilder.setObjectFields(childFromObj, childToObj, pf, removeDeletedAndSort, modifiedIndexes, ctx)
+		f.listItemBuilder.SetObjectFields(childFromObj, childToObj, pf, removeDeletedAndSort, modifiedIndexes, ctx)
 	})
 
 }
