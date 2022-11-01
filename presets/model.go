@@ -2,6 +2,7 @@ package presets
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
@@ -14,28 +15,29 @@ import (
 )
 
 type ModelBuilder struct {
-	p                *Builder
-	model            interface{}
-	primaryField     string
-	modelType        reflect.Type
-	menuGroupName    string
-	notInMenu        bool
-	menuIcon         string
-	uriName          string
-	label            string
-	fieldLabels      []string
-	placeholders     []string
-	listing          *ListingBuilder
-	detailing        *DetailingBuilder
-	editing          *EditingBuilder
-	creating         *EditingBuilder
-	writeFields      *FieldsBuilder
-	hasDetailing     bool
-	rightDrawerWidth string
-	link             string
-	layoutConfig     *LayoutConfig
-	modelInfo        *ModelInfo
-	singleton        bool
+	p                   *Builder
+	model               interface{}
+	primaryField        string
+	modelType           reflect.Type
+	menuGroupName       string
+	notInMenu           bool
+	menuIcon            string
+	uriName             string
+	defaultURLQueryFunc func(*http.Request) url.Values
+	label               string
+	fieldLabels         []string
+	placeholders        []string
+	listing             *ListingBuilder
+	detailing           *DetailingBuilder
+	editing             *EditingBuilder
+	creating            *EditingBuilder
+	writeFields         *FieldsBuilder
+	hasDetailing        bool
+	rightDrawerWidth    string
+	link                string
+	layoutConfig        *LayoutConfig
+	modelInfo           *ModelInfo
+	singleton           bool
 	web.EventsHub
 }
 
@@ -177,6 +179,11 @@ func (b ModelInfo) Verifier() *perm.Verifier {
 
 func (mb *ModelBuilder) URIName(v string) (r *ModelBuilder) {
 	mb.uriName = v
+	return mb
+}
+
+func (mb *ModelBuilder) DefaultURLQueryFunc(v func(*http.Request) url.Values) (r *ModelBuilder) {
+	mb.defaultURLQueryFunc = v
 	return mb
 }
 

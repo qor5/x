@@ -418,6 +418,9 @@ func (b *Builder) menuItem(ctx *web.EventContext, m *ModelBuilder, isSub bool) (
 	if m.link != "" {
 		href = m.link
 	}
+	if m.defaultURLQueryFunc != nil {
+		href = fmt.Sprintf("%s?%s", href, m.defaultURLQueryFunc(ctx.R).Encode())
+	}
 	item := VListItem(
 		VListItemAction(
 			VIcon(menuIcon),
