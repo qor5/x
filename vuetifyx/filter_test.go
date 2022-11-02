@@ -112,8 +112,8 @@ var setByQueryCases = []struct {
 				ValueTo:   "2019-04-11",
 			},
 		}),
-		expectedSQLConds: "created_at >= ? AND created_at <= ?",
-		expectedSQLArgs:  []interface{}{mustParseDatePickerValue("2019-04-10"), mustParseDatePickerValue("2019-04-11")},
+		expectedSQLConds: "created_at >= ? AND created_at < ?",
+		expectedSQLArgs:  []interface{}{mustParseDatePickerValue("2019-04-10"), mustParseDatePickerValue("2019-04-12")},
 	},
 	{
 		name: "date_range_has_left_param",
@@ -156,8 +156,8 @@ var setByQueryCases = []struct {
 				ValueTo:  "2019-04-10",
 			},
 		}),
-		expectedSQLConds: "created_at <= ?",
-		expectedSQLArgs:  []interface{}{mustParseDatePickerValue("2019-04-10")},
+		expectedSQLConds: "created_at < ?",
+		expectedSQLArgs:  []interface{}{mustParseDatePickerValue("2019-04-11")},
 	},
 	{
 		name: "customize SQLCondition",

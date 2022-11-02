@@ -56,7 +56,7 @@ const DEFAULT_CLEAR_TEXT = 'CLEAR'
 const DEFAULT_OK_TEXT = 'OK'
 
 export default {
-	name: 'v-datepicker',
+	name: 'vx-datepicker',
 	model: {
 		prop: 'value',
 		event: 'input'

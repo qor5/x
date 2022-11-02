@@ -316,6 +316,15 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 				if it.ItemType == ItemTypeDate {
 					conds = append(conds, sqlcToCond(sqlc, "gte"), sqlcToCond(sqlc, "lt"))
 					sqlArgs = append(sqlArgs, ival, ival.(time.Time).Add(24*time.Hour))
+				} else if it.ItemType == ItemTypeDateRange {
+					if mod == "gte" {
+						conds = append(conds, sqlcToCond(sqlc, "gte"))
+						sqlArgs = append(sqlArgs, ival)
+					}
+					if mod == "lte" {
+						conds = append(conds, sqlcToCond(sqlc, "lt"))
+						sqlArgs = append(sqlArgs, ival.(time.Time).Add(24*time.Hour))
+					}
 				} else {
 					conds = append(conds, sqlcToCond(sqlc, mod))
 
