@@ -133,8 +133,8 @@ type FilterIndependentTranslations struct {
 type FilterItemType string
 
 const (
-	ItemTypeDatetimeRange FilterItemType = "DatetimeRangeItem"
-	// TODO: add ItemTypeDateRange
+	ItemTypeDatetimeRange  FilterItemType = "DatetimeRangeItem"
+	ItemTypeDateRange      FilterItemType = "DateRangeItem"
 	ItemTypeDate           FilterItemType = "DateItem"
 	ItemTypeSelect         FilterItemType = "SelectItem"
 	ItemTypeMultipleSelect FilterItemType = "MultipleSelectItem"
@@ -305,7 +305,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 					if err != nil {
 						continue
 					}
-				} else if it.ItemType == ItemTypeDate {
+				} else if it.ItemType == ItemTypeDate || it.ItemType == ItemTypeDateRange {
 					var err error
 					ival, err = time.ParseInLocation("2006-01-02", val, time.Local)
 					if err != nil {
@@ -316,6 +316,15 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 				if it.ItemType == ItemTypeDate {
 					conds = append(conds, sqlcToCond(sqlc, "gte"), sqlcToCond(sqlc, "lt"))
 					sqlArgs = append(sqlArgs, ival, ival.(time.Time).Add(24*time.Hour))
+				} else if it.ItemType == ItemTypeDateRange {
+					if mod == "gte" {
+						conds = append(conds, sqlcToCond(sqlc, "gte"))
+						sqlArgs = append(sqlArgs, ival)
+					}
+					if mod == "lte" {
+						conds = append(conds, sqlcToCond(sqlc, "lt"))
+						sqlArgs = append(sqlArgs, ival.(time.Time).Add(24*time.Hour))
+					}
 				} else {
 					conds = append(conds, sqlcToCond(sqlc, mod))
 
@@ -355,7 +364,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 					it.ValueTo = mv["lt"]
 				}
 
-				if it.ItemType == ItemTypeNumber {
+				if it.ItemType == ItemTypeNumber || it.ItemType == ItemTypeDateRange {
 					it.ValueFrom = mv["gte"]
 					it.ValueTo = mv["lte"]
 				}
@@ -381,6 +390,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 						}
 						continue
 					}
+
 					if it.ItemType == ItemTypeLinkageSelect {
 						if v != "" {
 							it.ValuesAre = strings.Split(v, ",")
@@ -395,6 +405,17 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 						}
 						if mod == "lt" {
 							it.ValueTo = mv["lt"]
+						}
+						continue
+					}
+
+					if it.ItemType == ItemTypeDateRange {
+						it.ValueIs = v
+						if mod == "gte" {
+							it.ValueFrom = mv["gte"]
+						}
+						if mod == "lte" {
+							it.ValueTo = mv["lte"]
 						}
 						continue
 					}

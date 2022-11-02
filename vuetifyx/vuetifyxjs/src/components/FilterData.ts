@@ -25,6 +25,25 @@ function pushDatetimeRangeItem(segs: any, op: any) {
 	}
 }
 
+function pushDateRangeItem(segs: any, op: any) {
+	const mod = op.modifier || constants.ModifierBetween;
+
+	if (mod === constants.ModifierBetween) {
+		if (op.valueFrom) {
+			pushKeyVal(
+				segs,
+				op.key,
+				'gte',
+				op.valueFrom,
+			);
+		}
+		if (op.valueTo) {
+			pushKeyVal(segs, op.key, 'lte', op.valueTo);
+		}
+		return;
+	}
+}
+
 function pushDateItem(segs: any, op: any) {
 	if (!op.valueIs) {
 		return
@@ -124,6 +143,9 @@ export function filterData(data: any): any {
 		.map((op: any) => {
 			if (op.itemType === 'DatetimeRangeItem') {
 				pushDatetimeRangeItem(r, op);
+			}
+			if (op.itemType === 'DateRangeItem') {
+				pushDateRangeItem(r, op);
 			}
 			if (op.itemType === 'DateItem') {
 				pushDateItem(r, op);
