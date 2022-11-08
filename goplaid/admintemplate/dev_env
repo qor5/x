@@ -1,2 +1,0 @@
-export DB_PARAMS="user=GoplaidPackageName password=123 dbname=GoplaidPackageName_dev sslmode=disable host=localhost port=6432"
-export PORT="9000"
