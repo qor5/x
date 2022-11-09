@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/goplaid/web"
-	"github.com/goplaid/x/i18n"
+	"github.com/qor5/web"
+	"github.com/qor5/x/i18n"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/pquerna/otp"

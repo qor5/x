@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/goplaid/x/i18n/i18n-transfer/csv"
-	"github.com/goplaid/x/i18n/i18n-transfer/parser"
+	"github.com/qor5/x/i18n/i18n-transfer/csv"
+	"github.com/qor5/x/i18n/i18n-transfer/parser"
 	"github.com/manifoldco/promptui"
 )
 

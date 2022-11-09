@@ -1,12 +1,11 @@
-module github.com/goplaid/x
+module github.com/qor5/x
 
-go 1.17
+go 1.19
 
 require (
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
-	github.com/goplaid/web v1.2.2
 	github.com/iancoleman/strcase v0.2.0
 	github.com/jinzhu/inflection v1.0.0
 	github.com/lib/pq v1.10.3
@@ -15,6 +14,7 @@ require (
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
 	github.com/ory/ladon v1.2.0
 	github.com/pquerna/otp v1.3.0
+	github.com/qor5/web v1.2.3
 	github.com/spf13/cast v1.5.0
 	github.com/stretchr/testify v1.8.0
 	github.com/sunfmin/reflectutils v1.0.3
@@ -65,5 +65,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-//replace	github.com/goplaid/web => ../web
+//replace	github.com/qor5/web => ../web
 //replace github.com/theplant/docgo => ../../docgo/

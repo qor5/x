@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/goplaid/x/perm"
+	"github.com/qor5/x/perm"
 	"github.com/ory/ladon"
 	"github.com/sunfmin/reflectutils"
 )
