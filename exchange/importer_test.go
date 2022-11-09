@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/goplaid/x/exchange"
+	"github.com/qor5/x/exchange"
 	"github.com/stretchr/testify/assert"
 )
 

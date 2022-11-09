@@ -48,7 +48,7 @@ type Visitor struct {
 	//      "httptest": "net/http/httptest",
 	//      "strings": "strings",
 	//      "testing": "testing"
-	//      "i18n": "github.com/goplaid/x/i18n",
+	//      "i18n": "github.com/qor5/x/i18n",
 	//      "testingutils": "github.com/theplant/testingutils",
 	//      "language": "golang.org/x/text/language",
 	//}

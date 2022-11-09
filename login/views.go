@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/goplaid/web"
-	"github.com/goplaid/x/i18n"
+	"github.com/qor5/web"
+	"github.com/qor5/x/i18n"
 	"github.com/pquerna/otp"
 	. "github.com/theplant/htmlgo"
 	"golang.org/x/text/language"

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/goplaid/x/i18n"
+	"github.com/qor5/x/i18n"
 	"github.com/theplant/testingutils"
 	"golang.org/x/text/language"
 )

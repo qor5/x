@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/goplaid/x/i18n"
+	"github.com/qor5/x/i18n"
 )
 
 type ViewHelper struct {

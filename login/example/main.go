@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/goplaid/x/i18n"
-	"github.com/goplaid/x/login"
+	"github.com/qor5/x/i18n"
+	"github.com/qor5/x/login"
 	"github.com/markbates/goth/providers/google"
 	"github.com/markbates/goth/providers/twitter"
 	. "github.com/theplant/htmlgo"
