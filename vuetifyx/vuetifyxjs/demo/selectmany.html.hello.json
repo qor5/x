@@ -1,9 +1,0 @@
-{
-    "data": [
-		{"id":"1","text":"person 1","image":"https://cdn.vuetifyjs.com/images/lists/1.jpg"},
-		{"id":"2","text":"person 2","image":"https://cdn.vuetifyjs.com/images/lists/2.jpg"},
-		{"id":"3","text":"person 3","image":"https://cdn.vuetifyjs.com/images/lists/3.jpg"},
-		{"id":"4","text":"person 4","image":"https://cdn.vuetifyjs.com/images/lists/4.jpg"},
-		{"id":"5","text":"person 5","image":"https://cdn.vuetifyjs.com/images/lists/5.jpg"}
-    ]
-}
