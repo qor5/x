@@ -70,6 +70,10 @@ type Messages struct {
 	// Info Messages
 	InfoPasswordSuccessfullyReset   string
 	InfoPasswordSuccessfullyChanged string
+	// Demo Account
+	DemoUsernameLabel string
+	DemoPasswordLabel string
+	DemoTips          string
 }
 
 var Messages_en_US = &Messages{
@@ -127,6 +131,9 @@ var Messages_en_US = &Messages{
 	WarnPasswordHasBeenChanged:          "Password has been changed, please sign-in again",
 	InfoPasswordSuccessfullyReset:       "Password successfully reset, please sign-in again",
 	InfoPasswordSuccessfullyChanged:     "Password successfully changed, please sign-in again",
+	DemoUsernameLabel:                   "Demo Username: ",
+	DemoPasswordLabel:                   "Demo Password: ",
+	DemoTips:                            "Please note that the database would be reset on every even hours.",
 }
 
 var Messages_zh_CN = &Messages{
@@ -184,4 +191,7 @@ var Messages_zh_CN = &Messages{
 	WarnPasswordHasBeenChanged:          "密码被修改了，请重新登录",
 	InfoPasswordSuccessfullyReset:       "密码重置成功，请重新登录",
 	InfoPasswordSuccessfullyChanged:     "密码修改成功，请重新登录",
+	DemoUsernameLabel:                   "演示账户：",
+	DemoPasswordLabel:                   "演示密码：",
+	DemoTips:                            "请注意，数据库将每隔偶数小时重置一次。",
 }
