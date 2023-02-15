@@ -12,12 +12,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/qor5/web"
-	"github.com/qor5/x/i18n"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
+	"github.com/qor5/web"
+	"github.com/qor5/x/i18n"
 	h "github.com/theplant/htmlgo"
 	"golang.org/x/text/language"
 	"gorm.io/gorm"
@@ -421,7 +421,8 @@ func (b *Builder) ViewHelper() *ViewHelper {
 
 func (b *Builder) registerI18n() {
 	b.i18nBuilder.RegisterForModule(language.English, I18nLoginKey, Messages_en_US).
-		RegisterForModule(language.SimplifiedChinese, I18nLoginKey, Messages_zh_CN)
+		RegisterForModule(language.SimplifiedChinese, I18nLoginKey, Messages_zh_CN).
+		RegisterForModule(language.Japanese, I18nLoginKey, Messages_ja_JP)
 }
 
 func (b *Builder) UserModel(m interface{}) (r *Builder) {
