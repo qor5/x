@@ -121,6 +121,7 @@ type Builder struct {
 	afterChangePasswordHook        HookFunc
 	afterExtendSessionHook         HookFunc
 	afterTOTPCodeReusedHook        HookFunc
+	afterOAuthCompleteHook         HookFunc
 
 	db                   *gorm.DB
 	userModel            interface{}
@@ -362,6 +363,12 @@ func (b *Builder) AfterTOTPCodeReused(v HookFunc) (r *Builder) {
 	return b
 }
 
+// user is goth.User
+func (b *Builder) AfterOAuthComplete(v HookFunc) (r *Builder) {
+	b.afterOAuthCompleteHook = b.wrapHook(v)
+	return b
+}
+
 // seconds
 // default 1h
 func (b *Builder) SessionMaxAge(v int) (r *Builder) {
@@ -493,6 +500,14 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 		setFailCodeFlash(w, FailCodeCompleteUserAuthFailed)
 		http.Redirect(w, r, b.LogoutURL, http.StatusFound)
 		return
+	}
+
+	if b.afterOAuthCompleteHook != nil {
+		if herr := b.afterOAuthCompleteHook(r, ouser); herr != nil {
+			setFailCodeFlash(w, FailCodeSystemError)
+			http.Redirect(w, r, b.LogoutURL, http.StatusFound)
+			return
+		}
 	}
 
 	userID := ouser.UserID
