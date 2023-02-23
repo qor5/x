@@ -21,7 +21,7 @@ require (
 	github.com/theplant/htmlgo v1.0.3
 	github.com/theplant/testingutils v0.0.0-20190603093022-26d8b4d95c61
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
-	golang.org/x/text v0.3.7
+	golang.org/x/text v0.3.8
 	gorm.io/driver/postgres v1.4.5
 	gorm.io/driver/sqlite v1.4.3
 	gorm.io/gorm v1.24.1-0.20221019064659-5dd2bb482755
@@ -58,7 +58,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 // indirect
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43 // indirect
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
