@@ -1,11 +1,12 @@
 package perm
 
 import (
-	"github.com/lib/pq"
-	"gorm.io/gorm"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 type DefaultDBPolicy struct {
@@ -18,7 +19,7 @@ type DefaultDBPolicy struct {
 	Resources pq.StringArray `gorm:"type:text[]"`
 }
 
-func (p DefaultDBPolicy) LoadDBPolicies(db *gorm.DB, startFrom *time.Time) (toUpdate []*PolicyBuilder, toDelete []*PolicyBuilder) {
+func (p DefaultDBPolicy) LoadDBPolicies(db *gorm.DB, startFrom *time.Time) (toUpdateOrCreate []*PolicyBuilder, toDelete []*PolicyBuilder) {
 	var ps []DefaultDBPolicy
 	if startFrom == nil || startFrom.IsZero() {
 		db.Find(&ps)
@@ -30,7 +31,7 @@ func (p DefaultDBPolicy) LoadDBPolicies(db *gorm.DB, startFrom *time.Time) (toUp
 		if p.DeletedAt.Valid {
 			toDelete = append(toDelete, p.ToPolicy())
 		} else {
-			toUpdate = append(toUpdate, p.ToPolicy())
+			toUpdateOrCreate = append(toUpdateOrCreate, p.ToPolicy())
 		}
 	}
 	return
