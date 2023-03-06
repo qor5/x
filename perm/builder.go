@@ -57,12 +57,12 @@ func ToPermissionRN(v interface{}) []string {
 }
 
 type Builder struct {
-	m             sync.Mutex
-	policies      []*PolicyBuilder
-	ladon         *ladon.Ladon
-	subjectsFunc  SubjectsFunc
-	contextFunc   ContextFunc
-	dbPolicyModel DBPolicy
+	m            sync.Mutex
+	policies     []*PolicyBuilder
+	ladon        *ladon.Ladon
+	subjectsFunc SubjectsFunc
+	contextFunc  ContextFunc
+	dbPolicy     *DBPolicyBuilder
 }
 
 func New() *Builder {
@@ -144,14 +144,10 @@ func (b *Builder) ContextFunc(v ContextFunc) (r *Builder) {
 	return b
 }
 
-func (b *Builder) EnableDBPolicy(db *gorm.DB, dbPolicyModel DBPolicy, loadDuration time.Duration) (r *Builder) {
-	if dbPolicyModel == nil {
-		b.dbPolicyModel = DefaultDBPolicy{}
-	} else {
-		b.dbPolicyModel = dbPolicyModel
-	}
+func (b *Builder) DBPolicy(dpb *DBPolicyBuilder) (r *Builder) {
+	b.dbPolicy = dpb
 
-	go b.loopLoadDBPolicies(db, loadDuration)
+	go b.loopLoadDBPolicies(dpb.db, dpb.loadFrequency)
 	return b
 }
 
@@ -188,7 +184,7 @@ func (b *Builder) DeletePolicies(toDelete ...*PolicyBuilder) {
 }
 
 func (b *Builder) LoadDBPoliciesToMemory(db *gorm.DB, startFrom *time.Time) {
-	toUpdateOrCreate, toDelete := b.dbPolicyModel.LoadDBPolicies(db, startFrom)
+	toUpdateOrCreate, toDelete := b.dbPolicy.model.LoadDBPolicies(db, startFrom)
 	b.DeletePolicies(toDelete...)
 	b.UpdateOrCreatePolicies(toUpdateOrCreate...)
 	if Verbose {

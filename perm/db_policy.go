@@ -9,6 +9,30 @@ import (
 	"gorm.io/gorm"
 )
 
+type DBPolicyBuilder struct {
+	db            *gorm.DB
+	model         DBPolicy
+	loadFrequency time.Duration
+}
+
+func NewDBPolicy(db *gorm.DB) *DBPolicyBuilder {
+	return &DBPolicyBuilder{
+		db:            db,
+		model:         DefaultDBPolicy{},
+		loadFrequency: time.Minute,
+	}
+}
+
+func (dpb *DBPolicyBuilder) Model(m DBPolicy) *DBPolicyBuilder {
+	dpb.model = m
+	return dpb
+}
+
+func (dpb *DBPolicyBuilder) LoadFrequency(d time.Duration) *DBPolicyBuilder {
+	dpb.loadFrequency = d
+	return dpb
+}
+
 type DefaultDBPolicy struct {
 	gorm.Model
 
