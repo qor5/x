@@ -82,7 +82,7 @@ func (b *Builder) Policies(ps ...*PolicyBuilder) (r *Builder) {
 }
 
 func (b *Builder) createPolicy(p *PolicyBuilder) {
-	p.SetIDIfEmpty()
+	p.setIDIfEmpty()
 	err := b.ladon.Manager.Create(p.policy)
 	if err != nil {
 		panic(err)

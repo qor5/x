@@ -61,7 +61,7 @@ func (b *PolicyBuilder) Given(conditions Conditions) (r *PolicyBuilder) {
 	return b
 }
 
-func (b *PolicyBuilder) SetIDIfEmpty() {
+func (b *PolicyBuilder) setIDIfEmpty() {
 	if b.policy.ID != "" {
 		return
 	}
