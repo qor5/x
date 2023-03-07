@@ -139,9 +139,17 @@ func (b *Builder) SubjectsFunc(v SubjectsFunc) (r *Builder) {
 	return b
 }
 
+func (b *Builder) GetSubjectsFunc() SubjectsFunc {
+	return b.subjectsFunc
+}
+
 func (b *Builder) ContextFunc(v ContextFunc) (r *Builder) {
 	b.contextFunc = v
 	return b
+}
+
+func (b *Builder) GetContextFunc() ContextFunc {
+	return b.contextFunc
 }
 
 func (b *Builder) DBPolicy(dpb *DBPolicyBuilder) (r *Builder) {
