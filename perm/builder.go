@@ -128,7 +128,7 @@ func (b *Builder) deletePolicy(p *PolicyBuilder) {
 			if err != nil {
 				panic(err)
 			}
-			b.policies = append(b.policies[:i], b.policies[1+1:]...)
+			b.policies = append(b.policies[:i], b.policies[i+1:]...)
 			break
 		}
 	}
