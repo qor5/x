@@ -1,7 +1,9 @@
 package perm
 
 import (
+	"crypto/md5"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/ory/ladon"
@@ -59,9 +61,16 @@ func (b *PolicyBuilder) Given(conditions Conditions) (r *PolicyBuilder) {
 	return b
 }
 
-func (b PolicyBuilder) Json() []byte {
-	str, _ := json.Marshal(b.policy)
-	return str
+func (b *PolicyBuilder) setIDIfEmpty() {
+	if b.policy.ID != "" {
+		return
+	}
+
+	bs, err := json.Marshal(b.policy)
+	if err != nil {
+		panic(err)
+	}
+	b.policy.ID = fmt.Sprintf("%x", md5.Sum(bs))
 }
 
 func (b *PolicyBuilder) GetID() string {

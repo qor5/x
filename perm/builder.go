@@ -1,12 +1,12 @@
 package perm
 
 import (
-	"crypto/md5"
 	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/iancoleman/strcase"
@@ -57,11 +57,12 @@ func ToPermissionRN(v interface{}) []string {
 }
 
 type Builder struct {
-	policies      []*PolicyBuilder
-	ladon         *ladon.Ladon
-	subjectsFunc  SubjectsFunc
-	contextFunc   ContextFunc
-	dbPolicyModel DBPolicy
+	m            sync.Mutex
+	policies     []*PolicyBuilder
+	ladon        *ladon.Ladon
+	subjectsFunc SubjectsFunc
+	contextFunc  ContextFunc
+	dbPolicy     *DBPolicyBuilder
 }
 
 func New() *Builder {
@@ -74,17 +75,63 @@ func New() *Builder {
 }
 
 func (b *Builder) Policies(ps ...*PolicyBuilder) (r *Builder) {
-	b.policies = ps
-	for _, p := range b.policies {
-		if p.policy.ID == "" {
-			p.policy.ID = fmt.Sprintf("%x", md5.Sum(p.Json()))
-		}
-		err := b.ladon.Manager.Create(p.policy)
-		if err != nil {
-			panic(err)
+	b.DeletePolicies(b.policies...)
+	b.policies = make([]*PolicyBuilder, 0)
+	b.CreatePolicies(ps...)
+	return b
+}
+
+func (b *Builder) createPolicy(p *PolicyBuilder) {
+	p.setIDIfEmpty()
+	err := b.ladon.Manager.Create(p.policy)
+	if err != nil {
+		panic(err)
+	}
+	b.policies = append(b.policies, p)
+}
+
+func (b *Builder) updatePolicy(p *PolicyBuilder) {
+	i := b.findPolicyIndex(p.GetID())
+	if i < 0 {
+		return
+	}
+
+	err := b.ladon.Manager.Update(p.policy)
+	if err != nil {
+		panic(err)
+	}
+	b.policies[i] = p
+}
+
+func (b *Builder) findPolicyIndex(id string) int {
+	for i, p := range b.policies {
+		if p.GetID() == id {
+			return i
 		}
 	}
-	return b
+	return -1
+}
+
+func (b *Builder) updateOrCreatePolicy(p *PolicyBuilder) {
+	i := b.findPolicyIndex(p.GetID())
+	if i < 0 {
+		b.createPolicy(p)
+	} else {
+		b.updatePolicy(p)
+	}
+}
+
+func (b *Builder) deletePolicy(p *PolicyBuilder) {
+	for i, ep := range b.policies {
+		if ep.GetID() == p.GetID() {
+			err := b.ladon.Manager.Delete(p.GetID())
+			if err != nil {
+				panic(err)
+			}
+			b.policies = append(b.policies[:i], b.policies[i+1:]...)
+			break
+		}
+	}
 }
 
 func (b *Builder) SubjectsFunc(v SubjectsFunc) (r *Builder) {
@@ -92,38 +139,62 @@ func (b *Builder) SubjectsFunc(v SubjectsFunc) (r *Builder) {
 	return b
 }
 
+func (b *Builder) GetSubjectsFunc() SubjectsFunc {
+	return b.subjectsFunc
+}
+
 func (b *Builder) ContextFunc(v ContextFunc) (r *Builder) {
 	b.contextFunc = v
 	return b
 }
 
-func (b *Builder) EnableDBPolicy(db *gorm.DB, dbPolicyModel DBPolicy, loadDuration time.Duration) (r *Builder) {
-	if dbPolicyModel == nil {
-		b.dbPolicyModel = DefaultDBPolicy{}
-	} else {
-		b.dbPolicyModel = dbPolicyModel
-	}
+func (b *Builder) GetContextFunc() ContextFunc {
+	return b.contextFunc
+}
 
-	go b.loopLoadDBPolicies(db, loadDuration)
+func (b *Builder) DBPolicy(dpb *DBPolicyBuilder) (r *Builder) {
+	b.dbPolicy = dpb
+
+	go b.loopLoadDBPolicies(dpb.db, dpb.loadFrequency)
 	return b
 }
 
+func (b *Builder) CreatePolicies(ps ...*PolicyBuilder) {
+	b.m.Lock()
+	defer b.m.Unlock()
+	for _, p := range ps {
+		b.createPolicy(p)
+	}
+}
+
 func (b *Builder) UpdatePolicies(toUpdate ...*PolicyBuilder) {
+	b.m.Lock()
+	defer b.m.Unlock()
 	for _, p := range toUpdate {
-		b.ladon.Manager.Update(p.policy)
+		b.updatePolicy(p)
+	}
+}
+
+func (b *Builder) UpdateOrCreatePolicies(toUpdate ...*PolicyBuilder) {
+	b.m.Lock()
+	defer b.m.Unlock()
+	for _, p := range toUpdate {
+		b.updateOrCreatePolicy(p)
 	}
 }
 
 func (b *Builder) DeletePolicies(toDelete ...*PolicyBuilder) {
+	b.m.Lock()
+	defer b.m.Unlock()
 	for _, p := range toDelete {
-		b.ladon.Manager.Delete(p.GetID())
+		b.deletePolicy(p)
 	}
 }
 
 func (b *Builder) LoadDBPoliciesToMemory(db *gorm.DB, startFrom *time.Time) {
-	toUpdate, toDelete := b.dbPolicyModel.LoadDBPolicies(db, startFrom)
+	toUpdateOrCreate, toDelete := b.dbPolicy.model.LoadDBPolicies(db, startFrom)
 	b.DeletePolicies(toDelete...)
-	b.UpdatePolicies(toUpdate...)
+	b.UpdateOrCreatePolicies(toUpdateOrCreate...)
 	if Verbose {
 		b.printPolices()
 	}
@@ -141,6 +212,7 @@ func (b *Builder) loopLoadDBPolicies(db *gorm.DB, duration time.Duration) {
 
 func (b *Builder) printPolices() {
 	allp, _ := b.ladon.Manager.GetAll(100, 0)
+	fmt.Printf("all permission policies: \n")
 	for _, p := range allp {
 		fmt.Printf("%+v \n", p)
 	}
