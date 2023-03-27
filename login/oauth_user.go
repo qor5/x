@@ -4,20 +4,20 @@ import "gorm.io/gorm"
 
 type OAuthUser interface {
 	FindUserByOAuthUserID(db *gorm.DB, model interface{}, provider string, oid string) (user interface{}, err error)
-	FindUserByOAuthIndentifier(db *gorm.DB, model interface{}, provider string, indentifier string) (user interface{}, err error)
-	InitOAuthUserID(db *gorm.DB, model interface{}, provider string, indentifier string, oid string) error
+	FindUserByOAuthIdentifier(db *gorm.DB, model interface{}, provider string, identifier string) (user interface{}, err error)
+	InitOAuthUserID(db *gorm.DB, model interface{}, provider string, identifier string, oid string) error
 	SetAvatar(v string)
 	GetAvatar() string
 }
 
 type OAuthInfo struct {
-	OAuthProvider string `gorm:"index:uidx_users_oauth_provider_user_id,unique,where:o_auth_provider!='' and o_auth_user_id!='' and deleted_at is null;index:uidx_users_oauth_provider_indentifier,unique,where:o_auth_provider!='' and o_auth_indentifier!='' and deleted_at is null"`
+	OAuthProvider string `gorm:"index:uidx_users_oauth_provider_user_id,unique,where:o_auth_provider!='' and o_auth_user_id!='' and deleted_at is null;index:uidx_users_oauth_provider_identifier,unique,where:o_auth_provider!='' and o_auth_identifier!='' and deleted_at is null"`
 	OAuthUserID   string `gorm:"index:uidx_users_oauth_provider_user_id,unique,where:o_auth_provider!='' and o_auth_user_id!='' and deleted_at is null"`
 	// users use this value to log into their account
 	// in most cases is email or account name
 	// it is used to find the user record on the first login
-	OAuthIndentifier string `gorm:"index:uidx_users_oauth_provider_indentifier,unique,where:o_auth_provider!='' and o_auth_indentifier!='' and deleted_at is null"`
-	OAuthAvatar      string `gorm:"-"`
+	OAuthIdentifier string `gorm:"index:uidx_users_oauth_provider_identifier,unique,where:o_auth_provider!='' and o_auth_identifier!='' and deleted_at is null"`
+	OAuthAvatar     string `gorm:"-"`
 }
 
 var _ OAuthUser = (*OAuthInfo)(nil)
@@ -32,8 +32,8 @@ func (oa *OAuthInfo) FindUserByOAuthUserID(db *gorm.DB, model interface{}, provi
 	return model, nil
 }
 
-func (oa *OAuthInfo) FindUserByOAuthIndentifier(db *gorm.DB, model interface{}, provider string, indentifier string) (user interface{}, err error) {
-	err = db.Where("o_auth_provider = ? and o_auth_indentifier = ?", provider, indentifier).
+func (oa *OAuthInfo) FindUserByOAuthIdentifier(db *gorm.DB, model interface{}, provider string, identifier string) (user interface{}, err error) {
+	err = db.Where("o_auth_provider = ? and o_auth_identifier = ?", provider, identifier).
 		First(model).
 		Error
 	if err != nil {
@@ -41,9 +41,9 @@ func (oa *OAuthInfo) FindUserByOAuthIndentifier(db *gorm.DB, model interface{}, 
 	}
 	return model, nil
 }
-func (oa *OAuthInfo) InitOAuthUserID(db *gorm.DB, model interface{}, provider string, indentifier string, oid string) error {
+func (oa *OAuthInfo) InitOAuthUserID(db *gorm.DB, model interface{}, provider string, identifier string, oid string) error {
 	err := db.Model(model).
-		Where("o_auth_provider = ? and o_auth_indentifier = ?", provider, indentifier).
+		Where("o_auth_provider = ? and o_auth_identifier = ?", provider, identifier).
 		Updates(map[string]interface{}{
 			"o_auth_user_id": oid,
 		}).
