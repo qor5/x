@@ -520,9 +520,9 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 				http.Redirect(w, r, b.LogoutURL, http.StatusFound)
 				return
 			}
-			// TODO: maybe the indentifier of some providers is not email
-			indentifier := ouser.Email
-			user, err = b.userModel.(OAuthUser).FindUserByOAuthIndentifier(b.db, b.newUserObject(), ouser.Provider, indentifier)
+			// TODO: maybe the identifier of some providers is not email
+			identifier := ouser.Email
+			user, err = b.userModel.(OAuthUser).FindUserByOAuthIdentifier(b.db, b.newUserObject(), ouser.Provider, identifier)
 			if err != nil {
 				if err == gorm.ErrRecordNotFound {
 					setFailCodeFlash(w, FailCodeUserNotFound)
@@ -532,7 +532,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 				http.Redirect(w, r, b.LogoutURL, http.StatusFound)
 				return
 			}
-			err = user.(OAuthUser).InitOAuthUserID(b.db, b.newUserObject(), ouser.Provider, indentifier, ouser.UserID)
+			err = user.(OAuthUser).InitOAuthUserID(b.db, b.newUserObject(), ouser.Provider, identifier, ouser.UserID)
 			if err != nil {
 				setFailCodeFlash(w, FailCodeSystemError)
 				http.Redirect(w, r, b.LogoutURL, http.StatusFound)
