@@ -67,6 +67,15 @@ func main() {
 		HomeURLFunc(func(r *http.Request, user interface{}) string {
 			return "/admin"
 		}).
+		BeforeSetPassword(func(r *http.Request, user interface{}, extraVals ...interface{}) error {
+			password := extraVals[0].(string)
+			if len(password) <= 2 {
+				return &login.ValidationError{
+					Msg: "password length cannot be less than 2",
+				}
+			}
+			return nil
+		}).
 		AfterConfirmSendResetPasswordLink(func(r *http.Request, user interface{}, extraVals ...interface{}) error {
 			link := extraVals[0]
 			fmt.Println("#########################################start")

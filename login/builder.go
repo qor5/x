@@ -36,7 +36,6 @@ var (
 )
 
 type HomeURLFunc func(r *http.Request, user interface{}) string
-type PasswordValidationFunc func(password string) (message string, ok bool)
 type HookFunc func(r *http.Request, user interface{}, extraVals ...interface{}) error
 
 type void struct{}
@@ -108,7 +107,7 @@ type Builder struct {
 	totpSetupPageFunc             web.PageFunc
 	totpValidatePageFunc          web.PageFunc
 
-	passwordValidationFunc PasswordValidationFunc
+	beforeSetPasswordHook HookFunc
 
 	afterLoginHook                        HookFunc
 	afterFailedToLoginHook                HookFunc
@@ -291,11 +290,6 @@ func (b *Builder) TOTPValidatePageFunc(v web.PageFunc) (r *Builder) {
 	return b
 }
 
-func (b *Builder) PasswordValidationFunc(v PasswordValidationFunc) (r *Builder) {
-	b.passwordValidationFunc = v
-	return b
-}
-
 func (b *Builder) wrapHook(v HookFunc) HookFunc {
 	if v == nil {
 		return nil
@@ -307,6 +301,13 @@ func (b *Builder) wrapHook(v HookFunc) HookFunc {
 		}
 		return v(r, user, extraVals...)
 	}
+}
+
+// extra vals:
+// - password
+func (b *Builder) BeforeSetPassword(v HookFunc) (r *Builder) {
+	b.beforeSetPasswordHook = b.wrapHook(v)
+	return b
 }
 
 func (b *Builder) AfterLogin(v HookFunc) (r *Builder) {
@@ -1055,18 +1056,6 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
-	if b.passwordValidationFunc != nil {
-		msg, ok := b.passwordValidationFunc(password)
-		if !ok {
-			setCustomErrorMessageFlash(w, msg)
-			setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
-				Password:        password,
-				ConfirmPassword: confirmPassword,
-			})
-			http.Redirect(w, r, failRedirectURL, http.StatusFound)
-			return
-		}
-	}
 
 	u, err := b.findUserByID(userID)
 	if err != nil {
@@ -1089,6 +1078,24 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 		setFailCodeFlash(w, FailCodeInvalidToken)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
+	}
+
+	if b.beforeSetPasswordHook != nil {
+		if herr := b.beforeSetPasswordHook(r, u, password); herr != nil {
+			verr, ok := herr.(*ValidationError)
+			if !ok {
+				setFailCodeFlash(w, FailCodeSystemError)
+				http.Redirect(w, r, failRedirectURL, http.StatusFound)
+				return
+			}
+			setCustomErrorMessageFlash(w, verr.Msg)
+			setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
+				Password:        password,
+				ConfirmPassword: confirmPassword,
+			})
+			http.Redirect(w, r, failRedirectURL, http.StatusFound)
+			return
+		}
 	}
 
 	if u.(UserPasser).GetIsTOTPSetup() {
@@ -1175,10 +1182,10 @@ func (b *Builder) ChangePassword(
 	if confirmPassword != password {
 		return ErrPasswordNotMatch
 	}
-	if b.passwordValidationFunc != nil {
-		msg, ok := b.passwordValidationFunc(password)
-		if !ok {
-			return &ValidationError{Msg: msg}
+
+	if b.beforeSetPasswordHook != nil {
+		if herr := b.beforeSetPasswordHook(r, user, password); herr != nil {
+			return herr
 		}
 	}
 
