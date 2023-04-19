@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/qor5/x/i18n"
-	"github.com/qor5/x/login"
 	"github.com/markbates/goth/providers/google"
 	"github.com/markbates/goth/providers/twitter"
+	"github.com/qor5/x/i18n"
+	"github.com/qor5/x/login"
 	. "github.com/theplant/htmlgo"
 	"github.com/theplant/testingutils"
 	"golang.org/x/text/language"
@@ -67,9 +67,10 @@ func main() {
 		HomeURLFunc(func(r *http.Request, user interface{}) string {
 			return "/admin"
 		}).
-		NotifyUserOfResetPasswordLinkFunc(func(user interface{}, resetLink string) error {
+		AfterConfirmSendResetPasswordLink(func(r *http.Request, user interface{}, extraVals ...interface{}) error {
+			link := extraVals[0]
 			fmt.Println("#########################################start")
-			testingutils.PrintlnJson(resetLink)
+			testingutils.PrintlnJson(link)
 			fmt.Println("#########################################end")
 			return nil
 		})
