@@ -36,9 +36,7 @@ var (
 )
 
 type HomeURLFunc func(r *http.Request, user interface{}) string
-type NotifyUserOfResetPasswordLinkFunc func(user interface{}, resetLink string) error
-type PasswordValidationFunc func(password string) (message string, ok bool)
-type HookFunc func(r *http.Request, user interface{}, vals ...interface{}) error
+type HookFunc func(r *http.Request, user interface{}, extraVals ...interface{}) error
 
 type void struct{}
 
@@ -109,19 +107,18 @@ type Builder struct {
 	totpSetupPageFunc             web.PageFunc
 	totpValidatePageFunc          web.PageFunc
 
-	notifyUserOfResetPasswordLinkFunc NotifyUserOfResetPasswordLinkFunc
-	passwordValidationFunc            PasswordValidationFunc
+	beforeSetPasswordHook HookFunc
 
-	afterLoginHook                 HookFunc
-	afterFailedToLoginHook         HookFunc
-	afterUserLockedHook            HookFunc
-	afterLogoutHook                HookFunc
-	afterSendResetPasswordLinkHook HookFunc
-	afterResetPasswordHook         HookFunc
-	afterChangePasswordHook        HookFunc
-	afterExtendSessionHook         HookFunc
-	afterTOTPCodeReusedHook        HookFunc
-	afterOAuthCompleteHook         HookFunc
+	afterLoginHook                        HookFunc
+	afterFailedToLoginHook                HookFunc
+	afterUserLockedHook                   HookFunc
+	afterLogoutHook                       HookFunc
+	afterConfirmSendResetPasswordLinkHook HookFunc
+	afterResetPasswordHook                HookFunc
+	afterChangePasswordHook               HookFunc
+	afterExtendSessionHook                HookFunc
+	afterTOTPCodeReusedHook               HookFunc
+	afterOAuthCompleteHook                HookFunc
 
 	db                   *gorm.DB
 	userModel            interface{}
@@ -293,27 +290,24 @@ func (b *Builder) TOTPValidatePageFunc(v web.PageFunc) (r *Builder) {
 	return b
 }
 
-func (b *Builder) NotifyUserOfResetPasswordLinkFunc(v NotifyUserOfResetPasswordLinkFunc) (r *Builder) {
-	b.notifyUserOfResetPasswordLinkFunc = v
-	return b
-}
-
-func (b *Builder) PasswordValidationFunc(v PasswordValidationFunc) (r *Builder) {
-	b.passwordValidationFunc = v
-	return b
-}
-
 func (b *Builder) wrapHook(v HookFunc) HookFunc {
 	if v == nil {
 		return nil
 	}
 
-	return func(r *http.Request, user interface{}, vals ...interface{}) error {
+	return func(r *http.Request, user interface{}, extraVals ...interface{}) error {
 		if GetCurrentUser(r) == nil {
 			r = r.WithContext(context.WithValue(r.Context(), UserKey, user))
 		}
-		return v(r, user, vals...)
+		return v(r, user, extraVals...)
 	}
+}
+
+// extra vals:
+// - password
+func (b *Builder) BeforeSetPassword(v HookFunc) (r *Builder) {
+	b.beforeSetPasswordHook = b.wrapHook(v)
+	return b
 }
 
 func (b *Builder) AfterLogin(v HookFunc) (r *Builder) {
@@ -336,8 +330,10 @@ func (b *Builder) AfterLogout(v HookFunc) (r *Builder) {
 	return b
 }
 
-func (b *Builder) AfterSendResetPasswordLink(v HookFunc) (r *Builder) {
-	b.afterSendResetPasswordLinkHook = b.wrapHook(v)
+// extra vals:
+// - reset link
+func (b *Builder) AfterConfirmSendResetPasswordLink(v HookFunc) (r *Builder) {
+	b.afterConfirmSendResetPasswordLinkHook = b.wrapHook(v)
 	return b
 }
 
@@ -351,7 +347,7 @@ func (b *Builder) AfterChangePassword(v HookFunc) (r *Builder) {
 	return b
 }
 
-// vals:
+// extra vals:
 // - old session token
 func (b *Builder) AfterExtendSession(v HookFunc) (r *Builder) {
 	b.afterExtendSessionHook = b.wrapHook(v)
@@ -1006,17 +1002,8 @@ func (b *Builder) sendResetPasswordLink(w http.ResponseWriter, r *http.Request) 
 	if doTOTP {
 		link = MustSetQuery(link, "totp", "1")
 	}
-	if err = b.notifyUserOfResetPasswordLinkFunc(u, link); err != nil {
-		setFailCodeFlash(w, FailCodeSystemError)
-		setWrongForgetPasswordInputFlash(w, WrongForgetPasswordInputFlash{
-			Account: account,
-		})
-		http.Redirect(w, r, failRedirectURL, http.StatusFound)
-		return
-	}
-
-	if b.afterSendResetPasswordLinkHook != nil {
-		if herr := b.afterSendResetPasswordLinkHook(r, u); herr != nil {
+	if b.afterConfirmSendResetPasswordLinkHook != nil {
+		if herr := b.afterConfirmSendResetPasswordLinkHook(r, u, link); herr != nil {
 			setFailCodeFlash(w, FailCodeSystemError)
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
@@ -1069,18 +1056,6 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
-	if b.passwordValidationFunc != nil {
-		msg, ok := b.passwordValidationFunc(password)
-		if !ok {
-			setCustomErrorMessageFlash(w, msg)
-			setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
-				Password:        password,
-				ConfirmPassword: confirmPassword,
-			})
-			http.Redirect(w, r, failRedirectURL, http.StatusFound)
-			return
-		}
-	}
 
 	u, err := b.findUserByID(userID)
 	if err != nil {
@@ -1103,6 +1078,24 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 		setFailCodeFlash(w, FailCodeInvalidToken)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
+	}
+
+	if b.beforeSetPasswordHook != nil {
+		if herr := b.beforeSetPasswordHook(r, u, password); herr != nil {
+			verr, ok := herr.(*ValidationError)
+			if !ok {
+				setFailCodeFlash(w, FailCodeSystemError)
+				http.Redirect(w, r, failRedirectURL, http.StatusFound)
+				return
+			}
+			setCustomErrorMessageFlash(w, verr.Msg)
+			setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
+				Password:        password,
+				ConfirmPassword: confirmPassword,
+			})
+			http.Redirect(w, r, failRedirectURL, http.StatusFound)
+			return
+		}
 	}
 
 	if u.(UserPasser).GetIsTOTPSetup() {
@@ -1189,10 +1182,10 @@ func (b *Builder) ChangePassword(
 	if confirmPassword != password {
 		return ErrPasswordNotMatch
 	}
-	if b.passwordValidationFunc != nil {
-		msg, ok := b.passwordValidationFunc(password)
-		if !ok {
-			return &ValidationError{Msg: msg}
+
+	if b.beforeSetPasswordHook != nil {
+		if herr := b.beforeSetPasswordHook(r, user, password); herr != nil {
+			return herr
 		}
 	}
 
