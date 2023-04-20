@@ -7,6 +7,23 @@ import (
 	"net/http"
 )
 
+type NoticeLevel int
+
+const (
+	NoticeLevel_Info NoticeLevel = iota
+	NoticeLevel_Warn
+	NoticeLevel_Error
+)
+
+type NoticeError struct {
+	Level   NoticeLevel
+	Message string
+}
+
+func (e *NoticeError) Error() string {
+	return e.Message
+}
+
 type FailCode int
 
 const (
@@ -70,15 +87,30 @@ func setInfoCodeFlash(w http.ResponseWriter, c InfoCode) {
 	})
 }
 
-const customErrorMessageFlashCookieName = "qor5_cem_flash"
+const noticeFlashCookieName = "qor5_notice_flash"
 
-func setCustomErrorMessageFlash(w http.ResponseWriter, f string) {
+func setNoticeFlash(w http.ResponseWriter, ne *NoticeError) {
+	if ne == nil {
+		return
+	}
 	http.SetCookie(w, &http.Cookie{
-		Name:     customErrorMessageFlashCookieName,
-		Value:    f,
+		Name:     noticeFlashCookieName,
+		Value:    fmt.Sprintf("%d#%s", ne.Level, ne.Message),
 		Path:     "/",
 		HttpOnly: true,
 	})
+}
+
+func setNoticeOrFailCodeFlash(w http.ResponseWriter, err error, c FailCode) {
+	if err == nil {
+		return
+	}
+	ne, ok := err.(*NoticeError)
+	if ok {
+		setNoticeFlash(w, ne)
+		return
+	}
+	setFailCodeFlash(w, c)
 }
 
 const wrongLoginInputFlashCookieName = "qor5_wli_flash"

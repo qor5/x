@@ -47,15 +47,6 @@ func defaultLoginPage(vh *ViewHelper) web.PageFunc {
 		}
 		// i18n end
 
-		fMsg := vh.GetFailFlashMessage(msgr, ctx.W, ctx.R)
-		wMsg := vh.GetWarnFlashMessage(msgr, ctx.W, ctx.R)
-		iMsg := vh.GetInfoFlashMessage(msgr, ctx.W, ctx.R)
-		wIn := vh.GetWrongLoginInputFlash(ctx.W, ctx.R)
-
-		if iMsg != "" && vh.GetInfoCodeFlash(ctx.W, ctx.R) == InfoCodePasswordSuccessfullyChanged {
-			wMsg = ""
-		}
-
 		var oauthHTML HTMLComponent
 		if vh.OAuthEnabled() {
 			ul := Div().Class("flex flex-col justify-center mt-8 text-center")
@@ -76,6 +67,7 @@ func defaultLoginPage(vh *ViewHelper) web.PageFunc {
 			)
 		}
 
+		wIn := vh.GetWrongLoginInputFlash(ctx.W, ctx.R)
 		isRecaptchaEnabled := vh.RecaptchaEnabled()
 
 		var userPassHTML HTMLComponent
@@ -111,7 +103,7 @@ func defaultLoginPage(vh *ViewHelper) web.PageFunc {
 			)
 		}
 
-		r.PageTitle = "Sign In"
+		r.PageTitle = msgr.LoginPageTitle
 		var bodyForm HTMLComponent
 		bodyForm = Div(
 			userPassHTML,
@@ -135,9 +127,7 @@ function onSubmit(token) {
 	document.getElementById("login-form").submit();
 }
 `)),
-			DefaultViewCommon.ErrNotice(fMsg),
-			DefaultViewCommon.WarnNotice(wMsg),
-			DefaultViewCommon.InfoNotice(iMsg),
+			DefaultViewCommon.Notice(vh, msgr, ctx.W, ctx.R),
 			bodyForm,
 		)
 
@@ -149,7 +139,6 @@ func defaultForgetPasswordPage(vh *ViewHelper) web.PageFunc {
 	return func(ctx *web.EventContext) (r web.PageResponse, err error) {
 		msgr := i18n.MustGetModuleMessages(ctx.R, I18nLoginKey, Messages_en_US).(*Messages)
 
-		fMsg := vh.GetFailFlashMessage(msgr, ctx.W, ctx.R)
 		wIn := vh.GetWrongForgetPasswordInputFlash(ctx.W, ctx.R)
 		secondsToResend := vh.GetSecondsToRedoFlash(ctx.W, ctx.R)
 		activeBtnText := msgr.SendResetPasswordEmailBtn
@@ -166,7 +155,7 @@ func defaultForgetPasswordPage(vh *ViewHelper) web.PageFunc {
 
 		isRecaptchaEnabled := vh.RecaptchaEnabled()
 
-		r.PageTitle = "Forget Your Password?"
+		r.PageTitle = msgr.ForgetPasswordPageTitle
 		r.Body = Div(
 			Link(StyleCSSURL).Type("text/css").Rel("stylesheet"),
 			If(isRecaptchaEnabled,
@@ -178,7 +167,7 @@ function onSubmit(token) {
 	document.getElementById("forget-form").submit();
 }
 `)),
-			DefaultViewCommon.ErrNotice(fMsg),
+			DefaultViewCommon.Notice(vh, msgr, ctx.W, ctx.R),
 			If(secondsToResend > 0,
 				DefaultViewCommon.WarnNotice(msgr.SendEmailTooFrequentlyNotice),
 			),
@@ -247,9 +236,10 @@ func defaultResetPasswordLinkSentPage(vh *ViewHelper) web.PageFunc {
 
 		a := ctx.R.URL.Query().Get("a")
 
-		r.PageTitle = "Forget Your Password?"
+		r.PageTitle = msgr.ResetPasswordLinkSentPageTitle
 		r.Body = Div(
 			Link(StyleCSSURL).Type("text/css").Rel("stylesheet"),
+			DefaultViewCommon.Notice(vh, msgr, ctx.W, ctx.R),
 			Div(
 				H1(fmt.Sprintf("%s %s.", msgr.ResetPasswordLinkWasSentTo, a)).Class("leading-tight text-2xl mt-0 mb-4"),
 				H2(msgr.ResetPasswordLinkSentPrompt).Class("leading-tight text-1xl mt-0"),
@@ -263,10 +253,6 @@ func defaultResetPasswordPage(vh *ViewHelper) web.PageFunc {
 	return func(ctx *web.EventContext) (r web.PageResponse, err error) {
 		msgr := i18n.MustGetModuleMessages(ctx.R, I18nLoginKey, Messages_en_US).(*Messages)
 
-		fMsg := vh.GetFailFlashMessage(msgr, ctx.W, ctx.R)
-		if fMsg == "" {
-			fMsg = vh.GetCustomErrorMessageFlash(ctx.W, ctx.R)
-		}
 		wIn := vh.GetWrongResetPasswordInputFlash(ctx.W, ctx.R)
 
 		doTOTP := ctx.R.URL.Query().Get("totp") == "1"
@@ -277,7 +263,7 @@ func defaultResetPasswordPage(vh *ViewHelper) web.PageFunc {
 
 		var user interface{}
 
-		r.PageTitle = "Reset Password"
+		r.PageTitle = msgr.ResetPasswordPageTitle
 
 		query := ctx.R.URL.Query()
 		id := query.Get("id")
@@ -314,7 +300,7 @@ func defaultResetPasswordPage(vh *ViewHelper) web.PageFunc {
 		r.Body = Div(
 			Link(StyleCSSURL).Type("text/css").Rel("stylesheet"),
 			Script("").Src(ZxcvbnJSURL),
-			DefaultViewCommon.ErrNotice(fMsg),
+			DefaultViewCommon.Notice(vh, msgr, ctx.W, ctx.R),
 			Div(
 				H1(msgr.ResetYourPasswordTitle).Class(DefaultViewCommon.TitleClass),
 				Form(
@@ -351,18 +337,14 @@ func defaultChangePasswordPage(vh *ViewHelper) web.PageFunc {
 	return func(ctx *web.EventContext) (r web.PageResponse, err error) {
 		msgr := i18n.MustGetModuleMessages(ctx.R, I18nLoginKey, Messages_en_US).(*Messages)
 
-		fMsg := vh.GetFailFlashMessage(msgr, ctx.W, ctx.R)
-		if fMsg == "" {
-			fMsg = vh.GetCustomErrorMessageFlash(ctx.W, ctx.R)
-		}
 		wIn := vh.GetWrongChangePasswordInputFlash(ctx.W, ctx.R)
 
-		r.PageTitle = "Change Password"
+		r.PageTitle = msgr.ChangePasswordPageTitle
 
 		r.Body = Div(
 			Link(StyleCSSURL).Type("text/css").Rel("stylesheet"),
 			Script("").Src(ZxcvbnJSURL),
-			DefaultViewCommon.ErrNotice(fMsg),
+			DefaultViewCommon.Notice(vh, msgr, ctx.W, ctx.R),
 			Div(
 				H1(msgr.ChangePasswordTitle).Class(DefaultViewCommon.TitleClass),
 				Form(
@@ -401,8 +383,6 @@ func defaultTOTPSetupPage(vh *ViewHelper) web.PageFunc {
 	return func(ctx *web.EventContext) (r web.PageResponse, err error) {
 		msgr := i18n.MustGetModuleMessages(ctx.R, I18nLoginKey, Messages_en_US).(*Messages)
 
-		fMsg := vh.GetFailFlashMessage(msgr, ctx.W, ctx.R)
-
 		user := GetCurrentUser(ctx.R)
 		u := user.(UserPasser)
 
@@ -436,10 +416,10 @@ func defaultTOTPSetupPage(vh *ViewHelper) web.PageFunc {
 			return
 		}
 
-		r.PageTitle = "TOTP Setup"
+		r.PageTitle = msgr.TOTPSetupPageTitle
 		r.Body = Div(
 			Link(StyleCSSURL).Type("text/css").Rel("stylesheet"),
-			DefaultViewCommon.ErrNotice(fMsg),
+			DefaultViewCommon.Notice(vh, msgr, ctx.W, ctx.R),
 			Div(
 				Div(
 					H1(msgr.TOTPSetupTitle).
@@ -473,12 +453,10 @@ func defaultTOTPValidatePage(vh *ViewHelper) web.PageFunc {
 	return func(ctx *web.EventContext) (r web.PageResponse, err error) {
 		msgr := i18n.MustGetModuleMessages(ctx.R, I18nLoginKey, Messages_en_US).(*Messages)
 
-		fMsg := vh.GetFailFlashMessage(msgr, ctx.W, ctx.R)
-
-		r.PageTitle = "TOTP Validate"
+		r.PageTitle = msgr.TOTPValidatePageTitle
 		r.Body = Div(
 			Link(StyleCSSURL).Type("text/css").Rel("stylesheet"),
-			DefaultViewCommon.ErrNotice(fMsg),
+			DefaultViewCommon.Notice(vh, msgr, ctx.W, ctx.R),
 			Div(
 				Div(
 					H1(msgr.TOTPValidateTitle).

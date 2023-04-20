@@ -2,6 +2,7 @@ package login
 
 import (
 	"fmt"
+	"net/http"
 
 	. "github.com/theplant/htmlgo"
 )
@@ -20,6 +21,26 @@ type ViewCommon struct {
 	LabelClass   string
 	InputClass   string
 	ButtonClass  string
+}
+
+func (vc *ViewCommon) Notice(vh *ViewHelper, msgr *Messages, w http.ResponseWriter, r *http.Request) HTMLComponent {
+	var nn HTMLComponent
+	if n := vh.GetNoticeFlash(w, r); n != nil && n.Message != "" {
+		switch n.Level {
+		case NoticeLevel_Info:
+			nn = vc.InfoNotice(n.Message)
+		case NoticeLevel_Warn:
+			nn = vc.WarnNotice(n.Message)
+		case NoticeLevel_Error:
+			nn = vc.ErrNotice(n.Message)
+		}
+	}
+	return Components(
+		vc.ErrNotice(vh.GetFailFlashMessage(msgr, w, r)),
+		vc.WarnNotice(vh.GetWarnFlashMessage(msgr, w, r)),
+		vc.InfoNotice(vh.GetInfoFlashMessage(msgr, w, r)),
+		nn,
+	)
 }
 
 func (vc *ViewCommon) ErrNotice(msg string) HTMLComponent {

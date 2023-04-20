@@ -9,6 +9,7 @@ type Messages struct {
 	Confirm string
 	Verify  string
 	// login page
+	LoginPageTitle      string
 	AccountLabel        string
 	AccountPlaceholder  string
 	PasswordLabel       string
@@ -16,6 +17,7 @@ type Messages struct {
 	SignInBtn           string
 	ForgetPasswordLink  string
 	// forget password page
+	ForgetPasswordPageTitle        string
 	ForgotMyPasswordTitle          string
 	ForgetPasswordEmailLabel       string
 	ForgetPasswordEmailPlaceholder string
@@ -23,15 +25,18 @@ type Messages struct {
 	ResendResetPasswordEmailBtn    string
 	SendEmailTooFrequentlyNotice   string
 	// reset password link sent page
-	ResetPasswordLinkWasSentTo  string
-	ResetPasswordLinkSentPrompt string
+	ResetPasswordLinkSentPageTitle string
+	ResetPasswordLinkWasSentTo     string
+	ResetPasswordLinkSentPrompt    string
 	// reset password page
+	ResetPasswordPageTitle          string
 	ResetYourPasswordTitle          string
 	ResetPasswordLabel              string
 	ResetPasswordPlaceholder        string
 	ResetPasswordConfirmLabel       string
 	ResetPasswordConfirmPlaceholder string
 	// change password page
+	ChangePasswordPageTitle             string
 	ChangePasswordTitle                 string
 	ChangePasswordOldLabel              string
 	ChangePasswordOldPlaceholder        string
@@ -40,12 +45,14 @@ type Messages struct {
 	ChangePasswordNewConfirmLabel       string
 	ChangePasswordNewConfirmPlaceholder string
 	// TOTP setup page
+	TOTPSetupPageTitle       string
 	TOTPSetupTitle           string
 	TOTPSetupScanPrompt      string
 	TOTPSetupSecretPrompt    string
 	TOTPSetupEnterCodePrompt string
 	TOTPSetupCodePlaceholder string
 	// TOTP validate page
+	TOTPValidatePageTitle       string
 	TOTPValidateTitle           string
 	TOTPValidateEnterCodePrompt string
 	TOTPValidateCodeLabel       string
@@ -75,25 +82,30 @@ type Messages struct {
 var Messages_en_US = &Messages{
 	Confirm:                             "Confirm",
 	Verify:                              "Verify",
+	LoginPageTitle:                      "Sign In",
 	AccountLabel:                        "Email",
 	AccountPlaceholder:                  "Email",
 	PasswordLabel:                       "Password",
 	PasswordPlaceholder:                 "Password",
 	SignInBtn:                           "Sign In",
 	ForgetPasswordLink:                  "Forget your password?",
+	ForgetPasswordPageTitle:             "Forget Your Password?",
 	ForgotMyPasswordTitle:               "I forgot my password",
 	ForgetPasswordEmailLabel:            "Enter your email",
 	ForgetPasswordEmailPlaceholder:      "Email",
 	SendResetPasswordEmailBtn:           "Send reset password email",
 	ResendResetPasswordEmailBtn:         "Resend reset password email",
 	SendEmailTooFrequentlyNotice:        "Sending emails too frequently, please try again later",
+	ResetPasswordLinkSentPageTitle:      "Forget Your Password?",
 	ResetPasswordLinkWasSentTo:          "A reset password link was sent to",
 	ResetPasswordLinkSentPrompt:         "You can close this page and reset your password from this link.",
+	ResetPasswordPageTitle:              "Reset Password",
 	ResetYourPasswordTitle:              "Reset your password",
 	ResetPasswordLabel:                  "Change your password",
 	ResetPasswordPlaceholder:            "New password",
 	ResetPasswordConfirmLabel:           "Re-enter new password",
 	ResetPasswordConfirmPlaceholder:     "Confirm new password",
+	ChangePasswordPageTitle:             "Change Password",
 	ChangePasswordTitle:                 "Change your password",
 	ChangePasswordOldLabel:              "Old password",
 	ChangePasswordOldPlaceholder:        "Old Password",
@@ -101,11 +113,13 @@ var Messages_en_US = &Messages{
 	ChangePasswordNewPlaceholder:        "New Password",
 	ChangePasswordNewConfirmLabel:       "Re-enter new password",
 	ChangePasswordNewConfirmPlaceholder: "New Password",
+	TOTPSetupPageTitle:                  "TOTP Setup",
 	TOTPSetupTitle:                      "Two Factor Authentication",
 	TOTPSetupScanPrompt:                 "Scan this QR code with Google Authenticator (or similar) app",
 	TOTPSetupSecretPrompt:               "Or manually enter the following code into your preferred authenticator app",
 	TOTPSetupEnterCodePrompt:            "Then enter the provided one-time code below",
 	TOTPSetupCodePlaceholder:            "Passcode",
+	TOTPValidatePageTitle:               "TOTP Validate",
 	TOTPValidateTitle:                   "Two Factor Authentication",
 	TOTPValidateEnterCodePrompt:         "Enter the provided one-time code below",
 	TOTPValidateCodeLabel:               "Authenticator passcode",
@@ -132,25 +146,30 @@ var Messages_en_US = &Messages{
 var Messages_zh_CN = &Messages{
 	Confirm:                             "确认",
 	Verify:                              "验证",
+	LoginPageTitle:                      "登录",
 	AccountLabel:                        "邮箱",
 	AccountPlaceholder:                  "邮箱",
 	PasswordLabel:                       "密码",
 	PasswordPlaceholder:                 "密码",
 	SignInBtn:                           "登录",
 	ForgetPasswordLink:                  "忘记密码？",
+	ForgetPasswordPageTitle:             "忘记密码？",
 	ForgotMyPasswordTitle:               "我忘记密码了",
 	ForgetPasswordEmailLabel:            "输入您的电子邮箱",
 	ForgetPasswordEmailPlaceholder:      "电子邮箱",
 	SendResetPasswordEmailBtn:           "发送重置密码电子邮件",
 	ResendResetPasswordEmailBtn:         "重新发送重置密码电子邮件",
 	SendEmailTooFrequentlyNotice:        "邮件发送过于频繁，请稍后再试",
+	ResetPasswordLinkSentPageTitle:      "忘记密码？",
 	ResetPasswordLinkWasSentTo:          "已将重置密码链接发送到",
 	ResetPasswordLinkSentPrompt:         "您可以关闭此页面并从此链接重置密码。",
+	ResetPasswordPageTitle:              "重置密码",
 	ResetYourPasswordTitle:              "重置您的密码",
 	ResetPasswordLabel:                  "改变您的密码",
 	ResetPasswordPlaceholder:            "新密码",
 	ResetPasswordConfirmLabel:           "再次输入新密码",
 	ResetPasswordConfirmPlaceholder:     "新密码",
+	ChangePasswordPageTitle:             "修改密码",
 	ChangePasswordTitle:                 "修改您的密码",
 	ChangePasswordOldLabel:              "旧密码",
 	ChangePasswordOldPlaceholder:        "旧密码",
@@ -158,11 +177,13 @@ var Messages_zh_CN = &Messages{
 	ChangePasswordNewPlaceholder:        "新密码",
 	ChangePasswordNewConfirmLabel:       "再次输入新密码",
 	ChangePasswordNewConfirmPlaceholder: "新密码",
+	TOTPSetupPageTitle:                  "双重认证",
 	TOTPSetupTitle:                      "双重认证",
 	TOTPSetupScanPrompt:                 "使用Google Authenticator（或类似）应用程序扫描此二维码",
 	TOTPSetupSecretPrompt:               "或者将以下代码手动输入到您首选的验证器应用程序中",
 	TOTPSetupEnterCodePrompt:            "然后在下面输入提供的一次性代码",
 	TOTPSetupCodePlaceholder:            "passcode",
+	TOTPValidatePageTitle:               "双重认证",
 	TOTPValidateTitle:                   "双重认证",
 	TOTPValidateEnterCodePrompt:         "在下面输入提供的一次性代码",
 	TOTPValidateCodeLabel:               "Authenticator验证码",
@@ -189,25 +210,30 @@ var Messages_zh_CN = &Messages{
 var Messages_ja_JP = &Messages{
 	Confirm:                             "確認する",
 	Verify:                              "検証",
+	LoginPageTitle:                      "ログイン",
 	AccountLabel:                        "メールアドレス",
 	AccountPlaceholder:                  "メールアドレス",
 	PasswordLabel:                       "パスワード",
 	PasswordPlaceholder:                 "パスワード",
 	SignInBtn:                           "ログイン",
 	ForgetPasswordLink:                  "パスワードをお忘れですか？",
+	ForgetPasswordPageTitle:             "パスワードをお忘れですか？",
 	ForgotMyPasswordTitle:               "パスワードを忘れました",
 	ForgetPasswordEmailLabel:            "メールアドレスを入力してください",
 	ForgetPasswordEmailPlaceholder:      "メールアドレス",
 	SendResetPasswordEmailBtn:           "パスワードリセット用メールが送信されました",
 	ResendResetPasswordEmailBtn:         "パスワードリセット用メールを再送する",
 	SendEmailTooFrequentlyNotice:        "メール送信回数が上限を超えています。しばらく経ってから再度お試しください",
+	ResetPasswordLinkSentPageTitle:      "パスワードをお忘れですか？",
 	ResetPasswordLinkWasSentTo:          "パスワードリセット用リンクが送信されました",
 	ResetPasswordLinkSentPrompt:         "このリンクからパスワードリセット手続きを行い、終了後はページを閉じてください",
+	ResetPasswordPageTitle:              "パスワードをリセットしてください",
 	ResetYourPasswordTitle:              "パスワードをリセットしてください",
 	ResetPasswordLabel:                  "パスワードを変更する",
 	ResetPasswordPlaceholder:            "新しいパスワード",
 	ResetPasswordConfirmLabel:           "新しいパスワードを再入力",
 	ResetPasswordConfirmPlaceholder:     "新しいパスワードを確認する",
+	ChangePasswordPageTitle:             "パスワードを変更する",
 	ChangePasswordTitle:                 "パスワードを変更する",
 	ChangePasswordOldLabel:              "古いパスワード",
 	ChangePasswordOldPlaceholder:        "古いパスワード",
@@ -215,11 +241,13 @@ var Messages_ja_JP = &Messages{
 	ChangePasswordNewPlaceholder:        "新しいパスワード",
 	ChangePasswordNewConfirmLabel:       "新しいパスワードを再入力する",
 	ChangePasswordNewConfirmPlaceholder: "新しいパスワード",
+	TOTPSetupPageTitle:                  "二段階認証",
 	TOTPSetupTitle:                      "二段階認証",
 	TOTPSetupScanPrompt:                 "Google認証アプリ(または同等アプリ)を利用してこのQRコードをスキャンしてください",
 	TOTPSetupSecretPrompt:               "または、お好きな認証アプリを利用して、以下のコードを入力してください",
 	TOTPSetupEnterCodePrompt:            "以下のワンタイムコードを入力してください",
 	TOTPSetupCodePlaceholder:            "パスコード",
+	TOTPValidatePageTitle:               "二段階認証",
 	TOTPValidateTitle:                   "二段階認証",
 	TOTPValidateEnterCodePrompt:         "提供されたワンタイムコードを以下に入力してください",
 	TOTPValidateCodeLabel:               "認証パスコード",
