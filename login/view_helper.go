@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/qor5/x/i18n"
 )
@@ -74,7 +75,7 @@ func (vh *ViewHelper) RecaptchaSiteKey() string {
 }
 
 func (vh *ViewHelper) TOTPIssuer() string {
-	return vh.b.totpIssuer
+	return vh.b.totpConfig.Issuer
 }
 
 func (vh *ViewHelper) FindUserByID(id string) (user interface{}, err error) {
@@ -126,18 +127,35 @@ func (vh *ViewHelper) GetInfoCodeFlash(w http.ResponseWriter, r *http.Request) I
 	return InfoCode(v)
 }
 
-func (vh *ViewHelper) GetCustomErrorMessageFlash(w http.ResponseWriter, r *http.Request) string {
-	c, err := r.Cookie(customErrorMessageFlashCookieName)
+func (vh *ViewHelper) GetNoticeFlash(w http.ResponseWriter, r *http.Request) *NoticeError {
+	c, err := r.Cookie(noticeFlashCookieName)
 	if err != nil {
-		return ""
+		return nil
+	}
+	var level NoticeLevel
+	var message string
+	{
+		vs := strings.SplitN(c.Value, "#", 2)
+		if len(vs) != 2 {
+			return nil
+		}
+		n, err := strconv.Atoi(vs[0])
+		if err != nil {
+			return nil
+		}
+		level = NoticeLevel(n)
+		message = vs[1]
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:     customErrorMessageFlashCookieName,
+		Name:     noticeFlashCookieName,
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
 	})
-	return c.Value
+	return &NoticeError{
+		Level:   level,
+		Message: message,
+	}
 }
 
 func (vh *ViewHelper) GetWrongLoginInputFlash(w http.ResponseWriter, r *http.Request) WrongLoginInputFlash {

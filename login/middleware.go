@@ -2,9 +2,9 @@ package login
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -16,17 +16,54 @@ const (
 	loginWIPKey
 )
 
-var staticFileRe = regexp.MustCompile(`\.(css|js|gif|jpg|jpeg|png|ico|svg|ttf|eot|woff|woff2)$`)
+type MiddlewareConfig interface {
+	middlewareConfig()
+}
 
-func Authenticate(b *Builder) func(next http.Handler) http.Handler {
+// LoginNotRequired executes the next handler regardless of whether the user is logged in or not
+type LoginNotRequired struct{}
+
+func (*LoginNotRequired) middlewareConfig() {}
+
+// DisableAutoRedirectToHomePage makes it possible to visit login page when user is logged in
+type DisableAutoRedirectToHomePage struct{}
+
+func (*DisableAutoRedirectToHomePage) middlewareConfig() {}
+
+func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) http.Handler {
+	mustLogin := true
+	autoRedirectToHomePage := true
+	for _, cfg := range cfgs {
+		switch cfg.(type) {
+		case *LoginNotRequired:
+			mustLogin = false
+		case *DisableAutoRedirectToHomePage:
+			autoRedirectToHomePage = false
+		}
+	}
+
+	whiteList := map[string]struct{}{
+		b.oauthBeginURL:                {},
+		b.oauthCallbackURL:             {},
+		b.oauthCallbackCompleteURL:     {},
+		b.passwordLoginURL:             {},
+		b.forgetPasswordPageURL:        {},
+		b.sendResetPasswordLinkURL:     {},
+		b.resetPasswordLinkSentPageURL: {},
+		b.resetPasswordURL:             {},
+		b.resetPasswordPageURL:         {},
+		b.validateTOTPURL:              {},
+	}
+
+	staticFileRe := regexp.MustCompile(`\.(css|js|gif|jpg|jpeg|png|ico|svg|ttf|eot|woff|woff2)$`)
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if staticFileRe.MatchString(strings.ToLower(r.URL.Path)) {
 				next.ServeHTTP(w, r)
 				return
 			}
-
-			if _, ok := b.allowURLs[r.URL.Path]; ok {
+			if _, ok := whiteList[r.URL.Path]; ok {
 				next.ServeHTTP(w, r)
 				return
 			}
@@ -35,8 +72,13 @@ func Authenticate(b *Builder) func(next http.Handler) http.Handler {
 
 			claims, err := parseUserClaimsFromCookie(r, b.authCookieName, b.secret)
 			if err != nil {
-				log.Println(err)
-				b.setContinueURL(w, r)
+				if !mustLogin {
+					next.ServeHTTP(w, r)
+					return
+				}
+				if r.Method == http.MethodGet {
+					b.setContinueURL(w, r)
+				}
 				if path == b.loginPageURL {
 					next.ServeHTTP(w, r)
 				} else {
@@ -53,7 +95,7 @@ func Authenticate(b *Builder) func(next http.Handler) http.Handler {
 				if err == nil {
 					if claims.Provider == "" {
 						if user.(UserPasser).GetPasswordUpdatedAt() != claims.PassUpdatedAt {
-							err = ErrUserPassChanged
+							err = ErrPasswordChanged
 						}
 						if user.(UserPasser).GetLocked() {
 							err = ErrUserLocked
@@ -63,14 +105,26 @@ func Authenticate(b *Builder) func(next http.Handler) http.Handler {
 					}
 				}
 				if err != nil {
-					log.Println(err)
+					if !mustLogin {
+						next.ServeHTTP(w, r)
+						return
+					}
 					switch err {
 					case ErrUserNotFound:
 						setFailCodeFlash(w, FailCodeUserNotFound)
 					case ErrUserLocked:
 						setFailCodeFlash(w, FailCodeUserLocked)
-					case ErrUserPassChanged:
-						setWarnCodeFlash(w, WarnCodePasswordHasBeenChanged)
+					case ErrPasswordChanged:
+						isSelfChange := false
+						if c, err := r.Cookie(infoCodeFlashCookieName); err == nil {
+							v, _ := strconv.Atoi(c.Value)
+							if InfoCode(v) == InfoCodePasswordSuccessfullyChanged {
+								isSelfChange = true
+							}
+						}
+						if !isSelfChange {
+							setWarnCodeFlash(w, WarnCodePasswordHasBeenChanged)
+						}
 					default:
 						setFailCodeFlash(w, FailCodeSystemError)
 					}
@@ -86,6 +140,10 @@ func Authenticate(b *Builder) func(next http.Handler) http.Handler {
 					secureSalt = user.(SessionSecurer).GetSecure()
 					_, err := parseBaseClaimsFromCookie(r, b.authSecureCookieName, b.secret+secureSalt)
 					if err != nil {
+						if !mustLogin {
+							next.ServeHTTP(w, r)
+							return
+						}
 						if path == b.LogoutURL {
 							next.ServeHTTP(w, r)
 						} else {
@@ -103,6 +161,10 @@ func Authenticate(b *Builder) func(next http.Handler) http.Handler {
 
 				claims.RegisteredClaims = b.genBaseSessionClaim(claims.UserID)
 				if err := b.setAuthCookiesFromUserClaims(w, claims, secureSalt); err != nil {
+					if !mustLogin {
+						next.ServeHTTP(w, r)
+						return
+					}
 					setFailCodeFlash(w, FailCodeSystemError)
 					if path == b.LogoutURL {
 						next.ServeHTTP(w, r)
@@ -115,7 +177,11 @@ func Authenticate(b *Builder) func(next http.Handler) http.Handler {
 				if b.afterExtendSessionHook != nil {
 					setCookieForRequest(r, &http.Cookie{Name: b.authCookieName, Value: b.mustGetSessionToken(*claims)})
 					if herr := b.afterExtendSessionHook(r, user, oldSessionToken); herr != nil {
-						setFailCodeFlash(w, FailCodeSystemError)
+						if !mustLogin {
+							next.ServeHTTP(w, r)
+							return
+						}
+						setNoticeOrFailCodeFlash(w, herr, FailCodeSystemError)
 						http.Redirect(w, r, b.LogoutURL, http.StatusFound)
 						return
 					}
@@ -159,9 +225,11 @@ func Authenticate(b *Builder) func(next http.Handler) http.Handler {
 				}
 			}
 
-			if path == b.loginPageURL || path == b.totpSetupPageURL || path == b.totpValidatePageURL {
-				http.Redirect(w, r, b.homePageURLFunc(r, user), http.StatusFound)
-				return
+			if autoRedirectToHomePage {
+				if path == b.loginPageURL || path == b.totpSetupPageURL || path == b.totpValidatePageURL {
+					http.Redirect(w, r, b.homePageURLFunc(r, user), http.StatusFound)
+					return
+				}
 			}
 
 			next.ServeHTTP(w, r)
@@ -173,6 +241,8 @@ func GetCurrentUser(r *http.Request) (u interface{}) {
 	return r.Context().Value(UserKey)
 }
 
+// IsLoginWIP indicates whether the user is in an intermediate step of login process,
+// such as on the TOTP validation page
 func IsLoginWIP(r *http.Request) bool {
 	v, ok := r.Context().Value(loginWIPKey).(bool)
 	if !ok {

@@ -8,11 +8,9 @@ import (
 
 	"github.com/markbates/goth/providers/google"
 	"github.com/markbates/goth/providers/twitter"
-	"github.com/qor5/x/i18n"
 	"github.com/qor5/x/login"
 	. "github.com/theplant/htmlgo"
 	"github.com/theplant/testingutils"
-	"golang.org/x/text/language"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -70,8 +68,8 @@ func main() {
 		BeforeSetPassword(func(r *http.Request, user interface{}, extraVals ...interface{}) error {
 			password := extraVals[0].(string)
 			if len(password) <= 2 {
-				return &login.ValidationError{
-					Msg: "password length cannot be less than 2",
+				return &login.NoticeError{
+					Message: "password length cannot be less than 2",
 				}
 			}
 			return nil
@@ -82,11 +80,8 @@ func main() {
 			testingutils.PrintlnJson(link)
 			fmt.Println("#########################################end")
 			return nil
-		})
-
-	i18nB := i18n.New()
-	i18nB.SupportLanguages(language.English, language.SimplifiedChinese)
-	b.I18n(i18nB)
+		}).
+		TOTP(false)
 
 	h := http.NewServeMux()
 	b.Mount(h)
@@ -95,7 +90,7 @@ func main() {
 	}))
 
 	mux := http.NewServeMux()
-	mux.Handle("/", login.Authenticate(b)(h))
+	mux.Handle("/", b.Middleware()(h))
 
 	log.Println("serving at http://localhost:9500")
 	log.Fatal(http.ListenAndServe(":9500", mux))
