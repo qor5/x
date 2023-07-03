@@ -113,6 +113,17 @@ func setNoticeOrFailCodeFlash(w http.ResponseWriter, err error, c FailCode) {
 	setFailCodeFlash(w, c)
 }
 
+func setNoticeOrPanic(w http.ResponseWriter, err error) {
+	if err == nil {
+		return
+	}
+	ne, ok := err.(*NoticeError)
+	if !ok {
+		panic(err)
+	}
+	setNoticeFlash(w, ne)
+}
+
 const wrongLoginInputFlashCookieName = "qor5_wli_flash"
 
 type WrongLoginInputFlash struct {
