@@ -126,7 +126,7 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 							setWarnCodeFlash(w, WarnCodePasswordHasBeenChanged)
 						}
 					default:
-						setFailCodeFlash(w, FailCodeSystemError)
+						panic(err)
 					}
 					if path == b.LogoutURL {
 						next.ServeHTTP(w, r)
@@ -160,19 +160,7 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 				oldSessionToken := b.mustGetSessionToken(*claims)
 
 				claims.RegisteredClaims = b.genBaseSessionClaim(claims.UserID)
-				if err := b.setAuthCookiesFromUserClaims(w, claims, secureSalt); err != nil {
-					if !mustLogin {
-						next.ServeHTTP(w, r)
-						return
-					}
-					setFailCodeFlash(w, FailCodeSystemError)
-					if path == b.LogoutURL {
-						next.ServeHTTP(w, r)
-					} else {
-						http.Redirect(w, r, b.LogoutURL, http.StatusFound)
-					}
-					return
-				}
+				b.setAuthCookiesFromUserClaims(w, claims, secureSalt)
 
 				if b.afterExtendSessionHook != nil {
 					setCookieForRequest(r, &http.Cookie{Name: b.authCookieName, Value: b.mustGetSessionToken(*claims)})
@@ -181,7 +169,7 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 							next.ServeHTTP(w, r)
 							return
 						}
-						setNoticeOrFailCodeFlash(w, herr, FailCodeSystemError)
+						setNoticeOrPanic(w, herr)
 						http.Redirect(w, r, b.LogoutURL, http.StatusFound)
 						return
 					}
