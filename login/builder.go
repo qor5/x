@@ -964,12 +964,8 @@ func (b *Builder) sendResetPasswordLink(w http.ResponseWriter, r *http.Request) 
 
 	u, err := b.userModel.(UserPasser).FindUser(b.db, b.newUserObject(), account)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			setFailCodeFlash(w, FailCodeUserNotFound)
-			setWrongForgetPasswordInputFlash(w, WrongForgetPasswordInputFlash{
-				Account: account,
-			})
-			http.Redirect(w, r, failRedirectURL, http.StatusFound)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			http.Redirect(w, r, fmt.Sprintf("%s?a=%s", b.resetPasswordLinkSentPageURL, account), http.StatusFound)
 			return
 		}
 		panic(err)
