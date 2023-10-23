@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 type OAuthUser interface {
 	FindUserByOAuthUserID(db *gorm.DB, model interface{}, provider string, oid string) (user interface{}, err error)
 	FindUserByOAuthIdentifier(db *gorm.DB, model interface{}, provider string, identifier string) (user interface{}, err error)
+	// only update the o_auth_user_id when it's empty(null or '')
 	InitOAuthUserID(db *gorm.DB, model interface{}, provider string, identifier string, oid string) error
 	SetAvatar(v string)
 	GetAvatar() string
@@ -43,7 +44,7 @@ func (oa *OAuthInfo) FindUserByOAuthIdentifier(db *gorm.DB, model interface{}, p
 }
 func (oa *OAuthInfo) InitOAuthUserID(db *gorm.DB, model interface{}, provider string, identifier string, oid string) error {
 	err := db.Model(model).
-		Where("o_auth_provider = ? and o_auth_identifier = ?", provider, identifier).
+		Where("o_auth_provider = ? and o_auth_identifier = ? and coalesce(o_auth_user_id, '') = ''", provider, identifier).
 		Updates(map[string]interface{}{
 			"o_auth_user_id": oid,
 		}).
