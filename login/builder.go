@@ -558,6 +558,15 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 			if err != nil {
 				panic(err)
 			}
+			// refetch user by oauth user id to prevent fake identifier
+			user, err = b.userModel.(OAuthUser).FindUserByOAuthUserID(b.db, b.newUserObject(), ouser.Provider, ouser.UserID)
+			if err != nil {
+				if err != gorm.ErrRecordNotFound {
+					panic(err)
+				}
+				setFailCodeFlash(w, FailCodeUserNotFound)
+				return
+			}
 		}
 		userID = objectID(user)
 	}
