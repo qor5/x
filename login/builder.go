@@ -131,6 +131,8 @@ type Builder struct {
 	userPassEnabled      bool
 	oauthEnabled         bool
 	sessionSecureEnabled bool
+	// key is provider
+	oauthIdentifiers map[string]OAuthIdentifier
 }
 
 func New() *Builder {
@@ -174,6 +176,7 @@ func New() *Builder {
 		totpConfig: TOTPConfig{
 			Issuer: "QOR5",
 		},
+		oauthIdentifiers: make(map[string]OAuthIdentifier),
 	}
 
 	i18nB := i18n.New()
@@ -442,6 +445,43 @@ func (b *Builder) I18n(v *i18n.Builder) (r *Builder) {
 	return b
 }
 
+type OAuthIdentifier int
+
+const (
+	OAuthIdentifierEmail OAuthIdentifier = iota
+	OAuthIdentifierName
+	OAuthIdentifierNickName
+	OAuthIdentifierUserID
+)
+
+// OAuthIdentifier is an externally-facing account identifier, such as an email address for a Google account.
+// default is email, fallback is userID
+func (b *Builder) OAuthIdentifier(provider string, identifier OAuthIdentifier) (r *Builder) {
+	b.oauthIdentifiers[provider] = identifier
+	return b
+}
+
+func (b *Builder) oauthIdentifierValue(ouser goth.User) string {
+	var val string
+	idt := b.oauthIdentifiers[ouser.Provider]
+	switch idt {
+	case OAuthIdentifierEmail:
+		val = ouser.Email
+	case OAuthIdentifierName:
+		val = ouser.Name
+	case OAuthIdentifierNickName:
+		val = ouser.NickName
+	case OAuthIdentifierUserID:
+		val = ouser.UserID
+	default:
+		panic(fmt.Sprintf("unknown identifier type %v", idt))
+	}
+	if val == "" {
+		val = ouser.UserID
+	}
+	return val
+}
+
 func (b *Builder) GetSessionMaxAge() int {
 	return b.sessionMaxAge
 }
@@ -548,10 +588,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 			if err != gorm.ErrRecordNotFound {
 				panic(err)
 			}
-			identifier := ouser.Email
-			if identifier == "" {
-				identifier = ouser.UserID
-			}
+			identifier := b.oauthIdentifierValue(ouser)
 			user, err = b.userModel.(OAuthUser).FindUserByOAuthIdentifier(b.db, b.newUserObject(), ouser.Provider, identifier)
 			if err != nil {
 				if err != gorm.ErrRecordNotFound {

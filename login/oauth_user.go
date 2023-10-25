@@ -14,8 +14,7 @@ type OAuthUser interface {
 type OAuthInfo struct {
 	OAuthProvider string `gorm:"index:uidx_users_oauth_provider_user_id,unique,where:o_auth_provider!='' and o_auth_user_id!='' and deleted_at is null;index:uidx_users_oauth_provider_identifier,unique,where:o_auth_provider!='' and o_auth_identifier!='' and deleted_at is null"`
 	OAuthUserID   string `gorm:"index:uidx_users_oauth_provider_user_id,unique,where:o_auth_provider!='' and o_auth_user_id!='' and deleted_at is null"`
-	// users use this value to log into their account
-	// in most cases is email or account name
+	// OAuthIdentifier is an externally-facing account identifier, such as an email address for a Google account.
 	// it is used to find the user record on the first login
 	OAuthIdentifier string `gorm:"index:uidx_users_oauth_provider_identifier,unique,where:o_auth_provider!='' and o_auth_identifier!='' and deleted_at is null"`
 	OAuthAvatar     string `gorm:"-"`
