@@ -537,6 +537,10 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 	}
 
 	userID := ouser.UserID
+	if userID == "" {
+		setFailCodeFlash(w, FailCodeCompleteUserAuthFailed)
+		return
+	}
 
 	if b.userModel != nil {
 		user, err = b.userModel.(OAuthUser).FindUserByOAuthUserID(b.db, b.newUserObject(), ouser.Provider, ouser.UserID)
@@ -544,8 +548,10 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 			if err != gorm.ErrRecordNotFound {
 				panic(err)
 			}
-			// TODO: maybe the identifier of some providers is not email
 			identifier := ouser.Email
+			if identifier == "" {
+				identifier = ouser.UserID
+			}
 			user, err = b.userModel.(OAuthUser).FindUserByOAuthIdentifier(b.db, b.newUserObject(), ouser.Provider, identifier)
 			if err != nil {
 				if err != gorm.ErrRecordNotFound {
