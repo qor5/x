@@ -20,8 +20,8 @@ require (
 	github.com/sunfmin/reflectutils v1.0.3
 	github.com/theplant/htmlgo v1.0.3
 	github.com/theplant/testingutils v0.0.0-20190603093022-26d8b4d95c61
-	golang.org/x/crypto v0.14.0
-	golang.org/x/text v0.13.0
+	golang.org/x/crypto v0.17.0
+	golang.org/x/text v0.14.0
 	gorm.io/driver/postgres v1.4.5
 	gorm.io/driver/sqlite v1.4.3
 	gorm.io/gorm v1.24.1-0.20221019064659-5dd2bb482755
@@ -58,7 +58,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
