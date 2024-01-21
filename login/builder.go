@@ -246,6 +246,29 @@ func (b *Builder) HomeURLFunc(v HomeURLFunc) (r *Builder) {
 	return b
 }
 
+func (b *Builder) URIPrefix(v string) (r *Builder) {
+	prefix := strings.TrimRight(v, "/")
+
+	b.loginPageURL = prefix + b.loginPageURL
+	b.LogoutURL = prefix + b.LogoutURL
+	b.validateTOTPURL = prefix + b.validateTOTPURL
+	b.totpSetupPageURL = prefix + b.totpSetupPageURL
+	b.totpValidatePageURL = prefix + b.totpValidatePageURL
+	b.oauthBeginURL = prefix + b.oauthBeginURL
+	b.oauthCallbackURL = prefix + b.oauthCallbackURL
+	b.oauthCallbackCompleteURL = prefix + b.oauthCallbackCompleteURL
+	b.passwordLoginURL = prefix + b.passwordLoginURL
+	b.resetPasswordURL = prefix + b.resetPasswordURL
+	b.resetPasswordPageURL = prefix + b.resetPasswordPageURL
+	b.changePasswordURL = prefix + b.changePasswordURL
+	b.changePasswordPageURL = prefix + b.changePasswordPageURL
+	b.forgetPasswordPageURL = prefix + b.forgetPasswordPageURL
+	b.sendResetPasswordLinkURL = prefix + b.sendResetPasswordLinkURL
+	b.resetPasswordLinkSentPageURL = prefix + b.resetPasswordLinkSentPageURL
+
+	return b
+}
+
 func (b *Builder) LoginPageURL(v string) (r *Builder) {
 	b.loginPageURL = v
 	return b
