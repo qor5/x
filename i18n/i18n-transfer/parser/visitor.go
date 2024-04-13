@@ -9,29 +9,29 @@ import (
 type Visitor struct {
 	// map[locale][]MessageStruct
 	// example:
-	//{
+	// {
 	//      "English": [
 	//              {
 	//                      "PkgName": "x/i18n",
 	//                      "StructName": "Messages_en_US"
 	//              }
 	//      ],
-	//}
+	// }
 	RigisterMap map[string][]MessageStruct
 
 	// map[locale][]MessageStruct
 	// example:
-	//{
+	// {
 	//      "Messages_en_US": "English",
 	//      "Messages_zh_CN": "SimplifiedChinese"
-	//}
+	// }
 	LocalesMap map[string]string
 
 	// map[pkgName][]structs
 	// example:
-	//{
+	// {
 	//      "x/i18n": []*ast.GenDecl,
-	//}
+	// }
 	Variables map[string][]*ast.GenDecl
 
 	// the current package path
@@ -42,16 +42,16 @@ type Visitor struct {
 	// the current import map
 	// example:
 	// when visit file "x/i18n/i18n_test.go", currentImportMap =
-	//{
+	// {
 	//      "fmt": "fmt",
 	//      "http": "net/http",
 	//      "httptest": "net/http/httptest",
 	//      "strings": "strings",
 	//      "testing": "testing"
-	//      "i18n": "github.com/qor5/x/i18n",
+	//      "i18n": "github.com/qor5/x/v3/i18n",
 	//      "testingutils": "github.com/theplant/testingutils",
 	//      "language": "golang.org/x/text/language",
-	//}
+	// }
 	currentImportMap  map[string]string
 	projectParentPath string
 	fset              *token.FileSet

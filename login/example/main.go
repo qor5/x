@@ -8,7 +8,7 @@ import (
 
 	"github.com/markbates/goth/providers/google"
 	"github.com/markbates/goth/providers/twitter"
-	"github.com/qor5/x/login"
+	"github.com/qor5/x/v3/login"
 	. "github.com/theplant/htmlgo"
 	"github.com/theplant/testingutils"
 	"gorm.io/driver/sqlite"

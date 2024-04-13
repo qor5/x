@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/qor5/x/perm"
 	"github.com/ory/ladon"
+	"github.com/qor5/x/v3/perm"
 	"github.com/sunfmin/reflectutils"
 )
 

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/qor5/x/exchange"
+	"github.com/qor5/x/v3/exchange"
 	"github.com/stretchr/testify/assert"
 )
 

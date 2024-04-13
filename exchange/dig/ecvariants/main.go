@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/qor5/x/exchange"
+	"github.com/qor5/x/v3/exchange"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

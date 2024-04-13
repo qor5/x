@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/qor5/x/i18n"
+	"github.com/qor5/x/v3/i18n"
 )
 
 type ViewHelper struct {

@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/qor5/x/i18n/i18n-transfer/csv"
-	"github.com/qor5/x/i18n/i18n-transfer/parser"
 	"github.com/manifoldco/promptui"
+	"github.com/qor5/x/v3/i18n/i18n-transfer/csv"
+	"github.com/qor5/x/v3/i18n/i18n-transfer/parser"
 )
 
 func main() {
