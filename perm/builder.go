@@ -1,6 +1,7 @@
 package perm
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -83,7 +84,7 @@ func (b *Builder) Policies(ps ...*PolicyBuilder) (r *Builder) {
 
 func (b *Builder) createPolicy(p *PolicyBuilder) {
 	p.setIDIfEmpty()
-	err := b.ladon.Manager.Create(p.policy)
+	err := b.ladon.Manager.Create(context.TODO(), p.policy)
 	if err != nil {
 		panic(err)
 	}
@@ -96,7 +97,7 @@ func (b *Builder) updatePolicy(p *PolicyBuilder) {
 		return
 	}
 
-	err := b.ladon.Manager.Update(p.policy)
+	err := b.ladon.Manager.Update(context.TODO(), p.policy)
 	if err != nil {
 		panic(err)
 	}
@@ -124,7 +125,7 @@ func (b *Builder) updateOrCreatePolicy(p *PolicyBuilder) {
 func (b *Builder) deletePolicy(p *PolicyBuilder) {
 	for i, ep := range b.policies {
 		if ep.GetID() == p.GetID() {
-			err := b.ladon.Manager.Delete(p.GetID())
+			err := b.ladon.Manager.Delete(context.TODO(), p.GetID())
 			if err != nil {
 				panic(err)
 			}
@@ -211,7 +212,7 @@ func (b *Builder) loopLoadDBPolicies(db *gorm.DB, duration time.Duration) {
 }
 
 func (b *Builder) printPolices() {
-	allp, _ := b.ladon.Manager.GetAll(100, 0)
+	allp, _ := b.ladon.Manager.GetAll(context.TODO(), 100, 0)
 	fmt.Printf("all permission policies: \n")
 	for _, p := range allp {
 		fmt.Printf("%+v \n", p)

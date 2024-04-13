@@ -1,6 +1,7 @@
 package perm
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -182,7 +183,7 @@ func (b *Verifier) IsAllowed() error {
 	for _, sub := range b.vr.subjects {
 		b.vr.req.Subject = sub
 
-		err = b.builder.ladon.IsAllowed(b.vr.req)
+		err = b.builder.ladon.IsAllowed(context.TODO(), b.vr.req)
 		if Verbose {
 			fmt.Printf("have permission: %+v, req: %#+v\n", err == nil, b.vr.req)
 		}
