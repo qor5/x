@@ -49,13 +49,13 @@ func TranslationsMapToCsv(translationsMap map[string]map[string]string) (err err
 	sort.Strings(translationKeys)
 
 	// Write CSV file
-	var (
-		index = 0
-	)
+
+	index := 0
+
 	for _, translationKey := range translationKeys {
 		// Filter out translation by scope
 		index++
-		var translations = []string{translationKey}
+		translations := []string{translationKey}
 		for _, locale := range locales {
 			translations = append(translations, translationsMap[locale][translationKey])
 		}

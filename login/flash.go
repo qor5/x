@@ -56,9 +56,11 @@ const (
 	InfoCodePasswordSuccessfullyChanged
 )
 
-const failCodeFlashCookieName = "qor5_fc_flash"
-const warnCodeFlashCookieName = "qor5_wc_flash"
-const infoCodeFlashCookieName = "qor5_ic_flash"
+const (
+	failCodeFlashCookieName = "qor5_fc_flash"
+	warnCodeFlashCookieName = "qor5_wc_flash"
+	infoCodeFlashCookieName = "qor5_ic_flash"
+)
 
 func setFailCodeFlash(w http.ResponseWriter, c FailCode) {
 	http.SetCookie(w, &http.Cookie{

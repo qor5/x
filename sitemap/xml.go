@@ -22,7 +22,7 @@ func (s SiteMapBuilder) EncodeToXml(ctx context.Context) string {
 		hostWithScheme = h
 	}
 
-	var urls = make([]URL, len(s.urls))
+	urls := make([]URL, len(s.urls))
 	copy(urls, s.urls)
 
 	for _, contextfunc := range s.contextFuncs {

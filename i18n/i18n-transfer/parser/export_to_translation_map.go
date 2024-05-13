@@ -33,7 +33,7 @@ func getTranslationsMapFromVistor(v *Visitor) map[string]map[string]string {
 			for _, spec := range astruct.Specs {
 				if spec, ok := spec.(*ast.ValueSpec); ok {
 					var locale string
-					var translationMap = make(map[string]string)
+					translationMap := make(map[string]string)
 					var isMessage bool
 					for _, name := range spec.Names {
 						if l, exist := v.LocalesMap[name.Name]; exist {

@@ -20,7 +20,7 @@ func ParseDir(fset *token.FileSet, path string, filter func(fs.FileInfo) bool, m
 	pkgs = make(map[string]*ast.Package)
 	for _, d := range list {
 		if d.IsDir() {
-			var insidePkgs = make(map[string]*ast.Package)
+			insidePkgs := make(map[string]*ast.Package)
 			insidePkgs, first = ParseDir(fset, go_path.Join(path, d.Name()), filter, mode)
 			if first != nil {
 				return

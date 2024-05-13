@@ -21,8 +21,7 @@ type Builder struct {
 	queryName                          string
 }
 
-type Messages interface {
-}
+type Messages interface{}
 
 func New() *Builder {
 	b := &Builder{
@@ -112,7 +111,7 @@ const (
 
 func (b *Builder) EnsureLanguage(in http.Handler) (out http.Handler) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var lang = ""
+		lang := ""
 		lang = r.FormValue(b.queryName)
 		if len(lang) > 0 {
 			maxAge := 365 * 24 * 60 * 60

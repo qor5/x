@@ -21,7 +21,6 @@ func (index *SiteMapIndexBuilder) MountTo(mux *http.ServeMux) {
 
 func (robot *RobotsBuilder) MountTo(mux *http.ServeMux) {
 	mux.Handle("/robots.txt", robot)
-
 }
 
 func (site *SiteMapBuilder) ServeHTTP(w http.ResponseWriter, r *http.Request) {

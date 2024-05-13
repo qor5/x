@@ -41,6 +41,7 @@ func (oa *OAuthInfo) FindUserByOAuthIdentifier(db *gorm.DB, model interface{}, p
 	}
 	return model, nil
 }
+
 func (oa *OAuthInfo) InitOAuthUserID(db *gorm.DB, model interface{}, provider string, identifier string, oid string) error {
 	err := db.Model(model).
 		Where("o_auth_provider = ? and o_auth_identifier = ? and coalesce(o_auth_user_id, '') = ''", provider, identifier).

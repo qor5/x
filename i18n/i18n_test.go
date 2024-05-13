@@ -86,5 +86,4 @@ Name
 	if !strings.Contains(recorder.Body.String(), "Update") {
 		t.Errorf("response is wrong, %s", recorder.Body.String())
 	}
-
 }

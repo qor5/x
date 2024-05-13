@@ -35,8 +35,10 @@ var (
 	ErrPasswordNotMatch    = errors.New("password not match")
 )
 
-type HomeURLFunc func(r *http.Request, user interface{}) string
-type HookFunc func(r *http.Request, user interface{}, extraVals ...interface{}) error
+type (
+	HomeURLFunc func(r *http.Request, user interface{}) string
+	HookFunc    func(r *http.Request, user interface{}, extraVals ...interface{}) error
+)
 
 type Provider struct {
 	Goth goth.Provider

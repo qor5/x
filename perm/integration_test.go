@@ -35,8 +35,10 @@ func getMediaLibrary() *MediaLibrary {
 	return &MediaLibrary{ID: 33, Category: "images"}
 }
 
-const Create = "Create"
-const Upload = "Upload"
+const (
+	Create = "Create"
+	Upload = "Upload"
+)
 
 func TestPermission(t *testing.T) {
 	perm.Verbose = true
@@ -62,7 +64,6 @@ func TestPermission(t *testing.T) {
 				if verifier.Do(Create).ObjectOn(&Post{}).WithReq(r).IsAllowed() == nil {
 					_, _ = fmt.Fprintln(w, "create")
 				}
-
 			})
 
 			w := httptest.NewRecorder()
@@ -82,10 +83,8 @@ func TestPermission(t *testing.T) {
 						c.subjects, c.wantPermission, w.Body.String())
 				}
 			}
-
 		})
 	}
-
 }
 
 func sf(roles ...string) perm.SubjectsFunc {

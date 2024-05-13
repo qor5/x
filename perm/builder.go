@@ -28,10 +28,12 @@ const (
 
 var PermissionDenied = errors.New("permission denied")
 
-type Context = ladon.Context
-type Conditions = ladon.Conditions
-type SubjectsFunc func(r *http.Request) []string
-type ContextFunc func(r *http.Request, objs []interface{}) Context
+type (
+	Context      = ladon.Context
+	Conditions   = ladon.Conditions
+	SubjectsFunc func(r *http.Request) []string
+	ContextFunc  func(r *http.Request, objs []interface{}) Context
+)
 
 type DBPolicy interface {
 	LoadDBPolicies(db *gorm.DB, startFrom *time.Time) ([]*PolicyBuilder, []*PolicyBuilder)

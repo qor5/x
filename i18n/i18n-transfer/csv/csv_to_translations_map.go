@@ -18,7 +18,7 @@ func CsvToTranslationsMap(csvPath string) (translationsMap map[string]map[string
 		return
 	}
 
-	var keyValueMap = make(map[int]map[int]string)
+	keyValueMap := make(map[int]map[int]string)
 	for i, record := range records {
 		for j, value := range record {
 			if keyValueMap[i] == nil {

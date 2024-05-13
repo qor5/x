@@ -72,7 +72,7 @@ func main() {
 		panic(err)
 	}
 	propertiesNameMap := make(map[string]*VariantProperty)
-	for i, _ := range properties {
+	for i := range properties {
 		p := properties[i]
 		propertiesNameMap[p.Name] = p
 	}
@@ -82,7 +82,7 @@ func main() {
 		panic(err)
 	}
 	productsCodeMap := make(map[string]*Product)
-	for i, _ := range products {
+	for i := range products {
 		p := products[i]
 		productsCodeMap[p.Code] = p
 	}

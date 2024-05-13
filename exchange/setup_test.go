@@ -11,9 +11,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var (
-	db *gorm.DB
-)
+var db *gorm.DB
 
 var tables = []interface{}{
 	&TestExchangeModel{},
