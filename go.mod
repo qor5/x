@@ -1,6 +1,6 @@
 module github.com/qor5/x/v3
 
-go 1.22
+go 1.22.2
 
 require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
@@ -19,6 +19,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/sunfmin/reflectutils v1.0.3
 	github.com/theplant/htmlgo v1.0.3
+	github.com/theplant/osenv v0.0.1
 	github.com/theplant/testingutils v0.0.0-20240326065615-ab2586803ce4
 	golang.org/x/crypto v0.22.0
 	golang.org/x/text v0.14.0

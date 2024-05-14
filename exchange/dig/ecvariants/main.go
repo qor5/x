@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/qor5/x/v3/exchange"
+	"github.com/theplant/osenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -41,9 +42,11 @@ type Product struct {
 	Code string
 }
 
+var dbParamsString = osenv.Get("DB_PARAMS", "database connection string", "")
+
 func main() {
 	var err error
-	db, err := gorm.Open(postgres.Open(os.Getenv("DB_PARAMS")), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(dbParamsString), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
