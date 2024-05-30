@@ -92,8 +92,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pquerna/otp v1.4.0 h1:wZvl1TIVxKRThZIBiwOOHOGP/1+nZyWBil9Y2XNEDzg=
 github.com/pquerna/otp v1.4.0/go.mod h1:dkJfzwRKNiegxyNb54X/3fLwhCynbMspSyWKnvi1AEg=
-github.com/qor5/web/v3 v3.0.0 h1:WWrU2ZV7/w0gqI8NTBEp/hEJaYPNu3wz76lDNvFfDaA=
-github.com/qor5/web/v3 v3.0.0/go.mod h1:NbiYUcErC80hyqtXvh5QPSF69xbE1j5eP9qURGF4R/s=
+github.com/qor5/web/v3 v3.0.2 h1:mFKxFnrpDpJWeC55qnm9IBHiH3hQ1ODL0quV+SgwBmQ=
+github.com/qor5/web/v3 v3.0.2/go.mod h1:c8IQAOj3oqr78P8Nq80xNm4UeXwW/hEMkdKfQYeNfHY=
 github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=
 github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99yedzYV+kq4uf4=
 github.com/spf13/cast v1.6.0 h1:GEiTHELF+vaR5dhz3VqZfFSzZjYbgeKDpBxQVS4GYJ0=
@@ -111,8 +111,8 @@ github.com/theplant/htmltestingutils v0.0.0-20190423050759-0e06de7b6967 h1:yPrgt
 github.com/theplant/htmltestingutils v0.0.0-20190423050759-0e06de7b6967/go.mod h1:86iN4EAYaQbx1VTW5uPslTIviRkYH8CzslMC//g+BgY=
 github.com/theplant/osenv v0.0.1 h1:CCuIqyEVHJmqPTJk9xbCkP3C9tGzkHVsZ5E8m2DmZ7c=
 github.com/theplant/osenv v0.0.1/go.mod h1:gUdlLzvmJb/dyBmXk+qEWiIhAN1tmVhYktzK1HHEz3c=
-github.com/theplant/testingutils v0.0.0-20240326065615-ab2586803ce4 h1:3c6o1DpsFq4u6q7twLE3GxoBERsFNI5+tg+7k8Ivh00=
-github.com/theplant/testingutils v0.0.0-20240326065615-ab2586803ce4/go.mod h1:nh7wj3YTJehg0PBHnPXtvqIqdnBUn0Gqb79JHnblFuc=
+github.com/theplant/testingutils v0.0.1 h1:wlvFtKSahEdUXDO8QPsb8AdjEg5L1MypEr/KNGfcsHE=
+github.com/theplant/testingutils v0.0.1/go.mod h1:nh7wj3YTJehg0PBHnPXtvqIqdnBUn0Gqb79JHnblFuc=
 github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4 h1:0sw0nJM544SpsihWx1bkXdYLQDlzRflMgFJQ4Yih9ts=
 github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4/go.mod h1:+ccdNT0xMY1dtc5XBxumbYfOUhmduiGudqaDgD2rVRE=
 goji.io/v3 v3.0.0 h1:CXZWGMTie+4tdhKiEpOlrUW9hCc8jF4LHs94sWdfcgQ=

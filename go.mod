@@ -14,13 +14,13 @@ require (
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
 	github.com/ory/ladon v1.3.0
 	github.com/pquerna/otp v1.4.0
-	github.com/qor5/web/v3 v3.0.0
+	github.com/qor5/web/v3 v3.0.2
 	github.com/spf13/cast v1.6.0
 	github.com/stretchr/testify v1.9.0
 	github.com/sunfmin/reflectutils v1.0.4
 	github.com/theplant/htmlgo v1.0.3
 	github.com/theplant/osenv v0.0.1
-	github.com/theplant/testingutils v0.0.0-20240326065615-ab2586803ce4
+	github.com/theplant/testingutils v0.0.1
 	golang.org/x/crypto v0.23.0
 	golang.org/x/text v0.15.0
 	gorm.io/driver/postgres v1.5.7
