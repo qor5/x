@@ -43,8 +43,7 @@ func TestRegisterContextFunc(t *testing.T) {
 	}
 }
 
-type post struct {
-}
+type post struct{}
 
 func (p post) Sitemap(ctx context.Context) []URL {
 	return []URL{
@@ -52,6 +51,7 @@ func (p post) Sitemap(ctx context.Context) []URL {
 		{Loc: "/post2"},
 	}
 }
+
 func TestRegisterModel(t *testing.T) {
 	s := SiteMap().RegisterModel(post{}).EncodeToXml(context.TODO())
 	expected := `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>/post1</loc></url><url><loc>/post2</loc></url></urlset>`

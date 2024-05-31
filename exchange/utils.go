@@ -79,7 +79,7 @@ func validateResourceAndMetas(r interface{}, metas []*Meta) error {
 	}
 
 	ret := rt.Elem()
-	for i, _ := range metas {
+	for i := range metas {
 		m := metas[i]
 		if m.field == "" {
 			return errors.New("field name is empty")

@@ -57,7 +57,7 @@ func (ip *Importer) Exec(db *gorm.DB, r Reader, opts ...ImporterExecOption) erro
 	{
 		headerIdxMetas := make(map[int]*Meta)
 		header := r.Header()
-		for i, _ := range ip.metas {
+		for i := range ip.metas {
 			m := ip.metas[i]
 			hasCol := false
 			for hi, h := range header {
@@ -328,7 +328,7 @@ func (ip *Importer) validateAndInit() error {
 	}
 
 	ip.pkMetas = []*Meta{}
-	for i, _ := range ip.metas {
+	for i := range ip.metas {
 		m := ip.metas[i]
 		if m.primaryKey {
 			ip.pkMetas = append(ip.pkMetas, m)

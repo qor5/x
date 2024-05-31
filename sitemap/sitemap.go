@@ -16,10 +16,12 @@ const (
 	FreqAlways  = "always"
 )
 
-type ContextFunc func(context.Context) []URL
-type ModelInferface interface {
-	Sitemap(context.Context) []URL
-}
+type (
+	ContextFunc    func(context.Context) []URL
+	ModelInferface interface {
+		Sitemap(context.Context) []URL
+	}
+)
 
 type SiteMapIndexBuilder struct {
 	pathName string
@@ -106,7 +108,6 @@ func (site *SiteMapBuilder) RegisterURL(urls ...URL) (s *SiteMapBuilder) {
 	site.urls = append(site.urls, urls...)
 	return site
 }
-
 
 func (site *SiteMapBuilder) RegisterContextFunc(funcs ...ContextFunc) (s *SiteMapBuilder) {
 	site.contextFuncs = append(site.contextFuncs, funcs...)

@@ -9,8 +9,8 @@ import (
 	"net/url"
 
 	"github.com/pquerna/otp"
-	"github.com/qor5/web"
-	"github.com/qor5/x/i18n"
+	"github.com/qor5/web/v3"
+	"github.com/qor5/x/v3/i18n"
 	. "github.com/theplant/htmlgo"
 	"golang.org/x/text/language"
 	"golang.org/x/text/language/display"

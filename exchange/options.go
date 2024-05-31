@@ -21,8 +21,10 @@ type maxParamsPerSQLOption struct {
 	v int
 }
 
-var _ ImporterExecOption = (*maxParamsPerSQLOption)(nil)
-var _ ExporterExecOption = (*maxParamsPerSQLOption)(nil)
+var (
+	_ ImporterExecOption = (*maxParamsPerSQLOption)(nil)
+	_ ExporterExecOption = (*maxParamsPerSQLOption)(nil)
+)
 
 func (o *maxParamsPerSQLOption) iePrivate() {}
 func (o *maxParamsPerSQLOption) eePrivate() {}

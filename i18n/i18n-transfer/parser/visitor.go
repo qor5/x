@@ -9,29 +9,29 @@ import (
 type Visitor struct {
 	// map[locale][]MessageStruct
 	// example:
-	//{
+	// {
 	//      "English": [
 	//              {
 	//                      "PkgName": "x/i18n",
 	//                      "StructName": "Messages_en_US"
 	//              }
 	//      ],
-	//}
+	// }
 	RigisterMap map[string][]MessageStruct
 
 	// map[locale][]MessageStruct
 	// example:
-	//{
+	// {
 	//      "Messages_en_US": "English",
 	//      "Messages_zh_CN": "SimplifiedChinese"
-	//}
+	// }
 	LocalesMap map[string]string
 
 	// map[pkgName][]structs
 	// example:
-	//{
+	// {
 	//      "x/i18n": []*ast.GenDecl,
-	//}
+	// }
 	Variables map[string][]*ast.GenDecl
 
 	// the current package path
@@ -42,16 +42,16 @@ type Visitor struct {
 	// the current import map
 	// example:
 	// when visit file "x/i18n/i18n_test.go", currentImportMap =
-	//{
+	// {
 	//      "fmt": "fmt",
 	//      "http": "net/http",
 	//      "httptest": "net/http/httptest",
 	//      "strings": "strings",
 	//      "testing": "testing"
-	//      "i18n": "github.com/qor5/x/i18n",
+	//      "i18n": "github.com/qor5/x/v3/i18n",
 	//      "testingutils": "github.com/theplant/testingutils",
 	//      "language": "golang.org/x/text/language",
-	//}
+	// }
 	currentImportMap  map[string]string
 	projectParentPath string
 	fset              *token.FileSet
@@ -65,7 +65,7 @@ type MessageStruct struct {
 func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 	// find all global variables and insert it into v.Variables
 	if f, ok := node.(*ast.File); ok {
-		var temp = strings.Split(v.fset.File(f.Package).Name(), "/")
+		temp := strings.Split(v.fset.File(f.Package).Name(), "/")
 		pkgName := strings.TrimPrefix(strings.Join(temp[:len(temp)-1], "/"), strings.TrimSuffix(v.projectParentPath, "/")+"/")
 		for _, decl := range f.Decls {
 			if genDecl, ok := decl.(*ast.GenDecl); ok && genDecl.Tok == token.VAR {
@@ -127,7 +127,7 @@ func newVisitorAndWalk(fset *token.FileSet, pkgs map[string]*ast.Package, projec
 								var importValue string
 
 								if spec.Name == nil {
-									var temp = strings.Split(strings.Trim(spec.Path.Value, "\""), "/")
+									temp := strings.Split(strings.Trim(spec.Path.Value, "\""), "/")
 									importName = temp[len(temp)-1]
 								} else {
 									importName = spec.Name.Name
@@ -141,7 +141,7 @@ func newVisitorAndWalk(fset *token.FileSet, pkgs map[string]*ast.Package, projec
 				}
 			}
 			v.currentPkgPath = pkgPath
-			var temp = strings.Split(projectPath, "/")
+			temp := strings.Split(projectPath, "/")
 			v.projectParentPath = strings.Join(temp[:len(temp)-1], "/")
 
 			ast.Walk(v, f)

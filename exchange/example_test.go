@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/qor5/x/exchange"
+	"github.com/qor5/x/v3/exchange"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
@@ -104,153 +104,155 @@ type ShoppingSite struct {
 	Name string
 }
 
-var phoneAssociations = []string{"Intro", "ExtraIntro", "Cameras", "SellingSites"}
-var phoneMetas = []*exchange.Meta{
-	exchange.NewMeta("Code").PrimaryKey(true),
-	exchange.NewMeta("Name"),
-	exchange.NewMeta("ReleaseDate").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
-		r := record.(*Phone)
-		if value == "" {
-			r.ReleaseDate = nil
+var (
+	phoneAssociations = []string{"Intro", "ExtraIntro", "Cameras", "SellingSites"}
+	phoneMetas        = []*exchange.Meta{
+		exchange.NewMeta("Code").PrimaryKey(true),
+		exchange.NewMeta("Name"),
+		exchange.NewMeta("ReleaseDate").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
+			r := record.(*Phone)
+			if value == "" {
+				r.ReleaseDate = nil
+				return nil
+			}
+			t, err := time.ParseInLocation("2006-01-02", value, time.Local)
+			if err != nil {
+				return err
+			}
+			r.ReleaseDate = &t
 			return nil
-		}
-		t, err := time.ParseInLocation("2006-01-02", value, time.Local)
-		if err != nil {
-			return err
-		}
-		r.ReleaseDate = &t
-		return nil
-	}).Valuer(func(record interface{}) (string, error) {
-		r := record.(*Phone)
-		if r.ReleaseDate == nil {
-			return "", nil
-		}
-		return r.ReleaseDate.Local().Format("2006-01-02"), nil
-	}),
-	exchange.NewMeta("Width"),
-	exchange.NewMeta("Height"),
-	exchange.NewMeta("Depth"),
-	exchange.NewMeta("ScreenSize").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
-		r := record.(*Phone)
-		r.Screen.Size = value
-		return nil
-	}).Valuer(func(record interface{}) (string, error) {
-		r := record.(*Phone)
-		return r.Screen.Size, nil
-	}),
-	exchange.NewMeta("ScreenType").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
-		r := record.(*Phone)
-		r.Screen.Type = value
-		return nil
-	}).Valuer(func(record interface{}) (string, error) {
-		r := record.(*Phone)
-		return r.Screen.Type, nil
-	}),
-	exchange.NewMeta("5G").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
-		has5G := strings.ToLower(value) == "true"
-		r := record.(*Phone)
-		if has5G {
-			setted := false
+		}).Valuer(func(record interface{}) (string, error) {
+			r := record.(*Phone)
+			if r.ReleaseDate == nil {
+				return "", nil
+			}
+			return r.ReleaseDate.Local().Format("2006-01-02"), nil
+		}),
+		exchange.NewMeta("Width"),
+		exchange.NewMeta("Height"),
+		exchange.NewMeta("Depth"),
+		exchange.NewMeta("ScreenSize").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
+			r := record.(*Phone)
+			r.Screen.Size = value
+			return nil
+		}).Valuer(func(record interface{}) (string, error) {
+			r := record.(*Phone)
+			return r.Screen.Size, nil
+		}),
+		exchange.NewMeta("ScreenType").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
+			r := record.(*Phone)
+			r.Screen.Type = value
+			return nil
+		}).Valuer(func(record interface{}) (string, error) {
+			r := record.(*Phone)
+			return r.Screen.Type, nil
+		}),
+		exchange.NewMeta("5G").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
+			has5G := strings.ToLower(value) == "true"
+			r := record.(*Phone)
+			if has5G {
+				setted := false
+				for _, f := range r.Features {
+					if f == "5G" {
+						setted = true
+						break
+					}
+				}
+				if !setted {
+					r.Features = append(r.Features, "5G")
+				}
+			} else {
+				var newFeatures []string
+				for _, f := range r.Features {
+					if f != "5G" {
+						newFeatures = append(newFeatures, f)
+					}
+				}
+				r.Features = newFeatures
+			}
+			return nil
+		}).Valuer(func(record interface{}) (string, error) {
+			r := record.(*Phone)
 			for _, f := range r.Features {
 				if f == "5G" {
-					setted = true
-					break
+					return "TRUE", nil
 				}
 			}
-			if !setted {
-				r.Features = append(r.Features, "5G")
-			}
-		} else {
-			var newFeatures []string
-			for _, f := range r.Features {
-				if f != "5G" {
-					newFeatures = append(newFeatures, f)
+			return "FALSE", nil
+		}),
+		exchange.NewMeta("WirelessCharge").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
+			hasWirelessCharge := strings.ToLower(value) == "true"
+			r := record.(*Phone)
+			if hasWirelessCharge {
+				setted := false
+				for _, f := range r.Features {
+					if f == "WirelessCharge" {
+						setted = true
+						break
+					}
 				}
+				if !setted {
+					r.Features = append(r.Features, "WirelessCharge")
+				}
+			} else {
+				var newFeatures []string
+				for _, f := range r.Features {
+					if f != "WirelessCharge" {
+						newFeatures = append(newFeatures, f)
+					}
+				}
+				r.Features = newFeatures
 			}
-			r.Features = newFeatures
-		}
-		return nil
-	}).Valuer(func(record interface{}) (string, error) {
-		r := record.(*Phone)
-		for _, f := range r.Features {
-			if f == "5G" {
-				return "TRUE", nil
-			}
-		}
-		return "FALSE", nil
-	}),
-	exchange.NewMeta("WirelessCharge").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
-		hasWirelessCharge := strings.ToLower(value) == "true"
-		r := record.(*Phone)
-		if hasWirelessCharge {
-			setted := false
+			return nil
+		}).Valuer(func(record interface{}) (string, error) {
+			r := record.(*Phone)
 			for _, f := range r.Features {
 				if f == "WirelessCharge" {
-					setted = true
-					break
+					return "TRUE", nil
 				}
 			}
-			if !setted {
-				r.Features = append(r.Features, "WirelessCharge")
-			}
-		} else {
-			var newFeatures []string
-			for _, f := range r.Features {
-				if f != "WirelessCharge" {
-					newFeatures = append(newFeatures, f)
-				}
-			}
-			r.Features = newFeatures
-		}
-		return nil
-	}).Valuer(func(record interface{}) (string, error) {
-		r := record.(*Phone)
-		for _, f := range r.Features {
-			if f == "WirelessCharge" {
-				return "TRUE", nil
-			}
-		}
-		return "FALSE", nil
-	}),
-	exchange.NewMeta("Intro").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
-		r := record.(*Phone)
-		r.Intro.Content = value
-		return nil
-	}).Valuer(func(record interface{}) (string, error) {
-		r := record.(*Phone)
-		return r.Intro.Content, nil
-	}),
-	exchange.NewMeta("ExtraIntro").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
-		r := record.(*Phone)
-		if value == "" {
-			r.ExtraIntro = nil
+			return "FALSE", nil
+		}),
+		exchange.NewMeta("Intro").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
+			r := record.(*Phone)
+			r.Intro.Content = value
 			return nil
-		}
-		if r.ExtraIntro == nil {
-			r.ExtraIntro = &ExtraIntro{}
-		}
-		r.ExtraIntro.Content = value
-		return nil
-	}).Valuer(func(record interface{}) (string, error) {
-		r := record.(*Phone)
-		if r.ExtraIntro == nil {
-			return "", nil
-		}
-		return r.ExtraIntro.Content, nil
-	}),
-	exchange.NewMeta("FrontCamera").
-		Setter(phoneCameraSetter("FrontCamera", "front")).
-		Valuer(phoneCameraValuer("front")),
-	exchange.NewMeta("BackCamera").
-		Setter(phoneCameraSetter("BackCamera", "back")).
-		Valuer(phoneCameraValuer("back")),
-	exchange.NewMeta("SellingOnJD").
-		Setter(sellingSiteSetter("SellingOnJD", 1)).
-		Valuer(sellingSiteValuer(1)),
-	exchange.NewMeta("SellingOnTaoBao").
-		Setter(sellingSiteSetter("SellingOnTaoBao", 2)).
-		Valuer(sellingSiteValuer(2)),
-}
+		}).Valuer(func(record interface{}) (string, error) {
+			r := record.(*Phone)
+			return r.Intro.Content, nil
+		}),
+		exchange.NewMeta("ExtraIntro").Setter(func(record interface{}, value string, metaValues exchange.MetaValues) error {
+			r := record.(*Phone)
+			if value == "" {
+				r.ExtraIntro = nil
+				return nil
+			}
+			if r.ExtraIntro == nil {
+				r.ExtraIntro = &ExtraIntro{}
+			}
+			r.ExtraIntro.Content = value
+			return nil
+		}).Valuer(func(record interface{}) (string, error) {
+			r := record.(*Phone)
+			if r.ExtraIntro == nil {
+				return "", nil
+			}
+			return r.ExtraIntro.Content, nil
+		}),
+		exchange.NewMeta("FrontCamera").
+			Setter(phoneCameraSetter("FrontCamera", "front")).
+			Valuer(phoneCameraValuer("front")),
+		exchange.NewMeta("BackCamera").
+			Setter(phoneCameraSetter("BackCamera", "back")).
+			Valuer(phoneCameraValuer("back")),
+		exchange.NewMeta("SellingOnJD").
+			Setter(sellingSiteSetter("SellingOnJD", 1)).
+			Valuer(sellingSiteValuer(1)),
+		exchange.NewMeta("SellingOnTaoBao").
+			Setter(sellingSiteSetter("SellingOnTaoBao", 2)).
+			Valuer(sellingSiteValuer(2)),
+	}
+)
 
 func phoneCameraSetter(field string, cameraType string) exchange.MetaSetter {
 	return func(record interface{}, value string, metaValues exchange.MetaValues) error {
@@ -268,7 +270,7 @@ func phoneCameraSetter(field string, cameraType string) exchange.MetaSetter {
 			})
 		} else {
 			var newCameras []*Camera
-			for i, _ := range r.Cameras {
+			for i := range r.Cameras {
 				m := r.Cameras[i]
 				if m.Type != cameraType {
 					newCameras = append(newCameras, m)

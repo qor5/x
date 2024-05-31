@@ -2,10 +2,11 @@ package exchange_test
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 	"time"
 
-	"github.com/qor5/x/exchange"
+	"github.com/qor5/x/v3/exchange"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,7 +44,10 @@ func TestExport(t *testing.T) {
 				exchange.NewMeta("ID").PrimaryKey(true),
 				exchange.NewMeta("Name").Header("Nameeee"),
 				exchange.NewMeta("Age"),
-				exchange.NewMeta("Birth"),
+				exchange.NewMeta("Birth").Valuer(func(record interface{}) (r string, err error) {
+					r = fmt.Sprint(record.(*TestExchangeModel).Birth.UTC())
+					return
+				}),
 			},
 			expectCSVContent: `ID,Nameeee,Age,Birth
 1,Tom,6,1939-01-01 00:00:00 +0000 UTC
@@ -71,18 +75,20 @@ func TestExport(t *testing.T) {
 			expectError: nil,
 		},
 	} {
-		exporter := exchange.NewExporter(&TestExchangeModel{}).
-			Metas(c.metas...)
+		t.Run(c.name, func(t *testing.T) {
+			exporter := exchange.NewExporter(&TestExchangeModel{}).
+				Metas(c.metas...)
 
-		buf := bytes.Buffer{}
-		w, err := exchange.NewCSVWriter(&buf)
-		assert.NoError(t, err, c.name)
+			buf := bytes.Buffer{}
+			w, err := exchange.NewCSVWriter(&buf)
+			assert.NoError(t, err, c.name)
 
-		err = exporter.Exec(db, w)
-		if err != nil {
-			assert.Equal(t, c.expectError, err, c.name)
-			continue
-		}
-		assert.Equal(t, c.expectCSVContent, buf.String(), c.name)
+			err = exporter.Exec(db, w)
+			if err != nil {
+				assert.Equal(t, c.expectError, err, c.name)
+				return
+			}
+			assert.Equal(t, c.expectCSVContent, buf.String(), c.name)
+		})
 	}
 }

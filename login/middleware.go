@@ -30,6 +30,14 @@ type DisableAutoRedirectToHomePage struct{}
 
 func (*DisableAutoRedirectToHomePage) middlewareConfig() {}
 
+func MockCurrentUser(user any) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), UserKey, user)))
+		})
+	}
+}
+
 func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) http.Handler {
 	mustLogin := true
 	autoRedirectToHomePage := true
@@ -55,7 +63,7 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 		b.validateTOTPURL:              {},
 	}
 
-	staticFileRe := regexp.MustCompile(`\.(css|js|gif|jpg|jpeg|png|ico|svg|ttf|eot|woff|woff2)$`)
+	staticFileRe := regexp.MustCompile(`\.(css|js|gif|jpg|jpeg|png|ico|svg|ttf|eot|woff|woff2|js\.map)$`)
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

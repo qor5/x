@@ -16,8 +16,8 @@ import (
 	"github.com/markbates/goth/gothic"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
-	"github.com/qor5/web"
-	"github.com/qor5/x/i18n"
+	"github.com/qor5/web/v3"
+	"github.com/qor5/x/v3/i18n"
 	h "github.com/theplant/htmlgo"
 	"golang.org/x/text/language"
 	"gorm.io/gorm"
@@ -35,8 +35,10 @@ var (
 	ErrPasswordNotMatch    = errors.New("password not match")
 )
 
-type HomeURLFunc func(r *http.Request, user interface{}) string
-type HookFunc func(r *http.Request, user interface{}, extraVals ...interface{}) error
+type (
+	HomeURLFunc func(r *http.Request, user interface{}) string
+	HookFunc    func(r *http.Request, user interface{}, extraVals ...interface{}) error
+)
 
 type Provider struct {
 	Goth goth.Provider

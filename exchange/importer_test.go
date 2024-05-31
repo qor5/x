@@ -8,8 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/qor5/x/exchange"
+	"github.com/qor5/x/v3/exchange"
 	"github.com/stretchr/testify/assert"
+	"github.com/theplant/testingutils"
 )
 
 func TestImport(t *testing.T) {
@@ -147,21 +148,31 @@ func TestImport(t *testing.T) {
 			expectError:   fmt.Errorf("name cannot be empty"),
 		},
 	} {
-		initTables()
-		r, err := exchange.NewCSVReader(ioutil.NopCloser(strings.NewReader(c.csvContent)))
-		assert.NoError(t, err, c.name)
-		err = exchange.NewImporter(&TestExchangeModel{}).
-			Metas(c.metas...).
-			Validators(c.validators...).
-			Exec(db, r)
-		if err != nil {
-			assert.Equal(t, c.expectError, err, c.name)
-			continue
-		}
-		var records []*TestExchangeModel
-		err = db.Order("id asc").Find(&records).Error
-		assert.NoError(t, err, c.name)
-		assert.Equal(t, c.expectRecords, records, c.name)
+		t.Run(c.name, func(t *testing.T) {
+			initTables()
+			r, err := exchange.NewCSVReader(ioutil.NopCloser(strings.NewReader(c.csvContent)))
+			assert.NoError(t, err, c.name)
+			err = exchange.NewImporter(&TestExchangeModel{}).
+				Metas(c.metas...).
+				Validators(c.validators...).
+				Exec(db, r)
+			if err != nil {
+				assert.Equal(t, c.expectError, err, c.name)
+				return
+			}
+			var records []*TestExchangeModel
+			err = db.Order("id asc").Find(&records).Error
+			for _, rc := range records {
+				if rc.Birth != nil {
+					rc.Birth = ptrTime(rc.Birth.UTC())
+				}
+			}
+			assert.NoError(t, err, c.name)
+			diff := testingutils.PrettyJsonDiff(c.expectRecords, records)
+			if diff != "" {
+				t.Error(diff)
+			}
+		})
 	}
 }
 

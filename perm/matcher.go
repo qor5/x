@@ -6,8 +6,7 @@ import (
 	"github.com/ory/ladon"
 )
 
-type PathMatcher struct {
-}
+type PathMatcher struct{}
 
 func (m *PathMatcher) Matches(p ladon.Policy, haystack []string, needle string) (bool, error) {
 	for _, h := range haystack {
