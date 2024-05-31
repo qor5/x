@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"gorm.io/driver/sqlite"
+	"github.com/theplant/testenv"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -17,10 +17,20 @@ var tables = []interface{}{
 	&TestExchangeModel{},
 	&TestExchangeCompositePrimaryKeyModel{},
 	&Phone{},
+	&ShoppingSite{},
+	&Camera{},
 	&Intro{},
 	&ExtraIntro{},
-	&Camera{},
+}
+
+var dropTableStructs = []interface{}{
+	&TestExchangeModel{},
+	&TestExchangeCompositePrimaryKeyModel{},
+	&Intro{},
+	&ExtraIntro{},
 	&ShoppingSite{},
+	&Camera{},
+	&Phone{},
 }
 
 type TestExchangeModel struct {
@@ -39,13 +49,12 @@ type TestExchangeCompositePrimaryKeyModel struct {
 }
 
 func TestMain(m *testing.M) {
-	var err error
-	db, err = gorm.Open(sqlite.Open("/tmp/test_exchange.db"), &gorm.Config{
-		DisableForeignKeyConstraintWhenMigrating: true,
-	})
+	env, err := testenv.New().DBEnable(true).SetUp()
 	if err != nil {
 		panic(err)
 	}
+	defer env.TearDown()
+	db = env.DB
 	db.Logger = db.Logger.LogMode(logger.Info)
 
 	migrateTables()
@@ -63,18 +72,18 @@ func migrateTables() {
 
 func dropTables() {
 	var err error
-	for _, m := range tables {
+	err = db.Exec(fmt.Sprintf("drop table phone_selling_shopping_site")).Error
+	if err != nil {
+		panic(err)
+	}
+
+	for _, m := range dropTableStructs {
 		stmt := &gorm.Statement{DB: db}
 		stmt.Parse(m)
 		err = db.Exec(fmt.Sprintf("drop table %s", stmt.Schema.Table)).Error
 		if err != nil {
 			panic(err)
 		}
-	}
-
-	err = db.Exec(fmt.Sprintf("drop table phone_selling_shopping_site")).Error
-	if err != nil {
-		panic(err)
 	}
 }
 
