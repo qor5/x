@@ -1,0 +1,13 @@
+// `density="compact"` and `variant="outlined"`
+.v-input--density-compact .v-field--variant-outlined {
+  --v-input-control-height: 32px;
+  --v-field-padding-start: 12px;
+  --v-field-input-padding-top: 4px;
+  --v-field-input-padding-bottom: 4px;
+  font-size: 14px;
+  .v-chip--size-small {
+    --v-chip-height: 20px;
+    font-size: 12px;
+    padding: 0 8px;
+  }
+}

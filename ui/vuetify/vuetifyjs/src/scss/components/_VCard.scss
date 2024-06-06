@@ -1,0 +1,5 @@
+@use "../variables" as variables;
+
+.v-card--variant-outlined {
+  border-color: variables.$color-grey-300;
+}

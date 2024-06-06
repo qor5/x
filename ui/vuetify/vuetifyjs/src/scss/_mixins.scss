@@ -1,0 +1,24 @@
+@use "sass:map";
+@use "./vuetify" as vuetify;
+
+// Usage: `@use "../mixins";` and then use `@include mixins.elevation(24);`
+@mixin elevation($z, $important: false) {
+  box-shadow: map.get(vuetify.$shadow-key-umbra, $z), map.get(vuetify.$shadow-key-penumbra, $z), map.get(vuetify.$shadow-key-ambient, $z) if($important, !important, null);
+}
+
+// This mixin is inspired from vuetify for adding hover styles via before pseudo element
+@mixin before-pseudo() {
+  position: relative;
+
+  &::before {
+    position: absolute;
+    border-radius: inherit;
+    background: currentcolor;
+    block-size: 100%;
+    content: "";
+    inline-size: 100%;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+}

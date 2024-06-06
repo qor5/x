@@ -1,0 +1,14 @@
+@use "../vuetify" as vuetify;
+@use "../variables" as variables;
+
+.v-table > .v-table__wrapper > table > tbody > tr > th,
+.v-table > .v-table__wrapper > table > thead > tr > th,
+.v-table > .v-table__wrapper > table > tfoot > tr > th {
+  color: var(--v-theme-on-background);
+  background-color: variables.$color-grey-50;
+}
+.v-table > .v-table__wrapper > table {
+  border: vuetify.$table-border;
+  border-radius: vuetify.$border-radius-root;
+  overflow: hidden;
+}
