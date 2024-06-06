@@ -1,0 +1,381 @@
+@use "./variables" as variables;
+
+$font-family-custom: -apple-system, "system-ui", "Segoe UI", "Noto Sans",
+  Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+$border-radius-custom: 4px;
+
+@forward "vuetify/settings" with (
+  // This will false all colors which is not necessory for theme
+  $color-pack: false !default,
+
+  // Global Font
+  $font-size-root: 14px,
+  $body-font-family: $font-family-custom !default,
+  $heading-font-family: $font-family-custom !default,
+
+  // Global Border Radius
+  $border-radius-root: $border-radius-custom !default,
+
+  // Global Radius as per breakeven point
+  $rounded:
+    (
+      0: 0,
+      "sm": $border-radius-custom * 0.5,
+      null: $border-radius-custom,
+      "md": $border-radius-custom * 1,
+      "lg": $border-radius-custom * 2,
+      "xl": $border-radius-custom * 6,
+      "pill": 9999px,
+      "circle": 50%,
+      "shaped": $border-radius-custom * 6 0
+    ),
+
+  // Global Typography
+  $typography:
+    (
+      "h1": (
+        "size": 60px,
+        "weight": 510,
+        "line-height": 60px,
+        "letter-spacing": -0.4px,
+        "font-family": inherit,
+      ),
+      "h2": (
+        "size": 35px,
+        "weight": 510,
+        "line-height": 40px,
+        "letter-spacing": -0.16px,
+        "font-family": inherit,
+      ),
+      "h3": (
+        "size": 28px,
+        "weight": 510,
+        "line-height": 36px,
+        "letter-spacing": -0.12px,
+        "font-family": inherit,
+      ),
+      "h4": (
+        "size": 24px,
+        "weight": 510,
+        "line-height": 32px,
+        "letter-spacing": -0.1px,
+        "font-family": inherit,
+      ),
+      "h5": (
+        "size": 20px,
+        "weight": 510,
+        "line-height": 28px,
+        "letter-spacing": -0.08px,
+        "font-family": inherit,
+      ),
+      "h6": (
+        "size": 18px,
+        "weight": 510,
+        "line-height": 26px,
+        "letter-spacing": -0.04px,
+        "font-family": inherit,
+      ),
+      "subtitle-1": (
+        "size": 16px,
+        "weight": 510,
+        "line-height": 24px,
+        "font-family": inherit,
+      ),
+      "subtitle-2": (
+        "size": 14px,
+        "weight": 510,
+        "line-height": 20px,
+        "letter-spacing": 0.15px,
+        "font-family": inherit,
+      ),
+      "body-1": (
+        "size": 16px,
+        "weight": 400,
+        "font-family": inherit,
+      ),
+      "body-2": (
+        "size": 14px,
+        "weight": 400,
+        "line-height": 20px,
+        "font-family": inherit,
+      ),
+      "caption": (
+        "size": 12px,
+        "weight": 400,
+        "line-height": 16px,
+        "letter-spacing": 0.04px,
+        "font-family": inherit,
+      ),
+      "overline": (
+        "size": 12px,
+        "weight": 400,
+        "line-height": 26px,
+        "letter-spacing": 0.04px,
+        "font-family": inherit,
+        "text-transform": uppercase,
+      ),
+      "button": (
+        "size": 14px,
+        "weight": 510,
+        "line-height": 20px,
+        "font-family": inherit,
+        "text-transform": none,
+      )
+    )
+    !default,
+
+  // Custom Shadows
+  $shadow-key-umbra:
+    (
+      0: (
+        0 0 0 0 rgba(var(--v-shadow-key-umbra-color), 1),
+      ),
+      1: (
+        0 2px 4px rgba(var(--v-shadow-key-umbra-color), 0.12),
+      ),
+      2: (
+        0 2px 4px 0
+          rgba(var(--v-shadow-key-umbra-color), var(--v-shadow-xs-opacity)),
+      ),
+      3: (
+        0 3px 8px rgba(var(--v-shadow-key-umbra-color), 0.14),
+      ),
+      4: (
+        0 3px 6px 0
+          rgba(var(--v-shadow-key-umbra-color), var(--v-shadow-sm-opacity)),
+      ),
+      5: (
+        0 4px 10px rgba(var(--v-shadow-key-umbra-color), 0.15),
+      ),
+      6: (
+        0 4px 10px 0
+          rgba(var(--v-shadow-key-umbra-color), var(--v-shadow-md-opacity)),
+      ),
+      7: (
+        0 4px 18px rgba(var(--v-shadow-key-umbra-color), 0.1),
+      ),
+      8: (
+        0 6px 16px 0
+          rgba(var(--v-shadow-key-umbra-color), var(--v-shadow-lg-opacity)),
+      ),
+      9: (
+        0 5px 14px rgba(var(--v-shadow-key-umbra-color), 0.18),
+      ),
+      10: (
+        0 8px 28px 0
+          rgba(var(--v-shadow-key-umbra-color), var(--v-shadow-xl-opacity)),
+      ),
+      11: (
+        0 5px 16px rgba(var(--v-shadow-key-umbra-color), 0.2),
+      ),
+      12: (
+        0 6px 17px rgba(var(--v-shadow-key-umbra-color), 0.22),
+      ),
+      13: (
+        0 6px 18px rgba(var(--v-shadow-key-umbra-color), 0.22),
+      ),
+      14: (
+        0 6px 19px rgba(var(--v-shadow-key-umbra-color), 0.24),
+      ),
+      15: (
+        0 7px 20px rgba(var(--v-shadow-key-umbra-color), 0.24),
+      ),
+      16: (
+        0 7px 21px rgba(var(--v-shadow-key-umbra-color), 0.26),
+      ),
+      17: (
+        0 7px 22px rgba(var(--v-shadow-key-umbra-color), 0.26),
+      ),
+      18: (
+        0 8px 23px rgba(var(--v-shadow-key-umbra-color), 0.28),
+      ),
+      19: (
+        0 8px 24px 6px rgba(var(--v-shadow-key-umbra-color), 0.28),
+      ),
+      20: (
+        0 9px 25px rgba(var(--v-shadow-key-umbra-color), 0.3),
+      ),
+      21: (
+        0 9px 26px rgba(var(--v-shadow-key-umbra-color), 0.32),
+      ),
+      22: (
+        0 9px 27px rgba(var(--v-shadow-key-umbra-color), 0.32),
+      ),
+      23: (
+        0 10px 28px rgba(var(--v-shadow-key-umbra-color), 0.34),
+      ),
+      24: (
+        0 10px 30px rgba(var(--v-shadow-key-umbra-color), 0.34),
+      )
+    )
+    !default,
+
+  $shadow-key-penumbra: (
+    0: (
+      0 0 transparent,
+    ),
+    1: (
+      0 0 transparent,
+    ),
+    2: (
+      0 0 transparent,
+    ),
+    3: (
+      0 0 transparent,
+    ),
+    4: (
+      0 0 transparent,
+    ),
+    5: (
+      0 0 transparent,
+    ),
+    6: (
+      0 0 transparent,
+    ),
+    7: (
+      0 0 transparent,
+    ),
+    8: (
+      0 0 transparent,
+    ),
+    9: (
+      0 0 transparent,
+    ),
+    10: (
+      0 0 transparent,
+    ),
+    11: (
+      0 0 transparent,
+    ),
+    12: (
+      0 0 transparent,
+    ),
+    13: (
+      0 0 transparent,
+    ),
+    14: (
+      0 0 transparent,
+    ),
+    15: (
+      0 0 transparent,
+    ),
+    16: (
+      0 0 transparent,
+    ),
+    17: (
+      0 0 transparent,
+    ),
+    18: (
+      0 0 transparent,
+    ),
+    19: (
+      0 0 transparent,
+    ),
+    20: (
+      0 0 transparent,
+    ),
+    21: (
+      0 0 transparent,
+    ),
+    22: (
+      0 0 transparent,
+    ),
+    23: (
+      0 0 transparent,
+    ),
+    24: (
+      0 0 transparent,
+    )
+  )
+  !default,
+
+  $shadow-key-ambient: (
+    0: (
+      0 0 transparent,
+    ),
+    1: (
+      0 0 transparent,
+    ),
+    2: (
+      0 0 transparent,
+    ),
+    3: (
+      0 0 transparent,
+    ),
+    4: (
+      0 0 transparent,
+    ),
+    5: (
+      0 0 transparent,
+    ),
+    6: (
+      0 0 transparent,
+    ),
+    7: (
+      0 0 transparent,
+    ),
+    8: (
+      0 0 transparent,
+    ),
+    9: (
+      0 0 transparent,
+    ),
+    10: (
+      0 0 transparent,
+    ),
+    11: (
+      0 0 transparent,
+    ),
+    12: (
+      0 0 transparent,
+    ),
+    13: (
+      0 0 transparent,
+    ),
+    14: (
+      0 0 transparent,
+    ),
+    15: (
+      0 0 transparent,
+    ),
+    16: (
+      0 0 transparent,
+    ),
+    17: (
+      0 0 transparent,
+    ),
+    18: (
+      0 0 transparent,
+    ),
+    19: (
+      0 0 transparent,
+    ),
+    20: (
+      0 0 transparent,
+    ),
+    21: (
+      0 0 transparent,
+    ),
+    22: (
+      0 0 transparent,
+    ),
+    23: (
+      0 0 transparent,
+    ),
+    24: (
+      0 0 transparent,
+    )
+  )
+  !default,
+
+  // Components
+  // Table
+  $table-header-font-weight: 510 !default,
+  $table-header-height: 44px !default,
+  $table-row-height: 60px !default,
+  $table-border-color: variables.$color-grey-300 !default,
+  // Chip
+  $chip-border-radius: 4px !default, // can't use $rounded map here
+  // Card
+  $card-item-padding: 16px,
+);

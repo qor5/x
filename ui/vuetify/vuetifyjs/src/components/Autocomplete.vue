@@ -1,0 +1,36 @@
+<template>
+  <v-row>
+    <v-col cols="12" sm="6">
+      <v-autocomplete
+        clearable
+        label="Autocomplete"
+        :items="[
+          'California',
+          'Colorado',
+          'Florida',
+          'Georgia',
+          'Texas',
+          'Wyoming',
+        ]"
+        multiple
+      ></v-autocomplete>
+    </v-col>
+    <v-col cols="12" sm="6">
+      <v-autocomplete
+        clearable
+        chips
+        density="compact"
+        :items="[
+          'California',
+          'Colorado',
+          'Florida',
+          'Georgia',
+          'Texas',
+          'Wyoming',
+        ]"
+        multiple
+        variant="outlined"
+      ></v-autocomplete>
+    </v-col>
+  </v-row>
+</template>
