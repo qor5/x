@@ -161,10 +161,14 @@ github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c h1:ncq/mPwQF
 github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c/go.mod h1:OmDBASR4679mdNQnz2pUhc2G8CO2JrUAVFDRBDP/hJE=
 github.com/pquerna/otp v1.4.0 h1:wZvl1TIVxKRThZIBiwOOHOGP/1+nZyWBil9Y2XNEDzg=
 github.com/pquerna/otp v1.4.0/go.mod h1:dkJfzwRKNiegxyNb54X/3fLwhCynbMspSyWKnvi1AEg=
-github.com/qor5/web/v3 v3.0.3 h1:/dKshHquPok3f39Au7OI4WEawVaUKk/+Ie1qFQfqOn0=
-github.com/qor5/web/v3 v3.0.3/go.mod h1:c8IQAOj3oqr78P8Nq80xNm4UeXwW/hEMkdKfQYeNfHY=
+github.com/qor5/web/v3 v3.0.4-0.20240606041122-ed616a64625f h1:X//Dv9IM1UpunbAyk97mvH/huu6ZmdUyThhhjC2ckr0=
+github.com/qor5/web/v3 v3.0.4-0.20240606041122-ed616a64625f/go.mod h1:MgLq6CEtC0G3hIDfo9HEq2Y1QmET+agkmcRJxo68+XE=
+github.com/qor5/web/v3 v3.0.4 h1:h2IuduqIqS6Q9pKIapZbd4KIGyJ1oyQ1TqRWj2txVJY=
+github.com/qor5/web/v3 v3.0.4/go.mod h1:MgLq6CEtC0G3hIDfo9HEq2Y1QmET+agkmcRJxo68+XE=
 github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=
 github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99yedzYV+kq4uf4=
+github.com/rs/xid v1.5.0 h1:mKX4bl4iPYJtEIxp6CYiUuLQ/8DYMoz0PUdtGgMFRVc=
+github.com/rs/xid v1.5.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=
 github.com/shirou/gopsutil/v3 v3.23.12 h1:z90NtUkp3bMtmICZKpC4+WaknU1eXtp5vtbQ11DgpE4=
 github.com/shirou/gopsutil/v3 v3.23.12/go.mod h1:1FrWgea594Jp7qmjHUUPlJDTPgcsb9mGnXDxavtikzM=
 github.com/shoenig/go-m1cpu v0.1.6 h1:nxdKQNcEB6vzgA2E2bvzKIYRuNj7XNJ4S/aRSwKzFtM=
