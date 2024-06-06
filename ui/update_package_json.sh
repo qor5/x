@@ -1,7 +1,7 @@
 ROOT=$(pwd)
 
 PKGS="
-$ROOT/../web/corejs 
+$ROOT/../../web/corejs 
 $ROOT/codehighlight/codehighlightjs 
 $ROOT/overlay/overlayjs
 $ROOT/tiptap/tiptapjs 
@@ -11,7 +11,7 @@ $ROOT/docs/docsjs
 for i in $PKGS
 do
     echo "$i" && \
-    rm $i/yarn.lock
-    cd $i && ncu -u && yarn && \
+    rm $i/pnpm-lock.yaml
+    cd $i && pnpm update && pnpm install && \
     cd $i/.. && ./build.sh
 done
