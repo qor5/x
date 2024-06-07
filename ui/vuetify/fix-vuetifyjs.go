@@ -2,6 +2,7 @@ package vuetify
 
 import (
 	"embed"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -15,6 +16,9 @@ var assetsbox embed.FS
 //go:embed vuetifyjs/dist
 var vuetifyjs embed.FS
 
+//go:embed vuetifyjs/src/plugins/theme.js
+var themeFs embed.FS
+
 var customizeVuetifyCSS = osenv.GetBool("CUSTOMIZE_VUETIFY_CSS", "Use customized styles for vuetify", true)
 
 func JSComponentsPack() web.ComponentsPack {
@@ -23,6 +27,14 @@ func JSComponentsPack() web.ComponentsPack {
 		panic(err)
 	}
 	return web.ComponentsPack(v)
+}
+
+func theme() string {
+	v, err := themeFs.ReadFile("vuetifyjs/src/plugins/theme.js")
+	if err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf(`{ theme: %s }`, strings.Replace(string(v), "export default", "", 1))
 }
 
 func cssComponentsPack() web.ComponentsPack {
@@ -95,40 +107,9 @@ window.__goplaidVueComponentRegisters.push(function(app, vueOptions) {
 	});
 `
 
-const defaultVuetifyOpts = `{
-	icons: {
-		// defaultSet: 'md', // 'mdi' || 'mdiSvg' || 'md' || 'fa' || 'fa4'
-	},
-	  theme: {
-		themes: {
-		  qor5: {
-			dark: false,
-			colors: {
-			  primary:   "#3E63DD",
-			  secondary: "#5B6471",
-			  accent:    "#82B1FF",
-			  error:     "#82B1FF",
-			  info:      "#0091FF",
-			  success:   "#30A46C",
-			  warning:   "#F76808",
-			}
-		  },
-		},
-	  },
-}`
-
-var vuetifyOpts string
-
-func ChangeVuetifyOpts(opts string) {
-	vuetifyOpts = opts
-}
-
 func Vuetify() web.ComponentsPack {
-	if vuetifyOpts == "" {
-		vuetifyOpts = defaultVuetifyOpts
-	}
 	return web.ComponentsPack(
-		strings.NewReplacer("{{vuetifyOpts}}", vuetifyOpts).
+		strings.NewReplacer("{{vuetifyOpts}}", theme()).
 			Replace(initVuetify),
 	)
 }
