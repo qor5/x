@@ -17,8 +17,6 @@ declare module 'vue' {
     DatetimepickerExample: typeof import('./src/demo/components/DatetimepickerExample.vue')['default']
     DatetimeRangeItem: typeof import('./src/lib/Filter/components/DatetimeRangeItem.vue')['default']
     DefaultNavigatorExample: typeof import('./src/demo/components/DefaultNavigatorExample.vue')['default']
-    DragListener: typeof import('./src/lib/DragListener.vue')['default']
-    DragListenerExample: typeof import('./src/demo/components/DragListenerExample.vue')['default']
     Filter: typeof import('./src/lib/Filter/index.vue')['default']
     FilterButton: typeof import('./src/lib/Filter/components/FilterButton.vue')['default']
     FilterButtonBody: typeof import('./src/lib/Filter/components/FilterButtonBody.vue')['default']
