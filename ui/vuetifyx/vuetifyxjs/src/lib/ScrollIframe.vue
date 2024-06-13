@@ -44,13 +44,13 @@ const scrollToCurrentContainer = (data: any) => {
   if (!iframe.value) {
     return
   }
+  removeHighlightClass()
   const current = iframe.value.contentWindow.document.body.querySelector(
     "div[data-container-id='" + data + "']"
   ) as HTMLElement
   if (!current) {
     return
   }
-  removeHighlightClass()
   current.classList.add('highlight')
   window.parent.scroll({ top: current.offsetTop, behavior: 'smooth' })
 }

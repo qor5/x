@@ -50,6 +50,15 @@ const internalValue = ref([
     valueIs: ''
   },
   {
+    key: 'TestStringItemNoChoose',
+    label: 'TestStringItemNoChoose',
+    itemType: 'StringItem',
+    selected: false,
+    folded: false,
+    valueIs: '',
+    disableChooseModifier: true
+  },
+  {
     key: 'TestLinkageSelectItem',
     label: 'TestLinkageSelectItem',
     itemType: 'LinkageSelectItem',

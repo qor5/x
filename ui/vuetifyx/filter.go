@@ -181,6 +181,7 @@ type FilterItem struct {
 	ItemType               FilterItemType                `json:"itemType,omitempty"`
 	Selected               bool                          `json:"selected,omitempty"`
 	Modifier               FilterItemModifier            `json:"modifier,omitempty"`
+	DisableChooseModifier  bool                          `json:"disableChooseModifier,omitempty"`
 	ValueIs                string                        `json:"valueIs,omitempty"`
 	ValuesAre              []string                      `json:"valuesAre"`
 	ValueFrom              string                        `json:"valueFrom,omitempty"`
@@ -191,6 +192,7 @@ type FilterItem struct {
 	Invisible              bool                          `json:"invisible,omitempty"`
 	AutocompleteDataSource *AutocompleteDataSource       `json:"autocompleteDataSource,omitempty"`
 	Translations           FilterIndependentTranslations `json:"translations,omitempty"`
+	WarpInput              func(val string) string       `json:"-"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {
@@ -278,10 +280,13 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 			mod = segs[1]
 		}
 		it := fd.getFilterItem(key)
+
 		if it == nil {
 			continue
 		}
-
+		if it.WarpInput != nil {
+			val = it.WarpInput(val)
+		}
 		if _, ok := keyModValueMap[key]; !ok {
 			keyModValueMap[key] = map[string]string{}
 		}
