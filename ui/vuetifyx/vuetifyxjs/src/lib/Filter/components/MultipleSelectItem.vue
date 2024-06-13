@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { SelectOption } from '@/lib/Filter/Model'
 import { ref } from 'vue'
 
 const props = defineProps<{
@@ -8,8 +7,6 @@ const props = defineProps<{
 }>()
 
 props.modelValue.modifier = props.modelValue.modifier || 'in'
-
-const datePickerVisible = ref(false)
 
 const t = props.translations
 
@@ -22,7 +19,7 @@ const items = ref([
 
 <template>
   <div>
-    <div>
+    <div v-if="!props.modelValue.disableChooseModifier">
       <v-select
         class="d-inline-block"
         style="width: 200px"

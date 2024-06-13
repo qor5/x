@@ -18,7 +18,7 @@ const items = ref([
 
 <template>
   <div>
-    <div>
+    <div v-if="!props.modelValue.disableChooseModifier">
       <v-select
         class="d-inline-block"
         style="width: 200px"

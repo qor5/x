@@ -20,6 +20,7 @@ export interface FilterItem {
   itemType: string
   modifier: string
   valueIs: string
+  disableChooseModifier?: boolean
   valuesAre: string[]
   selected?: boolean
   valueFrom?: string
