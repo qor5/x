@@ -5,7 +5,7 @@
 - Install the i18n-transfer.
 
   ``` 
-  $ go install github.com/goplaid/x/i18n/i18n-transfer@latest
+  $ go install github.com/qor5/x/i18n/i18n-transfer@latest
   ```
 
 - Must cd root dir of the project.
@@ -16,7 +16,7 @@
 
   example:
   ```
-   $ cd $GOPATH/src/github.com/goplaid/x
+   $ cd $GOPATH/src/github.com/qor5/x
   ```
  
 
