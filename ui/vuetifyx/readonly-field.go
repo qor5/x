@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/qor5/web/v3"
 	"github.com/qor5/x/v3/ui/vuetify"
 	h "github.com/theplant/htmlgo"
 )
@@ -49,7 +50,8 @@ func (b *VXReadonlyFieldBuilder) MarshalHTML(ctx context.Context) ([]byte, error
 		vComp = b.children
 	} else {
 		if b.checkbox {
-			vComp = vuetify.VCheckbox().Value(b.value).
+			vComp = vuetify.VCheckbox().
+				Attr(web.VField(b.label, b.value)...).
 				Readonly(true).
 				Ripple(false).
 				HideDetails(true).
