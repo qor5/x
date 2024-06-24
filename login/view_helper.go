@@ -168,7 +168,7 @@ func (vh *ViewHelper) GetWrongLoginInputFlash(w http.ResponseWriter, r *http.Req
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   vh.b.cookieConfig.Secure,
 	})
 	v, _ := base64.StdEncoding.DecodeString(c.Value)
 	wi := WrongLoginInputFlash{}
@@ -186,7 +186,7 @@ func (vh *ViewHelper) GetWrongForgetPasswordInputFlash(w http.ResponseWriter, r 
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   vh.b.cookieConfig.Secure,
 	})
 	v, _ := base64.StdEncoding.DecodeString(c.Value)
 	f := WrongForgetPasswordInputFlash{}
@@ -204,7 +204,7 @@ func (vh *ViewHelper) GetWrongResetPasswordInputFlash(w http.ResponseWriter, r *
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   vh.b.cookieConfig.Secure,
 	})
 	v, _ := base64.StdEncoding.DecodeString(c.Value)
 	f := WrongResetPasswordInputFlash{}
@@ -222,7 +222,7 @@ func (vh *ViewHelper) GetWrongChangePasswordInputFlash(w http.ResponseWriter, r 
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   vh.b.cookieConfig.Secure,
 	})
 	v, _ := base64.StdEncoding.DecodeString(c.Value)
 	f := WrongChangePasswordInputFlash{}
