@@ -50,6 +50,7 @@ type Provider struct {
 type CookieConfig struct {
 	Path     string
 	Domain   string
+	Secure   bool
 	SameSite http.SameSite
 }
 
@@ -170,6 +171,7 @@ func New() *Builder {
 		cookieConfig: CookieConfig{
 			Path:     "/",
 			Domain:   "",
+			Secure:   true,
 			SameSite: http.SameSiteStrictMode,
 		},
 		autoExtendSession: true,
@@ -199,6 +201,11 @@ func New() *Builder {
 
 func (b *Builder) Secret(v string) (r *Builder) {
 	b.secret = v
+	return b
+}
+
+func (b *Builder) CookieSecure(v bool) (r *Builder) {
+	b.cookieConfig.Secure = v
 	return b
 }
 
@@ -844,7 +851,7 @@ func (b *Builder) setAuthCookiesFromUserClaims(w http.ResponseWriter, claims *Us
 		MaxAge:   b.sessionMaxAge,
 		Expires:  time.Now().Add(time.Duration(b.sessionMaxAge) * time.Second),
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   b.cookieConfig.Secure,
 		SameSite: b.cookieConfig.SameSite,
 	})
 
@@ -857,7 +864,7 @@ func (b *Builder) setAuthCookiesFromUserClaims(w http.ResponseWriter, claims *Us
 			MaxAge:   b.sessionMaxAge,
 			Expires:  time.Now().Add(time.Duration(b.sessionMaxAge) * time.Second),
 			HttpOnly: true,
-			Secure:   true,
+			Secure:   b.cookieConfig.Secure,
 			SameSite: b.cookieConfig.SameSite,
 		})
 	}
