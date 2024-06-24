@@ -133,14 +133,14 @@ type WrongLoginInputFlash struct {
 	Password string
 }
 
-func setWrongLoginInputFlash(w http.ResponseWriter, f WrongLoginInputFlash) {
+func (b *Builder) setWrongLoginInputFlash(w http.ResponseWriter, f WrongLoginInputFlash) {
 	bf, _ := json.Marshal(&f)
 	http.SetCookie(w, &http.Cookie{
 		Name:     wrongLoginInputFlashCookieName,
 		Value:    base64.StdEncoding.EncodeToString(bf),
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   b.cookieConfig.Secure,
 	})
 }
 
@@ -151,14 +151,14 @@ type WrongForgetPasswordInputFlash struct {
 	TOTP    string
 }
 
-func setWrongForgetPasswordInputFlash(w http.ResponseWriter, f WrongForgetPasswordInputFlash) {
+func (b *Builder) setWrongForgetPasswordInputFlash(w http.ResponseWriter, f WrongForgetPasswordInputFlash) {
 	bf, _ := json.Marshal(&f)
 	http.SetCookie(w, &http.Cookie{
 		Name:     wrongForgetPasswordInputFlashCookieName,
 		Value:    base64.StdEncoding.EncodeToString(bf),
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   b.cookieConfig.Secure,
 	})
 }
 
@@ -170,14 +170,14 @@ type WrongResetPasswordInputFlash struct {
 	TOTP            string
 }
 
-func setWrongResetPasswordInputFlash(w http.ResponseWriter, f WrongResetPasswordInputFlash) {
+func (b *Builder) setWrongResetPasswordInputFlash(w http.ResponseWriter, f WrongResetPasswordInputFlash) {
 	bf, _ := json.Marshal(&f)
 	http.SetCookie(w, &http.Cookie{
 		Name:     wrongResetPasswordInputFlashCookieName,
 		Value:    base64.StdEncoding.EncodeToString(bf),
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   b.cookieConfig.Secure,
 	})
 }
 
@@ -190,14 +190,14 @@ type WrongChangePasswordInputFlash struct {
 	TOTP            string
 }
 
-func setWrongChangePasswordInputFlash(w http.ResponseWriter, f WrongChangePasswordInputFlash) {
+func (b *Builder) setWrongChangePasswordInputFlash(w http.ResponseWriter, f WrongChangePasswordInputFlash) {
 	bf, _ := json.Marshal(&f)
 	http.SetCookie(w, &http.Cookie{
 		Name:     wrongChangePasswordInputFlashCookieName,
 		Value:    base64.StdEncoding.EncodeToString(bf),
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   b.cookieConfig.Secure,
 	})
 }
 

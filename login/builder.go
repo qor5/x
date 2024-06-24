@@ -772,7 +772,7 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 		setFailCodeFlash(w, code)
-		setWrongLoginInputFlash(w, WrongLoginInputFlash{
+		b.setWrongLoginInputFlash(w, WrongLoginInputFlash{
 			Account:  account,
 			Password: password,
 		})
@@ -879,7 +879,7 @@ func (b *Builder) cleanAuthCookies(w http.ResponseWriter) {
 		MaxAge:   -1,
 		Expires:  time.Unix(1, 0),
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   b.cookieConfig.Secure,
 	})
 	http.SetCookie(w, &http.Cookie{
 		Name:     b.authSecureCookieName,
@@ -889,7 +889,7 @@ func (b *Builder) cleanAuthCookies(w http.ResponseWriter) {
 		MaxAge:   -1,
 		Expires:  time.Unix(1, 0),
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   b.cookieConfig.Secure,
 	})
 }
 
@@ -1060,7 +1060,7 @@ func (b *Builder) sendResetPasswordLink(w http.ResponseWriter, r *http.Request) 
 		v := 60 - int(time.Now().Sub(*createdAt).Seconds())
 		if v > 0 {
 			setSecondsToRedoFlash(w, v)
-			setWrongForgetPasswordInputFlash(w, WrongForgetPasswordInputFlash{
+			b.setWrongForgetPasswordInputFlash(w, WrongForgetPasswordInputFlash{
 				Account: account,
 			})
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
@@ -1070,7 +1070,7 @@ func (b *Builder) sendResetPasswordLink(w http.ResponseWriter, r *http.Request) 
 
 	if u.(UserPasser).GetIsTOTPSetup() {
 		if !doTOTP {
-			setWrongForgetPasswordInputFlash(w, WrongForgetPasswordInputFlash{
+			b.setWrongForgetPasswordInputFlash(w, WrongForgetPasswordInputFlash{
 				Account: account,
 			})
 			failRedirectURL = MustSetQuery(failRedirectURL, "totp", "1")
@@ -1089,7 +1089,7 @@ func (b *Builder) sendResetPasswordLink(w http.ResponseWriter, r *http.Request) 
 				panic(err)
 			}
 			setNoticeOrFailCodeFlash(w, err, fc)
-			setWrongForgetPasswordInputFlash(w, WrongForgetPasswordInputFlash{
+			b.setWrongForgetPasswordInputFlash(w, WrongForgetPasswordInputFlash{
 				Account: account,
 				TOTP:    passcode,
 			})
@@ -1158,7 +1158,7 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	if confirmPassword != password {
 		setFailCodeFlash(w, FailCodePasswordNotMatch)
-		setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
+		b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
 			Password:        password,
 			ConfirmPassword: confirmPassword,
 		})
@@ -1191,7 +1191,7 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 	if b.beforeSetPasswordHook != nil {
 		if herr := b.beforeSetPasswordHook(r, u, password); herr != nil {
 			setNoticeOrPanic(w, herr)
-			setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
+			b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
 				Password:        password,
 				ConfirmPassword: confirmPassword,
 			})
@@ -1202,7 +1202,7 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	if u.(UserPasser).GetIsTOTPSetup() {
 		if !doTOTP {
-			setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
+			b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
 				Password:        password,
 				ConfirmPassword: confirmPassword,
 			})
@@ -1222,7 +1222,7 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 			setFailCodeFlash(w, fc)
-			setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
+			b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
 				Password:        password,
 				ConfirmPassword: confirmPassword,
 				TOTP:            passcode,
@@ -1343,7 +1343,7 @@ func (b *Builder) doFormChangePassword(w http.ResponseWriter, r *http.Request) {
 			setFailCodeFlash(w, fc)
 		}
 
-		setWrongChangePasswordInputFlash(w, WrongChangePasswordInputFlash{
+		b.setWrongChangePasswordInputFlash(w, WrongChangePasswordInputFlash{
 			OldPassword:     oldPassword,
 			NewPassword:     password,
 			ConfirmPassword: confirmPassword,
