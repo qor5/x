@@ -196,13 +196,11 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 					Class("mt-0").
 					Value(id).
 					HideDetails(true).
-					Attr("v-model", b.varSelectedIDs).
+					Attr(":model-value", b.varSelectedIDs).
 					Attr("@update:model-value", fmt.Sprintf(`value => {
 						%s = value; 
 						locals.selected_count = %s.length;
-						locals.allChecked = locals.idsOfPage.every(element => %s.includes(element));
 					}`,
-						b.varSelectedIDs,
 						b.varSelectedIDs,
 						b.varSelectedIDs,
 					)),
@@ -303,12 +301,11 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 					Density(v.DensityCompact).
 					Class("mt-0").
 					HideDetails(true).
-					Attr("v-model", "locals.allChecked").
+					Attr(":model-value", fmt.Sprintf("locals.ids_of_page.every(element => %s.includes(element))", b.varSelectedIDs)).
 					Attr("@update:model-value", fmt.Sprintf(`value => {
-							const arr = value ? %s.concat(locals.idsOfPage) : %s.filter(id => !locals.idsOfPage.includes(id)); 
+							const arr = value ? %s.concat(locals.ids_of_page) : %s.filter(id => !locals.ids_of_page.includes(id)); 
 							%s = arr.filter((item, index) => arr.indexOf(item) === index)
 							locals.selected_count = %s.length;
-							locals.allChecked = value;
 						}`,
 						b.varSelectedIDs, b.varSelectedIDs,
 						b.varSelectedIDs,
@@ -387,7 +384,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 			v.VBtn(b.clearSelectionLabel).
 				Variant("plain").
 				Size("small").
-				On("click", b.varSelectedIDs+" = []; locals.selected_count = 0; locals.allChecked = false;"),
+				On("click", b.varSelectedIDs+" = []; locals.selected_count = 0;"),
 		).
 			Class("bg-grey-lighten-3 text-center pt-2 pb-2").
 			Attr("v-show", "locals.selected_count > 0"),
@@ -399,9 +396,8 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 	).VSlot("{ locals }").Init(fmt.Sprintf(`{ 
 		selected_count : %s.length,
 		loadmore : false,
-		idsOfPage : %s,
-		allChecked: %s.every(element => %s.includes(element)),
-	 }`, b.varSelectedIDs, idsOfPageJSON, idsOfPageJSON, b.varSelectedIDs))
+		ids_of_page : %s,
+	 }`, b.varSelectedIDs, idsOfPageJSON))
 
 	return table.MarshalHTML(c)
 }
