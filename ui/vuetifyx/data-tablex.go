@@ -197,13 +197,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 					Value(id).
 					HideDetails(true).
 					Attr(":model-value", b.varSelectedIDs).
-					Attr("@update:model-value", fmt.Sprintf(`value => {
-						%s = value; 
-						locals.selected_count = %s.length;
-					}`,
-						b.varSelectedIDs,
-						b.varSelectedIDs,
-					)),
+					Attr("@update:model-value", fmt.Sprintf(`value => { %s = value; }`, b.varSelectedIDs)),
 			).Class("pr-0"))
 		}
 
@@ -287,7 +281,6 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 
 	var thead h.HTMLComponent
 
-	idsOfPageJSON := h.JSONString(idsOfPage)
 	if !b.withoutHeaders {
 		var heads []h.HTMLComponent
 
@@ -296,21 +289,22 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 		}
 
 		if b.selectable {
+			idsOfPageJSON := h.JSONString(idsOfPage)
 			heads = append(heads, h.Th("").Children(
-				v.VCheckbox().
-					Density(v.DensityCompact).
-					Class("mt-0").
-					HideDetails(true).
-					Attr(":model-value", fmt.Sprintf("locals.ids_of_page.every(element => %s.includes(element))", b.varSelectedIDs)).
-					Attr("@update:model-value", fmt.Sprintf(`value => {
-							const arr = value ? %s.concat(locals.ids_of_page) : %s.filter(id => !locals.ids_of_page.includes(id)); 
-							%s = arr.filter((item, index) => arr.indexOf(item) === index)
-							locals.selected_count = %s.length;
-						}`,
-						b.varSelectedIDs, b.varSelectedIDs,
-						b.varSelectedIDs,
-						b.varSelectedIDs,
-					)),
+				web.Scope().VSlot("{ locals: head0Locals }").Init(fmt.Sprintf(`{ ids_of_page : %s} `, idsOfPageJSON)).Children(
+					v.VCheckbox().
+						Density(v.DensityCompact).
+						Class("mt-0").
+						HideDetails(true).
+						Attr(":model-value", fmt.Sprintf("head0Locals.ids_of_page.every(element => %s.includes(element))", b.varSelectedIDs)).
+						Attr("@update:model-value", fmt.Sprintf(`value => {
+								const arr = value ? %s.concat(head0Locals.ids_of_page) : %s.filter(id => !head0Locals.ids_of_page.includes(id)); 
+								%s = arr.filter((item, index) => arr.indexOf(item) === index);
+							}`,
+							b.varSelectedIDs, b.varSelectedIDs,
+							b.varSelectedIDs,
+						)),
+				),
 			).Style("width: 48px;").Class("pr-0"))
 		}
 
@@ -374,7 +368,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 	} else {
 		selectedCountNotice = append(selectedCountNotice,
 			h.Text(ss[0]),
-			h.Strong("{{locals.selected_count}}"),
+			h.Strong(fmt.Sprintf("{{%s.length}}", b.varSelectedIDs)),
 			h.Text(ss[1]),
 		)
 	}
@@ -384,20 +378,16 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 			v.VBtn(b.clearSelectionLabel).
 				Variant("plain").
 				Size("small").
-				On("click", b.varSelectedIDs+" = []; locals.selected_count = 0;"),
+				On("click", b.varSelectedIDs+" = [];"),
 		).
 			Class("bg-grey-lighten-3 text-center pt-2 pb-2").
-			Attr("v-show", "locals.selected_count > 0"),
+			Attr("v-show", fmt.Sprintf("%s.length > 0", b.varSelectedIDs)),
 		v.VTable(
 			thead,
 			h.Tbody(rows...),
 			tfoot,
 		),
-	).VSlot("{ locals }").Init(fmt.Sprintf(`{ 
-		selected_count : %s.length,
-		loadmore : false,
-		ids_of_page : %s,
-	 }`, b.varSelectedIDs, idsOfPageJSON))
+	).VSlot("{ locals }").Init(`{ loadmore : false }`)
 
 	return table.MarshalHTML(c)
 }
