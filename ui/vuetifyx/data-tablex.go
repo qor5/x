@@ -266,7 +266,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 		if b.varSelectedIDs != "" {
 			idsOfPageJSON := h.JSONString(idsOfPage)
 			heads = append(heads, h.Th("").Children(
-				web.Scope().VSlot("{ locals: _head0Locals_ }").Init(fmt.Sprintf(`{ ids_of_page : %s} `, idsOfPageJSON)).Children(
+				web.Scope().VSlot("{ locals: _head0Locals_ }").Init(fmt.Sprintf(`{ ids_of_page : %s || []} `, idsOfPageJSON)).Children(
 					v.VCheckbox().
 						Density(v.DensityCompact).
 						Class("mt-0").
@@ -349,9 +349,11 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 				h.Text(ss[1]),
 			)
 		}
-		selectedCountCompo = h.Div().Class("bg-grey-lighten-3 text-center pt-2 pb-2").Attr("v-show", fmt.Sprintf("%s.length > 0", b.varSelectedIDs)).Children(
-			selectedCountNotice,
-			v.VBtn(b.clearSelectionLabel).Variant(v.VariantPlain).Size(v.SizeSmall).On("click", b.varSelectedIDs+" = [];"),
+		selectedCountCompo = h.Div().Attr("v-show", fmt.Sprintf("%s.length > 0", b.varSelectedIDs)).Children(
+			h.Div().Class("bg-grey-lighten-3 d-flex justify-center align-center ga-1 py-2").Children(
+				selectedCountNotice,
+				v.VBtn(b.clearSelectionLabel).Variant(v.VariantPlain).Size(v.SizeSmall).On("click", b.varSelectedIDs+" = [];"),
+			),
 		)
 	}
 
