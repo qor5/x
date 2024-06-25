@@ -13,12 +13,12 @@ import (
 
 type DataTableBuilderX struct {
 	data             interface{}
-	selectable       bool
 	withoutHeaders   bool
 	varSelectedIDs   string
 	cellWrapper      CellWrapperFunc
 	headCellWrapper  HeadCellWrapperFunc
 	rowWrapper       RowWrapperFunc
+	rowMenuHead      h.HTMLComponent
 	rowMenuItemFuncs []RowMenuItemFunc
 	rowExpandFunc    RowComponentFunc
 	columns          []*DataTableColumnBuilder
@@ -26,13 +26,9 @@ type DataTableBuilderX struct {
 	loadMoreLabel    string
 	loadMoreURL      string
 	// e.g. {count} records are selected.
-	selectedCountLabel   string
-	clearSelectionLabel  string
-	onClearSelectionFunc OnClearSelectionFunc
-	tfootChildren        []h.HTMLComponent
-	selectableColumnsBtn h.HTMLComponent
-	onSelectFunc         OnSelectFunc
-	onSelectAllFunc      OnSelectAllFunc
+	selectedCountLabel  string
+	clearSelectionLabel string
+	tfootChildren       []h.HTMLComponent
 }
 
 func DataTableX(data interface{}) (r *DataTableBuilderX) {
@@ -60,18 +56,13 @@ func (b *DataTableBuilderX) Tfoot(children ...h.HTMLComponent) (r *DataTableBuil
 	return b
 }
 
-func (b *DataTableBuilderX) Selectable(v bool) (r *DataTableBuilderX) {
-	b.selectable = v
-	return b
-}
-
 func (b *DataTableBuilderX) Data(v interface{}) (r *DataTableBuilderX) {
 	b.data = v
 	return b
 }
 
-func (b *DataTableBuilderX) VarSelectedIDs(s string) (r *DataTableBuilderX) {
-	b.varSelectedIDs = s
+func (b *DataTableBuilderX) VarSelectedIDs(v string) (r *DataTableBuilderX) {
+	b.varSelectedIDs = v
 	return b
 }
 
@@ -92,6 +83,11 @@ func (b *DataTableBuilderX) HeadCellWrapperFunc(v HeadCellWrapperFunc) (r *DataT
 
 func (b *DataTableBuilderX) RowWrapperFunc(v RowWrapperFunc) (r *DataTableBuilderX) {
 	b.rowWrapper = v
+	return b
+}
+
+func (b *DataTableBuilderX) RowMenuHead(v h.HTMLComponent) (r *DataTableBuilderX) {
+	b.rowMenuHead = v
 	return b
 }
 
@@ -120,26 +116,6 @@ func (b *DataTableBuilderX) ClearSelectionLabel(v string) (r *DataTableBuilderX)
 	return b
 }
 
-func (b *DataTableBuilderX) OnClearSelectionFunc(v OnClearSelectionFunc) (r *DataTableBuilderX) {
-	b.onClearSelectionFunc = v
-	return b
-}
-
-func (b *DataTableBuilderX) SelectableColumnsBtn(v h.HTMLComponent) (r *DataTableBuilderX) {
-	b.selectableColumnsBtn = v
-	return b
-}
-
-func (b *DataTableBuilderX) OnSelectAllFunc(v OnSelectAllFunc) (r *DataTableBuilderX) {
-	b.onSelectAllFunc = v
-	return b
-}
-
-func (b *DataTableBuilderX) OnSelectFunc(v OnSelectFunc) (r *DataTableBuilderX) {
-	b.onSelectFunc = v
-	return b
-}
-
 func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error) {
 	ctx := web.MustGetEventContext(c)
 
@@ -162,7 +138,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 		}
 	})
 
-	hasRowMenuCol := len(objRowMenusMap) > 0 || b.selectableColumnsBtn != nil
+	hasRowMenuCol := len(objRowMenusMap) > 0 || b.rowMenuHead != nil
 
 	var rows []h.HTMLComponent
 	var idsOfPage []string
@@ -180,25 +156,24 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 		idsOfPage = append(idsOfPage, id)
 		var tds []h.HTMLComponent
 		if hasExpand {
-			localsExpandVarName := fmt.Sprintf("locals.%s_%d", expandVarName, i)
+			localsExpandVarName := fmt.Sprintf("_dataTableLocals_.%s_%d", expandVarName, i)
 			tds = append(tds, h.Td(
 				v.VIcon("").
 					Attr(":icon", fmt.Sprintf(`%s?"mdi-chevron-up-circle":"mdi-chevron-down"`, localsExpandVarName)).
-					Attr(":class", fmt.Sprintf(`{"v-data-table__expand-icon--active": locals.%s_%d, "v-data-table__expand-icon": true}`, expandVarName, i)).
-					On("click", fmt.Sprintf("locals.%s_%d = !locals.%s_%d", expandVarName, i, expandVarName, i)),
+					Attr(":class", fmt.Sprintf(`{"v-data-table__expand-icon--active": _dataTableLocals_.%s_%d, "v-data-table__expand-icon": true}`, expandVarName, i)).
+					On("click", fmt.Sprintf("_dataTableLocals_.%s_%d = !_dataTableLocals_.%s_%d", expandVarName, i, expandVarName, i)),
 			).Class("pr-0").Style("width: 40px;"))
 		}
 
-		if b.selectable {
-			tds = append(tds, h.Td(
+		if b.varSelectedIDs != "" {
+			tds = append(tds, h.Td().Class("pr-0").Children(
 				v.VCheckbox().
 					Density(v.DensityCompact).
 					Class("mt-0").
 					Value(id).
 					HideDetails(true).
-					Attr(":model-value", b.varSelectedIDs).
-					Attr("@update:model-value", fmt.Sprintf(`value => { %s = value; }`, b.varSelectedIDs)),
-			).Class("pr-0"))
+					Attr("v-model", b.varSelectedIDs),
+			))
 		}
 
 		for _, f := range b.columns {
@@ -250,7 +225,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 			if len(b.loadMoreURL) > 0 {
 				return
 			} else {
-				row.Attr("v-if", "locals.loadmore")
+				row.Attr("v-if", "_dataTableLocals_.loadmore")
 			}
 			haveMoreRecord = true
 		}
@@ -269,7 +244,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 							h.Div(
 								b.rowExpandFunc(obj, ctx),
 								v.VDivider(),
-							).Attr("v-if", fmt.Sprintf("locals.%s_%d", expandVarName, i)).
+							).Attr("v-if", fmt.Sprintf("_dataTableLocals_.%s_%d", expandVarName, i)).
 								Class("bg-grey-lighten-5"), // bg-grey-lighten-5 | grey lighten-5
 						),
 					).Attr("colspan", fmt.Sprint(tdCount)).Class("pa-0").Style("height: auto; border-bottom: none"),
@@ -288,17 +263,17 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 			heads = append(heads, h.Th(" "))
 		}
 
-		if b.selectable {
+		if b.varSelectedIDs != "" {
 			idsOfPageJSON := h.JSONString(idsOfPage)
 			heads = append(heads, h.Th("").Children(
-				web.Scope().VSlot("{ locals: head0Locals }").Init(fmt.Sprintf(`{ ids_of_page : %s} `, idsOfPageJSON)).Children(
+				web.Scope().VSlot("{ locals: _head0Locals_ }").Init(fmt.Sprintf(`{ ids_of_page : %s} `, idsOfPageJSON)).Children(
 					v.VCheckbox().
 						Density(v.DensityCompact).
 						Class("mt-0").
 						HideDetails(true).
-						Attr(":model-value", fmt.Sprintf("head0Locals.ids_of_page.every(element => %s.includes(element))", b.varSelectedIDs)).
+						Attr(":model-value", fmt.Sprintf("_head0Locals_.ids_of_page.every(element => %s.includes(element))", b.varSelectedIDs)).
 						Attr("@update:model-value", fmt.Sprintf(`value => {
-								const arr = value ? %s.concat(head0Locals.ids_of_page) : %s.filter(id => !head0Locals.ids_of_page.includes(id)); 
+								const arr = value ? %s.concat(_head0Locals_.ids_of_page) : %s.filter(id => !_head0Locals_.ids_of_page.includes(id)); 
 								%s = arr.filter((item, index) => arr.indexOf(item) === index);
 							}`,
 							b.varSelectedIDs, b.varSelectedIDs,
@@ -323,7 +298,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 		}
 
 		if hasRowMenuCol {
-			heads = append(heads, h.Th("").Children(b.selectableColumnsBtn).Style("width: 64px;").Class("pl-0")) // Edit, Delete menu
+			heads = append(heads, h.Th("").Children(b.rowMenuHead).Style("width: 64px;").Class("pl-0")) // Edit, Delete menu
 		}
 		thead = h.Thead(
 			h.Tr(heads...),
@@ -342,7 +317,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 				Variant("text").
 				Size("small").
 				Class("mt-2").
-				On("click", "locals.loadmore = !locals.loadmore")
+				On("click", "_dataTableLocals_.loadmore = !_dataTableLocals_.loadmore")
 		} else {
 			btn = v.VBtn(b.loadMoreLabel).
 				Variant("text").
@@ -358,38 +333,36 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 					btn,
 				).Class("text-center pa-0").Attr("colspan", fmt.Sprint(tdCount)),
 			),
-		).Attr("v-if", "!locals.loadmore")
+		).Attr("v-if", "!_dataTableLocals_.loadmore")
 	}
 
-	var selectedCountNotice h.HTMLComponents
-	ss := strings.Split(b.selectedCountLabel, "{count}")
-	if len(ss) == 1 {
-		selectedCountNotice = append(selectedCountNotice, h.Text(ss[0]))
-	} else {
-		selectedCountNotice = append(selectedCountNotice,
-			h.Text(ss[0]),
-			h.Strong(fmt.Sprintf("{{%s.length}}", b.varSelectedIDs)),
-			h.Text(ss[1]),
+	var selectedCountCompo h.HTMLComponent
+	if b.varSelectedIDs != "" {
+		var selectedCountNotice h.HTMLComponents
+		ss := strings.Split(b.selectedCountLabel, "{count}")
+		if len(ss) == 1 {
+			selectedCountNotice = append(selectedCountNotice, h.Text(ss[0]))
+		} else {
+			selectedCountNotice = append(selectedCountNotice,
+				h.Text(ss[0]),
+				h.Strong(fmt.Sprintf("{{%s.length}}", b.varSelectedIDs)),
+				h.Text(ss[1]),
+			)
+		}
+		selectedCountCompo = h.Div().Class("bg-grey-lighten-3 text-center pt-2 pb-2").Attr("v-show", fmt.Sprintf("%s.length > 0", b.varSelectedIDs)).Children(
+			selectedCountNotice,
+			v.VBtn(b.clearSelectionLabel).Variant(v.VariantPlain).Size(v.SizeSmall).On("click", b.varSelectedIDs+" = [];"),
 		)
 	}
-	table := web.Scope(
-		h.Div(
-			selectedCountNotice,
-			v.VBtn(b.clearSelectionLabel).
-				Variant("plain").
-				Size("small").
-				On("click", b.varSelectedIDs+" = [];"),
-		).
-			Class("bg-grey-lighten-3 text-center pt-2 pb-2").
-			Attr("v-show", fmt.Sprintf("%s.length > 0", b.varSelectedIDs)),
+
+	return web.Scope().VSlot("{ locals:_dataTableLocals_ }").Init(`{ loadmore : false }`).Children(
+		selectedCountCompo,
 		v.VTable(
 			thead,
 			h.Tbody(rows...),
 			tfoot,
 		),
-	).VSlot("{ locals }").Init(`{ loadmore : false }`)
-
-	return table.MarshalHTML(c)
+	).MarshalHTML(c)
 }
 
 func (b *DataTableBuilderX) Column(name string) (r *DataTableColumnBuilder) {
