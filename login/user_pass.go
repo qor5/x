@@ -42,14 +42,14 @@ type SessionSecureUserPasser interface {
 }
 
 type UserPass struct {
-	Account  string `gorm:"index:uidx_users_account,unique,where:account!='' and deleted_at is null"`
+	Account  string `gorm:"index:,unique,where:account!='' and deleted_at is null"`
 	Password string `gorm:"size:60"`
 	// UnixNano string
 	PassUpdatedAt               string
 	LoginRetryCount             int
 	Locked                      bool
 	LockedAt                    *time.Time
-	ResetPasswordToken          string `gorm:"index:uidx_users_reset_password_token,unique,where:reset_password_token!=''"`
+	ResetPasswordToken          string `gorm:"index:,unique,where:reset_password_token!=''"`
 	ResetPasswordTokenCreatedAt *time.Time
 	ResetPasswordTokenExpiredAt *time.Time
 	TOTPSecret                  string
