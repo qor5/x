@@ -14,7 +14,7 @@ import (
 type DataTableBuilderX struct {
 	data             interface{}
 	withoutHeaders   bool
-	varSelectedIDs   string
+	varSelectedIds   string
 	cellWrapper      CellWrapperFunc
 	headCellWrapper  HeadCellWrapperFunc
 	rowWrapper       RowWrapperFunc
@@ -61,8 +61,8 @@ func (b *DataTableBuilderX) Data(v interface{}) (r *DataTableBuilderX) {
 	return b
 }
 
-func (b *DataTableBuilderX) VarSelectedIDs(v string) (r *DataTableBuilderX) {
-	b.varSelectedIDs = v
+func (b *DataTableBuilderX) VarSelectedIds(v string) (r *DataTableBuilderX) {
+	b.varSelectedIds = v
 	return b
 }
 
@@ -165,14 +165,14 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 			).Class("pr-0").Style("width: 40px;"))
 		}
 
-		if b.varSelectedIDs != "" {
+		if b.varSelectedIds != "" {
 			tds = append(tds, h.Td().Class("pr-0").Children(
 				v.VCheckbox().
 					Density(v.DensityCompact).
 					Class("mt-0").
 					Value(id).
 					HideDetails(true).
-					Attr("v-model", b.varSelectedIDs),
+					Attr("v-model", b.varSelectedIds),
 			))
 		}
 
@@ -263,7 +263,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 			heads = append(heads, h.Th(" "))
 		}
 
-		if b.varSelectedIDs != "" {
+		if b.varSelectedIds != "" {
 			idsOfPageJSON := h.JSONString(idsOfPage)
 			heads = append(heads, h.Th("").Children(
 				web.Scope().VSlot("{ locals: _head0Locals_ }").Init(fmt.Sprintf(`{ ids_of_page : %s || []} `, idsOfPageJSON)).Children(
@@ -271,13 +271,13 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 						Density(v.DensityCompact).
 						Class("mt-0").
 						HideDetails(true).
-						Attr(":model-value", fmt.Sprintf("_head0Locals_.ids_of_page.every(element => %s.includes(element))", b.varSelectedIDs)).
+						Attr(":model-value", fmt.Sprintf("_head0Locals_.ids_of_page.every(element => %s.includes(element))", b.varSelectedIds)).
 						Attr("@update:model-value", fmt.Sprintf(`value => {
 								const arr = value ? %s.concat(_head0Locals_.ids_of_page) : %s.filter(id => !_head0Locals_.ids_of_page.includes(id)); 
 								%s = arr.filter((item, index) => arr.indexOf(item) === index);
 							}`,
-							b.varSelectedIDs, b.varSelectedIDs,
-							b.varSelectedIDs,
+							b.varSelectedIds, b.varSelectedIds,
+							b.varSelectedIds,
 						)),
 				),
 			).Style("width: 48px;").Class("pr-0"))
@@ -337,7 +337,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 	}
 
 	var selectedCountCompo h.HTMLComponent
-	if b.varSelectedIDs != "" {
+	if b.varSelectedIds != "" {
 		var selectedCountNotice h.HTMLComponents
 		ss := strings.Split(b.selectedCountLabel, "{count}")
 		if len(ss) == 1 {
@@ -345,14 +345,14 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 		} else {
 			selectedCountNotice = append(selectedCountNotice,
 				h.Text(ss[0]),
-				h.Strong(fmt.Sprintf("{{%s.length}}", b.varSelectedIDs)),
+				h.Strong(fmt.Sprintf("{{%s.length}}", b.varSelectedIds)),
 				h.Text(ss[1]),
 			)
 		}
-		selectedCountCompo = h.Div().Attr("v-show", fmt.Sprintf("%s.length > 0", b.varSelectedIDs)).Children(
+		selectedCountCompo = h.Div().Attr("v-show", fmt.Sprintf("%s.length > 0", b.varSelectedIds)).Children(
 			h.Div().Class("bg-grey-lighten-3 d-flex justify-center align-center ga-1 py-2").Children(
 				selectedCountNotice,
-				v.VBtn(b.clearSelectionLabel).Variant(v.VariantPlain).Size(v.SizeSmall).On("click", b.varSelectedIDs+" = [];"),
+				v.VBtn(b.clearSelectionLabel).Variant(v.VariantPlain).Size(v.SizeSmall).On("click", b.varSelectedIds+" = [];"),
 			),
 		)
 	}
