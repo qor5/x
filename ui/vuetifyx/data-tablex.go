@@ -12,19 +12,20 @@ import (
 )
 
 type DataTableBuilderX struct {
-	data             interface{}
-	withoutHeaders   bool
-	varSelectedIds   string
-	cellWrapper      CellWrapperFunc
-	headCellWrapper  HeadCellWrapperFunc
-	rowWrapper       RowWrapperFunc
-	rowMenuHead      h.HTMLComponent
-	rowMenuItemFuncs []RowMenuItemFunc
-	rowExpandFunc    RowComponentFunc
-	columns          []*DataTableColumnBuilder
-	loadMoreCount    int
-	loadMoreLabel    string
-	loadMoreURL      string
+	data               interface{}
+	withoutHeaders     bool
+	selectedIds        []string
+	onSelectionChanged string // function({selectedIds}) { %s }
+	cellWrapper        CellWrapperFunc
+	headCellWrapper    HeadCellWrapperFunc
+	rowWrapper         RowWrapperFunc
+	rowMenuHead        h.HTMLComponent
+	rowMenuItemFuncs   []RowMenuItemFunc
+	rowExpandFunc      RowComponentFunc
+	columns            []*DataTableColumnBuilder
+	loadMoreCount      int
+	loadMoreLabel      string
+	loadMoreURL        string
 	// e.g. {count} records are selected.
 	selectedCountLabel  string
 	clearSelectionLabel string
@@ -61,8 +62,17 @@ func (b *DataTableBuilderX) Data(v interface{}) (r *DataTableBuilderX) {
 	return b
 }
 
-func (b *DataTableBuilderX) VarSelectedIds(v string) (r *DataTableBuilderX) {
-	b.varSelectedIds = v
+func (b *DataTableBuilderX) SelectedIds(vs []string) (r *DataTableBuilderX) {
+	b.selectedIds = vs
+	return b
+}
+
+const ParamDataTableSelectedIds = "selectedIds"
+
+// OnSelectionChanged
+// example: console.log(selectedIds)
+func (b *DataTableBuilderX) OnSelectionChanged(v string) (r *DataTableBuilderX) {
+	b.onSelectionChanged = v
 	return b
 }
 
@@ -165,14 +175,14 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 			).Class("pr-0").Style("width: 40px;"))
 		}
 
-		if b.varSelectedIds != "" {
+		if b.onSelectionChanged != "" {
 			tds = append(tds, h.Td().Class("pr-0").Children(
 				v.VCheckbox().
 					Density(v.DensityCompact).
 					Class("mt-0").
 					Value(id).
 					HideDetails(true).
-					Attr("v-model", b.varSelectedIds),
+					Attr("v-model", "_dataTableLocals_.selectedIds"),
 			))
 		}
 
@@ -263,22 +273,21 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 			heads = append(heads, h.Th(" "))
 		}
 
-		if b.varSelectedIds != "" {
+		if b.onSelectionChanged != "" {
 			idsOfPageJSON := h.JSONString(idsOfPage)
 			heads = append(heads, h.Th("").Children(
-				web.Scope().VSlot("{ locals: _head0Locals_ }").Init(fmt.Sprintf(`{ ids_of_page : %s || []} `, idsOfPageJSON)).Children(
+				web.Scope().VSlot("{ locals: _head0Locals_ }").Init(fmt.Sprintf(`{ idsOfPage : %s || []} `, idsOfPageJSON)).Children(
 					v.VCheckbox().
 						Density(v.DensityCompact).
 						Class("mt-0").
 						HideDetails(true).
-						Attr(":model-value", fmt.Sprintf("_head0Locals_.ids_of_page.every(element => %s.includes(element))", b.varSelectedIds)).
-						Attr("@update:model-value", fmt.Sprintf(`value => {
-								const arr = value ? %s.concat(_head0Locals_.ids_of_page) : %s.filter(id => !_head0Locals_.ids_of_page.includes(id)); 
-								%s = arr.filter((item, index) => arr.indexOf(item) === index);
+						Attr(":model-value", "_head0Locals_.idsOfPage.every(id => _dataTableLocals_.selectedIds.includes(id))").
+						Attr("@update:model-value", `(value) => {
+								let arr = _dataTableLocals_.selectedIds;
+								arr = value ? arr.concat(_head0Locals_.idsOfPage) : arr.filter(id => !_head0Locals_.idsOfPage.includes(id))
+								_dataTableLocals_.selectedIds = arr.filter((item, index) => arr.indexOf(item) === index);
 							}`,
-							b.varSelectedIds, b.varSelectedIds,
-							b.varSelectedIds,
-						)),
+						),
 				),
 			).Style("width: 48px;").Class("pr-0"))
 		}
@@ -337,7 +346,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 	}
 
 	var selectedCountCompo h.HTMLComponent
-	if b.varSelectedIds != "" {
+	if b.onSelectionChanged != "" {
 		var selectedCountNotice h.HTMLComponents
 		ss := strings.Split(b.selectedCountLabel, "{count}")
 		if len(ss) == 1 {
@@ -345,26 +354,50 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 		} else {
 			selectedCountNotice = append(selectedCountNotice,
 				h.Text(ss[0]),
-				h.Strong(fmt.Sprintf("{{%s.length}}", b.varSelectedIds)),
+				h.Strong("{{_dataTableLocals_.selectedIds.length}}"),
 				h.Text(ss[1]),
 			)
 		}
-		selectedCountCompo = h.Div().Attr("v-show", fmt.Sprintf("%s.length > 0", b.varSelectedIds)).Children(
+		selectedCountCompo = h.Div().Attr("v-show", "_dataTableLocals_.selectedIds.length > 0").Children(
 			h.Div().Class("bg-grey-lighten-3 d-flex justify-center align-center ga-1 py-2").Children(
 				selectedCountNotice,
-				v.VBtn(b.clearSelectionLabel).Variant(v.VariantPlain).Size(v.SizeSmall).On("click", b.varSelectedIds+" = [];"),
+				v.VBtn(b.clearSelectionLabel).Variant(v.VariantPlain).Size(v.SizeSmall).On("click", "_dataTableLocals_.selectedIds = [];"),
 			),
 		)
 	}
 
-	return web.Scope().VSlot("{ locals:_dataTableLocals_ }").Init(`{ loadmore : false }`).Children(
-		selectedCountCompo,
-		v.VTable(
-			thead,
-			h.Tbody(rows...),
-			tfoot,
-		),
-	).MarshalHTML(c)
+	selectedIdsJSON := h.JSONString(b.selectedIds)
+	return web.Scope().
+		VSlot("{ locals:_dataTableLocals_ }").
+		Init(fmt.Sprintf(`{ 
+			loadmore : false,
+			selectedIds: %s || [],
+			lastSelectedIds: %s || [],
+			onSelectionChanged: function({selectedIds}) {
+				%s
+			},
+			onLocalsDebounceChanged: function() {
+				if (JSON.stringify(this.selectedIds) !== JSON.stringify(this.lastSelectedIds)) {
+					this.lastSelectedIds = this.selectedIds;
+					this.onSelectionChanged({selectedIds: this.selectedIds});
+				}
+			}}`,
+			selectedIdsJSON,
+			selectedIdsJSON,
+			b.onSelectionChanged,
+		)).
+		// Because the change of loadmore is also triggered,
+		// and because of the existence of debounce,
+		// the lastSelectedIds needs to be recorded to confirm its change.
+		OnChange(`locals.onLocalsDebounceChanged()`).UseDebounce(1).
+		Children(
+			selectedCountCompo,
+			v.VTable(
+				thead,
+				h.Tbody(rows...),
+				tfoot,
+			),
+		).MarshalHTML(c)
 }
 
 func (b *DataTableBuilderX) Column(name string) (r *DataTableColumnBuilder) {
