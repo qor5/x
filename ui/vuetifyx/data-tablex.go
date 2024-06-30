@@ -15,7 +15,7 @@ type DataTableBuilderX struct {
 	data               interface{}
 	withoutHeaders     bool
 	selectedIds        []string
-	onSelectionChanged string // function({selectedIds}) { %s }
+	onSelectionChanged string // function(selectedIds) { console.log(selectedIds) }
 	cellWrapper        CellWrapperFunc
 	headCellWrapper    HeadCellWrapperFunc
 	rowWrapper         RowWrapperFunc
@@ -67,10 +67,8 @@ func (b *DataTableBuilderX) SelectedIds(vs []string) (r *DataTableBuilderX) {
 	return b
 }
 
-const ParamDataTableSelectedIds = "selectedIds"
-
 // OnSelectionChanged
-// example: console.log(selectedIds)
+// example: function(selectedIds) { console.log(selectedIds) }
 func (b *DataTableBuilderX) OnSelectionChanged(v string) (r *DataTableBuilderX) {
 	b.onSelectionChanged = v
 	return b
@@ -370,18 +368,17 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 	return web.Scope().
 		VSlot("{ locals:_dataTableLocals_ }").
 		Init(fmt.Sprintf(`{ 
-			loadmore : false,
-			selectedIds: %s || [],
-			lastSelectedIds: %s || [],
-			onSelectionChanged: function({selectedIds}) {
-				%s
-			},
-			onLocalsDebounceChanged: function() {
-				if (JSON.stringify(this.selectedIds) !== JSON.stringify(this.lastSelectedIds)) {
-					this.lastSelectedIds = this.selectedIds;
-					this.onSelectionChanged({selectedIds: this.selectedIds});
-				}
-			}}`,
+				loadmore : false,
+				selectedIds: %s || [],
+				lastSelectedIds: %s || [],
+				onSelectionChanged: %s,
+				onLocalsDebounceChanged: function() {
+					if (JSON.stringify(this.selectedIds) !== JSON.stringify(this.lastSelectedIds)) {
+						this.lastSelectedIds = this.selectedIds;
+						this.onSelectionChanged([...this.selectedIds]);
+					}
+				},
+			}`,
 			selectedIdsJSON,
 			selectedIdsJSON,
 			b.onSelectionChanged,
