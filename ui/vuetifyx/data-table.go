@@ -239,6 +239,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 						TrueValue(id).
 						FalseValue("").
 						HideDetails(true).
+						Attr("@click.native.stop", true).
 						Attr("v-model", "itemLocals.inputValue").
 						Attr("@update:model-value", onChange+";locals.selected_count+=($event?1:-1);"),
 				).VSlot("{ locals: itemLocals }").Init(fmt.Sprintf(`{ inputValue :"%v"} `, inputValue)),
@@ -357,6 +358,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 						Class("mt-0").
 						TrueValue(idsOfPageComma).
 						HideDetails(true).
+						Attr("@click.native.stop", true).
 						Attr("v-model", "itemLocals.allInputValue").
 						Attr("@update:model-value", onChange),
 				).VSlot("{ locals: itemLocals }").Init(fmt.Sprintf(`{ allInputValue :"%v"} `, allInputValue)),

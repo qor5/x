@@ -180,6 +180,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 					Class("mt-0").
 					Value(id).
 					HideDetails(true).
+					Attr("@click.native.stop", true).
 					Attr("v-model", "_dataTableLocals_.selectedIds"),
 			))
 		}
@@ -279,6 +280,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 						Density(v.DensityCompact).
 						Class("mt-0").
 						HideDetails(true).
+						Attr("@click.native.stop", true).
 						Attr(":model-value", "_head0Locals_.idsOfPage.every(id => _dataTableLocals_.selectedIds.includes(id))").
 						Attr("@update:model-value", `(value) => {
 								let arr = _dataTableLocals_.selectedIds;
