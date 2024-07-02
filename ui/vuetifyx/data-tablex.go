@@ -367,6 +367,10 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 	}
 
 	selectedIdsJSON := h.JSONString(b.selectedIds)
+	onSelectionChanged := b.onSelectionChanged
+	if onSelectionChanged == "" {
+		onSelectionChanged = "function(v){}"
+	}
 	return web.Scope().
 		VSlot("{ locals:_dataTableLocals_ }").
 		Init(fmt.Sprintf(`{ 
@@ -383,7 +387,7 @@ func (b *DataTableBuilderX) MarshalHTML(c context.Context) (r []byte, err error)
 			}`,
 			selectedIdsJSON,
 			selectedIdsJSON,
-			b.onSelectionChanged,
+			onSelectionChanged,
 		)).
 		// Because the change of loadmore is also triggered,
 		// and because of the existence of debounce,
