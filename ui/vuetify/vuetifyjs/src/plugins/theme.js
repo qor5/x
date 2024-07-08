@@ -52,6 +52,31 @@ export default {
         // surface
         'surface': '#fff',
         'on-surface': '#424242',
+        // grey
+        'grey': '#9E9E9E',
+        'grey-lighten-1': '#BDBDBD',
+        'grey-lighten-2': '#E0E0E0',
+        'grey-lighten-3': '#EEEEEE',
+        'grey-lighten-4': '#F5F5F5',
+        'grey-lighten-5': '#FAFAFA',
+        'grey-darken-1': '#757575',
+        'grey-darken-2': '#616161',
+        'grey-darken-3': '#424242',
+        'grey-darken-4': '#212121',
+        // black
+        'black': 'rgba(0, 0, 0, 0.87)',
+        'black-lighten-1': 'rgba(0, 0, 0, 0.6)',
+        'black-lighten-2': 'rgba(0, 0, 0, 0.58)',
+        'black-lighten-3': 'rgba(0, 0, 0, 0.54)',
+        'black-lighten-4': 'rgba(0, 0, 0, 0.42)',
+        'black-lighten-5': 'rgba(0, 0, 0, 0.38)',
+        'black-lighten-6': 'rgba(0, 0, 0, 0.26)',
+        'black-lighten-7': 'rgba(0, 0, 0, 0.2)',
+        'black-lighten-8': 'rgba(0, 0, 0, 0.18)',
+        'black-lighten-9': 'rgba(0, 0, 0, 0.12)',
+        'black-lighten-10': 'rgba(0, 0, 0, 0.06)',
+
+
       },
       variables: {
         'border-color': '#000000',
