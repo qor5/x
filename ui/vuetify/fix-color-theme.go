@@ -54,4 +54,29 @@ const (
 	ColorOnBackground = "on-background"
 	ColorSurface      = "surface"
 	ColorOnSurface    = "on-surface"
+
+	// grey
+	ColorGrey         = "#9E9E9E"
+	ColorGreyLighten1 = "#BDBDBD"
+	ColorGreyLighten2 = "#E0E0E0"
+	ColorGreyLighten3 = "#EEEEEE"
+	ColorGreyLighten4 = "#F5F5F5"
+	ColorGreyLighten5 = "#FAFAFA"
+	ColorGreyDarken1  = "#757575"
+	ColorGreyDarken2  = "#616161"
+	ColorGreyDarken3  = "#424242"
+	ColorGreyDarken4  = "#212121"
+
+	// Black colors
+	ColorBlack          = "rgba(0, 0, 0, 0.87)"
+	ColorBlackLighten1  = "rgba(0, 0, 0, 0.6)"
+	ColorBlackLighten2  = "rgba(0, 0, 0, 0.58)"
+	ColorBlackLighten3  = "rgba(0, 0, 0, 0.54)"
+	ColorBlackLighten4  = "rgba(0, 0, 0, 0.42)"
+	ColorBlackLighten5  = "rgba(0, 0, 0, 0.38)"
+	ColorBlackLighten6  = "rgba(0, 0, 0, 0.26)"
+	ColorBlackLighten7  = "rgba(0, 0, 0, 0.2)"
+	ColorBlackLighten8  = "rgba(0, 0, 0, 0.18)"
+	ColorBlackLighten9  = "rgba(0, 0, 0, 0.12)"
+	ColorBlackLighten10 = "rgba(0, 0, 0, 0.06)"
 )
