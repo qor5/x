@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import {ref} from 'vue'
 
 const iframe = ref()
 const virtualEle = ref()
@@ -8,27 +8,28 @@ const currentEle = ref()
 const container = ref()
 const height = ref()
 const props = defineProps({
-  srcdoc: { type: String, required: true },
-  iframeHeightName: { type: String, required: true },
-  iframeHeight: { type: String, required: true },
-  width: { type: String },
-  containerDataId: { type: String }
+  srcdoc: {type: String, required: true},
+  iframeHeightName: {type: String, required: true},
+  iframeHeight: {type: String, required: true},
+  width: {type: String},
+  virtualEleText: {type: String, default: 'New Component'},
+  virtualEleHeight: {type: Number, default: 100},
+  containerDataId: {type: String}
+
 })
-const virtualHeight = 100
+const virtualHeight = props.virtualEleHeight
 
 const load = (event: any) => {
+  if (!iframe.value) {
+    return
+  }
   height.value = iframe.value.contentWindow.document.documentElement.scrollHeight
   if (height.value < virtualHeight) {
     height.value = virtualHeight
   }
-  if (props.containerDataId) {
-    addVirtualElement(props.containerDataId)
-    height.value += virtualHeight
-    window.parent.scroll({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
-  } else {
-    setIframeContainerHeight(0)
-  }
+  setIframeContainerHeight(0)
   document.cookie = `${props.iframeHeightName}=` + height.value + 'px'
+  scrollToCurrentContainer(props.containerDataId)
 }
 const removeHighlightClass = () => {
   const iframeDocument = iframe.value.contentDocument || iframe.value.contentWindow.document
@@ -41,7 +42,7 @@ const setIframeContainerHeight = (h: number) => {
   container.value.style.height = height.value + h + 'px'
 }
 const scrollToCurrentContainer = (data: any) => {
-  if (!iframe.value) {
+  if (!iframe.value || !data) {
     return
   }
   removeHighlightClass()
@@ -52,7 +53,7 @@ const scrollToCurrentContainer = (data: any) => {
     return
   }
   current.classList.add('highlight')
-  window.parent.scroll({ top: current.offsetTop, behavior: 'smooth' })
+  window.parent.scroll({top: current.offsetTop, behavior: 'smooth'})
 }
 
 const createVirtualElement = () => {
@@ -66,7 +67,7 @@ const createVirtualElement = () => {
   virtualEle.value.style.display = 'flex'
   virtualEle.value.style.justifyContent = 'center'
   virtualEle.value.style.alignItems = 'center'
-  virtualEle.value.innerHTML = 'New Element'
+  virtualEle.value.innerHTML = props.virtualEleText
   setIframeContainerHeight(virtualHeight)
 }
 const addVirtualElement = (data: any) => {
@@ -105,7 +106,7 @@ const appendVirtualElement = () => {
   }
   if (app == currentEle.value) {
     if (virtualEle.value) {
-      window.parent.scroll({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
+      window.parent.scroll({top: virtualEle.value.offsetTop, behavior: 'smooth'})
     }
     return
   }
@@ -114,7 +115,7 @@ const appendVirtualElement = () => {
   currentEle.value = app
   parentEle.value = app
   app.appendChild(virtualEle.value)
-  window.parent.scroll({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
+  window.parent.scroll({top: virtualEle.value.offsetTop, behavior: 'smooth'})
 }
 defineExpose({
   scrollToCurrentContainer,
