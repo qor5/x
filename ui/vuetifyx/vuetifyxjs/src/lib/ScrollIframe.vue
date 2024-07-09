@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref} from 'vue'
+import { ref } from 'vue'
 
 const iframe = ref()
 const virtualEle = ref()
@@ -8,14 +8,13 @@ const currentEle = ref()
 const container = ref()
 const height = ref()
 const props = defineProps({
-  srcdoc: {type: String, required: true},
-  iframeHeightName: {type: String, required: true},
-  iframeHeight: {type: String, required: true},
-  width: {type: String},
-  virtualEleText: {type: String, default: 'New Component'},
-  virtualEleHeight: {type: Number, default: 100},
-  containerDataId: {type: String}
-
+  srcdoc: { type: String, required: true },
+  iframeHeightName: { type: String, required: true },
+  iframeHeight: { type: String, required: true },
+  width: { type: String },
+  virtualEleText: { type: String, default: 'New Component' },
+  virtualEleHeight: { type: Number, default: 100 },
+  containerDataId: { type: String }
 })
 const virtualHeight = props.virtualEleHeight
 
@@ -53,7 +52,7 @@ const scrollToCurrentContainer = (data: any) => {
     return
   }
   current.classList.add('highlight')
-  window.parent.scroll({top: current.offsetTop, behavior: 'smooth'})
+  window.parent.scroll({ top: current.offsetTop, behavior: 'smooth' })
 }
 
 const createVirtualElement = () => {
@@ -106,7 +105,7 @@ const appendVirtualElement = () => {
   }
   if (app == currentEle.value) {
     if (virtualEle.value) {
-      window.parent.scroll({top: virtualEle.value.offsetTop, behavior: 'smooth'})
+      window.parent.scroll({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
     }
     return
   }
@@ -115,7 +114,7 @@ const appendVirtualElement = () => {
   currentEle.value = app
   parentEle.value = app
   app.appendChild(virtualEle.value)
-  window.parent.scroll({top: virtualEle.value.offsetTop, behavior: 'smooth'})
+  window.parent.scroll({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
 }
 defineExpose({
   scrollToCurrentContainer,
