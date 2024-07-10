@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/qor5/x/v3/i18n/i18n-transfer/csv"
 	"os"
 	"path/filepath"
 	"testing"
@@ -27,5 +28,31 @@ func TestExport(t *testing.T) {
 			"mock/messages/name":        "User CN",
 		},
 	}
+	assert.Equal(t, want, translationsMap)
+}
+
+func TestImport(t *testing.T) {
+	projectPath, err := os.Getwd()
+	projectPath = filepath.Join(projectPath, "mock")
+	assert.NoError(t, err)
+	translationMap, err := csv.CsvToTranslationsMap(projectPath + "/test_import.csv")
+	assert.NoError(t, err)
+	err = parser.ImportFromTranslationsMap(projectPath, translationMap)
+
+	translationsMap, err := parser.ExportToTranslationsMap(projectPath)
+	assert.NoError(t, err)
+	want := map[string]map[string]string{
+		"Japanese": {
+			"mock/messages/name":        "New User JP",
+			"mock/messages/Email":       "New JPEmail",
+			"mock/messages/PhoneNumber": "+100000",
+		},
+		"Chinese": {
+			"mock/messages/Email":       "New CNEmail",
+			"mock/messages/PhoneNumber": "+8666",
+			"mock/messages/name":        "New User CN",
+		},
+	}
+	err = parser.ImportFromTranslationsMap(projectPath, translationsMap)
 	assert.Equal(t, want, translationsMap)
 }
