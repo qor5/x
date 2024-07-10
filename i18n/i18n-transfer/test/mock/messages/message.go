@@ -12,10 +12,6 @@ type Email struct {
 	Phone
 }
 
-type Phone struct {
-	PhoneNumber string
-}
-
 var User_CN = &UserMessage{
 	name:  "User CN",
 	Email: Email_CN,
@@ -26,10 +22,6 @@ var Email_CN = Email{
 	Phone: Phone_CN,
 }
 
-var Phone_CN = Phone{
-	PhoneNumber: "+86",
-}
-
 var User_JP = &UserMessage{
 	name:  "User JP",
 	Email: Email_JP,
@@ -38,8 +30,4 @@ var User_JP = &UserMessage{
 var Email_JP = Email{
 	Email: "terry@theplant.jp",
 	Phone: Phone_JP,
-}
-
-var Phone_JP = Phone{
-	PhoneNumber: "+100",
 }
