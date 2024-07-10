@@ -39,7 +39,7 @@ func getTranslationsMapFromVistor(v *Visitor) map[string]map[string]string {
 						if l, exist := v.LocalesMap[name.Name]; exist {
 							locale = l
 							for _, messageStructs := range v.RigisterMap[locale] {
-								if messageStructs.PkgName == pkgName && messageStructs.StructName == name.Name {
+								if strings.HasSuffix(messageStructs.PkgName, pkgName) && messageStructs.StructName == name.Name {
 									isMessage = true
 									break
 								}
@@ -56,36 +56,7 @@ func getTranslationsMapFromVistor(v *Visitor) map[string]map[string]string {
 							isMessage = false
 							break
 						}
-
-						x, ok := unaryExpr.X.(*ast.CompositeLit)
-						if !ok {
-							isMessage = false
-							break
-						}
-
-						for _, elt := range x.Elts {
-							keyValueExpr, ok := elt.(*ast.KeyValueExpr)
-							if !ok {
-								isMessage = false
-								break
-							}
-
-							key, ok := keyValueExpr.Key.(*ast.Ident)
-							if !ok {
-								isMessage = false
-								break
-							}
-
-							value, ok := keyValueExpr.Value.(*ast.BasicLit)
-							if !ok {
-								isMessage = false
-								break
-							}
-
-							if isMessage {
-								translationMap[go_path.Join(pkgName, key.Name)] = strings.Trim(value.Value, "\"")
-							}
-						}
+						isMessage = v.translation(translationMap, pkgName, unaryExpr.X)
 					}
 
 					if isMessage {
@@ -101,4 +72,63 @@ func getTranslationsMapFromVistor(v *Visitor) map[string]map[string]string {
 		}
 	}
 	return translationsMap
+}
+
+func (v *Visitor) translation(translationMap map[string]string, pkgName string, x interface{}) bool {
+	_, ok := x.(*ast.CompositeLit)
+	if !ok {
+		return false
+	}
+	for _, elt := range x.(*ast.CompositeLit).Elts {
+		keyValueExpr, ok := elt.(*ast.KeyValueExpr)
+		if !ok {
+			return false
+		}
+
+		key, ok := keyValueExpr.Key.(*ast.Ident)
+		if !ok {
+			return false
+		}
+
+		value, ok := keyValueExpr.Value.(*ast.BasicLit)
+		if ok {
+			translationMap[go_path.Join(pkgName, key.Name)] = strings.Trim(value.Value, "\"")
+		} else {
+			// embed struct
+			isMessage := false
+			if embed, ok := keyValueExpr.Value.(*ast.Ident); ok {
+				// struct is in other file
+				if embed.Obj == nil {
+					for name, dels := range v.Variables {
+						if pkgName != name {
+							continue
+						}
+						for _, del := range dels {
+							for _, spec := range del.Specs {
+								if valueSpec, ok := spec.(*ast.ValueSpec); ok {
+									for _, specName := range valueSpec.Names {
+										if specName.Name != embed.Name {
+											continue
+										}
+										embed = specName
+										goto JUMP
+									}
+								}
+							}
+						}
+					}
+				}
+			JUMP:
+				if del, ok := embed.Obj.Decl.(*ast.ValueSpec); ok {
+					for _, val := range del.Values {
+						isMessage = v.translation(translationMap, pkgName, val)
+					}
+				}
+			}
+			if !isMessage {
+				return false
+			}
+		}
+	}
+	return true
 }
