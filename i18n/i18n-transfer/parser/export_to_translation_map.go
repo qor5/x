@@ -56,7 +56,7 @@ func getTranslationsMapFromVistor(v *Visitor) map[string]map[string]string {
 							isMessage = false
 							break
 						}
-						isMessage = v.translation(translationMap, pkgName, unaryExpr.X)
+						isMessage = v.translationExport(translationMap, pkgName, unaryExpr.X)
 					}
 
 					if isMessage {
@@ -74,7 +74,7 @@ func getTranslationsMapFromVistor(v *Visitor) map[string]map[string]string {
 	return translationsMap
 }
 
-func (v *Visitor) translation(translationMap map[string]string, pkgName string, x interface{}) bool {
+func (v *Visitor) translationExport(translationMap map[string]string, pkgName string, x interface{}) bool {
 	_, ok := x.(*ast.CompositeLit)
 	if !ok {
 		return false
@@ -121,7 +121,7 @@ func (v *Visitor) translation(translationMap map[string]string, pkgName string, 
 			JUMP:
 				if del, ok := embed.Obj.Decl.(*ast.ValueSpec); ok {
 					for _, val := range del.Values {
-						isMessage = v.translation(translationMap, pkgName, val)
+						isMessage = v.translationExport(translationMap, pkgName, val)
 					}
 				}
 			}
