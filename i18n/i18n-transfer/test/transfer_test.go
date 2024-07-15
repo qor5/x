@@ -1,10 +1,11 @@
 package test
 
 import (
-	"github.com/qor5/x/v3/i18n/i18n-transfer/csv"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/qor5/x/v3/i18n/i18n-transfer/csv"
 
 	"github.com/qor5/x/v3/i18n/i18n-transfer/parser"
 	"github.com/stretchr/testify/assert"
