@@ -31,6 +31,9 @@
         <v-divider class="mb-6"></v-divider>
         <h1 class="text-h2 mb-4">scroll-iframe-example</h1>
         <scroll-iframe-example></scroll-iframe-example>
+        <v-divider class="mb-6"></v-divider>
+        <h1 class="text-h2 mb-4">overlay-example</h1>
+        <overlay-example></overlay-example>
       </v-container>
     </v-main>
   </v-app>
@@ -47,4 +50,5 @@ import TextDatepickerExample from '@/demo/components/TextDatepickerExample.vue'
 import DefaultNavigatorExample from '@/demo/components/DefaultNavigatorExample.vue'
 import SendVariablesExample from '@/demo/components/SendVariablesExample.vue'
 import ScrollIframeExample from '@/demo/components/ScrollIframeExample.vue'
+import OverlayExample from '@/demo/components/OverlayExample.vue'
 </script>

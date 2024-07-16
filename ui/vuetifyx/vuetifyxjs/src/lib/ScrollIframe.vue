@@ -116,11 +116,15 @@ const appendVirtualElement = () => {
   app.appendChild(virtualEle.value)
   window.parent.scroll({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
 }
+const querySelector = (val: any) => {
+  return container.value.querySelector(val)
+}
 defineExpose({
   scrollToCurrentContainer,
   addVirtualElement,
   removeVirtualElement,
-  appendVirtualElement
+  appendVirtualElement,
+  querySelector
 })
 </script>
 

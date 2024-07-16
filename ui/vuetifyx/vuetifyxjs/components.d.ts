@@ -29,6 +29,8 @@ declare module 'vue' {
     MessageListener: typeof import('./src/lib/MessageListener.vue')['default']
     MultipleSelectItem: typeof import('./src/lib/Filter/components/MultipleSelectItem.vue')['default']
     NumberItem: typeof import('./src/lib/Filter/components/NumberItem.vue')['default']
+    Overlay: typeof import('./src/lib/Overlay.vue')['default']
+    OverlayExample: typeof import('./src/demo/components/OverlayExample.vue')['default']
     RestoreScrollListener: typeof import('./src/lib/RestoreScrollListener.vue')['default']
     ScrollIframe: typeof import('./src/lib/ScrollIframe.vue')['default']
     ScrollIframeExample: typeof import('./src/demo/components/ScrollIframeExample.vue')['default']
