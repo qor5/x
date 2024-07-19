@@ -107,7 +107,16 @@ type i18nContextKey int
 const (
 	moduleMessagesKey i18nContextKey = iota
 	dynaBuilderKey
+	languageTagKey
 )
+
+func LanguageTagFromContext(ctx context.Context, fallback language.Tag) language.Tag {
+	v, ok := ctx.Value(languageTagKey).(language.Tag)
+	if !ok {
+		return fallback
+	}
+	return v
+}
 
 func (b *Builder) EnsureLanguage(in http.Handler) (out http.Handler) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -150,6 +159,7 @@ func (b *Builder) EnsureLanguage(in http.Handler) (out http.Handler) {
 		dyna := DynaNew().Language(tag.String())
 		ctx := context.WithValue(r.Context(), moduleMessagesKey, moduleMsgs)
 		ctx = context.WithValue(ctx, dynaBuilderKey, dyna)
+		ctx = context.WithValue(ctx, languageTagKey, tag)
 		in.ServeHTTP(w, r.WithContext(ctx))
 		if dyna.HaveMissingKeys() {
 			log.Println(dyna.PrettyMissingKeys())
