@@ -41,7 +41,11 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="grey lighten-1" variant="text" @click.native="clearHandler(isActive)"
+            <v-btn
+              v-if="clearText"
+              color="grey lighten-1"
+              variant="text"
+              @click.native="clearHandler(isActive)"
               >{{ clearText }}
             </v-btn>
             <v-btn color="green darken-1" variant="text" @click="okHandler(isActive)"
