@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
-import { onMounted, type Ref, ref } from "vue";
+import { type Ref, ref } from "vue";
 
 const emit = defineEmits(["update:modelValue"]);
 const cropper: Ref<Cropper | undefined> = ref();
@@ -338,8 +338,7 @@ const setAspectRatio = (aspectRatio: number) => {
 const setDragMode = (mode: Cropper.DragMode) => {
   return cropper.value?.setDragMode(mode);
 };
-
-onMounted(() => {
+const loaded = () => {
   const { containerStyle, modelValue, src, alt, imgStyle, ...data } = props;
   const propsObj = <any>{};
 
@@ -358,7 +357,7 @@ onMounted(() => {
   propsObj.data = modelValue;
 
   cropper.value = new Cropper(img.value, propsObj);
-});
+};
 
 const crossorigin: any = ref(props.crossorigin || undefined);
 
@@ -397,6 +396,7 @@ defineExpose({
   <div>
     <img
       ref="img"
+      @load="loaded"
       :src="props.src"
       :alt="props.alt || 'image'"
       :crossorigin="crossorigin"
