@@ -4,7 +4,6 @@ import "cropperjs/dist/cropper.css";
 import { onMounted, type Ref, ref } from "vue";
 
 const emit = defineEmits(["update:modelValue"]);
-console.log(typeof window);
 const cropper: Ref<Cropper | undefined> = ref();
 
 const img = ref();
