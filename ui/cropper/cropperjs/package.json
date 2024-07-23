@@ -10,7 +10,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "cropperjs": "^1.6.1",
+    "cropperjs": "^1.6.2",
     "vue": "^3.4.21"
   },
   "devDependencies": {
