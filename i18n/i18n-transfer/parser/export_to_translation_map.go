@@ -54,7 +54,7 @@ func getTranslationsMapFromVistor(v *Visitor) map[string]map[string]string {
 						unaryExpr, ok := values.(*ast.UnaryExpr)
 						if !ok {
 							isMessage = false
-							break
+							continue
 						}
 						isMessage = v.translationExport(translationMap, pkgName, unaryExpr.X)
 					}
@@ -95,7 +95,6 @@ func (v *Visitor) translationExport(translationMap map[string]string, pkgName st
 			translationMap[go_path.Join(pkgName, key.Name)] = strings.Trim(value.Value, "\"")
 		} else {
 			// embed struct
-			isMessage := false
 			if embed, ok := keyValueExpr.Value.(*ast.Ident); ok {
 				// struct is in other file
 				if embed.Obj == nil {
@@ -121,12 +120,9 @@ func (v *Visitor) translationExport(translationMap map[string]string, pkgName st
 			JUMP:
 				if del, ok := embed.Obj.Decl.(*ast.ValueSpec); ok {
 					for _, val := range del.Values {
-						isMessage = v.translationExport(translationMap, pkgName, val)
+						v.translationExport(translationMap, pkgName, val)
 					}
 				}
-			}
-			if !isMessage {
-				return false
 			}
 		}
 	}
