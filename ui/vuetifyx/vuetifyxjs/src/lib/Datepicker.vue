@@ -36,7 +36,7 @@
             <v-container>
               <v-row>
                 <v-col cols="6" class="pa-0">
-                  <v-date-picker v-model="date" full-width no-title></v-date-picker>
+                  <v-date-picker v-model="dateOfPicker" full-width no-title></v-date-picker>
                 </v-col>
               </v-row>
             </v-container>
@@ -108,6 +108,7 @@ const props = defineProps({
 })
 const display = ref(false)
 const date = ref()
+const dateOfPicker = ref()
 
 const dateTimeFormat = computed(() => {
   return props.dateFormat
@@ -121,12 +122,14 @@ const init = () => {
   }
   // see https://stackoverflow.com/a/9436948
   date.value = parse(props.modelValue, dateTimeFormat.value, new Date())
+  dateOfPicker.value = date.value
 }
 
 const emit = defineEmits(['update:modelValue'])
 
 const okHandler = (isActive: Ref) => {
   isActive.value = false
+  date.value = dateOfPicker.value
   if (!date.value) {
     date.value = new Date()
   }

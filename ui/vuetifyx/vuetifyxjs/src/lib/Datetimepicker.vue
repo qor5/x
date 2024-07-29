@@ -35,8 +35,8 @@
         <v-card>
           <v-card-text class="px-0 py-0">
             <v-container class="d-flex justify-space-between align-center">
-              <v-date-picker v-model="date" full-width no-title></v-date-picker>
-              <input type="time" class="text-h2 timer" v-model="time" />
+              <v-date-picker v-model="dateOfPicker" full-width no-title></v-date-picker>
+              <input type="time" class="text-h2 timer" v-model="timeOfPicker" />
             </v-container>
           </v-card-text>
           <v-card-actions>
@@ -115,8 +115,10 @@ const props = defineProps({
   }
 })
 const date = ref()
+const dateOfPicker = ref()
 const time = ref(DEFAULT_TIME)
 const timer = ref()
+const timeOfPicker = ref()
 
 const dateTimeFormat = computed(() => {
   return props.dateFormat + ' ' + props.timeFormat
@@ -149,10 +151,13 @@ const init = () => {
   let initDateTime = parse(props.modelValue, dateTimeFormat.value, new Date())
   date.value = initDateTime
   time.value = format(initDateTime, DEFAULT_TIME_FORMAT)
+  dateOfPicker.value = date.value
+  timeOfPicker.value = time.value
 }
 
 const okHandler = (isActive: Ref) => {
   resetPicker(isActive)
+  date.value = dateOfPicker.value
   if (!date.value) {
     date.value = new Date()
   }
@@ -166,6 +171,7 @@ const clearHandler = (isActive: Ref) => {
 
 const resetPicker = (isActive: Ref) => {
   isActive.value = false
+  time.value = timeOfPicker.value
   if (timer.value) {
     timer.value.selectingHour = true
   }
