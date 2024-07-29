@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog :width="dialogWidth">
+    <v-dialog v-model="dialogVisible" :width="dialogWidth">
       <template v-slot:activator="{ isActive: isActive, props: activatorProps }">
         <v-text-field
           v-bind="activatorProps"
@@ -114,6 +114,7 @@ const props = defineProps({
     type: Boolean
   }
 })
+const dialogVisible = ref(false)
 const date = ref()
 const dateOfPicker = ref()
 const time = ref(DEFAULT_TIME)
@@ -155,9 +156,16 @@ const init = () => {
   timeOfPicker.value = time.value
 }
 
+watch(dialogVisible, (newVal) => {
+  if (newVal) {
+    dateOfPicker.value = date.value
+    timeOfPicker.value = time.value
+  }
+})
+
 const okHandler = (isActive: Ref) => {
-  resetPicker(isActive)
   date.value = dateOfPicker.value
+  resetPicker(isActive)
   if (!date.value) {
     date.value = new Date()
   }
@@ -170,8 +178,8 @@ const clearHandler = (isActive: Ref) => {
 }
 
 const resetPicker = (isActive: Ref) => {
-  isActive.value = false
   time.value = timeOfPicker.value
+  isActive.value = false
   if (timer.value) {
     timer.value.selectingHour = true
   }
