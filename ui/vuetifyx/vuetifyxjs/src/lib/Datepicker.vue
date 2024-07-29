@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog :width="dialogWidth">
+    <v-dialog v-model="dialogVisible" :width="dialogWidth">
       <template v-slot:activator="{ isActive: isActive, props: activatorProps }">
         <v-text-field
           v-bind="activatorProps"
@@ -106,7 +106,8 @@ const props = defineProps({
     type: Boolean
   }
 })
-const display = ref(false)
+
+const dialogVisible = ref(false)
 const date = ref()
 const dateOfPicker = ref()
 
@@ -125,11 +126,17 @@ const init = () => {
   dateOfPicker.value = date.value
 }
 
+watch(dialogVisible, (newVal) => {
+  if (newVal) {
+    dateOfPicker.value = date.value
+  }
+})
+
 const emit = defineEmits(['update:modelValue'])
 
 const okHandler = (isActive: Ref) => {
-  isActive.value = false
   date.value = dateOfPicker.value
+  isActive.value = false
   if (!date.value) {
     date.value = new Date()
   }
@@ -141,9 +148,6 @@ const clearHandler = (isActive: Ref) => {
   emit('update:modelValue', null)
 }
 
-const resetPicker = () => {
-  display.value = false
-}
 onMounted(() => {
   nextTick(() => {
     init()
