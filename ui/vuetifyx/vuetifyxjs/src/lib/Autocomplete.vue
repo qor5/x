@@ -111,6 +111,9 @@ const endIntersect = (isIntersecting: boolean) => {
 }
 
 const changeStatus = (e: any) => {
+  if (!e) {
+    return
+  }
   if (cachedSelectedItems.value.find((element) => element[props.itemValue] == e)) {
     return
   }
