@@ -18,7 +18,10 @@ func VXDateTimePicker() (r *VXDateTimePickerBuilder) {
 	return
 }
 
-type DatePickerProps struct{}
+type DatePickerProps struct {
+	Min string `json:"min"`
+	Max string `json:"max"`
+}
 
 type TimePickerProps struct {
 	Format     string `json:"format"` // 可用的选项是 ampm 和 24hr
