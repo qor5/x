@@ -35,7 +35,12 @@
         <v-card>
           <v-card-text class="px-0 py-0">
             <v-container class="d-flex justify-space-between align-center">
-              <v-date-picker v-model="dateOfPicker" full-width no-title></v-date-picker>
+              <v-date-picker
+                v-model="dateOfPicker"
+                full-width
+                no-title
+                v-bind="datePickerProps"
+              ></v-date-picker>
               <input type="time" class="text-h2 timer" v-model="timeOfPicker" />
             </v-container>
           </v-card-text>

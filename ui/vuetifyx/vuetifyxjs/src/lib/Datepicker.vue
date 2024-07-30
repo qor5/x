@@ -36,7 +36,12 @@
             <v-container>
               <v-row>
                 <v-col cols="6" class="pa-0">
-                  <v-date-picker v-model="dateOfPicker" full-width no-title></v-date-picker>
+                  <v-date-picker
+                    v-model="dateOfPicker"
+                    full-width
+                    no-title
+                    v-bind="datePickerProps"
+                  ></v-date-picker>
                 </v-col>
               </v-row>
             </v-container>
@@ -95,9 +100,6 @@ const props = defineProps({
   okText: {
     type: String,
     default: 'OK'
-  },
-  textFieldProps: {
-    type: Object
   },
   datePickerProps: {
     type: Object
