@@ -111,6 +111,8 @@ const endIntersect = (isIntersecting: boolean) => {
 }
 
 const changeStatus = (e: any) => {
+  emit('update:modelValue', value.value)
+
   if (!e) {
     return
   }
@@ -118,7 +120,6 @@ const changeStatus = (e: any) => {
     return
   }
   cachedSelectedItems.value.push(listItems.value.find((element) => element[props.itemValue] == e))
-  emit('update:modelValue', value.value)
 }
 
 const removeItem = (v: any) => {
