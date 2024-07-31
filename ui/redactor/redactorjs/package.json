@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "watch-build": "nodemon --watch src --exec 'npm run build'",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -13,6 +14,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
+    "nodemon": "^3.1.4",
     "vite": "^5.1.6",
     "vite-plugin-vue-devtools": "^7.0.18"
   }
