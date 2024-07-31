@@ -1,5 +1,4 @@
 export default {
-  theme: {
     defaultTheme: 'light',
     themes: {
       light: {
@@ -19,6 +18,8 @@ export default {
           'secondary-darken-2': '#19212B',
           'secondary-lighten-1': '#C2CDDC',
           'secondary-lighten-2': '#E4ECFE',
+          // accent
+          'accent': '#82B1FF',
           // info
           'info': '#0091FF',
           'on-info': '#fff',
@@ -52,7 +53,7 @@ export default {
           'on-background': '#212121',
           // surface
           'surface': '#fff',
-          'on-surface': '#424242',
+          'on-surface': '#212121',
           // grey
           'grey': '#9E9E9E',
           'grey-lighten-1': '#BDBDBD',
@@ -108,5 +109,4 @@ export default {
         },
       }
     }
-  }
 }
