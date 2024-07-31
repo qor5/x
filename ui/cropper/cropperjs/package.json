@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build ",
+    "watch-build": "nodemon --watch src --exec 'npm run build'",
     "preview": "vite preview",
     "format": "prettier --write src/"
   },
@@ -18,11 +19,12 @@
     "@types/node": "^20.11.28",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/tsconfig": "^0.5.1",
+    "nodemon": "^3.1.4",
     "npm-run-all2": "^6.1.2",
+    "prettier": "^3.2.5",
     "typescript": "~5.4.0",
     "vite": "^5.1.6",
     "vite-plugin-vue-devtools": "^7.0.18",
-    "vue-tsc": "^2.0.6",
-    "prettier": "^3.2.5"
+    "vue-tsc": "^2.0.6"
   }
 }
