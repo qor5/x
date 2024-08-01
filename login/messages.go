@@ -5,10 +5,9 @@ import "github.com/qor5/x/v3/i18n"
 const I18nLoginKey i18n.ModuleKey = "I18nLoginKey"
 
 type Messages struct {
-	// common
 	Confirm string
 	Verify  string
-	// login page
+
 	LoginPageTitle      string
 	AccountLabel        string
 	AccountPlaceholder  string
@@ -16,7 +15,7 @@ type Messages struct {
 	PasswordPlaceholder string
 	SignInBtn           string
 	ForgetPasswordLink  string
-	// forget password page
+
 	ForgetPasswordPageTitle        string
 	ForgotMyPasswordTitle          string
 	ForgetPasswordEmailLabel       string
@@ -24,18 +23,18 @@ type Messages struct {
 	SendResetPasswordEmailBtn      string
 	ResendResetPasswordEmailBtn    string
 	SendEmailTooFrequentlyNotice   string
-	// reset password link sent page
+
 	ResetPasswordLinkSentPageTitle string
 	ResetPasswordLinkWasSentTo     string
 	ResetPasswordLinkSentPrompt    string
-	// reset password page
+
 	ResetPasswordPageTitle          string
 	ResetYourPasswordTitle          string
 	ResetPasswordLabel              string
 	ResetPasswordPlaceholder        string
 	ResetPasswordConfirmLabel       string
 	ResetPasswordConfirmPlaceholder string
-	// change password page
+
 	ChangePasswordPageTitle             string
 	ChangePasswordTitle                 string
 	ChangePasswordOldLabel              string
@@ -44,20 +43,20 @@ type Messages struct {
 	ChangePasswordNewPlaceholder        string
 	ChangePasswordNewConfirmLabel       string
 	ChangePasswordNewConfirmPlaceholder string
-	// TOTP setup page
+
 	TOTPSetupPageTitle       string
 	TOTPSetupTitle           string
 	TOTPSetupScanPrompt      string
 	TOTPSetupSecretPrompt    string
 	TOTPSetupEnterCodePrompt string
 	TOTPSetupCodePlaceholder string
-	// TOTP validate page
+
 	TOTPValidatePageTitle       string
 	TOTPValidateTitle           string
 	TOTPValidateEnterCodePrompt string
 	TOTPValidateCodeLabel       string
 	TOTPValidateCodePlaceholder string
-	// Error Messages
+
 	ErrorSystemError                    string
 	ErrorCompleteUserAuthFailed         string
 	ErrorUserNotFound                   string
@@ -72,9 +71,9 @@ type Messages struct {
 	ErrorIncorrectTOTPCode              string
 	ErrorTOTPCodeReused                 string
 	ErrorIncorrectRecaptchaToken        string
-	// Warn Messages
+
 	WarnPasswordHasBeenChanged string
-	// Info Messages
+
 	InfoPasswordSuccessfullyReset   string
 	InfoPasswordSuccessfullyChanged string
 }
@@ -235,8 +234,8 @@ var Messages_ja_JP = &Messages{
 	ResetPasswordConfirmPlaceholder:     "新しいパスワードを確認する",
 	ChangePasswordPageTitle:             "パスワードを変更する",
 	ChangePasswordTitle:                 "パスワードを変更する",
-	ChangePasswordOldLabel:              "古いパスワード",
-	ChangePasswordOldPlaceholder:        "古いパスワード",
+	ChangePasswordOldLabel:              "現在パスワード",
+	ChangePasswordOldPlaceholder:        "現在パスワード",
 	ChangePasswordNewLabel:              "新しいパスワード",
 	ChangePasswordNewPlaceholder:        "新しいパスワード",
 	ChangePasswordNewConfirmLabel:       "新しいパスワードを再入力する",
@@ -260,7 +259,7 @@ var Messages_ja_JP = &Messages{
 	ErrorAccountIsRequired:              "メールアドレスは必須です",
 	ErrorPasswordCannotBeEmpty:          "パスワードは必須です",
 	ErrorPasswordNotMatch:               "パスワードが間違っています",
-	ErrorIncorrectPassword:              "古いパスワードが間違っています",
+	ErrorIncorrectPassword:              "現在パスワードが間違っています",
 	ErrorInvalidToken:                   "このトークンは無効です",
 	ErrorTokenExpired:                   "トークンの有効期限が切れています",
 	ErrorIncorrectTOTPCode:              "パスコードが間違っています",
