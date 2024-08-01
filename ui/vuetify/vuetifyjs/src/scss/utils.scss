@@ -1,0 +1,29 @@
+// SCSS function to convert color and opacity to rgba
+@function rgba-color($color, $alpha) {
+  // Check if it's a CSS variable
+  @if (type-of($color) == 'string' and str-index($color, '--') == 1) {
+    // If it's a CSS variable, return an rgba value as a string
+    @return unquote('rgba(var(#{$color}), #{$alpha})');
+  } @else {
+    // Otherwise, convert the given color to rgb
+    $rgb: if(type-of($color) == 'color', $color, unquote($color));
+
+    // If the given color is not in rgb or hex format, throw an error
+    @if not(type-of($rgb) == 'color') {
+      @error 'Invalid color value.';
+    }
+
+    // Return the converted rgba color value
+    @return rgba(red($rgb), green($rgb), blue($rgb), $alpha);
+  }
+}
+
+// Usage example
+//.element {
+//  // Using standard colors
+//  background-color: rgba-color(#3498db, 0.5);
+//  color: rgba-color(rgb(52, 152, 219), 0.8);
+//
+//  // Using CSS variables
+//  border-color: rgba-color(--var-color, 0.6);
+//}
