@@ -8,3 +8,7 @@
 @import "components/Listing";
 @import "components/Layout";
 @import "components/Menu";
+@import "components/SlideGroup";
+
+//some style that fix display problems
+@import "./fixer"

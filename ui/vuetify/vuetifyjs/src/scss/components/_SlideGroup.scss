@@ -1,0 +1,13 @@
+// resize button style in v-slide-group (filter compo)
+.v-slide-group {
+  .v-slide-group__content {
+    flex: initial;
+    padding-right: 130px;
+    border-block-end-width: thin !important;
+    border-block-end-style: solid !important;
+    border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+  }
+  .v-tab.v-tab.v-btn {
+    min-width: auto;
+  }
+}

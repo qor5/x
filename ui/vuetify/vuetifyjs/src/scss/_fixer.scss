@@ -1,0 +1,10 @@
+/** fix continuous characters that never break word.**/
+.v-container {
+  div,span,h1,h2,h3,h4,h5,h6 {
+    word-break: break-word;
+  }
+
+  h1 + .v-chip {
+    flex-shrink: 0;
+  }
+}
