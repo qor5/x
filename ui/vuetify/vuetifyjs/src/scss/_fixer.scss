@@ -4,7 +4,15 @@
     word-break: break-word;
   }
 
+  /** fix: version chip comp is pushed out by h1 in flex wrap **/
   h1 + .v-chip {
     flex-shrink: 0;
+  }
+}
+
+/** fix: set bg-transparent to v-list, but not working **/
+.v-navigation-drawer__content {
+  .v-list.bg-transparent {
+    background: transparent;
   }
 }
