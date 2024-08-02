@@ -16,8 +16,21 @@
   }
 }
 
+// let menu content to scroll(fix:https://theplanttokyo.atlassian.net/browse/KAK-3304)
+.v-navigation-drawer {
+  .v-main {
+    display: flex;
+    flex-direction: column;
+
+    .menu-content {
+      overflow: auto;
+    }
+  }
+}
+
 
 .v-navigation-drawer__content {
+
   button.v-btn.i18n-switcher-btn {
     height: 32px;
     padding:0 16px;
@@ -39,6 +52,10 @@
     height: 32px;
     align-self: center;
     --v-border-opacity:0.079;
+  }
+
+  .v-list.bg-transparent {
+    background: transparent;
   }
 
   .v-list-item--variant-text .v-list-item__overlay {
