@@ -13,3 +13,20 @@
     }
   }
 }
+
+
+.v-navigation-drawer__content {
+  button.v-btn.i18n-switcher-btn {
+    height: 32px;
+    padding:0 16px;
+    border-radius: 9999px;
+    min-width: 0;
+    width: 0;
+  }
+
+  .i18n-divider {
+    height: 32px;
+    align-self: center;
+    --v-border-opacity:0.079;
+  }
+}
