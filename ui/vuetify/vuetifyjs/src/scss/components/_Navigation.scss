@@ -24,6 +24,15 @@
     width: 0;
   }
 
+  /** fix: v-col-2 result in touch area is collapse **/
+  button.v-btn.menu-control-icon {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 8px;
+  }
+
   .i18n-divider {
     height: 32px;
     align-self: center;
