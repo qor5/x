@@ -1,0 +1,10 @@
+.ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ellipsis-flex {
+  flex:1;
+  @extend .ellipsis;
+}
