@@ -9,8 +9,10 @@
 @import "components/Layout";
 @import "components/SlideGroup";
 @import "components/Navigation";
+@import "components/Input";
+@import "components/vTabs";
 
 //some style that fix display problems
 @import "./fixer";
 
-@import "./utils"
+@import "./utils";

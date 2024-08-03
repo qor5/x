@@ -1,4 +1,5 @@
-@use "../variables" as variables;
+@use "../utils" as utils;
+@import "../variables";
 
 .v-theme--light {
   .v-navigation-drawer__content {
@@ -25,6 +26,12 @@
     .menu-content {
       overflow: auto;
     }
+  }
+
+  /** color of menu and profile bar */
+  .v-list,
+  .v-app-bar.v-toolbar {
+    --v-theme-on-surface: #{utils.hex-to-rgb-number($text-secondary-color)};
   }
 }
 
@@ -68,10 +75,6 @@
   }
   .v-list-group__items {
     --list-indent-size: 8px;
-    /** fix css transition throttle **/
-    // .v-list-item:first-child {
-    //   margin-top:0;
-    // }
   }
   .v-list-item--density-compact:not(.v-list-item--nav).v-list-item--one-line{
     padding-inline: 8px;

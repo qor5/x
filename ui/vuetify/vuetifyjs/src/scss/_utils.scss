@@ -1,3 +1,11 @@
+@function hex-to-rgba($color, $alpha: 1) {
+  @return rgba(hex-to-rgb-number($color), $alpha);
+}
+
+@function hex-to-rgb-number($color) {
+  @return red($color), green($color), blue($color)
+}
+
 .ellipsis {
   overflow: hidden;
   white-space: nowrap;
@@ -8,3 +16,4 @@
   flex:1;
   @extend .ellipsis;
 }
+
