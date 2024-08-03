@@ -69,13 +69,9 @@
   .v-list-group__items {
     --list-indent-size: 8px;
     /** fix css transition throttle **/
-    .v-list-item:first-child {
-      margin-top:0;
-    }
-    /** fix css transition throttle **/
-    .v-list-item:last-child {
-      margin-bottom:0;
-    }
+    // .v-list-item:first-child {
+    //   margin-top:0;
+    // }
   }
   .v-list-item--density-compact:not(.v-list-item--nav).v-list-item--one-line{
     padding-inline: 8px;
@@ -91,7 +87,7 @@
   }
 
   .v-list {
-    padding: 0;
+    padding: 8px 0 0 0;
   }
 
   .v-list-item {
@@ -99,12 +95,18 @@
     min-height: 32px;
     padding-top:0;
     padding-bottom:0;
-    margin-top:8px;
     margin-bottom:8px;
   }
   /* adjust menu-list-item end*/
 
   & .v-main>.v-container {
     padding-top: 14px;
+  }
+
+  .menu-profile-btn-divider {
+    height: 32px;
+    margin: 0 16px;
+    --v-border-opacity:0.079;
+    align-self: center;
   }
 }
