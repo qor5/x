@@ -7,7 +7,7 @@ $color-grey-300: #E0E0E0;
 $color-grey-400: #BDBDBD;
 $color-grey-500: #9E9E9E;
 $color-grey-600: #757575;
-$color-grey-700: #616161;
+$color-grey-700: #616161; 
 $color-grey-800: #424242;
 $color-grey-900: #212121;
 
@@ -40,5 +40,6 @@ $black-lighten-10:var(--v-theme-black-lighten-10);
 $shadow-key-umbra: var(--v-shadow-key-umbra-color);
 
 //text
-$text-secondary-color: #616161;
+$text-secondary-color: $color-grey-700;
+
 

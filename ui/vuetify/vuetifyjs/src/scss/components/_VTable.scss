@@ -13,6 +13,10 @@
     --v-chip-height: 28px;
     font-size: 12px;
   }
+
+  .v-selection-control--dirty {
+    color:rgb(var(--v-theme-primary));
+  }
 }
 
 .v-table > .v-table__wrapper > table {

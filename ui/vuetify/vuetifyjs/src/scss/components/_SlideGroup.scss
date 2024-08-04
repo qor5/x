@@ -1,13 +1,18 @@
+@use "../utils" as utils;
+@import "../variables";
 // resize button style in v-slide-group (filter compo)
 .v-slide-group {
   .v-slide-group__content {
     flex: initial;
-    padding-right: 130px;
     border-block-end-width: thin !important;
     border-block-end-style: solid !important;
     border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
   }
   .v-tab.v-tab.v-btn {
     min-width: auto;
+  }
+  .v-btn {
+    --v-theme-on-surface: #{utils.hex-to-rgb-number($color-grey-700)};
+    color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity))
   }
 }

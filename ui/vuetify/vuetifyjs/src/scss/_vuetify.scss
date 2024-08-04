@@ -70,7 +70,7 @@ $border-radius-custom: 4px;
       ),
       "h6": (
         "size": 18px,
-        "weight": 510,
+        "weight": 500,
         "line-height": 26px,
         "letter-spacing": -0.04px,
         "font-family": inherit,
@@ -379,4 +379,6 @@ $border-radius-custom: 4px;
   $chip-border-radius: 4px !default, // can't use $rounded map here
   // Card
   $card-item-padding: 16px,
+  //vbtn
+  $button-font-weight:500 !default
 );
