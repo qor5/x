@@ -17,6 +17,14 @@
   }
 }
 
+a {
+  color: rgb(var(--v-theme-primary));
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .v-app-bar.v-toolbar,
 .v-list-item-title {
   font-weight: 500;
