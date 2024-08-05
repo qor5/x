@@ -1,0 +1,12 @@
+.v-toolbar__content {
+  .v-field{
+    --v-input-control-height: 40px;
+  }
+  .v-field__append-inner i{
+    --v-theme-on-surface: var(--v-theme-grey-darken-2);
+    --v-medium-emphasis-opacity:1;
+  }
+  .v-chip {
+    --v-chip-height: 40px;
+  }
+}

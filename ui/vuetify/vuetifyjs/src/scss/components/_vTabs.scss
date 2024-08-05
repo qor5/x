@@ -1,0 +1,11 @@
+.v-main .v-tabs--density-compact {
+  --v-tabs-height: 44px;
+
+    .v-slide-group__content {
+      color: rgba(var(--v-theme-grey-darken-2), var(--v-high-emphasis-opacity));     
+    }
+
+    .v-btn {
+      font-weight: 500;
+    }
+}

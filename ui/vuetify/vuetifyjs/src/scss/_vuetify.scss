@@ -70,7 +70,7 @@ $border-radius-custom: 4px;
       ),
       "h6": (
         "size": 18px,
-        "weight": 510,
+        "weight": 500,
         "line-height": 26px,
         "letter-spacing": -0.04px,
         "font-family": inherit,
@@ -370,12 +370,15 @@ $border-radius-custom: 4px;
 
   // Components
   // Table
-  $table-header-font-weight: 510 !default,
+  $table-header-font-weight: 500 !default,
   $table-header-height: 44px !default,
   $table-row-height: 60px !default,
   $table-border-color: variables.$color-grey-300 !default,
+  $table-color: rgba(var(--v-theme-grey-darken-3), var(--v-high-emphasis-opacity)) !default,
   // Chip
   $chip-border-radius: 4px !default, // can't use $rounded map here
   // Card
   $card-item-padding: 16px,
+  //vbtn
+  $button-font-weight:500 !default
 );

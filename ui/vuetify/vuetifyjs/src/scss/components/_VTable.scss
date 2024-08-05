@@ -7,6 +7,18 @@
   color: var(--v-theme-on-background);
   background-color: variables.$color-grey-50;
 }
+
+.v-table tbody td {
+  .v-chip.v-chip--size-default  {
+    --v-chip-height: 28px;
+    font-size: 12px;
+  }
+
+  .v-selection-control--dirty {
+    color:rgb(var(--v-theme-primary));
+  }
+}
+
 .v-table > .v-table__wrapper > table {
   border: vuetify.$table-border;
   border-radius: vuetify.$border-radius-root;

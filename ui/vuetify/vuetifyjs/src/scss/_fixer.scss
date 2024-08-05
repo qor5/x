@@ -1,6 +1,13 @@
 /** fix continuous characters that never break word.**/
 .v-container {
-  div,span,h1,h2,h3,h4,h5,h6 {
+  div,
+  span,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     word-break: break-word;
   }
 
@@ -8,4 +15,14 @@
   h1 + .v-chip {
     flex-shrink: 0;
   }
+}
+
+a {
+  color: rgb(var(--v-theme-primary));
+  text-decoration: none;
+}
+
+.v-app-bar.v-toolbar,
+.v-list-item-title {
+  font-weight: 500;
 }

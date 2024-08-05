@@ -1,3 +1,11 @@
+@function hex-to-rgba($color, $alpha: 1) {
+  @return rgba(hex-to-rgb-number($color), $alpha);
+}
+
+@function hex-to-rgb-number($color) {
+  @return red($color), green($color), blue($color)
+}
+
 .ellipsis {
   overflow: hidden;
   white-space: nowrap;
@@ -7,4 +15,47 @@
 .ellipsis-flex {
   flex:1;
   @extend .ellipsis;
+}
+
+// extend pt-[number] utils in vuetify, pt-16 (64px) is reach to the top in origin.
+.pt-17 {
+  padding-top: 68px;
+}
+.pt-18 {
+  padding-top: 72px;
+}
+.pt-19 {
+  padding-top: 76px;
+}
+.pt-20{
+  padding-top: 80px;
+}
+.pt-21{
+  padding-top: 84px;
+}
+.pt-22{
+  padding-top: 88px;
+}
+.pt-23{
+  padding-top: 92px;
+}
+// absolute value of tag
+.ml-abs-1 {
+  margin-left: 1px;
+}
+
+.h-abs-26 {
+  height: 26px;
+}
+
+.h-abs-36 {
+  height: 36px;
+}
+
+.content-box {
+  box-sizing: content-box;
+}
+
+.color-grey-darken-1 {
+  color: var(--v-theme-grey-darken-1);
 }
