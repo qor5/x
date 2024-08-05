@@ -24,3 +24,9 @@
   border-radius: vuetify.$border-radius-root;
   overflow: hidden;
 }
+
+/** fix the long text word-break problem **/
+table {
+  table-layout: auto;
+  word-break: break-word;
+}
