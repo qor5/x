@@ -3,6 +3,7 @@ package vuetifyx
 import (
 	"context"
 	"fmt"
+	"math"
 	"sort"
 
 	"github.com/qor5/web/v3"
@@ -16,9 +17,9 @@ type VXTablePaginationBuilder struct {
 	perPage         int64
 	customPerPages  []int64
 	noPerPagePart   bool
-	onSelectPerPage interface{}
-	onPrevPage      interface{}
-	onNextPage      interface{}
+	noOffsetPart    bool
+	onSelectPerPage string
+	onSelectPage    string
 
 	perPageText string
 }
@@ -57,40 +58,33 @@ func (tpb *VXTablePaginationBuilder) NoPerPagePart(v bool) *VXTablePaginationBui
 	return tpb
 }
 
-func (tpb *VXTablePaginationBuilder) OnSelectPerPage(v interface{}) *VXTablePaginationBuilder {
+func (tpb *VXTablePaginationBuilder) NoOffsetPart(v bool) *VXTablePaginationBuilder {
+	tpb.noOffsetPart = v
+	return tpb
+}
+
+func (tpb *VXTablePaginationBuilder) OnSelectPerPage(v string) *VXTablePaginationBuilder {
 	tpb.onSelectPerPage = v
 	return tpb
 }
 
-func (tpb *VXTablePaginationBuilder) OnPrevPage(v interface{}) *VXTablePaginationBuilder {
-	tpb.onPrevPage = v
-	return tpb
-}
-
-func (tpb *VXTablePaginationBuilder) OnNextPage(v interface{}) *VXTablePaginationBuilder {
-	tpb.onNextPage = v
+func (tpb *VXTablePaginationBuilder) OnSelectPage(v string) *VXTablePaginationBuilder {
+	tpb.onSelectPage = v
 	return tpb
 }
 
 func (tpb *VXTablePaginationBuilder) MarshalHTML(ctx context.Context) ([]byte, error) {
-	if tpb.onSelectPerPage == nil {
+	if tpb.onSelectPerPage == "" {
 		tpb.OnSelectPerPage(web.Plaid().
 			PushState(true).
 			Query("per_page", web.Var("[$event]")).
 			MergeQuery(true).
 			Go())
 	}
-	if tpb.onPrevPage == nil {
-		tpb.OnPrevPage(web.Plaid().
+	if tpb.onSelectPage == "" {
+		tpb.OnSelectPage(web.Plaid().
 			PushState(true).
-			Query("page", tpb.currPage-1).
-			MergeQuery(true).
-			Go())
-	}
-	if tpb.onNextPage == nil {
-		tpb.OnNextPage(web.Plaid().
-			PushState(true).
-			Query("page", tpb.currPage+1).
+			Query("page", web.Var("value")).
 			MergeQuery(true).
 			Go())
 	}
@@ -129,22 +123,7 @@ func (tpb *VXTablePaginationBuilder) MarshalHTML(ctx context.Context) ([]byte, e
 		currPageEnd = tpb.total
 	}
 
-	canNext := false
-	canPrev := false
-	if tpb.currPage*tpb.perPage < tpb.total {
-		canNext = true
-	}
-	if tpb.currPage > 1 {
-		canPrev = true
-	}
-	var nextIconStyle string
-	var prevIconStyle string
-	if canNext {
-		nextIconStyle = "cursor: pointer;"
-	}
-	if canPrev {
-		prevIconStyle = "cursor: pointer;"
-	}
+	totalPages := int64(math.Ceil(float64(tpb.total) / float64(tpb.perPage)))
 
 	rowsPerPageText := "Rows per page: "
 	if tpb.perPageText != "" {
@@ -153,28 +132,26 @@ func (tpb *VXTablePaginationBuilder) MarshalHTML(ctx context.Context) ([]byte, e
 	return h.Div(
 		v.VRow().Justify("end").Align("center").Class("ma-0").
 			Children(
-				h.If(!tpb.noPerPagePart,
-					h.Div(
-						h.Text(rowsPerPageText),
-					),
-					h.Div(
-						v.VSelect().Items(sItems).Variant("underlined").ModelValue(fmt.Sprint(tpb.perPage)).
-							HideDetails(true).Density("compact").Attr("style", "margin-top: -8px").
-							Attr("@update:model-value", tpb.onSelectPerPage),
-					).Style("width: 64px;").Class("ml-6"),
-				),
-				h.Div(
-					h.Text(fmt.Sprintf("%d-%d of %d", currPageStart, currPageEnd, tpb.total)),
-				).Class("ml-6"),
-				h.Div(
-					h.Span("").Style(prevIconStyle).Children(
-						v.VBtn("").Variant("text").Icon("mdi-chevron-left").Size(32).Disabled(!canPrev).
-							Attr("@click", tpb.onPrevPage),
-					),
-					h.Span("").Style(nextIconStyle).Children(
-						v.VBtn("").Variant("text").Icon("mdi-chevron-right").Size(32).Disabled(!canNext).
-							Attr("@click", tpb.onNextPage),
-					).Class("ml-3"),
-				).Class("ml-6"),
+				h.Iff(!tpb.noPerPagePart, func() h.HTMLComponent {
+					return h.Components(
+						h.Div(
+							h.Text(rowsPerPageText),
+						),
+						h.Div(
+							v.VSelect().Items(sItems).Variant("underlined").ModelValue(fmt.Sprint(tpb.perPage)).
+								HideDetails(true).Density("compact").Attr("style", "margin-top: -8px").
+								Attr("@update:model-value", tpb.onSelectPerPage),
+						).Style("width: 64px;").Class("ml-6"),
+					)
+				}),
+				h.Iff(!tpb.noOffsetPart, func() h.HTMLComponent {
+					return h.Div(
+						h.Text(fmt.Sprintf("%d-%d of %d", currPageStart, currPageEnd, tpb.total)),
+					).Class("ml-6")
+				}),
+				v.VPagination().Class("ml-6").ShowFirstLastPage(true).Rounded("circle").Density(v.DensityCompact).ActiveColor(v.ColorPrimary).
+					Length(totalPages).
+					Attr(":model-value", tpb.currPage).
+					Attr("@update:model-value", fmt.Sprintf(`(value) => { %s }`, tpb.onSelectPage)),
 			)).MarshalHTML(ctx)
 }
