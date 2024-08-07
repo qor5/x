@@ -13,8 +13,12 @@
 @import "components/vTabs";
 @import "components/AutoComplete";
 @import "components/Dialog";
+@import "components/Detailing";
 
 //some style that fix display problems
 @import "./fixer";
 
 @import "./utils";
+
+// it's flexible to split out from qor5 index.scss
+@import "sites/kakuyasu.scss"
