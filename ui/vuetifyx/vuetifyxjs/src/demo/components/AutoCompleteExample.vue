@@ -33,7 +33,7 @@ const loadData = (): Promise<any> => {
   })
 }
 // const items = ref( [{ 'text': '高节', 'value': '1' }, { 'text': '地界', 'value': '3' }],)
-const items = ref([])
+const items = ref(getItems())
 const value = ref()
 </script>
 <template>
@@ -43,7 +43,6 @@ const value = ref()
   <!--    :items="items"-->
   <!--  ></vx-autocomplete>-->
   <vx-autocomplete
-    :load-data="loadData"
     sorting
     :items="items"
     has-icon

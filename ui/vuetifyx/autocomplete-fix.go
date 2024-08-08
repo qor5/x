@@ -67,9 +67,46 @@ func (b *VXAutocompleteBuilder) ChipTextColor(v string) (r *VXAutocompleteBuilde
 	return b
 }
 
+func (b *VXAutocompleteBuilder) PageKey(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("page-key", v)
+	return b
+}
+func (b *VXAutocompleteBuilder) PagesKey(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("pages-key", v)
+	return b
+}
+func (b *VXAutocompleteBuilder) PageSizeKey(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("page-size-key", v)
+	return b
+}
+func (b *VXAutocompleteBuilder) TotalKey(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("total-key", v)
+	return b
+}
+func (b *VXAutocompleteBuilder) ItemsKey(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("items-key", v)
+	return b
+}
+func (b *VXAutocompleteBuilder) CurrentKey(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("current-key", v)
+	return b
+}
+func (b *VXAutocompleteBuilder) SearchKey(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("search-key", v)
+	return b
+}
+func (b *VXAutocompleteBuilder) Page(v int) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("page", v)
+	return b
+}
+
+func (b *VXAutocompleteBuilder) PageSize(v int) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("page-size", v)
+	return b
+}
+
 func (b *VXAutocompleteBuilder) SetDataSource(ds *AutocompleteDataSource) (r *VXAutocompleteBuilder) {
 	b.tag.Attr("remote-url", ds.RemoteURL)
-	b.tag.Attr("event-name", ds.EventName)
 	b.tag.Attr("is-paging", ds.IsPaging)
 	b.tag.Attr("has-icon", ds.HasIcon)
 	return b
@@ -85,8 +122,19 @@ func (b *VXAutocompleteBuilder) MarshalHTML(ctx context.Context) (r []byte, err 
 }
 
 type AutocompleteDataSource struct {
-	RemoteURL string `json:"remote-url"`
-	EventName string `json:"event-name"`
-	IsPaging  bool   `json:"is-paging"`
-	HasIcon   bool   `json:"has-icon"`
+	RemoteURL   string `json:"remoteUrl"`
+	IsPaging    bool   `json:"isPaging"`
+	HasIcon     bool   `json:"hasIcon"`
+	ItemTitle   string `json:"itemTitle"`
+	ItemValue   string `json:"itemValue"`
+	ItemIcon    string `json:"itemIcon"`
+	PageKey     string `json:"pageKey"`
+	PagesKey    string `json:"pagesKey"`
+	PageSizeKey string `json:"pageSizeKey"`
+	TotalKey    string `json:"totalKey"`
+	ItemsKey    string `json:"itemsKey"`
+	CurrentKey  string `json:"currentKey"`
+	SearchKey   string `json:"searchKey"`
+	Page        int    `json:"page"`
+	PageSize    int    `json:"pageSize"`
 }

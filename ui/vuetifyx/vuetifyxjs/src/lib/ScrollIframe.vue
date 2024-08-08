@@ -12,11 +12,11 @@ const props = defineProps({
   iframeHeightName: { type: String, required: true },
   iframeHeight: { type: String, required: true },
   width: { type: String },
-  virtualEleText: { type: String, default: 'New Component' },
-  virtualEleHeight: { type: Number, default: 100 },
+  virtualElementText: { type: String, default: 'New Component' },
+  virtualElementHeight: { type: Number, default: 100 },
   containerDataId: { type: String }
 })
-const virtualHeight = props.virtualEleHeight
+const virtualHeight = props.virtualElementHeight
 
 const load = (event: any) => {
   if (!iframe.value) {
@@ -66,7 +66,7 @@ const createVirtualElement = () => {
   virtualEle.value.style.display = 'flex'
   virtualEle.value.style.justifyContent = 'center'
   virtualEle.value.style.alignItems = 'center'
-  virtualEle.value.innerHTML = props.virtualEleText
+  virtualEle.value.innerHTML = props.virtualElementText
   setIframeContainerHeight(virtualHeight)
 }
 const addVirtualElement = (data: any) => {
