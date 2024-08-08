@@ -24,6 +24,9 @@ const offsetTop = computed(() => {
     top + contentHeight.value > window.innerHeight &&
     window.innerHeight - top - contentHeight.value
   ) {
+    if (top - contentHeight.value < 0) {
+      return '0'
+    }
     return top - contentHeight.value + 'px'
   }
   return top + 'px'
