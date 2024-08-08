@@ -13,6 +13,24 @@ export interface linkageSelectData {
   selectOutOfOrder: Boolean
 }
 
+export interface autocompleteDataSource {
+  remoteUrl: string
+  isPaging: Boolean
+  hasIcon: Boolean
+  itemTitle: string
+  itemValue: string
+  itemIcon: string
+  pageKey: string
+  pagesKey: string
+  pageSizeKey: string
+  totalKey: string
+  itemsKey: string
+  currentKey: string
+  searchKey: string
+  page: number
+  pageSize: number
+}
+
 export interface FilterItem {
   key: string
   label: string
@@ -30,4 +48,5 @@ export interface FilterItem {
   options?: SelectOption[]
   translations?: IndependentTranslations
   linkageSelectData?: linkageSelectData
+  autocompleteDataSource: autocompleteDataSource
 }

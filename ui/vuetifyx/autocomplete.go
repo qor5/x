@@ -176,8 +176,8 @@ func (b *VXAutocompleteBuilder) ItemDisabled(v string) (r *VXAutocompleteBuilder
 	return b
 }
 
-func (b *VXAutocompleteBuilder) ItemText(v string) (r *VXAutocompleteBuilder) {
-	b.tag.Attr("item-text", v)
+func (b *VXAutocompleteBuilder) ItemTitle(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("item-title", v)
 	return b
 }
 

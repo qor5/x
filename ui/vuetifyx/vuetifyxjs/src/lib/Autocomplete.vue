@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, onUpdated, PropType, Ref, ref } from 'vue'
+import { computed, onMounted, onUpdated, PropType, reactive, Ref, ref } from 'vue'
 import draggable from 'vuedraggable'
+import get from 'lodash/get'
 
 enum Variant {
   Filled = 'filled',
@@ -26,7 +27,7 @@ const props = defineProps({
   clearable: Boolean,
   chips: Boolean,
   sorting: Boolean,
-  itemText: { type: String, default: 'text' },
+  itemTitle: { type: String, default: 'text' },
   itemValue: { type: String, default: 'value' },
   itemIcon: { type: String, default: 'icon' },
   pageKey: { type: String, default: 'page' },
@@ -37,15 +38,10 @@ const props = defineProps({
   currentKey: { type: String, default: 'current' },
   searchKey: { type: String, default: 'search' },
   chipColor: String,
-  loadData: Function,
-  remote: {
-    type: Object,
-    default: {
-      page: 0,
-      pageSize: 0,
-      search: ''
-    }
-  }
+  remoteUrl: String,
+  page: { type: Number, default: 1 },
+  pageSize: { type: Number, default: 20 },
+  errorMessages: { type: String || Array<String> || null }
 })
 const listItems: Ref<Array<any>> = ref([...props.items])
 const value = ref()
@@ -55,42 +51,47 @@ const disabled = ref(false)
 const total = ref(0)
 const pages = ref(0)
 const current = ref(0)
+const url = ref(props.remoteUrl)
+const pagination = reactive({
+  page: props.page,
+  pageSize: props.pageSize,
+  search: ''
+})
 
-// key like `$.data.total` if just `total` this function will be  change key to `data.total`
-// and return object multilevel value
-const getObjMultiValue = (d: Object, key: string) => {
-  const keys = key.split('.')
-  if (keys.length === 0) {
-    return d
-  }
-  if (keys[0] === '$') {
-    keys.shift()
+const loadData = () => {
+  let urlObj
+  if (!url.value!.startsWith('http')) {
+    urlObj = new URL(url.value!, `${window.location.protocol}//${window.location.host}`)
   } else {
-    keys.unshift('data')
+    urlObj = new URL(url.value!)
   }
-  return getObjectValue(d, keys)
-}
-const getObjectValue = (d: any, keys: Array<string>): any => {
-  if (typeof d !== 'object' || keys.length == 0) {
-    return d
+  urlObj.searchParams.set(props.pageKey, pagination.page.toString())
+  urlObj.searchParams.set(props.pageSizeKey, pagination.pageSize.toString())
+  if (pagination.search) {
+    urlObj.searchParams.set(props.searchKey, pagination.search)
   }
-  const newKey = keys[0]
-  keys.shift()
-  return getObjectValue(d[newKey], keys)
+  const a = urlObj.toString()
+  return fetch(a)
 }
 const loadRemoteItems = () => {
-  if (!props.loadData) {
+  if (!url.value) {
     return
   }
 
   isLoading.value = true
-  props
-    .loadData()
-    .then((r: any) => {
-      total.value = getObjMultiValue(r, props.totalKey)
-      pages.value = getObjMultiValue(r, props.pagesKey)
-      current.value = getObjMultiValue(r, props.currentKey)
-      const items = getObjMultiValue(r, props.itemsKey)
+
+  loadData()
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok ' + response.statusText)
+      }
+      return response.json()
+    })
+    .then((r) => {
+      total.value = get(r, props.totalKey)
+      pages.value = get(r, props.pagesKey)
+      current.value = get(r, props.currentKey)
+      const items = get(r, props.itemsKey)
       if (props.isPaging) {
         listItems.value = items
       } else {
@@ -105,21 +106,23 @@ const loadRemoteItems = () => {
 
 const endIntersect = (isIntersecting: boolean) => {
   if (isIntersecting && !disabled.value) {
-    props.remote[props.pageKey] += 1
+    pagination.page += 1
     loadRemoteItems()
   }
 }
 
 const changeStatus = (e: any) => {
-  emit('update:modelValue', value.value)
+  emit('update:modelValue', value.value[props.itemTitle])
 
   if (!e) {
     return
   }
-  if (cachedSelectedItems.value.find((element) => element[props.itemValue] == e)) {
+  if (cachedSelectedItems.value.find((element) => element[props.itemValue] == e[props.itemValue])) {
     return
   }
-  cachedSelectedItems.value.push(listItems.value.find((element) => element[props.itemValue] == e))
+  cachedSelectedItems.value.push(
+    listItems.value.find((element) => element[props.itemValue] == e[props.itemValue])
+  )
 }
 
 const removeItem = (v: any) => {
@@ -127,7 +130,7 @@ const removeItem = (v: any) => {
   cachedSelectedItems.value = cachedSelectedItems.value.filter(
     (element) => element[props.itemValue] != v[props.itemValue]
   )
-  emit('update:modelValue', value.value)
+  emit('update:modelValue', value.value[props.itemTitle])
 }
 onMounted(() => {
   loadRemoteItems()
@@ -137,17 +140,17 @@ onUpdated(() => {
 })
 
 const reloadSearch = (val: any) => {
-  if (!props.loadData) {
+  if (!url.value) {
     return
   }
-  if (val == props.remote[props.searchKey] || !val) {
+  if (!val) {
     return
   }
-  if (val == value.value[props.itemText]) {
+  if (value.value && val == value.value[props.itemTitle]) {
     return
   }
-  props.remote[props.pageKey] = 1
-  props.remote[props.searchKey] = val
+  pagination.search = val
+  pagination.page = 1
   loadRemoteItems()
 }
 
@@ -170,7 +173,7 @@ const chipsVisible = computed(() => {
             <v-list-item
               v-if="hasIcon"
               :prepend-avatar="element[itemIcon]"
-              :title="element[itemText]"
+              :title="element[itemTitle]"
               animation="300"
             >
               <template v-slot:append>
@@ -178,7 +181,7 @@ const chipsVisible = computed(() => {
                 <v-btn @click="removeItem(element)" variant="text" icon="mdi-delete"></v-btn>
               </template>
             </v-list-item>
-            <v-list-item v-else :title="element[itemText]" animation="300">
+            <v-list-item v-else :title="element[itemTitle]" animation="300">
               <template v-slot:append>
                 <v-icon icon="mdi-drag" class="handle mx-2 cursor-grab"></v-icon>
                 <v-btn @click="removeItem(element)" variant="text" icon="mdi-delete"></v-btn>
@@ -189,11 +192,12 @@ const chipsVisible = computed(() => {
       </v-list>
     </v-card>
     <v-autocomplete
+      return-object
       v-model="value"
       :items="listItems"
       :loading="isLoading"
       :item-value="itemValue"
-      :item-title="itemText"
+      :item-title="itemTitle"
       :clearable="sorting ? false : clearable"
       :hide-details="hideDetails"
       :hide-selected="hideSelected"
@@ -202,12 +206,13 @@ const chipsVisible = computed(() => {
       :variant="variant"
       :density="density"
       @update:search="reloadSearch"
+      :error-messages="props.errorMessages"
     >
       <template v-slot:item="{ item, props }" v-if="hasIcon">
         <v-list-item
           v-bind="props"
           :prepend-avatar="item.raw[itemIcon]"
-          :title="item.raw[itemText]"
+          :title="item.raw[itemTitle]"
         ></v-list-item>
       </template>
       <template v-slot:chip="{ props, item }" v-if="chipsVisible">
@@ -215,14 +220,14 @@ const chipsVisible = computed(() => {
           v-bind="props"
           :color="chipColor"
           :prepend-avatar="hasIcon ? item.raw[itemIcon] : undefined"
-          :text="item.raw[itemText]"
+          :text="item.raw[itemTitle]"
         ></v-chip>
       </template>
-      <template v-slot:append-item="" v-if="loadData">
+      <template v-slot:append-item="" v-if="remoteUrl">
         <div class="text-center">
           <v-pagination
             v-if="props.isPaging"
-            v-model="remote[pageKey]"
+            v-model="pagination.page"
             rounded="circle"
             :length="pages"
             total-visible="5"
@@ -237,7 +242,7 @@ const chipsVisible = computed(() => {
               v-intersect="endIntersect"
               @click="
                 () => {
-                  remote[pageKey] += 1
+                  pagination.page += 1
                   loadRemoteItems()
                 }
               "

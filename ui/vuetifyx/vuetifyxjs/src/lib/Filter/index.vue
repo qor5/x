@@ -83,7 +83,6 @@ const getSelectedIndexes = (value: FilterItem[]): number[] => {
 
 const visible = ref(false)
 const selectedIndexs = ref(getSelectedIndexes(props.internalValue))
-
 const emit = defineEmits(['update:modelValue'])
 
 const clickDone = () => {

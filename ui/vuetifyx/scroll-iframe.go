@@ -37,6 +37,14 @@ func (b *VXScrollIframeBuilder) Width(v interface{}) (r *VXScrollIframeBuilder) 
 	b.tag.Attr(":width", h.JSONString(v))
 	return b
 }
+func (b *VXScrollIframeBuilder) VirtualElementText(v string) (r *VXScrollIframeBuilder) {
+	b.tag.Attr(":virtual-element-text", h.JSONString(v))
+	return b
+}
+func (b *VXScrollIframeBuilder) virtualElementHeight(v int) (r *VXScrollIframeBuilder) {
+	b.tag.Attr(":virtual-element-height", h.JSONString(v))
+	return b
+}
 
 func (b *VXScrollIframeBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)

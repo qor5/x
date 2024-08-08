@@ -123,13 +123,29 @@ const internalValue = ref([
     label: 'Company',
     itemType: 'SelectItem',
     valuesAre: null,
-    valuesIs: null,
     options: [
       { text: '高节', value: '1' },
       { text: '地界', value: '3' }
     ],
     linkageSelectData: {},
     translations: { filterBy: 'Filter by Company' }
+  },
+  {
+    key: 'f_company_remote',
+    label: 'Remote',
+    itemType: 'SelectItem',
+    valuesAre: null,
+    linkageSelectData: {},
+    translations: { filterBy: 'Filter by Company' },
+    autocompleteDataSource: {
+      remoteUrl: 'http://localhost:7800/complete/auto-complete-posts',
+      itemTitle: 'title',
+      itemValue: 'id',
+      totalKey: 'total',
+      itemsKey: 'data',
+      isPaging: true,
+      pageSize: 2
+    }
   }
 ])
 // const internalValue = [{
