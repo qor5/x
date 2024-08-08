@@ -5,6 +5,7 @@ import { type Ref, ref } from "vue";
 
 const emit = defineEmits(["update:modelValue"]);
 const cropper: Ref<Cropper | undefined> = ref();
+const container = ref();
 
 const img = ref();
 
@@ -339,6 +340,9 @@ const setDragMode = (mode: Cropper.DragMode) => {
   return cropper.value?.setDragMode(mode);
 };
 const loaded = () => {
+  container.value.style.height = `${img.value.height}px`;
+  container.value.style.width = `${img.value.width}px`;
+
   const { containerStyle, modelValue, src, alt, imgStyle, ...data } = props;
   const propsObj = <any>{};
 
@@ -393,7 +397,7 @@ defineExpose({
 </script>
 
 <template>
-  <div>
+  <div ref="container">
     <img
       ref="img"
       @load="loaded"
