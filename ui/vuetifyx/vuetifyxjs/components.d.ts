@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     Autocomplete: typeof import('./src/lib/Autocomplete.vue')['default']
     AutoCompleteExample: typeof import('./src/demo/components/AutoCompleteExample.vue')['default']
+    AutoCompleteItem: typeof import('./src/lib/Filter/components/AutoCompleteItem.vue')['default']
     DateItem: typeof import('./src/lib/Filter/components/DateItem.vue')['default']
     Datepicker: typeof import('./src/lib/Datepicker.vue')['default']
     DatepickerExample: typeof import('./src/demo/components/DatepickerExample.vue')['default']

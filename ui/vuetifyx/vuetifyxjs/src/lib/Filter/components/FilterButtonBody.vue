@@ -89,6 +89,13 @@ const showValueComputed = computed(() => {
       case 'SelectItem': {
         const mod = props.op.modifier || 'equals'
         if (mod === 'equals' && props.op.valueIs) {
+          showValue = props.op.options!.find((o) => o.value === props.op.valueIs)?.text || ''
+        }
+        break
+      }
+      case 'AutoCompleteItem': {
+        const mod = props.op.modifier || 'equals'
+        if (mod === 'equals' && props.op.valueIs) {
           showValue = props.op.valueIs.toString()
         }
         break

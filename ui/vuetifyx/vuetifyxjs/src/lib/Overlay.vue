@@ -38,6 +38,9 @@ const offsetLeft = computed(() => {
     left + contentWidth.value > window.innerWidth &&
     window.innerWidth - left - contentWidth.value
   ) {
+    if (left - contentWidth.value < 0) {
+      return '0'
+    }
     return left - contentWidth.value + 'px'
   }
   return left + 'px'
