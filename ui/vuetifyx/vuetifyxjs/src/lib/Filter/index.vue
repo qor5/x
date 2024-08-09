@@ -11,6 +11,7 @@ import StringItem from '@/lib/Filter/components/StringItem.vue'
 import LinkageSelectItem from '@/lib/Filter/components/LinkageSelectItem.vue'
 import MultipleSelectItem from '@/lib/Filter/components/MultipleSelectItem.vue'
 import SelectItem from '@/lib/Filter/components/SelectItem.vue'
+import AutoCompleteItem from '@/lib/Filter/components/AutoCompleteItem.vue'
 
 const props = defineProps({
   internalValue: { type: Array<any>, required: true },
@@ -56,7 +57,8 @@ const itemTypes: any = {
   StringItem,
   LinkageSelectItem,
   MultipleSelectItem,
-  SelectItem
+  SelectItem,
+  AutoCompleteItem
 }
 
 const trans: any = {
@@ -66,6 +68,7 @@ const trans: any = {
   NumberItem: t.number,
   StringItem: t.string,
   SelectItem: {},
+  AutoCompleteItem: {},
   MultipleSelectItem: t.multipleSelect,
   LinkageSelectItem: {}
 }

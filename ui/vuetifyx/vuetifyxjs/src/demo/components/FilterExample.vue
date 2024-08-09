@@ -122,7 +122,8 @@ const internalValue = ref([
     key: 'f_company',
     label: 'Company',
     itemType: 'SelectItem',
-    valuesAre: null,
+    selected: true,
+    valueIs: '1',
     options: [
       { text: '高节', value: '1' },
       { text: '地界', value: '3' }
@@ -133,7 +134,7 @@ const internalValue = ref([
   {
     key: 'f_company_remote',
     label: 'Remote',
-    itemType: 'SelectItem',
+    itemType: 'AutoCompleteItem',
     valuesAre: null,
     linkageSelectData: {},
     translations: { filterBy: 'Filter by Company' },

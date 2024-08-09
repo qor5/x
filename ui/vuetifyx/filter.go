@@ -143,6 +143,7 @@ const (
 	ItemTypeLinkageSelect  FilterItemType = "LinkageSelectItem"
 	ItemTypeNumber         FilterItemType = "NumberItem"
 	ItemTypeString         FilterItemType = "StringItem"
+	AutoCompleteTypeSelect FilterItemType = "AutoCompleteItem"
 )
 
 type FilterItemModifier string
