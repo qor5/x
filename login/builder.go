@@ -172,7 +172,7 @@ func New() *Builder {
 			Path:     "/",
 			Domain:   "",
 			Secure:   true,
-			SameSite: http.SameSiteStrictMode,
+			SameSite: http.SameSiteLaxMode,
 		},
 		autoExtendSession: true,
 		maxRetryCount:     5,
