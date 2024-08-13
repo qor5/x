@@ -1,3 +1,17 @@
+.v-container .go-plaid-portal:not(:last-child)  .section-body{
+  border-block-end-width: thin;
+  border-block-end-style: solid;
+  border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity));  
+}
+
+.v-main .layout-center .v-card:not(:last-child) .listing-compo-wrap {
+  padding-bottom: 26px;
+  border-block-end-width: thin;
+  border-block-end-style: solid;
+  border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity));  
+}
+
+
 .detailing-title-wrap {
   display: inline-flex;
   align-items: center;
@@ -58,7 +72,7 @@
   margin-left:8px;
   margin-right:8px;
   padding-bottom: 40px;
-
+ 
   .v-row {
     gap: 16px;
     &:not(:last-child) {
