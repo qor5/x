@@ -18,6 +18,7 @@ type VXTablePaginationBuilder struct {
 	customPerPages  []int64
 	noPerPagePart   bool
 	noOffsetPart    bool
+	totalVisible    int64
 	onSelectPerPage string
 	onSelectPage    string
 
@@ -60,6 +61,11 @@ func (tpb *VXTablePaginationBuilder) NoPerPagePart(v bool) *VXTablePaginationBui
 
 func (tpb *VXTablePaginationBuilder) NoOffsetPart(v bool) *VXTablePaginationBuilder {
 	tpb.noOffsetPart = v
+	return tpb
+}
+
+func (tpb *VXTablePaginationBuilder) TotalVisible(v int64) *VXTablePaginationBuilder {
+	tpb.totalVisible = v
 	return tpb
 }
 
@@ -129,6 +135,20 @@ func (tpb *VXTablePaginationBuilder) MarshalHTML(ctx context.Context) ([]byte, e
 	if tpb.perPageText != "" {
 		rowsPerPageText = tpb.perPageText
 	}
+	pagination := v.VPagination().ShowFirstLastPage(true).Rounded("circle").Density(v.DensityCompact).ActiveColor(v.ColorPrimary).
+		Length(totalPages).
+		// https://github.com/vuetifyjs/vuetify/issues/20321
+		// https://github.com/vuetifyjs/vuetify/issues/18853
+		Attr("v-run", `(el) => { 
+			const currentWidth = el.offsetWidth + 38; // 37.6;
+			el.style.minWidth = currentWidth + "px";
+		}`).
+		Attr(":model-value", tpb.currPage).
+		Attr("@update:model-value", fmt.Sprintf(`(value) => { %s }`, tpb.onSelectPage))
+	if tpb.totalVisible > 0 {
+		pagination = pagination.TotalVisible(tpb.totalVisible)
+	}
+
 	return h.Div(
 		v.VRow().Justify("end").Align("center").Class("ma-0").
 			Children(
@@ -149,15 +169,6 @@ func (tpb *VXTablePaginationBuilder) MarshalHTML(ctx context.Context) ([]byte, e
 						h.Text(fmt.Sprintf("%d-%d of %d", currPageStart, currPageEnd, tpb.total)),
 					).Class("ml-6")
 				}),
-				v.VPagination().ShowFirstLastPage(true).Rounded("circle").Density(v.DensityCompact).ActiveColor(v.ColorPrimary).
-					Length(totalPages).
-					// https://github.com/vuetifyjs/vuetify/issues/20321
-					// https://github.com/vuetifyjs/vuetify/issues/18853
-					Attr("v-run", `(el) => { 
-						const currentWidth = el.offsetWidth + 38; // 37.6;
-						el.style.minWidth = currentWidth + "px";
-					}`).
-					Attr(":model-value", tpb.currPage).
-					Attr("@update:model-value", fmt.Sprintf(`(value) => { %s }`, tpb.onSelectPage)),
+				pagination,
 			)).MarshalHTML(ctx)
 }
