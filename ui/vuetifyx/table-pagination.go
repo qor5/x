@@ -149,8 +149,14 @@ func (tpb *VXTablePaginationBuilder) MarshalHTML(ctx context.Context) ([]byte, e
 						h.Text(fmt.Sprintf("%d-%d of %d", currPageStart, currPageEnd, tpb.total)),
 					).Class("ml-6")
 				}),
-				v.VPagination().Class("ml-6").ShowFirstLastPage(true).Rounded("circle").Density(v.DensityCompact).ActiveColor(v.ColorPrimary).
+				v.VPagination().ShowFirstLastPage(true).Rounded("circle").Density(v.DensityCompact).ActiveColor(v.ColorPrimary).
 					Length(totalPages).
+					// https://github.com/vuetifyjs/vuetify/issues/20321
+					// https://github.com/vuetifyjs/vuetify/issues/18853
+					Attr("v-run", `(el) => { 
+						const currentWidth = el.offsetWidth + 38; // 37.6;
+						el.style.minWidth = currentWidth + "px";
+					}`).
 					Attr(":model-value", tpb.currPage).
 					Attr("@update:model-value", fmt.Sprintf(`(value) => { %s }`, tpb.onSelectPage)),
 			)).MarshalHTML(ctx)
