@@ -40,6 +40,10 @@ type (
 	HookFunc    func(r *http.Request, user interface{}, extraVals ...interface{}) error
 )
 
+var NopHookFunc HookFunc = func(r *http.Request, user interface{}, extraVals ...interface{}) error {
+	return nil
+}
+
 type Provider struct {
 	Goth goth.Provider
 	Key  string
@@ -115,6 +119,7 @@ type Builder struct {
 	totpValidatePageFunc          web.PageFunc
 
 	beforeSetPasswordHook HookFunc
+	beforeTOTPFlowHook    HookFunc
 
 	afterLoginHook                        HookFunc
 	afterFailedToLoginHook                HookFunc
@@ -364,64 +369,177 @@ func (b *Builder) wrapHook(v HookFunc) HookFunc {
 // extra vals:
 // - password
 func (b *Builder) BeforeSetPassword(v HookFunc) (r *Builder) {
-	b.beforeSetPasswordHook = b.wrapHook(v)
+	b.beforeSetPasswordHook = v
+	return b
+}
+
+func (b *Builder) WrapBeforeSetPassword(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.beforeSetPasswordHook == nil {
+		b.beforeSetPasswordHook = w(NopHookFunc)
+	} else {
+		b.beforeSetPasswordHook = w(b.beforeSetPasswordHook)
+	}
+	return b
+}
+
+func (b *Builder) BeforeTOTPFlow(v HookFunc) (r *Builder) {
+	b.beforeTOTPFlowHook = v
+	return b
+}
+
+func (b *Builder) WrapBeforeTOTPFlow(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.beforeTOTPFlowHook == nil {
+		b.beforeTOTPFlowHook = w(NopHookFunc)
+	} else {
+		b.beforeTOTPFlowHook = w(b.beforeTOTPFlowHook)
+	}
 	return b
 }
 
 func (b *Builder) AfterLogin(v HookFunc) (r *Builder) {
-	b.afterLoginHook = b.wrapHook(v)
+	b.afterLoginHook = v
+	return b
+}
+
+func (b *Builder) WrapAfterLogin(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.afterLoginHook == nil {
+		b.afterLoginHook = w(NopHookFunc)
+	} else {
+		b.afterLoginHook = w(b.afterLoginHook)
+	}
 	return b
 }
 
 // extra vals:
 // - login error
 func (b *Builder) AfterFailedToLogin(v HookFunc) (r *Builder) {
-	b.afterFailedToLoginHook = b.wrapHook(v)
+	b.afterFailedToLoginHook = v
+	return b
+}
+
+func (b *Builder) WrapAfterFailedToLogin(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.afterFailedToLoginHook == nil {
+		b.afterFailedToLoginHook = w(NopHookFunc)
+	} else {
+		b.afterFailedToLoginHook = w(b.afterFailedToLoginHook)
+	}
 	return b
 }
 
 func (b *Builder) AfterUserLocked(v HookFunc) (r *Builder) {
-	b.afterUserLockedHook = b.wrapHook(v)
+	b.afterUserLockedHook = v
+	return b
+}
+
+func (b *Builder) WrapAfterUserLocked(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.afterUserLockedHook == nil {
+		b.afterUserLockedHook = w(NopHookFunc)
+	} else {
+		b.afterUserLockedHook = w(b.afterUserLockedHook)
+	}
 	return b
 }
 
 func (b *Builder) AfterLogout(v HookFunc) (r *Builder) {
-	b.afterLogoutHook = b.wrapHook(v)
+	b.afterLogoutHook = v
+	return b
+}
+
+func (b *Builder) WrapAfterLogout(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.afterLogoutHook == nil {
+		b.afterLogoutHook = w(NopHookFunc)
+	} else {
+		b.afterLogoutHook = w(b.afterLogoutHook)
+	}
 	return b
 }
 
 // extra vals:
 // - reset link
 func (b *Builder) AfterConfirmSendResetPasswordLink(v HookFunc) (r *Builder) {
-	b.afterConfirmSendResetPasswordLinkHook = b.wrapHook(v)
+	b.afterConfirmSendResetPasswordLinkHook = v
+	return b
+}
+
+func (b *Builder) WrapAfterConfirmSendResetPasswordLink(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.afterConfirmSendResetPasswordLinkHook == nil {
+		b.afterConfirmSendResetPasswordLinkHook = w(NopHookFunc)
+	} else {
+		b.afterConfirmSendResetPasswordLinkHook = w(b.afterConfirmSendResetPasswordLinkHook)
+	}
 	return b
 }
 
 func (b *Builder) AfterResetPassword(v HookFunc) (r *Builder) {
-	b.afterResetPasswordHook = b.wrapHook(v)
+	b.afterResetPasswordHook = v
+	return b
+}
+
+func (b *Builder) WrapAfterResetPassword(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.afterResetPasswordHook == nil {
+		b.afterResetPasswordHook = w(NopHookFunc)
+	} else {
+		b.afterResetPasswordHook = w(b.afterResetPasswordHook)
+	}
 	return b
 }
 
 func (b *Builder) AfterChangePassword(v HookFunc) (r *Builder) {
-	b.afterChangePasswordHook = b.wrapHook(v)
+	b.afterChangePasswordHook = v
+	return b
+}
+
+func (b *Builder) WrapAfterChangePassword(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.afterChangePasswordHook == nil {
+		b.afterChangePasswordHook = w(NopHookFunc)
+	} else {
+		b.afterChangePasswordHook = w(b.afterChangePasswordHook)
+	}
 	return b
 }
 
 // extra vals:
 // - old session token
 func (b *Builder) AfterExtendSession(v HookFunc) (r *Builder) {
-	b.afterExtendSessionHook = b.wrapHook(v)
+	b.afterExtendSessionHook = v
+	return b
+}
+
+func (b *Builder) WrapAfterExtendSession(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.afterExtendSessionHook == nil {
+		b.afterExtendSessionHook = w(NopHookFunc)
+	} else {
+		b.afterExtendSessionHook = w(b.afterExtendSessionHook)
+	}
 	return b
 }
 
 func (b *Builder) AfterTOTPCodeReused(v HookFunc) (r *Builder) {
-	b.afterTOTPCodeReusedHook = b.wrapHook(v)
+	b.afterTOTPCodeReusedHook = v
+	return b
+}
+
+func (b *Builder) WrapAfterTOTPCodeReused(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.afterTOTPCodeReusedHook == nil {
+		b.afterTOTPCodeReusedHook = w(NopHookFunc)
+	} else {
+		b.afterTOTPCodeReusedHook = w(b.afterTOTPCodeReusedHook)
+	}
 	return b
 }
 
 // user is goth.User
 func (b *Builder) AfterOAuthComplete(v HookFunc) (r *Builder) {
-	b.afterOAuthCompleteHook = b.wrapHook(v)
+	b.afterOAuthCompleteHook = v
+	return b
+}
+
+func (b *Builder) WrapAfterOAuthComplete(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.afterOAuthCompleteHook == nil {
+		b.afterOAuthCompleteHook = w(NopHookFunc)
+	} else {
+		b.afterOAuthCompleteHook = w(b.afterOAuthCompleteHook)
+	}
 	return b
 }
 
@@ -586,7 +704,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 		}
 		if err != nil {
 			if b.afterFailedToLoginHook != nil {
-				if herr := b.afterFailedToLoginHook(r, user, err); herr != nil {
+				if herr := b.wrapHook(b.afterFailedToLoginHook)(r, user, err); herr != nil {
 					setNoticeOrPanic(w, herr)
 				}
 			}
@@ -602,7 +720,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 	}
 
 	if b.afterOAuthCompleteHook != nil {
-		if err = b.afterOAuthCompleteHook(r, ouser); err != nil {
+		if err = b.wrapHook(b.afterOAuthCompleteHook)(r, ouser); err != nil {
 			setNoticeOrPanic(w, err)
 			return
 		}
@@ -660,7 +778,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 
 	if b.afterLoginHook != nil {
 		setCookieForRequest(r, &http.Cookie{Name: b.authCookieName, Value: b.mustGetSessionToken(claims)})
-		if err = b.afterLoginHook(r, user); err != nil {
+		if err = b.wrapHook(b.afterLoginHook)(r, user); err != nil {
 			setNoticeOrPanic(w, err)
 			return
 		}
@@ -743,7 +861,7 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 		}
 		if err != nil {
 			if b.afterFailedToLoginHook != nil {
-				if herr := b.afterFailedToLoginHook(r, user, err); herr != nil {
+				if herr := b.wrapHook(b.afterFailedToLoginHook)(r, user, err); herr != nil {
 					setNoticeOrPanic(w, herr)
 				}
 			}
@@ -756,7 +874,7 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 	user, err = b.authUserPass(account, password)
 	if err != nil {
 		if err == ErrUserGetLocked && b.afterUserLockedHook != nil {
-			if err = b.afterUserLockedHook(r, user); err != nil {
+			if err = b.wrapHook(b.afterUserLockedHook)(r, user); err != nil {
 				setNoticeOrPanic(w, err)
 				return
 			}
@@ -790,7 +908,7 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 	if !b.totpEnabled {
 		if b.afterLoginHook != nil {
 			setCookieForRequest(r, &http.Cookie{Name: b.authCookieName, Value: b.mustGetSessionToken(claims)})
-			if err = b.afterLoginHook(r, user); err != nil {
+			if err = b.wrapHook(b.afterLoginHook)(r, user); err != nil {
 				setNoticeOrPanic(w, err)
 				return
 			}
@@ -802,6 +920,13 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if b.totpEnabled {
+		if b.beforeTOTPFlowHook != nil {
+			if err = b.wrapHook(b.beforeTOTPFlowHook)(r, user); err != nil {
+				setNoticeOrPanic(w, err)
+				return
+			}
+		}
+
 		if u.GetIsTOTPSetup() {
 			http.Redirect(w, r, b.totpValidatePageURL, http.StatusFound)
 			return
@@ -974,7 +1099,7 @@ func (b *Builder) consumeTOTPCode(r *http.Request, up UserPasser, passcode strin
 	}
 	if passcode == lastCode {
 		if b.afterTOTPCodeReusedHook != nil {
-			if herr := b.afterTOTPCodeReusedHook(r, GetCurrentUser(r)); herr != nil {
+			if herr := b.wrapHook(b.afterTOTPCodeReusedHook)(r, GetCurrentUser(r)); herr != nil {
 				return herr
 			}
 		}
@@ -998,7 +1123,7 @@ func (b *Builder) logout(w http.ResponseWriter, r *http.Request) {
 	if b.afterLogoutHook != nil {
 		user := GetCurrentUser(r)
 		if user != nil {
-			if herr := b.afterLogoutHook(r, user); herr != nil {
+			if herr := b.wrapHook(b.afterLogoutHook)(r, user); herr != nil {
 				setNoticeOrPanic(w, herr)
 				http.Redirect(w, r, b.loginPageURL, http.StatusFound)
 				return
@@ -1112,7 +1237,7 @@ func (b *Builder) sendResetPasswordLink(w http.ResponseWriter, r *http.Request) 
 		link = MustSetQuery(link, "totp", "1")
 	}
 	if b.afterConfirmSendResetPasswordLinkHook != nil {
-		if herr := b.afterConfirmSendResetPasswordLinkHook(r, u, link); herr != nil {
+		if herr := b.wrapHook(b.afterConfirmSendResetPasswordLinkHook)(r, u, link); herr != nil {
 			setNoticeOrPanic(w, herr)
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
@@ -1189,7 +1314,7 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if b.beforeSetPasswordHook != nil {
-		if herr := b.beforeSetPasswordHook(r, u, password); herr != nil {
+		if herr := b.wrapHook(b.beforeSetPasswordHook)(r, u, password); herr != nil {
 			setNoticeOrPanic(w, herr)
 			b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
 				Password:        password,
@@ -1243,7 +1368,7 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if b.afterResetPasswordHook != nil {
-		if herr := b.afterResetPasswordHook(r, u); herr != nil {
+		if herr := b.wrapHook(b.afterResetPasswordHook)(r, u); herr != nil {
 			setNoticeOrPanic(w, herr)
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
@@ -1282,7 +1407,7 @@ func (b *Builder) ChangePassword(
 	}
 
 	if b.beforeSetPasswordHook != nil {
-		if herr := b.beforeSetPasswordHook(r, user, password); herr != nil {
+		if herr := b.wrapHook(b.beforeSetPasswordHook)(r, user, password); herr != nil {
 			return herr
 		}
 	}
@@ -1299,7 +1424,7 @@ func (b *Builder) ChangePassword(
 	}
 
 	if b.afterChangePasswordHook != nil {
-		if herr := b.afterChangePasswordHook(r, user); herr != nil {
+		if herr := b.wrapHook(b.afterChangePasswordHook)(r, user); herr != nil {
 			return herr
 		}
 	}
@@ -1387,7 +1512,7 @@ func (b *Builder) totpDo(w http.ResponseWriter, r *http.Request) {
 		}
 		if err != nil {
 			if b.afterFailedToLoginHook != nil {
-				if herr := b.afterFailedToLoginHook(r, user, err); herr != nil {
+				if herr := b.wrapHook(b.afterFailedToLoginHook)(r, user, err); herr != nil {
 					setNoticeOrPanic(w, herr)
 				}
 			}
@@ -1427,7 +1552,7 @@ func (b *Builder) totpDo(w http.ResponseWriter, r *http.Request) {
 	claims.TOTPValidated = true
 	if b.afterLoginHook != nil {
 		setCookieForRequest(r, &http.Cookie{Name: b.authCookieName, Value: b.mustGetSessionToken(*claims)})
-		if err = b.afterLoginHook(r, user); err != nil {
+		if err = b.wrapHook(b.afterLoginHook)(r, user); err != nil {
 			setNoticeOrPanic(w, err)
 			return
 		}

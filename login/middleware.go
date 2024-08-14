@@ -172,7 +172,7 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 
 				if b.afterExtendSessionHook != nil {
 					setCookieForRequest(r, &http.Cookie{Name: b.authCookieName, Value: b.mustGetSessionToken(*claims)})
-					if herr := b.afterExtendSessionHook(r, user, oldSessionToken); herr != nil {
+					if herr := b.wrapHook(b.afterExtendSessionHook)(r, user, oldSessionToken); herr != nil {
 						if !mustLogin {
 							next.ServeHTTP(w, r)
 							return
