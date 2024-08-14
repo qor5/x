@@ -13,6 +13,7 @@ import draggable from 'vuedraggable'
 import SendVariables from '@/lib/SendVariables.vue'
 import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
+import { registerPlugins, registerVuetify2Window } from '@/lib/plugins'
 
 const vuetifyx = {
   install: (app: App) => {
@@ -32,7 +33,14 @@ const vuetifyx = {
   }
 }
 declare const window: any
+
+// export vuetifyInstance to window, thus qor5/web/core.js can use it.
+registerVuetify2Window()
+
 window.__goplaidVueComponentRegisters = window.__goplaidVueComponentRegisters || []
 window.__goplaidVueComponentRegisters.push((app: App, vueOptions: any): any => {
+  // register any theme、build-in components from vuetify
+  registerPlugins(app)
+  // register any business components based on vuetify build-in components
   app.use(vuetifyx)
 })

@@ -7,9 +7,12 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    Autocomplete: typeof import('./src/lib/Autocomplete.vue')['default']
+    Autocomplete: typeof import('./src/demo/components/Autocomplete.vue')['default']
     AutoCompleteExample: typeof import('./src/demo/components/AutoCompleteExample.vue')['default']
     AutoCompleteItem: typeof import('./src/lib/Filter/components/AutoCompleteItem.vue')['default']
+    Button: typeof import('./src/demo/components/Button.vue')['default']
+    Card: typeof import('./src/demo/components/Card.vue')['default']
+    Checkbox: typeof import('./src/demo/components/Checkbox.vue')['default']
     DateItem: typeof import('./src/lib/Filter/components/DateItem.vue')['default']
     Datepicker: typeof import('./src/lib/Datepicker.vue')['default']
     DatepickerExample: typeof import('./src/demo/components/DatepickerExample.vue')['default']
@@ -41,7 +44,9 @@ declare module 'vue' {
     SendVariables: typeof import('./src/lib/SendVariables.vue')['default']
     SendVariablesExample: typeof import('./src/demo/components/SendVariablesExample.vue')['default']
     StringItem: typeof import('./src/lib/Filter/components/StringItem.vue')['default']
+    Table: typeof import('./src/demo/components/Table.vue')['default']
     TextDatepicker: typeof import('./src/lib/TextDatepicker.vue')['default']
     TextDatepickerExample: typeof import('./src/demo/components/TextDatepickerExample.vue')['default']
+    TextField: typeof import('./src/demo/components/TextField.vue')['default']
   }
 }
