@@ -119,6 +119,7 @@ type Builder struct {
 	totpValidatePageFunc          web.PageFunc
 
 	beforeSetPasswordHook HookFunc
+	beforeTOTPFlowHook    HookFunc
 
 	afterLoginHook                        HookFunc
 	afterFailedToLoginHook                HookFunc
@@ -377,6 +378,20 @@ func (b *Builder) WrapBeforeSetPassword(w func(in HookFunc) HookFunc) (r *Builde
 		b.beforeSetPasswordHook = w(NopHookFunc)
 	} else {
 		b.beforeSetPasswordHook = w(b.beforeSetPasswordHook)
+	}
+	return b
+}
+
+func (b *Builder) BeforeTOTPFlow(v HookFunc) (r *Builder) {
+	b.beforeTOTPFlowHook = v
+	return b
+}
+
+func (b *Builder) WrapBeforeTOTPFlow(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.beforeTOTPFlowHook == nil {
+		b.beforeTOTPFlowHook = w(NopHookFunc)
+	} else {
+		b.beforeTOTPFlowHook = w(b.beforeTOTPFlowHook)
 	}
 	return b
 }
@@ -905,6 +920,13 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if b.totpEnabled {
+		if b.beforeTOTPFlowHook != nil {
+			if err = b.wrapHook(b.beforeTOTPFlowHook)(r, user); err != nil {
+				setNoticeOrPanic(w, err)
+				return
+			}
+		}
+
 		if u.GetIsTOTPSetup() {
 			http.Redirect(w, r, b.totpValidatePageURL, http.StatusFound)
 			return
