@@ -39,6 +39,8 @@ type DataTableBuilder struct {
 	selectedCountLabel  string
 	clearSelectionLabel string
 	tfootChildren       []h.HTMLComponent
+	hover               bool
+	hoverClass          string
 }
 
 func DataTable(data interface{}) (r *DataTableBuilder) {
@@ -58,6 +60,14 @@ func (b *DataTableBuilder) LoadMoreAt(count int, label string) (r *DataTableBuil
 
 func (b *DataTableBuilder) LoadMoreURL(url string) (r *DataTableBuilder) {
 	b.loadMoreURL = url
+	return b
+}
+func (b *DataTableBuilder) Hover(v bool) (r *DataTableBuilder) {
+	b.hover = v
+	return b
+}
+func (b *DataTableBuilder) HoverClass(v string) (r *DataTableBuilder) {
+	b.hoverClass = v
 	return b
 }
 
@@ -410,9 +420,9 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 			selectedCountCompo,
 			v.VTable(
 				thead,
-				h.Tbody(rows...),
+				h.Tbody(rows...).ClassIf(b.hoverClass, b.hover && b.hoverClass != ""),
 				tfoot,
-			),
+			).Hover(b.hover),
 		).MarshalHTML(c)
 }
 
