@@ -1,6 +1,30 @@
 <template>
   <v-app>
     <v-main>
+      <v-container fluid>
+        <h3 class="v-heading mb-2 text-h3">Button</h3>
+        <Button></Button>
+      </v-container>
+      <v-container fluid>
+        <h3 class="v-heading mb-2 text-h3">Table</h3>
+        <Table></Table>
+      </v-container>
+      <v-container fluid>
+        <h3 class="v-heading mb-2 text-h3">Autocomplete</h3>
+        <Autocomplete></Autocomplete>
+      </v-container>
+      <v-container fluid>
+        <h3 class="v-heading mb-2 text-h3">Checkbox</h3>
+        <Checkbox></Checkbox>
+      </v-container>
+      <v-container fluid>
+        <h3 class="v-heading mb-2 text-h3">Text Field</h3>
+        <TextField></TextField>
+      </v-container>
+      <v-container fluid>
+        <h3 class="v-heading mb-2 text-h3">Card</h3>
+        <Card></Card>
+      </v-container>
       <v-container>
         <h1 class="text-h2 mb-4">select-many-example</h1>
         <select-many-example></select-many-example>
@@ -40,6 +64,12 @@
 </template>
 
 <script setup lang="ts">
+import Button from "@/demo/components/Button.vue";
+import Table from "@/demo/components/Table.vue";
+import Autocomplete from "@/demo/components/Autocomplete.vue";
+import Checkbox from "@/demo/components/Checkbox.vue";
+import TextField from "@/demo/components/TextField.vue";
+import Card from "@/demo/components/Card.vue";
 import SelectManyExample from '@/demo/components/SelectManyExample.vue'
 import DatepickerExample from '@/demo/components/DatepickerExample.vue'
 import LinkageSelectExample from '@/demo/components/LinkageSelectExample.vue'
