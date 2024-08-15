@@ -1,5 +1,5 @@
-@use "../vuetify" as vuetify;
-@use "../variables" as variables;
+@use '../vuetify' as vuetify;
+@use '../variables' as variables;
 
 .v-table > .v-table__wrapper > table > tbody > tr > th,
 .v-table > .v-table__wrapper > table > thead > tr > th,
@@ -9,13 +9,13 @@
 }
 
 .v-table tbody td {
-  .v-chip.v-chip--size-default  {
+  .v-chip.v-chip--size-default {
     --v-chip-height: 28px;
     font-size: 12px;
   }
 
   .v-selection-control--dirty {
-    color:rgb(var(--v-theme-primary));
+    color: rgb(var(--v-theme-primary));
   }
 }
 

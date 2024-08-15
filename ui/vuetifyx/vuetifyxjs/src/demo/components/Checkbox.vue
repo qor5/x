@@ -2,13 +2,7 @@
   <div>
     <v-row>
       <v-col cols="12" md="4" sm="4">
-        <v-checkbox
-          v-model="ex4"
-          color="red"
-          label="red"
-          value="red"
-          hide-details
-        ></v-checkbox>
+        <v-checkbox v-model="ex4" color="red" label="red" value="red" hide-details></v-checkbox>
         <v-checkbox
           v-model="ex4"
           color="red-darken-3"
@@ -76,13 +70,7 @@
           value="success"
           hide-details
         ></v-checkbox>
-        <v-checkbox
-          v-model="ex4"
-          color="info"
-          label="info"
-          value="info"
-          hide-details
-        ></v-checkbox>
+        <v-checkbox v-model="ex4" color="info" label="info" value="info" hide-details></v-checkbox>
       </v-col>
       <v-col cols="12" md="4" sm="4">
         <v-checkbox
@@ -109,20 +97,20 @@ export default {
   data() {
     return {
       ex4: [
-        "red",
-        "indigo",
-        "orange",
-        "primary",
-        "secondary",
-        "success",
-        "info",
-        "warning",
-        "error",
-        "red darken-3",
-        "indigo darken-3",
-        "orange darken-3",
-      ],
-    };
-  },
-};
+        'red',
+        'indigo',
+        'orange',
+        'primary',
+        'secondary',
+        'success',
+        'info',
+        'warning',
+        'error',
+        'red darken-3',
+        'indigo darken-3',
+        'orange darken-3'
+      ]
+    }
+  }
+}
 </script>

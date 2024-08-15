@@ -4,14 +4,7 @@
       <v-autocomplete
         clearable
         label="Autocomplete"
-        :items="[
-          'California',
-          'Colorado',
-          'Florida',
-          'Georgia',
-          'Texas',
-          'Wyoming',
-        ]"
+        :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
         multiple
       ></v-autocomplete>
     </v-col>
@@ -20,14 +13,7 @@
         clearable
         chips
         density="compact"
-        :items="[
-          'California',
-          'Colorado',
-          'Florida',
-          'Georgia',
-          'Texas',
-          'Wyoming',
-        ]"
+        :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
         multiple
         variant="outlined"
       ></v-autocomplete>

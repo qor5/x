@@ -64,12 +64,12 @@
 </template>
 
 <script setup lang="ts">
-import Button from "@/demo/components/Button.vue";
-import Table from "@/demo/components/Table.vue";
-import Autocomplete from "@/demo/components/Autocomplete.vue";
-import Checkbox from "@/demo/components/Checkbox.vue";
-import TextField from "@/demo/components/TextField.vue";
-import Card from "@/demo/components/Card.vue";
+import Button from '@/demo/components/Button.vue'
+import Table from '@/demo/components/Table.vue'
+import Autocomplete from '@/demo/components/Autocomplete.vue'
+import Checkbox from '@/demo/components/Checkbox.vue'
+import TextField from '@/demo/components/TextField.vue'
+import Card from '@/demo/components/Card.vue'
 import SelectManyExample from '@/demo/components/SelectManyExample.vue'
 import DatepickerExample from '@/demo/components/DatepickerExample.vue'
 import LinkageSelectExample from '@/demo/components/LinkageSelectExample.vue'

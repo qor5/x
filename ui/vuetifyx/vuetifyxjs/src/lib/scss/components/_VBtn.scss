@@ -3,7 +3,8 @@
 }
 
 .v-btn--variant-elevated {
-  box-shadow: 0px 1px 3px 0px rgba(var(--v-shadow-key-umbra-color), 0.14),
+  box-shadow:
+    0px 1px 3px 0px rgba(var(--v-shadow-key-umbra-color), 0.14),
     0px 2px 1px 0px rgba(var(--v-shadow-key-umbra-color), 0.12),
     0px 1px 1px 0px rgba(var(--v-shadow-key-umbra-color), 0.14);
 }

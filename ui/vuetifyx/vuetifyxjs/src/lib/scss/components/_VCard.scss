@@ -1,9 +1,9 @@
-@use "../variables" as variables;
+@use '../variables' as variables;
 
 .v-card--variant-outlined {
   border-color: variables.$color-grey-300;
 }
 
-.v-card-actions .v-btn~.v-btn:not(.v-btn-toggle .v-btn) {
+.v-card-actions .v-btn ~ .v-btn:not(.v-btn-toggle .v-btn) {
   margin-inline-start: 12px;
 }

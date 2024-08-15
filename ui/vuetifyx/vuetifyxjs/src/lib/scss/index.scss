@@ -1,26 +1,26 @@
 // base comp style refactor
-@import "./components/VTable";
-@import "./components/VCard";
-@import "./components/VInput";
-@import "./components/VBtn";
-@import "./components/VTextarea";
+@import './components/VTable';
+@import './components/VCard';
+@import './components/VInput';
+@import './components/VBtn';
+@import './components/VTextarea';
 
 // business comp style refactor
-@import "components/Listing";
-@import "components/Layout";
-@import "components/SlideGroup";
-@import "components/Navigation";
-@import "components/Input";
-@import "components/vTabs";
-@import "components/AutoComplete";
-@import "components/Dialog";
-@import "components/Detailing";
-@import "components/VPagination";
+@import 'components/Listing';
+@import 'components/Layout';
+@import 'components/SlideGroup';
+@import 'components/Navigation';
+@import 'components/Input';
+@import 'components/vTabs';
+@import 'components/AutoComplete';
+@import 'components/Dialog';
+@import 'components/Detailing';
+@import 'components/VPagination';
 
 //some style that fix display problems
-@import "./fixer";
+@import './fixer';
 
-@import "./utils";
+@import './utils';
 
 // it's flexible to split out from qor5 index.scss
-@import "sites/k-theme.scss"
+@import 'sites/k-theme.scss';
