@@ -258,7 +258,7 @@ var Messages_ja_JP = &Messages{
 	ErrorUserLocked:                     "ユーザーがロックされました",
 	ErrorAccountIsRequired:              "メールアドレスは必須です",
 	ErrorPasswordCannotBeEmpty:          "パスワードは必須です",
-	ErrorPasswordNotMatch:               "パスワードが間違っています",
+	ErrorPasswordNotMatch:               "入力されたパスワードが一致しません",
 	ErrorIncorrectPassword:              "現在パスワードが間違っています",
 	ErrorInvalidToken:                   "このトークンは無効です",
 	ErrorTokenExpired:                   "トークンの有効期限が切れています",
