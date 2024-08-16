@@ -3,7 +3,7 @@
 }
 
 @function hex-to-rgb-number($color) {
-  @return red($color), green($color), blue($color)
+  @return red($color), green($color), blue($color);
 }
 
 .ellipsis {
@@ -13,7 +13,7 @@
 }
 
 .ellipsis-flex {
-  flex:1;
+  flex: 1;
   @extend .ellipsis;
 }
 
@@ -27,16 +27,16 @@
 .pt-19 {
   padding-top: 76px;
 }
-.pt-20{
+.pt-20 {
   padding-top: 80px;
 }
-.pt-21{
+.pt-21 {
   padding-top: 84px;
 }
-.pt-22{
+.pt-22 {
   padding-top: 88px;
 }
-.pt-23{
+.pt-23 {
   padding-top: 92px;
 }
 // absolute value of tag

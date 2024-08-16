@@ -22,7 +22,7 @@
 <script>
 export default {
   data: () => ({
-    variants: ["elevated", "flat", "tonal", "outlined", "text", "plain"],
-  }),
-};
+    variants: ['elevated', 'flat', 'tonal', 'outlined', 'text', 'plain']
+  })
+}
 </script>

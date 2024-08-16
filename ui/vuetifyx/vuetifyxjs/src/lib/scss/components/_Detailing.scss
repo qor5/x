@@ -1,16 +1,15 @@
-.v-container .go-plaid-portal:not(:last-child)  .section-body{
+.v-container .go-plaid-portal:not(:last-child) .section-body {
   border-block-end-width: thin;
   border-block-end-style: solid;
-  border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity));  
+  border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .v-main .layout-center .v-card:not(:last-child) .listing-compo-wrap {
   padding-bottom: 26px;
   border-block-end-width: thin;
   border-block-end-style: solid;
-  border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity));  
+  border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity));
 }
-
 
 .detailing-title-wrap {
   display: inline-flex;
@@ -34,19 +33,19 @@
 .section-wrap {
   &.edit-view {
     .section-body .v-card-text {
-      background: rgb(var(--v-theme-grey-lighten-5))
+      background: rgb(var(--v-theme-grey-lighten-5));
     }
   }
 
   &:not(.edit-view) {
     .section-body .v-card-text {
-      padding-bottom:0;
+      padding-bottom: 0;
     }
   }
 
-  .thead-gap th{
-    padding-top:10px!important;
-    padding-bottom:10px!important;
+  .thead-gap th {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
   }
 }
 
@@ -64,15 +63,14 @@
     color: rgb(var(--v-theme-on-surface));
     line-height: 32px; /* 133.333% */
     letter-spacing: -0.1px;
-
   }
 }
 
 .section-body {
-  margin-left:8px;
-  margin-right:8px;
+  margin-left: 8px;
+  margin-right: 8px;
   padding-bottom: 40px;
- 
+
   .v-row {
     gap: 16px;
     &:not(:last-child) {
@@ -80,20 +78,19 @@
     }
   }
 
-  .text-caption  {
-    font-size: 14px!important;
+  .text-caption {
+    font-size: 14px !important;
     font-weight: 500;
     color: rgb(var(--v-theme-on-surface));
-    --v-medium-emphasis-opacity:1;
+    --v-medium-emphasis-opacity: 1;
     margin-bottom: 12px;
-    line-height: 20px; 
+    line-height: 20px;
   }
-  .text-caption +* {
+  .text-caption + * {
     color: rgb(var(--v-theme-grey-darken-1));
     font-size: 16px;
     line-height: 24px;
   }
-  
 }
 
 .section-edit-area {
@@ -103,7 +100,6 @@
   }
 }
 
-
 .layout-center {
   display: table;
   margin: 0 auto;
@@ -112,10 +108,11 @@
 }
 
 .section-field-wrap {
-  .section-field-label{}
-  .section-field{
-    .v-field__outline{
-      color: rgb(var(--v-theme-grey-lighten-1))
+  .section-field-label {
+  }
+  .section-field {
+    .v-field__outline {
+      color: rgb(var(--v-theme-grey-lighten-1));
     }
   }
 }

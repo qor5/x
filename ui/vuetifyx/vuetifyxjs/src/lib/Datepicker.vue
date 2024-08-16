@@ -32,19 +32,10 @@
 
       <template v-slot:default="{ isActive }">
         <v-card>
-          <v-card-text class="px-0 py-0">
-            <v-container>
-              <v-row>
-                <v-col cols="6" class="pa-0">
-                  <v-date-picker
-                    v-model="dateOfPicker"
-                    full-width
-                    no-title
-                    v-bind="datePickerProps"
-                  ></v-date-picker>
-                </v-col>
-              </v-row>
-            </v-container>
+          <v-card-text class="pa-0">
+            <div class="d-flex flex-column align-center px-6">
+              <v-date-picker v-model="dateOfPicker" v-bind="datePickerProps"></v-date-picker>
+            </div>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -86,8 +77,8 @@ const props = defineProps({
     default: ''
   },
   dialogWidth: {
-    type: Number,
-    default: 380
+    type: String,
+    default: 'auto'
   },
   dateFormat: {
     type: String,
