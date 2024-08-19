@@ -139,7 +139,7 @@ func (tpb *VXTablePaginationBuilder) MarshalHTML(ctx context.Context) ([]byte, e
 		Length(totalPages).
 		// https://github.com/vuetifyjs/vuetify/issues/20321
 		// https://github.com/vuetifyjs/vuetify/issues/18853
-		Attr("v-run", `(el) => { 
+		Attr("v-on-mounted", `({el}) => { 
 			const currentWidth = el.offsetWidth + 38; // 37.6;
 			el.style.minWidth = currentWidth + "px";
 		}`).
