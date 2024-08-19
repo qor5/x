@@ -268,23 +268,23 @@ func (b *VDataTableBuilder) FilterKeys(v interface{}) (r *VDataTableBuilder) {
 	return b
 }
 
-func (b *VDataTableBuilder) PrevIcon(v string) (r *VDataTableBuilder) {
-	b.tag.Attr("prev-icon", v)
+func (b *VDataTableBuilder) PrevIcon(v interface{}) (r *VDataTableBuilder) {
+	b.tag.Attr(":prev-icon", h.JSONString(v))
 	return b
 }
 
-func (b *VDataTableBuilder) NextIcon(v string) (r *VDataTableBuilder) {
-	b.tag.Attr("next-icon", v)
+func (b *VDataTableBuilder) NextIcon(v interface{}) (r *VDataTableBuilder) {
+	b.tag.Attr(":next-icon", h.JSONString(v))
 	return b
 }
 
-func (b *VDataTableBuilder) FirstIcon(v string) (r *VDataTableBuilder) {
-	b.tag.Attr("first-icon", v)
+func (b *VDataTableBuilder) FirstIcon(v interface{}) (r *VDataTableBuilder) {
+	b.tag.Attr(":first-icon", h.JSONString(v))
 	return b
 }
 
-func (b *VDataTableBuilder) LastIcon(v string) (r *VDataTableBuilder) {
-	b.tag.Attr("last-icon", v)
+func (b *VDataTableBuilder) LastIcon(v interface{}) (r *VDataTableBuilder) {
+	b.tag.Attr(":last-icon", h.JSONString(v))
 	return b
 }
 

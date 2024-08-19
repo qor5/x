@@ -48,6 +48,11 @@ func (b *VNumberInputBuilder) HideInput(v bool) (r *VNumberInputBuilder) {
 	return b
 }
 
+func (b *VNumberInputBuilder) ModelValue(v int) (r *VNumberInputBuilder) {
+	b.tag.Attr(":model-value", fmt.Sprint(v))
+	return b
+}
+
 func (b *VNumberInputBuilder) Min(v int) (r *VNumberInputBuilder) {
 	b.tag.Attr(":min", fmt.Sprint(v))
 	return b
@@ -210,11 +215,6 @@ func (b *VNumberInputBuilder) Readonly(v bool) (r *VNumberInputBuilder) {
 
 func (b *VNumberInputBuilder) Rules(v interface{}) (r *VNumberInputBuilder) {
 	b.tag.Attr(":rules", h.JSONString(v))
-	return b
-}
-
-func (b *VNumberInputBuilder) ModelValue(v interface{}) (r *VNumberInputBuilder) {
-	b.tag.Attr(":model-value", h.JSONString(v))
 	return b
 }
 

@@ -73,6 +73,11 @@ func (b *VDatePickerMonthBuilder) WeeksInMonth(v interface{}) (r *VDatePickerMon
 	return b
 }
 
+func (b *VDatePickerMonthBuilder) FirstDayOfWeek(v interface{}) (r *VDatePickerMonthBuilder) {
+	b.tag.Attr(":first-day-of-week", h.JSONString(v))
+	return b
+}
+
 func (b *VDatePickerMonthBuilder) AllowedDates(v interface{}) (r *VDatePickerMonthBuilder) {
 	b.tag.Attr(":allowed-dates", h.JSONString(v))
 	return b

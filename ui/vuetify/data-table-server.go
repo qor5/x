@@ -248,23 +248,23 @@ func (b *VDataTableServerBuilder) Theme(v string) (r *VDataTableServerBuilder) {
 	return b
 }
 
-func (b *VDataTableServerBuilder) PrevIcon(v string) (r *VDataTableServerBuilder) {
-	b.tag.Attr("prev-icon", v)
+func (b *VDataTableServerBuilder) PrevIcon(v interface{}) (r *VDataTableServerBuilder) {
+	b.tag.Attr(":prev-icon", h.JSONString(v))
 	return b
 }
 
-func (b *VDataTableServerBuilder) NextIcon(v string) (r *VDataTableServerBuilder) {
-	b.tag.Attr("next-icon", v)
+func (b *VDataTableServerBuilder) NextIcon(v interface{}) (r *VDataTableServerBuilder) {
+	b.tag.Attr(":next-icon", h.JSONString(v))
 	return b
 }
 
-func (b *VDataTableServerBuilder) FirstIcon(v string) (r *VDataTableServerBuilder) {
-	b.tag.Attr("first-icon", v)
+func (b *VDataTableServerBuilder) FirstIcon(v interface{}) (r *VDataTableServerBuilder) {
+	b.tag.Attr(":first-icon", h.JSONString(v))
 	return b
 }
 
-func (b *VDataTableServerBuilder) LastIcon(v string) (r *VDataTableServerBuilder) {
-	b.tag.Attr("last-icon", v)
+func (b *VDataTableServerBuilder) LastIcon(v interface{}) (r *VDataTableServerBuilder) {
+	b.tag.Attr(":last-icon", h.JSONString(v))
 	return b
 }
 

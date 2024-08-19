@@ -53,16 +53,6 @@ func (b *VExpansionPanelsBuilder) Mandatory(v interface{}) (r *VExpansionPanelsB
 	return b
 }
 
-func (b *VExpansionPanelsBuilder) Title(v string) (r *VExpansionPanelsBuilder) {
-	b.tag.Attr("title", v)
-	return b
-}
-
-func (b *VExpansionPanelsBuilder) Text(v string) (r *VExpansionPanelsBuilder) {
-	b.tag.Attr("text", v)
-	return b
-}
-
 func (b *VExpansionPanelsBuilder) BgColor(v string) (r *VExpansionPanelsBuilder) {
 	b.tag.Attr("bg-color", v)
 	return b
@@ -70,11 +60,6 @@ func (b *VExpansionPanelsBuilder) BgColor(v string) (r *VExpansionPanelsBuilder)
 
 func (b *VExpansionPanelsBuilder) Elevation(v interface{}) (r *VExpansionPanelsBuilder) {
 	b.tag.Attr(":elevation", h.JSONString(v))
-	return b
-}
-
-func (b *VExpansionPanelsBuilder) Value(v interface{}) (r *VExpansionPanelsBuilder) {
-	b.tag.Attr(":value", h.JSONString(v))
 	return b
 }
 

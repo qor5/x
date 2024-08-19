@@ -38,18 +38,18 @@ func (b *VDatePickerBuilder) Disabled(v bool) (r *VDatePickerBuilder) {
 	return b
 }
 
-func (b *VDatePickerBuilder) NextIcon(v string) (r *VDatePickerBuilder) {
-	b.tag.Attr("next-icon", v)
+func (b *VDatePickerBuilder) NextIcon(v interface{}) (r *VDatePickerBuilder) {
+	b.tag.Attr(":next-icon", h.JSONString(v))
 	return b
 }
 
-func (b *VDatePickerBuilder) PrevIcon(v string) (r *VDatePickerBuilder) {
-	b.tag.Attr("prev-icon", v)
+func (b *VDatePickerBuilder) PrevIcon(v interface{}) (r *VDatePickerBuilder) {
+	b.tag.Attr(":prev-icon", h.JSONString(v))
 	return b
 }
 
-func (b *VDatePickerBuilder) ModeIcon(v string) (r *VDatePickerBuilder) {
-	b.tag.Attr("mode-icon", v)
+func (b *VDatePickerBuilder) ModeIcon(v interface{}) (r *VDatePickerBuilder) {
+	b.tag.Attr(":mode-icon", h.JSONString(v))
 	return b
 }
 
@@ -110,6 +110,11 @@ func (b *VDatePickerBuilder) Weekdays(v interface{}) (r *VDatePickerBuilder) {
 
 func (b *VDatePickerBuilder) WeeksInMonth(v interface{}) (r *VDatePickerBuilder) {
 	b.tag.Attr(":weeks-in-month", h.JSONString(v))
+	return b
+}
+
+func (b *VDatePickerBuilder) FirstDayOfWeek(v interface{}) (r *VDatePickerBuilder) {
+	b.tag.Attr(":first-day-of-week", h.JSONString(v))
 	return b
 }
 
