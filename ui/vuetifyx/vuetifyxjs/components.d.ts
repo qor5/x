@@ -7,7 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    Autocomplete: typeof import('./src/demo/components/Autocomplete.vue')['default']
+    Autocomplete: typeof import('./src/lib/Autocomplete.vue')['default']
     AutoCompleteExample: typeof import('./src/demo/components/AutoCompleteExample.vue')['default']
     AutoCompleteItem: typeof import('./src/lib/Filter/components/AutoCompleteItem.vue')['default']
     Button: typeof import('./src/demo/components/Button.vue')['default']

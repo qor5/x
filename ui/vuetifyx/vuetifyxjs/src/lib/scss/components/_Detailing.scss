@@ -119,3 +119,19 @@
     }
   }
 }
+
+.amount-detail-wrap {
+  margin: 24px 0;
+  padding: 16px;
+  border-radius: 4px;
+  background: rgb(var(--v-theme-grey-lighten-5));
+  & > div {
+    height: 52px;
+    align-items: center;
+  }
+}
+
+.amount-detail-title {
+  width: 352px;
+  color: rgb(var(--v-theme-grey-darken-3))!important;
+}
