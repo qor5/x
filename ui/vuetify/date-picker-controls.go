@@ -28,18 +28,18 @@ func (b *VDatePickerControlsBuilder) Disabled(v interface{}) (r *VDatePickerCont
 	return b
 }
 
-func (b *VDatePickerControlsBuilder) NextIcon(v string) (r *VDatePickerControlsBuilder) {
-	b.tag.Attr("next-icon", v)
+func (b *VDatePickerControlsBuilder) NextIcon(v interface{}) (r *VDatePickerControlsBuilder) {
+	b.tag.Attr(":next-icon", h.JSONString(v))
 	return b
 }
 
-func (b *VDatePickerControlsBuilder) PrevIcon(v string) (r *VDatePickerControlsBuilder) {
-	b.tag.Attr("prev-icon", v)
+func (b *VDatePickerControlsBuilder) PrevIcon(v interface{}) (r *VDatePickerControlsBuilder) {
+	b.tag.Attr(":prev-icon", h.JSONString(v))
 	return b
 }
 
-func (b *VDatePickerControlsBuilder) ModeIcon(v string) (r *VDatePickerControlsBuilder) {
-	b.tag.Attr("mode-icon", v)
+func (b *VDatePickerControlsBuilder) ModeIcon(v interface{}) (r *VDatePickerControlsBuilder) {
+	b.tag.Attr(":mode-icon", h.JSONString(v))
 	return b
 }
 

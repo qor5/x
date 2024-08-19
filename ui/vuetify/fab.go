@@ -48,11 +48,6 @@ func (b *VFabBuilder) Layout(v bool) (r *VFabBuilder) {
 	return b
 }
 
-func (b *VFabBuilder) Location(v interface{}) (r *VFabBuilder) {
-	b.tag.Attr(":location", h.JSONString(v))
-	return b
-}
-
 func (b *VFabBuilder) Offset(v bool) (r *VFabBuilder) {
 	b.tag.Attr(":offset", fmt.Sprint(v))
 	return b
@@ -175,6 +170,11 @@ func (b *VFabBuilder) SelectedClass(v string) (r *VFabBuilder) {
 
 func (b *VFabBuilder) Loading(v interface{}) (r *VFabBuilder) {
 	b.tag.Attr(":loading", h.JSONString(v))
+	return b
+}
+
+func (b *VFabBuilder) Location(v interface{}) (r *VFabBuilder) {
+	b.tag.Attr(":location", h.JSONString(v))
 	return b
 }
 

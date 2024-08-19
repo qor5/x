@@ -23,6 +23,11 @@ func (b *VTimePickerControlsBuilder) Ampm(v bool) (r *VTimePickerControlsBuilder
 	return b
 }
 
+func (b *VTimePickerControlsBuilder) AmpmInTitle(v bool) (r *VTimePickerControlsBuilder) {
+	b.tag.Attr(":ampm-in-title", fmt.Sprint(v))
+	return b
+}
+
 func (b *VTimePickerControlsBuilder) AmpmReadonly(v bool) (r *VTimePickerControlsBuilder) {
 	b.tag.Attr(":ampm-readonly", fmt.Sprint(v))
 	return b

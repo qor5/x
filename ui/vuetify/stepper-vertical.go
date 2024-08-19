@@ -18,11 +18,6 @@ func VStepperVertical(children ...h.HTMLComponent) (r *VStepperVerticalBuilder) 
 	return
 }
 
-func (b *VStepperVerticalBuilder) Title(v string) (r *VStepperVerticalBuilder) {
-	b.tag.Attr("title", v)
-	return b
-}
-
 func (b *VStepperVerticalBuilder) Flat(v bool) (r *VStepperVerticalBuilder) {
 	b.tag.Attr(":flat", fmt.Sprint(v))
 	return b
@@ -88,11 +83,6 @@ func (b *VStepperVerticalBuilder) ItemValue(v string) (r *VStepperVerticalBuilde
 	return b
 }
 
-func (b *VStepperVerticalBuilder) Value(v interface{}) (r *VStepperVerticalBuilder) {
-	b.tag.Attr(":value", h.JSONString(v))
-	return b
-}
-
 func (b *VStepperVerticalBuilder) NonLinear(v bool) (r *VStepperVerticalBuilder) {
 	b.tag.Attr(":non-linear", fmt.Sprint(v))
 	return b
@@ -135,11 +125,6 @@ func (b *VStepperVerticalBuilder) Disabled(v bool) (r *VStepperVerticalBuilder) 
 
 func (b *VStepperVerticalBuilder) Mandatory(v interface{}) (r *VStepperVerticalBuilder) {
 	b.tag.Attr(":mandatory", h.JSONString(v))
-	return b
-}
-
-func (b *VStepperVerticalBuilder) Text(v string) (r *VStepperVerticalBuilder) {
-	b.tag.Attr("text", v)
 	return b
 }
 
