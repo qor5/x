@@ -97,7 +97,7 @@ const internalValue = ref([
         ]
       ],
       labels: ['Province', 'City', 'District'],
-      selectOutOfOrder: false
+      selectOutOfOrder: true
     }
   },
   {
