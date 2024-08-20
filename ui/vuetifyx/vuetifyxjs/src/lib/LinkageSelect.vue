@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, Ref } from 'vue'
+import { computed, onMounted, ref, Ref } from 'vue'
 
 interface LinkageSelectItem {
   ID: string
@@ -173,13 +173,13 @@ const getLevelItems = (level: number): LinkageSelectItem[] => {
         return items
       }
     }
-    return items
+    return props.items[level]
   }
   return []
 }
 
 const selectItem = (v: string, level: number) => {
-  const updateSelectIds = [...selectedIDs.value]
+  let updateSelectIds = [...selectedIDs.value]
   if (v) {
     for (var i = level + 1; i < updateSelectIds.length; i++) {
       if (updateSelectIds[i]) {

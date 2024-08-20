@@ -38,7 +38,12 @@ const labels = ref(['Province', 'City', 'District'])
 
 <template>
   <p>{{ value }}</p>
-  <linkage-select v-model="value" :items="items" :labels="labels"></linkage-select>
+  <linkage-select
+    v-model="value"
+    :items="items"
+    :labels="labels"
+    select-out-of-order
+  ></linkage-select>
 </template>
 
 <style scoped></style>
