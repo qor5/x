@@ -169,10 +169,11 @@ type SelectItem struct {
 }
 
 type FilterLinkageSelectData struct {
-	Items            [][]*LinkageSelectItem `json:"items,omitempty"`
-	Labels           []string               `json:"labels,omitempty"`
-	SelectOutOfOrder bool                   `json:"selectOutOfOrder,omitempty"`
-	SQLConditions    []string               `json:"-"`
+	Items            [][]*LinkageSelectItem    `json:"items,omitempty"`
+	Labels           []string                  `json:"labels,omitempty"`
+	SelectOutOfOrder bool                      `json:"selectOutOfOrder,omitempty"`
+	SQLConditions    []string                  `json:"-"`
+	WrapInput        []func(val string) string `json:"-"`
 }
 
 type FilterItem struct {
@@ -299,6 +300,9 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 			for i, v := range vals {
 				if v != "" {
 					conds = append(conds, it.LinkageSelectData.SQLConditions[i])
+					if len(it.LinkageSelectData.WrapInput) > 0 && it.LinkageSelectData.WrapInput[i] != nil {
+						v = it.LinkageSelectData.WrapInput[i](v)
+					}
 					sqlArgs = append(sqlArgs, v)
 				}
 			}
