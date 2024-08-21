@@ -169,11 +169,11 @@ type SelectItem struct {
 }
 
 type FilterLinkageSelectData struct {
-	Items            [][]*LinkageSelectItem    `json:"items,omitempty"`
-	Labels           []string                  `json:"labels,omitempty"`
-	SelectOutOfOrder bool                      `json:"selectOutOfOrder,omitempty"`
-	SQLConditions    []string                  `json:"-"`
-	WrapInput        []func(val string) string `json:"-"`
+	Items            [][]*LinkageSelectItem         `json:"items,omitempty"`
+	Labels           []string                       `json:"labels,omitempty"`
+	SelectOutOfOrder bool                           `json:"selectOutOfOrder,omitempty"`
+	SQLConditions    []string                       `json:"-"`
+	WrapInput        []func(val string) interface{} `json:"-"`
 }
 
 type FilterItem struct {
@@ -194,7 +194,7 @@ type FilterItem struct {
 	Invisible              bool                          `json:"invisible,omitempty"`
 	AutocompleteDataSource *AutocompleteDataSource       `json:"autocompleteDataSource,omitempty"`
 	Translations           FilterIndependentTranslations `json:"translations,omitempty"`
-	WarpInput              func(val string) string       `json:"-"`
+	WrapInput              func(val string) interface{}  `json:"-"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {
@@ -276,7 +276,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 
 		mod := ""
 		key := k
-		val := v[0]
+		var val interface{} = v[0]
 		if len(segs) > 1 {
 			key = segs[0]
 			mod = segs[1]
@@ -286,8 +286,8 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 		if it == nil {
 			continue
 		}
-		if it.WarpInput != nil {
-			val = it.WarpInput(val)
+		if it.WrapInput != nil {
+			val = it.WrapInput(val.(string))
 		}
 		if _, ok := keyModValueMap[key]; !ok {
 			keyModValueMap[key] = map[string]string{}
@@ -296,29 +296,29 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 		keyModValueMap[key][mod] = v[0]
 
 		if it.ItemType == ItemTypeLinkageSelect {
-			vals := strings.Split(val, ",")
+			vals := strings.Split(val.(string), ",")
 			for i, v := range vals {
 				if v != "" {
+					var val interface{} = v
 					conds = append(conds, it.LinkageSelectData.SQLConditions[i])
 					if len(it.LinkageSelectData.WrapInput) > 0 && it.LinkageSelectData.WrapInput[i] != nil {
-						v = it.LinkageSelectData.WrapInput[i](v)
+						val = it.LinkageSelectData.WrapInput[i](v)
 					}
-					sqlArgs = append(sqlArgs, v)
+					sqlArgs = append(sqlArgs, val)
 				}
 			}
 		} else {
 			sqlc := fd.getSQLCondition(key, v[0])
 			if len(sqlc) > 0 {
-				var ival interface{} = val
 				if it.ItemType == ItemTypeDatetimeRange {
 					var err error
-					ival, err = time.ParseInLocation("2006-01-02 15:04", val, time.Local)
+					val, err = time.ParseInLocation("2006-01-02 15:04", val.(string), time.Local)
 					if err != nil {
 						continue
 					}
 				} else if it.ItemType == ItemTypeDate || it.ItemType == ItemTypeDateRange {
 					var err error
-					ival, err = time.ParseInLocation("2006-01-02", val, time.Local)
+					val, err = time.ParseInLocation("2006-01-02", val.(string), time.Local)
 					if err != nil {
 						continue
 					}
@@ -326,15 +326,15 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 
 				if it.ItemType == ItemTypeDate {
 					conds = append(conds, sqlcToCond(sqlc, "gte"), sqlcToCond(sqlc, "lt"))
-					sqlArgs = append(sqlArgs, ival, ival.(time.Time).Add(24*time.Hour))
+					sqlArgs = append(sqlArgs, val, val.(time.Time).Add(24*time.Hour))
 				} else if it.ItemType == ItemTypeDateRange {
 					if mod == "gte" {
 						conds = append(conds, sqlcToCond(sqlc, "gte"))
-						sqlArgs = append(sqlArgs, ival)
+						sqlArgs = append(sqlArgs, val)
 					}
 					if mod == "lte" {
 						conds = append(conds, sqlcToCond(sqlc, "lt"))
-						sqlArgs = append(sqlArgs, ival.(time.Time).Add(24*time.Hour))
+						sqlArgs = append(sqlArgs, val.(time.Time).Add(24*time.Hour))
 					}
 				} else {
 					conds = append(conds, sqlcToCond(sqlc, mod))
@@ -350,9 +350,9 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 						case "ilike":
 							sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", val))
 						case "in", "notIn":
-							sqlArgs = append(sqlArgs, strings.Split(val, ","))
+							sqlArgs = append(sqlArgs, strings.Split(val.(string), ","))
 						default:
-							sqlArgs = append(sqlArgs, ival)
+							sqlArgs = append(sqlArgs, val)
 						}
 					}
 				}
