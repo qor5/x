@@ -144,7 +144,7 @@ const reloadSearch = (val: any) => {
     return
   }
   if (!val) {
-    return
+    val = ''
   }
   if (value.value && val == value.value[props.itemTitle]) {
     return
@@ -226,6 +226,7 @@ const chipsVisible = computed(() => {
       <template v-slot:append-item="" v-if="remoteUrl">
         <div class="text-center">
           <v-pagination
+            size="20"
             v-if="props.isPaging"
             v-model="pagination.page"
             rounded="circle"
