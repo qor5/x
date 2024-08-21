@@ -194,7 +194,7 @@ type FilterItem struct {
 	Invisible              bool                          `json:"invisible,omitempty"`
 	AutocompleteDataSource *AutocompleteDataSource       `json:"autocompleteDataSource,omitempty"`
 	Translations           FilterIndependentTranslations `json:"translations,omitempty"`
-	WarpInput              func(val string) string       `json:"-"`
+	WrapInput              func(val string) string       `json:"-"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {
@@ -286,8 +286,8 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 		if it == nil {
 			continue
 		}
-		if it.WarpInput != nil {
-			val = it.WarpInput(val)
+		if it.WrapInput != nil {
+			val = it.WrapInput(val)
 		}
 		if _, ok := keyModValueMap[key]; !ok {
 			keyModValueMap[key] = map[string]string{}
