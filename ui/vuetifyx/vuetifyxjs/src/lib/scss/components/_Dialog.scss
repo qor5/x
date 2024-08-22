@@ -3,3 +3,16 @@
     color: rgba(var(--v-theme-grey-darken-1), var(--v-high-emphasis-opacity));
   }
 }
+
+
+.common-dialog {
+  .v-card-title {
+    text-overflow: initial;
+    white-space: inherit;
+    
+  }
+  .v-btn--size-small .v-btn__content {
+    font-size: 12px;
+    font-weight: 400;
+  }
+}
