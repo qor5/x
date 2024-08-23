@@ -6,7 +6,6 @@
 @import './components/VTextarea';
 
 // business comp style refactor
-@import 'components/Listing';
 @import 'components/Layout';
 @import 'components/SlideGroup';
 @import 'components/Navigation';
@@ -14,9 +13,12 @@
 @import 'components/vTabs';
 @import 'components/AutoComplete';
 @import 'components/Dialog';
-@import 'components/Detailing';
 @import 'components/VPagination';
 @import 'components/Drawer';
+
+// page module
+@import 'page/Listing';
+@import 'page/Detailing';
 
 //some style that fix display problems
 @import './fixer';
