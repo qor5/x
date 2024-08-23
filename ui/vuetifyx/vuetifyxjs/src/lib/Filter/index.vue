@@ -179,14 +179,13 @@ const foldedFilters = computed(() => {
       variant="plain"
       size="small"
       :disabled="internalValue.findIndex((item) => item.selected) < 0"
-      class="my-1"
     >
       <v-icon size="small" icon="mdi-close"></v-icon>
       {{ t.clear }}
     </v-btn>
     <v-menu v-if="foldedFilters.length > 0" :close-on-content-click="false" class="rounded-lg">
       <template v-slot:activator="{ props }">
-        <v-btn v-bind="props" variant="plain" size="small" color="primary" class="my-1">
+        <v-btn v-bind="props" variant="plain" size="small" color="primary">
           <v-icon size="small" icon="mdi-filter"></v-icon>
           {{ t.add }}
         </v-btn>

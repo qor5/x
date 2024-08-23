@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build ",
     "build:lib": "cross-env NODE_ENV=lib babel src --out-dir lib --source-maps --extensions \".ts\",\".tsx\",\".snap\" --copy-files --no-copy-ignored --out-file-extension .mjs",
-    "watch-build": "nodemon --watch src --ext ts,scss --exec 'npm run build'",
+    "watch-build": "nodemon --watch src --ext ts,scss,vue --exec 'npm run build'",
     "preview": "vite preview",
     "format": "prettier --write src/",
     "test:unit": "vitest"
