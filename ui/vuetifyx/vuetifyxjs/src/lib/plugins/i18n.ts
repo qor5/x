@@ -8,7 +8,8 @@ const messages = {
       datePicker: {
         ...zhHans.datePicker,
         title: '',
-        header: '选择日期'
+        header: '选择日期',
+        okTips: '选择日期才能保存'
       }
     }
   },
@@ -18,7 +19,8 @@ const messages = {
       datePicker: {
         ...en.datePicker,
         title: '',
-        header: 'Select date'
+        header: 'Select date',
+        okTips: 'You must select a date to save'
       }
     }
   },
@@ -28,7 +30,8 @@ const messages = {
       datePicker: {
         ...ja.datePicker,
         title: '',
-        header: '日付を選択'
+        header: '日付を選択',
+        okTips: '日付を選択してから保存してください'
       }
     }
   }

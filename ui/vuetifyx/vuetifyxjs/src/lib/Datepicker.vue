@@ -34,7 +34,13 @@
         <v-card>
           <v-card-text class="pa-0">
             <div class="d-flex flex-column align-center px-6">
-              <v-date-picker v-model="dateOfPicker" v-bind="datePickerProps"></v-date-picker>
+              <v-date-picker
+                v-model="dateOfPicker"
+                v-bind="datePickerProps"
+                @update:year="onYearOrMonthChange($event, 'year')"
+                @update:month="onYearOrMonthChange($event, 'month')"
+                @update:modelValue="onYearOrMonthChange($event, 'modelValue')"
+              />
             </div>
           </v-card-text>
           <v-card-actions>
@@ -46,9 +52,19 @@
               @click.native="clearHandler(isActive)"
               >{{ clearText }}
             </v-btn>
-            <v-btn color="green darken-1" variant="text" @click="okHandler(isActive)"
-              >{{ okText }}
-            </v-btn>
+            <v-tooltip :text="okTips" :disabled="!valueChangedWithoutSaved">
+              <template v-slot:activator="{ props }">
+                <span v-bind="props">
+                  <v-btn
+                    color="green darken-1"
+                    variant="text"
+                    :disabled="valueChangedWithoutSaved"
+                    @click="okHandler(isActive)"
+                    >{{ okText }}
+                  </v-btn>
+                </span>
+              </template>
+            </v-tooltip>
           </v-card-actions>
         </v-card>
       </template>
@@ -58,8 +74,12 @@
 
 <script lang="ts" setup>
 import { format, parse } from 'date-fns'
-
+import dayjs from 'dayjs'
 import { computed, nextTick, onMounted, Ref, ref, watch } from 'vue'
+import { useLocale } from 'vuetify'
+const { t } = useLocale()
+const okTips = t('$vuetify.datePicker.okTips')
+const tempYearAndMonth = ref(['-1', '-1'])
 
 const props = defineProps({
   modelValue: {
@@ -117,13 +137,43 @@ const init = () => {
   // see https://stackoverflow.com/a/9436948
   date.value = parse(props.modelValue, dateTimeFormat.value, new Date())
   dateOfPicker.value = date.value
+  tempYearAndMonth.value = getYearAndMonthStr(date.value).split('-')
 }
 
 watch(dialogVisible, (newVal) => {
   if (newVal) {
     dateOfPicker.value = date.value
+    tempYearAndMonth.value = getYearAndMonthStr(date.value).split('-')
   }
 })
+
+const onYearOrMonthChange = (value: number, type: 'year' | 'month' | 'modelValue') => {
+  if (type === 'modelValue') {
+    tempYearAndMonth.value = ['-1', '-1']
+    console.log('modelValue', value)
+    return
+  }
+
+  const map = {
+    year: 0,
+    month: 1
+  }
+  const curYearAndMonth = getYearAndMonthStr(date.value)
+  tempYearAndMonth.value[map[type]] = value.toString()
+}
+
+// must choose a date when year or month changed
+const valueChangedWithoutSaved = computed(() => {
+  if (tempYearAndMonth.value.join('-') === '-1--1') return false
+
+  const curYearAndMonth = getYearAndMonthStr(date.value)
+
+  return curYearAndMonth !== Object.values(tempYearAndMonth.value).join('-')
+})
+
+const getYearAndMonthStr = (dateTime: number) => {
+  return dayjs(date.value).format('YYYY-MM')
+}
 
 const emit = defineEmits(['update:modelValue'])
 
@@ -138,6 +188,7 @@ const okHandler = (isActive: Ref) => {
 const clearHandler = (isActive: Ref) => {
   isActive.value = false
   date.value = null
+  tempYearAndMonth.value = ['-1', '-1']
   emit('update:modelValue', null)
 }
 
