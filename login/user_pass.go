@@ -155,15 +155,27 @@ func (up *UserPass) IncreaseRetryCount(db *gorm.DB, model interface{}) error {
 	return nil
 }
 
+func (up *UserPass) GenerateResetPasswordTokenExpiration(db *gorm.DB) (createdAt time.Time, expiredAt time.Time) {
+	createdAt = db.NowFunc()
+	return createdAt, createdAt.Add(10 * time.Minute)
+}
+
 func (up *UserPass) GenerateResetPasswordToken(db *gorm.DB, model interface{}) (token string, err error) {
 	token = base64.URLEncoding.EncodeToString([]byte(uuid.NewString()))
-	now := time.Now()
-	expiredAt := now.Add(10 * time.Minute)
+
+	iface, ok := model.(interface {
+		GenerateResetPasswordTokenExpiration(db *gorm.DB) (createdAt time.Time, expiredAt time.Time)
+	})
+	if !ok {
+		return "", fmt.Errorf("model does not have GenerateResetPasswordTokenExpiration method, maybe it does not embed UserPass")
+	}
+
+	createdAt, expiredAt := iface.GenerateResetPasswordTokenExpiration(db)
 	err = db.Model(model).
 		Where("account = ?", up.Account).
 		Updates(map[string]interface{}{
 			"reset_password_token":            token,
-			"reset_password_token_created_at": now,
+			"reset_password_token_created_at": createdAt,
 			"reset_password_token_expired_at": expiredAt,
 		}).
 		Error
@@ -171,7 +183,7 @@ func (up *UserPass) GenerateResetPasswordToken(db *gorm.DB, model interface{}) (
 		return "", err
 	}
 	up.ResetPasswordToken = token
-	up.ResetPasswordTokenCreatedAt = &now
+	up.ResetPasswordTokenCreatedAt = &createdAt
 	up.ResetPasswordTokenExpiredAt = &expiredAt
 	return token, nil
 }
