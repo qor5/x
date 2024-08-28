@@ -135,7 +135,7 @@ func (tpb *VXTablePaginationBuilder) MarshalHTML(ctx context.Context) ([]byte, e
 	if tpb.perPageText != "" {
 		rowsPerPageText = tpb.perPageText
 	}
-	pagination := v.VPagination().ShowFirstLastPage(true).Rounded("circle").Density(v.DensityCompact).ActiveColor(v.ColorPrimary).
+	pagination := v.VPagination().ShowFirstLastPage(true).ActiveColor(v.ColorPrimary).Density(v.DensityCompact).
 		Length(totalPages).
 		// https://github.com/vuetifyjs/vuetify/issues/20321
 		// https://github.com/vuetifyjs/vuetify/issues/18853
