@@ -127,7 +127,7 @@
     border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity));
   }
   
-  .layout-center .v-card:not(:last-child) .listing-compo-wrap {
+  .section-wrap:not(:last-child) .listing-compo-wrap {
     padding-bottom: 26px;
     border-block-end-width: thin;
     border-block-end-style: solid;
