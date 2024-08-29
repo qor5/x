@@ -14,3 +14,11 @@
     font-weight: 400;
   }
 }
+
+.v-dialog {
+  // listing-comp-wrap is also displayed in detailing
+  .listing-compo-wrap {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
