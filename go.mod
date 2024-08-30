@@ -14,7 +14,7 @@ require (
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
 	github.com/ory/ladon v1.3.0
 	github.com/pquerna/otp v1.4.0
-	github.com/qor5/web/v3 v3.0.7-0.20240820073152-c8eaf32af2a1
+	github.com/qor5/web/v3 v3.0.7
 	github.com/spf13/cast v1.6.0
 	github.com/stretchr/testify v1.9.0
 	github.com/sunfmin/reflectutils v1.0.6
