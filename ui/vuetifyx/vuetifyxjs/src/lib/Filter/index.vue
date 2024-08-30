@@ -157,7 +157,7 @@ const foldedFilters = computed(() => {
 
 <template>
   <div class="d-flex flex-grow-1">
-    <div>
+    <div class="filter-item-wrap">
       <item-filter
         v-for="item in fixedFilters"
         v-model="item.op"
@@ -204,4 +204,10 @@ const foldedFilters = computed(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.filter-item-wrap {
+  display: flex;
+  flex-wrap:wrap;
+  gap: 8px 0;
+}
+</style>
