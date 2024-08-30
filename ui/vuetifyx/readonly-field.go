@@ -53,9 +53,10 @@ func (b *VXReadonlyFieldBuilder) MarshalHTML(ctx context.Context) ([]byte, error
 			vComp = vuetify.VCheckbox().
 				Attr(web.VField(b.label, b.value)...).
 				Readonly(true).
+				Disabled(true).
 				Ripple(false).
 				HideDetails(true).
-				Class("my-0 py-0")
+				Class("my-0 py-0 text-black-lighten-9")
 		} else {
 			vComp = h.Text(fmt.Sprint(b.value))
 		}
