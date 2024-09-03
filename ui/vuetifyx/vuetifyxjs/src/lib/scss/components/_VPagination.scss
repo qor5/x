@@ -1,5 +1,13 @@
 .v-pagination {
-  .v-btn {
+  // .v-pagination__first,
+  // .v-pagination__prev,
+  // .v-pagination__next,
+  // .v-pagination__last {
+  //   .v-btn.v-btn--density-compact {
+  //     width: calc(var(--v-btn-height) + -8px)
+  //   }
+  // }
+  .v-pagination__item .v-btn {
     --v-btn-size: 16px;
     font-weight: 500;
     &.v-btn--density-compact {
