@@ -156,7 +156,7 @@ const foldedFilters = computed(() => {
 </script>
 
 <template>
-  <div class="d-flex flex-grow-1">
+  <div class="filter-selectGroup-wrap">
     <div class="filter-item-wrap">
       <item-filter
         v-for="item in fixedFilters"

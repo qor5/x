@@ -1,12 +1,11 @@
 // base comp style refactor
 @import './components/VTable';
 @import './components/VCard';
-@import './components/VInput';
+@import './components/VField';
 @import './components/VBtn';
 @import './components/VTextarea';
 @import 'components/SlideGroup';
 @import 'components/Navigation';
-@import 'components/Input';
 @import 'components/vTabs';
 @import 'components/AutoComplete';
 @import 'components/Dialog';
@@ -14,6 +13,9 @@
 @import 'components/Drawer';
 @import 'components/ActivityTimeLine';
 @import 'components/vChip';
+@import 'components/VFilter';
+@import 'components/VVersionSelect';
+
 
 // page module
 @import 'page/Listing';
