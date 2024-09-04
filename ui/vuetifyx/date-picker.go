@@ -28,7 +28,7 @@ func (b *VXDatePickerBuilder) Label(v string) (r *VXDatePickerBuilder) {
 	return b
 }
 
-func (b *VXDatePickerBuilder) DialogWidth(v int) (r *VXDatePickerBuilder) {
+func (b *VXDatePickerBuilder) DialogWidth(v string) (r *VXDatePickerBuilder) {
 	b.tag.Attr(":dialogWidth", h.JSONString(v))
 	return b
 }

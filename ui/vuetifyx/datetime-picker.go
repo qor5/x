@@ -40,7 +40,7 @@ func (b *VXDateTimePickerBuilder) Label(v string) (r *VXDateTimePickerBuilder) {
 	return b
 }
 
-func (b *VXDateTimePickerBuilder) DialogWidth(v int) (r *VXDateTimePickerBuilder) {
+func (b *VXDateTimePickerBuilder) DialogWidth(v string) (r *VXDateTimePickerBuilder) {
 	b.tag.Attr(":dialogWidth", h.JSONString(v))
 	return b
 }
