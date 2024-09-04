@@ -4,6 +4,6 @@
   display: flex;
   .v-chip__content {
     flex:1;
-    max-width: 93%;
+    max-width: calc(100% - 26px);
   }
 }

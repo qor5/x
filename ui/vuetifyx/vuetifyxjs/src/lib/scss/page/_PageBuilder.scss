@@ -1,0 +1,13 @@
+.page-builder-edit-bar-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 36px;
+  width: 100%;
+
+  .tagList-bar-warp {
+    display: flex;
+    width: calc(100% - 364px);
+  }
+}
