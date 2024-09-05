@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUpdated, PropType, reactive, Ref, ref } from 'vue'
+import {computed, onMounted, onUpdated, PropType, reactive, Ref, ref} from 'vue'
 import draggable from 'vuedraggable'
 import get from 'lodash/get'
 
@@ -15,11 +15,11 @@ enum Variant {
 
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
-  modelValue: { type: String },
-  variant: { type: String as PropType<Variant>, default: 'underlined' },
-  density: { type: String as PropType<null | 'default' | 'comfortable' | 'compact'> },
-  items: { type: Array<any>, default: [] },
-  cacheItems: { type: Array<any>, default: [] },
+  modelValue: {type: String},
+  variant: {type: String as PropType<Variant>, default: 'underlined'},
+  density: {type: String as PropType<null | 'default' | 'comfortable' | 'compact'>},
+  items: {type: Array<any>, default: []},
+  cacheItems: {type: Array<any>, default: []},
   isPaging: Boolean,
   hasIcon: Boolean,
   hideSelected: Boolean,
@@ -27,21 +27,21 @@ const props = defineProps({
   clearable: Boolean,
   chips: Boolean,
   sorting: Boolean,
-  itemTitle: { type: String, default: 'text' },
-  itemValue: { type: String, default: 'value' },
-  itemIcon: { type: String, default: 'icon' },
-  pageKey: { type: String, default: 'page' },
-  pagesKey: { type: String, default: 'pages' },
-  pageSizeKey: { type: String, default: 'pageSize' },
-  totalKey: { type: String, default: 'total' },
-  itemsKey: { type: String, default: 'items' },
-  currentKey: { type: String, default: 'current' },
-  searchKey: { type: String, default: 'search' },
+  itemTitle: {type: String, default: 'text'},
+  itemValue: {type: String, default: 'value'},
+  itemIcon: {type: String, default: 'icon'},
+  pageField: {type: String, default: 'page'},
+  pagesField: {type: String, default: 'pages'},
+  pageSizeField: {type: String, default: 'pageSize'},
+  totalField: {type: String, default: 'total'},
+  itemsField: {type: String, default: 'items'},
+  currentField: {type: String, default: 'current'},
+  searchField: {type: String, default: 'search'},
   chipColor: String,
   remoteUrl: String,
-  page: { type: Number, default: 1 },
-  pageSize: { type: Number, default: 20 },
-  errorMessages: { type: String || Array<String> || null }
+  page: {type: Number, default: 1},
+  pageSize: {type: Number, default: 20},
+  errorMessages: {type: String || Array<String> || null}
 })
 const listItems: Ref<Array<any>> = ref([...props.items])
 const value = ref()
@@ -65,19 +65,17 @@ const loadData = () => {
   } else {
     urlObj = new URL(url.value!)
   }
-  urlObj.searchParams.set(props.pageKey, pagination.page.toString())
-  urlObj.searchParams.set(props.pageSizeKey, pagination.pageSize.toString())
+  urlObj.searchParams.set(props.pageField, pagination.page.toString())
+  urlObj.searchParams.set(props.pageSizeField, pagination.pageSize.toString())
   if (pagination.search) {
-    urlObj.searchParams.set(props.searchKey, pagination.search)
+    urlObj.searchParams.set(props.searchField, pagination.search)
   }
-  const a = urlObj.toString()
-  return fetch(a)
+  return fetch(urlObj.toString())
 }
 const loadRemoteItems = () => {
   if (!url.value) {
     return
   }
-
   isLoading.value = true
 
   loadData()
@@ -88,15 +86,19 @@ const loadRemoteItems = () => {
       return response.json()
     })
     .then((r) => {
-      total.value = get(r, props.totalKey)
-      pages.value = get(r, props.pagesKey)
-      current.value = get(r, props.currentKey)
-      const items = get(r, props.itemsKey)
+      total.value = get(r, props.totalField)
+      pages.value = get(r, props.pagesField)
+      current.value = get(r, props.currentField)
+      const items = get(r, props.itemsField)
       if (props.isPaging) {
         listItems.value = items
       } else {
         disabled.value = current.value >= total.value
-        listItems.value = listItems.value.concat(items || [])
+        if (pagination.page == props.page) {
+          listItems.value = items
+        } else {
+          listItems.value = listItems.value.concat(items || [])
+        }
       }
     })
     .finally(() => {
@@ -105,15 +107,14 @@ const loadRemoteItems = () => {
 }
 
 const endIntersect = (isIntersecting: boolean) => {
-  if (isIntersecting && !disabled.value) {
+  if (isIntersecting && !disabled.value && listItems.value.length > 0) {
     pagination.page += 1
     loadRemoteItems()
   }
 }
 
 const changeStatus = (e: any) => {
-  emit('update:modelValue', value.value[props.itemTitle])
-
+  emit('update:modelValue', e)
   if (!e) {
     return
   }
@@ -126,11 +127,12 @@ const changeStatus = (e: any) => {
 }
 
 const removeItem = (v: any) => {
-  value.value = ''
   cachedSelectedItems.value = cachedSelectedItems.value.filter(
     (element) => element[props.itemValue] != v[props.itemValue]
   )
-  emit('update:modelValue', value.value[props.itemTitle])
+  if (v[props.itemValue] == value.value[props.itemValue]) {
+    emit('update:modelValue', null)
+  }
 }
 onMounted(() => {
   loadRemoteItems()
@@ -146,7 +148,7 @@ const reloadSearch = (val: any) => {
   if (!val) {
     val = ''
   }
-  if (value.value && val == value.value[props.itemTitle]) {
+  if (value.value && val == value.value[props.itemValue]) {
     return
   }
   pagination.search = val
@@ -247,7 +249,7 @@ const chipsVisible = computed(() => {
                   loadRemoteItems()
                 }
               "
-              >Load more
+            >Load more
             </v-btn>
             <v-divider vertical></v-divider>
             <span> {{ current }}/{{ total }} </span>

@@ -3,8 +3,9 @@ package vuetifyx
 import (
 	"context"
 
-	"github.com/qor5/x/v3/ui/vuetify"
 	h "github.com/theplant/htmlgo"
+
+	"github.com/qor5/x/v3/ui/vuetify"
 )
 
 type VXAutocompleteBuilder struct {
@@ -67,32 +68,32 @@ func (b *VXAutocompleteBuilder) ChipTextColor(v string) (r *VXAutocompleteBuilde
 	return b
 }
 
-func (b *VXAutocompleteBuilder) PageKey(v string) (r *VXAutocompleteBuilder) {
-	b.tag.Attr("page-key", v)
+func (b *VXAutocompleteBuilder) PageField(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("page-field", v)
 	return b
 }
-func (b *VXAutocompleteBuilder) PagesKey(v string) (r *VXAutocompleteBuilder) {
-	b.tag.Attr("pages-key", v)
+func (b *VXAutocompleteBuilder) PagesField(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("pages-field", v)
 	return b
 }
-func (b *VXAutocompleteBuilder) PageSizeKey(v string) (r *VXAutocompleteBuilder) {
-	b.tag.Attr("page-size-key", v)
+func (b *VXAutocompleteBuilder) PageSizeField(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("page-size-field", v)
 	return b
 }
-func (b *VXAutocompleteBuilder) TotalKey(v string) (r *VXAutocompleteBuilder) {
-	b.tag.Attr("total-key", v)
+func (b *VXAutocompleteBuilder) TotalField(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("total-field", v)
 	return b
 }
-func (b *VXAutocompleteBuilder) ItemsKey(v string) (r *VXAutocompleteBuilder) {
-	b.tag.Attr("items-key", v)
+func (b *VXAutocompleteBuilder) ItemsField(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("items-field", v)
 	return b
 }
-func (b *VXAutocompleteBuilder) CurrentKey(v string) (r *VXAutocompleteBuilder) {
-	b.tag.Attr("current-key", v)
+func (b *VXAutocompleteBuilder) CurrentField(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("current-field", v)
 	return b
 }
-func (b *VXAutocompleteBuilder) SearchKey(v string) (r *VXAutocompleteBuilder) {
-	b.tag.Attr("search-key", v)
+func (b *VXAutocompleteBuilder) SearchField(v string) (r *VXAutocompleteBuilder) {
+	b.tag.Attr("search-field", v)
 	return b
 }
 func (b *VXAutocompleteBuilder) Page(v int) (r *VXAutocompleteBuilder) {
@@ -122,19 +123,22 @@ func (b *VXAutocompleteBuilder) MarshalHTML(ctx context.Context) (r []byte, err 
 }
 
 type AutocompleteDataSource struct {
-	RemoteURL   string `json:"remoteUrl"`
-	IsPaging    bool   `json:"isPaging"`
-	HasIcon     bool   `json:"hasIcon"`
-	ItemTitle   string `json:"itemTitle"`
-	ItemValue   string `json:"itemValue"`
-	ItemIcon    string `json:"itemIcon"`
-	PageKey     string `json:"pageKey"`
-	PagesKey    string `json:"pagesKey"`
-	PageSizeKey string `json:"pageSizeKey"`
-	TotalKey    string `json:"totalKey"`
-	ItemsKey    string `json:"itemsKey"`
-	CurrentKey  string `json:"currentKey"`
-	SearchKey   string `json:"searchKey"`
-	Page        int    `json:"page"`
-	PageSize    int    `json:"pageSize"`
+	RemoteURL string `json:"remoteUrl"`
+	IsPaging  bool   `json:"isPaging"`
+	ItemTitle string `json:"itemTitle"`
+	ItemValue string `json:"itemValue"`
+	ItemIcon  string `json:"itemIcon"`
+	Separator string `json:"separator"`
+	Page      int    `json:"page"`
+	PageSize  int    `json:"pageSize"`
+
+	HasIcon bool `json:"hasIcon"`
+
+	PageField     string `json:"pageField"`
+	PagesField    string `json:"pagesField"`
+	PageSizeField string `json:"pageSizeField"`
+	TotalField    string `json:"totalField"`
+	ItemsField    string `json:"itemsField"`
+	CurrentField  string `json:"currentField"`
+	SearchField   string `json:"searchField"`
 }

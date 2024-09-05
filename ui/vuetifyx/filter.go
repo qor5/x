@@ -135,15 +135,16 @@ type FilterIndependentTranslations struct {
 type FilterItemType string
 
 const (
-	ItemTypeDatetimeRange  FilterItemType = "DatetimeRangeItem"
-	ItemTypeDateRange      FilterItemType = "DateRangeItem"
-	ItemTypeDate           FilterItemType = "DateItem"
-	ItemTypeSelect         FilterItemType = "SelectItem"
-	ItemTypeMultipleSelect FilterItemType = "MultipleSelectItem"
-	ItemTypeLinkageSelect  FilterItemType = "LinkageSelectItem"
-	ItemTypeNumber         FilterItemType = "NumberItem"
-	ItemTypeString         FilterItemType = "StringItem"
-	AutoCompleteTypeSelect FilterItemType = "AutoCompleteItem"
+	ItemTypeDatetimeRange       FilterItemType = "DatetimeRangeItem"
+	ItemTypeDateRange           FilterItemType = "DateRangeItem"
+	ItemTypeDate                FilterItemType = "DateItem"
+	ItemTypeSelect              FilterItemType = "SelectItem"
+	ItemTypeMultipleSelect      FilterItemType = "MultipleSelectItem"
+	ItemTypeLinkageSelect       FilterItemType = "LinkageSelectItem"
+	ItemTypeLinkageSelectRemote FilterItemType = "LinkageSelectItemRemote"
+	ItemTypeNumber              FilterItemType = "NumberItem"
+	ItemTypeString              FilterItemType = "StringItem"
+	AutoCompleteTypeSelect      FilterItemType = "AutoCompleteItem"
 )
 
 type FilterItemModifier string
@@ -169,11 +170,12 @@ type SelectItem struct {
 }
 
 type FilterLinkageSelectData struct {
-	Items            [][]*LinkageSelectItem         `json:"items,omitempty"`
-	Labels           []string                       `json:"labels,omitempty"`
-	SelectOutOfOrder bool                           `json:"selectOutOfOrder,omitempty"`
-	SQLConditions    []string                       `json:"-"`
-	WrapInput        []func(val string) interface{} `json:"-"`
+	Items                      [][]*LinkageSelectItem         `json:"items,omitempty"`
+	Labels                     []string                       `json:"labels,omitempty"`
+	SelectOutOfOrder           bool                           `json:"selectOutOfOrder,omitempty"`
+	SQLConditions              []string                       `json:"-"`
+	WrapInput                  []func(val string) interface{} `json:"-"`
+	LinkageSelectRemoteOptions *VXLinkageSelectRemoteOptions  `json:"linkageSelectRemoteOptions,omitempty"`
 }
 
 type FilterItem struct {
@@ -184,8 +186,8 @@ type FilterItem struct {
 	Selected               bool                          `json:"selected,omitempty"`
 	Modifier               FilterItemModifier            `json:"modifier,omitempty"`
 	DisableChooseModifier  bool                          `json:"disableChooseModifier,omitempty"`
-	ValueIs                string                        `json:"valueIs,omitempty"`
-	ValuesAre              []string                      `json:"valuesAre"`
+	ValueIs                interface{}                   `json:"valueIs,omitempty"`
+	ValuesAre              interface{}                   `json:"valuesAre"`
 	ValueFrom              string                        `json:"valueFrom,omitempty"`
 	ValueTo                string                        `json:"valueTo,omitempty"`
 	SQLCondition           string                        `json:"-"`
@@ -295,7 +297,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 
 		keyModValueMap[key][mod] = v[0]
 
-		if it.ItemType == ItemTypeLinkageSelect {
+		if it.ItemType == ItemTypeLinkageSelect || it.ItemType == ItemTypeLinkageSelectRemote {
 			vals := strings.Split(val.(string), ",")
 			for i, v := range vals {
 				if v != "" {
@@ -402,9 +404,35 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 						continue
 					}
 
+					if it.ItemType == AutoCompleteTypeSelect {
+						if v != "" {
+							options := it.AutocompleteDataSource
+							values := strings.Split(v, options.Separator)
+							it.ValueIs = map[string]string{
+								options.ItemTitle: values[0],
+								options.ItemValue: values[1],
+							}
+						}
+						continue
+					}
 					if it.ItemType == ItemTypeLinkageSelect {
 						if v != "" {
 							it.ValuesAre = strings.Split(v, ",")
+						}
+						continue
+					}
+					if it.ItemType == ItemTypeLinkageSelectRemote {
+						if v != "" {
+							options := it.LinkageSelectData.LinkageSelectRemoteOptions
+							var items []map[string]string
+							for _, val := range strings.Split(v, ",") {
+								values := strings.Split(val, options.Separator)
+								items = append(items, map[string]string{
+									options.ItemTitle: values[0],
+									options.ItemValue: values[1],
+								})
+							}
+							it.ValuesAre = items
 						}
 						continue
 					}

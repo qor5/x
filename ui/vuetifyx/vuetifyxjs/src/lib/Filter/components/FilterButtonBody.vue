@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { FilterItem } from '@/lib/Filter/Model'
-import { computed } from 'vue'
+import {FilterItem} from '@/lib/Filter/Model'
+import {computed} from 'vue'
 import * as constants from '@/lib/Filter/Constants'
 
 const props = defineProps<{ op: FilterItem }>()
@@ -96,7 +96,10 @@ const showValueComputed = computed(() => {
       case 'AutoCompleteItem': {
         const mod = props.op.modifier || 'equals'
         if (mod === 'equals' && props.op.valueIs) {
-          showValue = props.op.valueIs.toString()
+          if (props.op.valueIs) {
+            // @ts-ignore
+            showValue = props.op.valueIs[props.op.autocompleteDataSource.itemTitle]
+          }
         }
         break
       }
@@ -122,6 +125,29 @@ const showValueComputed = computed(() => {
             return
           }
           return item.Name ? item.Name : item.ID
+        })
+        textsAre = textsAre.filter((item) => {
+          return item
+        })
+        showValue = textsAre.join(',')
+        break
+
+        // const mod =  props.op.modifier || 'equals'
+        // const textsAre =  props.op
+        //   .options!.filter((o) =>  props.op.valuesAre.includes(o.value))
+        //   .map((o) => o.text)
+        // if (mod === 'equals' &&  props.op.valuesAre &&  props.op.valuesAre.length > 0) {
+        //   showValue = textsAre.join(', ')
+        // }
+        // break
+      }
+      case 'LinkageSelectItemRemote': {
+        let textsAre = props.op.valuesAre.map((item) => {
+          if (!item) {
+            return
+          }
+          //@ts-ignore
+          return item[props.op.linkageSelectData?.linkageSelectRemoteOptions.itemTitle]
         })
         textsAre = textsAre.filter((item) => {
           return item
