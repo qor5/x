@@ -38,6 +38,9 @@
         <h1 class="text-h2 mb-4">linkage-select-example</h1>
         <linkage-select-example></linkage-select-example>
         <v-divider class="mb-6"></v-divider>
+        <h1 class="text-h2 mb-4">linkage-select-remote-example</h1>
+        <linkage-select-remote-example></linkage-select-remote-example>
+        <v-divider class="mb-6"></v-divider>
         <h1 class="text-h2 mb-4">filter-example</h1>
         <filter-example></filter-example>
         <v-divider class="mb-6"></v-divider>
@@ -73,6 +76,7 @@ import Card from '@/demo/components/Card.vue'
 import SelectManyExample from '@/demo/components/SelectManyExample.vue'
 import DatepickerExample from '@/demo/components/DatepickerExample.vue'
 import LinkageSelectExample from '@/demo/components/LinkageSelectExample.vue'
+import LinkageSelectRemoteExample from '@/demo/components/LinkageSelectRemoteExample.vue'
 import DatetimepickerExample from '@/demo/components/DatetimepickerExample.vue'
 import FilterExample from '@/demo/components/FilterExample.vue'
 import AutoCompleteExample from '@/demo/components/AutoCompleteExample.vue'

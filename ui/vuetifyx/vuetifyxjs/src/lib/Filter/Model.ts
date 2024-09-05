@@ -11,6 +11,7 @@ export interface linkageSelectData {
   items: Array<any>
   labels: Array<string>
   selectOutOfOrder: Boolean
+  linkageSelectRemoteOptions: linkageSelectRemoteOptions
 }
 
 export interface autocompleteDataSource {
@@ -19,17 +20,49 @@ export interface autocompleteDataSource {
   hasIcon: Boolean
   itemTitle: string
   itemValue: string
-  itemIcon: string
-  pageKey: string
-  pagesKey: string
-  pageSizeKey: string
-  totalKey: string
-  itemsKey: string
-  currentKey: string
-  searchKey: string
   page: number
   pageSize: number
+  separator: string
+
+  itemIcon: string
+
+
+  pageField: string
+  pagesField: string
+  pageSizeField: string
+  totalField: string
+  itemsField: string
+  currentField: string
+  searchField: string
+
 }
+
+export interface linkageSelectRemoteOptions {
+  remoteUrl: string
+  isPaging: Boolean
+  itemTitle: string
+  itemValue: string
+  page: number
+  pageSize: number
+  separator: string
+
+  levelStart: number
+  levelStep: number
+
+  pageField: string
+  pagesField: string
+  pageSizeField: string
+  totalField: string
+  itemsField: string
+  currentField: string
+  searchField: string
+
+  parentField: string
+  parentIdField: string
+  levelField: string
+
+}
+
 
 export interface FilterItem {
   key: string

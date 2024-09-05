@@ -103,6 +103,19 @@ function pushSelectItem(segs: any, op: any) {
   }
 }
 
+function pushAutoCompleteItem(segs: any, op: any) {
+  const mod = op.modifier || 'equals'
+  if (mod === 'equals' && op.valueIs) {
+    let val = ""
+    if (op.valueIs) {
+      const source = op.autocompleteDataSource
+      val = op.valueIs[source.itemTitle] + source.separator + op.valueIs[source.itemValue]
+    }
+    pushKeyVal(segs, op.key, '', val)
+    return
+  }
+}
+
 function pushMultipleSelectItem(segs: any, op: any) {
   const mod = op.modifier || 'in'
   if (mod === 'in' && op.valuesAre && op.valuesAre.length > 0) {
@@ -119,6 +132,23 @@ function pushLinkageSelectItem(segs: any, op: any) {
   const mod = op.modifier || 'equals'
   if (mod === 'equals' && op.valuesAre && op.valuesAre.length > 0) {
     pushKeyVal(segs, op.key, '', op.valuesAre)
+    return
+  }
+}
+
+function pushLinkageSelectItemRemote(segs: any, op: any) {
+  const mod = op.modifier || 'equals'
+  if (mod === 'equals' && op.valuesAre && op.valuesAre.length > 0) {
+    let values = [];
+    const source = op.linkageSelectData.linkageSelectRemoteOptions
+    for (let i = 0; i < op.valuesAre.length; i++) {
+      let item = op.valuesAre[i]
+      if (!item) {
+        continue
+      }
+      values.push(item[source.itemTitle] + source.separator + item[source.itemValue])
+    }
+    pushKeyVal(segs, op.key, '', values.join(","))
     return
   }
 }
@@ -151,13 +181,17 @@ export function filterData(data: any): any {
         pushSelectItem(r, op)
       }
       if (op.itemType === 'AutoCompleteItem') {
-        pushSelectItem(r, op)
+        pushAutoCompleteItem(r, op)
       }
       if (op.itemType === 'MultipleSelectItem') {
         pushMultipleSelectItem(r, op)
       }
       if (op.itemType === 'LinkageSelectItem') {
         pushLinkageSelectItem(r, op)
+      }
+      if (op.itemType === 'LinkageSelectItemRemote') {
+
+        pushLinkageSelectItemRemote(r, op)
       }
       return op
     })
