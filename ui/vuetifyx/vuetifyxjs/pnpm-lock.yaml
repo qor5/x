@@ -48,6 +48,12 @@ importers:
       '@babel/types':
         specifier: ^7.24.7
         version: 7.25.2
+      '@docsearch/css':
+        specifier: ^3.6.1
+        version: 3.6.1
+      '@docsearch/js':
+        specifier: ^3.6.1
+        version: 3.6.1(@algolia/client-search@4.24.0)(search-insights@2.17.1)
       '@types/jsdom':
         specifier: ^21.1.7
         version: 21.1.7
@@ -63,6 +69,12 @@ importers:
       '@vue/test-utils':
         specifier: ^2.4.6
         version: 2.4.6
+      '@vueuse/core':
+        specifier: ^11.0.3
+        version: 11.0.3(vue@3.5.1(typescript@5.5.4))
+      body-scroll-lock:
+        specifier: 4.0.0-beta.0
+        version: 4.0.0-beta.0
       jsdom:
         specifier: ^24.1.0
         version: 24.1.1
@@ -970,6 +982,9 @@ packages:
 
   birpc@0.2.17:
     resolution: {integrity: sha512-+hkTxhot+dWsLpp3gia5AkVHIsKlZybNT5gIYiDlNzJrmYPcTM9k5/w2uaj3IPpd7LlEYpmCj4Jj1nC41VhDFg==}
+
+  body-scroll-lock@4.0.0-beta.0:
+    resolution: {integrity: sha512-a7tP5+0Mw3YlUJcGAKUqIBkYYGlYxk2fnCasq/FUph1hadxlTRjF+gAcZksxANnaMnALjxEddmSi/H3OR8ugcQ==}
 
   brace-expansion@1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
@@ -3092,6 +3107,8 @@ snapshots:
   binary-extensions@2.3.0: {}
 
   birpc@0.2.17: {}
+
+  body-scroll-lock@4.0.0-beta.0: {}
 
   brace-expansion@1.1.11:
     dependencies:
