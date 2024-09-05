@@ -14,6 +14,7 @@ import draggable from 'vuedraggable'
 import SendVariables from '@/lib/SendVariables.vue'
 import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
+import TextField from '@/lib/Form/TextFiled.vue'
 import { registerPlugins, registerVuetify2Window } from '@/lib/plugins'
 
 const vuetifyx = {
@@ -32,6 +33,7 @@ const vuetifyx = {
     app.component('vx-send-variables', SendVariables)
     app.component('vx-messagelistener', MessageListener)
     app.component('vx-overlay', Overlay)
+    app.component('vx-text-field', TextField)
   }
 }
 declare const window: any

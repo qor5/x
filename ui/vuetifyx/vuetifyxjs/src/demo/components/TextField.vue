@@ -60,5 +60,17 @@
         readonly
       ></v-text-field>
     </v-col>
+
+    <v-col cols="12" sm="6">
+      <vx-text-field
+        model-value="Compact Outlined"
+        label="Email"
+      ></vx-text-field>
+    </v-col>
   </v-row>
 </template>
+
+<script setup>
+import vxTextField from '@/lib/Form/TextFiled.vue'
+
+</script>
