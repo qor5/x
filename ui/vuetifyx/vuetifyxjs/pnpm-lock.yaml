@@ -11,6 +11,9 @@ importers:
       '@mdi/font':
         specifier: 7.0.96
         version: 7.0.96
+      '@vitejs/plugin-vue-jsx':
+        specifier: ^4.0.1
+        version: 4.0.1(vite@5.3.3(@types/node@20.14.15)(sass@1.77.8))(vue@3.5.1(typescript@5.5.4))
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
@@ -725,6 +728,13 @@ packages:
 
   '@types/wrap-ansi@3.0.0':
     resolution: {integrity: sha512-ltIpx+kM7g/MLRZfkbL7EsCEjfzCcScLpkg37eXEtx5kmrAKBkTJwd1GIAjDSL8wTpM6Hzn5YO4pSb91BEwu1g==}
+
+  '@vitejs/plugin-vue-jsx@4.0.1':
+    resolution: {integrity: sha512-7mg9HFGnFHMEwCdB6AY83cVK4A6sCqnrjFYF4WIlebYAQVVJ/sC/CiTruVdrRlhrFoeZ8rlMxY9wYpPTIRhhAg==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    peerDependencies:
+      vite: ^5.0.0
+      vue: ^3.0.0
 
   '@vitejs/plugin-vue@5.1.2':
     resolution: {integrity: sha512-nY9IwH12qeiJqumTCLJLE7IiNx7HZ39cbHaysEUd+Myvbz9KAqd2yq+U01Kab1R/H1BmiyM2ShTYlNH32Fzo3A==}
@@ -2776,6 +2786,16 @@ snapshots:
   '@types/web-bluetooth@0.0.20': {}
 
   '@types/wrap-ansi@3.0.0': {}
+
+  '@vitejs/plugin-vue-jsx@4.0.1(vite@5.3.3(@types/node@20.14.15)(sass@1.77.8))(vue@3.5.1(typescript@5.5.4))':
+    dependencies:
+      '@babel/core': 7.25.2
+      '@babel/plugin-transform-typescript': 7.25.2(@babel/core@7.25.2)
+      '@vue/babel-plugin-jsx': 1.2.2(@babel/core@7.25.2)
+      vite: 5.3.3(@types/node@20.14.15)(sass@1.77.8)
+      vue: 3.5.1(typescript@5.5.4)
+    transitivePeerDependencies:
+      - supports-color
 
   '@vitejs/plugin-vue@5.1.2(vite@5.3.3(@types/node@20.14.15)(sass@1.77.8))(vue@3.5.1(typescript@5.5.4))':
     dependencies:
