@@ -1,5 +1,5 @@
 import markDownPlugin from 'vitepress-demo-editor/markdownPlugin'
-
+import { fileURLToPath, URL } from 'node:url'
 import { UserConfig } from 'vitepress'
 import sidebar from './sidebar.ts'
 
@@ -26,7 +26,15 @@ const config: UserConfig = {
   description: '一个基于vuetify的企业级组件库',
   markdown: {
     config: (md) => {
-      md.use(markDownPlugin, {})
+      md.use(markDownPlugin)
+    }
+  },
+
+  vite: {
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('../../src', import.meta.url))
+      }
     }
   }
 }
