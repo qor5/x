@@ -13,22 +13,23 @@ export default {
         // }
     //   ]
     // },
-    // {
-    //   "text": "通用",
-    //   "items": [
-    //     { "text": "Button 按钮", "link": "/components/button/" },
-    //     { "text": "Overlay 遮罩层", "link": "/components/overlay/" },
-    //     { "text": "Scrollbar 滚动条", "link": "/components/scrollbar/" },
-    //     { "text": "VirtualScroll 虚拟滚动", "link": "/components/virtualScroll/" }
-    //   ]
-    // },
-    // {
-    //   "text": "数据展示",
-    //   "items": [
-    //     { "text": "Table 表格", "link": "/components/table/" },
-    //     { "text": "Tag 标签", "link": "/components/tag/" }
-    //   ]
-    // },
+    {
+      "text": "通用",
+      "items": [
+        { "text": "Button 按钮", "link": "/components/button/" },
+        // { "text": "Overlay 遮罩层", "link": "/components/overlay/" },
+        // { "text": "Scrollbar 滚动条", "link": "/components/scrollbar/" },
+        // { "text": "VirtualScroll 虚拟滚动", "link": "/components/virtualScroll/" }
+      ]
+    },
+    {
+      "text": "数据展示",
+      "items": [
+        { "text": "Table 表格", "link": "/components/table/" },
+        { "text": "Filter 筛选", "link": "/components/filter/" },
+        // { "text": "Tag 标签", "link": "/components/tag/" }
+      ]
+    },
     // {
     //   "text": "导航",
     //   "items": [
@@ -54,7 +55,7 @@ export default {
         // { "text": "Form 表单", "link": "/components/form/" },
         { "text": "textField 输入框", "link": "/components/textField/" },
         // { "text": "Radio 单选框", "link": "/components/radio/" },
-        // { "text": "Select 选择器", "link": "/components/select/" },
+        { "text": "Select 选择器", "link": "/components/Select/selectMany/" },
         // { "text": "Switch 开关", "link": "/components/switch/" },
         // { "text": "DatePicker 日期选择器", "link": "/components/datePicker/" }
       ]
