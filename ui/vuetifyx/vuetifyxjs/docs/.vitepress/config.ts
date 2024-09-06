@@ -20,7 +20,7 @@ const config: UserConfig = {
     sidebar,
     nav,
     search: true,
-    logo: "./logo.svg"
+    logo: "/logo.svg"
   },
 
   title: 'VuetifyX UI',
