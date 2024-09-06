@@ -2,7 +2,7 @@
 
 ## 基本用法
 
-:::demo column
+:::demo
 
 ```vue
 <template>
@@ -172,3 +172,4 @@ const value = ref()
 </script>
 
 ```
+:::

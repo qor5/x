@@ -2,7 +2,7 @@
 
 ## 基本用法
 
-:::demo column
+:::demo
 
 ```vue
 <template>
@@ -73,4 +73,4 @@ export default {
 </script>
 
 ```
-
+:::

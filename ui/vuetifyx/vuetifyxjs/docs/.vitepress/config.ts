@@ -1,7 +1,8 @@
-import markDownPlugin from 'vitepress-demo-editor/markdownPlugin'
 import { fileURLToPath, URL } from 'node:url'
 import { UserConfig } from 'vitepress'
 import sidebar from './sidebar.ts'
+import { demoPreviewPlugin } from '@vitepress-code-preview/plugin'
+import { defineConfig } from 'vitepress'
 
 const nav = [
   { text: '组件文档', link: '/quick-start/', target: '_self' },
@@ -25,9 +26,10 @@ const config: UserConfig = {
   lang: 'zh-CN',
   description: '一个基于vuetify的企业级组件库',
   markdown: {
-    config: (md) => {
-      md.use(markDownPlugin)
-    }
+    config(md) {
+      const docRoot = fileURLToPath(new URL('../', import.meta.url))
+      md.use(demoPreviewPlugin, { docRoot })
+    },
   },
 
   vite: {
@@ -39,4 +41,4 @@ const config: UserConfig = {
   }
 }
 
-export default config
+export default defineConfig(config)
