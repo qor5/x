@@ -1,7 +1,7 @@
 import { defineComponent, h } from 'vue'
-import DefaultTheme from 'vitepress/theme'
+import DefaultTheme from './theme-default/theme.ts'
 
-import './theme-default/custom.css'
+import './theme-default/custom.scss'
 const { Layout } = DefaultTheme
 export default defineComponent({
   async mounted() {
