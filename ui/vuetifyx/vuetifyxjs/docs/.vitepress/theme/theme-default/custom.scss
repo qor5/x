@@ -54,6 +54,22 @@
       right:24px;
     }
   }
+  .vp-raw [class*='language-'] {
+    position: relative;
+  }
+  .vp-raw [class*='language-'] > span.lang {
+    position: absolute;
+    top: 2px;
+    /*rtl:ignore*/
+    right: 8px;
+    z-index: 2;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--vp-code-lang-color);
+    transition:
+      color 0.4s,
+      opacity 0.4s;
+  }
 }
 
 @media (max-width: 1280px) {
