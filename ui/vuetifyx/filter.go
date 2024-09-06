@@ -294,7 +294,9 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 		if _, ok := keyModValueMap[key]; !ok {
 			keyModValueMap[key] = map[string]string{}
 		}
-
+		if v[0] == "" {
+			continue
+		}
 		keyModValueMap[key][mod] = v[0]
 
 		if it.ItemType == ItemTypeLinkageSelect || it.ItemType == ItemTypeLinkageSelectRemote {

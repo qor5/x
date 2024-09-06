@@ -117,6 +117,9 @@ const showValueComputed = computed(() => {
         break
       }
       case 'LinkageSelectItem': {
+        if (!props.op.valuesAre) {
+          return
+        }
         let textsAre = props.op.valuesAre.map((o, i) => {
           const item = props.op.linkageSelectData?.items[i].find((x: any) => {
             return o === x.ID
@@ -142,6 +145,9 @@ const showValueComputed = computed(() => {
         // break
       }
       case 'LinkageSelectItemRemote': {
+        if (!props.op.valuesAre) {
+          return
+        }
         let textsAre = props.op.valuesAre.map((item) => {
           if (!item) {
             return
