@@ -19,6 +19,7 @@
   }
 
   .VPNav {
+    z-index:9999;
     .container {
       margin-left: 0;
       margin-right: 0;
@@ -38,7 +39,7 @@
   .VPDoc {
     padding-right:0;
     .container {
-      max-width: 960px;
+      max-width: 1440px;
       .content-container {
         max-width: initial;
       }
