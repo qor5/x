@@ -5,7 +5,7 @@ import { demoPreviewPlugin } from '@vitepress-code-preview/plugin'
 import { defineConfig } from 'vitepress'
 
 const nav = [
-  { text: '组件文档', link: '/quick-start/', target: '_self' },
+  { text: '组件文档', link: '/Components/Button/', target: '_self' },
   // { text: 'playground', link: '/playground/' },
   {
     text: 'Github',
