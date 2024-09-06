@@ -6,6 +6,7 @@ import { h } from 'vue'
 import myLayout from './myLayout'
 
 export default {
+    // ...DefaultTheme,
     ...theme,
     Layout: () => {
       return h(myLayout)

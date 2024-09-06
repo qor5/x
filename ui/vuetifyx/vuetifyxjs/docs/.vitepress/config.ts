@@ -30,14 +30,6 @@ const config: UserConfig = {
       const docRoot = fileURLToPath(new URL('../', import.meta.url))
       md.use(demoPreviewPlugin, { docRoot })
     },
-  },
-
-  vite: {
-    resolve: {
-      alias: {
-        '@': fileURLToPath(new URL('../../src', import.meta.url))
-      }
-    }
   }
 }
 
