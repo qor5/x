@@ -2,7 +2,7 @@
 
 ## 基本用法
 
-:::demo column
+:::demo
 
 ```vue
 <template>
@@ -77,3 +77,4 @@
   </v-row>
 </template>
 ```
+:::

@@ -1,8 +1,8 @@
-# v-Select-many 选择
+# vx-selectmany 选择
 
 ## 基本用法
 
-:::demo column
+:::demo
 
 ```vue
 <script setup>
@@ -39,4 +39,4 @@ const items = ref([
 </template>
 
 ```
-
+:::
