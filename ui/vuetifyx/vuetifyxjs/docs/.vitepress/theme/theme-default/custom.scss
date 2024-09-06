@@ -1,11 +1,17 @@
 #app {
   .VPSidebar {
     padding-left: 32px;
-
     width: 280px;
+    &.open {
+      z-index: 2002;
+    }
     .curtain {
       background-color: #fff;
     }
+  }
+
+  .VPBackdrop.backdrop{
+    z-index: 2001;
   }
 
   .VPNavBar.has-sidebar {
@@ -16,6 +22,10 @@
 
   .VPNavBarTitle.has-sidebar .title {
     border-bottom:0;
+  }
+
+  .VPLocalNav {
+    z-index: 1999;
   }
 
   .VPNav {
