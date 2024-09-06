@@ -180,10 +180,6 @@ select:focus {
   outline: none;
 }
 
-table {
-  border-collapse: collapse;
-}
-
 input {
   background-color: transparent;
 }

@@ -1,5 +1,5 @@
 import { defineComponent, h } from 'vue'
-import DefaultTheme from './theme-default/theme.ts'
+import DefaultTheme from 'vitepress/theme'
 
 import './theme-default/custom.scss'
 const { Layout } = DefaultTheme
