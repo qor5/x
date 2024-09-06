@@ -1,4 +1,4 @@
-# v-filter 筛选
+# vx-filter 筛选
 
 ## 基本用法
 
