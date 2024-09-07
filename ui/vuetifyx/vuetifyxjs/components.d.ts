@@ -52,5 +52,7 @@ declare module 'vue' {
     TextDatepicker: typeof import('./src/lib/TextDatepicker.vue')['default']
     TextDatepickerExample: typeof import('./src/demo/components/TextDatepickerExample.vue')['default']
     TextField: typeof import('./src/demo/components/TextField.vue')['default']
+    TiptapEditor: typeof import('./src/lib/TiptapEditor.vue')['default']
+    TiptapEditorExample: typeof import('./src/demo/components/TiptapEditorExample.vue')['default']
   }
 }

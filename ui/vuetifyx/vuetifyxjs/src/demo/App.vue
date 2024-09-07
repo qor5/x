@@ -61,6 +61,9 @@
         <v-divider class="mb-6"></v-divider>
         <h1 class="text-h2 mb-4">overlay-example</h1>
         <overlay-example></overlay-example>
+        <v-divider class="mb-6"></v-divider>
+        <h1 class="text-h2 mb-4">tiptap-editor-example</h1>
+        <tiptap-editor-example></tiptap-editor-example>
       </v-container>
     </v-main>
   </v-app>
@@ -85,4 +88,5 @@ import DefaultNavigatorExample from '@/demo/components/DefaultNavigatorExample.v
 import SendVariablesExample from '@/demo/components/SendVariablesExample.vue'
 import ScrollIframeExample from '@/demo/components/ScrollIframeExample.vue'
 import OverlayExample from '@/demo/components/OverlayExample.vue'
+import TiptapEditorExample from './components/TiptapEditorExample.vue'
 </script>

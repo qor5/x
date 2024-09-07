@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@mdi/font": "7.0.96",
+    "@tiptap/core": "^2.6.6",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",
     "lodash": "^4.17.21",
@@ -22,7 +23,8 @@
     "vue-i18n": "^9.13.1",
     "vue-json-pretty": "^2.4.0",
     "vuedraggable": "^4.1.0",
-    "vuetify": "^3.6.14"
+    "vuetify": "^3.6.14",
+    "vuetify-pro-tiptap": "^2.5.4"
   },
   "devDependencies": {
     "@babel/types": "^7.24.7",
