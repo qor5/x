@@ -5,14 +5,9 @@
 :::demo
 
 ```vue
-<template>
-  <!--  <h5 class="text-h5">v-model</h5>-->
-  <!--  <h5 class="text-h5">internalValue</h5>-->
-  <!--  <VueJsonPretty :data="internalValue"></VueJsonPretty>-->
-  <vx-filter v-model="value" :internal-value="internalValue" />
-</template>
-
-<script setup>
+<script setup lang="ts">
+import VueJsonPretty from 'vue-json-pretty'
+import 'vue-json-pretty/lib/styles.css'
 import { ref } from 'vue'
 
 const internalValue = ref([
@@ -170,6 +165,19 @@ const internalValue = ref([
 // }]
 const value = ref()
 </script>
+
+<template>
+  <!--  <h5 class="text-h5">v-model</h5>-->
+  <VueJsonPretty :data="value"></VueJsonPretty>
+  <v-divider />
+  <!--  <h5 class="text-h5">internalValue</h5>-->
+  <!--  <VueJsonPretty :data="internalValue"></VueJsonPretty>-->
+  <v-divider />
+  <vx-filter v-model="value" :internal-value="internalValue" />
+</template>
+
+<style scoped></style>
+
 
 ```
 :::
