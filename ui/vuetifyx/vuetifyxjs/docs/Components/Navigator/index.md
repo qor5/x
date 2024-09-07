@@ -128,7 +128,8 @@ const leftMenuItems = ref([
   position:absolute!important;
 }
 .v-navigation-drawer {
-  height: 865px!important;
+  /* height: 865px!important; */
+  height: 99%!important;
 
 }
 </style>
