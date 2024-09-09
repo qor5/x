@@ -49,7 +49,7 @@ window.addEventListener('message', function (e: any) {
       <v-main>
         <v-card>
           <div ref="iframe">
-            <iframe src="/iframe.html" class="w-100 overflow-y-auto" style="height: 600px"></iframe>
+            <iframe src="/x/iframe.html" class="w-100 overflow-y-auto" style="height: 600px"></iframe>
           </div>
         </v-card>
       </v-main>
