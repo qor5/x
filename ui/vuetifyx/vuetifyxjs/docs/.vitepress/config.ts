@@ -17,6 +17,7 @@ const nav = [
 ]
 
 const config: UserConfig = {
+  base: '/x/',
   vite: {
     plugins: [Vuetify({
       autoImport: { labs: true },
