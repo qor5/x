@@ -5,11 +5,11 @@ export default {
       "items": [
         {
           "text": "Button 按钮",
-          "link": "/components/Button/"
+          "link": "/Components/Button/"
         },
         {
           "text": "Overlay 遮罩层",
-          "link": "/components/Overlay/"
+          "link": "/Components/Overlay/"
         }
       ]
     },
@@ -18,19 +18,19 @@ export default {
       "items": [
         {
           "text": "Table 表格",
-          "link": "/components/Table/"
+          "link": "/Components/Table/"
         },
         {
           "text": "Filter 筛选",
-          "link": "/components/Filter/"
+          "link": "/Components/Filter/"
         },
         {
           "text": "Card 卡片",
-          "link": "/components/Card/"
+          "link": "/Components/Card/"
         },
         {
           "text": "ScrollIframe 组件",
-          "link": "/components/ScrollIframe/"
+          "link": "/Components/ScrollIframe/"
         }
       ]
     },
@@ -39,7 +39,7 @@ export default {
       "items": [
         {
           "text": "Navigator 导航栏",
-          "link": "/components/Navigator/"
+          "link": "/Components/Navigator/"
         }
       ]
     },
@@ -48,27 +48,27 @@ export default {
       "items": [
         {
           "text": "AutoComplete 自动填充",
-          "link": "/components/AutoComplete/"
+          "link": "/Components/AutoComplete/"
         },
         {
           "text": "Checkbox 多选框",
-          "link": "/components/Checkbox/"
+          "link": "/Components/Checkbox/"
         },
         {
           "text": "TextField 输入框",
-          "link": "/components/TextField/"
+          "link": "/Components/TextField/"
         },
         {
           "text": "SendVariables 组件",
-          "link": "/components/TextField/sendVariables"
+          "link": "/Components/TextField/sendVariables"
         },
         {
           "text": "Select 选择器",
-          "link": "/components/Select/SelectMany/"
+          "link": "/Components/Select/SelectMany/"
         },
         {
           "text": "DatePicker 时间选择器",
-          "link": "/components/DatePicker/"
+          "link": "/Components/DatePicker/"
         }
       ]
     }

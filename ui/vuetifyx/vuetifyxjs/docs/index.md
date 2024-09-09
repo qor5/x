@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: alt
       text: 快速开始
-      link: /components/textField
+      link: /Components/Button
     - theme: alt
       text: View on GitHub
       link: https://github.com/liyao1520/promise-ui
