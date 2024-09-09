@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
 import { UserConfig } from 'vitepress'
-import sidebar from './sidebar.ts'
+import sidebar from '../sidebar.ts'
 import { demoPreviewPlugin } from '@vitepress-code-preview/plugin'
 import { defineConfig } from 'vitepress'
 import Vuetify from 'vite-plugin-vuetify'

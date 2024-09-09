@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "demo": "tsx ./scripts/new-demo-doc.ts",
     "dev": "vitepress dev docs",
     "build": "vue-tsc --noEmit && vite build ",
     "build:lib": "cross-env NODE_ENV=lib babel src --out-dir lib --source-maps --extensions \".ts\",\".tsx\",\".snap\" --copy-files --no-copy-ignored --out-file-extension .mjs",
@@ -38,6 +39,7 @@
     "@vue/test-utils": "^2.4.6",
     "@vueuse/core": "^11.0.3",
     "body-scroll-lock": "4.0.0-beta.0",
+    "inquirer": "^10.2.2",
     "jsdom": "^24.1.0",
     "msw": "^2.3.5",
     "nodemon": "^3.1.4",
@@ -45,6 +47,7 @@
     "prettier": "^3.3.2",
     "sass": "^1.77.6",
     "sass-loader": "14.2.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.5.2",
     "unplugin-fonts": "^1.1.1",
     "unplugin-vue-components": "0.26.0",
