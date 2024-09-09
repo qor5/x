@@ -1,8 +1,8 @@
 import { defineComponent, h } from 'vue'
-import DefaultTheme from 'vitepress/theme'
+import theme from './theme-default/theme'
 
 import './theme-default/custom.scss'
-const { Layout } = DefaultTheme
+const { Layout } = theme
 export default defineComponent({
   async mounted() {
     // 黑暗模式设配
