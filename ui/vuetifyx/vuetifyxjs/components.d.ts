@@ -51,7 +51,6 @@ declare module 'vue' {
     Table: typeof import('./src/demo/components/Table.vue')['default']
     TextDatepicker: typeof import('./src/lib/TextDatepicker.vue')['default']
     TextDatepickerExample: typeof import('./src/demo/components/TextDatepickerExample.vue')['default']
-    TextField: typeof import('./src/demo/components/TextField.vue')['default']
     TextFiled: typeof import('./src/lib/Form/TextFiled.vue')['default']
   }
 }
