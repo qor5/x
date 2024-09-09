@@ -3,6 +3,7 @@ import { UserConfig } from 'vitepress'
 import sidebar from './sidebar.ts'
 import { demoPreviewPlugin } from '@vitepress-code-preview/plugin'
 import { defineConfig } from 'vitepress'
+import Vuetify from 'vite-plugin-vuetify'
 
 const nav = [
   { text: '组件文档', link: '/Components/Button/', target: '_self' },
@@ -16,6 +17,17 @@ const nav = [
 ]
 
 const config: UserConfig = {
+  vite: {
+    plugins: [Vuetify({
+      autoImport: { labs: true },
+      styles: {
+        configFile: '../src/lib/scss/_vuetify.scss'
+      }
+    }),],
+    ssr: {
+      noExternal: ['vuetify']
+    }
+  },
   themeConfig: {
     sidebar,
     nav,
