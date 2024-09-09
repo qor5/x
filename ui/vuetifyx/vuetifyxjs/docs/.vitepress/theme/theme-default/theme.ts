@@ -18,6 +18,13 @@ export { default as VPTeamPage } from './components/VPTeamPage.vue'
 export { default as VPTeamPageTitle } from './components/VPTeamPageTitle.vue'
 export { default as VPTeamPageSection } from './components/VPTeamPageSection.vue'
 export { default as VPTeamMembers } from './components/VPTeamMembers.vue'
+// make vue i18n happy
+if (typeof globalThis !== 'undefined') {
+  globalThis.__VUE_PROD_DEVTOOLS__ = false;
+} else {
+  window.__VUE_PROD_DEVTOOLS__ = false;
+}
+
 const theme = {
   Layout,
   NotFound
