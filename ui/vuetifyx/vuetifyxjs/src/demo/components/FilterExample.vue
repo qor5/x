@@ -2,7 +2,7 @@
 import VxFilter from '@/lib/Filter/index.vue'
 import VueJsonPretty from 'vue-json-pretty'
 import 'vue-json-pretty/lib/styles.css'
-import {ref} from 'vue'
+import { ref } from 'vue'
 
 const internalValue = ref([
   {
@@ -80,20 +80,20 @@ const internalValue = ref([
           }
         ],
         [
-          {ID: '1', Name: '杭州', ChildrenIDs: ['1', '2']},
-          {ID: '2', Name: '宁波', ChildrenIDs: ['3', '4']},
-          {ID: '3', Name: '南京', ChildrenIDs: ['5', '6']},
-          {ID: '4', Name: '苏州', ChildrenIDs: ['7', '8']}
+          { ID: '1', Name: '杭州', ChildrenIDs: ['1', '2'] },
+          { ID: '2', Name: '宁波', ChildrenIDs: ['3', '4'] },
+          { ID: '3', Name: '南京', ChildrenIDs: ['5', '6'] },
+          { ID: '4', Name: '苏州', ChildrenIDs: ['7', '8'] }
         ],
         [
-          {ID: '1', Name: '拱墅区'},
-          {ID: '2', Name: '西湖区'},
-          {ID: '3', Name: '镇海区'},
-          {ID: '4', Name: '鄞州区'},
-          {ID: '5', Name: '鼓楼区'},
-          {ID: '6', Name: '玄武区'},
-          {ID: '7', Name: '常熟区'},
-          {ID: '8', Name: '吴江区'}
+          { ID: '1', Name: '拱墅区' },
+          { ID: '2', Name: '西湖区' },
+          { ID: '3', Name: '镇海区' },
+          { ID: '4', Name: '鄞州区' },
+          { ID: '5', Name: '鼓楼区' },
+          { ID: '6', Name: '玄武区' },
+          { ID: '7', Name: '常熟区' },
+          { ID: '8', Name: '吴江区' }
         ]
       ],
       labels: ['Province', 'City', 'District'],
@@ -125,11 +125,11 @@ const internalValue = ref([
     selected: true,
     valueIs: '1',
     options: [
-      {text: '高节', value: '1'},
-      {text: '地界', value: '3'}
+      { text: '高节', value: '1' },
+      { text: '地界', value: '3' }
     ],
     linkageSelectData: {},
-    translations: {filterBy: 'Filter by Company'}
+    translations: { filterBy: 'Filter by Company' }
   },
   {
     key: 'f_company_remote',
@@ -137,7 +137,7 @@ const internalValue = ref([
     itemType: 'AutoCompleteItem',
     valuesAre: null,
     linkageSelectData: {},
-    translations: {filterBy: 'Filter by Company'},
+    translations: { filterBy: 'Filter by Company' },
     autocompleteDataSource: {
       remoteUrl: 'http://localhost:7800/examples/api/complete/auto-complete-posts',
       itemTitle: 'title',
@@ -146,14 +146,18 @@ const internalValue = ref([
       itemsField: 'data',
       isPaging: true,
       pageSize: 2,
-      separator: "__"
+      separator: '__'
     }
   },
   {
     key: 'f_linkage_remote',
     label: 'LinkageSelectItemRemote',
     itemType: 'LinkageSelectItemRemote',
-    valuesAre: [{ID: "1", Name: "浙江"}, {ID: "3", Name: "杭州"}, {ID: "7", Name: "拱墅区"}],
+    valuesAre: [
+      { ID: '1', Name: '浙江' },
+      { ID: '3', Name: '杭州' },
+      { ID: '7', Name: '拱墅区' }
+    ],
     selected: true,
     linkageSelectData: {
       labels: ['Province', 'City', 'District'],
@@ -166,9 +170,9 @@ const internalValue = ref([
         isPaging: true,
         levelStart: 1,
         pageSize: 2,
-        separator: "__"
+        separator: '__'
       }
-    },
+    }
   }
 ])
 // const internalValue = [{
@@ -185,11 +189,11 @@ const value = ref()
 <template>
   <!--  <h5 class="text-h5">v-model</h5>-->
   <VueJsonPretty :data="value"></VueJsonPretty>
-  <v-divider/>
+  <v-divider />
   <!--  <h5 class="text-h5">internalValue</h5>-->
   <!--  <VueJsonPretty :data="internalValue"></VueJsonPretty>-->
-  <v-divider/>
-  <vx-filter v-model="value" :internal-value="internalValue"/>
+  <v-divider />
+  <vx-filter v-model="value" :internal-value="internalValue" />
 </template>
 
 <style scoped></style>

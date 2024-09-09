@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {FilterItem} from '@/lib/Filter/Model'
-import {computed} from 'vue'
+import { FilterItem } from '@/lib/Filter/Model'
+import { computed } from 'vue'
 import * as constants from '@/lib/Filter/Constants'
 
 const props = defineProps<{ op: FilterItem }>()

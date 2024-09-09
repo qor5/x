@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {computed, ref} from 'vue'
-import {encodeFilterData, filterData} from '@/lib/Filter/FilterData'
-import {FilterItem} from '@/lib/Filter/Model'
+import { computed, ref } from 'vue'
+import { encodeFilterData, filterData } from '@/lib/Filter/FilterData'
+import { FilterItem } from '@/lib/Filter/Model'
 import ItemFilter from '@/lib/Filter/components/ItemFilter.vue'
 import DatetimeRangeItem from '@/lib/Filter/components/DatetimeRangeItem.vue'
 import DateRangeItem from '@/lib/Filter/components/DateRangeItem.vue'
@@ -15,8 +15,8 @@ import SelectItem from '@/lib/Filter/components/SelectItem.vue'
 import AutoCompleteItem from '@/lib/Filter/components/AutoCompleteItem.vue'
 
 const props = defineProps({
-  internalValue: {type: Array<any>, required: true},
-  modelValue: {type: Object},
+  internalValue: { type: Array<any>, required: true },
+  modelValue: { type: Object },
   replaceWindowLocation: Boolean,
   translations: {
     type: Object,
@@ -73,7 +73,7 @@ const trans: any = {
   AutoCompleteItem: {},
   MultipleSelectItem: t.multipleSelect,
   LinkageSelectItem: {},
-  LinkageSelectItemRemote: {},
+  LinkageSelectItemRemote: {}
 }
 
 const getSelectedIndexes = (value: FilterItem[]): number[] => {
@@ -176,7 +176,7 @@ const foldedFilters = computed(() => {
         @clear="clear"
       ></item-filter>
     </div>
-    <v-spacer/>
+    <v-spacer />
     <v-btn
       @click="clearAll"
       variant="text"

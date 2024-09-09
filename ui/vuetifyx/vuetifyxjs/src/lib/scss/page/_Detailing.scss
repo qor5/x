@@ -130,7 +130,7 @@
     border-block-end-style: solid;
     border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity));
   }
-  
+
   .section-wrap:not(:last-child) .listing-compo-wrap {
     padding-bottom: 26px;
     border-block-end-width: thin;
@@ -139,9 +139,8 @@
   }
 
   .listing-compo-wrap .list-table-wrap {
-    padding-left:0;
-    padding-right:0;
-    padding-top:0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
   }
 }
-

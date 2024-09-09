@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, onMounted, onUpdated, PropType, reactive, Ref, ref} from 'vue'
+import { computed, onMounted, onUpdated, PropType, reactive, Ref, ref } from 'vue'
 import draggable from 'vuedraggable'
 import get from 'lodash/get'
 
@@ -15,11 +15,11 @@ enum Variant {
 
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
-  modelValue: {type: String},
-  variant: {type: String as PropType<Variant>, default: 'underlined'},
-  density: {type: String as PropType<null | 'default' | 'comfortable' | 'compact'>},
-  items: {type: Array<any>, default: []},
-  cacheItems: {type: Array<any>, default: []},
+  modelValue: { type: String },
+  variant: { type: String as PropType<Variant>, default: 'underlined' },
+  density: { type: String as PropType<null | 'default' | 'comfortable' | 'compact'> },
+  items: { type: Array<any>, default: [] },
+  cacheItems: { type: Array<any>, default: [] },
   isPaging: Boolean,
   hasIcon: Boolean,
   hideSelected: Boolean,
@@ -27,21 +27,21 @@ const props = defineProps({
   clearable: Boolean,
   chips: Boolean,
   sorting: Boolean,
-  itemTitle: {type: String, default: 'text'},
-  itemValue: {type: String, default: 'value'},
-  itemIcon: {type: String, default: 'icon'},
-  pageField: {type: String, default: 'page'},
-  pagesField: {type: String, default: 'pages'},
-  pageSizeField: {type: String, default: 'pageSize'},
-  totalField: {type: String, default: 'total'},
-  itemsField: {type: String, default: 'items'},
-  currentField: {type: String, default: 'current'},
-  searchField: {type: String, default: 'search'},
+  itemTitle: { type: String, default: 'text' },
+  itemValue: { type: String, default: 'value' },
+  itemIcon: { type: String, default: 'icon' },
+  pageField: { type: String, default: 'page' },
+  pagesField: { type: String, default: 'pages' },
+  pageSizeField: { type: String, default: 'pageSize' },
+  totalField: { type: String, default: 'total' },
+  itemsField: { type: String, default: 'items' },
+  currentField: { type: String, default: 'current' },
+  searchField: { type: String, default: 'search' },
   chipColor: String,
   remoteUrl: String,
-  page: {type: Number, default: 1},
-  pageSize: {type: Number, default: 20},
-  errorMessages: {type: String || Array<String> || null}
+  page: { type: Number, default: 1 },
+  pageSize: { type: Number, default: 20 },
+  errorMessages: { type: String || Array<String> || null }
 })
 const listItems: Ref<Array<any>> = ref([...props.items])
 const value = ref()
@@ -249,7 +249,7 @@ const chipsVisible = computed(() => {
                   loadRemoteItems()
                 }
               "
-            >Load more
+              >Load more
             </v-btn>
             <v-divider vertical></v-divider>
             <span> {{ current }}/{{ total }} </span>
