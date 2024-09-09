@@ -30,13 +30,14 @@
           :disabled="disabled"
           :error-message="errorMessage(i)"
           :select-out-of-order="selectOutOfOrder"
-          @update:model-value="changeStatus($event,i)"
+          @update:model-value="changeStatus($event, i)"
         ></autocomplete>
       </v-col>
     </v-row>
     <div v-else>
       <autocomplete
-        v-for="(v, i) in labels" :key="i"
+        v-for="(v, i) in labels"
+        :key="i"
         :chips="chips"
         :level="i"
         :label="v"
@@ -64,58 +65,61 @@
         :disabled="disabled"
         :error-message="errorMessage(i)"
         :select-out-of-order="selectOutOfOrder"
-        @update:model-value="changeStatus($event,i)"
+        @update:model-value="changeStatus($event, i)"
       ></autocomplete>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {onMounted, reactive, ref} from 'vue'
-import Autocomplete from "@/lib/LinkageSelectRemote/components/LinkSelectAutoComplete.vue";
+import { onMounted, reactive, ref } from 'vue'
+import Autocomplete from '@/lib/LinkageSelectRemote/components/LinkSelectAutoComplete.vue'
 
 import get from 'lodash/get'
 
 const props = defineProps({
-  modelValue: {type: Array<Object>, default: []},
-  labels: {type: Array<string>, default: []},
-  selectOutOfOrder: {type: Boolean, default: false},
-  row: {type: Boolean, default: false},
-  errorMessages: {type: Array<string>, default: []},
-  disabled: {type: Boolean, default: false},
-  chips: {type: Boolean, default: false},
-  hideDetails: {type: Boolean, default: false},
+  modelValue: { type: Array<Object>, default: [] },
+  labels: { type: Array<string>, default: [] },
+  selectOutOfOrder: { type: Boolean, default: false },
+  row: { type: Boolean, default: false },
+  errorMessages: { type: Array<string>, default: [] },
+  disabled: { type: Boolean, default: false },
+  chips: { type: Boolean, default: false },
+  hideDetails: { type: Boolean, default: false },
 
-  isPaging: {type: Boolean, default: false},
-  itemTitle: {type: String, default: 'Name'},
-  itemValue: {type: String, default: 'ID'},
-  pageField: {type: String, default: 'page'},
-  pagesField: {type: String, default: 'pages'},
-  pageSizeField: {type: String, default: 'pageSize'},
-  totalField: {type: String, default: 'total'},
-  itemsField: {type: String, default: 'data'},
-  currentField: {type: String, default: 'current'},
-  searchField: {type: String, default: 'search'},
+  isPaging: { type: Boolean, default: false },
+  itemTitle: { type: String, default: 'Name' },
+  itemValue: { type: String, default: 'ID' },
+  pageField: { type: String, default: 'page' },
+  pagesField: { type: String, default: 'pages' },
+  pageSizeField: { type: String, default: 'pageSize' },
+  totalField: { type: String, default: 'total' },
+  itemsField: { type: String, default: 'data' },
+  currentField: { type: String, default: 'current' },
+  searchField: { type: String, default: 'search' },
   remoteUrl: String,
-  page: {type: Number, default: 1},
-  pageSize: {type: Number, default: 20},
+  page: { type: Number, default: 1 },
+  pageSize: { type: Number, default: 20 },
 
-  parentField: {type: String, default: "parent"},
-  parentIdField: {type: String, default: "parentID"},
-  levelField: {type: String, default: "level"},
-  levelStart: {type: Number, default: 0},
-  levelStep: {type: Number, default: 1},
-
+  parentField: { type: String, default: 'parent' },
+  parentIdField: { type: String, default: 'parentID' },
+  levelField: { type: String, default: 'level' },
+  levelStart: { type: Number, default: 0 },
+  levelStep: { type: Number, default: 1 }
 })
-
 
 const emit = defineEmits(['update:modelValue'])
 
 const value = ref([...(props.modelValue ?? [])])
-const parentIDValue = reactive(props.labels.reduce((obj, _, index) => {
-  obj[index + 1] = '';
-  return obj;
-}, {} as { [key: number]: string }))
+const parentIDValue = reactive(
+  props.labels.reduce(
+    (obj, _, index) => {
+      obj[index + 1] = ''
+      return obj
+    },
+    {} as { [key: number]: string }
+  )
+)
 const changeStatus = (val: any, level: number) => {
   for (let i = props.labels.length - 1; i >= 0; i--) {
     if (i > level && !val) {
@@ -146,7 +150,7 @@ const changeStatus = (val: any, level: number) => {
   }
   //@ts-ignore
   parentIDValue[level + 1] = parentValue(level + 1)
-  emit("update:modelValue", value.value)
+  emit('update:modelValue', value.value)
 }
 const parentValue = (level: number): string => {
   if (props.selectOutOfOrder) {
@@ -157,20 +161,19 @@ const parentValue = (level: number): string => {
         return v[props.itemValue]
       }
     }
-    return ""
+    return ''
   }
   const val = value.value[level - 1]
 
   //@ts-ignore
-  return level - 1 >= 0 && val ? val[props.itemValue] : ""
+  return level - 1 >= 0 && val ? val[props.itemValue] : ''
 }
 
 const errorMessage = (level: number): string => {
   if (level > props.errorMessages.length - 1) {
-    return ""
+    return ''
   }
   return props.errorMessages[level]
-
 }
 
 onMounted(() => {
@@ -185,6 +188,5 @@ onMounted(() => {
     //@ts-ignore
     parentIDValue[i + 1] = item[props.itemValue]
   }
-
 })
 </script>
