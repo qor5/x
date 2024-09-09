@@ -11,7 +11,7 @@ hero:
       link: /Components/Button
     - theme: alt
       text: View on GitHub
-      link: https://github.com/liyao1520/promise-ui
+      link: https://github.com/qor5/x/tree/master/ui/vuetifyx
 features:
   - icon: 🔑
     title: 使用 Typescript
