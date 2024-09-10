@@ -25,6 +25,8 @@ if (options) {
       v-model="modelValue.valueIs"
       :visible="datePickerVisible"
       :hide-details="true"
+      :clear-text="translations['clear']"
+      :ok-text="translations['ok']"
       v-bind="option"
     />
   </div>

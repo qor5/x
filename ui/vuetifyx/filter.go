@@ -81,6 +81,8 @@ func (b *VXFilterBuilder) MarshalHTML(ctx context.Context) (r []byte, err error)
 			return {
 				date: {
 					to: 'to',
+					clear: 'Clear',
+					ok: 'OK',
 				},
 				number: {
 					equals: 'is equal to',
@@ -106,7 +108,9 @@ type FilterTranslations struct {
 	Apply string `json:"apply,omitempty"`
 
 	Date struct {
-		To string `json:"to,omitempty"`
+		To    string `json:"to,omitempty"`
+		Clear string `json:"clear,omitempty"`
+		OK    string `json:"ok,omitempty"`
 	} `json:"date,omitempty"`
 
 	Number struct {
