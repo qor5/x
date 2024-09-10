@@ -60,6 +60,16 @@ export interface linkageSelectRemoteOptions {
   levelField: string
 }
 
+export interface dateOptions {
+  label: string
+  disabled: boolean
+  loading: boolean
+  dateFormat: string
+  clearText: string
+  okText: string
+  datePickerProps: object
+}
+
 export interface FilterItem {
   key: string
   label: string
@@ -78,4 +88,5 @@ export interface FilterItem {
   translations?: IndependentTranslations
   linkageSelectData?: linkageSelectData
   autocompleteDataSource: autocompleteDataSource
+  dateOptions: dateOptions[]
 }
