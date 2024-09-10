@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import VxLinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
-import {ref} from "vue";
+import { ref } from 'vue'
 
 const props = defineProps<{
   modelValue: any

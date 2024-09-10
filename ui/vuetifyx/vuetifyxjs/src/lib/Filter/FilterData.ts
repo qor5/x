@@ -106,7 +106,7 @@ function pushSelectItem(segs: any, op: any) {
 function pushAutoCompleteItem(segs: any, op: any) {
   const mod = op.modifier || 'equals'
   if (mod === 'equals' && op.valueIs) {
-    let val = ""
+    let val = ''
     if (op.valueIs) {
       const source = op.autocompleteDataSource
       val = op.valueIs[source.itemTitle] + source.separator + op.valueIs[source.itemValue]
@@ -139,7 +139,7 @@ function pushLinkageSelectItem(segs: any, op: any) {
 function pushLinkageSelectItemRemote(segs: any, op: any) {
   const mod = op.modifier || 'equals'
   if (mod === 'equals' && op.valuesAre && op.valuesAre.length > 0) {
-    let values = [];
+    let values = []
     const source = op.linkageSelectData.linkageSelectRemoteOptions
     for (let i = 0; i < op.valuesAre.length; i++) {
       let item = op.valuesAre[i]
@@ -148,7 +148,7 @@ function pushLinkageSelectItemRemote(segs: any, op: any) {
       }
       values.push(item[source.itemTitle] + source.separator + item[source.itemValue])
     }
-    pushKeyVal(segs, op.key, '', values.join(","))
+    pushKeyVal(segs, op.key, '', values.join(','))
     return
   }
 }
@@ -190,7 +190,6 @@ export function filterData(data: any): any {
         pushLinkageSelectItem(r, op)
       }
       if (op.itemType === 'LinkageSelectItemRemote') {
-
         pushLinkageSelectItemRemote(r, op)
       }
       return op

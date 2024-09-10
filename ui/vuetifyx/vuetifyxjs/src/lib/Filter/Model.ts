@@ -26,7 +26,6 @@ export interface autocompleteDataSource {
 
   itemIcon: string
 
-
   pageField: string
   pagesField: string
   pageSizeField: string
@@ -34,7 +33,6 @@ export interface autocompleteDataSource {
   itemsField: string
   currentField: string
   searchField: string
-
 }
 
 export interface linkageSelectRemoteOptions {
@@ -60,9 +58,7 @@ export interface linkageSelectRemoteOptions {
   parentField: string
   parentIdField: string
   levelField: string
-
 }
-
 
 export interface FilterItem {
   key: string
