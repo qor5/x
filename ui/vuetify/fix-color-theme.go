@@ -66,6 +66,8 @@ const (
 	ColorGreyDarken2  = "grey-darken-2"
 	ColorGreyDarken3  = "grey-darken-3"
 	ColorGreyDarken4  = "grey-darken-4"
+	ColorAbsGreyLighten1 = "#BDBDBD"
+	ColorAbsGreyDarken3 = "#424242"
 
 	// Black colors
 	ColorBlack          = "black"
