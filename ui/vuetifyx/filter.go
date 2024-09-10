@@ -195,6 +195,7 @@ type FilterItem struct {
 	LinkageSelectData      FilterLinkageSelectData       `json:"linkageSelectData,omitempty"`
 	Invisible              bool                          `json:"invisible,omitempty"`
 	AutocompleteDataSource *AutocompleteDataSource       `json:"autocompleteDataSource,omitempty"`
+	DateOptions            *[]DateOption                 `json:"dateOptions,omitempty"`
 	Translations           FilterIndependentTranslations `json:"translations,omitempty"`
 	WrapInput              func(val string) interface{}  `json:"-"`
 }
@@ -533,4 +534,14 @@ func sqlcToCond(sqlc string, mod string) string {
 		return fmt.Sprintf(sqlc, sqlOps[mod])
 	}
 	return strings.NewReplacer(SQLOperatorPlaceholder, sqlOps[mod]).Replace(sqlc)
+}
+
+type DateOption struct {
+	Label           string      `json:"label,omitempty"`
+	Disabled        bool        `json:"disabled,omitempty"`
+	Loading         bool        `json:"loading,omitempty"`
+	DateFormat      bool        `json:"dateFormat,omitempty"`
+	ClearText       bool        `json:"clearText,omitempty"`
+	OkText          bool        `json:"okText,omitempty"`
+	DatePickerProps interface{} `json:"datePickerProps,omitempty"`
 }

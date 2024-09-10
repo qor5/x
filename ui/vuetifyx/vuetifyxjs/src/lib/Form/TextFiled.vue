@@ -17,16 +17,13 @@
 </template>
 
 <script setup>
- const props = defineProps({
+const props = defineProps({
   label: String,
   type: String,
   errorMessages: String,
   disabled: Boolean,
   attrs: Object
- })
-
+})
 </script>
 
-<style lang="less" scoped>
-
-</style>
+<style lang="less" scoped></style>
