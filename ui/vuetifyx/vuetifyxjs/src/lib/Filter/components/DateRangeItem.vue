@@ -34,6 +34,8 @@ if (options) {
       :key="modifier + 'form'"
       :visible="datePickerVisible"
       :hide-details="true"
+      :clear-text="translations['clear']"
+      :ok-text="translations['ok']"
       v-bind="fromOption"
     />
     <div style="height: 34px" class="pl-2 pt-4">
@@ -43,6 +45,8 @@ if (options) {
       v-model="modelValue.valueTo"
       :key="modifier + 'to'"
       :hide-details="true"
+      :clear-text="translations['clear']"
+      :ok-text="translations['ok']"
       v-bind="toOption"
     />
   </div>
