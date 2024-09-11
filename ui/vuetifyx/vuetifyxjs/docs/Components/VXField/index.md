@@ -69,10 +69,10 @@
     </v-col>
 
     <v-col cols="12" sm="6">
-      <vx-text-field
+      <vx-field
         model-value="Compact Outlined"
         label="Email"
-      ></vx-text-field>
+      ></vx-field>
     </v-col>
   </v-row>
 </template>

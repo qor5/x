@@ -55,12 +55,12 @@ export default {
           "link": "/Components/Checkbox/"
         },
         {
-          "text": "TextField 输入框",
-          "link": "/Components/TextField/"
+          "text": "VXField 输入框",
+          "link": "/Components/VXField/"
         },
         {
           "text": "SendVariables 组件",
-          "link": "/Components/TextField/sendVariables"
+          "link": "/Components/VXField/sendVariables"
         },
         {
           "text": "Select 选择器",

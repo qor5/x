@@ -34,6 +34,6 @@ declare module 'vue' {
     SendVariables: typeof import('./src/lib/SendVariables.vue')['default']
     StringItem: typeof import('./src/lib/Filter/components/StringItem.vue')['default']
     TextDatepicker: typeof import('./src/lib/TextDatepicker.vue')['default']
-    TextFiled: typeof import('./src/lib/Form/TextFiled.vue')['default']
+    VXField: typeof import('./src/lib/Form/VXField.vue')['default']
   }
 }
