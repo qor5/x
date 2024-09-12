@@ -63,8 +63,8 @@ export default {
           "link": "/Components/VXField/sendVariables"
         },
         {
-          "text": "Select 选择器",
-          "link": "/Components/Select/SelectMany/"
+          "text": "VXSelect 选择器",
+          "link": "/Components/VXSelect/"
         },
         {
           "text": "DatePicker 时间选择器",

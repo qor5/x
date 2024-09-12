@@ -33,7 +33,7 @@ const dataWithBinding = ref('hello world')
 
 <style scoped lang="css">
 * {
-  white-space: break-word;
+  word-break: break-word;
 }
 </style>
 ```

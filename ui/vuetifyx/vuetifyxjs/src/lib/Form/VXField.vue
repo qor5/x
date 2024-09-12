@@ -3,7 +3,7 @@
     <span class="text-subtitle-2 text-high-emphasis section-filed-label mb-2 d-sm-inline-block">
       {{ label }}
     </span>
-    <v-text-field class="section-field" density="compact" variant="outlined" :model-value="fiedValue"
+    <v-text-field density="compact" variant="outlined" :model-value="fiedValue"
       :type="type" :error-messages="errorMessages" :disabled="disabled" :placeholder="placeholder" v-bind="attrs"
       @update:modelValue="onUpdateModelValue" />
   </div>
