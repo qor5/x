@@ -11,6 +11,7 @@ declare module 'vue' {
     AutoCompleteExample: typeof import('./src/demo/components/AutoCompleteExample.vue')['default']
     AutoCompleteItem: typeof import('./src/lib/Filter/components/AutoCompleteItem.vue')['default']
     Button: typeof import('./src/demo/components/Button.vue')['default']
+    CallbackActionButton: typeof import('./src/lib/TiptapEditor/Extensions/CallbackActionButton.vue')['default']
     Card: typeof import('./src/demo/components/Card.vue')['default']
     Checkbox: typeof import('./src/demo/components/Checkbox.vue')['default']
     DateItem: typeof import('./src/lib/Filter/components/DateItem.vue')['default']
@@ -52,7 +53,7 @@ declare module 'vue' {
     TextDatepicker: typeof import('./src/lib/TextDatepicker.vue')['default']
     TextDatepickerExample: typeof import('./src/demo/components/TextDatepickerExample.vue')['default']
     TextField: typeof import('./src/demo/components/TextField.vue')['default']
-    TiptapEditor: typeof import('./src/lib/TiptapEditor.vue')['default']
+    TiptapEditor: typeof import('./src/lib/TiptapEditor/TiptapEditor.vue')['default']
     TiptapEditorExample: typeof import('./src/demo/components/TiptapEditorExample.vue')['default']
   }
 }

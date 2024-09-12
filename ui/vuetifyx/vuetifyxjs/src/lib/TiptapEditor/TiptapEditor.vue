@@ -1,5 +1,7 @@
 <template>
   <div class="border-thin rounded">
+    <!-- <VuetifyViewer v-if="readonly" v-bind="processedAttrs" :value="model">
+    </VuetifyViewer> -->
     <VuetifyTiptap v-bind="processedAttrs" v-model="model">
       <template #bottom>
         <div style="display: none"></div>
@@ -9,15 +11,30 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useAttrs } from 'vue'
+import { useLocale } from 'vuetify'
+import { locale } from 'vuetify-pro-tiptap'
+// i18n
+const { current: currentLocale } = useLocale()
+watchEffect(() => {
+  locale.setLang(currentLocale.value)
+})
+
+import { computed, useAttrs, watchEffect } from 'vue'
 import { Extension } from '@tiptap/core'
-import { VuetifyTiptap } from 'vuetify-pro-tiptap'
+import { VuetifyTiptap,VuetifyViewer } from 'vuetify-pro-tiptap'
 import { BaseKit, Bold, Italic, Underline, Strike, Color, Highlight, Heading, TextAlign, FontFamily, FontSize, SubAndSuperScript, BulletList, OrderedList, TaskList, Indent, Link, Image, Video, Table, Blockquote, HorizontalRule, Code, CodeBlock, Clear, Fullscreen, History } from 'vuetify-pro-tiptap'
-const extensionMap = { BaseKit, Bold, Italic, Underline, Strike, Color, Highlight, Heading, TextAlign, FontFamily, FontSize, SubAndSuperScript, BulletList, OrderedList, TaskList, Indent, Link, Image, Video, Table, Blockquote, HorizontalRule, Code, CodeBlock, Clear, Fullscreen, History }
+import Callback from './Extensions/CallbackActionButton'
+const extensionMap = { BaseKit, Bold, Italic, Underline, Strike, Color, Highlight, Heading, TextAlign, FontFamily, FontSize, SubAndSuperScript, BulletList, OrderedList, TaskList, Indent, Link, Image, Video, Table, Blockquote, HorizontalRule, Code, CodeBlock, Clear, Fullscreen, History, Callback }
 type ExtensionName = keyof typeof extensionMap
 
 const model: string | object | undefined = defineModel()
 const attrs = useAttrs()
+
+const props = withDefaults(defineProps<{
+  readonly?: boolean | undefined
+}>(),{
+  readonly: false,
+})
 
 function resolvedExtensions(
   extensions: Array<{ name: ExtensionName; options?: any }>
@@ -91,9 +108,13 @@ const processedAttrs = computed(() => {
     // TODO: hideable ?
     extensions = [...extensions,  { name: 'History' }]
   }
+  if (props.readonly) {}
   return {
     ...attrs,
-    'hide-bubble': attrs['hide-bubble'] !== undefined ? attrs['hide-bubble'] : true,
+    disabled: !!attrs.disabled || props.readonly,
+    'disable-toolbar': !!attrs['disable-toolbar'] || !!attrs.disabled || props.readonly,
+    'hide-toolbar': !!attrs['hide-toolbar'] || props.readonly,
+    'hide-bubble': attrs['hide-bubble'] !== undefined ? !!attrs['hide-bubble'] || props.readonly : true,
     extensions: resolvedExtensions(extensions)
   }
 })

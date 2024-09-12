@@ -2,11 +2,11 @@ package vuetifyx
 
 import (
 	"context"
+	"fmt"
 
 	h "github.com/theplant/htmlgo"
 )
 
-// TODO: not ready
 type VXTiptapEditorBuilder struct {
 	tag *h.HTMLTagBuilder
 }
@@ -33,12 +33,18 @@ func (b *VXTiptapEditorBuilder) Label(v string) (r *VXTiptapEditorBuilder) {
 	return b
 }
 
-func (b *VXTiptapEditorBuilder) SetAttr(k string, v interface{}) {
-	b.tag.SetAttr(k, v)
-}
-
 func (b *VXTiptapEditorBuilder) Attr(vs ...interface{}) (r *VXTiptapEditorBuilder) {
 	b.tag.Attr(vs...)
+	return b
+}
+
+func (b *VXTiptapEditorBuilder) Disabled(v bool) (r *VXTiptapEditorBuilder) {
+	b.tag.Attr(":disabled", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXTiptapEditorBuilder) Readonly(v bool) (r *VXTiptapEditorBuilder) {
+	b.tag.Attr(":readonly", fmt.Sprint(v))
 	return b
 }
 

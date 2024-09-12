@@ -1,79 +1,98 @@
 <template>
   <VApp id="app">
     <VContainer>
-      <TiptapEditor
-        v-model="content"
-        label=""
-        :min-height="200"
-        :max-height="465"
-        :hide-bubble="true"
-        :extensions="extensions"
-      />
-      <pre class="mt-4">{{ content }}</pre>
+      <VLocaleProvider locale="zhHans">
+        <TiptapEditor
+          v-model="content"
+          label=""
+          :min-height="200"
+          :max-height="265"
+          :hide-bubble="true"
+          :extensions="extensions"
+          :disabled="false"
+          :readonly="false"
+        />
+        <p class="mt-4">{{ content }}</p>
+      </VLocaleProvider>
     </VContainer>
   </VApp>
 </template>
 
 <script setup lang="ts">
-import TiptapEditor from '@/lib/TiptapEditor.vue'
+import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 import { ref } from 'vue'
 
-// const extensions = ref([
-// //   { 
-// //     name: 'BaseKit', 
-// //     options: { 
-// //         placeholder: { 
-// //             placeholder: 'Enter some text...' 
-// //         }
-// //     }
-// //   },
-//   { name: 'Bold' },
-//   { name: 'Italic' },
-//   { name: 'Underline' },
-//   { name: 'Strike' },
-//   { name: 'Code', options: { divider: true } },
-//   { name: 'Heading' },
-//   { name: 'TextAlign' },
-// //   // { name: 'FontFamily' },
-// //   // { name: 'FontSize' },
-//   { name: 'Color' },
-//   { name: 'Highlight', options: { divider: true } },
-// //   // { name: 'SubAndSuperScript', options: { divider: true } },
-//   { name: 'BulletList' },
-//   { name: 'OrderedList', options: { divider: true } },
-// //   // { name: 'TaskList' },
-//   { name: 'Indent', options: { divider: true } },
-//   { name: 'Link' },
-//   { name: 'Video', options: { divider: true } },
-//   // { name: 'Table', options: { divider: true } },
-//   { name: 'Blockquote' },
-//   { name: 'HorizontalRule' },
-//   { name: 'CodeBlock', options: { divider: true } },
-//   { name: 'Clear' },
-//   { name: 'History', options: { divider: true } },
-// //   { name: 'Fullscreen' },
-// ])
-
-// slack-like
 const extensions = ref([
+//   { 
+//     name: 'BaseKit', 
+//     options: { 
+//         placeholder: { 
+//             placeholder: 'Enter some text...' 
+//         }
+//     }
+//   },
+  { name: 'Bold' },
+  { name: 'Italic' },
+  { name: 'Underline' },
+  { name: 'Strike' },
+  { name: 'Code', options: { divider: true } },
+  { name: 'Heading' },
+  { name: 'TextAlign', options: {
+        types: ['heading', 'paragraph'],
+    } },
+  { name: 'FontFamily' },
+  { name: 'FontSize' },
+  { name: 'Color' },
+  { name: 'Highlight', options: { divider: true } },
+//   // { name: 'SubAndSuperScript', options: { divider: true } },
+  { name: 'BulletList' },
+  { name: 'OrderedList', options: { divider: true } },
+//   // { name: 'TaskList' },
+  { name: 'Indent', options: { divider: true } },
+  { name: 'Link' },
+  { name: 'Image',options: { hiddenTabs: ["upload"] } },
+  { name: 'Video', options: { divider: true } },
+  // { name: 'Table', options: { divider: true } },
+  { name: 'Blockquote' },
+  { name: 'HorizontalRule' },
+  { name: 'CodeBlock', options: { divider: true } },
+  { name: 'Clear' },
+  { name: 'History', options: { divider: true } },
+//   { name: 'Fullscreen' },
   { 
-    name: 'BaseKit', 
+    name: 'Callback', 
     options: { 
-        placeholder: { 
-            placeholder: 'Jot something down...' 
+        divider: true,
+        tooltip: "callback",
+        icon:"mdi-file-code-outline",
+        click: ({editor, extension}: {editor: any, extension: any}) => {
+            console.log(editor,extension)
+            alert(extension.name)
         }
     }
   },
-  { name: 'Bold' },
-  { name: 'Italic' },
-  { name: 'Strike', options: { divider: true } },
-  { name: 'Link' , options: { divider: true } },
-  { name: 'OrderedList'},
-  { name: 'BulletList', options: { divider: true } },
-  { name: 'Blockquote',  options: { divider: true }  },
-  { name: 'Code'},
-  { name: 'CodeBlock'},
 ])
+
+// slack-like
+// const extensions = ref([
+//   { 
+//     name: 'BaseKit', 
+//     options: { 
+//         placeholder: { 
+//             placeholder: 'Jot something down...' 
+//         }
+//     }
+//   },
+//   { name: 'Bold' },
+//   { name: 'Italic' },
+//   { name: 'Strike', options: { divider: true } },
+//   { name: 'Link' , options: { divider: true } },
+//   { name: 'OrderedList'},
+//   { name: 'BulletList', options: { divider: true } },
+//   { name: 'Blockquote',  options: { divider: true }  },
+//   { name: 'Code'},
+//   { name: 'CodeBlock'},
+// ])
 
 const content = ref(`<h2>
             Hi there,

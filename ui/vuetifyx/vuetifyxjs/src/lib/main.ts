@@ -14,7 +14,7 @@ import draggable from 'vuedraggable'
 import SendVariables from '@/lib/SendVariables.vue'
 import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
-import TiptapEditor from './TiptapEditor.vue'
+import TiptapEditor from './TiptapEditor/TiptapEditor.vue'
 import { registerPlugins, registerVuetify2Window } from '@/lib/plugins'
 
 const vuetifyx = {
