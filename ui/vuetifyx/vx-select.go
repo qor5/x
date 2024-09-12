@@ -3,13 +3,11 @@ package vuetifyx
 import (
 	"context"
 
-	"github.com/qor5/x/v3/ui/vuetify"
 	h "github.com/theplant/htmlgo"
 )
 
 type VXSelectBuilder struct {
 	tag           *h.HTMLTagBuilder
-	selectedItems interface{}
 	items         interface{}
 }
 
@@ -21,17 +19,12 @@ func VXSelect(children ...h.HTMLComponent) (r *VXSelectBuilder) {
 }
 
 func (b *VXSelectBuilder) ErrorMessages(v ...string) (r *VXSelectBuilder) {
-	vuetify.SetErrorMessages(b.tag, v)
+	b.tag.Attr("error-messages", v)
 	return b
 }
 
 func (b *VXSelectBuilder) Items(v interface{}) (r *VXSelectBuilder) {
-	b.items = v
-	return b
-}
-
-func (b *VXSelectBuilder) SelectedItems(v interface{}) (r *VXSelectBuilder) {
-	b.selectedItems = v
+	b.tag.Attr(":items", b.items)
 	return b
 }
 
@@ -41,11 +34,5 @@ func (b *VXSelectBuilder) FieldName(v string) (r *VXSelectBuilder) {
 }
 
 func (b *VXSelectBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	if b.items == nil {
-		b.items = b.selectedItems
-	}
-	b.tag.Attr(":items", b.items)
-	b.tag.Attr(":selected-items", b.selectedItems)
-
 	return b.tag.MarshalHTML(ctx)
 }

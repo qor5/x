@@ -1,80 +1,41 @@
-# vx-text-field 输入框
+# vx-field 输入框
 
 ## 基本用法
+
+```html
+<vx-field model-value="Hello World" label="field1" />
+
+```
 
 :::demo
 
 ```vue
 <template>
-    <v-row>
-    <v-col cols="12" sm="6">
-      <v-text-field label="Regular" model-value="John Doe" disabled></v-text-field>
+  <v-row>
+    <v-col cols="6" sm="6">
+      <vx-field :model-value="dataNoBinding" label="field1" />
     </v-col>
+    <v-col cols="6" class="pt-12"><b> no binding:</b> {{ dataNoBinding }} </v-col>
 
-    <v-col cols="12" sm="6">
-      <v-text-field label="Regular" model-value="John Doe" readonly></v-text-field>
+    <v-col cols="6" sm="6">
+      <vx-field v-model="dataWithBinding" label="field2" />
     </v-col>
-
-    <v-col cols="12" sm="6">
-      <v-text-field label="Solo" model-value="John Doe" variant="solo" disabled></v-text-field>
-    </v-col>
-
-    <v-col cols="12" sm="6">
-      <v-text-field label="Solo" model-value="John Doe" variant="solo" readonly></v-text-field>
-    </v-col>
-
-    <v-col cols="12" sm="6">
-      <v-text-field
-        label="Outlined"
-        model-value="John Doe"
-        variant="outlined"
-        disabled
-      ></v-text-field>
-    </v-col>
-
-    <v-col cols="12" sm="6">
-      <v-text-field
-        label="Outlined"
-        model-value="John Doe"
-        variant="outlined"
-        readonly
-      ></v-text-field>
-    </v-col>
-
-    <v-col cols="12" sm="6">
-      <v-text-field
-        label="underlined"
-        model-value="John Doe"
-        variant="underlined"
-        disabled
-      ></v-text-field>
-    </v-col>
-
-    <v-col cols="12" sm="6">
-      <v-text-field
-        label="underlined"
-        model-value="John Doe"
-        variant="underlined"
-        readonly
-      ></v-text-field>
-    </v-col>
-
-    <v-col cols="12" sm="6">
-      <v-text-field
-        model-value="Compact Outlined"
-        variant="outlined"
-        density="compact"
-        readonly
-      ></v-text-field>
-    </v-col>
-
-    <v-col cols="12" sm="6">
-      <vx-field
-        model-value="Compact Outlined"
-        label="Email"
-      ></vx-field>
-    </v-col>
+    <v-col cols="6" class="pt-12"><b> with binding:</b> {{ dataWithBinding }} </v-col>
   </v-row>
 </template>
+
+<script setup>
+import { ref } from 'vue'
+
+const dataNoBinding = ref('hello world')
+const dataWithBinding = ref('hello world')
+</script>
+
+<style scoped lang="css">
+* {
+  white-space: break-word;
+}
+</style>
 ```
+
 :::

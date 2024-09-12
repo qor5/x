@@ -35,5 +35,6 @@ declare module 'vue' {
     StringItem: typeof import('./src/lib/Filter/components/StringItem.vue')['default']
     TextDatepicker: typeof import('./src/lib/TextDatepicker.vue')['default']
     VXField: typeof import('./src/lib/Form/VXField.vue')['default']
+    VXSelect: typeof import('./src/lib/Form/VXSelect.vue')['default']
   }
 }

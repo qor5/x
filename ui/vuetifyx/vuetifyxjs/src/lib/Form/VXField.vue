@@ -3,15 +3,17 @@
     <span class="text-subtitle-2 text-high-emphasis section-filed-label mb-2 d-sm-inline-block">
       {{ label }}
     </span>
-    <v-text-field class="section-field" density="compact" variant="outlined" :value="modelValue"
+    <v-text-field class="section-field" density="compact" variant="outlined" :model-value="fiedValue"
       :type="type" :error-messages="errorMessages" :disabled="disabled" :placeholder="placeholder" v-bind="attrs"
       @update:modelValue="onUpdateModelValue" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineEmits } from "vue"
-defineProps({
+import { defineEmits, ref, watch } from "vue"
+
+const emit = defineEmits(["update:modelValue"])
+const props = defineProps({
   modelValue: [String, Number],
   label: String,
   type: String,
@@ -21,22 +23,20 @@ defineProps({
   placeholder: String
 })
 
-const emit = defineEmits(["update:modelValue"])
+const fiedValue = ref(props.modelValue)
+
+watch(() => props.modelValue, (newValue) => {
+  fiedValue.value = newValue
+})
 
 function onUpdateModelValue(value: any) {
   emit("update:modelValue", value)
+  fiedValue.value = value
 }
 
 </script>
 
 <style lang="scss" scoped>
-// @media (hover: hover) {
-//   .vx-field-wrap .v-input:deep(.v-field:not(.v-field--focused)):hover .v-field__outline {
-
-//       --v-field-border-opacity:1
-//   }
-// }
-
 .vx-field-wrap {
   margin-bottom: 2px;
 

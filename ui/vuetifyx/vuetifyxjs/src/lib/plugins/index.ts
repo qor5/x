@@ -20,6 +20,7 @@ import SendVariables from '@/lib/SendVariables.vue'
 import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
 import VXField from '@/lib/Form/VXField.vue'
+import VXSelect from '@/lib/Form/VXSelect.vue'
 declare const window: any
 
 const vuetifyx = {
@@ -38,6 +39,7 @@ const vuetifyx = {
     app.component('vx-messagelistener', MessageListener)
     app.component('vx-overlay', Overlay)
     app.component('vx-field', VXField)
+    app.component('vx-select', VXSelect)
   }
 }
 
