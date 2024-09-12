@@ -145,6 +145,8 @@ const changeStatus = (val: any, level: number) => {
   if (!val || parentIDValue[level + 1] != val[props.itemValue]) {
     for (let i = level + 1; i < props.labels.length; i++) {
       //@ts-ignore
+      parentIDValue[i] = undefined
+      //@ts-ignore
       value.value[i] = undefined
     }
   }
