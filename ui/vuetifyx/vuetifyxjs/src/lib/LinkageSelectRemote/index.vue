@@ -148,8 +148,10 @@ const changeStatus = (val: any, level: number) => {
       value.value[i] = undefined
     }
   }
-  //@ts-ignore
-  parentIDValue[level + 1] = parentValue(level + 1)
+  for (let i = level + 1; i < props.labels.length; i++) {
+    //@ts-ignore
+    parentIDValue[i] = parentValue(i)
+  }
   emit('update:modelValue', value.value)
 }
 const parentValue = (level: number): string => {
