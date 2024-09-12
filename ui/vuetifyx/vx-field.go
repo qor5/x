@@ -33,6 +33,11 @@ func (b *VXFieldBuilder) Focused(v bool) (r *VXFieldBuilder) {
 	return b
 }
 
+func (b *VXFieldBuilder) Placeholder(v string) (r *VXFieldBuilder) {
+	b.tag.Attr("placeholder", v)
+	return b
+}
+
 func (b *VXFieldBuilder) Reverse(v bool) (r *VXFieldBuilder) {
 	b.tag.Attr(":reverse", fmt.Sprint(v))
 	return b
