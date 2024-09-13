@@ -37,9 +37,7 @@ const extensions = ref([
   { name: 'Strike' },
   { name: 'Code', options: { divider: true } },
   { name: 'Heading' },
-  { name: 'TextAlign', options: {
-        types: ['heading', 'paragraph'],
-    } },
+  { name: 'TextAlign', options: { types: ['heading', 'paragraph', 'image'] } },
   { name: 'FontFamily' },
   { name: 'FontSize' },
   { name: 'Color' },
@@ -50,7 +48,7 @@ const extensions = ref([
 //   // { name: 'TaskList' },
   { name: 'Indent', options: { divider: true } },
   { name: 'Link' },
-  { name: 'Image',options: { hiddenTabs: ["upload"] } },
+  { name: 'Image', options: { hiddenTabs: ["upload"] } },
   { name: 'Video', options: { divider: true } },
   // { name: 'Table', options: { divider: true } },
   { name: 'Blockquote' },
@@ -59,18 +57,29 @@ const extensions = ref([
   { name: 'Clear' },
   { name: 'History', options: { divider: true } },
 //   { name: 'Fullscreen' },
-  { 
-    name: 'Callback', 
-    options: { 
-        divider: true,
-        tooltip: "callback",
-        icon:"mdi-file-code-outline",
-        click: ({editor, extension}: {editor: any, extension: any}) => {
-            console.log(editor,extension)
-            alert(extension.name)
-        }
-    }
-  },
+  // { 
+  //   name: 'Callback', 
+  //   options: { 
+  //       divider: true,
+  //       tooltip: "Image",
+  //       icon:"mdi-image",
+  //       isDisabled: ({editor}: {editor: any, extension: any}) => {
+  //           return !editor.can().setImage({})
+  //       },
+  //       isActive: ({editor}: {editor: any, extension: any}) => {
+  //           return () => editor.isActive('image') || false
+  //       },
+  //       onAction: ({editor}: {editor: any, extension: any}) => {
+  //           editor.chain().focus().setImage({
+  //               display: 'block', // 'block' 'inline' 'left' 'right'
+  //               src: 'https://picsum.photos/300/200',
+  //               alt: 'Random image',
+  //               width: 300,
+  //               height: 200,
+  //           }).run()
+  //       }
+  //   }
+  // },
 ])
 
 // slack-like

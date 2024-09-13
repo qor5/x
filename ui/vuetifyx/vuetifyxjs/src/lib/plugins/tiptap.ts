@@ -2,7 +2,7 @@ import { VuetifyTiptap, VuetifyViewer, createVuetifyProTipTap } from 'vuetify-pr
 import 'vuetify-pro-tiptap/style.css'
 
 export const vuetifyProTipTap = createVuetifyProTipTap({
-  lang: 'en', // TODO: i18n
+  lang: 'en', 
   components: {
     VuetifyTiptap,
     VuetifyViewer

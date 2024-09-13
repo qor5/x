@@ -48,6 +48,16 @@ func (b *VXTiptapEditorBuilder) Readonly(v bool) (r *VXTiptapEditorBuilder) {
 	return b
 }
 
+func (b *VXTiptapEditorBuilder) Value(v string) (r *VXTiptapEditorBuilder) {
+	b.Attr(":model-value", h.JSONString(v))
+	return b
+}
+
+func (b *VXTiptapEditorBuilder) MarkdownTheme(v string) (r *VXTiptapEditorBuilder) {
+	b.Attr(":markdown-theme", h.JSONString(v))
+	return b
+}
+
 func (b *VXTiptapEditorBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }

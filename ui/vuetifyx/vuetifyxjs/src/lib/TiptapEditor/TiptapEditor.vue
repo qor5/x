@@ -2,7 +2,7 @@
   <div class="border-thin rounded">
     <!-- <VuetifyViewer v-if="readonly" v-bind="processedAttrs" :value="model">
     </VuetifyViewer> -->
-    <VuetifyTiptap v-bind="processedAttrs" v-model="model">
+    <VuetifyTiptap v-bind="processedAttrs" v-model="model" >
       <template #bottom>
         <div style="display: none"></div>
       </template>
@@ -21,7 +21,7 @@ watchEffect(() => {
 
 import { computed, useAttrs, watchEffect } from 'vue'
 import { Extension } from '@tiptap/core'
-import { VuetifyTiptap,VuetifyViewer } from 'vuetify-pro-tiptap'
+import { VuetifyTiptap, useContext } from 'vuetify-pro-tiptap'
 import { BaseKit, Bold, Italic, Underline, Strike, Color, Highlight, Heading, TextAlign, FontFamily, FontSize, SubAndSuperScript, BulletList, OrderedList, TaskList, Indent, Link, Image, Video, Table, Blockquote, HorizontalRule, Code, CodeBlock, Clear, Fullscreen, History } from 'vuetify-pro-tiptap'
 import Callback from './Extensions/CallbackActionButton'
 const extensionMap = { BaseKit, Bold, Italic, Underline, Strike, Color, Highlight, Heading, TextAlign, FontFamily, FontSize, SubAndSuperScript, BulletList, OrderedList, TaskList, Indent, Link, Image, Video, Table, Blockquote, HorizontalRule, Code, CodeBlock, Clear, Fullscreen, History, Callback }
@@ -68,7 +68,7 @@ const defaultExtensions: Array<{ name: ExtensionName; options?: any }> = [
   { name: 'Strike' },
   { name: 'Code', options: { divider: true } },
   { name: 'Heading' },
-  { name: 'TextAlign' }, // TODO: unavailable
+  { name: 'TextAlign', options: { types: ['heading', 'paragraph', 'image'] } },
   // { name: 'FontFamily' },
   // { name: 'FontSize' },
   { name: 'Color' },
@@ -86,7 +86,7 @@ const defaultExtensions: Array<{ name: ExtensionName; options?: any }> = [
   { name: 'CodeBlock', options: { divider: true } },
   { name: 'Clear' },
   { name: 'History', options: { divider: true } },
-  { name: 'Fullscreen' },
+  // { name: 'Fullscreen' },
 ]
 
 const processedAttrs = computed(() => {
@@ -108,7 +108,6 @@ const processedAttrs = computed(() => {
     // TODO: hideable ?
     extensions = [...extensions,  { name: 'History' }]
   }
-  if (props.readonly) {}
   return {
     ...attrs,
     disabled: !!attrs.disabled || props.readonly,
@@ -117,5 +116,12 @@ const processedAttrs = computed(() => {
     'hide-bubble': attrs['hide-bubble'] !== undefined ? !!attrs['hide-bubble'] || props.readonly : true,
     extensions: resolvedExtensions(extensions)
   }
+})
+
+// vuetify-pro-tiptap bug
+// we need to force update the theme
+const { state } = useContext()
+watchEffect(() => {
+  state.defaultMarkdownTheme = (attrs['markdown-theme'] as string) || 'default'
 })
 </script>
