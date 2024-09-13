@@ -1,7 +1,7 @@
 <template>
   <div class="vx-field-wrap">
     <span class="text-subtitle-2 text-high-emphasis mb-2 d-inline-flex align-center">
-      {{ label }}<IconTip v-if="tips !== undefined" :text="tips" class="ml-2"/>
+      {{ label }}<IconTip v-if="tips !== undefined" :text="tips" class="ml-1"/>
     </span>
     <v-text-field density="compact" variant="outlined" :model-value="fiedValue"
       :type="type" :error-messages="errorMessages" :disabled="disabled" :placeholder="placeholder" v-bind="attrs"

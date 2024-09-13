@@ -1,7 +1,7 @@
 <template>
   <div class="vx-select-wrap">
     <span class="text-subtitle-2 text-high-emphasis mb-2 d-inline-flex align-center">
-      {{ label }}<IconTip v-if="tips !== undefined" :text="tips" class="ml-2"/>
+      {{ label }}<IconTip v-if="tips !== undefined" :text="tips" class="ml-1"/>
     </span>
     <v-autocomplete
       v-if="type === 'autocomplete'"
@@ -95,7 +95,8 @@ function onUpdateModelValue(value: any) {
       }
     }
 
-    &:deep(.v-autocomplete__selection) {
+    &:deep(.v-autocomplete__selection),
+    &:deep(.v-select__selection) {
       margin-inline-end: 4px;
       .v-chip {
         color: rgb(var(--v-theme-primary))

@@ -36,7 +36,6 @@
       font-weight: 500;
       line-height: 36px; /* 128.571% */
       letter-spacing: -0.12px;
-      // color: rgb(var(--v-theme-on-surface))
     }
   }
 
@@ -127,8 +126,12 @@
       display: flex;
       align-items: center;
 
-      .v-icon.v-icon--size-default {
-        font-size: 20px;
+      .v-icon.v-icon--size-small {
+        font-size: 16px;
+      }
+
+      .v-icon {
+        color: rgb(var(--v-theme-grey-darken-1));
       }
     }
 
@@ -178,9 +181,7 @@
       right:0;
       top:0;
     }
-    &.bottom-area {
-      margin-top: 24px;
-    }
+
     .v-btn {
       color: rgb(var(--v-theme-primary));
       border-radius: 4px;

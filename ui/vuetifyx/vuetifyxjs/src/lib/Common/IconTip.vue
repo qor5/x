@@ -14,11 +14,11 @@ const props = defineProps({
   text: String,
   icon: {
     type: String,
-    default: "mdi-help-circle-outline"
+    default: "mdi-information-outline"
   },
   iconSize: {
     type: String,
-    default: "default"
+    default: "small"
   },
 
 })
@@ -27,8 +27,12 @@ const props = defineProps({
 
 <style lang="scss" scoped>
 .v-icon {
-  color: rgb(var(--v-theme-grey-lighten-1));
+  color: rgb(var(--v-theme-grey-darken-1));
   cursor: pointer;
-  font-size: 20px;
+
+  &.v-icon--size-small {
+    font-size: 16px;
+  }
+
 }
 </style>
