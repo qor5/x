@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "comp": "tsx ./scripts/new-demo-doc.ts",
+    "comp": "npx tsx ./scripts/new-demo-doc.ts",
     "dev": "vitepress dev docs",
     "build": "vue-tsc --noEmit && vite build ",
     "build:lib": "cross-env NODE_ENV=lib babel src --out-dir lib --source-maps --extensions \".ts\",\".tsx\",\".snap\" --copy-files --no-copy-ignored --out-file-extension .mjs",

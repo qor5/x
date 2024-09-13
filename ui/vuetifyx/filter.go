@@ -166,6 +166,7 @@ const (
 type FilterItemInTheLastUnit string
 
 type FilterData []*FilterItem
+type ValidateFunc func(ctx *web.EventContext, vErr *web.ValidationErrors, it *FilterItem)
 
 type SelectItem struct {
 	Text         string `json:"text,omitempty"`
@@ -202,6 +203,7 @@ type FilterItem struct {
 	DateOptions            *[]DateOption                 `json:"dateOptions,omitempty"`
 	Translations           FilterIndependentTranslations `json:"translations,omitempty"`
 	WrapInput              func(val string) interface{}  `json:"-"`
+	ValidateFunc           ValidateFunc                  `json:"-"`
 }
 
 func (fd FilterData) Clone() (r FilterData) {
@@ -260,7 +262,8 @@ var sqlOps = map[string]string{
 
 const SQLOperatorPlaceholder = "{op}"
 
-func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs []interface{}) {
+func (fd FilterData) SetByQueryString(ctx *web.EventContext, qs string) (sqlCondition string, sqlArgs []interface{}, vErr web.ValidationErrors) {
+
 	queryMap, err := url.ParseQuery(qs)
 	if err != nil {
 		panic(err)
@@ -299,6 +302,7 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 		if _, ok := keyModValueMap[key]; !ok {
 			keyModValueMap[key] = map[string]string{}
 		}
+
 		if v[0] == "" {
 			continue
 		}
@@ -375,7 +379,6 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 			if it.Key != k {
 				continue
 			}
-
 			if len(mv) == 2 {
 				it.Selected = true
 				it.Modifier = ModifierBetween
@@ -495,6 +498,9 @@ func (fd FilterData) SetByQueryString(qs string) (sqlCondition string, sqlArgs [
 					}
 
 				}
+			}
+			if it.ValidateFunc != nil {
+				it.ValidateFunc(ctx, &vErr, it)
 			}
 		}
 	}

@@ -96,20 +96,20 @@ const internalValue = ref([
           }
         ],
         [
-          { ID: '1', Name: '杭州', ChildrenIDs: ['1', '2'] },
-          { ID: '2', Name: '宁波', ChildrenIDs: ['3', '4'] },
-          { ID: '3', Name: '南京', ChildrenIDs: ['5', '6'] },
-          { ID: '4', Name: '苏州', ChildrenIDs: ['7', '8'] }
+          {ID: '1', Name: '杭州', ChildrenIDs: ['1', '2']},
+          {ID: '2', Name: '宁波', ChildrenIDs: ['3', '4']},
+          {ID: '3', Name: '南京', ChildrenIDs: ['5', '6']},
+          {ID: '4', Name: '苏州', ChildrenIDs: ['7', '8']}
         ],
         [
-          { ID: '1', Name: '拱墅区' },
-          { ID: '2', Name: '西湖区' },
-          { ID: '3', Name: '镇海区' },
-          { ID: '4', Name: '鄞州区' },
-          { ID: '5', Name: '鼓楼区' },
-          { ID: '6', Name: '玄武区' },
-          { ID: '7', Name: '常熟区' },
-          { ID: '8', Name: '吴江区' }
+          {ID: '1', Name: '拱墅区'},
+          {ID: '2', Name: '西湖区'},
+          {ID: '3', Name: '镇海区'},
+          {ID: '4', Name: '鄞州区'},
+          {ID: '5', Name: '鼓楼区'},
+          {ID: '6', Name: '玄武区'},
+          {ID: '7', Name: '常熟区'},
+          {ID: '8', Name: '吴江区'}
         ]
       ],
       labels: ['Province', 'City', 'District'],
@@ -141,28 +141,49 @@ const internalValue = ref([
     selected: true,
     valueIs: '1',
     options: [
-      { text: '高节', value: '1' },
-      { text: '地界', value: '3' }
+      {text: '高节', value: '1'},
+      {text: '地界', value: '3'}
     ],
     linkageSelectData: {},
-    translations: { filterBy: 'Filter by Company' }
+    translations: {filterBy: 'Filter by Company'}
   },
   {
     key: 'f_company_remote',
-    label: 'Remote',
+    label: 'AutoCompleteItemRemote',
     itemType: 'AutoCompleteItem',
     valuesAre: null,
     linkageSelectData: {},
-    translations: { filterBy: 'Filter by Company' },
+    translations: {filterBy: 'Filter by Company'},
     autocompleteDataSource: {
-      remoteUrl: 'http://localhost:7800/complete/auto-complete-posts',
+      remoteUrl: 'http://localhost:7800/examples/api/complete/auto-complete-posts',
       itemTitle: 'title',
       itemValue: 'id',
-      totalKey: 'total',
-      itemsKey: 'data',
+      totalField: 'total',
+      itemsField: 'data',
       isPaging: true,
-      pageSize: 2
+      pageSize: 2,
+      separator: "__"
     }
+  },
+  {
+    key: 'f_linkage_remote',
+    label: 'LinkageSelectItemRemote',
+    itemType: 'LinkageSelectItemRemote',
+    linkageSelectData: {
+      labels: ['Province', 'City', 'District'],
+      linkageSelectRemoteOptions: {
+        remoteUrl: 'http://localhost:7800/examples/api/linkage-select-server',
+        itemTitle: 'Name',
+        itemValue: 'ID',
+        totalField: 'total',
+        itemsField: 'data',
+        isPaging: true,
+        levelStart: 1,
+        pageSize: 2,
+        separator: "__",
+        selectOutOfOrder: true
+      }
+    },
   }
 ])
 // const internalValue = [{
