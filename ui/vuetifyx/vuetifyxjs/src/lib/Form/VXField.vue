@@ -76,7 +76,7 @@ function onUpdateModelValue(value: any) {
 
     &.v-input--density-compact:deep(input) {
       &::placeholder {
-        font-size: 14px;
+        font-size: 16px;
         color: rgb(var(--v-theme-grey));
         opacity: 1;
       }

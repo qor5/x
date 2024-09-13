@@ -28,6 +28,11 @@ func (b *VXSelectBuilder) Label(v string) (r *VXSelectBuilder) {
 	return b
 }
 
+func (b *VXSelectBuilder) Placeholder(v string) (r *VXSelectBuilder) {
+	b.tag.Attr("placeholder", v)
+	return b
+}
+
 func (b *VXSelectBuilder) Chips(v bool) (r *VXSelectBuilder) {
 	b.tag.Attr(":chips", fmt.Sprint(v))
 	return b
