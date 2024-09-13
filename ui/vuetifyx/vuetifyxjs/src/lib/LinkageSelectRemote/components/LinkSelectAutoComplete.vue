@@ -172,9 +172,9 @@ const searchData = (val: any) => {
       :clearable="!chips"
       :hide-details="hideDetails"
       @update:modelValue="changeStatus"
+      @click="searchData('')"
       variant="underlined"
       @update:search="reloadSearch"
-      @click="searchData('')"
       :error-messages="errorMessage"
     >
       <template v-slot:append-item v-if="remoteUrl">
