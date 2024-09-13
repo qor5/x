@@ -27,6 +27,7 @@ declare module 'vue' {
     FilterButtonBody: typeof import('./src/lib/Filter/components/FilterButtonBody.vue')['default']
     FilterExample: typeof import('./src/demo/components/FilterExample.vue')['default']
     HelloWorld: typeof import('./src/demo/components/HelloWorld.vue')['default']
+    ImageGlue: typeof import('./src/lib/TiptapEditor/Extensions/ImageGlue.vue')['default']
     ItemFilter: typeof import('./src/lib/Filter/components/ItemFilter.vue')['default']
     LinkageSelect: typeof import('./src/lib/LinkageSelect.vue')['default']
     LinkageSelectExample: typeof import('./src/demo/components/LinkageSelectExample.vue')['default']

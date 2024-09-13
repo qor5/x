@@ -19,12 +19,13 @@ watchEffect(() => {
   locale.setLang(currentLocale.value)
 })
 
-import { computed, useAttrs, watchEffect } from 'vue'
+import { provide, computed, useAttrs, watchEffect } from 'vue'
 import { Extension } from '@tiptap/core'
 import { VuetifyTiptap, useContext } from 'vuetify-pro-tiptap'
 import { BaseKit, Bold, Italic, Underline, Strike, Color, Highlight, Heading, TextAlign, FontFamily, FontSize, SubAndSuperScript, BulletList, OrderedList, TaskList, Indent, Link, Image, Video, Table, Blockquote, HorizontalRule, Code, CodeBlock, Clear, Fullscreen, History } from 'vuetify-pro-tiptap'
+import ImageGlue from '@/lib/TiptapEditor/Extensions/ImageGlue.vue'
 import Callback from './Extensions/CallbackActionButton'
-const extensionMap = { BaseKit, Bold, Italic, Underline, Strike, Color, Highlight, Heading, TextAlign, FontFamily, FontSize, SubAndSuperScript, BulletList, OrderedList, TaskList, Indent, Link, Image, Video, Table, Blockquote, HorizontalRule, Code, CodeBlock, Clear, Fullscreen, History, Callback }
+const extensionMap = { BaseKit, Bold, Italic, Underline, Strike, Color, Highlight, Heading, TextAlign, FontFamily, FontSize, SubAndSuperScript, BulletList, OrderedList, TaskList, Indent, Link, Image, Video, Table, Blockquote, HorizontalRule, Code, CodeBlock, Clear, Fullscreen, History, Callback, ImageGlue }
 type ExtensionName = keyof typeof extensionMap
 
 const model: string | object | undefined = defineModel()
@@ -89,6 +90,14 @@ const defaultExtensions: Array<{ name: ExtensionName; options?: any }> = [
   // { name: 'Fullscreen' },
 ]
 
+let imageGlueClick: any = undefined
+
+provide("__imageGlueClick__", ({editor,value}:{editor: any,value: any}) => {
+  if (imageGlueClick) {
+    imageGlueClick({editor,value, window: window})
+  }
+})
+
 const processedAttrs = computed(() => {
   let extensions = (attrs.extensions as { name: ExtensionName; options?: any }[]) || []
   if (extensions.length <=0 ) {
@@ -107,6 +116,21 @@ const processedAttrs = computed(() => {
     }
     // TODO: hideable ?
     extensions = [...extensions,  { name: 'History' }]
+  }
+  const imageGlueIdx = extensions.findIndex((extension) => extension.name === 'ImageGlue')
+  if (imageGlueIdx >= 0) {
+    const imageGlueOptions = extensions[imageGlueIdx].options
+    imageGlueClick = imageGlueOptions?.onClick
+    
+    extensions[imageGlueIdx] = { 
+      name: 'Image',
+      options: { 
+        ...imageGlueOptions,
+        dialogComponent: () => {
+          return ImageGlue
+        },
+      }
+    }
   }
   return {
     ...attrs,

@@ -6,7 +6,7 @@
           v-model="content"
           label=""
           :min-height="200"
-          :max-height="265"
+          :max-height="365"
           :hide-bubble="true"
           :extensions="extensions"
           :disabled="false"
@@ -48,7 +48,13 @@ const extensions = ref([
 //   // { name: 'TaskList' },
   { name: 'Indent', options: { divider: true } },
   { name: 'Link' },
-  { name: 'Image', options: { hiddenTabs: ["upload"] } },
+  { name: 'ImageGlue', options: {
+    onClick:({editor, value, window}:{editor: any, value:any, window: any}) => {
+      console.log('ImageGlue clicked with editor:', editor);
+      console.log('ImageGlue clicked with value:', value);
+      console.log('ImageGlue clicked with window:', window);
+    },
+  } },
   { name: 'Video', options: { divider: true } },
   // { name: 'Table', options: { divider: true } },
   { name: 'Blockquote' },
