@@ -22,7 +22,7 @@ import SendVariables from '@/lib/SendVariables.vue'
 import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
 import TextField from '@/lib/Form/TextFiled.vue'
-import TiptapEditor from '@/lib/TiptapEditor.vue'
+import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 declare const window: any
 
 const vuetifyx = {

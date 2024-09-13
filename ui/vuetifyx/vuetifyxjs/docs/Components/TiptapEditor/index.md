@@ -1,3 +1,10 @@
+# vx-tiptap-editor 富文本编辑器
+
+## 基本用法
+
+:::demo
+
+```vue
 <template>
   <VApp id="app">
     <VContainer>
@@ -48,13 +55,14 @@ const extensions = ref([
 //   // { name: 'TaskList' },
   { name: 'Indent', options: { divider: true } },
   { name: 'Link' },
-  { name: 'ImageGlue', options: {
-    onClick:({editor, value, window}:{editor: any, value:any, window: any}) => {
-      console.log('ImageGlue clicked with editor:', editor);
-      console.log('ImageGlue clicked with value:', value);
-      console.log('ImageGlue clicked with window:', window);
-    },
-  } },
+  { name: 'Image' },
+  // { name: 'ImageGlue', options: {
+  //   onClick:({editor, value, window}:{editor: any, value:any, window: any}) => {
+  //     console.log('ImageGlue clicked with editor:', editor);
+  //     console.log('ImageGlue clicked with value:', value);
+  //     console.log('ImageGlue clicked with window:', window);
+  //   },
+  // } },
   { name: 'Video', options: { divider: true } },
   // { name: 'Table', options: { divider: true } },
   { name: 'Blockquote' },
@@ -138,3 +146,5 @@ const content = ref(`<h2>
             — Mom
           </blockquote>`)
 </script>
+```
+:::
