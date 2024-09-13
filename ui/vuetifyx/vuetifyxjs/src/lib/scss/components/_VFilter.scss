@@ -1,0 +1,11 @@
+.filter-comp-wrap {
+  .filter-selectGroup-wrap {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+
+    .v-chip {
+      --v-chip-height: 40px;
+    }
+  }
+}

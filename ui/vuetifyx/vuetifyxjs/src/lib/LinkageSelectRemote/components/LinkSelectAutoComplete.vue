@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import {onMounted, reactive, ref, watch} from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import get from 'lodash/get'
-
 
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
@@ -13,27 +12,27 @@ const props = defineProps({
   chips: Boolean,
   level: Number,
   label: String,
-  selectOutOfOrder: {type: Boolean, default: false},
-  disabled: {type: Boolean, default: false},
-  parentField: {type: String},
-  levelField: {type: String},
-  parentValue: {type: String},
-  parentIdField: {type: String},
-  itemTitle: {type: String},
-  itemValue: {type: String},
-  pageField: {type: String},
-  pagesField: {type: String},
-  pageSizeField: {type: String},
-  totalField: {type: String},
-  itemsField: {type: String},
-  currentField: {type: String},
-  searchField: {type: String},
+  selectOutOfOrder: { type: Boolean, default: false },
+  disabled: { type: Boolean, default: false },
+  parentField: { type: String },
+  levelField: { type: String },
+  parentValue: { type: String },
+  parentIdField: { type: String },
+  itemTitle: { type: String },
+  itemValue: { type: String },
+  pageField: { type: String },
+  pagesField: { type: String },
+  pageSizeField: { type: String },
+  totalField: { type: String },
+  itemsField: { type: String },
+  currentField: { type: String },
+  searchField: { type: String },
   remoteUrl: String,
-  levelStart: {type: Number, default: 0},
-  levelStep: {type: Number, default: 1},
-  page: {type: Number, default: 1},
-  pageSize: {type: Number, default: 20},
-  errorMessage: {type: String, default: ""}
+  levelStart: { type: Number, default: 0 },
+  levelStep: { type: Number, default: 1 },
+  page: { type: Number, default: 1 },
+  pageSize: { type: Number, default: 20 },
+  errorMessage: { type: String, default: '' }
 })
 
 const value = ref()
@@ -57,7 +56,10 @@ const loadData = () => {
     urlObj = new URL(url.value!)
   }
   urlObj.searchParams.set(props.pageField!, pagination.page.toString())
-  urlObj.searchParams.set(props.levelField!, ((props.level! * props.levelStep!) + props.levelStart!).toString())
+  urlObj.searchParams.set(
+    props.levelField!,
+    (props.level! * props.levelStep! + props.levelStart!).toString()
+  )
   urlObj.searchParams.set(props.pageSizeField!, pagination.pageSize.toString())
   if (props.parentValue) {
     urlObj.searchParams.set(props.parentIdField!, props.parentValue)
@@ -69,21 +71,23 @@ const loadData = () => {
 }
 onMounted(() => {
   value.value = props.modelValue
-
 })
-watch(() => props.modelValue, () => {
-  value.value = props.modelValue
-  if (!props.modelValue) {
-    listItems.value.splice(0, listItems.value.length)
+watch(
+  () => props.modelValue,
+  () => {
+    value.value = props.modelValue
+    if (!props.modelValue) {
+      listItems.value.splice(0, listItems.value.length)
+    }
   }
-})
+)
 
 const loadRemoteItems = () => {
   if (!url.value) {
     return
   }
   if (!props.selectOutOfOrder && props.level != 0 && !props.parentValue) {
-    return;
+    return
   }
   isLoading.value = true
 
@@ -133,7 +137,7 @@ const changeStatus = (e: any) => {
 
 const reloadSearch = (val: any) => {
   if (!val) {
-    return;
+    return
   }
   searchData(val)
 }
@@ -142,7 +146,7 @@ const searchData = (val: any) => {
     return
   }
   if (!val) {
-    val = ""
+    val = ''
   }
   if (value.value && val == value.value[props.itemValue!]) {
     return
@@ -151,8 +155,6 @@ const searchData = (val: any) => {
   pagination.page = 1
   loadRemoteItems()
 }
-
-
 </script>
 
 <template>
@@ -170,9 +172,9 @@ const searchData = (val: any) => {
       :clearable="!chips"
       :hide-details="hideDetails"
       @update:modelValue="changeStatus"
+      @click="searchData('')"
       variant="underlined"
       @update:search="reloadSearch"
-      @click="searchData('')"
       :error-messages="errorMessage"
     >
       <template v-slot:append-item v-if="remoteUrl">
@@ -199,7 +201,7 @@ const searchData = (val: any) => {
                   loadRemoteItems()
                 }
               "
-            >Load more
+              >Load more
             </v-btn>
             <v-divider vertical></v-divider>
             <span> {{ current }}/{{ total }} </span>

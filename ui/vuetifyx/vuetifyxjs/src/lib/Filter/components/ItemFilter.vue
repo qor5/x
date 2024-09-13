@@ -23,6 +23,10 @@ const clickDone = () => {
     !value.value.valueFrom &&
     !value.value.valueTo
   ) {
+    value.value.selected = false
+    Object.assign(props.modelValue, value.value)
+    emit('update:modelValue', props.modelValue)
+    emit('change', null)
     return
   }
   value.value.selected = true

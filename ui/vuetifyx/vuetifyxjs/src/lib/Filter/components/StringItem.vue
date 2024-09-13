@@ -18,10 +18,10 @@ const items = ref([
 
 <template>
   <div>
-    <div v-if="!props.modelValue.disableChooseModifier">
+    <div class="d-flex" v-if="!props.modelValue.disableChooseModifier">
       <v-select
         class="d-inline-block"
-        style="width: 200px"
+        style="min-width: 200px"
         v-model="props.modelValue.modifier"
         :items="items"
         item-title="text"
@@ -30,7 +30,7 @@ const items = ref([
         hide-details
       ></v-select>
     </div>
-    <div>
+    <div class="d-flex">
       <v-icon
         class="py-8 mr-4 float-md-start"
         icon="mdi-subdirectory-arrow-right"
@@ -38,7 +38,7 @@ const items = ref([
       ></v-icon>
       <v-text-field
         class="d-inline-block"
-        style="width: 120px"
+        style="min-width: 120px"
         variant="underlined"
         type="text"
         v-model="props.modelValue.valueIs"

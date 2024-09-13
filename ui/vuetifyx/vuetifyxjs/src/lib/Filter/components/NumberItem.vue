@@ -12,8 +12,8 @@ const t = props.translations
 </script>
 
 <template>
-  <div style="width: 200px">
-    <div v-if="modifier == 'between'">
+  <div>
+    <div v-if="modifier == 'between'" class="d-flex">
       <v-icon
         class="py-8 mr-4 float-md-start"
         icon="mdi-subdirectory-arrow-right"
@@ -35,7 +35,7 @@ const t = props.translations
         v-model="props.modelValue.valueTo"
       />
     </div>
-    <div v-else>
+    <div v-else class="d-flex">
       <v-icon
         class="py-8 mr-4 float-md-start"
         icon="mdi-subdirectory-arrow-right"
@@ -43,7 +43,6 @@ const t = props.translations
       ></v-icon>
       <v-text-field
         class="d-inline-block"
-        style="width: 120px"
         type="number"
         variant="underlined"
         v-model="props.modelValue.valueIs"

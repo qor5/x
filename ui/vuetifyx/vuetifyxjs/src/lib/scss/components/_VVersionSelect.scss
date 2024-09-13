@@ -1,0 +1,9 @@
+.version-select-wrap {
+  padding: 0 8px;
+  border-color: rgb(var(--v-theme-grey-lighten-1));
+  display: flex;
+  .v-chip__content {
+    flex: 1;
+    max-width: calc(100% - 26px);
+  }
+}

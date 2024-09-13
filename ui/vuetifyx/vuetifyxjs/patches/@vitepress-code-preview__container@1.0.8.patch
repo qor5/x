@@ -1,0 +1,26 @@
+diff --git a/dist/index.js b/dist/index.js
+index ab3dd78e9a373861d0265487fe1cd6ecc6d568ca..15d1733fc89c6e34623c5804387b8dad3d8ddf06 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -1643,7 +1643,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
+     };
+   }
+ });
+-const example = "_example_8jhae_2";
++const example = "_example_8jhae_2 vp-raw";
+ const style0 = {
+   example,
+   "example-showcase": "_example-showcase_8jhae_14",
+diff --git a/dist/index.umd.cjs b/dist/index.umd.cjs
+index f33062b5245d5a6ac6ff1db0af7ea0072631eb74..a4660855d149f7aa55f7370547cd535acc6130d6 100644
+--- a/dist/index.umd.cjs
++++ b/dist/index.umd.cjs
+@@ -1646,7 +1646,7 @@
+       };
+     }
+   });
+-  const example = "_example_8jhae_2";
++  const example = "_example_8jhae_2 vp-raw";
+   const style0 = {
+     example,
+     "example-showcase": "_example-showcase_8jhae_14",

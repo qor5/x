@@ -14,6 +14,17 @@ const datePickerVisible = ref(false)
 
 const emit = defineEmits(['update:modelValue'])
 const modifier = props.modelValue.modifier
+const options = props.modelValue.dateOptions
+const fromOption = ref()
+const toOption = ref()
+if (options) {
+  if (options.length >= 1) {
+    fromOption.value = options[0]
+  }
+  if (options.length >= 2) {
+    toOption.value = options[1]
+  }
+}
 </script>
 
 <template>
@@ -23,11 +34,21 @@ const modifier = props.modelValue.modifier
       :key="modifier + 'form'"
       :visible="datePickerVisible"
       :hide-details="true"
+      :clear-text="translations['clear']"
+      :ok-text="translations['ok']"
+      v-bind="fromOption"
     />
     <div style="height: 34px" class="pl-2 pt-4">
       <span>{{ translations['to'] }}</span>
     </div>
-    <datepicker v-model="modelValue.valueTo" :key="modifier + 'to'" :hide-details="true" />
+    <datepicker
+      v-model="modelValue.valueTo"
+      :key="modifier + 'to'"
+      :hide-details="true"
+      :clear-text="translations['clear']"
+      :ok-text="translations['ok']"
+      v-bind="toOption"
+    />
   </div>
 </template>
 

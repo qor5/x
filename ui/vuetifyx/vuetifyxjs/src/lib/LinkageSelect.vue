@@ -211,6 +211,10 @@ const selectItem = (v: string, level: number) => {
   if (props.labels.length > level + 1) {
     levelItems.value[level + 1] = getLevelItems(level + 1)
   }
+  if (updateSelectIds.every((x) => !x)) {
+    emit('update:modelValue', [])
+    return
+  }
   emit('update:modelValue', updateSelectIds)
 }
 
