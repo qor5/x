@@ -21,6 +21,10 @@
       <vx-field v-model="dataWithBinding" label="field2" />
     </v-col>
     <v-col cols="6" class="pt-12"><b> with binding:</b> {{ dataWithBinding }} </v-col>
+
+     <v-col cols="6" sm="6">
+      <vx-field v-model="dataWithTips" tips="this is tips" label="field2" />
+    </v-col>
   </v-row>
 </template>
 
@@ -29,6 +33,7 @@ import { ref } from 'vue'
 
 const dataNoBinding = ref('hello world')
 const dataWithBinding = ref('hello world')
+const dataWithTips = ref('data with tips')
 </script>
 
 <style scoped lang="css">

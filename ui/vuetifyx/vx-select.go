@@ -48,6 +48,11 @@ func (b *VXSelectBuilder) Items(v interface{}) (r *VXSelectBuilder) {
 	return b
 }
 
+func (b *VXSelectBuilder) Disabled(v bool) (r *VXSelectBuilder) {
+	b.tag.Attr(":disabled", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXSelectBuilder) ItemTitle(v interface{}) (r *VXSelectBuilder) {
 	b.tag.Attr("item-title", v)
 	return b
@@ -55,6 +60,11 @@ func (b *VXSelectBuilder) ItemTitle(v interface{}) (r *VXSelectBuilder) {
 
 func (b *VXSelectBuilder) ItemValue(v interface{}) (r *VXSelectBuilder) {
 	b.tag.Attr("item-value", v)
+	return b
+}
+
+func (b *VXSelectBuilder) Tips(v string) (r *VXSelectBuilder) {
+	b.tag.Attr("tips", fmt.Sprint(v))
 	return b
 }
 

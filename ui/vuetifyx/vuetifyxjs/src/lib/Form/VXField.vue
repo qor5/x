@@ -1,7 +1,7 @@
 <template>
   <div class="vx-field-wrap">
-    <span class="text-subtitle-2 text-high-emphasis section-filed-label mb-2 d-sm-inline-block">
-      {{ label }}
+    <span class="text-subtitle-2 text-high-emphasis mb-2 d-inline-flex align-center">
+      {{ label }}<IconTip v-if="tips !== undefined" :text="tips" class="ml-2"/>
     </span>
     <v-text-field density="compact" variant="outlined" :model-value="fiedValue"
       :type="type" :error-messages="errorMessages" :disabled="disabled" :placeholder="placeholder" v-bind="attrs"
@@ -11,6 +11,7 @@
 
 <script setup lang="ts">
 import { defineEmits, ref, watch } from "vue"
+import IconTip from "../Common/IconTip.vue"
 
 const emit = defineEmits(["update:modelValue"])
 const props = defineProps({
@@ -20,7 +21,8 @@ const props = defineProps({
   errorMessages: String,
   disabled: Boolean,
   attrs: Object,
-  placeholder: String
+  placeholder: String,
+  tips: String
 })
 
 const fiedValue = ref(props.modelValue)
@@ -41,6 +43,13 @@ function onUpdateModelValue(value: any) {
   margin-bottom: 2px;
 
   .v-input {
+    &.v-input--disabled {
+      &:deep(.v-field) {
+        background-color: rgb(var(--v-theme-grey-lighten-4));
+        color: rgb(var(--v-theme-grey))
+      }
+    }
+
     &:deep(.v-field) {
       --v-theme-overlay-multiplier: var(--v-theme-background-overlay-multiplier);
       background-color: rgb(var(--v-theme-background));

@@ -1,7 +1,7 @@
 <template>
   <div class="vx-select-wrap">
-    <span class="text-subtitle-2 text-high-emphasis section-filed-label mb-2 d-sm-inline-block">
-      {{ label }}
+    <span class="text-subtitle-2 text-high-emphasis mb-2 d-inline-flex align-center">
+      {{ label }}<IconTip v-if="tips !== undefined" :text="tips" class="ml-2"/>
     </span>
     <v-autocomplete
       v-if="type === 'autocomplete'"
@@ -13,6 +13,7 @@
       :chips="chips"
       :clearable="clearable"
       :placeholder="placeholder"
+      :disabled="disabled"
       v-bind="attrs"
       class="vx-type-autocomplete"
       variant="outlined"
@@ -22,11 +23,16 @@
     />
     <v-select
       v-else
-      :model-value="modelValue"
-      :disabled="disabled"
+      :model-value="selectValue"
       :items="items"
-      v-bind="attrs"
+      :item-title="itemTitle"
+      :item-value="itemValue"
+      :multiple="multiple"
+      :chips="chips"
+      :clearable="clearable"
       :placeholder="placeholder"
+      :disabled="disabled"
+      v-bind="attrs"
       class="vx-type-select"
       variant="outlined"
       density="compact"
@@ -38,6 +44,8 @@
 
 <script setup lang="ts">
 import { defineEmits, ref, watch, onMounted } from "vue"
+import IconTip from "../Common/IconTip.vue"
+
 const props = defineProps({
   modelValue: null,
   type: String,
@@ -52,6 +60,7 @@ const props = defineProps({
   multiple: Boolean,
   chips: Boolean,
   clearable: Boolean,
+  tips: String
 })
 
  onMounted(()=>{
@@ -61,7 +70,7 @@ const props = defineProps({
 const selectValue = ref(props.modelValue)
 
 watch(() => props.modelValue, (newValue) => {
-  console.log("watch", )
+  console.log("watch", newValue)
   selectValue.value = newValue
 })
 
@@ -76,7 +85,16 @@ function onUpdateModelValue(value: any) {
 
 <style lang="scss" scoped>
 .vx-select-wrap {
+  margin-bottom: 2px;
+
   .v-input {
+    &.v-input--disabled {
+      &:deep(.v-field) {
+        background-color: rgb(var(--v-theme-grey-lighten-4));
+        color: rgb(var(--v-theme-grey))
+      }
+    }
+
     &:deep(.v-autocomplete__selection) {
       margin-inline-end: 4px;
       .v-chip {
