@@ -2,13 +2,13 @@ package vuetifyx
 
 import (
 	"context"
+	"fmt"
 
 	h "github.com/theplant/htmlgo"
 )
 
 type VXSelectBuilder struct {
 	tag           *h.HTMLTagBuilder
-	items         interface{}
 }
 
 func VXSelect(children ...h.HTMLComponent) (r *VXSelectBuilder) {
@@ -18,18 +18,48 @@ func VXSelect(children ...h.HTMLComponent) (r *VXSelectBuilder) {
 	return
 }
 
-func (b *VXSelectBuilder) ErrorMessages(v ...string) (r *VXSelectBuilder) {
-	b.tag.Attr("error-messages", v)
+func (b *VXSelectBuilder) Type(v string) (r *VXSelectBuilder) {
+	b.tag.Attr("type", v)
+	return b
+}
+
+func (b *VXSelectBuilder) Label(v string) (r *VXSelectBuilder) {
+	b.tag.Attr("label", v)
+	return b
+}
+
+func (b *VXSelectBuilder) Chips(v bool) (r *VXSelectBuilder) {
+	b.tag.Attr(":chips", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXSelectBuilder) Multiple(v bool) (r *VXSelectBuilder) {
+	b.tag.Attr(":multiple", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXSelectBuilder) Clearable(v bool) (r *VXSelectBuilder) {
+	b.tag.Attr(":clearable", fmt.Sprint(v))
 	return b
 }
 
 func (b *VXSelectBuilder) Items(v interface{}) (r *VXSelectBuilder) {
-	b.tag.Attr(":items", b.items)
+	b.tag.Attr(":items", v)
 	return b
 }
 
-func (b *VXSelectBuilder) FieldName(v string) (r *VXSelectBuilder) {
-	b.tag.Attr("field-name", v)
+func (b *VXSelectBuilder) ItemTitle(v interface{}) (r *VXSelectBuilder) {
+	b.tag.Attr("item-title", v)
+	return b
+}
+
+func (b *VXSelectBuilder) ItemValue(v interface{}) (r *VXSelectBuilder) {
+	b.tag.Attr("item-value", v)
+	return b
+}
+
+func (b *VXSelectBuilder) Attr(vs ...interface{}) (r *VXSelectBuilder) {
+	b.tag.Attr(vs...)
 	return b
 }
 

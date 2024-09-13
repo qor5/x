@@ -5,31 +5,41 @@
     </span>
     <v-autocomplete
       v-if="type === 'autocomplete'"
-      variant="outlined"
-      density="compact"
-      :items="items",
+      :model-value="selectValue"
+      :items="items"
       :item-title="itemTitle"
       :item-value="itemValue"
       :multiple="multiple"
       :chips="chips"
       :clearable="clearable"
+      :placeholder="placeholder"
+      v-bind="attrs"
+      class="vx-type-autocomplete"
+      variant="outlined"
+      density="compact"
+      color="primary"
+      @update:model-value="onUpdateModelValue"
     />
     <v-select
       v-else
       :model-value="modelValue"
-      variant="outlined"
-      density="compact"
       :disabled="disabled"
       :items="items"
       v-bind="attrs"
+      :placeholder="placeholder"
+      class="vx-type-select"
+      variant="outlined"
+      density="compact"
+      color="primary"
+      @update:model-value="onUpdateModelValue"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, watch } from "vue"
+import { defineEmits, ref, watch, onMounted } from "vue"
 const props = defineProps({
-  modelValue: [String, Number],
+  modelValue: null,
   type: String,
   label: String,
   errorMessages: String,
@@ -41,12 +51,17 @@ const props = defineProps({
   itemValue: String,
   multiple: Boolean,
   chips: Boolean,
-  clearable: Boolean
+  clearable: Boolean,
 })
+
+ onMounted(()=>{
+  console.log(selectValue.value, props.items, props.itemTitle, props.itemValue)
+ })
 
 const selectValue = ref(props.modelValue)
 
 watch(() => props.modelValue, (newValue) => {
+  console.log("watch", )
   selectValue.value = newValue
 })
 
@@ -62,9 +77,26 @@ function onUpdateModelValue(value: any) {
 <style lang="scss" scoped>
 .vx-select-wrap {
   .v-input {
+    &:deep(.v-autocomplete__selection) {
+      margin-inline-end: 4px;
+      .v-chip {
+        color: rgb(var(--v-theme-primary))
+      }
+    }
+
     &:deep(.v-field) {
       --v-theme-overlay-multiplier: var(--v-theme-background-overlay-multiplier);
       background-color: rgb(var(--v-theme-background));
+
+      .v-field__clearable .mdi-close-circle{
+        font-size: 18px;
+        color: rgb(var(--v-theme-grey-darken-3));
+        --v-medium-emphasis-opacity:1;
+      }
+
+      .v-field__append-inner .mdi-menu-down {
+        font-size: 16px;
+      }
     }
 
     &:deep(.v-field__outline) {
@@ -88,7 +120,7 @@ function onUpdateModelValue(value: any) {
 
     &.v-input--density-compact:deep(input) {
       &::placeholder {
-        font-size: 14px;
+        font-size: 16px;
         color: rgb(var(--v-theme-grey));
         opacity: 1;
       }
