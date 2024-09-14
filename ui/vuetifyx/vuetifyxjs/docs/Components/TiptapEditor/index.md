@@ -9,16 +9,18 @@
   <VApp id="app">
     <VContainer>
       <VLocaleProvider locale="zhHans">
-        <TiptapEditor
-          v-model="content"
-          label=""
-          :min-height="200"
-          :max-height="365"
-          :hide-bubble="true"
-          :extensions="extensions"
-          :disabled="false"
-          :readonly="false"
-        />
+        <div class="border-thin">
+          <TiptapEditor
+            v-model="content"
+            label=""
+            :min-height="200"
+            :max-height="365"
+            :hide-bubble="true"
+            :extensions="extensions"
+            :disabled="false"
+            :readonly="false"
+          />
+        </div>
         <p class="mt-4">{{ content }}</p>
       </VLocaleProvider>
     </VContainer>

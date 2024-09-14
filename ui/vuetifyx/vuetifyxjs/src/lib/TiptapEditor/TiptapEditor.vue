@@ -1,5 +1,5 @@
 <template>
-  <div class="border-thin rounded">
+  <div class="rounded tiptap-wrapper">
     <!-- <VuetifyViewer v-if="readonly" v-bind="processedAttrs" :value="model">
     </VuetifyViewer> -->
     <VuetifyTiptap v-bind="processedAttrs" v-model="model" >
@@ -138,7 +138,9 @@ const processedAttrs = computed(() => {
     'disable-toolbar': !!attrs['disable-toolbar'] || !!attrs.disabled || props.readonly,
     'hide-toolbar': !!attrs['hide-toolbar'] || props.readonly,
     'hide-bubble': attrs['hide-bubble'] !== undefined ? !!attrs['hide-bubble'] || props.readonly : true,
-    extensions: resolvedExtensions(extensions)
+    extensions: resolvedExtensions(extensions),
+    style: "",
+    class: "",
   }
 })
 
@@ -149,3 +151,9 @@ watchEffect(() => {
   state.defaultMarkdownTheme = (attrs['markdown-theme'] as string) || 'default'
 })
 </script>
+
+<style lang="scss">
+.tiptap-wrapper .vuetify-pro-tiptap-editor__content {
+  cursor: text !important;
+}
+</style>
