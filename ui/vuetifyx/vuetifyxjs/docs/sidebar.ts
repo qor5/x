@@ -10,6 +10,14 @@ export default {
         {
           "text": "Overlay 遮罩层",
           "link": "/Components/Overlay/"
+        },
+        {
+          "text": "vx-toolbar",
+          "link": "/components/vx-toolbar/"
+        },
+        {
+          "text": "vx-icon-tip",
+          "link": "/components/vx-icon-tip/"
         }
       ]
     },

@@ -1,8 +1,6 @@
 <template>
   <div class="vx-select-wrap">
-    <span class="text-subtitle-2 text-high-emphasis mb-2 d-inline-flex align-center">
-      {{ label }}<IconTip v-if="tips !== undefined" :text="tips" class="ml-1"/>
-    </span>
+    <VXLabel :tooltip="tips" class="mb-2">{{label}}</VXLabel>
     <v-autocomplete
       v-if="type === 'autocomplete'"
       :model-value="selectValue"
@@ -44,7 +42,7 @@
 
 <script setup lang="ts">
 import { defineEmits, ref, watch, onMounted } from "vue"
-import IconTip from "../Common/IconTip.vue"
+import VXLabel from "../Common/VXLabel.vue"
 
 const props = defineProps({
   modelValue: null,
@@ -64,7 +62,7 @@ const props = defineProps({
 })
 
  onMounted(()=>{
-  console.log(selectValue.value, props.items, props.itemTitle, props.itemValue)
+  console.log(props.tips, "tips")
  })
 
 const selectValue = ref(props.modelValue)

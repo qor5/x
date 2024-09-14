@@ -1,8 +1,6 @@
 <template>
   <div class="vx-field-wrap">
-    <span class="text-subtitle-2 text-high-emphasis mb-2 d-inline-flex align-center">
-      {{ label }}<IconTip v-if="tips !== undefined" :text="tips" class="ml-1"/>
-    </span>
+    <VXLabel :tooltip="tips" class="mb-2">{{label}}</VXLabel>
     <v-text-field density="compact" variant="outlined" :model-value="fiedValue"
       :type="type" :error-messages="errorMessages" :disabled="disabled" :placeholder="placeholder" v-bind="attrs"
       @update:modelValue="onUpdateModelValue" />
@@ -11,7 +9,7 @@
 
 <script setup lang="ts">
 import { defineEmits, ref, watch } from "vue"
-import IconTip from "../Common/IconTip.vue"
+import VXLabel from "../Common/VXLabel.vue"
 
 const emit = defineEmits(["update:modelValue"])
 const props = defineProps({

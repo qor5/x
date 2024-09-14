@@ -64,8 +64,20 @@
       right:24px;
     }
   }
+  
+  .vp-code {
+    padding: 0;
+    margin: 20px 20px 0;
+    padding-bottom: 20px;
+    code {
+      padding: 0;
+      padding-right: 50px;
+    }
+  }
+
   .vp-raw [class*='language-'] {
     position: relative;
+
   }
   .vp-raw [class*='language-'] > span.lang {
     position: absolute;

@@ -17,7 +17,6 @@ declare module 'vue' {
     Filter: typeof import('./src/lib/Filter/index.vue')['default']
     FilterButton: typeof import('./src/lib/Filter/components/FilterButton.vue')['default']
     FilterButtonBody: typeof import('./src/lib/Filter/components/FilterButtonBody.vue')['default']
-    IconTip: typeof import('./src/lib/Common/IconTip.vue')['default']
     ItemFilter: typeof import('./src/lib/Filter/components/ItemFilter.vue')['default']
     LinkageSelect: typeof import('./src/lib/LinkageSelect.vue')['default']
     LinkageSelectItem: typeof import('./src/lib/Filter/components/LinkageSelectItem.vue')['default']
@@ -35,7 +34,9 @@ declare module 'vue' {
     SendVariables: typeof import('./src/lib/SendVariables.vue')['default']
     StringItem: typeof import('./src/lib/Filter/components/StringItem.vue')['default']
     TextDatepicker: typeof import('./src/lib/TextDatepicker.vue')['default']
+    ToolBar: typeof import('./src/lib/Common/ToolBar.vue')['default']
     VXField: typeof import('./src/lib/Form/VXField.vue')['default']
+    VXLabel: typeof import('./src/lib/Common/VXLabel.vue')['default']
     VXSelect: typeof import('./src/lib/Form/VXSelect.vue')['default']
   }
 }

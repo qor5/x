@@ -21,6 +21,8 @@ import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
 import VXField from '@/lib/Form/VXField.vue'
 import VXSelect from '@/lib/Form/VXSelect.vue'
+import VXToolbar from '@/lib/Common/ToolBar.vue'
+import VXLabel from '@/lib/Common/VXLabel.vue'
 declare const window: any
 
 const vuetifyx = {
@@ -40,6 +42,8 @@ const vuetifyx = {
     app.component('vx-overlay', Overlay)
     app.component('vx-field', VXField)
     app.component('vx-select', VXSelect)
+    app.component('vx-toolbar', VXToolbar)
+    app.component('vx-label', VXLabel)
   }
 }
 

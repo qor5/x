@@ -69,7 +69,7 @@ func (b *VXSelectBuilder) ItemValue(v interface{}) (r *VXSelectBuilder) {
 }
 
 func (b *VXSelectBuilder) Tips(v string) (r *VXSelectBuilder) {
-	b.tag.Attr("tips", fmt.Sprint(v))
+	b.tag.Attr(":tips", fmt.Sprint(v))
 	return b
 }
 
