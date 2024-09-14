@@ -10,7 +10,7 @@
     <VContainer>
       <VLocaleProvider locale="zhHans">
         <div class="border-thin">
-          <TiptapEditor
+          <vx-tiptap-editor
             v-model="content"
             label=""
             :min-height="200"
@@ -28,7 +28,6 @@
 </template>
 
 <script setup lang="ts">
-import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 import { ref } from 'vue'
 
 const extensions = ref([

@@ -24,7 +24,7 @@ import { Extension } from '@tiptap/core'
 import { VuetifyTiptap, useContext } from 'vuetify-pro-tiptap'
 import { BaseKit, Bold, Italic, Underline, Strike, Color, Highlight, Heading, TextAlign, FontFamily, FontSize, SubAndSuperScript, BulletList, OrderedList, TaskList, Indent, Link, Image, Video, Table, Blockquote, HorizontalRule, Code, CodeBlock, Clear, Fullscreen, History } from 'vuetify-pro-tiptap'
 import ImageGlue from '@/lib/TiptapEditor/Extensions/ImageGlue.vue'
-import Callback from './Extensions/CallbackActionButton'
+import Callback from '@/lib/TiptapEditor/Extensions/CallbackActionButton'
 const extensionMap = { BaseKit, Bold, Italic, Underline, Strike, Color, Highlight, Heading, TextAlign, FontFamily, FontSize, SubAndSuperScript, BulletList, OrderedList, TaskList, Indent, Link, Image, Video, Table, Blockquote, HorizontalRule, Code, CodeBlock, Clear, Fullscreen, History, Callback, ImageGlue }
 type ExtensionName = keyof typeof extensionMap
 
