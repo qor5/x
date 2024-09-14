@@ -70,6 +70,11 @@ func (b *VXDateTimePickerBuilder) Disabled(v bool) (r *VXDateTimePickerBuilder) 
 	return b
 }
 
+func (b *VXDateTimePickerBuilder) ErrorMessages(vs ...string) (r *VXDateTimePickerBuilder) {
+	b.tag.Attr(":error-messages", h.JSONString(vs))
+	return b
+}
+
 func (b *VXDateTimePickerBuilder) DatePickerProps(v DatePickerProps) (r *VXDateTimePickerBuilder) {
 	b.tag.Attr(":datePickerProps", h.JSONString(v))
 	return b
