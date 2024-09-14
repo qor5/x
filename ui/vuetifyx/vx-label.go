@@ -18,6 +18,11 @@ func VXLabel(children ...h.HTMLComponent) (r *VXLabelBuilder) {
 	return
 }
 
+func (b *VXLabelBuilder) Class(v string) (r *VXLabelBuilder) {
+	b.tag.Attr("class", v)
+	return b
+}
+
 func (b *VXLabelBuilder) Tooltip(v interface{}) (r *VXLabelBuilder) {
 	b.tag.Attr("tooltip", fmt.Sprint(v))
 	return b
