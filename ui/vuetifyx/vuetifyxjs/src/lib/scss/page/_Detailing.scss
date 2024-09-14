@@ -41,6 +41,9 @@
 
   .section-wrap {
     &.edit-view {
+      .section-body {
+        margin-top: 24px;
+      }
       .section-body .v-card-text {
         background: rgb(var(--v-theme-grey-lighten-5));
       }
@@ -226,6 +229,10 @@
     color: rgb(var(--v-theme-grey-darken-3)) !important;
   }
 
+  .go-plaid-portal:not(first-child) .section-wrap.with-border-b {
+    border-block-end-width:0;
+  }
+
   .section-wrap {
     &.with-border-b {
       border-block-end-width: thin;
@@ -249,7 +256,15 @@
     padding-top: 0;
   }
 
-  // .v-slide-group + .v-window {
-  //   margin-top:16px;
-  // }
+
+  .v-slide-group {
+    border-block-end-width: thin !important;
+    border-block-end-style: solid !important;
+    border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+
+    .v-slide-group__content {
+      border-block-end-width:0;
+    }
+  }
+
 }
