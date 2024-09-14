@@ -14,7 +14,7 @@ require (
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
 	github.com/ory/ladon v1.3.0
 	github.com/pquerna/otp v1.4.0
-	github.com/qor5/web/v3 v3.0.7
+	github.com/qor5/web/v3 v3.0.8
 	github.com/samber/lo v1.47.0
 	github.com/spf13/cast v1.6.0
 	github.com/stretchr/testify v1.9.0
@@ -24,7 +24,7 @@ require (
 	github.com/theplant/testenv v0.0.0-20240513012518-1c94c8c84239
 	github.com/theplant/testingutils v0.0.2
 	golang.org/x/crypto v0.25.0
-	golang.org/x/text v0.17.0
+	golang.org/x/text v0.18.0
 	gorm.io/driver/postgres v1.5.9
 	gorm.io/driver/sqlite v1.5.6
 	gorm.io/gorm v1.25.11
