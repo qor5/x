@@ -62,10 +62,12 @@ func (b *DataTableBuilder) LoadMoreURL(url string) (r *DataTableBuilder) {
 	b.loadMoreURL = url
 	return b
 }
+
 func (b *DataTableBuilder) Hover(v bool) (r *DataTableBuilder) {
 	b.hover = v
 	return b
 }
+
 func (b *DataTableBuilder) HoverClass(v string) (r *DataTableBuilder) {
 	b.hoverClass = v
 	return b
@@ -396,27 +398,13 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 	}
 	return web.Scope().
 		VSlot("{ locals:_dataTableLocals_ }").
-		Init(fmt.Sprintf(`{ 
-				loadmore : false,
-				selectedIds: %s || [],
-				lastSelectedIds: %s || [],
-				onSelectionChanged: %s,
-				onLocalsDebounceChanged: function() {
-					if (JSON.stringify(this.selectedIds) !== JSON.stringify(this.lastSelectedIds)) {
-						this.lastSelectedIds = this.selectedIds;
-						this.onSelectionChanged([...this.selectedIds]);
-					}
-				},
-			}`,
-			selectedIdsJSON,
-			selectedIdsJSON,
-			onSelectionChanged,
-		)).
-		// Because the change of loadmore is also triggered,
-		// and because of the existence of debounce,
-		// the lastSelectedIds needs to be recorded to confirm its change.
-		OnChange(`locals.onLocalsDebounceChanged()`).UseDebounce(1).
+		Init(fmt.Sprintf(`{ loadmore : false, selectedIds: %s || [], onSelectionChanged: %s, }`, selectedIdsJSON, onSelectionChanged)).
 		Children(
+			h.Div().Style("display: none;").Attr("v-on-mounted", fmt.Sprintf(`({watch}) => {
+				watch(() => _dataTableLocals_.selectedIds, (val) => {
+					_dataTableLocals_.onSelectionChanged([...val]);
+				})
+			}`)),
 			selectedCountCompo,
 			v.VTable(
 				thead,
@@ -424,6 +412,16 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 				tfoot,
 			).Hover(b.hover),
 		).MarshalHTML(c)
+}
+
+func ScriptDataTableSwitchSelectedIds(ids ...string) string {
+	return fmt.Sprintf(`() => {
+		let arr = _dataTableLocals_.selectedIds;
+		for(const id of %s) {
+			arr = arr.includes(id) ? arr.filter(item => item !== id) : [...arr, id];
+		}
+		_dataTableLocals_.selectedIds = arr;
+	}`, h.JSONString(ids))
 }
 
 func ObjectID(obj interface{}) string {

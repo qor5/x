@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { FilterItem } from '@/lib/Filter/Model'
 import FilterButton from '@/lib/Filter/components/FilterButton.vue'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import cloneDeep from 'lodash/cloneDeep'
 
 const props = defineProps<{
   modelValue: FilterItem
@@ -12,9 +13,19 @@ const props = defineProps<{
   internalValue: any
   index: number
 }>()
-const value = ref({ ...props.modelValue })
+const value = ref(cloneDeep(props.modelValue))
 const menu = ref(false)
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
+
+watch(
+  () => menu.value,
+  (isOpen) => {
+    if (isOpen) {
+      value.value = cloneDeep(props.modelValue)
+    }
+  }
+)
+
 const clickDone = () => {
   menu.value = false
   if (
@@ -52,8 +63,8 @@ const clear = (e: any) => {
 
 <template>
   <v-menu :close-on-content-click="false" class="rounded-lg" v-model="menu">
-    <template v-slot:activator="{ props }">
-      <filter-button :op="value" :is-folded-item="isFoldedItem" :slotProps="props" @clear="clear" />
+    <template v-slot:activator="{ props: menuProps }">
+      <filter-button :op="modelValue" :is-folded-item="isFoldedItem" :slotProps="menuProps" @clear="clear" />
     </template>
     <v-card class="pa-3 bg-white">
       <div>{{ modelValue.translations?.filterBy }}</div>
