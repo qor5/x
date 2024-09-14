@@ -62,10 +62,12 @@ func (b *DataTableBuilder) LoadMoreURL(url string) (r *DataTableBuilder) {
 	b.loadMoreURL = url
 	return b
 }
+
 func (b *DataTableBuilder) Hover(v bool) (r *DataTableBuilder) {
 	b.hover = v
 	return b
 }
+
 func (b *DataTableBuilder) HoverClass(v string) (r *DataTableBuilder) {
 	b.hoverClass = v
 	return b
@@ -424,6 +426,19 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 				tfoot,
 			).Hover(b.hover),
 		).MarshalHTML(c)
+}
+
+func ScriptDataTableSwitchSelectedIds(ids ...string) string {
+	return fmt.Sprintf(`() => {
+		for(const id of %s) {
+			const idx = _dataTableLocals_.selectedIds.indexOf(id);
+			if (idx > -1) {
+				_dataTableLocals_.selectedIds.splice(idx, 1);
+			} else {
+				_dataTableLocals_.selectedIds.push(id)
+			}
+		}
+	}`, h.JSONString(ids))
 }
 
 func ObjectID(obj interface{}) string {
