@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     Autocomplete: typeof import('./src/lib/Autocomplete.vue')['default']
     AutoCompleteItem: typeof import('./src/lib/Filter/components/AutoCompleteItem.vue')['default']
+    CallbackActionButton: typeof import('./src/lib/TiptapEditor/Extensions/CallbackActionButton.vue')['default']
     DateItem: typeof import('./src/lib/Filter/components/DateItem.vue')['default']
     Datepicker: typeof import('./src/lib/Datepicker.vue')['default']
     DateRangeItem: typeof import('./src/lib/Filter/components/DateRangeItem.vue')['default']
@@ -17,6 +18,7 @@ declare module 'vue' {
     Filter: typeof import('./src/lib/Filter/index.vue')['default']
     FilterButton: typeof import('./src/lib/Filter/components/FilterButton.vue')['default']
     FilterButtonBody: typeof import('./src/lib/Filter/components/FilterButtonBody.vue')['default']
+    ImageGlue: typeof import('./src/lib/TiptapEditor/Extensions/ImageGlue.vue')['default']
     ItemFilter: typeof import('./src/lib/Filter/components/ItemFilter.vue')['default']
     LinkageSelect: typeof import('./src/lib/LinkageSelect.vue')['default']
     LinkageSelectItem: typeof import('./src/lib/Filter/components/LinkageSelectItem.vue')['default']
@@ -38,5 +40,6 @@ declare module 'vue' {
     VXField: typeof import('./src/lib/Form/VXField.vue')['default']
     VXLabel: typeof import('./src/lib/Common/VXLabel.vue')['default']
     VXSelect: typeof import('./src/lib/Form/VXSelect.vue')['default']
+    TiptapEditor: typeof import('./src/lib/TiptapEditor/TiptapEditor.vue')['default']
   }
 }

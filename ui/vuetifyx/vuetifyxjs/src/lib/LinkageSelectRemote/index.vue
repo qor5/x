@@ -121,18 +121,19 @@ const parentIDValue = reactive(
   )
 )
 const changeStatus = (val: any, level: number) => {
+  let newVal = val
   for (let i = props.labels.length - 1; i >= 0; i--) {
-    if (i > level && !val) {
+    if (i > level && !newVal) {
       //@ts-ignore
       value.value[i] = undefined
     }
     if (props.selectOutOfOrder && i < level) {
-      let parent = get(val, props.parentField)
-      if (!val || !parent) {
+      let parent = get(newVal, props.parentField)
+      if (!newVal || !parent) {
         continue
       }
       value.value[i] = parent
-      val = parent
+      newVal = parent
       //@ts-ignore
       parentIDValue[i + 1] = parentValue(i + 1)
     }
@@ -153,6 +154,10 @@ const changeStatus = (val: any, level: number) => {
   for (let i = level + 1; i < props.labels.length; i++) {
     //@ts-ignore
     parentIDValue[i] = parentValue(i)
+  }
+  if (value.value.every((x) => !x)) {
+    emit('update:modelValue', [])
+    return
   }
   emit('update:modelValue', value.value)
 }

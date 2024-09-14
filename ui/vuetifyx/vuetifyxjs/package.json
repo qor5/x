@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "comp": "tsx ./scripts/new-demo-doc.ts",
+    "comp": "npx tsx ./scripts/new-demo-doc.ts",
     "dev": "vitepress dev docs",
     "build": "vue-tsc --noEmit && vite build ",
     "build:lib": "cross-env NODE_ENV=lib babel src --out-dir lib --source-maps --extensions \".ts\",\".tsx\",\".snap\" --copy-files --no-copy-ignored --out-file-extension .mjs",
@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@mdi/font": "7.0.96",
+    "@tiptap/core": "^2.6.6",
+    "@tiptap/vue-3": "^2.6.6",
     "@vitejs/plugin-vue-jsx": "^4.0.1",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",
@@ -25,7 +27,8 @@
     "vue-i18n": "^9.13.1",
     "vue-json-pretty": "^2.4.0",
     "vuedraggable": "^4.1.0",
-    "vuetify": "^3.6.14"
+    "vuetify": "^3.6.14",
+    "vuetify-pro-tiptap": "^2.5.4"
   },
   "devDependencies": {
     "@babel/types": "^7.24.7",

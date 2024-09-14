@@ -77,7 +77,11 @@ export default {
         {
           "text": "DatePicker 时间选择器",
           "link": "/Components/DatePicker/"
-        }
+        },
+        {
+          "text": "TiptapEditor 富文本编辑器",
+          "link": "/Components/TiptapEditor/"
+        },
       ]
     }
   ]

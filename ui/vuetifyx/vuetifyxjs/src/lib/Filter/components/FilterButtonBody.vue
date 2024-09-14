@@ -2,6 +2,7 @@
 import { FilterItem } from '@/lib/Filter/Model'
 import { computed } from 'vue'
 import * as constants from '@/lib/Filter/Constants'
+import { b } from 'vitest/dist/suite-IbNSsUWN'
 
 const props = defineProps<{ op: FilterItem }>()
 const emit = defineEmits(['clear'])
@@ -118,7 +119,7 @@ const showValueComputed = computed(() => {
       }
       case 'LinkageSelectItem': {
         if (!props.op.valuesAre) {
-          return
+          break
         }
         let textsAre = props.op.valuesAre.map((o, i) => {
           const item = props.op.linkageSelectData?.items[i].find((x: any) => {
@@ -132,6 +133,9 @@ const showValueComputed = computed(() => {
         textsAre = textsAre.filter((item) => {
           return item
         })
+        if (textsAre.length == 0) {
+          break
+        }
         showValue = textsAre.join(',')
         break
 
@@ -146,7 +150,7 @@ const showValueComputed = computed(() => {
       }
       case 'LinkageSelectItemRemote': {
         if (!props.op.valuesAre) {
-          return
+          break
         }
         let textsAre = props.op.valuesAre.map((item) => {
           if (!item) {
@@ -158,6 +162,9 @@ const showValueComputed = computed(() => {
         textsAre = textsAre.filter((item) => {
           return item
         })
+        if (textsAre.length == 0) {
+          break
+        }
         showValue = textsAre.join(',')
         break
 

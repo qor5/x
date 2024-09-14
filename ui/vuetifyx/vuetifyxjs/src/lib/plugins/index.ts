@@ -6,6 +6,8 @@
 import { type App } from 'vue'
 import vuetify from './vuetify'
 import i18n from './i18n'
+import { vuetifyProTipTap } from './tiptap'
+
 import Datepicker from '@/lib/Datepicker.vue'
 import Datetimepicker from '@/lib/Datetimepicker.vue'
 import SelectMany from '@/lib/SelectMany.vue'
@@ -23,6 +25,7 @@ import VXField from '@/lib/Form/VXField.vue'
 import VXSelect from '@/lib/Form/VXSelect.vue'
 import VXToolbar from '@/lib/Common/ToolBar.vue'
 import VXLabel from '@/lib/Common/VXLabel.vue'
+import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 declare const window: any
 
 const vuetifyx = {
@@ -44,6 +47,7 @@ const vuetifyx = {
     app.component('vx-select', VXSelect)
     app.component('vx-toolbar', VXToolbar)
     app.component('vx-label', VXLabel)
+    app.component('vx-tiptap-editor', TiptapEditor)
   }
 }
 
@@ -51,6 +55,10 @@ export function registerPlugins(app: App) {
   app.use(i18n)
   app.use(vuetify)
   app.use(vuetifyx)
+  app.use(vuetifyProTipTap)
+  // fix warning injected property "decorationClasses" is a ref and will be auto-unwrapped
+  // https://github.com/ueberdosis/tiptap/issues/1719
+  // app.config.unwrapInjectedRef = true
 }
 
 export function registerVuetify2Window() {

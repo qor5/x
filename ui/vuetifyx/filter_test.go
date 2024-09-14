@@ -4,8 +4,10 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/qor5/x/v3/ui/vuetifyx"
+	"github.com/qor5/web/v3"
 	"github.com/theplant/testingutils"
+
+	. "github.com/qor5/x/v3/ui/vuetifyx"
 )
 
 func mustParseDatetimePickerValue(v string) time.Time {
@@ -441,7 +443,7 @@ var setByQueryCases = []struct {
 func TestSetByQueryString(t *testing.T) {
 	for _, c := range setByQueryCases {
 		t.Run(c.name, func(t *testing.T) {
-			conds, args := c.data.SetByQueryString(c.qs)
+			conds, args, _ := c.data.SetByQueryString(&web.EventContext{}, c.qs)
 			diff := testingutils.PrettyJsonDiff(c.expected, c.data)
 			if len(diff) > 0 {
 				t.Error(c.name, diff)
