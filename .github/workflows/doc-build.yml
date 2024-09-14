@@ -1,0 +1,36 @@
+name: Build and Deploy Docs
+
+on:
+  push:
+    branches:
+      - doc-build
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+
+      - name: set Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dep
+        working-directory: ui/vuetifyx/vuetifyxjs
+        run: pnpm install
+
+      - name: build doc
+        working-directory: ui/vuetifyx/vuetifyxjs
+        run: pnpm run docs:build
+
+      - name: push to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ui/vuetifyx/vuetifyxjs/docs/.vitepress/dist
+          publish_branch: gh-pages
