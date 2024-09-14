@@ -14,10 +14,6 @@ export default {
         {
           "text": "vx-toolbar",
           "link": "/components/vx-toolbar/"
-        },
-        {
-          "text": "vx-icon-tip",
-          "link": "/components/vx-icon-tip/"
         }
       ]
     },
@@ -54,6 +50,10 @@ export default {
     {
       "text": "表单",
       "items": [
+        {
+          "text": "VXLabel 标签",
+          "link": "/components/vx-label/"
+        },
         {
           "text": "AutoComplete 自动填充",
           "link": "/Components/AutoComplete/"
