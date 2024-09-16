@@ -61,14 +61,9 @@ const props = defineProps({
   tips: String
 })
 
- onMounted(()=>{
-  console.log(props.tips, "tips")
- })
-
 const selectValue = ref(props.modelValue)
 
 watch(() => props.modelValue, (newValue) => {
-  console.log("watch", newValue)
   selectValue.value = newValue
 })
 
