@@ -23,6 +23,11 @@ func (b *VXFieldBuilder) Label(v string) (r *VXFieldBuilder) {
 	return b
 }
 
+func (b *VXFieldBuilder) Type(v string) (r *VXFieldBuilder) {
+	b.tag.Attr("type", v)
+	return b
+}
+
 func (b *VXFieldBuilder) Id(v string) (r *VXFieldBuilder) {
 	b.tag.Attr("id", v)
 	return b

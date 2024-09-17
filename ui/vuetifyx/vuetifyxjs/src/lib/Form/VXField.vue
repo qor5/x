@@ -1,16 +1,30 @@
 <template>
   <div class="vx-field-wrap">
-    <VXLabel :tooltip="tips" class="mb-2">{{label}}</VXLabel>
-    <v-text-field density="compact" variant="outlined" :model-value="fiedValue"
-      :type="type" :error-messages="errorMessages" :disabled="disabled" :placeholder="placeholder" v-bind="attrs"
-      @update:modelValue="onUpdateModelValue" />
+    <VXLabel :tooltip="tips" class="mb-2">{{ label }}</VXLabel>
+
+    <!-- text-area -->
+    <template v-if="type === 'textarea'">
+      <v-textarea :rows="2" :max-rows="20" auto-grow variant="outlined" density="compact" :model-value="fiedValue"
+        :error-messages="errorMessages" :disabled="disabled" :placeholder="placeholder" v-bind="filteredAttrs"
+        @update:modelValue="onUpdateModelValue" />
+    </template>
+
+    <!-- v-text-file -->
+    <template v-else>
+      <v-text-field density="compact" variant="outlined" :model-value="fiedValue" :type="type"
+        :error-messages="errorMessages" :disabled="disabled" :placeholder="placeholder" v-bind="filteredAttrs"
+        @update:modelValue="onUpdateModelValue" />
+    </template>
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { defineEmits, ref, watch } from "vue"
 import VXLabel from "../Common/VXLabel.vue"
+import { useFilteredAttrs } from "@/lib/composables/useFilteredAttrs";
 
+const { filteredAttrs } = useFilteredAttrs()
 const emit = defineEmits(["update:modelValue"])
 const props = defineProps({
   modelValue: [String, Number],
@@ -18,7 +32,6 @@ const props = defineProps({
   type: String,
   errorMessages: String,
   disabled: Boolean,
-  attrs: Object,
   placeholder: String,
   tips: String
 })
@@ -55,12 +68,12 @@ function onUpdateModelValue(value: any) {
 
     &:deep(.v-field__outline) {
       --v-field-border-width: 1px;
-      --v-field-border-opacity:1;
+      --v-field-border-opacity: 1;
       color: rgb(var(--v-theme-grey-lighten-2));
       transition: color .3s ease;
     }
 
-    &:deep(.v-field:not(.v-field--focused)):hover .v-field__outline{
+    &:deep(.v-field:not(.v-field--focused)):hover .v-field__outline {
       color: rgb(var(--v-theme-primary));
     }
 

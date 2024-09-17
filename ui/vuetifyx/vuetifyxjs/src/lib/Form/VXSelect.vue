@@ -12,7 +12,7 @@
       :clearable="clearable"
       :placeholder="placeholder"
       :disabled="disabled"
-      v-bind="attrs"
+      v-bind="filteredAttrs"
       class="vx-type-autocomplete"
       variant="outlined"
       density="compact"
@@ -30,7 +30,7 @@
       :clearable="clearable"
       :placeholder="placeholder"
       :disabled="disabled"
-      v-bind="attrs"
+      v-bind="filteredAttrs"
       class="vx-type-select"
       variant="outlined"
       density="compact"
@@ -43,6 +43,8 @@
 <script setup lang="ts">
 import { defineEmits, ref, watch, onMounted } from "vue"
 import VXLabel from "../Common/VXLabel.vue"
+import { useFilteredAttrs } from "@/lib/composables/useFilteredAttrs";
+const { filteredAttrs } = useFilteredAttrs()
 
 const props = defineProps({
   modelValue: null,
@@ -50,7 +52,6 @@ const props = defineProps({
   label: String,
   errorMessages: String,
   disabled: Boolean,
-  attrs: Object,
   placeholder: String,
   items: Array,
   itemTitle: String,
