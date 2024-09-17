@@ -18,7 +18,17 @@ func VXLabel(children ...h.HTMLComponent) (r *VXLabelBuilder) {
 	return
 }
 
+func (b *VXLabelBuilder) ToggleLabel(v bool) (r *VXLabelBuilder) {
+	b.tag.Attr(":toggle-label", fmt.Sprint((v)))
+	return b
+}
+
 func (b *VXLabelBuilder) Class(v string) (r *VXLabelBuilder) {
+	b.tag.Attr("class", v)
+	return b
+}
+
+func (b *VXLabelBuilder) ToggleIconSize(v string) (r *VXLabelBuilder) {
 	b.tag.Attr("class", v)
 	return b
 }
@@ -40,6 +50,12 @@ func (b *VXLabelBuilder) Icon(v string) (r *VXLabelBuilder) {
 
 func (b *VXLabelBuilder) IconSize(v string) (r *VXLabelBuilder) {
 	b.tag.Attr("iconSize", v)
+	return b
+}
+
+func (b *VXLabelBuilder) Slot(name string, children ...h.HTMLComponent) *VXLabelBuilder {
+	slotTemplate := h.Tag("template").Attr("#"+name).Children(children...)
+	b.tag.Children(slotTemplate)
 	return b
 }
 

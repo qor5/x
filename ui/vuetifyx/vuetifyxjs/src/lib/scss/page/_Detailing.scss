@@ -49,11 +49,11 @@
       }
     }
 
-    &:not(.edit-view) {
-      .section-body .v-card-text {
-        padding-bottom: 0;
-      }
-    }
+    // &:not(.edit-view) {
+    //   .section-body .v-card-text {
+    //     padding-bottom: 0;
+    //   }
+    // }
 
     .thead-gap th {
       padding-top: 10px !important;
@@ -175,6 +175,20 @@
 
   .section-content {
     position: relative;
+
+    .media-box-wrap {
+      padding-left: 12px;
+      padding-top:0;
+      padding-bottom:0;
+      margin-bottom:16px;
+      margin-top: 16px;
+      .v-card {
+        overflow: hidden;
+        box-shadow: none;
+        width: 194px;
+        height: 80px;
+      }
+    }
   }
 
   .section-edit-area {
