@@ -11,15 +11,6 @@
 :::demo
 
 ```vue
-<script setup lang="ts">
-import { ref } from "vue"
-const formatTooltip = ref(`{
-      "defaultValue": {
-              "value": "3426"
-      },
-      "valueType": "STRING"
-}`)
-</script>
 <template>
   <div>
       <vx-label>simple label</vx-label>
@@ -36,7 +27,30 @@ const formatTooltip = ref(`{
   <div>
      <vx-label icon="mdi-help-circle-outline" :tooltip="formatTooltip" >label with format tooltip</vx-label>
   </div>
+
+  <div>
+     <vx-label toggleLabel>Title1 toggle to switch content
+      <template #toggle-content>
+         <div class="timeline-block">asdfsdf</div>
+      </template>
+     </vx-label>
+
+     <vx-label toggleLabel>Title2 toggle to switch content
+      <template #toggle-content>
+         <div class="timeline-block">asdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdfasdfsdf</div>
+      </template>
+     </vx-label>
+  </div>
 </template>
+<script setup lang="ts">
+import { ref } from "vue"
+const formatTooltip = ref(`{
+      "defaultValue": {
+              "value": "3426"
+      },
+      "valueType": "STRING"
+}`)
+</script>
 ```
 
 <style scoped></style>

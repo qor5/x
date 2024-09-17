@@ -1,7 +1,7 @@
 <template>
     <div class="vx-toolbar-wrap">
       <div class="vx-toolbar vx-toolbar-default">
-        {{ text }}
+        <slot>{{ text }}</slot>
       </div>
     </div>
 </template>

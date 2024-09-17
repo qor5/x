@@ -23,7 +23,7 @@ import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
 import VXField from '@/lib/Form/VXField.vue'
 import VXSelect from '@/lib/Form/VXSelect.vue'
-import VXToolbar from '@/lib/Common/ToolBar.vue'
+import VXToolbar from '@/lib/Common/VXToolBar.vue'
 import VXLabel from '@/lib/Common/VXLabel.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 declare const window: any

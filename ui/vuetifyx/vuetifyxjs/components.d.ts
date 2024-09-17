@@ -37,9 +37,9 @@ declare module 'vue' {
     StringItem: typeof import('./src/lib/Filter/components/StringItem.vue')['default']
     TextDatepicker: typeof import('./src/lib/TextDatepicker.vue')['default']
     TiptapEditor: typeof import('./src/lib/TiptapEditor/TiptapEditor.vue')['default']
-    ToolBar: typeof import('./src/lib/Common/ToolBar.vue')['default']
     VXField: typeof import('./src/lib/Form/VXField.vue')['default']
     VXLabel: typeof import('./src/lib/Common/VXLabel.vue')['default']
     VXSelect: typeof import('./src/lib/Form/VXSelect.vue')['default']
+    VXToolBar: typeof import('./src/lib/Common/VXToolBar.vue')['default']
   }
 }
