@@ -18,6 +18,11 @@ func VXSelect(children ...h.HTMLComponent) (r *VXSelectBuilder) {
 	return
 }
 
+func (b *VXSelectBuilder) Class(names ...string) (r *VXSelectBuilder) {
+	b.tag.Class(names...)
+	return b
+}
+
 func (b *VXSelectBuilder) Type(v string) (r *VXSelectBuilder) {
 	b.tag.Attr("type", v)
 	return b
