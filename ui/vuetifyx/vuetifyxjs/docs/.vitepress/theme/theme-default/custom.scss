@@ -1,5 +1,6 @@
 #app {
   .VPSidebar {
+    z-index: 1001;
     padding-left: 32px;
     width: 280px;
     &.open {
@@ -25,11 +26,12 @@
   }
 
   .VPLocalNav {
-    z-index: 1999;
+    z-index: 1000;
   }
 
   .VPNav {
     z-index:2000;
+    background:#fff;
     .container {
       margin-left: 0;
       margin-right: 0;

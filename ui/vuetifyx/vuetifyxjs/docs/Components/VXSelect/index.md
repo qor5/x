@@ -14,11 +14,20 @@
 <template>
   <vx-select
     type="autocomplete"
-    v-model="value"
+    v-model="valueAutoComplete"
     multiple
     chips
     clearable
     label="autoComplete Select"
+    :items="items"
+    item-title="name"
+    item-value="id"
+    placeholder="choose a item"
+  />
+
+  <vx-select
+    v-model="valueNormal"
+    label="Normal Select"
     :items="items"
     item-title="name"
     item-value="id"
@@ -30,8 +39,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-
-const value = ref([1,2,3])
+const valueAutoComplete = ref([1,2,3])
+const valueNormal = ref([1])
 const srcs = {
   1: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
   2: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
@@ -57,6 +66,8 @@ const items = ref([
 :::
 
 ## vx-selectmany
+
+> legacy component
 
 :::demo
 
@@ -98,6 +109,8 @@ const items = ref([
 :::
 
 ## vx-linkageselect
+
+> legacy component
 
 :::demo
 
@@ -152,4 +165,68 @@ const labels = ref(['Province', 'City', 'District'])
 <style scoped></style>
 ```
 
+:::
+
+
+## vx-autocomplete
+
+> legacy component
+
+:::demo
+
+```vue
+<script setup lang="ts">
+import { reactive, ref } from 'vue'
+import VueJsonPretty from 'vue-json-pretty'
+
+const remote = reactive({
+  pageSize: 5,
+  page: 1,
+  search: ''
+})
+
+const getItems = () => {
+  const items = []
+  for (let i = 1; i <= remote.pageSize; i++) {
+    items.push({
+      icon: `https://cdn.vuetifyjs.com/images/lists/${i}.jpg`,
+      text: `test_${remote.page}_${i}`,
+      value: (remote.pageSize * (remote.page - 1) + i).toFixed()
+    })
+  }
+  return items
+}
+const loadData = (): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    resolve({
+      data: {
+        pages: 4,
+        total: 20,
+        current: remote.page * remote.pageSize,
+        items: getItems()
+      }
+    })
+  })
+}
+// const items = ref( [{ 'text': '高节', 'value': '1' }, { 'text': '地界', 'value': '3' }],)
+const items = ref(getItems())
+const value = ref()
+</script>
+<template>
+<vue-json-pretty :data="value"></vue-json-pretty>
+  <!--  <vx-autocomplete-->
+  <!--    v-model="value"-->
+  <!--    :items="items"-->
+  <!--  ></vx-autocomplete>-->
+  <vx-autocomplete
+    sorting
+    :items="items"
+    has-icon
+    :remote="remote"
+    v-model="value"
+  ></vx-autocomplete>
+</template>
+
+<style scoped></style>
+```
 :::
