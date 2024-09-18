@@ -26,7 +26,7 @@ const config: UserConfig = {
       }
     }),],
     ssr: {
-      noExternal: ['vuetify']
+      noExternal: ['vuetify', 'vuetify-pro-tiptap']
     }
   },
   themeConfig: {

@@ -21,7 +21,10 @@ import draggable from 'vuedraggable'
 import SendVariables from '@/lib/SendVariables.vue'
 import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
-import TextField from '@/lib/Form/TextFiled.vue'
+import VXField from '@/lib/Form/VXField.vue'
+import VXSelect from '@/lib/Form/VXSelect.vue'
+import VXToolbar from '@/lib/Common/VXToolBar.vue'
+import VXLabel from '@/lib/Common/VXLabel.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 declare const window: any
 
@@ -40,7 +43,10 @@ const vuetifyx = {
     app.component('vx-send-variables', SendVariables)
     app.component('vx-messagelistener', MessageListener)
     app.component('vx-overlay', Overlay)
-    app.component('vx-text-field', TextField)
+    app.component('vx-field', VXField)
+    app.component('vx-select', VXSelect)
+    app.component('vx-toolbar', VXToolbar)
+    app.component('vx-label', VXLabel)
     app.component('vx-tiptap-editor', TiptapEditor)
   }
 }

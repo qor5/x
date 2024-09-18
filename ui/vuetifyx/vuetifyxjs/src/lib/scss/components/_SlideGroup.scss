@@ -4,13 +4,17 @@
 .v-slide-group {
   .v-slide-group__content {
     flex: initial;
-    border-block-end-width: thin !important;
-    border-block-end-style: solid !important;
+    border-block-end-width: thin;
+    border-block-end-style: solid;
     border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
   }
   .v-tab.v-tab.v-btn {
     min-width: auto;
   }
+  .v-btn.v-tab--selected {
+    color: rgba(var(--v-theme-primary), var(--v-high-emphasis-opacity));
+  }
+
   .v-btn {
     --v-theme-on-surface: #{utils.hex-to-rgb-number($color-grey-700)};
     color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
