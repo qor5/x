@@ -22,6 +22,7 @@
   }
 
   .detailing-title-wrap {
+    margin-bottom: 40px;
     display: inline-flex;
     align-items: center;
     .detailing-back-btn {
@@ -39,6 +40,7 @@
     }
   }
 
+
   .section-wrap {
     &.edit-view {
       .section-body {
@@ -49,16 +51,19 @@
       }
     }
 
-    &.can-edit {
-      .section-body:hover>.v-card {
+    &.can-edit .section-body:hover>.v-card {
         box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12), 0px 6px 10px 0px rgba(0, 0, 0, 0.14);
       }
-    }
+    
 
     .thead-gap th {
       padding-top: 10px !important;
       padding-bottom: 10px !important;
     }
+  }
+
+  .section-body.can-edit:hover {
+    box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12), 0px 6px 10px 0px rgba(0, 0, 0, 0.14);
   }
 
   .value-type-media-wrap .media-box-wrap,
@@ -243,7 +248,7 @@
   }
 
   .amount-detail-wrap {
-    margin: 24px 0 40px 0;
+    margin: 24px 0 0 0;
     padding: 16px;
     border-radius: 4px;
     background: rgb(var(--v-theme-grey-lighten-5));
@@ -258,22 +263,30 @@
     color: rgb(var(--v-theme-grey-darken-3)) !important;
   }
 
-  .go-plaid-portal:not(first-child) .section-wrap.with-border-b {
-    border-block-end-width:0;
+  .go-plaid-portal .section-wrap.with-border-b {
+    border-block-end-width:1px;
   }
 
-  .section-wrap {
-    &.with-border-b {
+  .go-plaid-portal:last-child .section-wrap.with-border-b {
+    border-block-end-width:0;
+    margin-bottom: 0;
+    padding-bottom:0;
+  }
+
+  .section-wrap.border-b,
+  .section-wrap.with-border-b,
+  .section-body.border-b
+  {
       border-block-end-width: thin;
       border-block-end-style: solid;
       border-block-end-color: rgb(var(--v-theme-grey-darken-3), var(--v-border-opacity));
       padding-bottom: 40px;
       margin-bottom: 40px;
     }
-  }
+  
 
   .section-wrap:not(:last-child) .listing-compo-wrap {
-    padding-bottom: 26px;
+    margin-bottom: 40px;
     border-block-end-width: thin;
     border-block-end-style: solid;
     border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity));
@@ -283,6 +296,7 @@
     padding-left: 0;
     padding-right: 0;
     padding-top: 0;
+    padding-bottom: 40px;
   }
 
 
