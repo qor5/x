@@ -78,6 +78,11 @@ func (b *VXFieldBuilder) Bind(name string, value string) (r *VXFieldBuilder) {
 	return b
 }
 
+func (b *VXFieldBuilder) ErrorMessages(errMsgs ...string) (r *VXFieldBuilder) {
+	b.tag.Attr(":error-messages", errMsgs)
+	return b
+}
+
 func (b *VXFieldBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }

@@ -68,6 +68,11 @@ func (b *VXSelectBuilder) ItemTitle(v interface{}) (r *VXSelectBuilder) {
 	return b
 }
 
+func (b *VXSelectBuilder) ErrorMessages(errMsgs ...string) (r *VXSelectBuilder) {
+	b.tag.Attr(":error-messages", errMsgs)
+	return b
+}
+
 func (b *VXSelectBuilder) ItemValue(v interface{}) (r *VXSelectBuilder) {
 	b.tag.Attr("item-value", v)
 	return b

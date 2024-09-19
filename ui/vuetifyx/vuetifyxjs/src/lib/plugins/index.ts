@@ -25,6 +25,7 @@ import VXField from '@/lib/Form/VXField.vue'
 import VXSelect from '@/lib/Form/VXSelect.vue'
 import VXToolbar from '@/lib/Common/VXToolBar.vue'
 import VXLabel from '@/lib/Common/VXLabel.vue'
+import VXDialog from '@/lib/Common/VXDialog.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 declare const window: any
 
@@ -48,6 +49,7 @@ const vuetifyx = {
     app.component('vx-toolbar', VXToolbar)
     app.component('vx-label', VXLabel)
     app.component('vx-tiptap-editor', TiptapEditor)
+    app.component('vx-dialog', VXDialog)
   }
 }
 

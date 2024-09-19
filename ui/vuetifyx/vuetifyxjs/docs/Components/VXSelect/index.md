@@ -2,12 +2,6 @@
 
 ## vx-select
 
-### 基本用法
-
-```html
-<vx-select model-value="Hello World" label="field1" />
-```
-
 :::demo
 
 ```vue
@@ -26,8 +20,32 @@
   />
 
   <vx-select
+    type="autocomplete"
+    v-model="valueAutoComplete"
+    multiple
+    chips
+    clearable
+    disabled
+    label="disabled autocomplete Select"
+    :items="items"
+    item-title="name"
+    item-value="id"
+    placeholder="choose a item"
+  />
+
+  <vx-select
     v-model="valueNormal"
     label="Normal Select"
+    :items="items"
+    item-title="name"
+    item-value="id"
+    placeholder="choose a item"
+  />
+
+  <vx-select
+    v-model="valueWithErrorMsg"
+    label="Select with Error messages"
+    error-messages="This is an error message explanation"
     :items="items"
     item-title="name"
     item-value="id"
@@ -39,8 +57,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-const valueAutoComplete = ref([1,2,3])
+const valueAutoComplete = ref([1, 2, 3])
 const valueNormal = ref([1])
+const valueWithErrorMsg = ref([1])
 const srcs = {
   1: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
   2: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
@@ -49,14 +68,14 @@ const srcs = {
   5: 'https://cdn.vuetifyjs.com/images/lists/5.jpg'
 }
 const items = ref([
-  { id:1, name: 'Sandra Adams', group: 'Group 1', avatar: srcs[1] },
-  { id:2, name: 'Ali Connors', group: 'Group 1', avatar: srcs[2] },
-  { id:3, name: 'Trevor Hansen', group: 'Group 1', avatar: srcs[3] },
-  { id:4, name: 'Tucker Smith', group: 'Group 1', avatar: srcs[2] },
-  { id:5, name: 'Britta Holt', group: 'Group 2', avatar: srcs[4] },
-  { id:6, name: 'Jane Smith ', group: 'Group 2', avatar: srcs[5] },
-  { id:7, name: 'John Smith', group: 'Group 2', avatar: srcs[1] },
-  { id:8, name: 'Sandra Williams', group: 'Group 2', avatar: srcs[3] }
+  { id: 1, name: 'Sandra Adams', group: 'Group 1', avatar: srcs[1] },
+  { id: 2, name: 'Ali Connors', group: 'Group 1', avatar: srcs[2] },
+  { id: 3, name: 'Trevor Hansen', group: 'Group 1', avatar: srcs[3] },
+  { id: 4, name: 'Tucker Smith', group: 'Group 1', avatar: srcs[2] },
+  { id: 5, name: 'Britta Holt', group: 'Group 2', avatar: srcs[4] },
+  { id: 6, name: 'Jane Smith ', group: 'Group 2', avatar: srcs[5] },
+  { id: 7, name: 'John Smith', group: 'Group 2', avatar: srcs[1] },
+  { id: 8, name: 'Sandra Williams', group: 'Group 2', avatar: srcs[3] }
 ])
 </script>
 
@@ -167,7 +186,6 @@ const labels = ref(['Province', 'City', 'District'])
 
 :::
 
-
 ## vx-autocomplete
 
 > legacy component
@@ -213,7 +231,7 @@ const items = ref(getItems())
 const value = ref()
 </script>
 <template>
-<vue-json-pretty :data="value"></vue-json-pretty>
+  <vue-json-pretty :data="value"></vue-json-pretty>
   <!--  <vx-autocomplete-->
   <!--    v-model="value"-->
   <!--    :items="items"-->
@@ -229,4 +247,5 @@ const value = ref()
 
 <style scoped></style>
 ```
+
 :::

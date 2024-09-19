@@ -6,7 +6,7 @@ import { defineConfig } from 'vitepress'
 import Vuetify from 'vite-plugin-vuetify'
 
 const nav = [
-  { text: '组件文档', link: '/Components/Button/', target: '_self' },
+  { text: '组件文档', link: '/Components/VXField/', target: '_self' },
   // { text: 'playground', link: '/playground/' },
   {
     text: 'Github',

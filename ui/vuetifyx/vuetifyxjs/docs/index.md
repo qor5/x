@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: alt
       text: 快速开始
-      link: /Components/Button
+      link: /Components/VXField
     - theme: alt
       text: View on GitHub
       link: https://github.com/qor5/x/tree/master/ui/vuetifyx
