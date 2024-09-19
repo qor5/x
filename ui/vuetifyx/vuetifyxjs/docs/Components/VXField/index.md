@@ -31,7 +31,6 @@
     <v-col cols="6">
       <vx-field
         v-model="dataTextErrorMessages"
-        remote-validation
         error-messages="This is an error message explanation"
         placeholder="enter any value"
         label="label with error messages"

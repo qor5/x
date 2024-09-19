@@ -32,7 +32,6 @@
     v-model="valueWithErrorMsg"
     label="Select with Error messages"
     error-messages="This is an error message explanation"
-    remoteValidation
     :items="items"
     item-title="name"
     item-value="id"
