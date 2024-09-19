@@ -88,6 +88,10 @@ function onUpdateModelValue(value: string|number|Record<string,any>) {
       transition: color 0.3s ease;
     }
 
+    &:not(.v-input--error):deep(.v-field__outline) {
+      color: rgb(var(--v-theme-grey-lighten-2));
+    }
+
     &:deep(.v-input__details) {
       padding:0;
       min-height: 20px;

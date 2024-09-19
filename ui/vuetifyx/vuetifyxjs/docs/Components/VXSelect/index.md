@@ -20,6 +20,20 @@
   />
 
   <vx-select
+    type="autocomplete"
+    v-model="valueAutoComplete"
+    multiple
+    chips
+    clearable
+    disabled
+    label="disabled autocomplete Select"
+    :items="items"
+    item-title="name"
+    item-value="id"
+    placeholder="choose a item"
+  />
+
+  <vx-select
     v-model="valueNormal"
     label="Normal Select"
     :items="items"

@@ -38,6 +38,17 @@
     </v-col>
   </v-row>
 
+    <v-row>
+    <v-col cols="6">
+      <vx-field
+        error-messages="This is an error message explanation"
+        placeholder="enter any value"
+        disabled
+        label="label with error messages"
+      />
+    </v-col>
+  </v-row>
+
   <v-row>
     <v-col cols="6">
       <vx-field type="textarea" v-model="dataTextArea" label="textarea" />
