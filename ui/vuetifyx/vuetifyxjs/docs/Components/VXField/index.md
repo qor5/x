@@ -4,7 +4,6 @@
 
 ```html
 <vx-field model-value="Hello World" label="field1" />
-
 ```
 
 :::demo
@@ -20,18 +19,31 @@
     <v-col cols="6" sm="6">
       <vx-field v-model="dataWithBinding" label="field2" />
     </v-col>
+
     <v-col cols="6" class="pt-12"><b> with binding:</b> {{ dataWithBinding }} </v-col>
 
-     <v-col cols="6" sm="6">
+    <v-col cols="6" sm="6">
       <vx-field v-model="dataWithTips" tips="this is tips" label="field with tooltip" />
     </v-col>
   </v-row>
 
   <v-row>
-     <v-col cols="6" >
-      <vx-field type="textarea" v-model="dataTextArea" label="textarea"/>
+    <v-col cols="6">
+      <vx-field
+        v-model="dataTextErrorMessages"
+        remote-validation
+        error-messages="This is an error message explanation"
+        placeholder="enter any value"
+        label="label with error messages"
+      />
     </v-col>
-   <v-col cols="6" class="pt-12"><b> with binding:</b> {{ dataTextArea }} </v-col>
+  </v-row>
+
+  <v-row>
+    <v-col cols="6">
+      <vx-field type="textarea" v-model="dataTextArea" label="textarea" />
+    </v-col>
+    <v-col cols="6" class="pt-12"><b> with binding:</b> {{ dataTextArea }} </v-col>
   </v-row>
 </template>
 
@@ -42,6 +54,7 @@ const dataNoBinding = ref('hello world')
 const dataWithBinding = ref('hello world')
 const dataWithTips = ref('data with tips')
 const dataTextArea = ref('textarea data')
+const dataTextErrorMessages = ref('This is a description')
 </script>
 
 <style scoped lang="css">

@@ -12,6 +12,7 @@
       :clearable="clearable"
       :placeholder="placeholder"
       :disabled="disabled"
+      :error-messages="errorFiled"
       v-bind="filteredAttrs"
       class="vx-type-autocomplete"
       variant="outlined"
@@ -30,6 +31,7 @@
       :clearable="clearable"
       :placeholder="placeholder"
       :disabled="disabled"
+      :error-messages="errorFiled"
       v-bind="filteredAttrs"
       class="vx-type-select"
       variant="outlined"
@@ -41,16 +43,18 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, watch, onMounted } from "vue"
+import { defineEmits, ref, computed, PropType } from "vue"
 import VXLabel from "../Common/VXLabel.vue"
 import { useFilteredAttrs } from "@/lib/composables/useFilteredAttrs";
 const { filteredAttrs } = useFilteredAttrs()
 
+const emit = defineEmits(["update:modelValue"])
 const props = defineProps({
   modelValue: null,
   type: String,
   label: String,
-  errorMessages: String,
+  errorMessages: [String, Array] as PropType<string | string[]>,
+  remoteValidation: Boolean,
   disabled: Boolean,
   placeholder: String,
   items: Array,
@@ -62,19 +66,13 @@ const props = defineProps({
   tips: String
 })
 
-const selectValue = ref(props.modelValue)
-
-watch(() => props.modelValue, (newValue) => {
-  selectValue.value = newValue
-})
-
-const emit = defineEmits(["update:modelValue"])
+const selectValue = computed(()=> props.modelValue)
+const errorFiled = ref(props.errorMessages)
 
 function onUpdateModelValue(value: any) {
   emit("update:modelValue", value)
-  selectValue.value = value
+  errorFiled.value = ''
 }
-
 </script>
 
 <style lang="scss" scoped>
@@ -114,16 +112,21 @@ function onUpdateModelValue(value: any) {
 
     &:deep(.v-field__outline) {
       --v-field-border-width: 1px;
-      --v-field-border-opacity:1;
-      color: rgb(var(--v-theme-grey-lighten-2));
-      transition: color .3s ease;
+      --v-field-border-opacity: 1;
+      transition: color 0.3s ease;
     }
 
-    &:deep(.v-field:not(.v-field--focused)):hover .v-field__outline{
+    &:deep(.v-input__details) {
+      padding:0;
+      min-height: 20px;
+      align-items:center;
+    }
+
+    &:not(.v-input--error):deep(.v-field:not(.v-field--focused)):hover .v-field__outline{
       color: rgb(var(--v-theme-primary));
     }
 
-    &:deep(.v-field--focused) .v-field__outline {
+    &:not(.v-input--error):deep(.v-field--focused) .v-field__outline {
       color: rgb(var(--v-theme-primary));
     }
 

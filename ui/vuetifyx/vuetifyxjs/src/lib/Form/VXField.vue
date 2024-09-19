@@ -4,48 +4,64 @@
 
     <!-- text-area -->
     <template v-if="type === 'textarea'">
-      <v-textarea :rows="2" :max-rows="20" auto-grow variant="outlined" density="compact" :model-value="fiedValue"
-        :error-messages="errorMessages" :disabled="disabled" :placeholder="placeholder" v-bind="filteredAttrs"
-        @update:modelValue="onUpdateModelValue" />
+      <v-textarea
+        :rows="2"
+        :max-rows="20"
+        auto-grow
+        variant="outlined"
+        density="compact"
+        :model-value="fieldValue"
+        :error-messages="errorFiled"
+        :disabled="disabled"
+        :placeholder="placeholder"
+        v-bind="filteredAttrs"
+        @update:modelValue="onUpdateModelValue"
+      />
     </template>
 
     <!-- v-text-file -->
     <template v-else>
-      <v-text-field density="compact" variant="outlined" :model-value="fiedValue" :type="type"
-        :error-messages="errorMessages" :disabled="disabled" :placeholder="placeholder" v-bind="filteredAttrs"
-        @update:modelValue="onUpdateModelValue" />
+      <v-text-field
+        density="compact"
+        variant="outlined"
+        :model-value="fieldValue"
+        :type="type"
+        :error-messages="errorFiled"
+        :disabled="disabled"
+        :placeholder="placeholder"
+        v-bind="filteredAttrs"
+        @update:modelValue="onUpdateModelValue"
+      />
     </template>
-
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, watch } from "vue"
-import VXLabel from "../Common/VXLabel.vue"
-import { useFilteredAttrs } from "@/lib/composables/useFilteredAttrs";
-
+import { defineEmits, computed, PropType, ref } from 'vue'
+import VXLabel from '../Common/VXLabel.vue'
+import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 const { filteredAttrs } = useFilteredAttrs()
-const emit = defineEmits(["update:modelValue"])
+
+const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
   modelValue: [String, Number],
   label: String,
   type: String,
-  errorMessages: String,
+  errorMessages: [String, Array] as PropType<string | string[]>,
+  remoteValidation: Boolean,
   disabled: Boolean,
   placeholder: String,
-  tips: String
+  tips: String,
 })
 
-const fiedValue = ref(props.modelValue)
+const fieldValue = computed(()=> props.modelValue)
+const errorFiled = ref(props.errorMessages)
 
-watch(() => props.modelValue, (newValue) => {
-  fiedValue.value = newValue
-})
-
-function onUpdateModelValue(value: any) {
-  emit("update:modelValue", value)
-  fiedValue.value = value
+function onUpdateModelValue(value: string|number|Record<string,any>) {
+  emit('update:modelValue', value)
+  errorFiled.value = ''
 }
+
 
 </script>
 
@@ -57,7 +73,7 @@ function onUpdateModelValue(value: any) {
     &.v-input--disabled {
       &:deep(.v-field) {
         background-color: rgb(var(--v-theme-grey-lighten-4));
-        color: rgb(var(--v-theme-grey))
+        color: rgb(var(--v-theme-grey));
       }
     }
 
@@ -69,15 +85,25 @@ function onUpdateModelValue(value: any) {
     &:deep(.v-field__outline) {
       --v-field-border-width: 1px;
       --v-field-border-opacity: 1;
-      color: rgb(var(--v-theme-grey-lighten-2));
-      transition: color .3s ease;
+      transition: color 0.3s ease;
     }
 
-    &:deep(.v-field:not(.v-field--focused)):hover .v-field__outline {
+    &:deep(.v-input__details) {
+      padding:0;
+      min-height: 20px;
+      align-items:center;
+    }
+
+    &:not(.v-input--error):deep(.v-field__outline) {
+      color: rgb(var(--v-theme-grey-lighten-2));
+      transition: color 0.3s ease;
+    }
+
+    &:not(.v-input--error):deep(.v-field:not(.v-field--focused)):hover .v-field__outline {
       color: rgb(var(--v-theme-primary));
     }
 
-    &:deep(.v-field--focused) .v-field__outline {
+    &:not(.v-input--error):deep(.v-field--focused) .v-field__outline {
       color: rgb(var(--v-theme-primary));
     }
 
