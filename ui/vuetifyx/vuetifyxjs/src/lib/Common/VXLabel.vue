@@ -20,7 +20,7 @@
       </template>
 
       <v-tooltip v-if="tooltip">
-        <pre>{{ tooltip }}</pre>
+        <pre class="tooltip-display">{{ tooltip }}</pre>
         <template v-slot:activator="{ props }">
           <v-icon :icon="icon" :size="iconSize" :color="tooltipIconColor" v-bind="props" class="ml-1" />
         </template>
@@ -88,6 +88,11 @@ const onClickToggleLabel = () => {
   .v-icon--size-small {
     font-size: 16px;
   }
+}
 
+.tooltip-display {
+  max-width: 50vw;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 </style>

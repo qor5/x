@@ -30,3 +30,13 @@ table {
   table-layout: auto;
   word-break: break-word;
 }
+
+/** fix: v-tab item have box-shadow which cropped by v-window's property overflow:hidden **/
+.v-slide-group ~ .v-window {
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  margin-left: -20px;
+  margin-right: -20px;
+  margin-bottom: -20px;
+}
