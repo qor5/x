@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, Ref } from 'vue'
+import { computed, onMounted, ref, Ref, watch } from 'vue'
 
 interface LinkageSelectItem {
   ID: string
@@ -76,6 +76,11 @@ onMounted(() => {
   for (let i = 0; i < props.labels.length; i++) {
     levelItems.value.push(getLevelItems(i))
   }
+  watch(selectedIDs, () => {
+    for (let i = 0; i < props.labels.length; i++) {
+      levelItems.value[i] = getLevelItems(i)
+    }
+  })
 })
 linkageSelectItems.value.forEach((v: any) => {
   v.forEach((item: LinkageSelectItem) => {
