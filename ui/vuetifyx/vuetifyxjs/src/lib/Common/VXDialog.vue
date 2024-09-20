@@ -8,8 +8,8 @@
       :persistent="persistent"
       @update:model-value="onUpdateModelValue"
     >
-      <template v-slot:activator="{ props: activatorProps }">
-        <slot name="activator" :props="{ activatorProps }" />
+      <template v-slot:activator="{ isActive, props: activatorProps }">
+        <slot name="activator" :props="{ isActive, activatorProps }" />
       </template>
 
       <template v-slot:default="{ isActive }">
@@ -24,6 +24,7 @@
 
           <v-card-text :style="[contentWidth, contentMaxWidth, contentHeightStyle]">
             <slot
+              :isActive="isActive"
               ><span class="dialog-content-text">{{ text }}</span></slot
             >
           </v-card-text>
@@ -70,7 +71,7 @@ import { useHasEventListener } from '@/lib/composables/useEventListener'
 
 const { filteredAttrs } = useFilteredAttrs()
 const { hasEventListener } = useHasEventListener()
-const emit = defineEmits(['update:modelValue', 'click:ok', 'click:cancel', 'click-close'])
+const emit = defineEmits(['update:modelValue', 'click:ok', 'click:cancel', 'click:close'])
 const props = defineProps({
   modelValue: Boolean,
   type: {
@@ -201,7 +202,7 @@ function onCancel(isActive: Ref<boolean>) {
 
 function onClose(isActive: Ref<boolean>) {
   if (hasEventListener('click-close')) {
-    emit('click:cancel', isActive)
+    emit('click:close', isActive)
   } else {
     isActive.value = false
   }

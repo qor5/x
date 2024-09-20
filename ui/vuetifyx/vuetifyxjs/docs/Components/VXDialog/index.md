@@ -1,6 +1,78 @@
-# vx-dialog 弹窗
+# vx-dialog - 弹窗
 
-## 唤起弹窗方式
+带样式预设的通用弹窗，即时反馈类的仅需配置较少参数即可使用，也支持复杂场景的控制
+
+## API
+
+### Props
+
+| Name | Introduction | Type | Default Value|
+|-- | -- | -- | -- | 
+| title | 弹窗标题 | `String` | - |
+| text | 弹窗内容，适合纯文本 | `String` | - |
+| size | [弹窗尺寸](./#弹窗尺寸), 默认尺寸定宽，large 尺寸定最大宽度 | `'default'`｜ `'large'` | `'default'` |
+| type | 弹窗[预设样式](./#预设样式) | `'default'` ｜ `'info'` ｜ `'success'` ｜ `'warn'` ｜ `'error'` | `'default'` |
+| hideOk | 隐藏确认按钮 | `Boolean` | `false` |
+| hideCancel | 隐藏取消按钮 | `Boolean` | `false` |
+| okText | 确认按钮文案 | `String` | `OK` |
+| cancelText | 取消按钮文案 | `String` | `Cancel` |
+| width | 弹窗宽度 | `Number` | - |
+| maxWidth | 弹窗最大宽度 | `Number` | - |
+| contentHeight | 弹窗内容高度 | `Number` | - |
+| model-value | 控制弹窗显示与否 | `Boolean` | `false` |
+
+> 除此之外所有的 [v-dialog](https://vuetifyjs.com/en/api/v-dialog/) 原生 props 都可使用 v-bind:[props]="[value]" 实现或覆盖
+
+### Events
+
+| Name | Payload | Introduction |
+| -- | -- | -- |
+| click:ok | `{ isActive: Ref<isActive> }` | 点击 OK 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) |
+| click:cancel | `{ isActive: Ref<isActive> }` | 点击 Cancel 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) |
+| click:close |`{ isActive: Ref<isActive> }` | 点击右上角关闭图标时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) |
+| update:modelValue | `boolean` | 弹窗 model 值改变时触发 |
+
+### Slots
+
+#### v-slot:activator
+
+[激活插槽](./#激活弹窗)，使用该插槽不需要绑定 `v-model`
+
+##### scope value
+
+```js
+{ 
+  isActive: boolean, 
+  props: { activatorProps:Record<string, any> }
+}
+```
+
+#### v-slot:default
+
+默认内容区域插槽
+
+##### scope value
+
+```js
+{ isActive: Ref<boolean> }
+```
+
+#### v-slot:action-btn
+
+底部按钮区域插槽
+
+##### scope value
+
+```js
+{ isActive: Ref<boolean> }
+```
+
+## 激活弹窗
+
+在以下两个极简的示例里，我们可以使用两种方法来唤起弹窗。
+
+- 1. 使用 `v-model` 去绑定值，并通过一个变量去驱动它
+- 2. 使用 **activator** slot 去渲染按钮，并给按钮 `v-bind` **props** 对象的 `activatorProps`
 
 :::demo
 
@@ -9,7 +81,7 @@
   <div>
     <v-row>
       <v-col cols="3" class="text-center">
-        <div class="mb-2">使用变量控制</div>
+        <div class="mb-2">1.使用v-model</div>
         <vx-dialog
           v-model="dialogVisible"
           title="Confirm"
@@ -19,7 +91,7 @@
       </v-col>
 
       <v-col cols="3" class="text-center">
-        <div class="mb-2">使用slot</div>
+        <div class="mb-2">2.使用 activator slot</div>
         <vx-dialog
           title="Confirm"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
@@ -41,7 +113,8 @@ const dialogVisible = ref(false)
 
 :::
 
-## 五种预设样式
+
+## 预设样式
 
 :::demo
 
@@ -50,65 +123,65 @@ const dialogVisible = ref(false)
   <div>
     <v-row>
       <v-col cols="3" class="text-center">
-        <div class="mb-2">普通样式</div>
+        <div class="mb-2">default</div>
         <vx-dialog
           title="Confirm"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
           <template v-slot:activator="{ props: { activatorProps } }">
-            <v-btn v-bind="activatorProps" color="secondary">普通Dialog</v-btn>
+            <v-btn v-bind="activatorProps" color="secondary">Open Dialog</v-btn>
           </template>
         </vx-dialog>
       </v-col>
 
       <v-col cols="3" class="text-center">
-        <div class="mb-2">提示样式</div>
+        <div class="mb-2">info</div>
         <vx-dialog
           title="Info"
           type="info"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
           <template v-slot:activator="{ props: { activatorProps } }">
-            <v-btn v-bind="activatorProps" color="primary">提示Dialog</v-btn>
+            <v-btn v-bind="activatorProps" color="primary">Open Dialog</v-btn>
           </template>
         </vx-dialog>
       </v-col>
 
       <v-col cols="3" class="text-center">
-        <div class="mb-2">成功样式</div>
+        <div class="mb-2">success</div>
         <vx-dialog
           title="Success"
           type="success"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
           <template v-slot:activator="{ props: { activatorProps } }">
-            <v-btn v-bind="activatorProps" color="success">提示Dialog</v-btn>
+            <v-btn v-bind="activatorProps" color="success">Open Dialog</v-btn>
           </template>
         </vx-dialog>
       </v-col>
 
       <v-col cols="3" class="text-center">
-        <div class="mb-2">警告样式</div>
+        <div class="mb-2">warn</div>
         <vx-dialog
           title="Warning"
           type="warn"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
           <template v-slot:activator="{ props: { activatorProps } }">
-            <v-btn v-bind="activatorProps" color="warning">警告Dialog</v-btn>
+            <v-btn v-bind="activatorProps" color="warning">Open Dialog</v-btn>
           </template>
         </vx-dialog>
       </v-col>
 
       <v-col cols="3" class="text-center">
-        <div class="mb-2">错误样式</div>
+        <div class="mb-2">error</div>
         <vx-dialog
           title="Error"
           type="error"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
           <template v-slot:activator="{ props: { activatorProps } }">
-            <v-btn v-bind="activatorProps" color="error">错误Dialog</v-btn>
+            <v-btn v-bind="activatorProps" color="error">Open Dialog</v-btn>
           </template>
         </vx-dialog>
       </v-col>
@@ -124,7 +197,7 @@ const dialogVisible = ref(false)
 
 :::
 
-## 不同尺寸
+## 弹窗尺寸
 
 - 默认尺寸是 `size: "default"`, 此时固定宽度，用作大多数场景的及时反馈
 - 大尺寸是 `size: "large"`, 此时最大宽度 665px，比较适合一些操作反馈类的弹窗
