@@ -184,23 +184,23 @@ const instance = getCurrentInstance()
 // }
 
 function onOk(isActive: Ref<boolean>) {
-  if(hasEventListener('click:ok')) {
-    emit('click:ok', {isActive, isLoading:isOkBtnLoading})
+  if (hasEventListener('click:ok')) {
+    emit('click:ok', { isActive, isLoading: isOkBtnLoading })
   } else {
     isActive.value = false
   }
 }
 
 function onCancel(isActive: Ref<boolean>) {
-  if(hasEventListener('click:cancel')) {
-    emit('click:cancel', {isActive})
+  if (hasEventListener('click:cancel')) {
+    emit('click:cancel', { isActive })
   } else {
     isActive.value = false
   }
 }
 
 function onClose(isActive: Ref<boolean>) {
-  if(hasEventListener('click-close')) {
+  if (hasEventListener('click-close')) {
     emit('click:cancel', isActive)
   } else {
     isActive.value = false

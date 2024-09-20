@@ -1,6 +1,6 @@
 <template>
   <div class="vx-select-wrap">
-    <VXLabel :tooltip="tips" class="mb-2">{{label}}</VXLabel>
+    <VXLabel :tooltip="tips" class="mb-2">{{ label }}</VXLabel>
     <v-autocomplete
       v-if="type === 'autocomplete'"
       :model-value="selectValue"
@@ -43,12 +43,12 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, computed, PropType } from "vue"
-import VXLabel from "../Common/VXLabel.vue"
-import { useFilteredAttrs } from "@/lib/composables/useFilteredAttrs";
+import { defineEmits, ref, computed, PropType } from 'vue'
+import VXLabel from '../Common/VXLabel.vue'
+import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 const { filteredAttrs } = useFilteredAttrs()
 
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
   modelValue: null,
   type: String,
@@ -66,11 +66,11 @@ const props = defineProps({
   tips: String
 })
 
-const selectValue = computed(()=> props.modelValue)
+const selectValue = computed(() => props.modelValue)
 const errorFiled = ref(props.errorMessages)
 
 function onUpdateModelValue(value: any) {
-  emit("update:modelValue", value)
+  emit('update:modelValue', value)
   errorFiled.value = ''
 }
 </script>
@@ -83,7 +83,7 @@ function onUpdateModelValue(value: any) {
     &.v-input--disabled {
       &:deep(.v-field) {
         background-color: rgb(var(--v-theme-grey-lighten-4));
-        color: rgb(var(--v-theme-grey))
+        color: rgb(var(--v-theme-grey));
       }
     }
 
@@ -91,7 +91,7 @@ function onUpdateModelValue(value: any) {
     &:deep(.v-select__selection) {
       margin-inline-end: 4px;
       .v-chip {
-        color: rgb(var(--v-theme-primary))
+        color: rgb(var(--v-theme-primary));
       }
     }
 
@@ -99,10 +99,10 @@ function onUpdateModelValue(value: any) {
       --v-theme-overlay-multiplier: var(--v-theme-background-overlay-multiplier);
       background-color: rgb(var(--v-theme-background));
 
-      .v-field__clearable .mdi-close-circle{
+      .v-field__clearable .mdi-close-circle {
         font-size: 18px;
         color: rgb(var(--v-theme-grey-darken-3));
-        --v-medium-emphasis-opacity:1;
+        --v-medium-emphasis-opacity: 1;
       }
 
       .v-field__append-inner .mdi-menu-down {
@@ -121,12 +121,12 @@ function onUpdateModelValue(value: any) {
     }
 
     &:deep(.v-input__details) {
-      padding:0;
+      padding: 0;
       min-height: 20px;
-      align-items:center;
+      align-items: center;
     }
 
-    &:not(.v-input--error):deep(.v-field:not(.v-field--focused)):hover .v-field__outline{
+    &:not(.v-input--error):deep(.v-field:not(.v-field--focused)):hover .v-field__outline {
       color: rgb(var(--v-theme-primary));
     }
 
