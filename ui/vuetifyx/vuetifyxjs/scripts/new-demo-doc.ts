@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const rootDir = path.resolve(__dirname, '../');
 const docsDir = path.join(rootDir, 'docs');
-const componentsDir = path.join(docsDir, 'components');
+const componentsDir = path.join(docsDir, 'Components')
 const sidebarFile = path.join(docsDir, 'sidebar.ts');
 
 // Read and parse the sidebar.ts file

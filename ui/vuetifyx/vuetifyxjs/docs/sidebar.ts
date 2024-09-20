@@ -25,17 +25,13 @@ export default {
           link: '/Components/TiptapEditor/'
         },
         {
-          text: 'SendVariables 组件',
-          link: '/Components/VXField/sendVariables'
-        },
-        {
           text: 'DatePicker 时间选择器',
           link: '/Components/DatePicker/'
         }
       ]
     },
     {
-      text: '数据展示',
+      text: '数据和展示',
       items: [
         {
           text: 'Label 标签',
@@ -44,6 +40,10 @@ export default {
         {
           text: 'Toolbar 提示条',
           link: '/Components/VXToolbar/'
+        },
+        {
+          text: 'Filter 筛选组件',
+          link: '/Components/Filter/'
         }
       ]
     },
@@ -56,7 +56,7 @@ export default {
         },
         {
           text: 'Dialog 弹窗',
-          link: '/components/VXDialog/'
+          link: '/Components/VXDialog/'
         }
       ]
     },
@@ -66,6 +66,10 @@ export default {
         {
           text: 'ScrollIframe 组件',
           link: '/Components/ScrollIframe/'
+        },
+        {
+          text: 'SendVariables 组件',
+          link: '/Components/VXField/sendVariables'
         }
       ]
     }
