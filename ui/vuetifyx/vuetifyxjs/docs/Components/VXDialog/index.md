@@ -55,7 +55,7 @@ const dialogVisible = ref(false)
           title="Confirm"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
-          <template v-slot:activator="{ activatorProps }">
+          <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="secondary">普通Dialog</v-btn>
           </template>
         </vx-dialog>
@@ -68,7 +68,7 @@ const dialogVisible = ref(false)
           type="info"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
-          <template v-slot:activator="{ activatorProps }">
+          <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="primary">提示Dialog</v-btn>
           </template>
         </vx-dialog>
@@ -81,7 +81,7 @@ const dialogVisible = ref(false)
           type="success"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
-          <template v-slot:activator="{ activatorProps }">
+          <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="success">提示Dialog</v-btn>
           </template>
         </vx-dialog>
@@ -94,7 +94,7 @@ const dialogVisible = ref(false)
           type="warn"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
-          <template v-slot:activator="{ activatorProps }">
+          <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="warning">警告Dialog</v-btn>
           </template>
         </vx-dialog>
@@ -107,7 +107,7 @@ const dialogVisible = ref(false)
           type="error"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
-          <template v-slot:activator="{ activatorProps }">
+          <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="error">错误Dialog</v-btn>
           </template>
         </vx-dialog>
@@ -142,7 +142,7 @@ const dialogVisible = ref(false)
           title="Confirm"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
-          <template v-slot:activator="{ activatorProps }">
+          <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
           </template>
         </vx-dialog>
@@ -156,7 +156,7 @@ const dialogVisible = ref(false)
           size="large"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info"
         >
-          <template v-slot:activator="{ activatorProps }">
+          <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
           </template>
         </vx-dialog>
@@ -169,7 +169,7 @@ const dialogVisible = ref(false)
           width="1200"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
-          <template v-slot:activator="{ activatorProps }">
+          <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
           </template>
         </vx-dialog>
@@ -182,7 +182,7 @@ const dialogVisible = ref(false)
           width="300"
           text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
         >
-          <template v-slot:activator="{ activatorProps }">
+          <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
           </template>
         </vx-dialog>
@@ -221,7 +221,7 @@ const dialogVisible = ref(false)
           @click:cancel="onCancel"
           @click:ok="onOK"
         >
-          <template v-slot:activator="{ activatorProps }">
+          <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
           </template>
         </vx-dialog>
@@ -236,7 +236,7 @@ const dialogVisible = ref(false)
           okText="保存"
           cancelText="取消"
         >
-          <template v-slot:activator="{ activatorProps }">
+          <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
           </template>
         </vx-dialog>
@@ -250,7 +250,7 @@ const dialogVisible = ref(false)
           hide-cancel
           ok-text="Fine"
         >
-          <template v-slot:activator="{ activatorProps }">
+          <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
           </template>
         </vx-dialog>
