@@ -27,6 +27,8 @@ import VXToolbar from '@/lib/Common/VXToolBar.vue'
 import VXLabel from '@/lib/Common/VXLabel.vue'
 import VXDialog from '@/lib/Common/VXDialog.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
+import LinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
+
 declare const window: any
 
 const vuetifyx = {
@@ -50,6 +52,7 @@ const vuetifyx = {
     app.component('vx-label', VXLabel)
     app.component('vx-tiptap-editor', TiptapEditor)
     app.component('vx-dialog', VXDialog)
+    app.component('vx-linkageselect-remote', LinkageSelectRemote)
   }
 }
 

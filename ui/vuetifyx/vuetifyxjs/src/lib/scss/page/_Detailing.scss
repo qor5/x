@@ -8,7 +8,7 @@
 
   .page-content-layout {
     max-width: 1440px;
-    padding-top:0;
+    padding-top: 0;
     padding-right: 8px;
     padding-left: 8px;
   }
@@ -50,8 +50,11 @@
     }
 
     &.can-edit {
-      .section-body:hover>.v-card {
-        box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12), 0px 6px 10px 0px rgba(0, 0, 0, 0.14);
+      .section-body:hover > .v-card {
+        box-shadow:
+          0px 3px 5px 0px rgba(0, 0, 0, 0.14),
+          0px 1px 18px 0px rgba(0, 0, 0, 0.12),
+          0px 6px 10px 0px rgba(0, 0, 0, 0.14);
       }
     }
 
@@ -64,23 +67,23 @@
   .value-type-media-wrap .media-box-wrap,
   .timeline-block .media-box-wrap,
   .section-content .media-box-wrap {
-      padding-left: 12px;
-      padding-top:0;
-      padding-bottom:0;
-      margin-bottom:16px;
-      margin-top: 16px;
-      .v-card {
-        overflow: hidden;
-        box-shadow: none;
-        width: 194px;
-        height: 80px;
-      }
+    padding-left: 12px;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 16px;
+    margin-top: 16px;
+    .v-card {
+      overflow: hidden;
+      box-shadow: none;
+      width: 194px;
+      height: 80px;
     }
+  }
 
   .section-wrap:not(.edit-view) .value-type-media-wrap .media-box-wrap,
   .section-wrap:not(.edit-view) .timeline-block .media-box-wrap,
   .section-wrap:not(.edit-view) .section-content .media-box-wrap {
-      margin-top: 0;
+    margin-top: 0;
   }
 
   .section-title-wrap {
@@ -103,7 +106,7 @@
   .section-body {
     margin-left: 0;
     margin-right: 0;
-   
+
     .v-card,
     &.v-card {
       background: transparent;
@@ -112,7 +115,7 @@
     }
 
     & .media-box-wrap .v-row {
-      gap:0;
+      gap: 0;
       &:not(:last-child) {
         margin-bottom: 0;
       }
@@ -177,19 +180,18 @@
         font-weight: 400;
       }
       .v-chip.text-primary {
-        color: rgb(var(--v-theme-primary))!important
+        color: rgb(var(--v-theme-primary)) !important;
       }
     }
 
     .field-item-value-switch {
       .v-switch__track:not(.bg-primary) {
         opacity: 1;
-        background-color: rgb(var(--v-theme-grey-lighten-1))
-
+        background-color: rgb(var(--v-theme-grey-lighten-1));
       }
       .v-label {
-        --v-medium-emphasis-opacity:1;
-        padding-inline-start:14px;
+        --v-medium-emphasis-opacity: 1;
+        padding-inline-start: 14px;
         color: rgb(var(--v-theme-grey-darken-3));
         font-size: 16px;
         line-height: 24px; /* 150% */
@@ -198,20 +200,20 @@
 
     .field-item-tooltip-icon {
       color: rgb(var(--v-theme-grey-lighten-1));
-      cursor:pointer;
+      cursor: pointer;
     }
   }
 
   .section-content {
     position: relative;
   }
-  
+
   .section-edit-area {
     text-align: right;
     &.top-area {
-      position:absolute;
-      right:0;
-      top:0;
+      position: absolute;
+      right: 0;
+      top: 0;
     }
 
     .v-btn {
@@ -222,13 +224,13 @@
       padding: 0 8px;
       font-weight: 400;
       .v-btn__prepend {
-        margin-inline:initial;
+        margin-inline: initial;
         margin-right: 4px;
       }
 
       &.bg-grey-lighten-3 {
         .v-btn__content {
-          color: rgb(var(--v-theme-grey-darken-3))
+          color: rgb(var(--v-theme-grey-darken-3));
         }
       }
     }
@@ -259,7 +261,7 @@
   }
 
   .go-plaid-portal:not(first-child) .section-wrap.with-border-b {
-    border-block-end-width:0;
+    border-block-end-width: 0;
   }
 
   .section-wrap {
@@ -285,15 +287,13 @@
     padding-top: 0;
   }
 
-
   .v-slide-group {
     border-block-end-width: thin !important;
     border-block-end-style: solid !important;
     border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
 
     .v-slide-group__content {
-      border-block-end-width:0;
+      border-block-end-width: 0;
     }
   }
-
 }

@@ -249,3 +249,35 @@ const value = ref()
 ```
 
 :::
+
+
+## vx-linkageselect-remote
+
+> legacy component
+
+:::demo
+
+```vue
+<script setup lang="ts">
+import { Ref, ref } from 'vue'
+
+const value = ref([])
+
+const labels = ref(['Province', 'City', 'District'])
+</script>
+
+<template>
+  <p>{{ value }}</p>
+  <vx-linkageselect-remote
+    v-model="value"
+    remote-url="http://localhost:7800/examples/api/linkage-select-server"
+    :level-start="1"
+    :labels="labels"
+    select-out-of-order
+  ></vx-linkageselect-remote>
+</template>
+
+<style scoped></style>
+```
+
+:::

@@ -4,29 +4,29 @@
   </div>
 </template>
 
-<script setup lang='ts'>
-import { defineEmits, ref, watch } from "vue"
-import { useFilteredAttrs } from "@/lib/composables/useFilteredAttrs";
+<script setup lang="ts">
+import { defineEmits, ref, watch } from 'vue'
+import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 
 const { filteredAttrs } = useFilteredAttrs()
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
-  modelValue: Boolean,
+  modelValue: Boolean
 })
 
 const dialogVisible = ref(props.modelValue)
 
-watch(() => props.modelValue, (newValue) => {
-  dialogVisible.value = newValue
-})
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    dialogVisible.value = newValue
+  }
+)
 
 function onUpdateModelValue(value: any) {
-  emit("update:modelValue", value)
+  emit('update:modelValue', value)
   dialogVisible.value = value
 }
-
 </script>
 
-<style lang="sass" scoped>
-
-</style>
+<style lang="sass" scoped></style>
