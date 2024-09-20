@@ -44,6 +44,5 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="elementRef">
-  </div>
+  <div ref="elementRef"></div>
 </template>

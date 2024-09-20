@@ -4,7 +4,6 @@ interface FilteredAttrs {
   filteredAttrs: Record<string, any>
 }
 
-
 /**
  * class and id are supposed to bind to root element,
  * other props should bind to child components
@@ -19,6 +18,6 @@ export function useFilteredAttrs(): FilteredAttrs {
   })
 
   return {
-    filteredAttrs,
+    filteredAttrs
   }
 }

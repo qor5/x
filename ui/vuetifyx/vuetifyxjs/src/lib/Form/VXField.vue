@@ -51,18 +51,16 @@ const props = defineProps({
   remoteValidation: Boolean,
   disabled: Boolean,
   placeholder: String,
-  tips: String,
+  tips: String
 })
 
-const fieldValue = computed(()=> props.modelValue)
+const fieldValue = computed(() => props.modelValue)
 const errorFiled = ref(props.errorMessages)
 
-function onUpdateModelValue(value: string|number|Record<string,any>) {
+function onUpdateModelValue(value: string | number | Record<string, any>) {
   emit('update:modelValue', value)
   errorFiled.value = ''
 }
-
-
 </script>
 
 <style lang="scss" scoped>
@@ -93,9 +91,9 @@ function onUpdateModelValue(value: string|number|Record<string,any>) {
     }
 
     &:deep(.v-input__details) {
-      padding:0;
+      padding: 0;
       min-height: 20px;
-      align-items:center;
+      align-items: center;
     }
 
     &:not(.v-input--error):deep(.v-field__outline) {

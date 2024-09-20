@@ -17,7 +17,7 @@ export default Extension.create<CallbackOptions>({
           componentProps: {
             editor: editor,
             extension: extension,
-            t: t,
+            t: t
           }
         }
       }
