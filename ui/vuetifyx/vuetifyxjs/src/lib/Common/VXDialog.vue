@@ -27,7 +27,7 @@
               ><span class="dialog-content-text">{{ text }}</span></slot
             >
           </v-card-text>
-          <v-card-actions :class="props.size" v-if="!hideCancel || !hideOK">
+          <v-card-actions :class="props.size" v-if="!hideCancel || !hideOk">
             <slot :isActive="isActive" name="action-btn">
               <v-btn
                 v-if="!hideCancel"
