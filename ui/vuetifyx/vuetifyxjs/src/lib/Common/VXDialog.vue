@@ -5,33 +5,48 @@
       width="auto"
       :model-value="dialogVisible"
       v-bind="filteredAttrs"
+      :persistent="persistent"
       @update:model-value="onUpdateModelValue"
     >
+      <template v-slot:activator="{ props: activatorProps }">
+        <slot name="activator" :props="{ activatorProps }" />
+      </template>
+
       <template v-slot:default="{ isActive }">
         <v-card :title="title">
           <template v-slot:prepend v-if="prependIcon.icon">
             <v-icon :color="prependIcon.color" size="small" :icon="prependIcon.icon" />
           </template>
 
-          <template v-slot:append v-if="showClose">
-            <v-icon color="#757575" size="small" icon="mdi-close" @click="isActive.value = false" />
+          <template v-slot:append v-if="!hideClose">
+            <v-icon color="#757575" size="small" icon="mdi-close" @click="onClose(isActive)" />
           </template>
 
-          <v-card-text :style="[contentWidth]">
-            <slot>{{ text }}</slot>
-          </v-card-text>
-          <v-card-actions class="custom-card-cation" v-if="showOK || showCancel">
-            <v-btn
-              v-if="showCancel"
-              color="grey-darken-3"
-              size="default"
-              variant="tonal"
-              @click="isActive.value = false"
-              >{{ cancelText }}</v-btn
+          <v-card-text :style="[contentWidth, contentMaxWidth, contentHeightStyle]">
+            <slot
+              ><span class="dialog-content-text">{{ text }}</span></slot
             >
-            <v-btn v-if="showOK" color="primary" variant="flat" @click="isActive.value = false">{{
-              okText
-            }}</v-btn>
+          </v-card-text>
+          <v-card-actions :class="props.size" v-if="!hideCancel || !hideOK">
+            <slot :isActive="isActive" name="action-btn">
+              <v-btn
+                v-if="!hideCancel"
+                color="grey-darken-3"
+                :size="props.size === 'default' ? 'small' : 'default'"
+                variant="tonal"
+                @click="onCancel(isActive)"
+                >{{ cancelText }}</v-btn
+              >
+              <v-btn
+                v-if="!hideOk"
+                color="primary"
+                :size="props.size === 'default' ? 'small' : 'default'"
+                :loading="isOkBtnLoading"
+                variant="flat"
+                @click="onOk(isActive)"
+                >{{ okText }}</v-btn
+              >
+            </slot>
           </v-card-actions>
         </v-card>
       </template>
@@ -40,29 +55,44 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, watch, defineProps, computed, PropType } from 'vue'
+import {
+  defineEmits,
+  ref,
+  watch,
+  defineProps,
+  computed,
+  PropType,
+  Ref,
+  getCurrentInstance
+} from 'vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
+import { useHasEventListener } from '@/lib/composables/useEventListener'
 
 const { filteredAttrs } = useFilteredAttrs()
-const emit = defineEmits(['update:modelValue'])
+const { hasEventListener } = useHasEventListener()
+const emit = defineEmits(['update:modelValue', 'click:ok', 'click:cancel', 'click-close'])
 const props = defineProps({
   modelValue: Boolean,
   type: {
     type: String as PropType<'default' | 'warn' | 'error' | 'info'>,
     default: 'default'
   },
+  size: {
+    type: String,
+    default: 'default'
+  },
   text: String,
-  showOK: {
+  hideOk: {
     type: Boolean,
-    default: true
+    default: false
   },
-  showCancel: {
+  hideCancel: {
     type: Boolean,
-    default: true
+    default: false
   },
-  showClose: {
+  hideClose: {
     type: Boolean,
-    default: true
+    default: false
   },
   okText: {
     type: String,
@@ -72,6 +102,15 @@ const props = defineProps({
     type: String,
     default: 'Cancel'
   },
+  persistent: Boolean,
+  contentHeight: {
+    type: [Number, String],
+    default: 'auto'
+  },
+  width: {
+    type: [Number, String],
+    default: ''
+  },
   maxWidth: {
     type: [Number, String],
     default: 665
@@ -79,8 +118,30 @@ const props = defineProps({
   title: String
 })
 
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    dialogVisible.value = newValue
+  }
+)
+
+const isOkBtnLoading = ref(false)
 const dialogVisible = ref(props.modelValue)
-const contentWidth = computed(() => `max-width:${props.maxWidth}px`)
+const contentMaxWidth = computed(() => {
+  return `max-width:${Math.max(+props.width, +props.maxWidth)}px`
+})
+const contentWidth = computed(() => {
+  let contentWidthStyle
+
+  if (props.size === 'default' && props.width === '') {
+    contentWidthStyle = 'width:461px'
+  } else {
+    contentWidthStyle = `width:${props.width}px`
+  }
+
+  return contentWidthStyle
+})
+const contentHeightStyle = computed(() => `height:${props.contentHeight}px`)
 const prependIcon = computed(() => {
   const vCardTitleIconMap = {
     default: {
@@ -108,33 +169,82 @@ const prependIcon = computed(() => {
   return vCardTitleIconMap[props.type]
 })
 
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    dialogVisible.value = newValue
-  }
-)
-
 function onUpdateModelValue(value: any) {
   emit('update:modelValue', value)
   dialogVisible.value = value
 }
+
+const instance = getCurrentInstance()
+
+// const hasEventListener = (event: Parameters<typeof emit>[0]) => {
+//   // Convert event name to the format used in vnode.props (e.g., 'click:ok' becomes 'onClick:ok')
+//   const eventName = 'on' + event.charAt(0).toUpperCase() + event.slice(1);
+//   debugger
+//   return !!instance?.vnode.props?.[eventName]
+// }
+
+function onOk(isActive: Ref<boolean>) {
+  if(hasEventListener('click:ok')) {
+    emit('click:ok', {isActive, isLoading:isOkBtnLoading})
+  } else {
+    isActive.value = false
+  }
+}
+
+function onCancel(isActive: Ref<boolean>) {
+  if(hasEventListener('click:cancel')) {
+    emit('click:cancel', {isActive})
+  } else {
+    isActive.value = false
+  }
+}
+
+function onClose(isActive: Ref<boolean>) {
+  if(hasEventListener('click-close')) {
+    emit('click:cancel', isActive)
+  } else {
+    isActive.value = false
+  }
+}
 </script>
 
 <style lang="scss" scoped>
-.custom-card-cation {
-  padding: 24px;
-  padding-top: 0;
+.dialog-content-text {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: rgb(var(--v-theme-grey-darken-2));
+}
+
+.v-card-text {
+  padding-bottom: 12px !important;
+}
+
+.v-card-actions {
+  padding: 12px 24px 24px;
+  &.default {
+    .v-btn.v-btn--size-small {
+      min-width: initial;
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 400;
+      &:deep(.v-btn__content) {
+        letter-spacing: 0.04px;
+      }
+    }
+  }
 
   .v-btn.v-btn--size-default {
     min-width: initial;
-    padding-left: 16px;
-    padding-right: 16px;
+    padding: 0 16px;
     font-weight: 500;
-    letter-spacing: 1;
     &:deep(.v-btn__content) {
       letter-spacing: 0.25px;
     }
+  }
+
+  .v-btn ~ .v-btn:not(.v-btn-toggle .v-btn) {
+    margin-inline-start: 10px;
   }
 }
 </style>
