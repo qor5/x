@@ -4,8 +4,8 @@
       scrollable
       width="auto"
       :model-value="dialogVisible"
-      v-bind="filteredAttrs"
       :persistent="persistent"
+      v-bind="filteredAttrs"
       @update:model-value="onUpdateModelValue"
     >
       <template v-slot:activator="{ isActive, props: activatorProps }">
