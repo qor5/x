@@ -18,10 +18,6 @@
             <span>{{ title }}</span>
           </template>
 
-          <!-- <template #subtitle>
-            <span>{{ subTitle }}</span>
-          </template> -->
-
           <template v-slot:prepend v-if="prependIcon.icon">
             <v-icon :color="prependIcon.color" size="small" :icon="prependIcon.icon" />
           </template>
@@ -30,7 +26,7 @@
             <v-icon color="#757575" size="small" icon="mdi-close" @click="onClose(isActive)" />
           </template>
 
-          <v-card-text :class="{'pb-3': !hideFooter }" :style="[contentWidth, contentMaxWidth, contentHeightStyle]">
+          <v-card-text :class="{'mb-3': !hideFooter }" :style="[contentWidth, contentMaxWidth, contentHeightStyle]">
             <slot
               :isActive="isActive"
               ><span class="dialog-content-text">{{ text }}</span></slot
