@@ -5,7 +5,6 @@
     <!-- text-area -->
     <template v-if="type === 'textarea'">
       <v-textarea
-        class="vx-field"
         :rows="2"
         :max-rows="20"
         auto-grow
@@ -23,7 +22,6 @@
     <!-- v-text-file -->
     <template v-else>
       <v-text-field
-        class="vx-field"
         density="compact"
         variant="outlined"
         :model-value="fieldValue"
