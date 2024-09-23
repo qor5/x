@@ -5,6 +5,7 @@
     <!-- text-area -->
     <template v-if="type === 'textarea'">
       <v-textarea
+        ref="vInputRef"
         :rows="2"
         :max-rows="20"
         auto-grow
@@ -22,6 +23,7 @@
     <!-- v-text-file -->
     <template v-else>
       <v-text-field
+        ref="vInputRef"
         density="compact"
         variant="outlined"
         :model-value="fieldValue"
@@ -37,10 +39,12 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, computed, PropType, ref } from 'vue'
+import { defineEmits, computed, PropType, ref, defineExpose } from 'vue'
 import VXLabel from '../Common/VXLabel.vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
+import { forwardRefs } from '@/lib/composables/forwardRefs'
 const { filteredAttrs } = useFilteredAttrs()
+const vInputRef = ref()
 
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
@@ -60,6 +64,9 @@ const errorFiled = ref(props.errorMessages)
 function onUpdateModelValue(value: string | number | Record<string, any>) {
   emit('update:modelValue', value)
 }
+
+defineExpose(forwardRefs({},vInputRef))
+
 </script>
 
 <style lang="scss" scoped>
