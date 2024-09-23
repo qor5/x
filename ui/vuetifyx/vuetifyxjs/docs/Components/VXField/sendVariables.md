@@ -27,6 +27,7 @@ const value = ref('1eiuh1ihaubfiad')
     >
     </vx-field>
     <vx-field
+      type="textarea"
       counter="200"
       v-model="value"
       label="textarea"
