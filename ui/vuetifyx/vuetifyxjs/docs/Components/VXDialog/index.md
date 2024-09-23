@@ -6,31 +6,33 @@
 
 ### Props
 
-| Name | Introduction | Type | Default Value|
-|-- | -- | -- | -- | 
-| title | 弹窗标题 | `String` | - |
-| text | 弹窗内容，适合纯文本 | `String` | - |
-| size | [弹窗尺寸](./#弹窗尺寸), 默认尺寸定宽，large 尺寸定最大宽度 | `'default'`｜ `'large'` | `'default'` |
-| type | 弹窗[预设样式](./#预设样式) | `'default'` ｜ `'info'` ｜ `'success'` ｜ `'warn'` ｜ `'error'` | `'default'` |
-| hideOk | 隐藏确认按钮 | `Boolean` | `false` |
-| hideCancel | 隐藏取消按钮 | `Boolean` | `false` |
-| okText | 确认按钮文案 | `String` | `OK` |
-| cancelText | 取消按钮文案 | `String` | `Cancel` |
-| width | 弹窗宽度 | `Number` | - |
-| maxWidth | 弹窗最大宽度 | `Number` | - |
-| contentHeight | 弹窗内容高度 | `Number` | - |
-| model-value | 控制弹窗显示与否 | `Boolean` | `false` |
+| Name          | Introduction                                                | Type                                                            | Default Value |
+| ------------- | ----------------------------------------------------------- | --------------------------------------------------------------- | ------------- |
+| title         | 弹窗标题                                                    | `String`                                                        | -             |
+| text          | 弹窗内容，适合纯文本                                        | `String`                                                        | -             |
+| size          | [弹窗尺寸](./#弹窗尺寸), 默认尺寸定宽，large 尺寸定最大宽度 | `'default'`｜ `'large'`                                         | `'default'`   |
+| type          | 弹窗[预设样式](./#预设样式)                                 | `'default'` ｜ `'info'` ｜ `'success'` ｜ `'warn'` ｜ `'error'` | `'default'`   |
+| okText        | 确认按钮文案                                                | `String`                                                        | `OK`          |
+| cancelText    | 取消按钮文案                                                | `String`                                                        | `Cancel`      |
+| width         | 弹窗宽度                                                    | `Number`                                                        | -             |
+| maxWidth      | 弹窗最大宽度                                                | `Number`                                                        | -             |
+| contentHeight | 弹窗内容高度                                                | `Number`                                                        | -             |
+| hideOk        | 隐藏确认按钮                                                | `Boolean`                                                       | `false`       |
+| hideCancel    | 隐藏取消按钮                                                | `Boolean`                                                       | `false`       |
+| hideClose    | 隐藏右上角关闭按钮                                               | `Boolean`                                                       | `false`       |
+| hideFooter    | 隐藏底部操作按钮区域                                        | `Boolean`                                                       | `false`       |
+| model-value   | 控制弹窗显示与否                                            | `Boolean`                                                       | `false`       |
 
 > 除此之外所有的 [v-dialog](https://vuetifyjs.com/en/api/v-dialog/) 原生 props 都可使用 v-bind:[props]="[value]" 实现或覆盖
 
 ### Events
 
-| Name | Payload | Introduction |
-| -- | -- | -- |
-| click:ok | `{ isActive: Ref<isActive> }` | 点击 OK 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) |
-| click:cancel | `{ isActive: Ref<isActive> }` | 点击 Cancel 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) |
-| click:close |`{ isActive: Ref<isActive> }` | 点击右上角关闭图标时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) |
-| update:modelValue | `boolean` | 弹窗 model 值改变时触发 |
+| Name              | Payload                       | Introduction                                                                  |
+| ----------------- | ----------------------------- | ----------------------------------------------------------------------------- |
+| click:ok          | `{ isActive: Ref<isActive> }` | 点击 OK 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调)       |
+| click:cancel      | `{ isActive: Ref<isActive> }` | 点击 Cancel 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调)   |
+| click:close       | `{ isActive: Ref<isActive> }` | 点击右上角关闭图标时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) |
+| update:modelValue | `boolean`                     | 弹窗 model 值改变时触发                                                       |
 
 ### Slots
 
@@ -41,8 +43,8 @@
 ##### scope value
 
 ```js
-{ 
-  isActive: boolean, 
+{
+  isActive: boolean,
   props: { activatorProps:Record<string, any> }
 }
 ```
@@ -112,7 +114,6 @@ const dialogVisible = ref(false)
 ```
 
 :::
-
 
 ## 预设样式
 
@@ -249,6 +250,20 @@ const dialogVisible = ref(false)
       </v-col>
 
       <v-col cols="3" class="text-center">
+        <div class="mb-2">内容滚动条（定高）</div>
+        <vx-dialog
+          title="Confirm"
+          size="large"
+          height="400"
+          text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description lineThis is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
+        >
+          <template v-slot:activator="{ props: { activatorProps } }">
+            <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
+          </template>
+        </vx-dialog>
+      </v-col>
+
+            <v-col cols="3" class="text-center">
         <div class="mb-2">内容区域滚动条</div>
         <vx-dialog
           title="Confirm"
@@ -277,7 +292,7 @@ const dialogVisible = ref(false)
 
 ## 按钮及事件回调
 
-- 提供三个事件回调来控制弹窗的开启或者关闭 `click:ok`, `click:close`, `click:cancel`, 
+- 提供三个事件回调来控制弹窗的开启或者关闭 `click:ok`, `click:close`, `click:cancel`,
 - 当传入自定义事件后，弹窗不再自动点击关闭，需要自己控制
 
 :::demo
@@ -314,13 +329,87 @@ const dialogVisible = ref(false)
           </template>
         </vx-dialog>
       </v-col>
+    </v-row>
+  </div>
+</template>
 
-        <v-col cols="3" class="text-center">
-        <div class="mb-2">隐藏按钮</div>
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const dialogVisible = ref(false)
+function onOK({ isActive, isLoading }) {
+  isLoading.value = true
+  setTimeout(() => {
+    isActive.value = false
+    isLoading.value = false
+  }, 1000)
+}
+
+function onCancel({ isActive }) {
+  alert('not allowed to close dialog')
+  // isActive.value = false
+}
+</script>
+```
+
+:::
+
+## 区域隐藏或显示
+
+:::demo
+
+```vue
+<template>
+  <div>
+    <v-row>
+      <v-col cols="3" class="text-center">
+        <div class="mb-2">hideCancel</div>
         <vx-dialog
           title="Confirm"
           text="This is an info description line This is an info description"
           hide-cancel
+          ok-text="Fine"
+        >
+          <template v-slot:activator="{ props: { activatorProps } }">
+            <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
+          </template>
+        </vx-dialog>
+      </v-col>
+
+       <v-col cols="3" class="text-center">
+        <div class="mb-2">hideOk</div>
+        <vx-dialog
+          title="Confirm"
+          text="This is an info description line This is an info description"
+          hide-ok
+          ok-text="Fine"
+        >
+          <template v-slot:activator="{ props: { activatorProps } }">
+            <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
+          </template>
+        </vx-dialog>
+      </v-col>
+
+       <v-col cols="3" class="text-center">
+        <div class="mb-2">hideClose</div>
+        <vx-dialog
+          title="Confirm"
+          text="This is an info description line This is an info description"
+          hide-close
+          ok-text="Fine"
+        >
+          <template v-slot:activator="{ props: { activatorProps } }">
+            <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
+          </template>
+        </vx-dialog>
+      </v-col>
+
+       <v-col cols="3" class="text-center">
+        <div class="mb-2">hideFooter</div>
+        <vx-dialog
+          title="Confirm"
+          text="This is an info description line This is an info description"
+          hideFooter
           ok-text="Fine"
         >
           <template v-slot:activator="{ props: { activatorProps } }">

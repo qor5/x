@@ -4,8 +4,8 @@
       scrollable
       width="auto"
       :model-value="dialogVisible"
-      v-bind="filteredAttrs"
       :persistent="persistent"
+      v-bind="filteredAttrs"
       @update:model-value="onUpdateModelValue"
     >
       <template v-slot:activator="{ isActive, props: activatorProps }">
@@ -13,7 +13,11 @@
       </template>
 
       <template v-slot:default="{ isActive }">
-        <v-card :title="title">
+        <v-card>
+          <template #title>
+            <span>{{ title }}</span>
+          </template>
+
           <template v-slot:prepend v-if="prependIcon.icon">
             <v-icon :color="prependIcon.color" size="small" :icon="prependIcon.icon" />
           </template>
@@ -22,13 +26,13 @@
             <v-icon color="#757575" size="small" icon="mdi-close" @click="onClose(isActive)" />
           </template>
 
-          <v-card-text :style="[contentWidth, contentMaxWidth, contentHeightStyle]">
+          <v-card-text :class="{'mb-3': !hideFooter }" :style="[contentWidth, contentMaxWidth, contentHeightStyle]">
             <slot
               :isActive="isActive"
               ><span class="dialog-content-text">{{ text }}</span></slot
             >
           </v-card-text>
-          <v-card-actions :class="props.size" v-if="!hideCancel || !hideOk">
+          <v-card-actions :class="props.size" v-if="!hideFooter">
             <slot :isActive="isActive" name="action-btn">
               <v-btn
                 v-if="!hideCancel"
@@ -74,6 +78,8 @@ const { hasEventListener } = useHasEventListener()
 const emit = defineEmits(['update:modelValue', 'click:ok', 'click:cancel', 'click:close'])
 const props = defineProps({
   modelValue: Boolean,
+  title: String,
+  // subTitle: String,
   type: {
     type: String as PropType<'default' | 'warn' | 'error' | 'info'>,
     default: 'default'
@@ -90,6 +96,14 @@ const props = defineProps({
   hideCancel: {
     type: Boolean,
     default: false
+  },
+  hideHeader: {
+    type: Boolean,
+    default: false
+  },
+  hideFooter: {
+    type: Boolean,
+    default: false,
   },
   hideClose: {
     type: Boolean,
@@ -116,7 +130,6 @@ const props = defineProps({
     type: [Number, String],
     default: 665
   },
-  title: String
 })
 
 watch(
@@ -177,13 +190,6 @@ function onUpdateModelValue(value: any) {
 
 const instance = getCurrentInstance()
 
-// const hasEventListener = (event: Parameters<typeof emit>[0]) => {
-//   // Convert event name to the format used in vnode.props (e.g., 'click:ok' becomes 'onClick:ok')
-//   const eventName = 'on' + event.charAt(0).toUpperCase() + event.slice(1);
-//   debugger
-//   return !!instance?.vnode.props?.[eventName]
-// }
-
 function onOk(isActive: Ref<boolean>) {
   if (hasEventListener('click:ok')) {
     emit('click:ok', { isActive, isLoading: isOkBtnLoading })
@@ -215,10 +221,6 @@ function onClose(isActive: Ref<boolean>) {
   font-weight: 400;
   line-height: 20px;
   color: rgb(var(--v-theme-grey-darken-2));
-}
-
-.v-card-text {
-  padding-bottom: 12px !important;
 }
 
 .v-card-actions {

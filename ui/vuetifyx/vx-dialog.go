@@ -11,25 +11,45 @@ type VXDialogBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
+type VXDialogType string
+type VXDialogSize string
+
+const (
+	DialogDefault   VXDialogType = "default"
+	DialogInfo   VXDialogType = "info"
+	DialogSuccess   VXDialogType = "success"
+	DialogWarn   VXDialogType = "warn"
+	DialogError   VXDialogType = "error"
+)
+
+const (
+	DialogSizeDefault VXDialogSize = "default"
+	DialogSizeLarge VXDialogSize = "large"
+)
+/*
+@doc https://qor5.github.io/x/Components/VXDialog/
+*/
 func VXDialog(children ...h.HTMLComponent) (r *VXDialogBuilder) {
 	r = &VXDialogBuilder{
 		tag: h.Tag("vx-dialog").Children(children...),
 	}
 	return
 }
-
+/*
+Set the title of VXDialog
+*/
 func (b *VXDialogBuilder) Title(v string) (r *VXDialogBuilder) {
 	b.tag.Attr("title", v)
 	return b
 }
 
-func (b *VXDialogBuilder) Type(v string) (r *VXDialogBuilder) {
-	b.tag.Attr("type", v)
+func (b *VXDialogBuilder) Type(v VXDialogType) (r *VXDialogBuilder) {
+	b.tag.Attr("type", string(v))
 	return b
 }
 
-func (b *VXDialogBuilder) Size(v string) (r *VXDialogBuilder) {
-	b.tag.Attr("size", v)
+func (b *VXDialogBuilder) Size(v VXDialogSize) (r *VXDialogBuilder) {
+	b.tag.Attr("size", string(v))
 	return b
 }
 
@@ -50,6 +70,11 @@ func (b *VXDialogBuilder) HideOk(v bool) (r *VXDialogBuilder) {
 
 func (b *VXDialogBuilder) HideClose(v bool) (r *VXDialogBuilder) {
 	b.tag.Attr(":hide-close", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXDialogBuilder) HideFooter(v bool) (r *VXDialogBuilder) {
+	b.tag.Attr(":hide-footer", fmt.Sprint(v))
 	return b
 }
 
@@ -101,12 +126,6 @@ func (b *VXDialogBuilder) Children(children ...h.HTMLComponent) (r *VXDialogBuil
 
 func (b *VXDialogBuilder) Class(names ...string) (r *VXDialogBuilder) {
 	b.tag.Class(names...)
-	return b
-}
-
-
-func (b *VXDialogBuilder) On(name string, value string) (r *VXDialogBuilder) {
-	b.tag.Attr(fmt.Sprintf("v-on:%s", name), value)
 	return b
 }
 
