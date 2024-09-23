@@ -5,6 +5,7 @@
     <!-- text-area -->
     <template v-if="type === 'textarea'">
       <v-textarea
+        class="vx-field"
         :rows="2"
         :max-rows="20"
         auto-grow
@@ -22,6 +23,7 @@
     <!-- v-text-file -->
     <template v-else>
       <v-text-field
+        class="vx-field"
         density="compact"
         variant="outlined"
         :model-value="fieldValue"
@@ -59,7 +61,6 @@ const errorFiled = ref(props.errorMessages)
 
 function onUpdateModelValue(value: string | number | Record<string, any>) {
   emit('update:modelValue', value)
-  errorFiled.value = ''
 }
 </script>
 
@@ -90,10 +91,25 @@ function onUpdateModelValue(value: string | number | Record<string, any>) {
       color: rgb(var(--v-theme-grey-lighten-2));
     }
 
-    &:deep(.v-input__details) {
+    &:deep(.v-input__details > .v-messages) {
+      order:1;
+    }
+
+    &:deep(.v-counter) {
+      order:0;
+      margin-right: 8px;
+      white-space: nowrap;
+      color: rgb(var(--v-theme-grey-darken-1));
+      letter-spacing:0;
+      word-spacing: -3px;
+    }
+
+    &:deep(.v-input__details),
+    &:deep(.v-messages__message)  {
       padding: 0;
       min-height: 20px;
-      align-items: center;
+      line-height: 20px;
+      align-items: flex-start;
     }
 
     &:not(.v-input--error):deep(.v-field__outline) {

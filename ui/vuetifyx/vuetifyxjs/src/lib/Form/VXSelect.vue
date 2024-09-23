@@ -71,7 +71,6 @@ const errorFiled = ref(props.errorMessages)
 
 function onUpdateModelValue(value: any) {
   emit('update:modelValue', value)
-  errorFiled.value = ''
 }
 </script>
 

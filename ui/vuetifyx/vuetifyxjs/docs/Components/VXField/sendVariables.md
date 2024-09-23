@@ -18,24 +18,23 @@ const value = ref('1eiuh1ihaubfiad')
       <v-icon icon="mdi-plus"></v-icon>
       Test
     </v-chip>
-    <v-text-field
+    <vx-field
       counter
       v-model="value"
       label="Title"
-      variant="underlined"
       @focus="seo.tagInputsFocus($refs.setting_title)"
       ref="setting_title"
     >
-    </v-text-field>
-    <v-textarea
-      counter
+    </vx-field>
+    <vx-field
+      counter="200"
       v-model="value"
       label="textarea"
-      variant="underlined"
       @focus="seo.tagInputsFocus($refs.textarea)"
       ref="textarea"
     >
-    </v-textarea>
+    </vx-field>
+    <div>Value: {{value}} </div>
   </vx-send-variables>
 </template>
 
