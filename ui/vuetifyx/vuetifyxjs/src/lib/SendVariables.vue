@@ -13,16 +13,16 @@ const addTags = (tag: any) => {
   let lazyValue = vnode.value.modelValue
   let selectionStart = vnode.value.selectionStart
   let selectionEnd = vnode.value.selectionEnd
-  const input = vnode.value.$el.querySelector('input')
-  if (input) {
-    selectionStart = input.selectionStart
-    selectionEnd = input.selectionEnd
+  const inputFiled = vnode.value.$el.querySelector('input') || vnode.value.$el.querySelector('textarea')
+  if (inputFiled) {
+    selectionStart = inputFiled.selectionStart
+    selectionEnd = inputFiled.selectionEnd
   }
   let startString = lazyValue.substring(0, selectionStart)
   let endString = lazyValue.substring(selectionEnd, lazyValue.length)
 
   vnode.value.$emit('update:modelValue', startString + '{{' + tag + '}}' + endString)
-  input.focus()
+  inputFiled.focus()
 }
 defineExpose({
   tagInputsFocus,
