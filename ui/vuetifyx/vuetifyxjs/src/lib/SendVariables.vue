@@ -4,16 +4,19 @@ import { ref } from 'vue'
 const vnode = ref()
 
 const tagInputsFocus = (v: any) => {
-  vnode.value =  v.$.ctx
+  vnode.value =  v
 }
 const addTags = (tag: any) => {
   if (!vnode.value) {
     return
   }
+
+  const $el = vnode.value.$el
+
   let lazyValue = vnode.value.modelValue
   let selectionStart = vnode.value.selectionStart
   let selectionEnd = vnode.value.selectionEnd
-  const inputFiled = vnode.value.$el.querySelector('input') || vnode.value.$el.querySelector('textarea')
+  const inputFiled = $el.querySelector('input') || vnode.value.$el.querySelector('textarea')
   if (inputFiled) {
     selectionStart = inputFiled.selectionStart
     selectionEnd = inputFiled.selectionEnd
