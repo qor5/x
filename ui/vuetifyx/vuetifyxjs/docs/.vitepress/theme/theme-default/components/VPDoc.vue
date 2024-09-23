@@ -90,7 +90,7 @@ const pageName = computed(() =>
   }
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1281px) {
   .VPDoc .container {
     display: flex;
     justify-content: center;
