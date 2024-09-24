@@ -80,17 +80,14 @@
 </template>
 <script lang="ts" setup>
 import { format, parse } from 'date-fns'
-import dayjs from 'dayjs'
 import { computed, nextTick, onMounted, Ref, ref, watch } from 'vue'
 import { useLocale } from 'vuetify'
+import { useVDatePickerTimeChange } from '@/lib/composables/useVDatePicker'
 const DEFAULT_TIME = '00:00:00'
 const DEFAULT_DATE_FORMAT = 'yyyy-MM-dd'
 const DEFAULT_TIME_FORMAT = 'HH:mm:ss'
 const emit = defineEmits(['update:modelValue', 'input'])
 const { t } = useLocale()
-const displayedMonth = ref()
-const displayedYear = ref()
-
 const okTips = t('$vuetify.datePicker.okTips')
 const props = defineProps({
   modelValue: {
@@ -142,13 +139,21 @@ const props = defineProps({
     type: Boolean
   }
 })
+
 const dialogVisible = ref(false)
 const date = ref()
 const dateOfPicker = ref()
 const time = ref(DEFAULT_TIME)
 const timer = ref()
 const timeOfPicker = ref()
-const tempYearAndMonth = ref(['-1', '-1'])
+
+const {
+  displayedMonth,
+  displayedYear,
+  setDisplayedYearAndMonth,
+  onYearOrMonthChange,
+  valueChangedWithoutSaved
+} = useVDatePickerTimeChange(dateOfPicker)
 
 const dateTimeFormat = computed(() => {
   return props.dateFormat + ' ' + props.timeFormat
@@ -171,11 +176,6 @@ const formattedDatetime = computed(() => {
   return selectedDatetime.value ? format(<Date>selectedDatetime.value, dateTimeFormat.value) : ''
 })
 
-// must choose a date when year or month changed
-const valueChangedWithoutSaved = computed(() => {
-  return dateOfPicker.value === null
-})
-
 const init = () => {
   if (!props.modelValue) {
     return
@@ -187,8 +187,6 @@ const init = () => {
   time.value = format(initDateTime, DEFAULT_TIME_FORMAT)
   dateOfPicker.value = date.value
   timeOfPicker.value = time.value
-
-  // tempYearAndMonth.value = getYearAndMonthStr(date.value).split('-')
 }
 
 watch(dialogVisible, (newVal) => {
@@ -196,31 +194,8 @@ watch(dialogVisible, (newVal) => {
     dateOfPicker.value = date.value
     timeOfPicker.value = time.value
     setDisplayedYearAndMonth(date.value)
-    // tempYearAndMonth.value = getYearAndMonthStr(date.value).split('-')
   }
 })
-
-const setDisplayedYearAndMonth = (timeStamp:string|number|Date) => {
-  let year:number, month:number
-  if(!timeStamp) {
-    year = new Date().getFullYear()
-    month = new Date().getMonth()
-  } else {
-    [year, month] = dayjs(timeStamp).format('YYYY-MM').split("-").map(Number)
-    month = month - 1
-  }
-
-  displayedYear.value = year
-  displayedMonth.value = month
-}
-
-const onYearOrMonthChange = (value: number, type: 'year' | 'month' | 'modelValue') => {
-  if (type === 'modelValue') {
-    console.log('modelValue', value)
-    return
-  }
-  dateOfPicker.value = null
-}
 
 const okHandler = (isActive: Ref) => {
   date.value = dateOfPicker.value
@@ -239,7 +214,6 @@ const clearHandler = (isActive: Ref) => {
 const resetPicker = (isActive: Ref) => {
   time.value = timeOfPicker.value
   isActive.value = false
-  tempYearAndMonth.value = ['-1', '-1']
   if (timer.value) {
     timer.value.selectingHour = true
   }

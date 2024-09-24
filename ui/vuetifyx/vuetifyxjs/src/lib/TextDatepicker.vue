@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Datepicker from '@/lib/Datepicker.vue'
-import { ref } from 'vue'
+import { ref,watch } from 'vue'
+import { useVDatePickerTimeChange } from '@/lib/composables/useVDatePicker'
 
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
@@ -9,15 +10,25 @@ const props = defineProps({
 })
 const value = ref(props.modelValue)
 
+const {
+  displayedMonth,
+  displayedYear,
+  setDisplayedYearAndMonth,
+  onYearOrMonthChange,
+  valueChangedWithoutSaved
+} = useVDatePickerTimeChange(value)
+setDisplayedYearAndMonth(value.value)
+
 const internalVisible = ref(props.visible)
 const toggle = () => {
   internalVisible.value = !internalVisible.value
 }
 
-const change = () => {
+watch(()=> value, (newVal)=> {
   emit('update:modelValue', value.value)
   toggle()
-}
+})
+
 </script>
 
 <template>
@@ -41,7 +52,14 @@ const change = () => {
       ></v-text-field>
     </template>
 
-    <datepicker v-model="value" @update:modelValue="change"></datepicker>
+    <datepicker
+      v-model="value"
+      :year="displayedYear"
+      :month="displayedMonth"
+      @update:year="onYearOrMonthChange($event, 'year')"
+      @update:month="onYearOrMonthChange($event, 'month')"
+      @update:modelValue="onYearOrMonthChange($event, 'modelValue')"
+    />
   </v-menu>
 </template>
 
