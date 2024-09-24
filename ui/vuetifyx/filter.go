@@ -550,8 +550,8 @@ type DateOption struct {
 	Label           string      `json:"label,omitempty"`
 	Disabled        bool        `json:"disabled,omitempty"`
 	Loading         bool        `json:"loading,omitempty"`
-	DateFormat      bool        `json:"dateFormat,omitempty"`
-	ClearText       bool        `json:"clearText,omitempty"`
-	OkText          bool        `json:"okText,omitempty"`
+	DateFormat      string      `json:"dateFormat,omitempty"`
+	ClearText       string      `json:"clearText,omitempty"`
+	OkText          string      `json:"okText,omitempty"`
 	DatePickerProps interface{} `json:"datePickerProps,omitempty"`
 }
