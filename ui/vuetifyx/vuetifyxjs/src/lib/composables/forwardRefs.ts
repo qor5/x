@@ -103,6 +103,7 @@ export function forwardRefs<
         if (!ref.value) continue
         const descriptor =
           getDescriptor(ref.value, key) ??
+          //@ts-ignore
           ('_' in ref.value ? getDescriptor(ref.value._?.setupState, key) : undefined)
         if (descriptor) return descriptor
       }
