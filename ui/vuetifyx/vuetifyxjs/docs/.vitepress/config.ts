@@ -19,12 +19,15 @@ const nav = [
 const config: UserConfig = {
   base: '/x/',
   vite: {
-    plugins: [Vuetify({
-      autoImport: { labs: true },
-      styles: {
-        configFile: '../src/lib/scss/_vuetify.scss'
-      }
-    }),],
+    plugins: [
+      //@ts-ignore
+      Vuetify({
+        autoImport: { labs: true },
+        styles: {
+          configFile: '../src/lib/scss/_vuetify.scss'
+        }
+      })
+    ],
     ssr: {
       noExternal: ['vuetify', 'vuetify-pro-tiptap']
     }
@@ -33,7 +36,7 @@ const config: UserConfig = {
     sidebar,
     nav,
     search: true,
-    logo: "/logo.svg"
+    logo: '/logo.svg'
   },
 
   title: 'VuetifyX UI',
@@ -43,7 +46,7 @@ const config: UserConfig = {
     config(md) {
       const docRoot = fileURLToPath(new URL('../', import.meta.url))
       md.use(demoPreviewPlugin, { docRoot })
-    },
+    }
   }
 }
 
