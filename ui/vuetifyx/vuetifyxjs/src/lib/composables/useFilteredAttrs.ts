@@ -13,7 +13,7 @@ export function useFilteredAttrs(): FilteredAttrs {
 
   // filter class and id, should not binding to components props
   const filteredAttrs: Record<string, any> = computed(() => {
-    const { class: _class, id: _id, ...rest } = attrs
+    const { class: _class, id: _id, style: _style, ...rest } = attrs
     return rest
   })
 
