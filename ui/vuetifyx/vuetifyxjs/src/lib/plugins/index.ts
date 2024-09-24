@@ -33,26 +33,34 @@ declare const window: any
 
 const vuetifyx = {
   install: (app: App) => {
+    // datepicker
     app.component('vx-datepicker', Datepicker)
     app.component('vx-datetimepicker', Datetimepicker)
+    app.component('vx-textdatepicker', TextDatepicker)
+    // select
+    app.component('vx-select', VXSelect)
     app.component('vx-selectmany', SelectMany)
     app.component('vx-linkageselect', LinkageSelect)
-    app.component('vx-filter', Filter)
     app.component('vx-autocomplete', Autocomplete)
-    app.component('vx-textdatepicker', TextDatepicker)
+    app.component('vx-linkageselect-remote', LinkageSelectRemote)
+    // field and label
+    app.component('vx-field', VXField)
+    app.component('vx-label', VXLabel)
+    // dialog
+    app.component('vx-dialog', VXDialog)
+    // editor
+    app.component('vx-tiptap-editor', TiptapEditor)
+    // overlay
+    app.component('vx-overlay', Overlay)
+    // filter
+    app.component('vx-filter', Filter)
+    // others
+    app.component('vx-toolbar', VXToolbar)
     app.component('vx-draggable', draggable)
     app.component('vx-restore-scroll-listener', RestoreScrollListener)
     app.component('vx-scroll-iframe', ScrollIframe)
     app.component('vx-send-variables', SendVariables)
     app.component('vx-messagelistener', MessageListener)
-    app.component('vx-overlay', Overlay)
-    app.component('vx-field', VXField)
-    app.component('vx-select', VXSelect)
-    app.component('vx-toolbar', VXToolbar)
-    app.component('vx-label', VXLabel)
-    app.component('vx-tiptap-editor', TiptapEditor)
-    app.component('vx-dialog', VXDialog)
-    app.component('vx-linkageselect-remote', LinkageSelectRemote)
   }
 }
 
