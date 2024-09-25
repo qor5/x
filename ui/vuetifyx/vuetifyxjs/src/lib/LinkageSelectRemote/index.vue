@@ -72,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { nextTick, onMounted, reactive, ref } from 'vue'
 import Autocomplete from '@/lib/LinkageSelectRemote/components/LinkSelectAutoComplete.vue'
 
 import get from 'lodash/get'
@@ -111,6 +111,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const value = ref([...(props.modelValue ?? [])])
+
 const parentIDValue = reactive(
   props.labels.reduce(
     (obj, _, index) => {
@@ -186,16 +187,19 @@ const errorMessage = (level: number): string => {
 }
 
 onMounted(() => {
-  if (!props.modelValue) {
-    return
-  }
-  for (let i = 0; i < props.modelValue.length; i++) {
-    let item = props.modelValue[i]
-    if (!item) {
+  nextTick(() => {
+    value.value = [...(props.modelValue ?? [])]
+    if (!props.modelValue) {
       return
     }
-    //@ts-ignore
-    parentIDValue[i + 1] = item[props.itemValue]
-  }
+    for (let i = 0; i < props.modelValue.length; i++) {
+      let item = props.modelValue[i]
+      if (!item) {
+        return
+      }
+      //@ts-ignore
+      parentIDValue[i + 1] = item[props.itemValue]
+    }
+  })
 })
 </script>
