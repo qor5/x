@@ -65,8 +65,7 @@ function onUpdateModelValue(value: string | number | Record<string, any>) {
   emit('update:modelValue', value)
 }
 
-defineExpose(forwardRefs({},vInputRef))
-
+defineExpose(forwardRefs({}, vInputRef))
 </script>
 
 <style lang="scss" scoped>
@@ -97,20 +96,20 @@ defineExpose(forwardRefs({},vInputRef))
     }
 
     &:deep(.v-input__details > .v-messages) {
-      order:1;
+      order: 1;
     }
 
     &:deep(.v-counter) {
-      order:0;
+      order: 0;
       margin-right: 8px;
       white-space: nowrap;
       color: rgb(var(--v-theme-grey-darken-1));
-      letter-spacing:0;
+      letter-spacing: 0;
       word-spacing: -3px;
     }
 
     &:deep(.v-input__details),
-    &:deep(.v-messages__message)  {
+    &:deep(.v-messages__message) {
       padding: 0;
       min-height: 20px;
       line-height: 20px;
