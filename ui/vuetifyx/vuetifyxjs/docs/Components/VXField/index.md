@@ -12,18 +12,39 @@
 <template>
   <v-row>
     <v-col cols="6" sm="6">
-      <vx-field :model-value="dataNoBinding" label="field1" />
+      <vx-field :model-value="dataNoBinding" label="input" />
     </v-col>
-    <v-col cols="6" class="pt-12"><b> no binding:</b> {{ dataNoBinding }} </v-col>
+    <v-col cols="6">
+      <vx-field type="textarea" v-model="dataTextArea" label="textarea" />
+    </v-col>
+  </v-row>
 
+  <v-row>
     <v-col cols="6" sm="6">
-      <vx-field v-model="dataWithBinding" label="field2" />
+      <vx-field v-model="dataWithTips" tips="this is tips" label="input with tooltip" />
+    </v-col>
+     <v-col cols="6" sm="6">
+      <vx-field  type="textarea" v-model="dataWithTips" tips="this is tips" label="textarea with tooltip" />
+    </v-col>
+  </v-row>
+
+    <v-row>
+    <v-col cols="6">
+      <vx-field
+        placeholder="enter any value"
+        readonly
+        label="input(readonly)"
+      />
     </v-col>
 
-    <v-col cols="6" class="pt-12"><b> with binding:</b> {{ dataWithBinding }} </v-col>
-
-    <v-col cols="6" sm="6">
-      <vx-field v-model="dataWithTips" tips="this is tips" label="field with tooltip" />
+    <v-col cols="6">
+      <vx-field
+        type="textarea"
+        placeholder="enter any value"
+        model-value="textareaaasdfasdf"
+        readonly
+        label="textarea(readonly)"
+      />
     </v-col>
   </v-row>
 
@@ -33,7 +54,17 @@
         v-model="dataTextErrorMessages"
         error-messages="This is an error message explanation"
         placeholder="enter any value"
-        label="label with error messages"
+        label="input with error messages"
+      />
+    </v-col>
+
+     <v-col cols="6">
+      <vx-field
+        v-model="dataTextErrorMessages"
+        type="textarea"
+        error-messages="This is an error message explanation"
+        placeholder="enter any value"
+        label="textarea with error messages"
       />
     </v-col>
   </v-row>
@@ -44,17 +75,20 @@
         error-messages="This is an error message explanation"
         placeholder="enter any value"
         disabled
-        label="label with error messages"
+        label="input disabled"
       />
     </v-col>
-  </v-row>
 
-  <v-row>
     <v-col cols="6">
-      <vx-field type="textarea" v-model="dataTextArea" label="textarea" />
+      <vx-field
+        type="textarea"
+        error-messages="This is an error message explanation"
+        placeholder="enter any value"
+        disabled
+        label="textarea disabled"
+      />
     </v-col>
-    <v-col cols="6" class="pt-12"><b> with binding:</b> {{ dataTextArea }} </v-col>
-  </v-row>
+    </v-row>
 </template>
 
 <script setup>

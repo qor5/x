@@ -1,11 +1,12 @@
 <template>
   <div class="vx-field-wrap">
-    <VXLabel :tooltip="tips" class="mb-2">{{ label }}</VXLabel>
+    <VXLabel v-if="label" :tooltip="tips" class="mb-2">{{ label }}</VXLabel>
 
     <!-- text-area -->
     <template v-if="type === 'textarea'">
       <v-textarea
         ref="vInputRef"
+        :readonly="readonly"
         :rows="2"
         :max-rows="20"
         auto-grow
@@ -24,6 +25,7 @@
     <template v-else>
       <v-text-field
         ref="vInputRef"
+        :readonly="readonly"
         density="compact"
         variant="outlined"
         :model-value="fieldValue"
@@ -55,7 +57,8 @@ const props = defineProps({
   remoteValidation: Boolean,
   disabled: Boolean,
   placeholder: String,
-  tips: String
+  tips: String,
+  readonly: Boolean
 })
 
 const fieldValue = computed(() => props.modelValue)
@@ -65,8 +68,7 @@ function onUpdateModelValue(value: string | number | Record<string, any>) {
   emit('update:modelValue', value)
 }
 
-defineExpose(forwardRefs({},vInputRef))
-
+defineExpose(forwardRefs({}, vInputRef))
 </script>
 
 <style lang="scss" scoped>
@@ -97,36 +99,36 @@ defineExpose(forwardRefs({},vInputRef))
     }
 
     &:deep(.v-input__details > .v-messages) {
-      order:1;
+      order: 1;
     }
 
     &:deep(.v-counter) {
-      order:0;
+      order: 0;
       margin-right: 8px;
       white-space: nowrap;
       color: rgb(var(--v-theme-grey-darken-1));
-      letter-spacing:0;
+      letter-spacing: 0;
       word-spacing: -3px;
     }
 
     &:deep(.v-input__details),
-    &:deep(.v-messages__message)  {
+    &:deep(.v-messages__message) {
       padding: 0;
       min-height: 20px;
       line-height: 20px;
       align-items: flex-start;
     }
 
-    &:not(.v-input--error):deep(.v-field__outline) {
+    &:not(.v-input--error,.v-input--readonly):deep(.v-field__outline) {
       color: rgb(var(--v-theme-grey-lighten-2));
       transition: color 0.3s ease;
     }
 
-    &:not(.v-input--error):deep(.v-field:not(.v-field--focused)):hover .v-field__outline {
+    &:not(.v-input--error,.v-input--readonly):deep(.v-field:not(.v-field--focused)):hover .v-field__outline {
       color: rgb(var(--v-theme-primary));
     }
 
-    &:not(.v-input--error):deep(.v-field--focused) .v-field__outline {
+    &:not(.v-input--error,.v-input--readonly):deep(.v-field--focused) .v-field__outline {
       color: rgb(var(--v-theme-primary));
     }
 
