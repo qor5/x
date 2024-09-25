@@ -38,6 +38,11 @@ func (b *VXFieldBuilder) Placeholder(v string) (r *VXFieldBuilder) {
 	return b
 }
 
+func (b *VXFieldBuilder) Readonly(v bool) (r *VXFieldBuilder) {
+	b.tag.Attr(":readonly", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXFieldBuilder) Disabled(v bool) (r *VXFieldBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
 	return b

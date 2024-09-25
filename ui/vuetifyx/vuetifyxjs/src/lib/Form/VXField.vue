@@ -1,11 +1,12 @@
 <template>
   <div class="vx-field-wrap">
-    <VXLabel :tooltip="tips" class="mb-2">{{ label }}</VXLabel>
+    <VXLabel v-if="label" :tooltip="tips" class="mb-2">{{ label }}</VXLabel>
 
     <!-- text-area -->
     <template v-if="type === 'textarea'">
       <v-textarea
         ref="vInputRef"
+        :readonly="readonly"
         :rows="2"
         :max-rows="20"
         auto-grow
@@ -24,6 +25,7 @@
     <template v-else>
       <v-text-field
         ref="vInputRef"
+        :readonly="readonly"
         density="compact"
         variant="outlined"
         :model-value="fieldValue"
@@ -55,7 +57,8 @@ const props = defineProps({
   remoteValidation: Boolean,
   disabled: Boolean,
   placeholder: String,
-  tips: String
+  tips: String,
+  readonly: Boolean
 })
 
 const fieldValue = computed(() => props.modelValue)
@@ -116,16 +119,16 @@ defineExpose(forwardRefs({}, vInputRef))
       align-items: flex-start;
     }
 
-    &:not(.v-input--error):deep(.v-field__outline) {
+    &:not(.v-input--error,.v-input--readonly):deep(.v-field__outline) {
       color: rgb(var(--v-theme-grey-lighten-2));
       transition: color 0.3s ease;
     }
 
-    &:not(.v-input--error):deep(.v-field:not(.v-field--focused)):hover .v-field__outline {
+    &:not(.v-input--error,.v-input--readonly):deep(.v-field:not(.v-field--focused)):hover .v-field__outline {
       color: rgb(var(--v-theme-primary));
     }
 
-    &:not(.v-input--error):deep(.v-field--focused) .v-field__outline {
+    &:not(.v-input--error,.v-input--readonly):deep(.v-field--focused) .v-field__outline {
       color: rgb(var(--v-theme-primary));
     }
 
