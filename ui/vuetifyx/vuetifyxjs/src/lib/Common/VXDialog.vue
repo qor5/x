@@ -26,9 +26,11 @@
             <v-icon color="#757575" size="small" icon="mdi-close" @click="onClose(isActive)" />
           </template>
 
-          <v-card-text :class="{'mb-3': !hideFooter }" :style="[contentWidth, contentMaxWidth, contentHeightStyle]">
-            <slot
-              :isActive="isActive"
+          <v-card-text
+            :class="{ 'mb-3': !hideFooter }"
+            :style="[contentWidth, contentMaxWidth, contentHeightStyle]"
+          >
+            <slot :isActive="isActive"
               ><span class="dialog-content-text">{{ text }}</span></slot
             >
           </v-card-text>
@@ -103,7 +105,7 @@ const props = defineProps({
   },
   hideFooter: {
     type: Boolean,
-    default: false,
+    default: false
   },
   hideClose: {
     type: Boolean,
@@ -129,7 +131,7 @@ const props = defineProps({
   maxWidth: {
     type: [Number, String],
     default: 665
-  },
+  }
 })
 
 watch(

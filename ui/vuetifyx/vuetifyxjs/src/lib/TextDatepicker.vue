@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Datepicker from '@/lib/Datepicker.vue'
-import { ref,watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useVDatePickerTimeChange } from '@/lib/composables/useVDatePicker'
 
 const emit = defineEmits(['update:modelValue'])
@@ -24,11 +24,13 @@ const toggle = () => {
   internalVisible.value = !internalVisible.value
 }
 
-watch(()=> value, (newVal)=> {
-  emit('update:modelValue', value.value)
-  toggle()
-})
-
+watch(
+  () => value,
+  (newVal) => {
+    emit('update:modelValue', value.value)
+    toggle()
+  }
+)
 </script>
 
 <template>

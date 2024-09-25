@@ -4,7 +4,7 @@ import { ref } from 'vue'
 const vnode = ref()
 
 const tagInputsFocus = (v: any) => {
-  vnode.value =   v
+  vnode.value = v
 }
 const addTags = (tag: any) => {
   if (!vnode.value) {
@@ -23,7 +23,6 @@ const addTags = (tag: any) => {
   }
   let startString = lazyValue.substring(0, selectionStart)
   let endString = lazyValue.substring(selectionEnd, lazyValue.length)
-
 
   vnode.value.$emit('update:modelValue', startString + '{{' + tag + '}}' + endString)
   vnode.value.focus()
