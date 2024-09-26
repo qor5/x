@@ -1,18 +1,21 @@
 <template>
   <div class="vx-field-wrap">
-    <VXLabel v-if="label" :tooltip="tips" class="mb-2">{{ label }}</VXLabel>
+    <VXLabel v-if="label" :label-for="name" :tooltip="tips" class="mb-2">{{ label }}</VXLabel>
 
     <!-- text-area -->
     <template v-if="type === 'textarea'">
       <v-textarea
         ref="vInputRef"
+        :id="id"
+        :name="name"
+        :autofocus="autoFocus"
         :readonly="readonly"
         :rows="2"
         :max-rows="20"
         auto-grow
         variant="outlined"
         density="compact"
-        :model-value="fieldValue"
+        v-model="fieldValue"
         :error-messages="errorFiled"
         :disabled="disabled"
         :placeholder="placeholder"
@@ -24,11 +27,14 @@
     <!-- v-text-file -->
     <template v-else>
       <v-text-field
+        :id="id"
         ref="vInputRef"
+        :name="name"
+        :autofocus="autoFocus"
         :readonly="readonly"
         density="compact"
         variant="outlined"
-        :model-value="fieldValue"
+        v-model="fieldValue"
         :type="type"
         :error-messages="errorFiled"
         :disabled="disabled"
@@ -41,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, computed, PropType, ref, defineExpose } from 'vue'
+import { defineEmits, PropType, watch, ref, defineExpose } from 'vue'
 import VXLabel from '../Common/VXLabel.vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import { forwardRefs } from '@/lib/composables/forwardRefs'
@@ -58,11 +64,16 @@ const props = defineProps({
   disabled: Boolean,
   placeholder: String,
   tips: String,
-  readonly: Boolean
+  readonly: Boolean,
+  autoFocus: Boolean,
+  name: String,
+  id: String //id will passthrough set to input, thus click label will focus on input element
 })
 
-const fieldValue = computed(() => props.modelValue)
+const fieldValue = ref(props.modelValue)
 const errorFiled = ref(props.errorMessages)
+
+watch(()=> props.modelValue, newVal => fieldValue.value = newVal)
 
 function onUpdateModelValue(value: string | number | Record<string, any>) {
   emit('update:modelValue', value)

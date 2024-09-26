@@ -8,7 +8,7 @@
 <template>
   <v-row>
     <v-col cols="6" sm="6">
-      <vx-field :model-value="dataNoBinding" label="input" />
+      <vx-field :model-value="dataNoBinding" label="input(autofocus)" auto-focus/>
     </v-col>
     <v-col cols="6">
       <vx-field type="textarea" v-model="dataTextArea" label="textarea" />
@@ -115,7 +115,12 @@ const dataTextErrorMessages = ref('This is a description')
 <template>
   <v-row>
     <v-col cols="6" sm="6">
-      <vx-field :model-value="dataNoBinding" label="Input" />
+      <vx-field :model-value="dataNoBinding" label="Input (use :model-value)" />
+      <div class="text-caption">Value Display:{{ dataNoBinding }}</div>
+    </v-col>
+    <v-col cols="6" sm="6">
+      <vx-field v-model="vModelBinding" label="Input(use v-model)" />
+      <div class="text-caption">Value Display:{{ vModelBinding }}</div>
     </v-col>
   </v-row>
 
@@ -136,6 +141,7 @@ const dataTextErrorMessages = ref('This is a description')
 import { ref } from 'vue'
 
 const dataNoBinding = ref('hello world')
+const vModelBinding = ref('hello world')
 const dataWithBinding = ref('hello world')
 const dataWithTips = ref('data with tips')
 const dataTextArea = ref('textarea data')
