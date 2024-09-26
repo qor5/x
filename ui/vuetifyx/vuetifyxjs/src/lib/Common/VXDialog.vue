@@ -27,7 +27,7 @@
           </template>
 
           <v-card-text
-            :class="{ 'mb-3': !hideFooter }"
+            :class="{ 'mb-6': !hideFooter, 'pb-0': !hideFooter }"
             :style="[contentWidth, contentMaxWidth, contentHeightStyle]"
           >
             <slot :isActive="isActive"
@@ -226,7 +226,7 @@ function onClose(isActive: Ref<boolean>) {
 }
 
 .v-card-actions {
-  padding: 12px 24px 24px;
+  padding: 0 24px 24px;
   &.default {
     .v-btn.v-btn--size-small {
       min-width: initial;
