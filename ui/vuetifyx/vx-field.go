@@ -53,8 +53,8 @@ func (b *VXFieldBuilder) Disabled(v bool) (r *VXFieldBuilder) {
 	return b
 }
 
-func (b *VXFieldBuilder) AutoFocus(v bool) (r *VXFieldBuilder) {
-	b.tag.Attr(":auto-focus", fmt.Sprint(v))
+func (b *VXFieldBuilder) Autofocus(v bool) (r *VXFieldBuilder) {
+	b.tag.Attr(":autofocus", fmt.Sprint(v))
 	return b
 }
 
