@@ -1,10 +1,6 @@
 # vx-field 输入框
 
-## 基本用法
-
-```html
-<vx-field model-value="Hello World" label="field1" />
-```
+## Usage
 
 :::demo
 
@@ -12,7 +8,7 @@
 <template>
   <v-row>
     <v-col cols="6" sm="6">
-      <vx-field :model-value="dataNoBinding" label="input" />
+      <vx-field :model-value="dataNoBinding" label="input(autofocus)" auto-focus/>
     </v-col>
     <v-col cols="6">
       <vx-field type="textarea" v-model="dataTextArea" label="textarea" />
@@ -95,6 +91,57 @@
 import { ref } from 'vue'
 
 const dataNoBinding = ref('hello world')
+const dataWithBinding = ref('hello world')
+const dataWithTips = ref('data with tips')
+const dataTextArea = ref('textarea data')
+const dataTextErrorMessages = ref('This is a description')
+</script>
+
+<style scoped lang="css">
+* {
+  word-break: break-word;
+}
+</style>
+```
+
+:::
+
+
+## Type
+
+:::demo
+
+```vue
+<template>
+  <v-row>
+    <v-col cols="6" sm="6">
+      <vx-field :model-value="dataNoBinding" label="Input (use :model-value)" />
+      <div class="text-caption">Value Display:{{ dataNoBinding }}</div>
+    </v-col>
+    <v-col cols="6" sm="6">
+      <vx-field v-model="vModelBinding" label="Input(use v-model)" />
+      <div class="text-caption">Value Display:{{ vModelBinding }}</div>
+    </v-col>
+  </v-row>
+
+  <v-row>
+    <v-col cols="6" sm="6">
+      <vx-field type="password" :model-value="dataNoBinding" label="Password" />
+    </v-col>
+  </v-row>
+
+  <v-row>
+    <v-col cols="6">
+      <vx-field type="textarea" v-model="dataTextArea" label="Textarea" />
+    </v-col>
+  </v-row>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const dataNoBinding = ref('hello world')
+const vModelBinding = ref('hello world')
 const dataWithBinding = ref('hello world')
 const dataWithTips = ref('data with tips')
 const dataTextArea = ref('textarea data')

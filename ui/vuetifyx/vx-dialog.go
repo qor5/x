@@ -58,6 +58,11 @@ func (b *VXDialogBuilder) Text(v string) (r *VXDialogBuilder) {
 	return b
 }
 
+func (b *VXDialogBuilder) NoClickAnimation(v bool) (r *VXDialogBuilder) {
+	b.tag.Attr(":no-click-animation", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXDialogBuilder) HideCancel(v bool) (r *VXDialogBuilder) {
 	b.tag.Attr(":hide-cancel", fmt.Sprint(v))
 	return b

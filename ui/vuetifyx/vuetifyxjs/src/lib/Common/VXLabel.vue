@@ -20,7 +20,7 @@
       </template>
       <!-- normal-label only for display -->
       <template v-else>
-        <label v-if="hasDefaultSlot" class="text-subtitle-2 text-high-emphasis">
+        <label v-if="hasDefaultSlot" class="text-subtitle-2 text-high-emphasis" :for="labelFor">
           <slot />
         </label>
       </template>
@@ -58,6 +58,7 @@ const props = defineProps({
     default: 'default'
   },
   tooltipIconColor: String,
+  labelFor: String,
   icon: {
     type: String,
     default: 'mdi-information-outline'

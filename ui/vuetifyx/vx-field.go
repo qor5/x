@@ -28,6 +28,11 @@ func (b *VXFieldBuilder) Type(v string) (r *VXFieldBuilder) {
 	return b
 }
 
+func (b *VXFieldBuilder) Name(v string) (r *VXFieldBuilder) {
+	b.tag.Attr("name", v)
+	return b
+}
+
 func (b *VXFieldBuilder) Id(v string) (r *VXFieldBuilder) {
 	b.tag.Attr("id", v)
 	return b
@@ -45,6 +50,11 @@ func (b *VXFieldBuilder) Readonly(v bool) (r *VXFieldBuilder) {
 
 func (b *VXFieldBuilder) Disabled(v bool) (r *VXFieldBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXFieldBuilder) AutoFocus(v bool) (r *VXFieldBuilder) {
+	b.tag.Attr(":auto-focus", fmt.Sprint(v))
 	return b
 }
 

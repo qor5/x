@@ -28,7 +28,8 @@
     "vue-json-pretty": "^2.4.0",
     "vuedraggable": "^4.1.0",
     "vuetify": "^3.6.14",
-    "vuetify-pro-tiptap": "^2.5.4"
+    "vuetify-pro-tiptap": "^2.5.4",
+    "@vueuse/core": "^11.0.3"
   },
   "devDependencies": {
     "@babel/types": "^7.24.7",
@@ -41,7 +42,6 @@
     "@vitepress-code-preview/container": "1.0.8",
     "@vitepress-code-preview/plugin": "^1.0.6",
     "@vue/test-utils": "^2.4.6",
-    "@vueuse/core": "^11.0.3",
     "body-scroll-lock": "4.0.0-beta.0",
     "cross-env": "^7.0.3",
     "inquirer": "^10.2.2",

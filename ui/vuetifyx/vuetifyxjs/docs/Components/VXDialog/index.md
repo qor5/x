@@ -21,6 +21,7 @@
 | hideCancel    | 隐藏取消按钮                                                | `Boolean`                                                       | `false`       |
 | hideClose    | 隐藏右上角关闭按钮                                               | `Boolean`                                                       | `false`       |
 | hideFooter    | 隐藏底部操作按钮区域                                        | `Boolean`                                                       | `false`       |
+| noClickAnimation    | 取消点击弹窗外的弹性动效                                      | `Boolean`                                                       | `false`       |
 | model-value   | 控制弹窗显示与否                                            | `Boolean`                                                       | `false`       |
 
 > 除此之外所有的 [v-dialog](https://vuetifyjs.com/en/api/v-dialog/) 原生 props 都可使用 v-bind:[props]="[value]" 实现或覆盖
@@ -32,6 +33,7 @@
 | click:ok          | `{ isActive: Ref<isActive> }` | 点击 OK 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调)       |
 | click:cancel      | `{ isActive: Ref<isActive> }` | 点击 Cancel 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调)   |
 | click:close       | `{ isActive: Ref<isActive> }` | 点击右上角关闭图标时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) |
+| click:outside       | `PointerEvent` | 点击弹窗以外的区域触发 |
 | update:modelValue | `boolean`                     | 弹窗 model 值改变时触发                                                       |
 
 ### Slots

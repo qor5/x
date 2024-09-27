@@ -4,6 +4,7 @@
       scrollable
       width="auto"
       :model-value="dialogVisible"
+      :no-click-animation="noClickAnimation"
       :persistent="persistent"
       v-bind="filteredAttrs"
       @update:model-value="onUpdateModelValue"
@@ -13,7 +14,7 @@
       </template>
 
       <template v-slot:default="{ isActive }">
-        <v-card>
+        <v-card ref="dialogMain">
           <template #title>
             <span>{{ title }}</span>
           </template>
@@ -27,7 +28,7 @@
           </template>
 
           <v-card-text
-            :class="{ 'mb-3': !hideFooter }"
+            :class="{ 'mb-6': !hideFooter, 'pb-0': !hideFooter }"
             :style="[contentWidth, contentMaxWidth, contentHeightStyle]"
           >
             <slot :isActive="isActive"
@@ -62,22 +63,21 @@
 </template>
 
 <script setup lang="ts">
-import {
-  defineEmits,
-  ref,
-  watch,
-  defineProps,
-  computed,
-  PropType,
-  Ref,
-  getCurrentInstance
-} from 'vue'
+import { defineEmits, ref, watch, defineProps, computed, PropType, Ref, effectScope } from 'vue'
+
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import { useHasEventListener } from '@/lib/composables/useEventListener'
-
+import { onClickOutside } from '@vueuse/core'
 const { filteredAttrs } = useFilteredAttrs()
 const { hasEventListener } = useHasEventListener()
-const emit = defineEmits(['update:modelValue', 'click:ok', 'click:cancel', 'click:close'])
+const scope = effectScope()
+const emit = defineEmits([
+  'update:modelValue',
+  'click:ok',
+  'click:cancel',
+  'click:close',
+  'click:outside'
+])
 const props = defineProps({
   modelValue: Boolean,
   title: String,
@@ -120,6 +120,7 @@ const props = defineProps({
     default: 'Cancel'
   },
   persistent: Boolean,
+  noClickAnimation: Boolean,
   contentHeight: {
     type: [Number, String],
     default: 'auto'
@@ -140,7 +141,7 @@ watch(
     dialogVisible.value = newValue
   }
 )
-
+const dialogMain = ref(null)
 const isOkBtnLoading = ref(false)
 const dialogVisible = ref(props.modelValue)
 const contentMaxWidth = computed(() => {
@@ -185,12 +186,18 @@ const prependIcon = computed(() => {
   return vCardTitleIconMap[props.type]
 })
 
+scope.run(()=> {
+  onClickOutside(dialogMain, (event) => {
+    // console.log('outside',event)
+    emit('click:outside', event)
+  })
+})
+
+
 function onUpdateModelValue(value: any) {
   emit('update:modelValue', value)
   dialogVisible.value = value
 }
-
-const instance = getCurrentInstance()
 
 function onOk(isActive: Ref<boolean>) {
   if (hasEventListener('click:ok')) {
@@ -226,7 +233,7 @@ function onClose(isActive: Ref<boolean>) {
 }
 
 .v-card-actions {
-  padding: 12px 24px 24px;
+  padding: 0 24px 24px;
   &.default {
     .v-btn.v-btn--size-small {
       min-width: initial;
