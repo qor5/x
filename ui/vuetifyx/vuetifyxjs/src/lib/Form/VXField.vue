@@ -8,7 +8,7 @@
         ref="vInputRef"
         :id="id"
         :name="name"
-        :autofocus="autoFocus"
+        :autofocus="autofocus"
         :readonly="readonly"
         :rows="2"
         :max-rows="20"
@@ -30,7 +30,7 @@
         :id="id"
         ref="vInputRef"
         :name="name"
-        :autofocus="autoFocus"
+        :autofocus="autofocus"
         :readonly="readonly"
         density="compact"
         variant="outlined"
@@ -65,7 +65,7 @@ const props = defineProps({
   placeholder: String,
   tips: String,
   readonly: Boolean,
-  autoFocus: Boolean,
+  autofocus: Boolean,
   name: String,
   id: String //id will passthrough set to input, thus click label will focus on input element
 })

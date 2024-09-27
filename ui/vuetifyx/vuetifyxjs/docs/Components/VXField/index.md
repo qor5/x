@@ -8,7 +8,7 @@
 <template>
   <v-row>
     <v-col cols="6" sm="6">
-      <vx-field :model-value="dataNoBinding" label="input(autofocus)" auto-focus/>
+      <vx-field :model-value="dataNoBinding" label="input(autofocus)" autofocus/>
     </v-col>
     <v-col cols="6">
       <vx-field type="textarea" v-model="dataTextArea" label="textarea" />
