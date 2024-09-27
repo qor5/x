@@ -152,7 +152,7 @@ const contentWidth = computed(() => {
 
   if (props.size === 'default' && props.width === '') {
     contentWidthStyle = 'width:461px'
-  } else {
+  } else if(+props.width > 0) {
     contentWidthStyle = `width:${props.width}px`
   }
 
