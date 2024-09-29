@@ -23,6 +23,7 @@ import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
 import VXField from '@/lib/Form/VXField.vue'
 import VXSelect from '@/lib/Form/VXSelect.vue'
+import VXCheckbox from '../Form/VXCheckbox.vue'
 import VXToolbar from '@/lib/Common/VXToolBar.vue'
 import VXLabel from '@/lib/Common/VXLabel.vue'
 import VXDialog from '@/lib/Common/VXDialog.vue'
@@ -43,6 +44,8 @@ const vuetifyx = {
     app.component('vx-linkageselect', LinkageSelect)
     app.component('vx-autocomplete', Autocomplete)
     app.component('vx-linkageselect-remote', LinkageSelectRemote)
+    // checkbox
+    app.component('vx-checkbox', VXCheckbox)
     // field and label
     app.component('vx-field', VXField)
     app.component('vx-label', VXLabel)

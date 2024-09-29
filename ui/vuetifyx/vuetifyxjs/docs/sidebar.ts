@@ -21,6 +21,10 @@ export default {
           link: '/Components/VXSelect/'
         },
         {
+          text: 'Checkbox',
+          link: '/Components/VXCheckbox/'
+        },
+        {
           text: 'TiptapEditor 富文本编辑器',
           link: '/Components/TiptapEditor/'
         },
