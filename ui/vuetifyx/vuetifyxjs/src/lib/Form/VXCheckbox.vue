@@ -1,18 +1,20 @@
 <template>
-  <v-checkbox
-    v-if="!readonly" 
-    :label="label"
-    v-model="model"
-    :true-icon="trueIcon"
-    :false-icon="falseIcon"
-    v-bind="filteredAttrs"
-    class="ms-n2"
-  />
-  <div v-if="readonly" class="d-flex flex-column ga-2 pb-4">
-    <VXLabel  :tooltip="tips">{{ label }}</VXLabel>
-    <div class="d-flex align-center ga-2">
-      <v-icon :icon="readonlyIcon" :color="readonlyColor"></v-icon>
-      <span class="v-label">{{ readonlyLabel }}</span>
+  <div class="vx-checkbox-wrap">
+    <v-checkbox
+      v-if="!readonly" 
+      :label="label"
+      v-model="model"
+      :true-icon="trueIcon"
+      :false-icon="falseIcon"
+      v-bind="filteredAttrs"
+      class="ms-n2"
+    />
+    <div v-if="readonly" class="d-flex flex-column ga-2 pb-4">
+      <VXLabel  :tooltip="tips">{{ label }}</VXLabel>
+      <div class="d-flex align-center ga-2">
+        <v-icon :icon="readonlyIcon" :color="readonlyColor"></v-icon>
+        <span class="v-label">{{ readonlyLabel }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -65,3 +67,9 @@ const readonlyIcon = computed(() => {
 });
 
 </script>
+
+<style lang="scss" scoped>
+.vx-checkbox-wrap {
+  margin-bottom: 2px;
+}
+</style>
