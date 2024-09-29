@@ -11,3 +11,25 @@
     width: calc(100% - 364px);
   }
 }
+
+.pb-drawer-btn {
+  &.v-btn--icon.v-btn--density-default {
+    position:absolute;
+    top:24px;
+    right:0;
+    margin-right: -16px;
+    width: 32px;
+    height: 32px;
+    z-index: 900;
+
+    &.drawer-btn-left {
+      right:0;
+      margin-right: -16px;
+    }
+
+    &.drawer-btn-right {
+      left:0;
+      margin-left: -16px;
+    }
+  }
+}
