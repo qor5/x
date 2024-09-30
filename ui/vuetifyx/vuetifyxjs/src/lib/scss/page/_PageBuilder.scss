@@ -20,7 +20,7 @@
     margin-right: -16px;
     width: 32px;
     height: 32px;
-    z-index: 900;
+    z-index: 902;
 
     &.drawer-btn-left {
       right:0;
@@ -30,6 +30,36 @@
     &.drawer-btn-right {
       left:0;
       margin-left: -16px;
+    }
+  }
+}
+
+.v-navigation-drawer {
+  &.draggable-el {
+    &::before {
+      position: absolute;
+      content: "";
+      height: 100%;
+      width: 5px;
+      left: -5px;
+      top: 0;
+    }
+  }
+
+
+  &.border-left-draggable-highlight {
+    cursor:col-resize;
+    transition-duration: unset;
+    &::after {
+      position: absolute;
+      content: "";
+      height: 100%;
+      background: rgb(var(--v-theme-primary));
+      transition: background-color ease .3s;
+      width: 2px;
+      left: 0;
+      top: 0;
+      z-index: 901;
     }
   }
 }
