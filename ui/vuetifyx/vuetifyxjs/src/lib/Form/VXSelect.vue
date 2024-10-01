@@ -3,6 +3,8 @@
     <VXLabel :tooltip="tips" class="mb-2">{{ label }}</VXLabel>
     <v-autocomplete
       v-if="type === 'autocomplete'"
+      :closable-chips="closableChips"
+      :hide-no-data="hideNoData"
       :model-value="selectValue"
       :items="items"
       :item-title="itemTitle"
@@ -13,6 +15,7 @@
       :placeholder="placeholder"
       :disabled="disabled"
       :error-messages="errorFiled"
+      :hide-details="hideDetails"
       v-bind="filteredAttrs"
       class="vx-type-autocomplete"
       variant="outlined"
@@ -22,7 +25,9 @@
     />
     <v-select
       v-else
+      :closable-chips="closableChips"
       :model-value="selectValue"
+      :hide-no-data="hideNoData"
       :items="items"
       :item-title="itemTitle"
       :item-value="itemValue"
@@ -32,6 +37,7 @@
       :placeholder="placeholder"
       :disabled="disabled"
       :error-messages="errorFiled"
+      :hideDetails="hideDetails"
       v-bind="filteredAttrs"
       class="vx-type-select"
       variant="outlined"
@@ -56,12 +62,15 @@ const props = defineProps({
   errorMessages: [String, Array] as PropType<string | string[]>,
   remoteValidation: Boolean,
   disabled: Boolean,
+  hideDetails: Boolean,
+  hideNoData: Boolean,
   placeholder: String,
   items: Array,
   itemTitle: String,
   itemValue: String,
   multiple: Boolean,
   chips: Boolean,
+  closableChips: Boolean,
   clearable: Boolean,
   tips: String
 })

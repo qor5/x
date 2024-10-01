@@ -17,6 +17,7 @@
 | width         | 弹窗宽度                                                    | `Number`                                                        | -             |
 | maxWidth      | 弹窗最大宽度                                                | `Number`                                                        | -             |
 | contentHeight | 弹窗内容高度                                                | `Number`                                                        | -             |
+| disableOk        | 禁用确认按钮                                                | `Boolean`                                                       | `false`       |
 | hideOk        | 隐藏确认按钮                                                | `Boolean`                                                       | `false`       |
 | hideCancel    | 隐藏取消按钮                                                | `Boolean`                                                       | `false`       |
 | hideClose    | 隐藏右上角关闭按钮                                               | `Boolean`                                                       | `false`       |
@@ -30,7 +31,7 @@
 
 | Name              | Payload                       | Introduction                                                                  |
 | ----------------- | ----------------------------- | ----------------------------------------------------------------------------- |
-| click:ok          | `{ isActive: Ref<isActive> }` | 点击 OK 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调)       |
+| click:ok          | `{ isActive: Ref<isActive>, isLoading: Ref<false> }` | 点击 OK 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) , 可以通过回调函数接收 isLoading 控制 okbtn 的loading状态      |
 | click:cancel      | `{ isActive: Ref<isActive> }` | 点击 Cancel 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调)   |
 | click:close       | `{ isActive: Ref<isActive> }` | 点击右上角关闭图标时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) |
 | click:outside       | `PointerEvent` | 点击弹窗以外的区域触发 |
@@ -356,7 +357,7 @@ function onCancel({ isActive }) {
 
 :::
 
-## 区域隐藏或显示
+## 区域隐藏/禁用/显示
 
 :::demo
 
@@ -413,6 +414,19 @@ function onCancel({ isActive }) {
           text="This is an info description line This is an info description"
           hideFooter
           ok-text="Fine"
+        >
+          <template v-slot:activator="{ props: { activatorProps } }">
+            <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
+          </template>
+        </vx-dialog>
+      </v-col>
+
+      <v-col cols="3" class="text-center">
+        <div class="mb-2">disableOk</div>
+        <vx-dialog
+          title="Confirm"
+          text="This is an info description line This is an info description"
+          disableOk
         >
           <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>

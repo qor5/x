@@ -48,6 +48,11 @@ func (b *VXFieldBuilder) Readonly(v bool) (r *VXFieldBuilder) {
 	return b
 }
 
+func (b *VXFieldBuilder) Width(v int) (r *VXFieldBuilder) {
+	b.tag.Attr("width", h.JSONString(v))
+	return b
+}
+
 func (b *VXFieldBuilder) Disabled(v bool) (r *VXFieldBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
 	return b
@@ -55,6 +60,11 @@ func (b *VXFieldBuilder) Disabled(v bool) (r *VXFieldBuilder) {
 
 func (b *VXFieldBuilder) Autofocus(v bool) (r *VXFieldBuilder) {
 	b.tag.Attr(":autofocus", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXFieldBuilder) HideDetails(v bool) (r *VXFieldBuilder) {
+	b.tag.Attr(":hide-details", fmt.Sprint(v))
 	return b
 }
 
