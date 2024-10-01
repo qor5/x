@@ -47,6 +47,7 @@
               >
               <v-btn
                 v-if="!hideOk"
+                :disabled="disableOk"
                 color="primary"
                 :size="props.size === 'default' ? 'small' : 'default'"
                 :loading="isOkBtnLoading"
@@ -91,6 +92,10 @@ const props = defineProps({
     default: 'default'
   },
   text: String,
+  disableOk: {
+    type: Boolean,
+    default: false
+  },
   hideOk: {
     type: Boolean,
     default: false

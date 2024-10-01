@@ -68,6 +68,11 @@ func (b *VXDialogBuilder) HideCancel(v bool) (r *VXDialogBuilder) {
 	return b
 }
 
+func (b *VXDialogBuilder) DisableOk(v bool) (r *VXDialogBuilder) {
+	b.tag.Attr(":disable-ok", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXDialogBuilder) HideOk(v bool) (r *VXDialogBuilder) {
 	b.tag.Attr(":hide-ok", fmt.Sprint(v))
 	return b
