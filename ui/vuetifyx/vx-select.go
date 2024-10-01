@@ -43,6 +43,21 @@ func (b *VXSelectBuilder) Chips(v bool) (r *VXSelectBuilder) {
 	return b
 }
 
+func (b *VXSelectBuilder) ClosableChips(v bool) (r *VXSelectBuilder) {
+	b.tag.Attr(":closable-chips", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXSelectBuilder) HideNoData(v bool) (r *VXSelectBuilder) {
+	b.tag.Attr(":hide-no-data", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXSelectBuilder) HideDetails(v bool) (r *VXSelectBuilder) {
+	b.tag.Attr(":hideDetails", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXSelectBuilder) Multiple(v bool) (r *VXSelectBuilder) {
 	b.tag.Attr(":multiple", fmt.Sprint(v))
 	return b

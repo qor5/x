@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/qor5/web/v3"
-	v "github.com/qor5/x/v3/ui/vuetify"
 
 	h "github.com/theplant/htmlgo"
 )
@@ -73,10 +72,10 @@ func (b *VXTextFieldBuilder) Suffix(suffix string) *VXTextFieldBuilder {
 }
 
 func (b *VXTextFieldBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	var labelStyle string = "font-size:16px; font-weight:500;"
+	// var labelStyle string = "font-size:16px; font-weight:500;"
 	var label h.HTMLComponent
 	if b.label != "" {
-		label = h.Div(h.Span(b.label).Style(labelStyle)).Class("mb-2")
+		label = VXLabel(h.Span(b.label)).Class("mb-2")
 	}
 	if b.readOnly {
 		div := h.Div().Class(b.class)
@@ -96,9 +95,8 @@ func (b *VXTextFieldBuilder) MarshalHTML(ctx context.Context) (r []byte, err err
 	if b.valueType != "" {
 		valueType = b.valueType
 	}
-	content := v.VTextField().HideDetails(true).Type(valueType).
-		Variant(v.VariantOutlined).Density(v.DensityCompact).
-		Suffix(b.suffix).
+	content := VXField().Type(valueType).
+		Attr("suffix", b.suffix).
 		Attr(web.VField(b.vField.formKey, b.vField.value)...)
 	return h.Div(
 		label,

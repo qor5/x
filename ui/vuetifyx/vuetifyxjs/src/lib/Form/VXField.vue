@@ -6,6 +6,8 @@
     <template v-if="type === 'textarea'">
       <v-textarea
         ref="vInputRef"
+        :width="width"
+        :hideDetails="hideDetails"
         :id="id"
         :name="name"
         :autofocus="autofocus"
@@ -27,8 +29,10 @@
     <!-- v-text-file -->
     <template v-else>
       <v-text-field
-        :id="id"
         ref="vInputRef"
+        :width="width"
+        :hideDetails="hideDetails"
+        :id="id"
         :name="name"
         :autofocus="autofocus"
         :readonly="readonly"
@@ -41,7 +45,12 @@
         :placeholder="placeholder"
         v-bind="filteredAttrs"
         @update:modelValue="onUpdateModelValue"
-      />
+      >
+      <template #append-inner>
+        <slot name="append-inner" />
+      </template>
+      <slot></slot>
+    </v-text-field>
     </template>
   </div>
 </template>
@@ -66,7 +75,9 @@ const props = defineProps({
   tips: String,
   readonly: Boolean,
   autofocus: Boolean,
+  hideDetails: Boolean,
   name: String,
+  width: [String, Number],
   id: String //id will passthrough set to input, thus click label will focus on input element
 })
 

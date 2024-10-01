@@ -156,3 +156,40 @@ const dataTextErrorMessages = ref('This is a description')
 ```
 
 :::
+
+
+## Slot
+
+:::demo
+
+```vue
+<template>
+  <v-row>
+    <v-col cols="6" sm="6">
+      <vx-label class="mb-2">search bar</vx-label>
+      <vx-field :model-value="dataNoBinding" Placeholder="Search" clearable @click:clear="dataNoBinding = ''" width="320">
+        <template #append-inner><v-icon icon="mdi-magnify" @click="onSearch" /></template>
+      </vx-field>
+    </v-col>
+  </v-row>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const dataNoBinding = ref('hello world')
+
+function onSearch() {
+  alert("search content is" + dataNoBinding.value)
+
+}
+</script>
+
+<style scoped lang="css">
+* {
+  word-break: break-word;
+}
+</style>
+```
+
+:::

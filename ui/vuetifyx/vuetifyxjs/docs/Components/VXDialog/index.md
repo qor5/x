@@ -31,7 +31,7 @@
 
 | Name              | Payload                       | Introduction                                                                  |
 | ----------------- | ----------------------------- | ----------------------------------------------------------------------------- |
-| click:ok          | `{ isActive: Ref<isActive> }` | 点击 OK 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调)       |
+| click:ok          | `{ isActive: Ref<isActive>, isLoading: Ref<false> }` | 点击 OK 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) , 可以通过回调函数接收 isLoading 控制 okbtn 的loading状态      |
 | click:cancel      | `{ isActive: Ref<isActive> }` | 点击 Cancel 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调)   |
 | click:close       | `{ isActive: Ref<isActive> }` | 点击右上角关闭图标时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) |
 | click:outside       | `PointerEvent` | 点击弹窗以外的区域触发 |
