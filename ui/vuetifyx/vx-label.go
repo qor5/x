@@ -8,7 +8,7 @@ import (
 )
 
 type VXLabelBuilder struct {
-	tag           *h.HTMLTagBuilder
+	tag *h.HTMLTagBuilder
 }
 
 func VXLabel(children ...h.HTMLComponent) (r *VXLabelBuilder) {
@@ -54,7 +54,7 @@ func (b *VXLabelBuilder) IconSize(v string) (r *VXLabelBuilder) {
 }
 
 func (b *VXLabelBuilder) Slot(name string, children ...h.HTMLComponent) *VXLabelBuilder {
-	slotTemplate := h.Tag("template").Attr("#"+name).Children(children...)
+	slotTemplate := h.Tag("template").Attr("#" + name).Children(children...)
 	b.tag.Children(slotTemplate)
 	return b
 }
@@ -62,6 +62,10 @@ func (b *VXLabelBuilder) Slot(name string, children ...h.HTMLComponent) *VXLabel
 func (b *VXLabelBuilder) Attr(vs ...interface{}) (r *VXLabelBuilder) {
 	b.tag.Attr(vs...)
 	return b
+}
+func (b *VXLabelBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+	return
 }
 
 func (b *VXLabelBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {

@@ -8,7 +8,7 @@ import (
 )
 
 type VXSelectBuilder struct {
-	tag           *h.HTMLTagBuilder
+	tag *h.HTMLTagBuilder
 }
 
 func VXSelect(children ...h.HTMLComponent) (r *VXSelectBuilder) {
@@ -101,6 +101,10 @@ func (b *VXSelectBuilder) Tips(v string) (r *VXSelectBuilder) {
 func (b *VXSelectBuilder) Attr(vs ...interface{}) (r *VXSelectBuilder) {
 	b.tag.Attr(vs...)
 	return b
+}
+func (b *VXSelectBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+	return
 }
 
 func (b *VXSelectBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {

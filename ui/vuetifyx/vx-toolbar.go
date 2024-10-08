@@ -7,7 +7,7 @@ import (
 )
 
 type VXToolbarBuilder struct {
-	tag           *h.HTMLTagBuilder
+	tag *h.HTMLTagBuilder
 }
 
 func VXToolbar(children ...h.HTMLComponent) (r *VXToolbarBuilder) {
@@ -30,6 +30,10 @@ func (b *VXToolbarBuilder) Placeholder(v string) (r *VXToolbarBuilder) {
 func (b *VXToolbarBuilder) Attr(vs ...interface{}) (r *VXToolbarBuilder) {
 	b.tag.Attr(vs...)
 	return b
+}
+func (b *VXToolbarBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+	return
 }
 
 func (b *VXToolbarBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
