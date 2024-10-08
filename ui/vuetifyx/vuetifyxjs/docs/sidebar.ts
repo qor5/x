@@ -21,7 +21,7 @@ export default {
           link: '/Components/VXSelect/'
         },
         {
-          text: 'Checkbox',
+          text: 'Checkbox 复选框',
           link: '/Components/VXCheckbox/'
         },
         {
