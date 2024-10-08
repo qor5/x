@@ -15,17 +15,18 @@ type VXDialogType string
 type VXDialogSize string
 
 const (
-	DialogDefault   VXDialogType = "default"
-	DialogInfo   VXDialogType = "info"
-	DialogSuccess   VXDialogType = "success"
-	DialogWarn   VXDialogType = "warn"
+	DialogDefault VXDialogType = "default"
+	DialogInfo    VXDialogType = "info"
+	DialogSuccess VXDialogType = "success"
+	DialogWarn    VXDialogType = "warn"
 	DialogError   VXDialogType = "error"
 )
 
 const (
 	DialogSizeDefault VXDialogSize = "default"
-	DialogSizeLarge VXDialogSize = "large"
+	DialogSizeLarge   VXDialogSize = "large"
 )
+
 /*
 @doc https://qor5.github.io/x/Components/VXDialog/
 */
@@ -35,6 +36,7 @@ func VXDialog(children ...h.HTMLComponent) (r *VXDialogBuilder) {
 	}
 	return
 }
+
 /*
 Set the title of VXDialog
 */
@@ -123,12 +125,14 @@ func (b *VXDialogBuilder) MaxWidth(v int) (r *VXDialogBuilder) {
 	return b
 }
 
-
 func (b *VXDialogBuilder) Attr(vs ...interface{}) (r *VXDialogBuilder) {
 	b.tag.Attr(vs...)
 	return b
 }
-
+func (b *VXDialogBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+	return
+}
 func (b *VXDialogBuilder) Children(children ...h.HTMLComponent) (r *VXDialogBuilder) {
 	b.tag.Children(children...)
 	return b

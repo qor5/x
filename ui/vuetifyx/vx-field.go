@@ -78,6 +78,11 @@ func (b *VXFieldBuilder) Attr(vs ...interface{}) (r *VXFieldBuilder) {
 	return b
 }
 
+func (b *VXFieldBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+	return
+}
+
 func (b *VXFieldBuilder) Children(children ...h.HTMLComponent) (r *VXFieldBuilder) {
 	b.tag.Children(children...)
 	return b

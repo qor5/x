@@ -40,6 +40,10 @@ func (b *VXTiptapEditorBuilder) Attr(vs ...any) (r *VXTiptapEditorBuilder) {
 	b.tag.Attr(vs...)
 	return b
 }
+func (b *VXTiptapEditorBuilder) SetAttr(k string, v interface{}) {
+	b.tag.SetAttr(k, v)
+	return
+}
 
 func (b *VXTiptapEditorBuilder) Disabled(v bool) (r *VXTiptapEditorBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
