@@ -19,6 +19,11 @@ func VXCheckbox(children ...h.HTMLComponent) (r *VXCheckboxBuilder) {
 	return
 }
 
+func (b *VXCheckboxBuilder) Title(v string) (r *VXCheckboxBuilder) {
+	b.tag.Attr("title", v)
+	return b
+}
+
 func (b *VXCheckboxBuilder) Label(v string) (r *VXCheckboxBuilder) {
 	b.tag.Attr("label", v)
 	return b
@@ -179,11 +184,6 @@ func (b *VXCheckboxBuilder) FalseValue(v interface{}) (r *VXCheckboxBuilder) {
 	return b
 }
 
-func (b *VXCheckboxBuilder) Value(v interface{}) (r *VXCheckboxBuilder) {
-	b.tag.Attr(":value", h.JSONString(v))
-	return b
-}
-
 func (b *VXCheckboxBuilder) Color(v string) (r *VXCheckboxBuilder) {
 	b.tag.Attr("color", v)
 	return b
@@ -229,13 +229,13 @@ func (b *VXCheckboxBuilder) FalseLabel(v string) (r *VXCheckboxBuilder) {
 	return b
 }
 
-func (b *VXCheckboxBuilder) TrueColor(v string) (r *VXCheckboxBuilder) {
-	b.tag.Attr("true-color", v)
+func (b *VXCheckboxBuilder) TrueIconColor(v string) (r *VXCheckboxBuilder) {
+	b.tag.Attr("true-icon-color", v)
 	return b
 }
 
-func (b *VXCheckboxBuilder) FalseColor(v string) (r *VXCheckboxBuilder) {
-	b.tag.Attr("false-color", v)
+func (b *VXCheckboxBuilder) FalseIconColor(v string) (r *VXCheckboxBuilder) {
+	b.tag.Attr("false-icon-color", v)
 	return b
 }
 

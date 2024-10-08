@@ -1,21 +1,17 @@
 <template>
   <div class="vx-checkbox-wrap">
+    <VXLabel :tooltip="tips">{{ title }}</VXLabel>
     <v-checkbox
-      v-if="!readonly" 
-      :label="label"
       v-model="model"
+      class="ms-n2"
+      :label="labelDisplay"
       :true-icon="trueIcon"
       :false-icon="falseIcon"
+      :readonly="readonly"
+      :hide-details="hideDetails"
       v-bind="filteredAttrs"
-      class="ms-n2"
+      :class="{ checked: model, readonly }"
     />
-    <div v-if="readonly" class="d-flex flex-column ga-2 pb-4">
-      <VXLabel  :tooltip="tips">{{ label }}</VXLabel>
-      <div class="d-flex align-center ga-2">
-        <v-icon :icon="readonlyIcon" :color="readonlyColor"></v-icon>
-        <span class="v-label">{{ readonlyLabel }}</span>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -29,47 +25,66 @@ const model = defineModel<boolean | undefined>({ default: undefined })
 
 const props = withDefaults(
   defineProps<{
-    readonly?: boolean | undefined
-    tips?: string | undefined,
-    label?: string | undefined,
-    value?: boolean | undefined,
-    trueLabel?: string | undefined,
-    falseLabel?: string | undefined,
-    trueIcon?: string | undefined,
-    falseIcon?: string | undefined,
-    trueColor?: string | undefined,
-    falseColor?: string | undefined,
+    readonly?: boolean
+    tips?: string
+    label?: string
+    value?: boolean
+    trueLabel?: string
+    falseLabel?: string
+    trueIcon?: string
+    falseIcon?: string
+    trueIconColor?: string
+    falseIconColor?: string
+    title?: string
+    hideDetails?: boolean
   }>(),
   {
+    hideDetails: false,
+    title: '',
+    label: '',
     readonly: false,
-    trueLabel: "YES",
-    falseLabel: "NO",
-    trueColor: "primary",
-    falseColor: "grey-darken-1",
+    trueLabel: '',
+    falseLabel: '',
+    trueIconColor: '',
+    falseIconColor: ''
   }
 )
 
-const readonlyValue = computed(() => {
-  return model.value !== undefined ? model.value : props.value !== undefined ? props.value : false;
-});
+const labelDisplay = computed(() => {
+  const label = model.value ? props.trueLabel : props.falseLabel
+  return label || props.label
+})
 
-const readonlyColor = computed(() => {
-  return readonlyValue.value ? props.trueColor : props.falseColor
-});
+const isRGBorHexColor = (colorStr: string) => /rgb|#/.test(colorStr)
 
-const readonlyLabel = computed(() => {
-  return readonlyValue.value ? props.trueLabel : props.falseLabel
-});
+const vIconStyle = computed(() => {
+  const trueIconColor = isRGBorHexColor(props.trueIconColor)
+      ? props.trueIconColor
+      : `rgb(var(--v-theme-${props.trueIconColor}))`
 
-const readonlyIcon = computed(() => {
-  const icon = readonlyValue.value ? props.trueIcon : props.falseIcon
-  return icon ?? "mdi-circle-outline"
-});
+  const falseIconColor = isRGBorHexColor(props.falseIconColor)
+      ? props.falseIconColor
+      : `rgb(var(--v-theme-${props.falseIconColor}))`
 
+
+  if(model.value) {
+    return trueIconColor || 'grey-darken-1'
+  } else {
+    return falseIconColor || 'grey-darken-1'
+  }
+})
 </script>
 
 <style lang="scss" scoped>
-.vx-checkbox-wrap {
-  margin-bottom: 2px;
+.v-input {
+  &.readonly {
+    &:deep(.v-selection-control) {
+      pointer-events: none;
+    }
+  }
+
+  &:deep(.v-icon) {
+    color: v-bind(vIconStyle);
+  }
 }
 </style>
