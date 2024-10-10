@@ -53,8 +53,23 @@ func (b *VXFieldBuilder) Width(v int) (r *VXFieldBuilder) {
 	return b
 }
 
+func (b *VXFieldBuilder) PasswordVisibleToggle(v bool) (r *VXFieldBuilder) {
+	b.tag.Attr(":password-visible-toggle", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXFieldBuilder) PasswordVisibleDefault(v bool) (r *VXFieldBuilder) {
+	b.tag.Attr(":password-visible-default", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXFieldBuilder) Disabled(v bool) (r *VXFieldBuilder) {
 	b.tag.Attr(":disabled", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXFieldBuilder) Required(v bool) (r *VXFieldBuilder) {
+	b.tag.Attr(":required", fmt.Sprint(v))
 	return b
 }
 

@@ -203,9 +203,11 @@ const dialogVisible = ref(false)
 
 ## 弹窗尺寸
 
-- 默认尺寸是 `size: "default"`, 此时固定宽度，用作大多数场景的及时反馈
-- 大尺寸是 `size: "large"`, 此时最大宽度 665px，比较适合一些操作反馈类的弹窗
-- 除此之外，还可使用 `width` 和 `maxWidth`, `contentHeight` 自定义宽度和内容高度
+- 预设尺寸： 
+  - 默认尺寸是 `size: "default"`, 此时**固定宽度**，用作大多数场景的及时反馈
+  - 大尺寸是 `size: "large"`, 此时宽度靠内容撑开，最大宽度 665px，比较适合一些操作反馈类的弹窗
+  
+- 如果要自定义尺寸：还可使用 `width` 和 `maxWidth`, `contentHeight` 自定义宽度和内容高度
 
 :::demo
 

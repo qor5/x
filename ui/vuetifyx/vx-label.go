@@ -38,6 +38,11 @@ func (b *VXLabelBuilder) Tooltip(v interface{}) (r *VXLabelBuilder) {
 	return b
 }
 
+func (b *VXLabelBuilder) RequiredSymbol(v bool) (r *VXLabelBuilder) {
+	b.tag.Attr(":required-symbol", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXLabelBuilder) TooltipIconColor(v string) (r *VXLabelBuilder) {
 	b.tag.Attr("type", v)
 	return b

@@ -21,6 +21,19 @@
 
   <vx-select
     type="autocomplete"
+    multiple
+    required
+    :rules="[(value) => (value && value.length > 0) || 'At least select a Item']"
+    clearable
+    label="autocomplete Select + required rules"
+    :items="items"
+    item-title="name"
+    item-value="id"
+    placeholder="choose a item"
+  />
+
+  <vx-select
+    type="autocomplete"
     v-model="valueAutoComplete"
     multiple
     chips
@@ -43,6 +56,16 @@
   />
 
   <vx-select
+    label="Normal Select + required rule"
+    :items="items"
+    required
+    :rules="[(value) => !!value || 'At least select a Item']"
+    item-title="name"
+    item-value="id"
+    placeholder="choose a item"
+  />
+
+  <vx-select
     v-model="valueWithErrorMsg"
     label="Select with Error messages"
     error-messages="This is an error message explanation"
@@ -51,8 +74,6 @@
     item-value="id"
     placeholder="choose a item"
   />
-
-  <p>selected value: {{ value }}</p>
 </template>
 
 <script setup lang="ts">
@@ -249,7 +270,6 @@ const value = ref()
 ```
 
 :::
-
 
 ## vx-linkageselect-remote
 

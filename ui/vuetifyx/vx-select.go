@@ -58,6 +58,11 @@ func (b *VXSelectBuilder) HideDetails(v bool) (r *VXSelectBuilder) {
 	return b
 }
 
+func (b *VXSelectBuilder) Required(v bool) (r *VXSelectBuilder) {
+	b.tag.Attr(":required", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXSelectBuilder) Multiple(v bool) (r *VXSelectBuilder) {
 	b.tag.Attr(":multiple", fmt.Sprint(v))
 	return b
