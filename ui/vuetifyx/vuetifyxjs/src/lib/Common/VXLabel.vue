@@ -13,7 +13,7 @@
             class="mr-1"
             :class="{ isFolded: toggleStatus }"
           />
-          <label v-if="hasDefaultSlot" class="text-subtitle-2 text-high-emphasis">
+          <label v-if="hasDefaultSlot" class="text-subtitle-2 text-high-emphasis" :for="labelFor">
             <slot />
           </label>
         </span>
@@ -24,6 +24,9 @@
           <slot />
         </label>
       </template>
+
+      <!-- requiredSymbol -->
+       <span v-if="requiredSymbol" class="required-symbol ml-1 text-error">*</span>
 
       <v-tooltip v-if="tooltip">
         <pre class="tooltip-display">{{ tooltip }}</pre>
@@ -66,6 +69,10 @@ const props = defineProps({
   iconSize: {
     type: String,
     default: 'small'
+  },
+  requiredSymbol: {
+    type: Boolean,
+    default: false
   }
 })
 const { icon: _, ...propsWithoutIcon } = props
@@ -108,5 +115,9 @@ const onClickToggleLabel = () => {
   max-width: 50vw;
   white-space: pre-wrap;
   word-break: break-all;
+}
+
+.required-symbol {
+  line-height: 1;
 }
 </style>

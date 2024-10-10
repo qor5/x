@@ -1,11 +1,11 @@
 <template>
   <div class="vx-select-wrap">
-    <VXLabel :tooltip="tips" class="mb-2">{{ label }}</VXLabel>
+    <VXLabel :tooltip="tips" class="mb-2" :required-symbol="required">{{ label }}</VXLabel>
     <v-autocomplete
       v-if="type === 'autocomplete'"
       :closable-chips="closableChips"
       :hide-no-data="hideNoData"
-      :model-value="selectValue"
+      v-model="selectValue"
       :items="items"
       :item-title="itemTitle"
       :item-value="itemValue"
@@ -26,7 +26,7 @@
     <v-select
       v-else
       :closable-chips="closableChips"
-      :model-value="selectValue"
+      v-model="selectValue"
       :hide-no-data="hideNoData"
       :items="items"
       :item-title="itemTitle"
@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, computed, PropType } from 'vue'
+import { defineEmits, ref, watch, PropType } from 'vue'
 import VXLabel from '../Common/VXLabel.vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 const { filteredAttrs } = useFilteredAttrs()
@@ -72,11 +72,17 @@ const props = defineProps({
   chips: Boolean,
   closableChips: Boolean,
   clearable: Boolean,
-  tips: String
+  tips: String,
+  required: Boolean
 })
 
-const selectValue = computed(() => props.modelValue)
+const selectValue = ref(props.modelValue)
 const errorFiled = ref(props.errorMessages)
+
+watch(
+  () => props.modelValue,
+  (newVal) => (selectValue.value = newVal)
+)
 
 function onUpdateModelValue(value: any) {
   emit('update:modelValue', value)

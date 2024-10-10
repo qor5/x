@@ -91,7 +91,7 @@
     </v-col>
 
     <v-col cols="4">
-      <div class="mb-2">7. readonly custom color</div>
+      <div class="mb-2">7. readonly + true icon color</div>
 
       <vx-checkbox
         :model-value="true"
@@ -105,7 +105,7 @@
     </v-col>
 
     <v-col cols="4">
-      <div class="mb-2">8. readonly with false icon color</div>
+      <div class="mb-2">8. readonly + false icon color</div>
 
       <vx-checkbox
         :model-value="false"

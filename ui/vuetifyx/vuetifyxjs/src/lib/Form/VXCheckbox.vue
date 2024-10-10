@@ -4,6 +4,7 @@
     <v-checkbox
       v-model="model"
       class="ms-n2"
+      color="primary"
       :label="labelDisplay"
       :true-icon="trueIcon"
       :false-icon="falseIcon"
@@ -76,15 +77,23 @@ const vIconStyle = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+
 .v-input {
+
   &.readonly {
     &:deep(.v-selection-control) {
       pointer-events: none;
     }
   }
 
+  &:deep(.v-label) {
+    color: rgb(var(--v-theme-grey-darken-3))
+  }
+
   &:deep(.v-icon) {
     color: v-bind(vIconStyle);
   }
+
+
 }
 </style>

@@ -1,6 +1,31 @@
 # vx-field 输入框
 
-## Usage
+带样式预设的表单输入项
+
+## API
+
+### Props
+
+| Name          | Introduction                                                                    | Type                                                                                                                        | Default Value |
+| ------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| label         | 输入框标题                                                                      | `String`                                                                                                                    | -             |
+| tips          | 输入框标题 tooltip 提示                                                         | `String`                                                                                                                    | -             |
+| name          | 输入框 label 的 for 属性，一般用来定位到输入框的元素，需要配合 id 使用          | `String`                                                                                                                    | -             |
+| id            | 直接作用到输入框原生元素的 id 属， 可辅助label元素定位性                        | `String`                                                                                                                    | -             |
+| placeholder   | 占位提示                                                                        | `String`                                                                                                                    | -             |
+| type          | [输入框类型](./#输入框类型)                                                     | `String`                                                                                                                    | `text`        |
+| errorMessages | 下方常显的错误信息                                                              | `String`                                                                                                                    | `text`        |
+| disabled      | 是否禁用                                                                        | `Boolean`                                                                                                                   | `text`        |
+| readonly      | 是否只读                                                                        | `Boolean`                                                                                                                   | `text`        |
+| autofocus     | 光标自动聚焦到输入框                                                            | `Boolean`                                                                                                                   | `text`        |
+| required      | 输入框标题样式上是否显示必填标星，仍然需要配合rules属性才能做到必填提示，见示例 | `Boolean`                                                                                                                   | `text`        |
+| rules         | 输入框标题样式上是否显示必填标星，仍然需要配合rules属性才能做到必填提示         | [ValidationRule](https://github.com/vuetifyjs/vuetify/blob/master/packages/vuetify/src/composables/validation.ts#L16-L20)[] | `[]`          |
+
+## 输入框类型
+
+### text
+
+> 所有的 [v-text-field](https://vuetifyjs.com/en/api/v-text-field/) 原生 props 都可使用 v-bind:[props]="[value]" 实现或覆盖
 
 :::demo
 
@@ -8,28 +33,193 @@
 <template>
   <v-row>
     <v-col cols="6" sm="6">
-      <vx-field :model-value="dataNoBinding" label="input(autofocus)" autofocus/>
+      <vx-field v-model="dataWithBinding" label="input(autofocus)" autofocus />
+      <div class="text-caption mt-2">v-model binding value: {{ dataWithBinding }}</div>
     </v-col>
-    <v-col cols="6">
-      <vx-field type="textarea" v-model="dataTextArea" label="textarea" />
-    </v-col>
-  </v-row>
 
-  <v-row>
     <v-col cols="6" sm="6">
-      <vx-field v-model="dataWithTips" tips="this is tips" label="input with tooltip" />
+      <vx-field model-value="data with tips" tips="this is tips" label="input with tooltip" />
     </v-col>
-     <v-col cols="6" sm="6">
-      <vx-field  type="textarea" v-model="dataWithTips" tips="this is tips" label="textarea with tooltip" />
-    </v-col>
-  </v-row>
 
-    <v-row>
+    <v-col cols="6" sm="6">
+      <vx-field model-value="data with tips" name="abc" id="abc" label="click label and focus on input" />
+      <div class="text-caption">use attr (name + id) to achieve this</div>
+    </v-col>
+
     <v-col cols="6">
       <vx-field
         placeholder="enter any value"
-        readonly
-        label="input(readonly)"
+        required
+        :rules="[(value) => !!value || 'This input field is requried']"
+        label="input (required)"
+      />
+    </v-col>
+
+    <v-col cols="6">
+      <vx-field placeholder="enter any value" readonly label="input(readonly)" />
+    </v-col>
+
+    <v-col cols="6">
+      <vx-field
+        model-value="This is a description"
+        error-messages="This is an error message explanation"
+        placeholder="enter any value"
+        label="input with error messages"
+      />
+    </v-col>
+
+    <v-col cols="6">
+      <vx-field
+        error-messages="This is an error message explanation"
+        placeholder="enter any value"
+        disabled
+        label="input disabled"
+      />
+    </v-col>
+  </v-row>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+const dataWithBinding = ref('hello world')
+</script>
+
+<style scoped lang="css">
+* {
+  word-break: break-word;
+}
+</style>
+```
+
+:::
+
+### password
+
+#### Props
+
+| Name                   | Introduction         | Type      | Default Value |
+| ---------------------- | -------------------- | --------- | ------------- |
+| passwordVisibleToggle  | 是否开启密码可见按钮 | `Boolean` | `false`       |
+| passwordVisibleDefault | 密码是否默认可见钮   | `Boolean` | `false`       |
+
+#### 示例
+
+:::demo
+
+```vue
+<template>
+  <v-row>
+    <v-col cols="4" sm="4">
+      <vx-field type="password" :model-value="123456" label="Password" />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        required
+        placeholder="enter a password"
+        :rules="[(value) => !!value || 'please enter a password']"
+        label="Password"
+      />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        :model-value="123456"
+        password-visible-toggle
+        label="Password with visible toogle"
+      />
+    </v-col>
+
+     <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        :model-value="123456"
+        password-visible-toggle
+        tips="enter password 123456"
+        label="Password with title tip"
+      />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        :model-value="123456"
+        password-visible-toggle
+        password-visible-default
+        label="Password with visible default"
+      />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        :model-value="123456"
+        password-visible-toggle
+        clearable
+        label="Password clearable"
+      />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        placeholder="Please enter password"
+        disabled
+        label="Password disabled"
+      />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        placeholder="Please enter password"
+        error-messages="This is an error message explanation"
+        label="Password with error"
+      />
+    </v-col>
+  </v-row>
+</template>
+
+<style scoped lang="css">
+* {
+  word-break: break-word;
+}
+</style>
+```
+
+:::
+
+### textarea
+
+- 使用时需要指定 type 为 `textarea`
+
+:::demo
+
+```vue
+<template>
+  <v-row>
+    <v-col cols="6">
+      <vx-field type="textarea" v-model="dataTextArea" label="textarea" />
+    </v-col>
+
+    <v-col cols="6" sm="6">
+      <vx-field
+        type="textarea"
+        v-model="dataWithTips"
+        tips="this is tips"
+        label="textarea with tooltip"
+      />
+    </v-col>
+
+    <v-col cols="6">
+      <vx-field
+        type="textarea"
+        placeholder="enter any value"
+        required
+        :rules="[(value) => !!value || 'This textarea field is requried']"
+        label="input (required)"
       />
     </v-col>
 
@@ -42,36 +232,14 @@
         label="textarea(readonly)"
       />
     </v-col>
-  </v-row>
 
-  <v-row>
     <v-col cols="6">
-      <vx-field
-        v-model="dataTextErrorMessages"
-        error-messages="This is an error message explanation"
-        placeholder="enter any value"
-        label="input with error messages"
-      />
-    </v-col>
-
-     <v-col cols="6">
       <vx-field
         v-model="dataTextErrorMessages"
         type="textarea"
         error-messages="This is an error message explanation"
         placeholder="enter any value"
         label="textarea with error messages"
-      />
-    </v-col>
-  </v-row>
-
-    <v-row>
-    <v-col cols="6">
-      <vx-field
-        error-messages="This is an error message explanation"
-        placeholder="enter any value"
-        disabled
-        label="input disabled"
       />
     </v-col>
 
@@ -84,7 +252,7 @@
         label="textarea disabled"
       />
     </v-col>
-    </v-row>
+  </v-row>
 </template>
 
 <script setup>
@@ -106,57 +274,7 @@ const dataTextErrorMessages = ref('This is a description')
 
 :::
 
-
-## Type
-
-:::demo
-
-```vue
-<template>
-  <v-row>
-    <v-col cols="6" sm="6">
-      <vx-field :model-value="dataNoBinding" label="Input (use :model-value)" />
-      <div class="text-caption">Value Display:{{ dataNoBinding }}</div>
-    </v-col>
-    <v-col cols="6" sm="6">
-      <vx-field v-model="vModelBinding" label="Input(use v-model)" />
-      <div class="text-caption">Value Display:{{ vModelBinding }}</div>
-    </v-col>
-  </v-row>
-
-  <v-row>
-    <v-col cols="6" sm="6">
-      <vx-field type="password" :model-value="dataNoBinding" label="Password" />
-    </v-col>
-  </v-row>
-
-  <v-row>
-    <v-col cols="6">
-      <vx-field type="textarea" v-model="dataTextArea" label="Textarea" />
-    </v-col>
-  </v-row>
-</template>
-
-<script setup>
-import { ref } from 'vue'
-
-const dataNoBinding = ref('hello world')
-const vModelBinding = ref('hello world')
-const dataWithBinding = ref('hello world')
-const dataWithTips = ref('data with tips')
-const dataTextArea = ref('textarea data')
-const dataTextErrorMessages = ref('This is a description')
-</script>
-
-<style scoped lang="css">
-* {
-  word-break: break-word;
-}
-</style>
-```
-
-:::
-
+> 所有的 [v-textarea](https://vuetifyjs.com/en/api/v-text-field/) 原生 props 都可使用 v-bind:[props]="[value]" 实现或覆盖
 
 ## Slot
 
@@ -167,7 +285,13 @@ const dataTextErrorMessages = ref('This is a description')
   <v-row>
     <v-col cols="6" sm="6">
       <vx-label class="mb-2">search bar</vx-label>
-      <vx-field :model-value="dataNoBinding" Placeholder="Search" clearable @click:clear="dataNoBinding = ''" width="320">
+      <vx-field
+        :model-value="dataNoBinding"
+        Placeholder="Search"
+        clearable
+        @click:clear="dataNoBinding = ''"
+        width="320"
+      >
         <template #append-inner><v-icon icon="mdi-magnify" @click="onSearch" /></template>
       </vx-field>
     </v-col>
@@ -180,8 +304,7 @@ import { ref } from 'vue'
 const dataNoBinding = ref('hello world')
 
 function onSearch() {
-  alert("search content is" + dataNoBinding.value)
-
+  alert('search content is' + dataNoBinding.value)
 }
 </script>
 

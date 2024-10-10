@@ -1,94 +1,89 @@
 <template>
   <div class="vx-field-wrap">
-    <VXLabel v-if="label" :label-for="name" :tooltip="tips" class="mb-2">{{ label }}</VXLabel>
+    <VXLabel
+      v-if="label"
+      :label-for="name"
+      :tooltip="tips"
+      :required-symbol="required"
+      class="mb-2"
+      >{{ label }}</VXLabel
+    >
 
     <!-- text-area -->
     <template v-if="type === 'textarea'">
-      <v-textarea
-        ref="vInputRef"
-        :width="width"
-        :hideDetails="hideDetails"
-        :id="id"
-        :name="name"
-        :autofocus="autofocus"
-        :readonly="readonly"
-        :rows="2"
-        :max-rows="20"
-        auto-grow
-        variant="outlined"
-        density="compact"
-        v-model="fieldValue"
-        :error-messages="errorFiled"
-        :disabled="disabled"
-        :placeholder="placeholder"
-        v-bind="filteredAttrs"
-        @update:modelValue="onUpdateModelValue"
-      />
+      <v-textarea v-bind="combinedProps" :rows="2" :max-rows="20" auto-grow />
+    </template>
+
+    <!-- password -->
+    <template v-else-if="type === 'password'">
+      <v-text-field v-bind="combinedProps" class="password-field" :type="passwordFieldType">
+        <template #append-inner>
+          <slot v-if="hasAppendInnerSlot" name="append-inner" />
+          <v-icon
+            v-else-if="passwordVisibleToggle"
+            :icon="!passwordVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+            size="xsmall"
+            @click="passwordVisible = !passwordVisible"
+          />
+        </template>
+        <slot></slot>
+      </v-text-field>
     </template>
 
     <!-- v-text-file -->
     <template v-else>
-      <v-text-field
-        ref="vInputRef"
-        :width="width"
-        :hideDetails="hideDetails"
-        :id="id"
-        :name="name"
-        :autofocus="autofocus"
-        :readonly="readonly"
-        density="compact"
-        variant="outlined"
-        v-model="fieldValue"
-        :type="type"
-        :error-messages="errorFiled"
-        :disabled="disabled"
-        :placeholder="placeholder"
-        v-bind="filteredAttrs"
-        @update:modelValue="onUpdateModelValue"
-      >
-      <template #append-inner>
-        <slot name="append-inner" />
-      </template>
-      <slot></slot>
-    </v-text-field>
+      <v-text-field v-bind="combinedProps">
+        <template #append-inner>
+          <slot name="append-inner" />
+        </template>
+        <slot></slot>
+      </v-text-field>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineEmits, PropType, watch, ref, defineExpose } from 'vue'
+import { defineEmits, ref, defineExpose, computed, useSlots, PropType } from 'vue'
 import VXLabel from '../Common/VXLabel.vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
+import useBindingValue from '@/lib/composables/useBindingValue'
 import { forwardRefs } from '@/lib/composables/forwardRefs'
 const { filteredAttrs } = useFilteredAttrs()
 const vInputRef = ref()
 
+const slots = useSlots()
+const hasAppendInnerSlot = slots['append-inner'] !== undefined
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
-  modelValue: [String, Number],
+  modelValue: [String, Number] as PropType<string | string[]>,
   label: String,
   type: String,
-  errorMessages: [String, Array] as PropType<string | string[]>,
-  remoteValidation: Boolean,
-  disabled: Boolean,
-  placeholder: String,
   tips: String,
-  readonly: Boolean,
-  autofocus: Boolean,
-  hideDetails: Boolean,
+  id: String,
   name: String,
-  width: [String, Number],
-  id: String //id will passthrough set to input, thus click label will focus on input element
+  required: Boolean,
+  passwordVisibleToggle: [Boolean, undefined] as PropType<boolean | undefined>,
+  passwordVisibleDefault: Boolean
+})
+const passwordVisible = ref(props.passwordVisibleDefault)
+const { bindingValue, onUpdateModelValue } = useBindingValue(props, emit)
+
+const passwordFieldType = computed(() => {
+  if (props.passwordVisibleToggle === undefined) return 'password'
+
+  return passwordVisible.value ? 'text' : 'password'
 })
 
-const fieldValue = ref(props.modelValue)
-const errorFiled = ref(props.errorMessages)
-
-watch(()=> props.modelValue, newVal => fieldValue.value = newVal)
-
-function onUpdateModelValue(value: string | number | Record<string, any>) {
-  emit('update:modelValue', value)
-}
+const combinedProps = computed(() => ({
+  density: 'compact',
+  variant: 'outlined',
+  ref: 'vInputRef',
+  modelValue: bindingValue.value,
+  id: props.id,
+  name: props.name,
+  'onUpdate:modelValue': onUpdateModelValue,
+  ...filteredAttrs.value // passthrough the props that defined by vuetify
+}))
 
 defineExpose(forwardRefs({}, vInputRef))
 </script>
@@ -141,16 +136,17 @@ defineExpose(forwardRefs({}, vInputRef))
       align-items: flex-start;
     }
 
-    &:not(.v-input--error,.v-input--readonly):deep(.v-field__outline) {
+    &:not(.v-input--error, .v-input--readonly):deep(.v-field__outline) {
       color: rgb(var(--v-theme-grey-lighten-2));
       transition: color 0.3s ease;
     }
 
-    &:not(.v-input--error,.v-input--readonly):deep(.v-field:not(.v-field--focused)):hover .v-field__outline {
+    &:not(.v-input--error, .v-input--readonly):deep(.v-field:not(.v-field--focused)):hover
+      .v-field__outline {
       color: rgb(var(--v-theme-primary));
     }
 
-    &:not(.v-input--error,.v-input--readonly):deep(.v-field--focused) .v-field__outline {
+    &:not(.v-input--error, .v-input--readonly):deep(.v-field--focused) .v-field__outline {
       color: rgb(var(--v-theme-primary));
     }
 
@@ -164,6 +160,18 @@ defineExpose(forwardRefs({}, vInputRef))
         color: rgb(var(--v-theme-grey));
         opacity: 1;
       }
+    }
+  }
+
+  &:deep(.password-field) {
+    .v-field__clearable i {
+      font-size: 16px;
+      color: rgb(var(--v-theme-grey-darken-3));
+      --v-medium-emphasis-opacity: 1;
+    }
+    .v-field__append-inner i {
+      font-size: 16px;
+      color: rgb(var(--v-theme-grey-darken-3));
     }
   }
 }
