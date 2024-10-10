@@ -33,12 +33,17 @@
 <template>
   <v-row>
     <v-col cols="6" sm="6">
-      <vx-field v-model="dataWithBinding" name="abc" id="abc" label="input(autofocus)" autofocus />
+      <vx-field v-model="dataWithBinding" label="input(autofocus)" autofocus />
       <div class="text-caption mt-2">v-model binding value: {{ dataWithBinding }}</div>
     </v-col>
 
     <v-col cols="6" sm="6">
       <vx-field model-value="data with tips" tips="this is tips" label="input with tooltip" />
+    </v-col>
+
+    <v-col cols="6" sm="6">
+      <vx-field model-value="data with tips" name="abc" id="abc" label="click label and focus on input" />
+      <div class="text-caption">use attr (name + id) to achieve this</div>
     </v-col>
 
     <v-col cols="6">
