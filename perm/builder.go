@@ -14,6 +14,7 @@ import (
 	"github.com/jinzhu/inflection"
 	"github.com/ory/ladon"
 	"github.com/ory/ladon/manager/memory"
+	"github.com/samber/lo"
 	"github.com/sunfmin/reflectutils"
 	"gorm.io/gorm"
 )
@@ -86,6 +87,14 @@ func (b *Builder) Policies(ps ...*PolicyBuilder) (r *Builder) {
 
 func (b *Builder) createPolicy(p *PolicyBuilder) {
 	p.setIDIfEmpty()
+
+	// just ignore if duplicate
+	if lo.ContainsBy(b.policies, func(item *PolicyBuilder) bool {
+		return item.GetID() == p.GetID()
+	}) {
+		return
+	}
+
 	err := b.ladon.Manager.Create(context.TODO(), p.policy)
 	if err != nil {
 		panic(err)
