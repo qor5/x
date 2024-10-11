@@ -1,4 +1,4 @@
-# vx-label
+# vx-label 标签
 
 ## 基本用法
 

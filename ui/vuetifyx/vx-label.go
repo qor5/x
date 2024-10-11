@@ -29,7 +29,7 @@ func (b *VXLabelBuilder) Class(v string) (r *VXLabelBuilder) {
 }
 
 func (b *VXLabelBuilder) ToggleIconSize(v string) (r *VXLabelBuilder) {
-	b.tag.Attr("class", v)
+	b.tag.Attr("toggle-icon-size", v)
 	return b
 }
 
