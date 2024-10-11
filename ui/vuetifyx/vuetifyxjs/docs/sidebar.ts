@@ -48,6 +48,10 @@ export default {
         {
           text: 'Filter 筛选组件',
           link: '/Components/Filter/'
+        },
+        {
+          text: 'Avatar 头像',
+          link: '/components/VXAvatar/'
         }
       ]
     },

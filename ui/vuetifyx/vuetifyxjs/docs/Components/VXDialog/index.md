@@ -1,4 +1,4 @@
-# vx-dialog - 弹窗
+# vx-dialog 弹窗
 
 带样式预设的通用弹窗，即时反馈类的仅需配置较少参数即可使用，也支持复杂场景的控制
 
@@ -206,7 +206,7 @@ const dialogVisible = ref(false)
 - 预设尺寸： 
   - 默认尺寸是 `size: "default"`, 此时**固定宽度**，用作大多数场景的及时反馈
   - 大尺寸是 `size: "large"`, 此时宽度靠内容撑开，最大宽度 665px，比较适合一些操作反馈类的弹窗
-  
+
 - 如果要自定义尺寸：还可使用 `width` 和 `maxWidth`, `contentHeight` 自定义宽度和内容高度
 
 :::demo

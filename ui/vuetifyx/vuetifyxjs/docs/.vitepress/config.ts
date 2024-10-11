@@ -7,7 +7,7 @@ import Vuetify from 'vite-plugin-vuetify'
 
 const nav = [
   { text: '组件文档', link: '/Components/VXField/', target: '_self' },
-  // { text: 'playground', link: '/playground/' },
+  { text: '在线预览', link: 'https://demo.qor5.theplant-dev.com/', target: '_blank' },
   {
     text: 'Github',
     link: 'https://github.com/qor5/x/tree/master/ui/vuetifyx/vuetifyxjs',
