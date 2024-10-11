@@ -21,10 +21,10 @@ import { defineProps, PropType, computed, ref } from 'vue'
 
 const sizeMap = {
   'x-small': 16,
-  small: 20,
+  small: 32,
   default: 40,
   large: 64,
-  'x-large': 80
+  'x-large': 96
 }
 
 const breakPointShapeMap = new Map([
