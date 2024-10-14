@@ -107,30 +107,32 @@ import VueJsonPretty from 'vue-json-pretty'
 
 // Add the component to the correct directory in sidebar.ts
 function addComponentToSidebar(componentName: string, directory: string): void {
-  const sidebarContent = readSidebar();
+  const sidebarContent = readSidebar()
 
-  const linkPath = `/components/${componentName}/`; // Adjusting for flat file structure
-  const newItem = { text: componentName, link: linkPath };
+  const linkPath = `/Components/${componentName}/` // Adjusting for flat file structure
+  const newItem = { text: componentName, link: linkPath }
 
   // Find the correct directory in the sidebar
-  const targetCategory = sidebarContent.find((category: any) => category.text === directory);
+  const targetCategory = sidebarContent.find((category: any) => category.text === directory)
 
   if (targetCategory) {
     // Insert into the existing category's items
-    targetCategory.items.push(newItem);
+    targetCategory.items.push(newItem)
   } else {
     // Create a new category and insert the item
     sidebarContent.push({
       text: directory,
       items: [newItem]
-    });
+    })
   }
 
   // Update sidebar.ts
-  const updatedSidebar = `export default ${JSON.stringify({ '/': sidebarContent }, null, 2)};`;
-  writeSidebar(updatedSidebar);
+  const updatedSidebar = `export default ${JSON.stringify({ '/': sidebarContent }, null, 2)};`
+  writeSidebar(updatedSidebar)
 
-  console.log(`Component ${componentName} has been successfully registered in sidebar.ts at path ${linkPath}`);
+  console.log(
+    `Component ${componentName} has been successfully registered in sidebar.ts at path ${linkPath}`
+  )
 }
 
 // Try to open the file in VSCode

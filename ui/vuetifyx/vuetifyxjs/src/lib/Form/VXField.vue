@@ -163,16 +163,17 @@ defineExpose(forwardRefs({}, vInputRef))
     }
   }
 
-  &:deep(.password-field) {
-    .v-field__clearable i {
+  &:deep(.v-field__clearable) {
+    i {
       font-size: 16px;
       color: rgb(var(--v-theme-grey-darken-3));
       --v-medium-emphasis-opacity: 1;
     }
-    .v-field__append-inner i {
+  }
+
+  &:deep(.v-field__append-inner) i {
       font-size: 16px;
       color: rgb(var(--v-theme-grey-darken-3));
     }
-  }
 }
 </style>
