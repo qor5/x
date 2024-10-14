@@ -11,12 +11,17 @@
 
     <!-- text-area -->
     <template v-if="type === 'textarea'">
-      <v-textarea v-bind="combinedProps" :rows="2" :max-rows="20" auto-grow />
+      <v-textarea ref="vInputRef" v-bind="combinedProps" :rows="2" :max-rows="20" auto-grow />
     </template>
 
     <!-- password -->
     <template v-else-if="type === 'password'">
-      <v-text-field v-bind="combinedProps" class="password-field" :type="passwordFieldType">
+      <v-text-field
+        ref="vInputRef"
+        v-bind="combinedProps"
+        class="password-field"
+        :type="passwordFieldType"
+      >
         <template #append-inner>
           <slot v-if="hasAppendInnerSlot" name="append-inner" />
           <v-icon
@@ -32,7 +37,7 @@
 
     <!-- v-text-file -->
     <template v-else>
-      <v-text-field v-bind="combinedProps">
+      <v-text-field ref="vInputRef" v-bind="combinedProps">
         <template #append-inner>
           <slot name="append-inner" />
         </template>
@@ -77,7 +82,6 @@ const passwordFieldType = computed(() => {
 const combinedProps = computed(() => ({
   density: 'compact',
   variant: 'outlined',
-  ref: 'vInputRef',
   modelValue: bindingValue.value,
   id: props.id,
   name: props.name,
@@ -172,8 +176,8 @@ defineExpose(forwardRefs({}, vInputRef))
   }
 
   &:deep(.v-field__append-inner) i {
-      font-size: 16px;
-      color: rgb(var(--v-theme-grey-darken-3));
-    }
+    font-size: 16px;
+    color: rgb(var(--v-theme-grey-darken-3));
+  }
 }
 </style>
