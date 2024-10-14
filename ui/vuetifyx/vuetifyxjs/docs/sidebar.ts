@@ -51,7 +51,7 @@ export default {
         },
         {
           text: 'Avatar 头像',
-          link: '/components/VXAvatar/'
+          link: '/Components/VXAvatar/'
         }
       ]
     },
