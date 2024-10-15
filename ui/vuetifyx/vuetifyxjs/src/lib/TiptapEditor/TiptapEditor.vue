@@ -2,57 +2,74 @@
   <div class="rounded tiptap-wrapper">
     <!-- <VuetifyViewer v-if="readonly" v-bind="processedAttrs" :value="model">
     </VuetifyViewer> -->
-    <VuetifyTiptap v-bind="processedAttrs" v-model="model">
+    <VuetifyTiptap ref="tiptapRef" v-bind="processedAttrs" v-model="model">
       <template #bottom>
         <div style="display: none"></div>
       </template>
     </VuetifyTiptap>
   </div>
 </template>
-
 <script setup lang="ts">
+import { computed, defineExpose, provide, ref, useAttrs, watchEffect } from 'vue'
 import { useLocale } from 'vuetify'
-import { locale } from 'vuetify-pro-tiptap'
+import {
+  BaseKit,
+  Blockquote,
+  Bold,
+  BulletList,
+  Clear,
+  Code,
+  CodeBlock,
+  Color,
+  FontFamily,
+  FontSize,
+  Fullscreen,
+  Heading,
+  Highlight,
+  History,
+  HorizontalRule,
+  Image,
+  Indent,
+  Italic,
+  Link,
+  locale,
+  OrderedList,
+  Strike,
+  SubAndSuperScript,
+  Table,
+  TaskList,
+  TextAlign,
+  Underline,
+  useContext,
+  Video,
+  VuetifyTiptap
+} from 'vuetify-pro-tiptap'
+import { Extension } from '@tiptap/core'
+import ImageGlue from '@/lib/TiptapEditor/Extensions/ImageGlue.vue'
+import Callback from '@/lib/TiptapEditor/Extensions/CallbackActionButton'
 // i18n
 const { current: currentLocale } = useLocale()
 watchEffect(() => {
   locale.setLang(currentLocale.value)
 })
-
-import { provide, computed, useAttrs, watchEffect } from 'vue'
-import { Extension } from '@tiptap/core'
-import { VuetifyTiptap, useContext } from 'vuetify-pro-tiptap'
-import {
-  BaseKit,
-  Bold,
-  Italic,
-  Underline,
-  Strike,
-  Color,
-  Highlight,
-  Heading,
-  TextAlign,
-  FontFamily,
-  FontSize,
-  SubAndSuperScript,
-  BulletList,
-  OrderedList,
-  TaskList,
-  Indent,
-  Link,
-  Image,
-  Video,
-  Table,
-  Blockquote,
-  HorizontalRule,
-  Code,
-  CodeBlock,
-  Clear,
-  Fullscreen,
-  History
-} from 'vuetify-pro-tiptap'
-import ImageGlue from '@/lib/TiptapEditor/Extensions/ImageGlue.vue'
-import Callback from '@/lib/TiptapEditor/Extensions/CallbackActionButton'
+const tiptapRef = ref()
+defineExpose({
+  focus() {
+    const editorInstance = tiptapRef.value?.editor
+    if (editorInstance) {
+      editorInstance.commands.focus()
+    }
+  },
+  setSelectionRange(from: number, to: number) {
+    const editorInstance = tiptapRef.value?.editor
+    if (editorInstance) {
+      editorInstance.commands.focus(from)
+    }
+  },
+  editor: computed(() => {
+    return tiptapRef.value?.editor
+  })
+})
 const extensionMap = {
   BaseKit,
   Bold,
