@@ -60,15 +60,14 @@ const isRGBorHexColor = (colorStr: string) => /rgb|#/.test(colorStr)
 
 const vIconStyle = computed(() => {
   const trueIconColor = isRGBorHexColor(props.trueIconColor)
-      ? props.trueIconColor
-      : `rgb(var(--v-theme-${props.trueIconColor}))`
+    ? props.trueIconColor
+    : `rgb(var(--v-theme-${props.trueIconColor}))`
 
   const falseIconColor = isRGBorHexColor(props.falseIconColor)
-      ? props.falseIconColor
-      : `rgb(var(--v-theme-${props.falseIconColor}))`
+    ? props.falseIconColor
+    : `rgb(var(--v-theme-${props.falseIconColor}))`
 
-
-  if(model.value) {
+  if (model.value) {
     return trueIconColor || 'grey-darken-1'
   } else {
     return falseIconColor || 'grey-darken-1'
@@ -77,9 +76,7 @@ const vIconStyle = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-
 .v-input {
-
   &.readonly {
     &:deep(.v-selection-control) {
       pointer-events: none;
@@ -87,13 +84,11 @@ const vIconStyle = computed(() => {
   }
 
   &:deep(.v-label) {
-    color: rgb(var(--v-theme-grey-darken-3))
+    color: rgb(var(--v-theme-grey-darken-3));
   }
 
   &:deep(.v-icon) {
     color: v-bind(vIconStyle);
   }
-
-
 }
 </style>

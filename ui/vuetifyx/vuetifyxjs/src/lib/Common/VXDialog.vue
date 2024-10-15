@@ -157,7 +157,7 @@ const contentWidth = computed(() => {
 
   if (props.size === 'default' && props.width === '') {
     contentWidthStyle = 'width:461px'
-  } else if(+props.width > 0) {
+  } else if (+props.width > 0) {
     contentWidthStyle = `width:${props.width}px`
   }
 
@@ -191,13 +191,12 @@ const prependIcon = computed(() => {
   return vCardTitleIconMap[props.type]
 })
 
-scope.run(()=> {
+scope.run(() => {
   onClickOutside(dialogMain, (event) => {
     // console.log('outside',event)
     emit('click:outside', event)
   })
 })
-
 
 function onUpdateModelValue(value: any) {
   emit('update:modelValue', value)
