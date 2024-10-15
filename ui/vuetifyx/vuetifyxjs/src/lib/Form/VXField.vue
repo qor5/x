@@ -26,7 +26,7 @@
           <slot v-if="hasAppendInnerSlot" name="append-inner" />
           <v-icon
             v-else-if="passwordVisibleToggle"
-            :icon="!passwordVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+            :icon="!passwordVisible ? 'mdi-eye-off' : 'mdi-eye'"
             size="xsmall"
             @click="passwordVisible = !passwordVisible"
           />
