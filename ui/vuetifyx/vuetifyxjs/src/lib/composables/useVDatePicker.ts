@@ -20,9 +20,9 @@ export function useVDatePickerTimeChange(dateOfPicker: Ref) {
     displayedMonth.value = month
   }
 
-  function onYearOrMonthChange(value: number, type: 'year' | 'month' | 'modelValue') {
+  function onYearOrMonthChange(value: number | unknown, type: 'year' | 'month' | 'modelValue') {
     if (type === 'modelValue') {
-      console.log('modelValue', value)
+      // console.log('modelValue', value)
       return
     }
     dateOfPicker.value = null

@@ -23,7 +23,7 @@
 
 ## 输入框类型
 
-### text
+### Text
 
 > 所有的 [v-text-field](https://vuetifyjs.com/en/api/v-text-field/) 原生 props 都可使用 v-bind:[props]="[value]" 实现或覆盖
 
@@ -42,7 +42,12 @@
     </v-col>
 
     <v-col cols="6" sm="6">
-      <vx-field model-value="data with tips" name="abc" id="abc" label="click label and focus on input" />
+      <vx-field
+        model-value="data with tips"
+        name="abc"
+        id="abc"
+        label="click label and focus on input"
+      />
       <div class="text-caption">use attr (name + id) to achieve this</div>
     </v-col>
 
@@ -93,105 +98,7 @@ const dataWithBinding = ref('hello world')
 
 :::
 
-### password
-
-#### Props
-
-| Name                   | Introduction         | Type      | Default Value |
-| ---------------------- | -------------------- | --------- | ------------- |
-| passwordVisibleToggle  | 是否开启密码可见按钮 | `Boolean` | `false`       |
-| passwordVisibleDefault | 密码是否默认可见钮   | `Boolean` | `false`       |
-
-#### 示例
-
-:::demo
-
-```vue
-<template>
-  <v-row>
-    <v-col cols="4" sm="4">
-      <vx-field type="password" :model-value="123456" label="Password" />
-    </v-col>
-
-    <v-col cols="4" sm="4">
-      <vx-field
-        type="password"
-        required
-        placeholder="enter a password"
-        :rules="[(value) => !!value || 'please enter a password']"
-        label="Password"
-      />
-    </v-col>
-
-    <v-col cols="4" sm="4">
-      <vx-field
-        type="password"
-        :model-value="123456"
-        password-visible-toggle
-        label="Password with visible toogle"
-      />
-    </v-col>
-
-     <v-col cols="4" sm="4">
-      <vx-field
-        type="password"
-        :model-value="123456"
-        password-visible-toggle
-        tips="enter password 123456"
-        label="Password with title tip"
-      />
-    </v-col>
-
-    <v-col cols="4" sm="4">
-      <vx-field
-        type="password"
-        :model-value="123456"
-        password-visible-toggle
-        password-visible-default
-        label="Password with visible default"
-      />
-    </v-col>
-
-    <v-col cols="4" sm="4">
-      <vx-field
-        type="password"
-        :model-value="123456"
-        password-visible-toggle
-        clearable
-        label="Password clearable"
-      />
-    </v-col>
-
-    <v-col cols="4" sm="4">
-      <vx-field
-        type="password"
-        placeholder="Please enter password"
-        disabled
-        label="Password disabled"
-      />
-    </v-col>
-
-    <v-col cols="4" sm="4">
-      <vx-field
-        type="password"
-        placeholder="Please enter password"
-        error-messages="This is an error message explanation"
-        label="Password with error"
-      />
-    </v-col>
-  </v-row>
-</template>
-
-<style scoped lang="css">
-* {
-  word-break: break-word;
-}
-</style>
-```
-
-:::
-
-### textarea
+### Textarea
 
 - 使用时需要指定 type 为 `textarea`
 
@@ -275,6 +182,135 @@ const dataTextErrorMessages = ref('This is a description')
 :::
 
 > 所有的 [v-textarea](https://vuetifyjs.com/en/api/v-text-field/) 原生 props 都可使用 v-bind:[props]="[value]" 实现或覆盖
+
+### Password
+
+#### Props
+
+| Name                   | Introduction         | Type      | Default Value |
+| ---------------------- | -------------------- | --------- | ------------- |
+| passwordVisibleToggle  | 是否开启密码可见按钮 | `Boolean` | `false`       |
+| passwordVisibleDefault | 密码是否默认可见钮   | `Boolean` | `false`       |
+
+#### 示例
+
+:::demo
+
+```vue
+<template>
+  <v-row>
+    <v-col cols="4" sm="4">
+      <vx-field type="password" :model-value="123456" label="Password" />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        required
+        placeholder="enter a password"
+        :rules="[(value) => !!value || 'please enter a password']"
+        label="Password"
+      />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        :model-value="123456"
+        password-visible-toggle
+        label="Password with visible toogle"
+      />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        :model-value="123456"
+        password-visible-toggle
+        tips="enter password 123456"
+        label="Password with title tip"
+      />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        :model-value="123456"
+        password-visible-toggle
+        password-visible-default
+        label="Password with visible default"
+      />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        :model-value="123456"
+        password-visible-toggle
+        clearable
+        label="Password clearable"
+      />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        placeholder="Please enter password"
+        disabled
+        label="Password disabled"
+      />
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        placeholder="Please enter password"
+        error-messages="This is an error message explanation"
+        label="Password with error"
+      />
+    </v-col>
+  </v-row>
+</template>
+
+<style scoped lang="css">
+* {
+  word-break: break-word;
+}
+</style>
+```
+
+:::
+
+### Number
+
+#### Props
+
+| Name | Introduction | Type | Default Value |
+| ---- | ------------ | ---- | ------------- |
+
+#### 示例
+
+:::demo
+
+```vue
+<template>
+  <v-row>
+    <v-col cols="4" sm="4">
+      <vx-field type="number" :model-value="123456" label="Password" />
+    </v-col>
+  </v-row>
+</template>
+
+<style scoped lang="css">
+* {
+  word-break: break-word;
+}
+</style>
+```
+
+:::
+
+> 所有的 [v-number-input](https://vuetifyjs.com/en/api/v-number-input/) 原生 props 都可使用 v-bind:[props]="[value]" 实现或覆盖
 
 ## Slot
 

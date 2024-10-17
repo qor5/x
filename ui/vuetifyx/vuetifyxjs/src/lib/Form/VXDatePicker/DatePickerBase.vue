@@ -1,0 +1,158 @@
+<template>
+  <div class="v-picker-ui-wrap" :class="{ 'pb-5': useTimeSelect }">
+    <v-date-picker
+      class="v-picker-wrap"
+      hide-header
+      flat
+      :show-adjacent-months="false"
+      v-model="dateOfPicker"
+      @update:modelValue="onModelValueChange"
+    />
+    <time-select
+      v-if="useTimeSelect"
+      class="time-select-wrap"
+      v-model="timeStr"
+      @update:modelValue="onUpdateTimeSelect"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import dayjs from 'dayjs'
+import { ref, defineEmits, defineProps, PropType, computed, watch } from 'vue'
+import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
+import TimeSelect from './TimeSelect.vue'
+
+const emit = defineEmits(['update:modelValue'])
+const props = defineProps({
+  modelValue: [String, Number] as PropType<string | number>,
+  useTimeSelect: Boolean
+})
+const timeStr = ref()
+const dateOfPicker = ref()
+
+const dateStr = computed(() => dayjs(props.modelValue).format('YYYY-MM-DD'))
+
+watch(
+  () => props.modelValue,
+  (value) => {
+    timeStr.value = value ? dayjs(value).format('HH:mm:ss') : '00:00:00'
+
+    if (value) {
+      const date = new Date(value)
+      if (!isNaN(date.getTime())) {
+        dateOfPicker.value = date
+      }
+    }
+  },
+  { immediate: true }
+)
+
+const { filteredAttrs } = useFilteredAttrs()
+
+function onModelValueChange(time: Date) {
+  const newDate = dayjs(time).format('YYYY-MM-DD')
+  let newValue
+
+  if (timeStr.value) {
+    newValue = dayjs(`${newDate} ${timeStr.value}`).valueOf()
+  } else {
+    newValue = new Date(time).getTime()
+  }
+
+  emit('update:modelValue', newValue)
+}
+
+function onUpdateTimeSelect(time: string) {
+  console.log('timeselect', time)
+
+  if (props.modelValue) {
+    emit('update:modelValue', dayjs(`${dateStr.value} ${timeStr.value}`).valueOf())
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.v-picker-wrap {
+  padding: 8px 0;
+  width: 292px;
+
+  &:deep(.v-date-picker-month__days) {
+    flex: initial;
+    column-gap: 2px;
+
+    .v-btn.v-btn--variant-outlined {
+      color: rgb(var(--v-theme-primary));
+    }
+
+    .v-date-picker-month__day {
+      width: 36px;
+      height: 36px;
+    }
+
+    .v-btn.v-date-picker-month__day-btn {
+      --v-btn-size: 14px;
+      --v-btn-height: 20px;
+    }
+
+    .v-date-picker-month__weekday {
+      color: rgb(var(--v-theme-grey-darken-1));
+    }
+
+    .v-date-picker-month__day--selected {
+      .v-btn {
+        background-color: rgb(var(--v-theme-primary));
+      }
+    }
+  }
+
+  &:deep(.v-date-picker-month__day--week-end) ~ .v-date-picker-month__day--hide-adjacent {
+    display: none;
+  }
+
+  &:deep(.v-date-picker-controls) {
+    display: block;
+    position: relative;
+    padding-inline-start: 15px;
+    padding-inline-end: 15px;
+    padding-bottom: 20px;
+
+    .v-date-picker-controls__month-btn {
+      position: absolute;
+      left: 50%;
+      margin-left: -10px;
+      transform: translateX(-50%);
+      top: 2px;
+      .v-btn__content {
+        color: rgb(var(--v-theme-on-surface));
+      }
+    }
+
+    .v-date-picker-controls__mode-btn {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-left: 65.5px;
+      top: 2px;
+    }
+
+    .v-date-picker-controls__month {
+      display: flex;
+      width: 100%;
+
+      .v-btn {
+        --v-btn-height: 20px;
+      }
+
+      & > :nth-child(2) {
+        margin-left: auto;
+      }
+    }
+  }
+}
+
+.time-select-wrap {
+  justify-content: center;
+  width: 292px;
+}
+</style>

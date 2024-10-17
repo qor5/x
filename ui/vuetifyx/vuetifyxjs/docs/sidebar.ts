@@ -30,7 +30,7 @@ export default {
         },
         {
           text: 'DatePicker 时间选择器',
-          link: '/Components/DatePicker/'
+          link: '/Components/VXDatePicker/'
         }
       ]
     },

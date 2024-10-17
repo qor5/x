@@ -1,5 +1,5 @@
 <template>
-  <div class="vx-field-wrap">
+  <div class="vx-datepicker-wrap">
     <VXLabel
       v-if="label"
       :label-for="name"
@@ -9,64 +9,21 @@
       >{{ label }}</VXLabel
     >
 
-    <!-- text-area -->
-    <template v-if="type === 'textarea'">
-      <v-textarea ref="vInputRef" v-bind="combinedProps" :rows="2" :max-rows="20" auto-grow />
-    </template>
-
-    <!-- password -->
-    <template v-else-if="type === 'password'">
-      <v-text-field
-        ref="vInputRef"
-        v-bind="combinedProps"
-        class="password-field"
-        :type="passwordFieldType"
-      >
-        <template #append-inner>
-          <slot v-if="hasAppendInnerSlot" name="append-inner" />
-          <v-icon
-            v-else-if="passwordVisibleToggle"
-            :icon="!passwordVisible ? 'mdi-eye-off' : 'mdi-eye'"
-            size="xsmall"
-            @click="passwordVisible = !passwordVisible"
-          />
-        </template>
-        <slot></slot>
-      </v-text-field>
-    </template>
-
-    <!-- number -->
-    <template v-else-if="type === 'number'">
-      <v-number-input class="number-field" control-variant="stacked" inset v-bind="combinedProps">
-        <template #prepend-inner="{ isActive, isFocused, controlRef, focus, blur }">
-          <slot name="prepend-inner" :props="{ isActive, isFocused, controlRef, focus, blur }" />
-        </template>
-      </v-number-input>
-    </template>
-
-    <!-- v-text-file -->
-    <template v-else>
-      <v-text-field ref="vInputRef" v-bind="combinedProps">
-        <template #append-inner>
-          <slot name="append-inner" />
-        </template>
-        <slot></slot>
-      </v-text-field>
-    </template>
+    <v-text-field v-bind="combinedProps">
+      <template #append-inner>
+        <v-icon icon="mdi-calendar-range-outline"></v-icon>
+      </template>
+    </v-text-field>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, defineExpose, computed, useSlots, PropType } from 'vue'
-import VXLabel from '../Common/VXLabel.vue'
+import { defineEmits, ref, computed, useSlots, PropType } from 'vue'
+import VXLabel from '@/lib/Common/VXLabel.vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import useBindingValue from '@/lib/composables/useBindingValue'
-import { forwardRefs } from '@/lib/composables/forwardRefs'
 const { filteredAttrs } = useFilteredAttrs()
-const vInputRef = ref()
 
-const slots = useSlots()
-const hasAppendInnerSlot = slots['append-inner'] !== undefined
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
   modelValue: [String, Number] as PropType<string | string[]>,
@@ -79,14 +36,7 @@ const props = defineProps({
   passwordVisibleToggle: [Boolean, undefined] as PropType<boolean | undefined>,
   passwordVisibleDefault: Boolean
 })
-const passwordVisible = ref(props.passwordVisibleDefault)
 const { bindingValue, onUpdateModelValue } = useBindingValue(props, emit)
-
-const passwordFieldType = computed(() => {
-  if (props.passwordVisibleToggle === undefined) return 'password'
-
-  return passwordVisible.value ? 'text' : 'password'
-})
 
 const combinedProps = computed(() => ({
   density: 'compact',
@@ -97,12 +47,10 @@ const combinedProps = computed(() => ({
   'onUpdate:modelValue': onUpdateModelValue,
   ...filteredAttrs.value // passthrough the props that defined by vuetify
 }))
-
-defineExpose(forwardRefs({}, vInputRef))
 </script>
 
 <style lang="scss" scoped>
-.vx-field-wrap {
+.vx-datepicker-wrap {
   margin-bottom: 2px;
 
   .v-input {
@@ -187,22 +135,6 @@ defineExpose(forwardRefs({}, vInputRef))
   &:deep(.v-field__append-inner) i {
     font-size: 16px;
     color: rgb(var(--v-theme-grey-darken-3));
-  }
-
-  .number-field {
-    &:deep(.v-number-input__control) {
-      .v-btn {
-        --v-btn-size: 13.75px;
-        --v-btn-height: 12px;
-        font-size: var(--v-btn-size);
-      }
-      .v-btn--variant-elevated {
-        box-shadow: none;
-      }
-      .v-divider {
-        display: none;
-      }
-    }
   }
 }
 </style>
