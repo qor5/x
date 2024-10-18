@@ -301,6 +301,8 @@ const dataTextErrorMessages = ref('This is a description')
   </v-row>
 </template>
 
+<script lang="ts" setup></script>
+
 <style scoped lang="css">
 * {
   word-break: break-word;

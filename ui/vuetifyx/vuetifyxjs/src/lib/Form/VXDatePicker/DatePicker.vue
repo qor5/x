@@ -79,7 +79,7 @@ const convertValueForInputAndDatePicker = (
     datePickerValue.value = value ? dayjs(value).valueOf() : ''
   }
 
-  console.log('datePickerValue', dayjs(datePickerValue.value).format('YYYY-MM-DD HH:mm:ss'))
+  // console.log('datePickerValue', dayjs(datePickerValue.value).format('YYYY-MM-DD HH:mm:ss'))
 
   if (shouldEmit) {
     emit('update:modelValue', emitModelValueFormat(datePickerValue.value))

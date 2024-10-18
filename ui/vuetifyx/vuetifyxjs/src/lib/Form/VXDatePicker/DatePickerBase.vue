@@ -6,13 +6,15 @@
       flat
       :show-adjacent-months="false"
       v-model="dateOfPicker"
-      @update:modelValue="onModelValueChange"
+      @update:year="onYearOrMonthChange($event, 'year')"
+      @update:month="onYearOrMonthChange($event, 'month')"
+      @update:modelValue="onYearOrMonthChange($event, 'date')"
     />
     <time-select
       v-if="useTimeSelect"
       class="time-select-wrap"
       v-model="timeStr"
-      @update:modelValue="onUpdateTimeSelect"
+      @update:modelValue="onTimeSelected"
     />
   </div>
 </template>
@@ -20,7 +22,6 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import { ref, defineEmits, defineProps, PropType, computed, watch } from 'vue'
-import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import TimeSelect from './TimeSelect.vue'
 
 const emit = defineEmits(['update:modelValue'])
@@ -48,26 +49,41 @@ watch(
   { immediate: true }
 )
 
-const { filteredAttrs } = useFilteredAttrs()
-
-function onModelValueChange(time: Date) {
-  const newDate = dayjs(time).format('YYYY-MM-DD')
-  let newValue
-
-  if (timeStr.value) {
-    newValue = dayjs(`${newDate} ${timeStr.value}`).valueOf()
-  } else {
-    newValue = new Date(time).getTime()
-  }
-
-  emit('update:modelValue', newValue)
+function emitValue(date: string, time: string) {
+  return dayjs(`${date} ${time}`).valueOf()
 }
 
-function onUpdateTimeSelect(time: string) {
-  console.log('timeselect', time)
+function onYearOrMonthChange(value: number, type: 'year' | 'month' | 'date') {
+  let newDate = ''
+  let newTimeStr = timeStr.value
+  let emitValueImmediate = false
 
+  if (type === 'year') {
+    newDate = dateStr.value
+      .split('-')
+      .map((item: string, index: number) => (index === 0 ? value : item))
+      .join('-')
+
+    emitValueImmediate = !!props.modelValue
+  } else if (type === 'month') {
+    newDate = dateStr.value
+      .split('-')
+      .map((item: string, index: number) => (index === 1 ? value + 1 : item))
+      .join('-')
+    emitValueImmediate = !!props.modelValue
+  } else {
+    newDate = dayjs(value).format('YYYY-MM-DD')
+    emitValueImmediate = true
+  }
+
+  // only emitValue when date is selected
+  emitValueImmediate && emit('update:modelValue', emitValue(newDate, newTimeStr))
+}
+
+function onTimeSelected(time: string) {
+  // only emitValue when date is selected
   if (props.modelValue) {
-    emit('update:modelValue', dayjs(`${dateStr.value} ${timeStr.value}`).valueOf())
+    emit('update:modelValue', emitValue(dateStr.value, timeStr.value))
   }
 }
 </script>

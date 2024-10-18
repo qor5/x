@@ -37,11 +37,20 @@
 
     <!-- number -->
     <template v-else-if="type === 'number'">
-      <v-number-input class="number-field" control-variant="stacked" inset v-bind="combinedProps">
+      <v-number-input
+        ref="vInputRef"
+        class="number-field"
+        control-variant="stacked"
+        v-model:focused="vInputFocus"
+        inset
+        v-bind="combinedProps"
+      >
         <template #prepend-inner="{ isActive, isFocused, controlRef, focus, blur }">
           <slot name="prepend-inner" :props="{ isActive, isFocused, controlRef, focus, blur }" />
         </template>
       </v-number-input>
+      <!-- slot for v-menu and so on -->
+      <slot></slot>
     </template>
 
     <!-- v-text-file -->
@@ -64,7 +73,7 @@ import useBindingValue from '@/lib/composables/useBindingValue'
 import { forwardRefs } from '@/lib/composables/forwardRefs'
 const { filteredAttrs } = useFilteredAttrs()
 const vInputRef = ref()
-
+const vInputFocus = ref(false)
 const slots = useSlots()
 const hasAppendInnerSlot = slots['append-inner'] !== undefined
 const emit = defineEmits(['update:modelValue'])
@@ -98,7 +107,16 @@ const combinedProps = computed(() => ({
   ...filteredAttrs.value // passthrough the props that defined by vuetify
 }))
 
-defineExpose(forwardRefs({}, vInputRef))
+defineExpose(
+  forwardRefs(
+    {
+      blur() {
+        vInputFocus.value = false
+      }
+    },
+    vInputRef
+  )
+)
 </script>
 
 <style lang="scss" scoped>
