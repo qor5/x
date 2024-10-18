@@ -59,6 +59,11 @@
         <template #append-inner>
           <slot name="append-inner" />
         </template>
+
+        <template #prepend-inner>
+          <slot name="prepend-inner" />
+        </template>
+
         <slot></slot>
       </v-text-field>
     </template>

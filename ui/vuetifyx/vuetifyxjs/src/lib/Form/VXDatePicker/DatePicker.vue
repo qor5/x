@@ -6,20 +6,25 @@
       :label="label"
       ref="inputRef"
       @blur="onInputBlur"
+      @keydown.enter="onInputBlur(inputValue, true)"
+      v-bind="filteredAttrs"
+      :style="minWidth"
     >
-      <!-- @keydown.enter="onInputKeyEnter($refs.inputRef)" -->
       <!-- calendar icon -->
-      <template #append-inner><v-icon icon="mdi-calendar-range-outline" /></template>
+      <template v-if="!hideAppendInner" #append-inner
+        ><v-icon icon="mdi-calendar-range-outline"
+      /></template>
 
       <!-- drop down -->
       <v-overlay
+        v-model="showMenu"
         open-on-click
         :close-on-content-click="false"
         activator="parent"
         :scrim="false"
         :open-delay="0"
         :close-delay="0"
-        max-width="300"
+        min-width="292"
         location-strategy="connected"
       >
         <date-picker-base
@@ -37,7 +42,7 @@
 import { defineEmits, ref, computed, PropType, watch } from 'vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import datePickerBase from './DatePickerBase.vue'
-// const { filteredAttrs } = useFilteredAttrs()
+const { filteredAttrs } = useFilteredAttrs()
 import dayjs from 'dayjs'
 const formatMapDefault = {
   datepicker: 'YYYY-MM-DD',
@@ -54,13 +59,17 @@ const props = defineProps({
   format: {
     type: String,
     default: ''
-  }
+  },
+  hideAppendInner: Boolean
 })
-const showDropDown = ref(false)
+const showMenu = ref(false)
 const inputValue = ref()
 const inputRef = ref()
 const datePickerValue = ref()
 const emit = defineEmits(['update:modelValue'])
+const minWidth = computed(() => ({
+  minWidth: props.type === 'datepicker' ? '140px' : '190px'
+}))
 
 const getFormatStr = () => formatMapDefault[props.type] || props.format
 
@@ -90,7 +99,8 @@ watch(
   () => props.modelValue,
   () => {
     convertValueForInputAndDatePicker(props.modelValue)
-  }
+  },
+  { immediate: true }
 )
 
 function emitModelValueFormat(value: any) {
@@ -103,18 +113,14 @@ function emitModelValueFormat(value: any) {
 
 function onDatePickerValueChange(value: any) {
   emit('update:modelValue', emitModelValueFormat(value))
-  // showDropDown.value = false
 }
 
-// function onInputKeyEnter(instance: any) {
-//   showDropDown.value = false
-//   instance.blur()
-// }
-
-function onInputBlur(obj: FocusEvent | string) {
+function onInputBlur(obj: FocusEvent | string, closeMenu: boolean = false) {
   // fix blur event is more quick than modelValue change event
   // dropdown visible condition is conflict with this event
-  // if (showDropDown.value) return
+  if (closeMenu) {
+    showMenu.value = false
+  }
 
   let value
 
@@ -127,8 +133,6 @@ function onInputBlur(obj: FocusEvent | string) {
 
   // the first time select date will trigger blur event
   if (!value) return
-
-  // showDropDown.value = false
 
   convertValueForInputAndDatePicker(dayjs(value).valueOf(), true)
 }

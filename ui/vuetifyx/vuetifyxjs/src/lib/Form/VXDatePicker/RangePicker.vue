@@ -1,28 +1,87 @@
 <template>
-  <div class="vx-datepicker-wrap">
-    <VXLabel
-      v-if="label"
-      :label-for="name"
-      :tooltip="tips"
+  <div class="vx-range-picker-wrap">
+    <vx-field
+      ref="inputFieldParent"
+      class="vx-range-picker-field"
+      :class="{ isFocus }"
+      :label="label"
       :required-symbol="required"
-      class="mb-2"
-      >{{ label }}</VXLabel
+      :tooltip="tips"
+      :label-for="name"
+      v-bind="filteredAttrs"
+      v-model:focused="isFocus"
     >
-
-    <v-text-field v-bind="combinedProps">
       <template #append-inner>
-        <v-icon icon="mdi-calendar-range-outline"></v-icon>
+        <v-icon
+          icon="mdi-calendar-range-outline ml-auto"
+          size="x-small"
+          @click="onClickEditDate(0)"
+        />
       </template>
-    </v-text-field>
+
+      <div class="vx-range-picker-group d-flex flex-1-1">
+        <vx-field
+          :class="{ current: current === 0 }"
+          v-model:focused="isStartInputFocus"
+          ref="startDateInput"
+          placeholder="Start at"
+          variant="flat"
+          class="flex-1-1"
+          hide-details
+          @click="onClickEditDate(0)"
+        />
+        <div class="separator" />
+        <vx-field
+          :class="{ current: current === 1 }"
+          v-model:focused="isEndInputFocus"
+          ref="endDateInput"
+          placeholder="End at"
+          variant="flat"
+          class="flex-1-1"
+          hide-details
+          @click="onClickEditDate(1)"
+        />
+      </div>
+
+      <!-- drop down -->
+      <v-overlay
+        :model-value="showMenu"
+        persistent
+        target="parent"
+        :scrim="false"
+        :open-delay="0"
+        :close-delay="0"
+        no-click-animation
+        min-width="292"
+        location-strategy="connected"
+        @click:outside="closeEditData()"
+      >
+        <date-picker-base
+          class="elevation-2 d-inline-block bg-background rounded-lg overflow-hidden"
+          :model-value="datePickerValue"
+          :use-time-select="type === 'datetimepicker'"
+          @update:modelValue="onDatePickerValueChange"
+        />
+      </v-overlay>
+    </vx-field>
   </div>
 </template>
 
 <script setup lang="ts">
 import { defineEmits, ref, computed, useSlots, PropType } from 'vue'
-import VXLabel from '@/lib/Common/VXLabel.vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import useBindingValue from '@/lib/composables/useBindingValue'
+import datePickerBase from './DatePickerBase.vue'
 const { filteredAttrs } = useFilteredAttrs()
+
+const inputFieldParent = ref()
+const startDateInput = ref()
+const endDateInput = ref()
+const current = ref()
+const isStartInputFocus = ref(false)
+const isEndInputFocus = ref(false)
+const datePickerValue = ref()
+const showMenu = ref(false)
 
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
@@ -38,6 +97,19 @@ const props = defineProps({
 })
 const { bindingValue, onUpdateModelValue } = useBindingValue(props, emit)
 
+const isFocus = computed(() => isStartInputFocus.value || isEndInputFocus.value)
+
+function onClickEditDate(index: number) {
+  showMenu.value = true
+  current.value = index
+}
+
+function closeEditData() {
+  if (isFocus.value) return
+  showMenu.value = false
+  current.value = null
+}
+
 const combinedProps = computed(() => ({
   density: 'compact',
   variant: 'outlined',
@@ -47,94 +119,82 @@ const combinedProps = computed(() => ({
   'onUpdate:modelValue': onUpdateModelValue,
   ...filteredAttrs.value // passthrough the props that defined by vuetify
 }))
+
+function onDatePickerValueChange() {}
 </script>
 
 <style lang="scss" scoped>
-.vx-datepicker-wrap {
-  margin-bottom: 2px;
-
-  .v-input {
-    &.v-input--disabled {
-      &:deep(.v-field) {
-        background-color: rgb(var(--v-theme-grey-lighten-4));
-        color: rgb(var(--v-theme-grey));
-      }
-    }
-
-    &:deep(.v-field) {
-      --v-theme-overlay-multiplier: var(--v-theme-background-overlay-multiplier);
-      background-color: rgb(var(--v-theme-background));
-    }
-
-    &:deep(.v-field__outline) {
-      --v-field-border-width: 1px;
-      --v-field-border-opacity: 1;
-      transition: color 0.3s ease;
-    }
-
-    &:not(.v-input--error):deep(.v-field__outline) {
-      color: rgb(var(--v-theme-grey-lighten-2));
-    }
-
-    &:deep(.v-input__details > .v-messages) {
-      order: 1;
-    }
-
-    &:deep(.v-counter) {
-      order: 0;
-      margin-right: 8px;
-      white-space: nowrap;
-      color: rgb(var(--v-theme-grey-darken-1));
-      letter-spacing: 0;
-      word-spacing: -3px;
-    }
-
-    &:deep(.v-input__details),
-    &:deep(.v-messages__message) {
-      padding: 0;
-      min-height: 20px;
-      line-height: 20px;
-      align-items: flex-start;
-    }
-
-    &:not(.v-input--error, .v-input--readonly):deep(.v-field__outline) {
-      color: rgb(var(--v-theme-grey-lighten-2));
-      transition: color 0.3s ease;
-    }
-
-    &:not(.v-input--error, .v-input--readonly):deep(.v-field:not(.v-field--focused)):hover
-      .v-field__outline {
-      color: rgb(var(--v-theme-primary));
-    }
-
-    &:not(.v-input--error, .v-input--readonly):deep(.v-field--focused) .v-field__outline {
-      color: rgb(var(--v-theme-primary));
-    }
-
-    &:deep(input) {
-      color: rgb(var(--v-theme-grey-darken-3));
-    }
-
-    &.v-input--density-compact:deep(input) {
-      &::placeholder {
-        font-size: 16px;
-        color: rgb(var(--v-theme-grey));
-        opacity: 1;
+.vx-range-picker-field {
+  .current > :deep(.v-input):not(.v-input--error, .v-input--readonly) {
+    .v-field {
+      &::after {
+        height: 3px !important;
+        transition: all ease 0.3s;
+        background: #3e63dd;
+        width: calc(100% - 24px);
       }
     }
   }
 
-  &:deep(.v-field__clearable) {
-    i {
-      font-size: 16px;
-      color: rgb(var(--v-theme-grey-darken-3));
-      --v-medium-emphasis-opacity: 1;
+  & > :deep(.v-input) {
+    & .vx-range-picker-group + input {
+      display: none;
+    }
+
+    &:not(.v-input--error, .v-input--readonly) {
+      & > .v-input__control > .v-field {
+        &:hover > .v-field__outline,
+        & > .v-field__outline {
+          color: rgb(var(--v-theme-grey-lighten-2)) !important;
+        }
+      }
+    }
+
+    & > .v-input__control > .v-field {
+      padding-inline-start: 0;
+
+      & > .v-field__field > .v-field__input {
+        padding: 0;
+      }
+
+      .v-field {
+        position: relative;
+        &::after {
+          transition: all ease 0.3s;
+          position: absolute;
+          height: 0;
+          content: '';
+          bottom: -2px;
+          left: 12px;
+        }
+      }
     }
   }
 
-  &:deep(.v-field__append-inner) i {
-    font-size: 16px;
-    color: rgb(var(--v-theme-grey-darken-3));
+  // &.isFocus > :deep(.v-input) {
+  //   & > .v-input__control > .v-field--focused {
+  //     .v-field--focused {
+  //       &::after {
+  //         height: 3px;
+  //         transition: all ease 0.3s;
+  //         background: #3e63dd;
+  //         width: calc(100% - 24px);
+  //       }
+  //     }
+  //   }
+  // }
+}
+
+.separator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &::before {
+    display: block;
+    content: '';
+    height: 1px;
+    background: rgb(var(--v-theme-grey));
+    width: 16px;
   }
 }
 </style>
