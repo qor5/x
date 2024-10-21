@@ -82,6 +82,10 @@ func (b *VXFieldBuilder) HideDetails(v bool) (r *VXFieldBuilder) {
 	b.tag.Attr(":hide-details", fmt.Sprint(v))
 	return b
 }
+func (b *VXFieldBuilder) Clearable(v bool) (r *VXFieldBuilder) {
+	b.tag.Attr(":clearable", fmt.Sprint(v))
+	return b
+}
 
 func (b *VXFieldBuilder) ModelValue(v interface{}) (r *VXFieldBuilder) {
 	b.tag.Attr(":model-value", h.JSONString(v))
@@ -95,7 +99,6 @@ func (b *VXFieldBuilder) Attr(vs ...interface{}) (r *VXFieldBuilder) {
 
 func (b *VXFieldBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
-	return
 }
 
 func (b *VXFieldBuilder) Children(children ...h.HTMLComponent) (r *VXFieldBuilder) {

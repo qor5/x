@@ -131,7 +131,6 @@ func (b *VXDialogBuilder) Attr(vs ...interface{}) (r *VXDialogBuilder) {
 }
 func (b *VXDialogBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
-	return
 }
 func (b *VXDialogBuilder) Children(children ...h.HTMLComponent) (r *VXDialogBuilder) {
 	b.tag.Children(children...)

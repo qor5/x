@@ -33,7 +33,6 @@ func (b *VXToolbarBuilder) Attr(vs ...interface{}) (r *VXToolbarBuilder) {
 }
 func (b *VXToolbarBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
-	return
 }
 
 func (b *VXToolbarBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {

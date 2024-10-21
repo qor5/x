@@ -17,6 +17,7 @@
     item-title="name"
     item-value="id"
     placeholder="choose a item"
+    closable-chips
   />
 
   <vx-select
