@@ -33,16 +33,16 @@
 <template>
   <v-row>
     <v-col cols="6" sm="6">
-      <vx-field v-model="dataWithBinding" label="input(autofocus)" autofocus />
+      <vx-field v-model="dataWithBinding" label="input(autofocus)" autofocus clearable />
       <div class="text-caption mt-2">v-model binding value: {{ dataWithBinding }}</div>
     </v-col>
 
     <v-col cols="6" sm="6">
-      <vx-field model-value="data with tips" tips="this is tips" label="input with tooltip" />
+      <vx-field model-value="data with tips" tips="this is tips" label="input with tooltip" clearable/>
     </v-col>
 
     <v-col cols="6" sm="6">
-      <vx-field model-value="data with tips" name="abc" id="abc" label="click label and focus on input" />
+      <vx-field model-value="data with tips" name="abc" id="abc" label="click label and focus on input" clearable/>
       <div class="text-caption">use attr (name + id) to achieve this</div>
     </v-col>
 
@@ -52,6 +52,7 @@
         required
         :rules="[(value) => !!value || 'This input field is requried']"
         label="input (required)"
+        clearable
       />
     </v-col>
 
@@ -65,6 +66,7 @@
         error-messages="This is an error message explanation"
         placeholder="enter any value"
         label="input with error messages"
+        clearable
       />
     </v-col>
 
@@ -201,7 +203,7 @@ const dataWithBinding = ref('hello world')
 <template>
   <v-row>
     <v-col cols="6">
-      <vx-field type="textarea" v-model="dataTextArea" label="textarea" />
+      <vx-field type="textarea" v-model="dataTextArea" label="textarea" clearable/>
     </v-col>
 
     <v-col cols="6" sm="6">
@@ -210,6 +212,7 @@ const dataWithBinding = ref('hello world')
         v-model="dataWithTips"
         tips="this is tips"
         label="textarea with tooltip"
+        clearable
       />
     </v-col>
 
@@ -220,6 +223,7 @@ const dataWithBinding = ref('hello world')
         required
         :rules="[(value) => !!value || 'This textarea field is requried']"
         label="input (required)"
+        clearable
       />
     </v-col>
 
@@ -240,6 +244,7 @@ const dataWithBinding = ref('hello world')
         error-messages="This is an error message explanation"
         placeholder="enter any value"
         label="textarea with error messages"
+        clearable
       />
     </v-col>
 
@@ -250,6 +255,7 @@ const dataWithBinding = ref('hello world')
         placeholder="enter any value"
         disabled
         label="textarea disabled"
+        clearable
       />
     </v-col>
   </v-row>

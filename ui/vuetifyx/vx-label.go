@@ -70,7 +70,6 @@ func (b *VXLabelBuilder) Attr(vs ...interface{}) (r *VXLabelBuilder) {
 }
 func (b *VXLabelBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
-	return
 }
 
 func (b *VXLabelBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {

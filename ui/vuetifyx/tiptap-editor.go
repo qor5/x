@@ -42,7 +42,6 @@ func (b *VXTiptapEditorBuilder) Attr(vs ...any) (r *VXTiptapEditorBuilder) {
 }
 func (b *VXTiptapEditorBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
-	return
 }
 
 func (b *VXTiptapEditorBuilder) Disabled(v bool) (r *VXTiptapEditorBuilder) {
