@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { isEqual } from 'lodash'
+import _ from 'lodash'
 import { ref } from 'vue'
 export type datePickerType = 'datepicker' | 'datetimepicker'
 
@@ -15,7 +15,7 @@ export function useDatePicker<EmitFnType>(props: any, emit: EmitFnType) {
   const formatStr = props.format || formatMapDefault[props.type as datePickerType]
 
   function emitModelValueFormat(value: number | string | (number | string)[]) {
-    if (isEqual(value, props.modelValue)) return value
+    if (_.isEqual(value, props.modelValue)) return value
 
     return Array.isArray(value)
       ? value.map((item) => dayjs(item).valueOf())
