@@ -4,16 +4,19 @@
       class="v-picker-wrap"
       hide-header
       flat
-      :show-adjacent-months="false"
+      show-adjacent-months
       v-model="dateOfPicker"
       @update:year="onYearOrMonthChange($event, 'year')"
       @update:month="onYearOrMonthChange($event, 'month')"
       @update:modelValue="onYearOrMonthChange($event, 'date')"
+      v-bind="combinedProps"
     />
+
     <time-select
       v-if="useTimeSelect"
       class="time-select-wrap"
       v-model="timeStr"
+      v-bind="propsForTimeSelect"
       @update:modelValue="onTimeSelected"
     />
   </div>
@@ -21,19 +24,27 @@
 
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import { ref, defineEmits, defineProps, PropType, computed, watch } from 'vue'
+import { ref, defineEmits, defineProps, PropType, computed, watch, Prop } from 'vue'
 import TimeSelect from './TimeSelect.vue'
-
+import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
+const { filteredAttrs } = useFilteredAttrs()
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
   modelValue: [String, Number] as PropType<string | number>,
-  useTimeSelect: Boolean
+  type: {
+    type: String,
+    default: 'datepicker'
+  },
+  datePickerProps: Object as PropType<any>,
+  disableSecond: Boolean,
+  disableMinute: Boolean,
+  disableHour: Boolean
 })
 const timeStr = ref()
 const dateOfPicker = ref()
 
 const dateStr = computed(() => dayjs(props.modelValue).format('YYYY-MM-DD'))
-
+const useTimeSelect = computed(() => props.type === 'datetimepicker')
 watch(
   () => props.modelValue,
   (value) => {
@@ -53,7 +64,7 @@ function emitValue(date: string, time: string) {
   return dayjs(`${date} ${time}`).valueOf()
 }
 
-function onYearOrMonthChange(value: number, type: 'year' | 'month' | 'date') {
+function onYearOrMonthChange(value: number | unknown | Date, type: 'year' | 'month' | 'date') {
   let newDate = ''
   let newTimeStr = timeStr.value
   let emitValueImmediate = false
@@ -68,11 +79,11 @@ function onYearOrMonthChange(value: number, type: 'year' | 'month' | 'date') {
   } else if (type === 'month') {
     newDate = dateStr.value
       .split('-')
-      .map((item: string, index: number) => (index === 1 ? value + 1 : item))
+      .map((item: string, index: number) => (index === 1 ? (value as number) + 1 : item))
       .join('-')
     emitValueImmediate = !!props.modelValue
   } else {
-    newDate = dayjs(value).format('YYYY-MM-DD')
+    newDate = dayjs(value as number).format('YYYY-MM-DD')
     emitValueImmediate = true
   }
 
@@ -86,12 +97,27 @@ function onTimeSelected(time: string) {
     emit('update:modelValue', emitValue(dateStr.value, timeStr.value))
   }
 }
+
+const combinedProps = computed(() => ({
+  ...props.datePickerProps,
+  ...filteredAttrs.value // passthrough the props that defined by vuetify
+}))
+
+const propsForTimeSelect = computed(() => {
+  const { disableSecond, disableMinute, disableHour, ...rest } = props.datePickerProps || {}
+  return { disableSecond, disableMinute, disableHour }
+})
 </script>
 
 <style lang="scss" scoped>
 .v-picker-wrap {
   padding: 8px 0;
   width: 292px;
+
+  &:deep(.v-date-picker-years),
+  &:deep(.v-date-picker-months) {
+    height: 256px;
+  }
 
   &:deep(.v-date-picker-month__days) {
     flex: initial;
@@ -122,9 +148,9 @@ function onTimeSelected(time: string) {
     }
   }
 
-  &:deep(.v-date-picker-month__day--week-end) ~ .v-date-picker-month__day--hide-adjacent {
-    display: none;
-  }
+  // &:deep(.v-date-picker-month__day--week-end) ~ .v-date-picker-month__day--hide-adjacent {
+  //   display: none;
+  // }
 
   &:deep(.v-date-picker-controls) {
     display: block;

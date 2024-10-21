@@ -19,8 +19,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Datepicker from '@/lib/Datepicker.vue'
-const value = ref(new Date().getTime())
+const value = ref()
 const valueDateTime = ref('')
+const rangeValue = ref([])
 </script>
 
 <template>
@@ -29,10 +30,11 @@ const valueDateTime = ref('')
       <vx-date-picker
         v-model="value"
         label="选择日期(type: datepicker)"
+        clearable
         placeholder="Start at"
-        :date-picker-props="{ min: '2016-06-15', max: '2028-03-20' }"
+        :date-picker-props="{ min: '2024-10-21', max: '2024-10-21' }"
       />
-      <div>selected value: {{ new Date(value) }}</div>
+      <div>selected value: {{ valueDateTime ? new Date(valueDateTime) : 'unselected' }}</div>
     </v-col>
 
     <v-col cols="6">
@@ -41,24 +43,59 @@ const valueDateTime = ref('')
         label="选择时间日期(type: datetimepicker)"
         type="datetimepicker"
         placeholder="Start at"
-        :date-picker-props="{ min: '2016-06-15', max: '2028-03-20' }"
+        :date-picker-props="{ min: '2024-10-21', max: '2024-10-21', disableSecond: true }"
       />
       <div>selected value: {{ valueDateTime ? new Date(valueDateTime) : 'unselected' }}</div>
     </v-col>
 
     <v-col cols="6">
-      <vx-range-picker
-        v-model="value"
-        label="时间区间选择(日期)"
+      <vx-date-picker
+        v-model="valueDateTime"
+        label="选择时间日期(type: datetimepicker)"
+        type="datetimepicker"
+        format="YYYY-MM-DD HH:mm:ss"
+        placeholder="Start at"
+        disabled
+      />
+      <div>selected value: {{ valueDateTime ? new Date(valueDateTime) : 'unselected' }}</div>
+    </v-col>
+
+    <v-col cols="6">
+      <vx-date-picker
+        v-model="valueDateTime"
+        label="选择时间日期(type: datetimepicker)"
+        type="datetimepicker"
+        format="YYYY-MM-DD HH:mm:ss"
+        placeholder="Start at"
         :date-picker-props="{ min: '2016-06-15', max: '2028-03-20' }"
+        error-messages="sfsfasf"
+        clearable
+      />
+      <div>selected value: {{ valueDateTime ? new Date(valueDateTime) : 'unselected' }}</div>
+    </v-col>
+
+    <v-col cols="6">
+      <vx-range-picker v-model="rangeValue" label="时间区间选择(日期)" />
+    </v-col>
+
+    <v-col cols="6">
+      <vx-range-picker
+        v-model="rangeValue"
+        type="datetimepicker"
+        label="时间区间选择（日期时间）"
+        format="YYYY-MM-DD HH:mm:ss"
+        :date-picker-props="[{ min: '2024-06-15', max: '2024-06-20' }]"
       />
     </v-col>
 
     <v-col cols="6">
       <vx-range-picker
-        v-model="value"
+        v-model="rangeValue"
+        type="datetimepicker"
+        :placeholder="['start at', 'end at']"
         label="时间区间选择（日期时间）"
-        :date-picker-props="{ min: '2016-06-15', max: '2028-03-20' }"
+        needConfirm
+        clearable
       />
     </v-col>
   </v-row>
@@ -69,7 +106,7 @@ const valueDateTime = ref('')
 
 ## legacy component
 
-### vx-date-picker 日期选择器
+### vx-datepicker 日期选择器
 
 :::demo
 
@@ -83,7 +120,7 @@ const value = ref('2023-10-01')
 
 <template>
   <p>{{ value }}</p>
-  <vx-date-picker v-model="value" :date-picker-props="{ min: '2016-06-15', max: '2028-03-20' }" />
+  <vx-datepicker v-model="value" :date-picker-props="{ min: '2016-06-15', max: '2028-03-20' }" />
 </template>
 
 <style scoped></style>

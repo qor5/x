@@ -11,13 +11,21 @@
 
     <!-- text-area -->
     <template v-if="type === 'textarea'">
-      <v-textarea ref="vInputRef" v-bind="combinedProps" :rows="2" :max-rows="20" auto-grow />
+      <v-textarea
+        ref="vInputRef"
+        v-model:focused="vInputFocus"
+        v-bind="combinedProps"
+        :rows="2"
+        :max-rows="20"
+        auto-grow
+      />
     </template>
 
     <!-- password -->
     <template v-else-if="type === 'password'">
       <v-text-field
         ref="vInputRef"
+        v-model:focused="vInputFocus"
         v-bind="combinedProps"
         class="password-field"
         :type="passwordFieldType"
@@ -55,7 +63,7 @@
 
     <!-- v-text-file -->
     <template v-else>
-      <v-text-field ref="vInputRef" v-bind="combinedProps">
+      <v-text-field ref="vInputRef" v-model:focused="vInputFocus" v-bind="combinedProps">
         <template #append-inner>
           <slot name="append-inner" />
         </template>

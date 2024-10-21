@@ -7,11 +7,12 @@
       type="number"
       width="70"
       maxlength="2"
+      :disabled="disableHour"
       :min="0"
       :max="23"
       hide-details
       @update:modelValue="onChooseValue('hour', $event)"
-      @click="showHourMenu = true"
+      @click="!disableHour && (showHourMenu = true)"
     >
       <template #prepend-inner>
         <div class="displayValue">{{ padZero(hourValue) }}</div>
@@ -41,12 +42,13 @@
       class="time-select minute-field"
       type="number"
       width="70"
+      :disabled="disableMinute"
       maxlength="2"
       :min="0"
       :max="59"
       hide-details
       @update:modelValue="onChooseValue('minute', $event)"
-      @click="showMinuteMenu = true"
+      @click="!disableMinute && (showMinuteMenu = true)"
     >
       <template #prepend-inner>
         <div class="displayValue">{{ padZero(minuteValue) }}</div>
@@ -76,12 +78,13 @@
       class="time-select second-field"
       type="number"
       width="70"
+      :disabled="disableSecond"
       maxlength="2"
       :min="0"
       :max="59"
       hide-details
       @update:modelValue="onChooseValue('second', $event)"
-      @click="showSecondMenu = true"
+      @click="!disableSecond && (showSecondMenu = true)"
     >
       <template #prepend-inner>
         <div class="displayValue">{{ padZero(secondValue) }}</div>
@@ -112,7 +115,10 @@ const props = defineProps({
   modelValue: {
     type: String,
     default: '00:00:00'
-  }
+  },
+  disableSecond: Boolean,
+  disableMinute: Boolean,
+  disableHour: Boolean
 })
 
 const emit = defineEmits(['update:modelValue'])
