@@ -8,8 +8,8 @@ import vuetify from './vuetify'
 import i18n from './i18n'
 import { vuetifyProTipTap } from './tiptap'
 
-import Datepicker from '@/lib/Datepicker.vue'
-import Datetimepicker from '@/lib/Datetimepicker.vue'
+import DatepickerOld from '@/lib/Datepicker.vue'
+import DatetimepickerOld from '@/lib/Datetimepicker.vue'
 import SelectMany from '@/lib/SelectMany.vue'
 import LinkageSelect from '@/lib/LinkageSelect.vue'
 import Autocomplete from '@/lib/Autocomplete.vue'
@@ -21,6 +21,8 @@ import draggable from 'vuedraggable'
 import SendVariables from '@/lib/SendVariables.vue'
 import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
+import VXRangepicker from '@/lib/Form/VXDatePicker/RangePicker.vue'
+import VXDatepicker from '@/lib/Form/VXDatePicker/DatePicker.vue'
 import VXField from '@/lib/Form/VXField.vue'
 import VXSelect from '@/lib/Form/VXSelect.vue'
 import VXCheckbox from '../Form/VXCheckbox.vue'
@@ -36,8 +38,10 @@ declare const window: any
 const vuetifyx = {
   install: (app: App) => {
     // datepicker
-    app.component('vx-datepicker', Datepicker)
-    app.component('vx-datetimepicker', Datetimepicker)
+    app.component('vx-date-picker', VXDatepicker)
+    app.component('vx-range-picker', VXRangepicker)
+    app.component('vx-datepicker', DatepickerOld)
+    app.component('vx-datetimepicker', DatetimepickerOld)
     app.component('vx-textdatepicker', TextDatepicker)
     // select
     app.component('vx-select', VXSelect)

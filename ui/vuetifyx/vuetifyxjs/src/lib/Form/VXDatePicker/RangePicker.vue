@@ -1,0 +1,339 @@
+<template>
+  <div class="vx-range-picker-wrap">
+    <vx-label class="mb-2" :tooltip="tooltip" :label-for="name" :required-symbol="required">{{
+      label
+    }}</vx-label>
+    <vx-field
+      ref="inputFieldParent"
+      class="vx-range-picker-field"
+      :class="{ isFocus }"
+      v-bind="filteredAttrs"
+      v-model:focused="isFocus"
+      @mouseover="isHovering = true"
+      @mouseout="isHovering = false"
+    >
+      <template #append-inner>
+        <v-icon
+          :icon="showClearIcon ? 'mdi-close-circle' : 'mdi-calendar-range-outline'"
+          size="x-small"
+          @click="onClickClear"
+        />
+      </template>
+
+      <div class="vx-range-picker-group d-flex flex-1-1">
+        <vx-field
+          :class="{ current: current === 0 }"
+          v-model="inputValue[0]"
+          v-model:focused="isStartInputFocus"
+          ref="startDateInput"
+          :placeholder="placeholder[0]"
+          variant="flat"
+          class="flex-1-1"
+          hide-details
+          readonly
+          @blur="onInputBlur($event, 0)"
+          @keydown.enter="onInputBlur(inputValue[0], 0)"
+          @click="onClickEditDate(0)"
+        />
+        <div class="separator" />
+        <vx-field
+          :class="{ current: current === 1 }"
+          v-model="inputValue[1]"
+          v-model:focused="isEndInputFocus"
+          ref="endDateInput"
+          :placeholder="placeholder[1]"
+          variant="flat"
+          class="flex-1-1"
+          hide-details
+          readonly
+          @blur="onInputBlur($event, 1)"
+          @keydown.enter="onInputBlur(inputValue[1], 1)"
+          @click="onClickEditDate(1)"
+        />
+      </div>
+
+      <!-- drop down -->
+      <v-overlay
+        :model-value="showMenu"
+        persistent
+        target="parent"
+        :scrim="false"
+        :open-delay="0"
+        :close-delay="0"
+        no-click-animation
+        min-width="292"
+        location-strategy="connected"
+        @click:outside="closeEditData()"
+      >
+        <div class="vx-date-picker-group elevation-5 bg-background rounded-lg">
+          <date-picker-base
+            class="d-inline-block overflow-hidden"
+            :model-value="datePickerValue[0]"
+            :format="format"
+            :type="type"
+            @update:modelValue="onDatePickerValueChange($event, 0)"
+            :date-picker-props="datePickerProps[0]"
+            v-bind="filteredAttrs.datePickerProps?.[0]"
+          />
+
+          <date-picker-base
+            class="d-inline-block overflow-hidden"
+            :model-value="datePickerValue[1]"
+            :format="format"
+            :type="type"
+            @update:modelValue="onDatePickerValueChange($event, 1)"
+            :date-picker-props="datePickerProps[1]"
+            v-bind="filteredAttrs.datePickerProps?.[1]"
+          />
+
+          <div v-if="needConfirm" class="border-b mx-2" />
+          <div v-if="needConfirm" class="btn-group text-right mt-2 pa-2">
+            <v-btn color="primary" @click="onClickConfirm">{{ i18_save }}</v-btn>
+          </div>
+        </div>
+      </v-overlay>
+    </vx-field>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { defineEmits, ref, computed, watchEffect, PropType, watch } from 'vue'
+import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
+import datePickerBase from './DatePickerBase.vue'
+import { useDatePicker, datePickerType } from '@/lib/composables/useDatePicker'
+const { filteredAttrs } = useFilteredAttrs()
+import dayjs from 'dayjs'
+import { useLocale } from 'vuetify'
+import { useHasEventListener } from '@/lib/composables/useEventListener'
+const { hasEventListener } = useHasEventListener()
+const { t } = useLocale()
+const i18_save = t('$vuetify.datePicker.saveBtn')
+const isHovering = ref(false)
+const inputFieldParent = ref()
+const startDateInput = ref()
+const endDateInput = ref()
+const current = ref()
+const isStartInputFocus = ref(false)
+const isEndInputFocus = ref(false)
+
+const emit = defineEmits(['update:modelValue', 'click:confirm'])
+const props = defineProps({
+  modelValue: {
+    type: Array as PropType<(string | number)[]>,
+    default: ['', '']
+  },
+  tooltip: Boolean,
+  label: String,
+  clearable: Boolean,
+  tooltips: String,
+  id: String,
+  name: String,
+  required: Boolean,
+  needConfirm: Boolean,
+  placeholder: {
+    type: Array as PropType<string[]>,
+    default: []
+  },
+  datePickerProps: {
+    type: Array as PropType<Record<string, any>>,
+    default: []
+  },
+  type: {
+    type: String as PropType<datePickerType>,
+    default: 'datepicker'
+  },
+  format: {
+    type: String,
+    default: ''
+  }
+})
+const inputValue = ref<(string | number)[]>(['', ''])
+const datePickerValue = ref<(string | number)[]>(['', ''])
+const { showMenu, formatStr, emitDatePickerValue, tempData } = useDatePicker(props, emit)
+
+const isFocus = computed(() => isStartInputFocus.value || isEndInputFocus.value)
+const showClearIcon = computed(
+  () =>
+    (isHovering.value || isFocus.value || showMenu.value) &&
+    props.clearable &&
+    inputValue.value.some((item) => Boolean(item))
+)
+
+watchEffect(() => {
+  convertValueForInputAndDatePicker(props.modelValue)
+})
+
+function onDatePickerValueChange(value: number, position: 0 | 1) {
+  let data = props.modelValue
+  current.value = position
+
+  if (datePickerValue.value.length === 0) {
+    if (position === 0) data.push(value)
+    else data = ['', value]
+  } else if (datePickerValue.value.length === 1) {
+    if (position === 0) data[0] = value
+    else data.push(value)
+  } else {
+    data = datePickerValue.value.map((item, i) => (position === i ? value : item))
+  }
+
+  emitDatePickerValue(data, props.needConfirm)
+}
+
+function convertValueForInputAndDatePicker(value: (string | number)[], shouldEmit?: boolean) {
+  //case: no init value
+  if (!value || value.length === 0) {
+    inputValue.value = ['', '']
+    datePickerValue.value = ['', '']
+  } else {
+    if (Array.isArray(value)) {
+      inputValue.value = formatStr
+        ? value.map((item) => (item ? dayjs(item).format(formatStr) : ''))
+        : value
+      datePickerValue.value = value.map((item) => (item ? dayjs(item).valueOf() : item))
+
+      // console.log(inputValue.value)
+    } else {
+      inputValue.value = formatStr ? [dayjs(value).format(formatStr)] : ['']
+      datePickerValue.value = [value ? dayjs(value).valueOf() : value]
+    }
+  }
+
+  shouldEmit && emitDatePickerValue(datePickerValue.value, props.needConfirm)
+}
+
+function onInputBlur(obj: FocusEvent | string | number, position: 0 | 1) {
+  inputFieldParent.value.blur()
+
+  let value
+
+  if (obj instanceof FocusEvent) {
+    const target = obj.target as HTMLInputElement
+    value = target.value
+  } else {
+    value = obj
+  }
+
+  if (props.datePickerProps[position]) {
+    const currentConfig = props.datePickerProps[position]
+    value = dayjs(value).valueOf()
+
+    if (currentConfig.max) {
+      const maxTimestamp = currentConfig.max ? dayjs(currentConfig.max).valueOf() : 0
+      value = Math.min(value, maxTimestamp)
+    }
+
+    if (currentConfig.min) {
+      const minTimestamp = currentConfig.min ? dayjs(currentConfig.min).valueOf() : 0
+      value = Math.max(minTimestamp, value)
+    }
+  }
+
+  // the first time select date will trigger blur event
+  if (!value) return
+
+  convertValueForInputAndDatePicker(
+    inputValue.value.map((item, i) => (i === position ? value : item)),
+    true
+  )
+}
+
+function onClickEditDate(index: number) {
+  showMenu.value = true
+}
+
+function onClickClear() {
+  if (showClearIcon.value) {
+    emitDatePickerValue(['', ''])
+    current.value = null
+  }
+  showMenu.value = false
+}
+
+function closeEditData() {
+  if (isFocus.value) return
+  showMenu.value = false
+  current.value = null
+}
+
+function onClickConfirm() {
+  if (hasEventListener('click:confirm')) {
+    emit('click:confirm', { showMenu, value: props.modelValue })
+  } else {
+    emitDatePickerValue(tempData.value as number[])
+    showMenu.value = false
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.vx-range-picker-field {
+  .current > :deep(.v-input):not(.v-input--error) {
+    .v-field {
+      &::after {
+        height: 3px !important;
+        transition: all ease 0.3s;
+        background: #3e63dd;
+        width: calc(100% - 24px);
+      }
+    }
+  }
+
+  & > :deep(.v-input) {
+    & .vx-range-picker-group + input {
+      display: none;
+    }
+
+    // &:not(.v-input--error, .v-input--readonly) {
+    //   & > .v-input__control > .v-field {
+    //     &:hover > .v-field__outline,
+    //     & > .v-field__outline {
+    //       color: rgb(var(--v-theme-grey-lighten-2)) !important;
+    //     }
+    //   }
+    // }
+
+    & > .v-input__control > .v-field {
+      padding-inline-start: 0;
+
+      & > .v-field__field > .v-field__input {
+        padding: 0;
+      }
+
+      .v-field {
+        position: relative;
+        &::after {
+          transition: all ease 0.3s;
+          position: absolute;
+          height: 0;
+          content: '';
+          bottom: -2px;
+          left: 12px;
+        }
+      }
+    }
+  }
+}
+
+.vx-date-picker-group {
+  &:deep(.v-picker-wrap) {
+    padding-bottom: 0;
+    .v-date-picker-month {
+      padding-bottom: 4px;
+    }
+  }
+}
+
+.separator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &::before {
+    display: block;
+    content: '';
+    height: 1px;
+    background: rgb(var(--v-theme-grey));
+    width: 16px;
+  }
+}
+</style>

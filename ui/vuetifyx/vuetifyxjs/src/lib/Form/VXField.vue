@@ -11,13 +11,21 @@
 
     <!-- text-area -->
     <template v-if="type === 'textarea'">
-      <v-textarea ref="vInputRef" v-bind="combinedProps" :rows="2" :max-rows="20" auto-grow />
+      <v-textarea
+        ref="vInputRef"
+        v-model:focused="vInputFocus"
+        v-bind="combinedProps"
+        :rows="2"
+        :max-rows="20"
+        auto-grow
+      />
     </template>
 
     <!-- password -->
     <template v-else-if="type === 'password'">
       <v-text-field
         ref="vInputRef"
+        v-model:focused="vInputFocus"
         v-bind="combinedProps"
         class="password-field"
         :type="passwordFieldType"
@@ -35,12 +43,35 @@
       </v-text-field>
     </template>
 
+    <!-- number -->
+    <template v-else-if="type === 'number'">
+      <v-number-input
+        ref="vInputRef"
+        class="number-field"
+        control-variant="stacked"
+        v-model:focused="vInputFocus"
+        inset
+        v-bind="combinedProps"
+      >
+        <template #prepend-inner="{ isActive, isFocused, controlRef, focus, blur }">
+          <slot name="prepend-inner" :props="{ isActive, isFocused, controlRef, focus, blur }" />
+        </template>
+      </v-number-input>
+      <!-- slot for v-menu and so on -->
+      <slot></slot>
+    </template>
+
     <!-- v-text-file -->
     <template v-else>
-      <v-text-field ref="vInputRef" v-bind="combinedProps">
+      <v-text-field ref="vInputRef" v-model:focused="vInputFocus" v-bind="combinedProps">
         <template #append-inner>
           <slot name="append-inner" />
         </template>
+
+        <template #prepend-inner>
+          <slot name="prepend-inner" />
+        </template>
+
         <slot></slot>
       </v-text-field>
     </template>
@@ -55,7 +86,7 @@ import useBindingValue from '@/lib/composables/useBindingValue'
 import { forwardRefs } from '@/lib/composables/forwardRefs'
 const { filteredAttrs } = useFilteredAttrs()
 const vInputRef = ref()
-
+const vInputFocus = ref(false)
 const slots = useSlots()
 const hasAppendInnerSlot = slots['append-inner'] !== undefined
 const emit = defineEmits(['update:modelValue'])
@@ -89,7 +120,16 @@ const combinedProps = computed(() => ({
   ...filteredAttrs.value // passthrough the props that defined by vuetify
 }))
 
-defineExpose(forwardRefs({}, vInputRef))
+defineExpose(
+  forwardRefs(
+    {
+      blur() {
+        vInputFocus.value = false
+      }
+    },
+    vInputRef
+  )
+)
 </script>
 
 <style lang="scss" scoped>
@@ -178,6 +218,22 @@ defineExpose(forwardRefs({}, vInputRef))
   &:deep(.v-field__append-inner) i {
     font-size: 16px;
     color: rgb(var(--v-theme-grey-darken-3));
+  }
+
+  .number-field {
+    &:deep(.v-number-input__control) {
+      .v-btn {
+        --v-btn-size: 13.75px;
+        --v-btn-height: 12px;
+        font-size: var(--v-btn-size);
+      }
+      .v-btn--variant-elevated {
+        box-shadow: none;
+      }
+      .v-divider {
+        display: none;
+      }
+    }
   }
 }
 </style>

@@ -2,10 +2,16 @@ import { ref, watch } from 'vue'
 
 export default function useBindingValue<EmitFnType>(props: Record<string, any>, emit: EmitFnType) {
   const bindingValue = ref(props.modelValue)
+  const bindingFocus = ref(false)
 
   function onUpdateModelValue(value: any) {
     ;(emit as any)('update:modelValue', value)
     bindingValue.value = value
+  }
+
+  function onUpdateFocused(value: boolean) {
+    ;(emit as any)('update:focused', value)
+    bindingFocus.value = value
   }
 
   watch(
@@ -15,5 +21,5 @@ export default function useBindingValue<EmitFnType>(props: Record<string, any>, 
     }
   )
 
-  return { bindingValue, onUpdateModelValue }
+  return { bindingValue, bindingFocus, onUpdateModelValue, onUpdateFocused }
 }

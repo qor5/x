@@ -57,7 +57,6 @@ import TextField from '@/lib/Form/TextFiled.vue'
 const vuetifyx = {
   install: (app: App) => {
     app.component('vx-datepicker', Datepicker)
-    app.component('vx-datetimepicker', Datetimepicker)
     app.component('vx-selectmany', SelectMany)
     app.component('vx-linkageselect', LinkageSelect)
     app.component('vx-filter', Filter)
@@ -102,7 +101,7 @@ import VueJsonPretty from 'vue-json-pretty'
 
 ### 4. 为组件撰写必要说明和参数
 目前先随意，后期会有规范
-`;
+`
 }
 
 // Add the component to the correct directory in sidebar.ts
