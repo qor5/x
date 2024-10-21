@@ -14,21 +14,21 @@
 
 .pb-drawer-btn {
   &.v-btn--icon.v-btn--density-default {
-    position:absolute;
-    top:24px;
-    right:0;
+    position: absolute;
+    top: 24px;
+    right: 0;
     margin-right: -16px;
     width: 32px;
     height: 32px;
     z-index: 902;
 
     &.drawer-btn-left {
-      right:0;
+      right: 0;
       margin-right: -16px;
     }
 
     &.drawer-btn-right {
-      left:0;
+      left: 0;
       margin-left: -16px;
     }
   }
@@ -38,7 +38,7 @@
   &.draggable-el {
     &::before {
       position: absolute;
-      content: "";
+      content: '';
       height: 100%;
       width: 5px;
       left: -5px;
@@ -46,16 +46,15 @@
     }
   }
 
-
   &.border-left-draggable-highlight {
-    cursor:col-resize;
+    cursor: col-resize;
     transition-duration: unset;
     &::after {
       position: absolute;
-      content: "";
+      content: '';
       height: 100%;
       background: rgb(var(--v-theme-primary));
-      transition: background-color ease .3s;
+      transition: background-color ease 0.3s;
       width: 2px;
       left: 0;
       top: 0;

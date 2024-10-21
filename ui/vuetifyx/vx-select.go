@@ -109,7 +109,6 @@ func (b *VXSelectBuilder) Attr(vs ...interface{}) (r *VXSelectBuilder) {
 }
 func (b *VXSelectBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
-	return
 }
 
 func (b *VXSelectBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {

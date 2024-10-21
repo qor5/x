@@ -26,7 +26,7 @@
       </template>
 
       <!-- requiredSymbol -->
-       <span v-if="requiredSymbol" class="required-symbol ml-1 text-error">*</span>
+      <span v-if="requiredSymbol" class="required-symbol ml-1 text-error">*</span>
 
       <v-tooltip v-if="tooltip">
         <pre class="tooltip-display">{{ tooltip }}</pre>
