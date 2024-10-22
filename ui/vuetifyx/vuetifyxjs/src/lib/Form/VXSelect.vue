@@ -122,6 +122,15 @@ function onUpdateModelValue(value: any) {
       .v-field__append-inner .mdi-menu-down {
         font-size: 16px;
       }
+
+      .v-chip__close {
+        .mdi-close-circle {
+          font-size: 16px;
+          &::before {
+            content: '\F0156';
+          }
+        }
+      }
     }
 
     &:deep(.v-field__outline) {
