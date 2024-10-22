@@ -1,6 +1,6 @@
 <template>
   <div class="vx-datepicker-wrap">
-    <vx-label class="mb-2" :tooltip="tooltip" :label-for="name" :required-symbol="required">{{
+    <vx-label class="mb-2" :tooltip="tips" :label-for="name" :required-symbol="required">{{
       label
     }}</vx-label>
     <vx-field
@@ -58,7 +58,7 @@ const { filteredAttrs } = useFilteredAttrs()
 
 const props = defineProps({
   modelValue: [String, Number, Date],
-  tooltip: String,
+  tips: String,
   name: String,
   required: Boolean,
   label: String,

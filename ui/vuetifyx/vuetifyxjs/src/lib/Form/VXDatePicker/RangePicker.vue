@@ -1,6 +1,6 @@
 <template>
   <div class="vx-range-picker-wrap">
-    <vx-label class="mb-2" :tooltip="tooltip" :label-for="name" :required-symbol="required">{{
+    <vx-label class="mb-2" :tooltip="tips" :label-for="name" :required-symbol="required">{{
       label
     }}</vx-label>
 
@@ -125,7 +125,7 @@ const props = defineProps({
     type: Array as PropType<(string | number)[]>,
     default: ['', '']
   },
-  tooltip: String,
+  tips: String,
   label: String,
   clearable: Boolean,
   tooltips: String,

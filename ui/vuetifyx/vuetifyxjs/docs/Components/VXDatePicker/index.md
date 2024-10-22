@@ -297,12 +297,7 @@ const rangeValue1 = ref([])
 <template>
   <v-row>
     <v-col cols="6">
-      <vx-date-picker
-        v-model="value"
-        label="vx-date-picker(clearable)"
-        clearable
-        tooltip="example"
-      />
+      <vx-date-picker v-model="value" label="vx-date-picker(clearable)" clearable tips="example" />
     </v-col>
 
     <v-col cols="6">
@@ -344,7 +339,7 @@ const rangeValue1 = ref([])
         type="datetimepicker"
         label="vx-range-picker （clearable）"
         :placeholder="['start at', 'end at']"
-        tooltip="clearable rangepicker"
+        tips="clearable rangepicker"
         clearable
       />
     </v-col>
