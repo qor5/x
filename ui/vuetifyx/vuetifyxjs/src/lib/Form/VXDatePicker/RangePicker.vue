@@ -7,10 +7,12 @@
       ref="inputFieldParent"
       class="vx-range-picker-field"
       :class="{ isFocus }"
+      v-model="inputValue"
       v-bind="filteredAttrs"
       v-model:focused="isFocus"
-      @mouseover="isHovering = true"
-      @mouseout="isHovering = false"
+      :disabled="disabled"
+      @mouseover="!disabled && (isHovering = true)"
+      @mouseout="!disabled && (isHovering = false)"
     >
       <template #append-inner>
         <v-icon
@@ -129,10 +131,11 @@ const props = defineProps({
   id: String,
   name: String,
   required: Boolean,
+  disabled: Boolean,
   needConfirm: Boolean,
   placeholder: {
     type: Array as PropType<string[]>,
-    default: []
+    default: ['', '']
   },
   datePickerProps: {
     type: Array as PropType<Record<string, any>>,
@@ -258,10 +261,17 @@ function closeEditData() {
 
 function onClickConfirm() {
   if (hasEventListener('click:confirm')) {
-    emit('click:confirm', { showMenu, value: props.modelValue })
+    new Promise((resolve) => {
+      emit('click:confirm', { next: resolve, value: tempData.value })
+    }).then(() => {
+      emitDatePickerValue(tempData.value as number[])
+      showMenu.value = false
+      current.value = null
+    })
   } else {
     emitDatePickerValue(tempData.value as number[])
     showMenu.value = false
+    current.value = null
   }
 }
 </script>
