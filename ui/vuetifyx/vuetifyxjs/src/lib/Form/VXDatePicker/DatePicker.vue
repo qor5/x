@@ -125,7 +125,7 @@ function onInputBlur(obj: FocusEvent | string, closeMenu: boolean = false) {
 }
 
 function convertValueForInputAndDatePicker(
-  value: string | number | undefined,
+  value: string | number | undefined | Date,
   shouldEmit?: boolean
 ) {
   //case: no init value

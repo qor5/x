@@ -167,7 +167,8 @@ watch(
   () => {
     console.log('modelValue')
     convertValueForInputAndDatePicker(props.modelValue)
-  }
+  },
+  { immediate: true }
 )
 
 watch(
@@ -281,13 +282,13 @@ function onClickConfirm() {
     new Promise((resolve) => {
       emit('click:confirm', { next: resolve, value: tempData.value || [] })
     }).then(() => {
-      emitDatePickerValue(tempData.value as number[])
+      emitDatePickerValue(tempData.value || [])
       reset()
       showMenu.value = false
     })
   } else {
-    emitDatePickerValue(tempData.value as number[])
-
+    console.log(tempData.value, 'tempData.value')
+    emitDatePickerValue(tempData.value || [])
     reset()
     showMenu.value = false
   }
