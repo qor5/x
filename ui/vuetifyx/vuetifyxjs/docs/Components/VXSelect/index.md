@@ -75,6 +75,19 @@
     item-value="id"
     placeholder="choose a item"
   />
+
+  <vx-select
+    v-model="valueWithErrorMsg"
+    label="vx-select multiple + closable-chips"
+    :items="items"
+    item-title="name"
+    item-value="id"
+    placeholder="choose a item"
+    multiple
+    chips
+    closable-chips
+    clearable
+  />
 </template>
 
 <script setup lang="ts">
