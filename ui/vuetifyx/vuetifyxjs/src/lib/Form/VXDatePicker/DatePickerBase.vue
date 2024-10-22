@@ -43,7 +43,7 @@ const props = defineProps({
 const timeStr = ref()
 const dateOfPicker = ref()
 
-const dateStr = computed(() => dayjs(props.modelValue).format('YYYY-MM-DD'))
+const dateStr = computed(() => dayjs(dateOfPicker.value).format('YYYY-MM-DD'))
 const useTimeSelect = computed(() => props.type === 'datetimepicker')
 watch(
   () => props.modelValue,
@@ -61,6 +61,7 @@ watch(
 )
 
 function emitValue(date: string, time: string) {
+  // console.log('emitValue', `${date} ${time}`)
   return dayjs(`${date} ${time}`).valueOf()
 }
 
@@ -93,7 +94,7 @@ function onYearOrMonthChange(value: number | unknown | Date, type: 'year' | 'mon
 
 function onTimeSelected(time: string) {
   // only emitValue when date is selected
-  if (props.modelValue) {
+  if (dateOfPicker.value) {
     emit('update:modelValue', emitValue(dateStr.value, timeStr.value))
   }
 }

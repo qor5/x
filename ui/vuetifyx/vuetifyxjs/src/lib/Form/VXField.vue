@@ -91,7 +91,7 @@ const slots = useSlots()
 const hasAppendInnerSlot = slots['append-inner'] !== undefined
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
-  modelValue: [String, Number] as PropType<string | string[]>,
+  modelValue: [String, Number, Array] as PropType<string | string[]>,
   label: String,
   type: String,
   tips: String,

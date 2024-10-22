@@ -1,11 +1,12 @@
 <template>
   <div class="vx-datepicker-wrap">
-    <vx-label class="mb-2" :tooltip="tooltip" :label-for="name" :required-symbol="required">{{
+    <vx-label class="mb-2" :tooltip="tips" :label-for="name" :required-symbol="required">{{
       label
     }}</vx-label>
     <vx-field
       v-model="inputValue"
       :placeholder="placeholder"
+      :focused="isFocus"
       ref="inputRef"
       @blur="onInputBlur"
       @mouseover="isHovering = true"
@@ -41,6 +42,8 @@
           :datePickerProps="datePickerProps"
         />
       </v-overlay>
+
+      <input readonly class="input-cover" :value="inputValue" :placeholder="placeholder" />
     </vx-field>
   </div>
 </template>
@@ -54,8 +57,8 @@ import dayjs from 'dayjs'
 const { filteredAttrs } = useFilteredAttrs()
 
 const props = defineProps({
-  modelValue: [String, Number],
-  tooltip: String,
+  modelValue: [String, Number, Date],
+  tips: String,
   name: String,
   required: Boolean,
   label: String,
@@ -76,6 +79,7 @@ const inputValue = ref()
 const inputRef = ref()
 const datePickerValue = ref()
 const isHovering = ref(false)
+const isFocus = computed(() => showMenu.value)
 const emit = defineEmits(['update:modelValue'])
 const { showMenu, formatStr, emitDatePickerValue } = useDatePicker(props, emit)
 
@@ -125,7 +129,7 @@ function onInputBlur(obj: FocusEvent | string, closeMenu: boolean = false) {
 }
 
 function convertValueForInputAndDatePicker(
-  value: string | number | undefined,
+  value: string | number | undefined | Date,
   shouldEmit?: boolean
 ) {
   //case: no init value
@@ -154,6 +158,22 @@ function onClickAppendInner() {
 .v-menu {
   &:deep(.v-overlay__content) {
     border-radius: 8px !important;
+  }
+}
+
+.vx-datepicker-wrap {
+  &:deep(.v-input) {
+    .input-cover {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    & input:not(.input-cover) {
+      display: none;
+    }
   }
 }
 </style>

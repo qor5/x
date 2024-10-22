@@ -1,16 +1,19 @@
 <template>
   <div class="vx-range-picker-wrap">
-    <vx-label class="mb-2" :tooltip="tooltip" :label-for="name" :required-symbol="required">{{
+    <vx-label class="mb-2" :tooltip="tips" :label-for="name" :required-symbol="required">{{
       label
     }}</vx-label>
+
     <vx-field
       ref="inputFieldParent"
       class="vx-range-picker-field"
       :class="{ isFocus }"
+      v-model="inputValue"
       v-bind="filteredAttrs"
-      v-model:focused="isFocus"
-      @mouseover="isHovering = true"
-      @mouseout="isHovering = false"
+      :focused="isFocus"
+      :disabled="disabled"
+      @mouseover="!disabled && (isHovering = true)"
+      @mouseout="!disabled && (isHovering = false)"
     >
       <template #append-inner>
         <v-icon
@@ -27,7 +30,7 @@
           v-model:focused="isStartInputFocus"
           ref="startDateInput"
           :placeholder="placeholder[0]"
-          variant="flat"
+          variant="plain"
           class="flex-1-1"
           hide-details
           readonly
@@ -42,7 +45,7 @@
           v-model:focused="isEndInputFocus"
           ref="endDateInput"
           :placeholder="placeholder[1]"
-          variant="flat"
+          variant="plain"
           class="flex-1-1"
           hide-details
           readonly
@@ -97,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, computed, watchEffect, PropType, watch } from 'vue'
+import { defineEmits, ref, computed, PropType, watch } from 'vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import datePickerBase from './DatePickerBase.vue'
 import { useDatePicker, datePickerType } from '@/lib/composables/useDatePicker'
@@ -122,17 +125,18 @@ const props = defineProps({
     type: Array as PropType<(string | number)[]>,
     default: ['', '']
   },
-  tooltip: Boolean,
+  tips: String,
   label: String,
   clearable: Boolean,
   tooltips: String,
   id: String,
   name: String,
   required: Boolean,
+  disabled: Boolean,
   needConfirm: Boolean,
   placeholder: {
-    type: Array as PropType<string[]>,
-    default: []
+    type: [Array, String] as PropType<string[] | string>,
+    default: ['', '']
   },
   datePickerProps: {
     type: Array as PropType<Record<string, any>>,
@@ -151,7 +155,7 @@ const inputValue = ref<(string | number)[]>(['', ''])
 const datePickerValue = ref<(string | number)[]>(['', ''])
 const { showMenu, formatStr, emitDatePickerValue, tempData } = useDatePicker(props, emit)
 
-const isFocus = computed(() => isStartInputFocus.value || isEndInputFocus.value)
+const isFocus = computed(() => (isStartInputFocus.value || isEndInputFocus.value) && showMenu)
 const showClearIcon = computed(
   () =>
     (isHovering.value || isFocus.value || showMenu.value) &&
@@ -159,9 +163,21 @@ const showClearIcon = computed(
     inputValue.value.some((item) => Boolean(item))
 )
 
-watchEffect(() => {
-  convertValueForInputAndDatePicker(props.modelValue)
-})
+watch(
+  () => props.modelValue,
+  () => {
+    convertValueForInputAndDatePicker(props.modelValue)
+  },
+  { immediate: true }
+)
+
+watch(
+  () => tempData,
+  (value) => {
+    console.log('needConfirm')
+    props.needConfirm && convertValueForInputAndDatePicker(tempData.value as (string | number)[])
+  }
+)
 
 function onDatePickerValueChange(value: number, position: 0 | 1) {
   let data = props.modelValue
@@ -242,10 +258,15 @@ function onClickEditDate(index: number) {
   showMenu.value = true
 }
 
+function reset() {
+  current.value = null
+  tempData.value = ['', '']
+}
+
 function onClickClear() {
   if (showClearIcon.value) {
     emitDatePickerValue(['', ''])
-    current.value = null
+    reset()
   }
   showMenu.value = false
 }
@@ -258,9 +279,17 @@ function closeEditData() {
 
 function onClickConfirm() {
   if (hasEventListener('click:confirm')) {
-    emit('click:confirm', { showMenu, value: props.modelValue })
+    new Promise((resolve) => {
+      emit('click:confirm', { next: resolve, value: tempData.value || [] })
+    }).then(() => {
+      emitDatePickerValue(tempData.value || [])
+      reset()
+      showMenu.value = false
+    })
   } else {
-    emitDatePickerValue(tempData.value as number[])
+    console.log(tempData.value, 'tempData.value')
+    emitDatePickerValue(tempData.value || [])
+    reset()
     showMenu.value = false
   }
 }
@@ -280,18 +309,16 @@ function onClickConfirm() {
   }
 
   & > :deep(.v-input) {
+    .v-field--variant-plain {
+      padding: 0 12px;
+      .v-field__input {
+        padding-bottom: 8px;
+      }
+    }
+
     & .vx-range-picker-group + input {
       display: none;
     }
-
-    // &:not(.v-input--error, .v-input--readonly) {
-    //   & > .v-input__control > .v-field {
-    //     &:hover > .v-field__outline,
-    //     & > .v-field__outline {
-    //       color: rgb(var(--v-theme-grey-lighten-2)) !important;
-    //     }
-    //   }
-    // }
 
     & > .v-input__control > .v-field {
       padding-inline-start: 0;
