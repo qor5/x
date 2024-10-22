@@ -6,7 +6,7 @@
 
 #### 公共props
 
-> 该组件继承了 [vx-field的props](/x/Components/VXField/#props)，所以是通用的，以下仅罗列 vx-date-picker 和 vx-range-picker 特有的Props
+> 该组件继承了 [vx-field的props](/Components/VXField/#props)，所以是通用的，以下仅罗列 vx-date-picker 和 vx-range-picker 特有的Props
 
 | Name      | Introduction                         | Type      | Default Value |
 | --------- | ------------------------------------ | --------- | ------------- |
