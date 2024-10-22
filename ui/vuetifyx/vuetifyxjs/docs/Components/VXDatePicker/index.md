@@ -372,7 +372,7 @@ const rangeValue1 = ref([])
         v-model="rangeValue"
         type="datetimepicker"
         :placeholder="['start at', 'end at']"
-        label="vx-range-picker (disabled)"
+        label="vx-range-picker (error)"
         error-messages="This is a error message"
       />
     </v-col>
