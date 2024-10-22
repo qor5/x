@@ -29,7 +29,7 @@
           v-model:focused="isStartInputFocus"
           ref="startDateInput"
           :placeholder="placeholder[0]"
-          variant="flat"
+          variant="plain"
           class="flex-1-1"
           hide-details
           readonly
@@ -44,7 +44,7 @@
           v-model:focused="isEndInputFocus"
           ref="endDateInput"
           :placeholder="placeholder[1]"
-          variant="flat"
+          variant="plain"
           class="flex-1-1"
           hide-details
           readonly
@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, computed, watchEffect, PropType, watch } from 'vue'
+import { defineEmits, ref, computed, PropType, watch } from 'vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import datePickerBase from './DatePickerBase.vue'
 import { useDatePicker, datePickerType } from '@/lib/composables/useDatePicker'
@@ -124,7 +124,7 @@ const props = defineProps({
     type: Array as PropType<(string | number)[]>,
     default: ['', '']
   },
-  tooltip: Boolean,
+  tooltip: String,
   label: String,
   clearable: Boolean,
   tooltips: String,
@@ -134,7 +134,7 @@ const props = defineProps({
   disabled: Boolean,
   needConfirm: Boolean,
   placeholder: {
-    type: Array as PropType<string[]>,
+    type: [Array, String] as PropType<string[] | string>,
     default: ['', '']
   },
   datePickerProps: {
@@ -162,9 +162,21 @@ const showClearIcon = computed(
     inputValue.value.some((item) => Boolean(item))
 )
 
-watchEffect(() => {
-  convertValueForInputAndDatePicker(props.modelValue)
-})
+watch(
+  () => props.modelValue,
+  () => {
+    console.log('modelValue')
+    convertValueForInputAndDatePicker(props.modelValue)
+  }
+)
+
+watch(
+  () => tempData,
+  (value) => {
+    console.log('needConfirm')
+    props.needConfirm && convertValueForInputAndDatePicker(tempData.value as (string | number)[])
+  }
+)
 
 function onDatePickerValueChange(value: number, position: 0 | 1) {
   let data = props.modelValue
@@ -245,10 +257,15 @@ function onClickEditDate(index: number) {
   showMenu.value = true
 }
 
+function reset() {
+  current.value = null
+  tempData.value = ['', '']
+}
+
 function onClickClear() {
   if (showClearIcon.value) {
     emitDatePickerValue(['', ''])
-    current.value = null
+    reset()
   }
   showMenu.value = false
 }
@@ -262,16 +279,17 @@ function closeEditData() {
 function onClickConfirm() {
   if (hasEventListener('click:confirm')) {
     new Promise((resolve) => {
-      emit('click:confirm', { next: resolve, value: tempData.value })
+      emit('click:confirm', { next: resolve, value: tempData.value || [] })
     }).then(() => {
       emitDatePickerValue(tempData.value as number[])
+      reset()
       showMenu.value = false
-      current.value = null
     })
   } else {
     emitDatePickerValue(tempData.value as number[])
+
+    reset()
     showMenu.value = false
-    current.value = null
   }
 }
 </script>
@@ -290,6 +308,13 @@ function onClickConfirm() {
   }
 
   & > :deep(.v-input) {
+    .v-field--variant-plain {
+      padding: 0 12px;
+      .v-field__input {
+        padding-bottom: 8px;
+      }
+    }
+
     & .vx-range-picker-group + input {
       display: none;
     }

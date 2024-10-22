@@ -251,6 +251,7 @@ const rangeValueDateTime = ref(['', ''])
           { min: new Date(), max: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }
         ]"
         needConfirm
+        clearable
         @click:confirm="onClickConfirm"
       />
       <div class="text-caption">当选择了开始值大于结束值，不予保存</div>
@@ -265,8 +266,11 @@ const value = ref(Date.now())
 const valueRangePicker = ref(['', ''])
 
 function onClickConfirm({ value, next }) {
+  console.log(value[0], value[1])
   if (value[0] > value[1]) {
     alert('start date should ahead of the end date !')
+  } else if (!value[0] || !value[1]) {
+    alert('please select a range date')
   } else {
     next()
   }

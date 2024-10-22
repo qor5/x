@@ -54,7 +54,7 @@ import dayjs from 'dayjs'
 const { filteredAttrs } = useFilteredAttrs()
 
 const props = defineProps({
-  modelValue: [String, Number],
+  modelValue: [String, Number, Date],
   tooltip: String,
   name: String,
   required: Boolean,
