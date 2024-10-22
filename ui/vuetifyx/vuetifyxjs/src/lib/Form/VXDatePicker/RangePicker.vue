@@ -3,13 +3,14 @@
     <vx-label class="mb-2" :tooltip="tooltip" :label-for="name" :required-symbol="required">{{
       label
     }}</vx-label>
+
     <vx-field
       ref="inputFieldParent"
       class="vx-range-picker-field"
       :class="{ isFocus }"
       v-model="inputValue"
       v-bind="filteredAttrs"
-      v-model:focused="isFocus"
+      :focused="isFocus"
       :disabled="disabled"
       @mouseover="!disabled && (isHovering = true)"
       @mouseout="!disabled && (isHovering = false)"
@@ -154,7 +155,7 @@ const inputValue = ref<(string | number)[]>(['', ''])
 const datePickerValue = ref<(string | number)[]>(['', ''])
 const { showMenu, formatStr, emitDatePickerValue, tempData } = useDatePicker(props, emit)
 
-const isFocus = computed(() => isStartInputFocus.value || isEndInputFocus.value)
+const isFocus = computed(() => (isStartInputFocus.value || isEndInputFocus.value) && showMenu)
 const showClearIcon = computed(
   () =>
     (isHovering.value || isFocus.value || showMenu.value) &&
@@ -165,7 +166,6 @@ const showClearIcon = computed(
 watch(
   () => props.modelValue,
   () => {
-    console.log('modelValue')
     convertValueForInputAndDatePicker(props.modelValue)
   },
   { immediate: true }
@@ -319,15 +319,6 @@ function onClickConfirm() {
     & .vx-range-picker-group + input {
       display: none;
     }
-
-    // &:not(.v-input--error, .v-input--readonly) {
-    //   & > .v-input__control > .v-field {
-    //     &:hover > .v-field__outline,
-    //     & > .v-field__outline {
-    //       color: rgb(var(--v-theme-grey-lighten-2)) !important;
-    //     }
-    //   }
-    // }
 
     & > .v-input__control > .v-field {
       padding-inline-start: 0;

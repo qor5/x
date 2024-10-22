@@ -6,6 +6,7 @@
     <vx-field
       v-model="inputValue"
       :placeholder="placeholder"
+      :focused="isFocus"
       ref="inputRef"
       @blur="onInputBlur"
       @mouseover="isHovering = true"
@@ -41,6 +42,8 @@
           :datePickerProps="datePickerProps"
         />
       </v-overlay>
+
+      <input readonly class="input-cover" :value="inputValue" :placeholder="placeholder" />
     </vx-field>
   </div>
 </template>
@@ -76,6 +79,7 @@ const inputValue = ref()
 const inputRef = ref()
 const datePickerValue = ref()
 const isHovering = ref(false)
+const isFocus = computed(() => showMenu.value)
 const emit = defineEmits(['update:modelValue'])
 const { showMenu, formatStr, emitDatePickerValue } = useDatePicker(props, emit)
 
@@ -154,6 +158,22 @@ function onClickAppendInner() {
 .v-menu {
   &:deep(.v-overlay__content) {
     border-radius: 8px !important;
+  }
+}
+
+.vx-datepicker-wrap {
+  &:deep(.v-input) {
+    .input-cover {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    & input:not(.input-cover) {
+      display: none;
+    }
   }
 }
 </style>
