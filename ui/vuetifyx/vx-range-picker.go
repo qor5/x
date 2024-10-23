@@ -39,7 +39,7 @@ func (b *VXRangePickerBuilder) Id(v string) (r *VXRangePickerBuilder) {
 }
 
 func (b *VXRangePickerBuilder) Placeholder(v interface{}) (r *VXRangePickerBuilder) {
-	b.tag.Attr("placeholder", h.JSONString(v))
+	b.tag.Attr(":placeholder", h.JSONString(v))
 	return b
 }
 
