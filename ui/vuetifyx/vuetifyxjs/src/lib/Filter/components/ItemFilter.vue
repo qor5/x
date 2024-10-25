@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { FilterItem } from '@/lib/Filter/Model'
 import FilterButton from '@/lib/Filter/components/FilterButton.vue'
-import { inject, ref, watch } from 'vue'
+import { inject, ref, Ref, watch } from 'vue'
 import cloneDeep from 'lodash/cloneDeep'
 
 const props = defineProps<{
@@ -17,14 +17,16 @@ const props = defineProps<{
 const value = ref(cloneDeep(props.modelValue))
 const menu = ref(false)
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
-const currentOpenMenu = inject('currentOpenMenu')
-const openMenu = inject('openMenu')
+const openMenu = inject<(val: string) => void>('openMenu')
+const currentOpenMenu = inject<Ref<string>>('currentOpenMenu', ref(''))
 
 watch(
   () => menu.value,
   (isOpen) => {
     if (isOpen) {
-      openMenu(props.indexKey)
+      if (openMenu) {
+        openMenu(props.indexKey)
+      }
       value.value = cloneDeep(props.modelValue)
     }
   }
