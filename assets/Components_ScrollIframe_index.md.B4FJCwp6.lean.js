@@ -1,4 +1,4 @@
-import{e as n}from"./chunks/theme.0IVfKo5V.js";import{f as B,d as C,a5 as F,R as r,W as d,l,V as h,O as i,F as c,$ as s}from"./chunks/framework.DB09DMR2.js";const o=B({__name:"virtual:index.md.222172d6",setup(A){const k=C(),E=C(`
+import{e as n}from"./chunks/theme.BblvlNvQ.js";import{f as B,d as C,a5 as F,R as r,W as d,l,V as h,O as i,F as c,$ as s}from"./chunks/framework.DB09DMR2.js";const o=B({__name:"virtual:index.md.222172d6",setup(A){const k=C(),E=C(`
 <!DOCTYPE html>
 <body>
    <div id="app">
