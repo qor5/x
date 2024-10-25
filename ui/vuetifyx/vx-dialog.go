@@ -119,6 +119,10 @@ func (b *VXDialogBuilder) Width(v int) (r *VXDialogBuilder) {
 	b.tag.Attr(":width", h.JSONString(v))
 	return b
 }
+func (b *VXDialogBuilder) Height(v int) (r *VXDialogBuilder) {
+	b.tag.Attr(":height", h.JSONString(v))
+	return b
+}
 
 func (b *VXDialogBuilder) MaxWidth(v int) (r *VXDialogBuilder) {
 	b.tag.Attr("max-width", h.JSONString(v))

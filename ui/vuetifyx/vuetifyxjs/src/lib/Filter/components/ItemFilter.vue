@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { FilterItem } from '@/lib/Filter/Model'
 import FilterButton from '@/lib/Filter/components/FilterButton.vue'
-import { ref, watch } from 'vue'
+import { inject, ref, Ref, watch } from 'vue'
 import cloneDeep from 'lodash/cloneDeep'
 
 const props = defineProps<{
@@ -12,19 +12,30 @@ const props = defineProps<{
   compTranslations: any
   internalValue: any
   index: number
+  indexKey: string
 }>()
 const value = ref(cloneDeep(props.modelValue))
 const menu = ref(false)
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
+const openMenu = inject<(val: string) => void>('openMenu')
+const currentOpenMenu = inject<Ref<string>>('currentOpenMenu', ref(''))
 
 watch(
   () => menu.value,
   (isOpen) => {
     if (isOpen) {
+      if (openMenu) {
+        openMenu(props.indexKey)
+      }
       value.value = cloneDeep(props.modelValue)
     }
   }
 )
+watch(currentOpenMenu, (key) => {
+  if (key != props.indexKey) {
+    menu.value = false
+  }
+})
 
 const clickDone = () => {
   menu.value = false
@@ -75,9 +86,9 @@ const clear = (e: any) => {
       <div>{{ modelValue.translations?.filterBy }}</div>
       <component v-model="value" :is="itemComp" :translations="compTranslations"></component>
       <div>
-        <v-btn class="mt-5 float-right" color="primary" rounded @click="clickDone">{{
-          translations.apply
-        }}</v-btn>
+        <v-btn class="mt-5 float-right" color="primary" rounded @click="clickDone"
+          >{{ translations.apply }}
+        </v-btn>
       </div>
     </v-card>
   </v-menu>
