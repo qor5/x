@@ -2,6 +2,9 @@
   <div class="vx-label-wrap">
     <!-- label-title -->
     <div class="vx-label-title d-flex align-center">
+      <!-- prepend slot -->
+      <slot name="prepend" />
+
       <!-- toggle-label has click event -->
       <template v-if="toggleLabel">
         <span class="toggle-label-wrap" @click="onClickToggleLabel">
