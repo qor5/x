@@ -203,3 +203,28 @@
     }
   }
 }
+
+.sortable-label {
+  &:hover {
+    .section-sortable-area {
+      display: block;
+    }
+  }
+}
+
+.section-sortable-area {
+  display: none;
+  position: absolute;
+  border: 1px solid transparent;
+  padding-right: 4px;
+  margin-left: -30px;
+  z-index: 1;
+  .section-sortable-group {
+    .v-btn.v-btn--disabled {
+      background: #fff;
+      .v-btn__overlay {
+        opacity: 0;
+      }
+    }
+  }
+}
