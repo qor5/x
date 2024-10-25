@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, provide, ref } from 'vue'
 import { encodeFilterData, filterData } from '@/lib/Filter/FilterData'
 import { FilterItem } from '@/lib/Filter/Model'
 import ItemFilter from '@/lib/Filter/components/ItemFilter.vue'
@@ -122,7 +122,11 @@ const clear = (e: any) => {
   e.stopPropagation()
 }
 
-const filtersGetFunc = (f: (item: FilterItem) => boolean, isFoldedItem: boolean) => {
+const filtersGetFunc = (
+  f: (item: FilterItem) => boolean,
+  isFoldedItem: boolean,
+  prefix: string
+) => {
   return (itemTypes: any, trans: any) => {
     return props.internalValue
       .filter((op: FilterItem) => {
@@ -140,21 +144,29 @@ const filtersGetFunc = (f: (item: FilterItem) => boolean, isFoldedItem: boolean)
           isFoldedItem: isFoldedItem,
           translations: props.translations,
           compTranslations: trans[op.itemType],
-          index: i
+          index: i,
+          indexKey: `${prefix}_${i}`
         }
       })
   }
 }
+const currentOpenMenu = ref('')
+const openMenu = (val: string) => {
+  currentOpenMenu.value = val
+}
+
+provide('currentOpenMenu', currentOpenMenu)
+provide('openMenu', openMenu)
 
 const fixedFilters = computed(() => {
-  return filtersGetFunc((item) => !item.folded, false)(itemTypes, trans)
+  return filtersGetFunc((item) => !item.folded, false, 'fixed')(itemTypes, trans)
 })
 
 const otherSelectedFilters = computed(() => {
-  return filtersGetFunc((item) => item.folded && !!item.selected, false)(itemTypes, trans)
+  return filtersGetFunc((item) => item.folded && !!item.selected, false, 'other')(itemTypes, trans)
 })
 const foldedFilters = computed(() => {
-  return filtersGetFunc((item) => item.folded && !item.selected, true)(itemTypes, trans)
+  return filtersGetFunc((item) => item.folded && !item.selected, true, 'folder')(itemTypes, trans)
 })
 </script>
 

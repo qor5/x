@@ -17,10 +17,11 @@ import (
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 	"github.com/qor5/web/v3"
-	"github.com/qor5/x/v3/i18n"
 	h "github.com/theplant/htmlgo"
 	"golang.org/x/text/language"
 	"gorm.io/gorm"
+
+	"github.com/qor5/x/v3/i18n"
 )
 
 var (
@@ -252,6 +253,15 @@ func (b *Builder) OAuthProviders(vs ...*Provider) (r *Builder) {
 
 func (b *Builder) AuthCookieName(v string) (r *Builder) {
 	b.authCookieName = v
+	return b
+}
+
+func (b *Builder) AuthSecureCookieName(v string) *Builder {
+	b.authSecureCookieName = v
+	return b
+}
+func (b *Builder) ContinueUrlCookieName(v string) *Builder {
+	b.continueUrlCookieName = v
 	return b
 }
 
