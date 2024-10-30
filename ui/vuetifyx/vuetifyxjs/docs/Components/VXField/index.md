@@ -281,6 +281,17 @@ const dataTextErrorMessages = ref('This is a description')
         label="Password with error"
       />
     </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field
+        type="password"
+        password-visible-toggle
+        clearable
+        placeholder="Please enter password"
+        error-messages="This is an error message explanation"
+        label="Password with error with eye btn"
+      />
+    </v-col>
   </v-row>
 </template>
 

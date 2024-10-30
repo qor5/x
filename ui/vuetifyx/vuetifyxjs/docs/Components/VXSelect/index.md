@@ -48,6 +48,21 @@
   />
 
   <vx-select
+    type="autocomplete"
+    v-model="valueAutoComplete"
+    multiple
+    chips
+    clearable
+    error-messages="error message"
+    label="autoComplete Select(state with error)"
+    :items="items"
+    item-title="name"
+    item-value="id"
+    placeholder="choose a item"
+    closable-chips
+  />
+
+  <vx-select
     v-model="valueNormal"
     label="Normal Select"
     :items="items"
@@ -69,8 +84,9 @@
   <vx-select
     v-model="valueWithErrorMsg"
     label="Select with Error messages"
-    error-messages="This is an error message explanation"
+    :error-messages="['This is an error message explanation']"
     :items="items"
+    clearable
     item-title="name"
     item-value="id"
     placeholder="choose a item"
@@ -84,6 +100,20 @@
     item-value="id"
     placeholder="choose a item"
     multiple
+    chips
+    closable-chips
+    clearable
+  />
+
+  <vx-select
+    v-model="valueWithErrorMsg"
+    label="vx-select disabled"
+    :items="items"
+    item-title="name"
+    item-value="id"
+    placeholder="choose a item"
+    multiple
+    disabled
     chips
     closable-chips
     clearable

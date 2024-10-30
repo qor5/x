@@ -163,6 +163,13 @@ defineExpose(
       color: rgb(var(--v-theme-grey-lighten-2));
     }
 
+    &.v-input--error:deep(.v-field__clearable),
+    &.v-input--error:deep(.v-field__append-inner) {
+      .v-icon {
+        color: rgb(var(--v-theme-grey-darken-3));
+      }
+    }
+
     &:deep(.v-input__details > .v-messages) {
       order: 1;
     }
