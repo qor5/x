@@ -14,7 +14,7 @@
       :clearable="clearable"
       :placeholder="placeholder"
       :disabled="disabled"
-      :error-messages="errorFiled"
+      :error-messages="errorMessages"
       :hide-details="hideDetails"
       v-bind="filteredAttrs"
       class="vx-type-autocomplete"
@@ -36,7 +36,7 @@
       :clearable="clearable"
       :placeholder="placeholder"
       :disabled="disabled"
-      :error-messages="errorFiled"
+      :error-messages="errorMessages"
       :hideDetails="hideDetails"
       v-bind="filteredAttrs"
       class="vx-type-select"
@@ -77,7 +77,6 @@ const props = defineProps({
 })
 
 const selectValue = ref(props.modelValue)
-const errorFiled = ref(props.errorMessages)
 
 watch(
   () => props.modelValue,
