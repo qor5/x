@@ -14,7 +14,7 @@
       :clearable="clearable"
       :placeholder="placeholder"
       :disabled="disabled"
-      :error-messages="errorFiled"
+      :error-messages="errorMessages"
       :hide-details="hideDetails"
       v-bind="filteredAttrs"
       class="vx-type-autocomplete"
@@ -36,7 +36,7 @@
       :clearable="clearable"
       :placeholder="placeholder"
       :disabled="disabled"
-      :error-messages="errorFiled"
+      :error-messages="errorMessages"
       :hideDetails="hideDetails"
       v-bind="filteredAttrs"
       class="vx-type-select"
@@ -77,7 +77,6 @@ const props = defineProps({
 })
 
 const selectValue = ref(props.modelValue)
-const errorFiled = ref(props.errorMessages)
 
 watch(
   () => props.modelValue,
@@ -141,6 +140,13 @@ function onUpdateModelValue(value: any) {
 
     &:not(.v-input--error):deep(.v-field__outline) {
       color: rgb(var(--v-theme-grey-lighten-2));
+    }
+
+    &.v-input--error:deep(.v-field__clearable),
+    &.v-input--error:deep(.v-field__append-inner) {
+      .v-icon {
+        color: rgb(var(--v-theme-grey-darken-3));
+      }
     }
 
     &:deep(.v-input__details) {

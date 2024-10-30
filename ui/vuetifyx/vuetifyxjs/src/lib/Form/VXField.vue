@@ -53,7 +53,10 @@
         inset
         v-bind="combinedProps"
       >
-        <template #prepend-inner="{ isActive, isFocused, controlRef, focus, blur }">
+        <template
+          v-if="hasPrependInnerSlot"
+          #prepend-inner="{ isActive, isFocused, controlRef, focus, blur }"
+        >
           <slot name="prepend-inner" :props="{ isActive, isFocused, controlRef, focus, blur }" />
         </template>
       </v-number-input>
@@ -89,6 +92,7 @@ const vInputRef = ref()
 const vInputFocus = ref(false)
 const slots = useSlots()
 const hasAppendInnerSlot = slots['append-inner'] !== undefined
+const hasPrependInnerSlot = slots['prepend-inner'] !== undefined
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
   modelValue: [String, Number, Array] as PropType<string | string[]>,
@@ -157,6 +161,13 @@ defineExpose(
 
     &:not(.v-input--error):deep(.v-field__outline) {
       color: rgb(var(--v-theme-grey-lighten-2));
+    }
+
+    &.v-input--error:deep(.v-field__clearable),
+    &.v-input--error:deep(.v-field__append-inner) {
+      .v-icon {
+        color: rgb(var(--v-theme-grey-darken-3));
+      }
     }
 
     &:deep(.v-input__details > .v-messages) {
