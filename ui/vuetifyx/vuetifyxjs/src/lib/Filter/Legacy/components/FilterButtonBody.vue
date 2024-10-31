@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { FilterItem } from '@/lib/Filter/Model'
+import { FilterItem } from '@/lib/Filter/Legacy/Model'
 import { computed } from 'vue'
-import * as constants from '@/lib/Filter/Constants'
+import * as constants from '@/lib/Filter/Legacy/Constants'
 // import { b } from 'vitest/dist/suite-IbNSsUWN'
 
 const props = defineProps<{ op: FilterItem }>()

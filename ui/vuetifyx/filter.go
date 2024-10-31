@@ -22,10 +22,10 @@ type VXFilterBuilder struct {
 	updateModelValue interface{}
 }
 
-func VXFilter(value FilterData) (r *VXFilterBuilder) {
+func VXLegacyFilter(value FilterData) (r *VXFilterBuilder) {
 	r = &VXFilterBuilder{
 		internalValue: value,
-		tag:           h.Tag("vx-filter"),
+		tag:           h.Tag("vx-legacy-filter"),
 	}
 
 	return
@@ -165,8 +165,10 @@ const (
 
 type FilterItemInTheLastUnit string
 
-type FilterData []*FilterItem
-type ValidateFunc func(ctx *web.EventContext, vErr *web.ValidationErrors, it *FilterItem)
+type (
+	FilterData   []*FilterItem
+	ValidateFunc func(ctx *web.EventContext, vErr *web.ValidationErrors, it *FilterItem)
+)
 
 type SelectItem struct {
 	Text         string `json:"text,omitempty"`
@@ -263,7 +265,6 @@ var sqlOps = map[string]string{
 const SQLOperatorPlaceholder = "{op}"
 
 func (fd FilterData) SetByQueryString(ctx *web.EventContext, qs string) (sqlCondition string, sqlArgs []interface{}, vErr web.ValidationErrors) {
-
 	queryMap, err := url.ParseQuery(qs)
 	if err != nil {
 		panic(err)

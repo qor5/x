@@ -14,13 +14,14 @@ import SelectMany from '@/lib/SelectMany.vue'
 import LinkageSelect from '@/lib/LinkageSelect.vue'
 import Autocomplete from '@/lib/Autocomplete.vue'
 import TextDatepicker from '@/lib/TextDatepicker.vue'
-import Filter from '@/lib/Filter/index.vue'
+import LegacyFilter from '@/lib/Filter/Legacy/index.vue'
 import RestoreScrollListener from '@/lib/RestoreScrollListener.vue'
 import ScrollIframe from '@/lib/ScrollIframe.vue'
 import draggable from 'vuedraggable'
 import SendVariables from '@/lib/SendVariables.vue'
 import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
+import VXFilter from '@/lib/Filter/index.vue'
 import VXRangepicker from '@/lib/Form/VXDatePicker/RangePicker.vue'
 import VXDatepicker from '@/lib/Form/VXDatePicker/DatePicker.vue'
 import VXField from '@/lib/Form/VXField.vue'
@@ -61,7 +62,8 @@ const vuetifyx = {
     // overlay
     app.component('vx-overlay', Overlay)
     // filter
-    app.component('vx-filter', Filter)
+    app.component('vx-filter', VXFilter)
+    app.component('vx-legacy-filter', LegacyFilter)
     // others
     app.component('vx-avatar', VXAvatar)
     app.component('vx-toolbar', VXToolbar)

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { FilterItem } from '@/lib/Filter/Model'
-import FilterButtonBody from '@/lib/Filter/components/FilterButtonBody.vue'
+import { FilterItem } from '@/lib/Filter/Legacy/Model'
+import FilterButtonBody from '@/lib/Filter/Legacy/components/FilterButtonBody.vue'
 
 const props = defineProps<{ op: FilterItem; isFoldedItem: boolean; slotProps: any }>()
 

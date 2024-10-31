@@ -1,4 +1,4 @@
-import * as constants from '@/lib/Filter/Constants'
+import * as constants from '@/lib/Filter/Legacy/Constants'
 
 function pushKeyVal(segs: any, key: string, mod: string, val: any) {
   const modWithDot = mod ? `.${mod}` : ''

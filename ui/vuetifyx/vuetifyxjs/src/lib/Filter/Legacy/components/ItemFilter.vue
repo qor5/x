@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { FilterItem } from '@/lib/Filter/Model'
-import FilterButton from '@/lib/Filter/components/FilterButton.vue'
+import { FilterItem } from '@/lib/Filter/Legacy/Model'
+import FilterButton from '@/lib/Filter/Legacy/components/FilterButton.vue'
 import { inject, ref, Ref, watch } from 'vue'
 import cloneDeep from 'lodash/cloneDeep'
 
