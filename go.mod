@@ -3,7 +3,7 @@ module github.com/qor5/x/v3
 go 1.22.5
 
 require (
-	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/iancoleman/strcase v0.3.0
