@@ -1,5 +1,5 @@
 <template>
-  <div class="vx-field-wrap">
+  <div class="vx-field-wrap" :class="rootAttrs.class" :style="rootAttrs.style">
     <VXLabel
       v-if="label"
       :label-for="name"
@@ -82,12 +82,12 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, defineExpose, computed, useSlots, PropType } from 'vue'
+import { defineEmits, ref, defineExpose, computed, useSlots, PropType, defineOptions } from 'vue'
 import VXLabel from '../Common/VXLabel.vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import useBindingValue from '@/lib/composables/useBindingValue'
 import { forwardRefs } from '@/lib/composables/forwardRefs'
-const { filteredAttrs } = useFilteredAttrs()
+const { filteredAttrs, rootAttrs } = useFilteredAttrs()
 const vInputRef = ref()
 const vInputFocus = ref(false)
 const slots = useSlots()
@@ -97,9 +97,9 @@ const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
   modelValue: [String, Number, Array] as PropType<string | string[]>,
   label: String,
+  id: String,
   type: String,
   tips: String,
-  id: String,
   name: String,
   required: Boolean,
   passwordVisibleToggle: [Boolean, undefined] as PropType<boolean | undefined>,
@@ -112,6 +112,11 @@ const passwordFieldType = computed(() => {
   if (props.passwordVisibleToggle === undefined) return 'password'
 
   return passwordVisible.value ? 'text' : 'password'
+})
+
+// bugfix: bind event will auto bind to rootElement, and result in trigger twice
+defineOptions({
+  inheritAttrs: false
 })
 
 const combinedProps = computed(() => ({
