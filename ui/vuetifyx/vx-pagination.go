@@ -11,7 +11,7 @@ type VXPaginationBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VPagination(children ...h.HTMLComponent) (r *VXPaginationBuilder) {
+func VXPagination(children ...h.HTMLComponent) (r *VXPaginationBuilder) {
 	r = &VXPaginationBuilder{
 		tag: h.Tag("vx-pagination").Children(children...),
 	}
