@@ -52,6 +52,10 @@ export default {
         {
           text: 'Avatar 头像',
           link: '/Components/VXAvatar/'
+        },
+        {
+          text: 'Pagination 分页器',
+          link: '/Components/VXPagination/'
         }
       ]
     },
