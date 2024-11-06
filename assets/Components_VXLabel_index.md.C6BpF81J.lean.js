@@ -1,4 +1,4 @@
-import{v as C,e as n}from"./chunks/theme.Br6Xqhn6.js";import{f as g,d as p,a5 as d,R as F,W as A,$ as s,l as E,V as l,O as i,F as y,az as D}from"./chunks/framework.DB09DMR2.js";const B={class:"section-sortable-area"},o={class:"section-sortable-area"},c=g({__name:"virtual:index.md.d8377020",setup(r){const e=p(`{
+import{v as C,e as n}from"./chunks/theme.Dmc6NUzV.js";import{f as g,d as p,a5 as d,R as F,W as A,$ as s,l as E,V as l,O as i,F as y,az as D}from"./chunks/framework.DB09DMR2.js";const B={class:"section-sortable-area"},o={class:"section-sortable-area"},c=g({__name:"virtual:index.md.d8377020",setup(r){const e=p(`{
       "defaultValue": {
               "value": "3426"
       },
