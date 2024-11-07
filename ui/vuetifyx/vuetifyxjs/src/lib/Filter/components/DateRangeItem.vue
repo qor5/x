@@ -36,6 +36,7 @@ if (options) {
       :hide-details="true"
       :clear-text="translations['clear']"
       :ok-text="translations['ok']"
+      :label="translations['startAt']"
       v-bind="fromOption"
     />
     <div style="height: 34px" class="pl-2 pt-4">
@@ -47,6 +48,7 @@ if (options) {
       :hide-details="true"
       :clear-text="translations['clear']"
       :ok-text="translations['ok']"
+      :label="translations['endAt']"
       v-bind="toOption"
     />
   </div>
