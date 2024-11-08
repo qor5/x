@@ -16,9 +16,9 @@
 
 ### Events
 
-| Name              | Payload  | Introduction            |
-| ----------------- | -------- | ----------------------- |
-| update:modelValue | `number` | 弹窗 model 值改变时触发 |
+| Name              | Payload  | Introduction       |
+| ----------------- | -------- | ------------------ |
+| update:modelValue | `number` | model 值改变时触发 |
 
 ## 示例
 

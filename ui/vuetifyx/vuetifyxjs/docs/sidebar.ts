@@ -76,6 +76,10 @@ export default {
       text: '其他',
       items: [
         {
+          text: 'Tabs 选项卡',
+          link: '/Components/VXTabs/'
+        },
+        {
           text: 'ScrollIframe 组件',
           link: '/Components/ScrollIframe/'
         },

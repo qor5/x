@@ -1,6 +1,7 @@
 import { computed, useAttrs } from 'vue'
 
 interface FilteredAttrs {
+  attrs: Record<string, any>
   filteredAttrs: Record<string, any>
   rootAttrs: Record<string, any>
 }
@@ -24,6 +25,7 @@ export function useFilteredAttrs(): FilteredAttrs {
   })
 
   return {
+    attrs,
     filteredAttrs,
     rootAttrs
   }
