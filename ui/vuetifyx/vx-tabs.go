@@ -11,7 +11,7 @@ type VXTabsBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VTabs(children ...h.HTMLComponent) (r *VXTabsBuilder) {
+func VXTabs(children ...h.HTMLComponent) (r *VXTabsBuilder) {
 	r = &VXTabsBuilder{
 		tag: h.Tag("vx-tabs").Children(children...),
 	}
