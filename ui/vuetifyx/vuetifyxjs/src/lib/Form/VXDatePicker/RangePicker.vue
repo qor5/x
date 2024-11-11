@@ -19,7 +19,7 @@
         <v-icon
           :icon="showClearIcon ? 'mdi-close-circle' : 'mdi-calendar-range-outline'"
           size="x-small"
-          @click="onClickClear"
+          @click.stop="onClickAppendInner"
         />
       </template>
 
@@ -38,7 +38,7 @@
           @keydown.enter="onInputBlur(inputValue[0], 0)"
           @click="onClickEditDate(0)"
         />
-        <div class="separator" />
+        <div class="separator" @click.stop="showMenu = true" />
         <vx-field
           :class="{ current: current === 1 }"
           v-model="inputValue[1]"
@@ -263,12 +263,14 @@ function reset() {
   tempData.value = ['', '']
 }
 
-function onClickClear() {
+function onClickAppendInner() {
   if (showClearIcon.value) {
     emitDatePickerValue(['', ''])
     reset()
+    showMenu.value = false
+  } else {
+    showMenu.value = true
   }
-  showMenu.value = false
 }
 
 function closeEditData() {
