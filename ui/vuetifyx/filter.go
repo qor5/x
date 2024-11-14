@@ -108,9 +108,11 @@ type FilterTranslations struct {
 	Apply string `json:"apply,omitempty"`
 
 	Date struct {
-		To    string `json:"to,omitempty"`
-		Clear string `json:"clear,omitempty"`
-		OK    string `json:"ok,omitempty"`
+		StartAt string `json:"startAt,omitempty"`
+		EndAt   string `json:"endAt,omitempty"`
+		To      string `json:"to,omitempty"`
+		Clear   string `json:"clear,omitempty"`
+		OK      string `json:"ok,omitempty"`
 	} `json:"date,omitempty"`
 
 	Number struct {
@@ -165,8 +167,10 @@ const (
 
 type FilterItemInTheLastUnit string
 
-type FilterData []*FilterItem
-type ValidateFunc func(ctx *web.EventContext, vErr *web.ValidationErrors, it *FilterItem)
+type (
+	FilterData   []*FilterItem
+	ValidateFunc func(ctx *web.EventContext, vErr *web.ValidationErrors, it *FilterItem)
+)
 
 type SelectItem struct {
 	Text         string `json:"text,omitempty"`
@@ -263,7 +267,6 @@ var sqlOps = map[string]string{
 const SQLOperatorPlaceholder = "{op}"
 
 func (fd FilterData) SetByQueryString(ctx *web.EventContext, qs string) (sqlCondition string, sqlArgs []interface{}, vErr web.ValidationErrors) {
-
 	queryMap, err := url.ParseQuery(qs)
 	if err != nil {
 		panic(err)
