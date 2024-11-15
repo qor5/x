@@ -96,7 +96,7 @@
     padding-bottom: 40px;
   }
 
-  .v-slide-group {
+  .v-slide-group:not(.vx-tabs-wrap) {
     border-block-end-width: thin !important;
     border-block-end-style: solid !important;
     border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
