@@ -8,6 +8,6 @@ fi
 
 rm -r $CUR/tiptapjs/dist
 echo "Building tiptapjs"
-cd $CUR/tiptapjs && npm install && npm run build
+cd $CUR/tiptapjs && pnpm install && pnpm run build
 
 # @snippet_end
