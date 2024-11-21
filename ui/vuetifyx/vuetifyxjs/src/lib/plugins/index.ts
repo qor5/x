@@ -29,7 +29,9 @@ import VXCheckbox from '../Form/VXCheckbox.vue'
 import VXToolbar from '@/lib/Common/VXToolBar.vue'
 import VXLabel from '@/lib/Common/VXLabel.vue'
 import VXDialog from '@/lib/Common/VXDialog.vue'
+import VXPagination from '@/lib/Common/VXPagination.vue'
 import VXAvatar from '@/lib/VXAvatar.vue'
+import VXTabs from '@/lib/Tabs/VXTabs.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 import LinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
 
@@ -63,6 +65,8 @@ const vuetifyx = {
     // filter
     app.component('vx-filter', Filter)
     // others
+    app.component('vx-tabs', VXTabs)
+    app.component('vx-pagination', VXPagination)
     app.component('vx-avatar', VXAvatar)
     app.component('vx-toolbar', VXToolbar)
     app.component('vx-draggable', draggable)

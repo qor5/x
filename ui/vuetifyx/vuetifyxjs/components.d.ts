@@ -10,6 +10,8 @@ declare module 'vue' {
     Autocomplete: typeof import('./src/lib/Autocomplete.vue')['default']
     AutoCompleteItem: typeof import('./src/lib/Filter/components/AutoCompleteItem.vue')['default']
     CallbackActionButton: typeof import('./src/lib/TiptapEditor/Extensions/CallbackActionButton.vue')['default']
+    CheckboxFilledOutline: typeof import('./src/lib/icons/checkbox-filled-outline.vue')['default']
+    CheckboxOnFilledOutline: typeof import('./src/lib/icons/checkbox-on-filled-outline.vue')['default']
     DateItem: typeof import('./src/lib/Filter/components/DateItem.vue')['default']
     Datepicker: typeof import('./src/lib/Datepicker.vue')['default']
     DatePicker: typeof import('./src/lib/Form/VXDatePicker/DatePicker.vue')['default']
@@ -46,7 +48,9 @@ declare module 'vue' {
     VXDialog: typeof import('./src/lib/Common/VXDialog.vue')['default']
     VXField: typeof import('./src/lib/Form/VXField.vue')['default']
     VXLabel: typeof import('./src/lib/Common/VXLabel.vue')['default']
+    VXPagination: typeof import('./src/lib/Common/VXPagination.vue')['default']
     VXSelect: typeof import('./src/lib/Form/VXSelect.vue')['default']
+    VXTabs: typeof import('./src/lib/Tabs/VXTabs.vue')['default']
     VXToolBar: typeof import('./src/lib/Common/VXToolBar.vue')['default']
   }
 }
