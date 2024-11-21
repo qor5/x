@@ -260,6 +260,7 @@ func (b *Builder) AuthSecureCookieName(v string) *Builder {
 	b.authSecureCookieName = v
 	return b
 }
+
 func (b *Builder) ContinueUrlCookieName(v string) *Builder {
 	b.continueUrlCookieName = v
 	return b
@@ -884,8 +885,8 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 	user, err = b.authUserPass(account, password)
 	if err != nil {
 		if err == ErrUserGetLocked && b.afterUserLockedHook != nil {
-			if err = b.wrapHook(b.afterUserLockedHook)(r, user); err != nil {
-				setNoticeOrPanic(w, err)
+			if herr := b.wrapHook(b.afterUserLockedHook)(r, user); herr != nil {
+				setNoticeOrPanic(w, herr)
 				return
 			}
 		}
