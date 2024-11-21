@@ -1,7 +1,8 @@
 @use '../utils' as utils;
 @import '../variables';
 // resize button style in v-slide-group (filter compo)
-.v-slide-group {
+// plz use vx-tabs-wrap instead of v-tabs
+.v-slide-group:not(.vx-tabs-wrap) {
   .v-slide-group__content {
     flex: initial;
     border-block-end-width: thin;

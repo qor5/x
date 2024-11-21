@@ -32,7 +32,7 @@ table {
 }
 
 /** fix: v-tab item have box-shadow which cropped by v-window's property overflow:hidden **/
-.v-slide-group ~ .v-window {
+.v-slide-group:not(.vx-tabs-wrap) ~ .v-window {
   padding-left: 20px;
   padding-right: 20px;
   padding-bottom: 20px;

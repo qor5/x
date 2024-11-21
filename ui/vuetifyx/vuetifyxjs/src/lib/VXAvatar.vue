@@ -21,6 +21,7 @@ import { defineProps, PropType, computed, ref } from 'vue'
 
 const sizeMap = {
   'x-small': 16,
+
   small: 32,
   default: 40,
   large: 64,
