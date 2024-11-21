@@ -47,23 +47,13 @@
     <v-col cols="4">
       <div class="mb-2">4. true label</div>
 
-      <vx-checkbox
-        :model-value="true"
-        label="Checkbox"
-        true-label="Yes"
-        false-label="NO"
-      />
+      <vx-checkbox :model-value="true" label="Checkbox" true-label="Yes" false-label="NO" />
     </v-col>
 
     <v-col cols="4">
       <div class="mb-2">5. false label</div>
 
-      <vx-checkbox
-        :model-value="false"
-        label="Checkbox"
-        true-label="Yes"
-        false-label="NO"
-      />
+      <vx-checkbox :model-value="false" label="Checkbox" true-label="Yes" false-label="NO" />
     </v-col>
 
     <v-col cols="4">
@@ -121,9 +111,14 @@
 
   <v-row>
     <v-col>
+      <vx-checkbox :model-value="false" title="带标题 title" label="Checkbox" />
+    </v-col>
+
+    <v-col style="background-color: #f5f5f5;">
       <vx-checkbox
         :model-value="false"
-        title="带标题 title"
+        icon="mdi-circle-outline"
+        title="复选框背景色为白色"
         label="Checkbox"
       />
     </v-col>
