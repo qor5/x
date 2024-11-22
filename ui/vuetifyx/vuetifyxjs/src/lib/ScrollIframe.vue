@@ -129,7 +129,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="mx-auto" ref="container" :style="{ height: iframeHeight, width: width }">
+  <div ref="container" :style="{ height: iframeHeight, width: width }">
     <iframe
       ref="iframe"
       :srcdoc="srcdoc"
