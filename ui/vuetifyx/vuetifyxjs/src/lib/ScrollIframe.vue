@@ -7,6 +7,7 @@ const parentEle = ref()
 const currentEle = ref()
 const container = ref()
 const height = ref()
+let resizable = false
 const props = defineProps({
   srcdoc: { type: String, required: true },
   iframeHeightName: { type: String, required: true },
@@ -20,7 +21,12 @@ const virtualHeight = props.virtualElementHeight
 
 const resizeObserver = new ResizeObserver((entries) => {
   for (let entry of entries) {
+    if (!container.value) {
+      return
+    }
     if (
+      iframe.value &&
+      iframe.value.contentWindow &&
       entry.contentRect.width >= iframe.value.contentWindow.document.documentElement.scrollWidth
     ) {
       container.value.style.overflow = ''
@@ -35,12 +41,16 @@ const resizeObserver = new ResizeObserver((entries) => {
 })
 
 onUnmounted(() => {
+  if (!container.value) {
+    return
+  }
   resizeObserver.unobserve(container.value)
   resizeObserver.disconnect()
+  resizable = false
 })
 
 const load = (event: any) => {
-  if (!iframe.value) {
+  if (!iframe.value || !iframe.value.contentWindow) {
     return
   }
   height.value = iframe.value.contentWindow.document.documentElement.scrollHeight
@@ -50,7 +60,10 @@ const load = (event: any) => {
   setIframeContainerHeight(0)
   document.cookie = `${props.iframeHeightName}=` + height.value + 'px'
   scrollToCurrentContainer(props.containerDataId)
-  resizeObserver.observe(container.value)
+  if (!resizable) {
+    resizeObserver.observe(container.value)
+    resizable = true
+  }
 }
 const removeHighlightClass = () => {
   const iframeDocument = iframe.value.contentDocument || iframe.value.contentWindow.document
@@ -73,7 +86,7 @@ const scrollToCurrentContainer = (data: any) => {
     return
   }
   current.classList.add('highlight')
-  window.parent.scroll({ top: current.offsetTop, behavior: 'smooth' })
+  container.value.scrollTo({ top: current.offsetTop, behavior: 'smooth' })
 }
 
 const createVirtualElement = () => {
@@ -126,7 +139,7 @@ const appendVirtualElement = () => {
   }
   if (app == currentEle.value) {
     if (virtualEle.value) {
-      window.parent.scroll({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
+      container.value.scrollTo({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
     }
     return
   }
@@ -135,7 +148,7 @@ const appendVirtualElement = () => {
   currentEle.value = app
   parentEle.value = app
   app.appendChild(virtualEle.value)
-  window.parent.scroll({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
+  container.value.scrollTo({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
 }
 const querySelector = (val: any) => {
   return container.value.querySelector(val)
