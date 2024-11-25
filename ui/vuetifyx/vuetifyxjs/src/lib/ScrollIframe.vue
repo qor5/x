@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onUnmounted, ref } from 'vue'
 
 const iframe = ref()
 const virtualEle = ref()
@@ -18,6 +18,27 @@ const props = defineProps({
 })
 const virtualHeight = props.virtualElementHeight
 
+const resizeObserver = new ResizeObserver((entries) => {
+  for (let entry of entries) {
+    if (
+      entry.contentRect.width >= iframe.value.contentWindow.document.documentElement.scrollWidth
+    ) {
+      container.value.style.overflow = ''
+      container.value.style.display = 'flex'
+      container.value.style.justifyContent = 'center'
+    } else {
+      container.value.style.overflow = 'auto'
+      container.value.style.display = ''
+      container.value.style.justifyContent = ''
+    }
+  }
+})
+
+onUnmounted(() => {
+  resizeObserver.unobserve(container.value)
+  resizeObserver.disconnect()
+})
+
 const load = (event: any) => {
   if (!iframe.value) {
     return
@@ -29,6 +50,7 @@ const load = (event: any) => {
   setIframeContainerHeight(0)
   document.cookie = `${props.iframeHeightName}=` + height.value + 'px'
   scrollToCurrentContainer(props.containerDataId)
+  resizeObserver.observe(container.value)
 }
 const removeHighlightClass = () => {
   const iframeDocument = iframe.value.contentDocument || iframe.value.contentWindow.document
@@ -38,7 +60,6 @@ const removeHighlightClass = () => {
 
 const setIframeContainerHeight = (h: number) => {
   iframe.value.style.height = height.value + h + 'px'
-  container.value.style.height = height.value + h + 'px'
 }
 const scrollToCurrentContainer = (data: any) => {
   if (!iframe.value || !data) {
@@ -129,7 +150,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="mx-auto" ref="container" :style="{ height: iframeHeight, width: width }">
+  <div ref="container" :style="{ height: 'calc(100vh - 88px)', width: '100%', overflow: 'auto' }">
     <iframe
       ref="iframe"
       :srcdoc="srcdoc"
@@ -137,7 +158,7 @@ defineExpose({
       scrolling="no"
       @load="load"
       :style="{
-        width: '100%',
+        width: width,
         display: 'block',
         border: 'none',
         padding: 0,
