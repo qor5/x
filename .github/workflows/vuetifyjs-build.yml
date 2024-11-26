@@ -1,0 +1,34 @@
+name: Build and Commit Artifacts
+
+on:
+  pull_request:
+    branches: [main, release-test]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install pnpm -g
+
+      - name: Build project
+        run: cd ui/vuetifyx/vuetifyxjs && pnpm run build
+
+      - name: Commit build artifacts
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -m 'Add build artifacts'
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
