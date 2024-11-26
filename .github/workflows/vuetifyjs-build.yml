@@ -30,5 +30,8 @@ jobs:
           git add .
           git commit -m 'Add build artifacts'
           git push
+          else
+            echo "No changes detected; skipping commit."
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
