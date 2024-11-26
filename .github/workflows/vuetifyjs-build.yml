@@ -11,28 +11,35 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # 确保获取完整的提交历史
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: Install dependencies
-        run: npm install pnpm -g
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Build project
-        run: cd ui/vuetifyx/vuetifyxjs && pnpm install && pnpm run build
+        run: |
+          cd ui/vuetifyx/vuetifyxjs
+          pnpm install
+          pnpm run build
 
       - name: Commit build artifacts
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # 强制添加被 .gitignore 忽略的 dist 目录
           git add dist -f
 
-          if ! git diff --quiet; then
-            git add .
+          # 检查是否有更改
+          if ! git diff --cached --quiet; then
             git commit -m 'Add build artifacts'
-            git push
+            git push origin HEAD:${{ github.head_ref }}
           else
             echo "No changes detected; skipping commit."
           fi
