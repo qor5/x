@@ -34,7 +34,7 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
           # 强制添加被 .gitignore 忽略的 dist 目录
-          git add dist -f
+          git add ui/vuetifyx/vuetifyxjs/dist -f
 
           # 检查是否有更改
           if ! git diff --cached --quiet; then
