@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 const iframe = ref()
 const virtualEle = ref()
@@ -38,6 +38,17 @@ const resizeObserver = new ResizeObserver((entries) => {
   }
 })
 
+onMounted(() => {
+  const iframeWidth = iframe.value.offsetWidth
+  const containerWidth = container.value.offsetWidth
+  if (iframeWidth <= containerWidth) {
+    container.value.style.display = 'flex'
+    container.value.style.justifyContent = 'center'
+  } else {
+    container.value.style.display = ''
+    container.value.style.justifyContent = ''
+  }
+})
 onUnmounted(() => {
   if (!container.value) {
     return
