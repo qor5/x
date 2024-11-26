@@ -76,7 +76,8 @@ const props = defineProps({
   requiredSymbol: {
     type: Boolean,
     default: false
-  }
+  },
+  test: String //TODO:
 })
 const { icon: _, ...propsWithoutIcon } = props
 const hasDefaultSlot = !!slots.default

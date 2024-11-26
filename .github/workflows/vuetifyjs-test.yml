@@ -20,13 +20,14 @@ jobs:
     steps:
       - uses: szenius/set-timezone@v1.0
         with:
-          timezoneLinux: "Asia/Shanghai"
+          timezoneLinux: 'Asia/Shanghai'
 
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+
       - name: Install pnpm
         run: npm install -g pnpm
       - name: Build and Test
