@@ -29,11 +29,9 @@ const resizeObserver = new ResizeObserver((entries) => {
       iframe.value.contentWindow &&
       entry.contentRect.width >= iframe.value.contentWindow.document.documentElement.scrollWidth
     ) {
-      container.value.style.overflow = ''
       container.value.style.display = 'flex'
       container.value.style.justifyContent = 'center'
     } else {
-      container.value.style.overflow = 'auto'
       container.value.style.display = ''
       container.value.style.justifyContent = ''
     }
