@@ -19,21 +19,29 @@ const props = defineProps({
 })
 const virtualHeight = props.virtualElementHeight
 
+const resizeContainer = (entry: ResizeObserverEntry) => {
+  if (!container.value) {
+    return
+  }
+  if (
+    iframe.value &&
+    iframe.value.contentWindow &&
+    entry.contentRect.width >= iframe.value.contentWindow.document.documentElement.scrollWidth
+  ) {
+    container.value.style.display = 'flex'
+    container.value.style.justifyContent = 'center'
+  } else {
+    container.value.style.display = ''
+    container.value.style.justifyContent = ''
+  }
+}
 const resizeObserver = new ResizeObserver((entries) => {
   for (let entry of entries) {
-    if (!container.value) {
-      return
-    }
-    if (
-      iframe.value &&
-      iframe.value.contentWindow &&
-      entry.contentRect.width >= iframe.value.contentWindow.document.documentElement.scrollWidth
-    ) {
-      container.value.style.display = 'flex'
-      container.value.style.justifyContent = 'center'
+    if (entry.target.tagName.toLowerCase() == 'div') {
+      resizeContainer(entry)
     } else {
-      container.value.style.display = ''
-      container.value.style.justifyContent = ''
+      setIframeHeight()
+      scrollToCurrentContainer(props.containerDataId)
     }
   }
 })
@@ -54,25 +62,32 @@ onUnmounted(() => {
     return
   }
   resizeObserver.unobserve(container.value)
+  resizeObserver.unobserve(iframe.value)
   resizeObserver.disconnect()
   resizable = false
 })
 
-const load = (event: any) => {
-  if (!iframe.value || !iframe.value.contentWindow) {
-    return
-  }
+const setIframeHeight = () => {
   height.value = iframe.value.contentWindow.document.documentElement.scrollHeight
   if (height.value < virtualHeight) {
     height.value = virtualHeight
   }
   setIframeContainerHeight(0)
   document.cookie = `${props.iframeHeightName}=` + height.value + 'px'
+}
+
+const load = (event: any) => {
+  if (!iframe.value || !iframe.value.contentWindow) {
+    return
+  }
+  setIframeHeight()
   scrollToCurrentContainer(props.containerDataId)
   if (!resizable) {
     resizeObserver.observe(container.value)
     resizable = true
   }
+  const iframeDoc = iframe.value.contentDocument || iframe.value.contentWindow.document
+  resizeObserver.observe(iframeDoc.body)
 }
 const removeHighlightClass = () => {
   const iframeDocument = iframe.value.contentDocument || iframe.value.contentWindow.document
