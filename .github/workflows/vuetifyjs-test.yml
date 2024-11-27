@@ -6,8 +6,16 @@ name: vuetifyxjs
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**/dist/**'
+      - '**/*.md'
+      - '**/docs/**'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - '**/dist/**'
+      - '**/*.md'
+      - '**/docs/**'
 
 jobs:
   test:
