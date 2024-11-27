@@ -2,18 +2,25 @@ name: go
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
+    paths-ignore:
+      - '**/dist/**'
+      - '**/*.md'
+      - '**/docs/**'
   pull_request:
-    branches: [ master ]
+    branches: [master]
+    paths-ignore:
+      - '**/dist/**'
+      - '**/*.md'
+      - '**/docs/**'
 
 jobs:
-
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: szenius/set-timezone@v1.0
         with:
-          timezoneLinux: "Asia/Shanghai"
+          timezoneLinux: 'Asia/Shanghai'
 
       - uses: actions/checkout@v2
 
