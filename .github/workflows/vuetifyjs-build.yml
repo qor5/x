@@ -33,7 +33,6 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-          # 强制添加被 .gitignore 忽略的 dist 目录
           git add ui/vuetifyx/vuetifyxjs/dist -f
 
           # 检查是否有更改
