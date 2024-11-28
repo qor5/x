@@ -46,8 +46,7 @@ const presetsSizeOptions = computed(() => {
     case 'x-small':
       obj.size = 'small'
       break
-    case 'small':
-      break
+
     case 'large':
       obj.size = 'large'
       break
