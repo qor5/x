@@ -94,6 +94,7 @@ const combinedProps = computed(() => ({
       }
     }
     &:deep(.v-btn__content) {
+      line-height: 20px;
       .v-icon {
         font-size: 20px;
       }
@@ -114,6 +115,7 @@ const combinedProps = computed(() => ({
       letter-spacing: 0.244px;
       font-size: 16px;
       font-weight: 400;
+      line-height: 24px;
       .v-icon {
         font-size: 24px;
       }
@@ -166,6 +168,7 @@ const combinedProps = computed(() => ({
     &:deep(.v-btn__content) {
       letter-spacing: -0.143px;
       font-size: 12px;
+      line-height: 16px;
       font-weight: 400;
       .v-icon {
         font-size: 16px;

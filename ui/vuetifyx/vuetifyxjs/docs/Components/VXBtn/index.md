@@ -141,7 +141,7 @@
 <template>
   <v-row>
     <v-col cols="2" class="text-center">
-      <div class="mb-2">elevated</div>
+      <div class="my-2">elevated</div>
       <vx-btn variant="elevated" color="primary">Button</vx-btn>
     </v-col>
     <v-col cols="2" class="text-center">
