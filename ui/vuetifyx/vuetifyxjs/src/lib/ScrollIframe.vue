@@ -150,7 +150,6 @@ const addVirtualElement = (data: any) => {
 const removeVirtualElement = () => {
   if (virtualEle.value && parentEle.value) {
     parentEle.value.removeChild(virtualEle.value)
-    container.value.style.height = height.value + 'px'
     virtualEle.value = null
     parentEle.value = null
     currentEle.value = null
