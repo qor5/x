@@ -10,9 +10,9 @@ type VXBtnBuilder struct {
 }
 
 
-func VXBtn(text string) (r *VXBtnBuilder) {
+func VXBtn(children ...h.HTMLComponent) (r *VXBtnBuilder) {
 	r = &VXBtnBuilder{
-		tag: h.Tag("vx-btn").Text(text),
+		tag: h.Tag("vx-btn").Children(children...),
 	}
 	return
 }
