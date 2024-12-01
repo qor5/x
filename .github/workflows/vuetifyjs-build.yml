@@ -1,0 +1,47 @@
+name: Build and Commit Artifacts
+
+on:
+  pull_request:
+    branches: [main, release-test]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # 确保获取完整的提交历史
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Build project
+        run: |
+          cd ui/vuetifyx/vuetifyxjs
+          pnpm install
+          pnpm run build
+
+      - name: Commit build artifacts
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # 强制添加被 .gitignore 忽略的 dist 目录
+          git add ui/vuetifyx/vuetifyxjs/dist -f
+
+          # 检查是否有更改
+          if ! git diff --cached --quiet; then
+            git commit -m 'Add build artifacts'
+            git push origin HEAD:${{ github.head_ref }}
+          else
+            echo "No changes detected; skipping commit."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

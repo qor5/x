@@ -38,6 +38,10 @@ export default {
       text: '数据和展示',
       items: [
         {
+          text: 'Btn 按钮',
+          link: '/Components/VXBtn/'
+        },
+        {
           text: 'Label 标签',
           link: '/Components/VXLabel/'
         },

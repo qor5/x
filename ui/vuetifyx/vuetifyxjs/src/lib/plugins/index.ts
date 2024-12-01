@@ -30,6 +30,7 @@ import VXToolbar from '@/lib/Common/VXToolBar.vue'
 import VXLabel from '@/lib/Common/VXLabel.vue'
 import VXDialog from '@/lib/Common/VXDialog.vue'
 import VXPagination from '@/lib/Common/VXPagination.vue'
+import VXBtn from '@/lib/Common/VXBtn.vue'
 import VXAvatar from '@/lib/VXAvatar.vue'
 import VXTabs from '@/lib/Tabs/VXTabs.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
@@ -45,26 +46,19 @@ const vuetifyx = {
     app.component('vx-datepicker', DatepickerOld)
     app.component('vx-datetimepicker', DatetimepickerOld)
     app.component('vx-textdatepicker', TextDatepicker)
-    // select
+    app.component('vx-btn', VXBtn)
     app.component('vx-select', VXSelect)
     app.component('vx-selectmany', SelectMany)
     app.component('vx-linkageselect', LinkageSelect)
     app.component('vx-autocomplete', Autocomplete)
     app.component('vx-linkageselect-remote', LinkageSelectRemote)
-    // checkbox
     app.component('vx-checkbox', VXCheckbox)
-    // field and label
     app.component('vx-field', VXField)
     app.component('vx-label', VXLabel)
-    // dialog
     app.component('vx-dialog', VXDialog)
-    // editor
     app.component('vx-tiptap-editor', TiptapEditor)
-    // overlay
     app.component('vx-overlay', Overlay)
-    // filter
     app.component('vx-filter', Filter)
-    // others
     app.component('vx-tabs', VXTabs)
     app.component('vx-pagination', VXPagination)
     app.component('vx-avatar', VXAvatar)
