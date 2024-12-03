@@ -42,6 +42,10 @@ export default {
           link: '/Components/VXBtn/'
         },
         {
+          text: 'Chip 徽章',
+          link: '/Components/VXChip/'
+        },
+        {
           text: 'Label 标签',
           link: '/Components/VXLabel/'
         },
