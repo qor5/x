@@ -177,6 +177,7 @@ const combinedProps = computed(() => ({
   }
 
   &.presets-x-small {
+    line-height: 1;
     &.presets-icon {
       .v-btn {
         padding: 4px;
@@ -201,6 +202,7 @@ const combinedProps = computed(() => ({
     &:deep(.v-btn__content) {
       letter-spacing: -0.14px;
       font-size: 12px;
+      line-height: 16px;
       font-weight: 400;
 
       .v-icon {

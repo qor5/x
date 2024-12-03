@@ -1,4 +1,4 @@
-# VXChip
+# vx-chip 徽章
 
 ## API
 
