@@ -15,6 +15,7 @@
     <time-select
       v-if="useTimeSelect"
       class="time-select-wrap"
+      :formatStr="formatStr"
       v-model="timeStr"
       v-bind="propsForTimeSelect"
       @update:modelValue="onTimeSelected"
@@ -27,6 +28,7 @@ import dayjs from 'dayjs'
 import { ref, defineEmits, defineProps, PropType, computed, watch, Prop } from 'vue'
 import TimeSelect from './TimeSelect.vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
+import { format } from 'path'
 const { filteredAttrs } = useFilteredAttrs()
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
@@ -36,6 +38,7 @@ const props = defineProps({
     default: 'datepicker'
   },
   datePickerProps: Object as PropType<any>,
+  formatStr: String,
   disableSecond: Boolean,
   disableMinute: Boolean,
   disableHour: Boolean
@@ -45,6 +48,7 @@ const dateOfPicker = ref()
 
 const dateStr = computed(() => dayjs(dateOfPicker.value).format('YYYY-MM-DD'))
 const useTimeSelect = computed(() => props.type === 'datetimepicker')
+
 watch(
   () => props.modelValue,
   (value) => {

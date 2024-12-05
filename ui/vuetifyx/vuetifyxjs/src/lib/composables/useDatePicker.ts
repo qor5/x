@@ -9,37 +9,55 @@ export function useDatePicker<EmitFnType>(props: any, emit: EmitFnType) {
   const tempData = ref<string | number | (string | number)[]>()
   const formatMapDefault = {
     datepicker: 'YYYY-MM-DD',
-    datetimepicker: 'YYYY-MM-DD HH:mm'
+    datetimepicker: 'YYYY-MM-DD HH:mm:ss'
   }
 
   const formatStr = props.format || formatMapDefault[props.type as datePickerType]
 
-  function emitModelValueFormat(value: number | string | (number | string)[]) {
-    if (_.isEqual(value, props.modelValue)) return value
+  function emitModelValueFormat(value: number | string | (number | string)[], formatStr?: string) {
+    if (_.isEqual(value, dayjs(props.modelValue).format(formatStr))) return value
 
-    return Array.isArray(value)
-      ? value.map((item) => dayjs(item).valueOf())
-      : dayjs(value).valueOf()
+    const formatedValue = Array.isArray(value)
+      ? value.map((item) =>
+          item
+            ? dayjs(item).format(formatStr || formatMapDefault[props.type as datePickerType])
+            : ''
+        )
+      : value
+        ? dayjs(value).format(formatStr || formatMapDefault[props.type as datePickerType])
+        : ''
+
+    return formatedValue
   }
 
   function emitDatePickerValue(
     value: number | string | (number | string)[],
-    needConfirm?: boolean
+    {
+      needConfirm,
+      formatStr = formatMapDefault[props.type as datePickerType]
+    }: {
+      needConfirm?: boolean
+      formatStr?: string
+    } = {
+      needConfirm: false,
+      formatStr: formatMapDefault[props.type as datePickerType]
+    }
   ) {
     if (needConfirm) {
       if (Array.isArray(value)) {
         if (!tempData.value || !Array.isArray(tempData.value)) {
-          tempData.value = value
+          tempData.value = emitModelValueFormat(value, formatStr)
         } else {
-          tempData.value = value.map(
-            (item, i) => item || (tempData.value as (number | string)[])[i]
+          tempData.value = emitModelValueFormat(
+            value.map((item, i) => item || (tempData.value as (number | string)[])[i]),
+            formatStr
           )
         }
       } else {
-        ;(tempData.value as string | number) = value
+        tempData.value = emitModelValueFormat(value, formatStr)
       }
     } else {
-      ;(emit as any)('update:modelValue', emitModelValueFormat(value))
+      ;(emit as any)('update:modelValue', emitModelValueFormat(value, formatStr))
     }
   }
 
