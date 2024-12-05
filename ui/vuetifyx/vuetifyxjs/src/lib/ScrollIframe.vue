@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 
+const emit = defineEmits(['load'])
 const iframe = ref()
 const virtualEle = ref()
 const parentEle = ref()
@@ -88,6 +89,7 @@ const load = (event: any) => {
   }
   const iframeDoc = iframe.value.contentDocument || iframe.value.contentWindow.document
   resizeObserver.observe(iframeDoc.body)
+  emit('load', event)
 }
 const removeHighlightClass = () => {
   const iframeDocument = iframe.value.contentDocument || iframe.value.contentWindow.document
