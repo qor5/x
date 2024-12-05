@@ -39,6 +39,7 @@
           :model-value="datePickerValue"
           :type="type"
           @update:modelValue="emitDatePickerValue"
+          :format-str="formatStr"
           :datePickerProps="datePickerProps"
         />
       </v-overlay>
@@ -91,7 +92,7 @@ const minWidth = computed(() => ({
 }))
 
 watchEffect(() => {
-  convertValueForInputAndDatePicker(props.modelValue)
+  convertValueForInputAndDatePicker(props.modelValue, true)
 })
 
 function onInputBlur(obj: FocusEvent | string, closeMenu: boolean = false) {
@@ -141,7 +142,10 @@ function convertValueForInputAndDatePicker(
     datePickerValue.value = value ? dayjs(value).valueOf() : ''
   }
 
-  shouldEmit && emitDatePickerValue(datePickerValue.value)
+  shouldEmit &&
+    emitDatePickerValue(datePickerValue.value, {
+      formatStr
+    })
 }
 
 function onClickAppendInner() {
