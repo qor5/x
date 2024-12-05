@@ -42,6 +42,10 @@ export default {
           link: '/Components/VXBtn/'
         },
         {
+          text: 'BtnGroup 按钮组',
+          link: '/Components/VXBtnGroup/'
+        },
+        {
           text: 'Chip 徽章',
           link: '/Components/VXChip/'
         },

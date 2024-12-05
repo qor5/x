@@ -25,7 +25,7 @@
 import { defineEmits, computed, useSlots, defineOptions } from 'vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 
-const { filteredAttrs, rootAttrs, attrs } = useFilteredAttrs()
+const { filteredAttrs, rootAttrs } = useFilteredAttrs()
 const slots = useSlots()
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({

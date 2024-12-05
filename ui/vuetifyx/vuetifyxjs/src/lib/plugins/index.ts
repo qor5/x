@@ -31,6 +31,7 @@ import VXLabel from '@/lib/Common/VXLabel.vue'
 import VXDialog from '@/lib/Common/VXDialog.vue'
 import VXPagination from '@/lib/Common/VXPagination.vue'
 import VXBtn from '@/lib/Common/VXBtn.vue'
+import VXBtnGroup from '@/lib/Common/VXBtnGroup.vue'
 import VXChip from '@/lib/Common/VXChip.vue'
 import VXAvatar from '@/lib/VXAvatar.vue'
 import VXTabs from '@/lib/Tabs/VXTabs.vue'
@@ -48,6 +49,7 @@ const vuetifyx = {
     app.component('vx-datetimepicker', DatetimepickerOld)
     app.component('vx-textdatepicker', TextDatepicker)
     app.component('vx-btn', VXBtn)
+    app.component('vx-btn-group', VXBtnGroup)
     app.component('vx-chip', VXChip)
     app.component('vx-select', VXSelect)
     app.component('vx-selectmany', SelectMany)
