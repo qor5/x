@@ -2,7 +2,7 @@ name: Build and Commit Artifacts
 
 on:
   pull_request:
-    branches: [main, release-test]
+    branches: [master, release-test]
 
 jobs:
   build:

@@ -1,4 +1,4 @@
-# VXBtn
+# vx-btn 按钮
 
 提供预设和样式微调的v-btn, 最重要的部份在presets，css根据presets进行了大量的微调
 
