@@ -11,7 +11,7 @@ type VXBtnGroupBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VBtnGroup(children ...h.HTMLComponent) (r *VXBtnGroupBuilder) {
+func VXBtnGroup(children ...h.HTMLComponent) (r *VXBtnGroupBuilder) {
 	r = &VXBtnGroupBuilder{
 		tag: h.Tag("vx-btn-group").Children(children...),
 	}
