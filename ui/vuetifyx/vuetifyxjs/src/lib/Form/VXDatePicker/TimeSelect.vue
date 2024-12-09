@@ -1,6 +1,7 @@
 <template>
   <div class="vx-time-select-wrap">
     <vx-field
+      v-show="showArea.hour"
       ref="inputFieldHour"
       v-model="hourValue"
       class="time-select"
@@ -34,9 +35,10 @@
       </v-menu>
     </vx-field>
 
-    <span class="separate mx-2">:</span>
+    <span v-if="showArea.minute" class="separate mx-2">:</span>
 
     <vx-field
+      v-show="showArea.minute"
       ref="inputFieldMinute"
       v-model="minuteValue"
       class="time-select minute-field"
@@ -70,9 +72,10 @@
       </v-menu>
     </vx-field>
 
-    <span class="separate mx-2">:</span>
+    <span v-if="showArea.second" class="separate mx-2">:</span>
 
     <vx-field
+      v-show="showArea.second"
       ref="inputFieldSecond"
       v-model="secondValue"
       class="time-select second-field"
@@ -109,13 +112,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, watch, defineEmits, computed, useTemplateRef } from 'vue'
+import { ref, defineProps, watch, defineEmits, computed } from 'vue'
 
 const props = defineProps({
   modelValue: {
     type: String,
     default: '00:00:00'
   },
+  formatStr: String,
   disableSecond: Boolean,
   disableMinute: Boolean,
   disableHour: Boolean
@@ -147,13 +151,32 @@ watch(
   { immediate: true }
 )
 
-function padZero(num: number): string {
-  return num < 10 ? `0${num}` : `${num}`
-}
-
 const payloadValue = computed(
   () => `${padZero(hourValue.value)}:${padZero(minuteValue.value)}:${padZero(secondValue.value)}`
 )
+
+const showArea = computed(() => {
+  // 分析当前的formatStr 是否包含hour、minute、second
+  const formatStr = props.formatStr
+
+  if (!formatStr) {
+    return {
+      hour: false,
+      minute: false,
+      second: false
+    }
+  }
+
+  return {
+    hour: formatStr.includes('H') || formatStr.includes('h'),
+    minute: formatStr.includes('m'),
+    second: formatStr.includes('s')
+  }
+})
+
+function padZero(num: number): string {
+  return num < 10 ? `0${num}` : `${num}`
+}
 
 function onChooseValue(type: 'hour' | 'minute' | 'second', value: number) {
   // console.log(type, value)
