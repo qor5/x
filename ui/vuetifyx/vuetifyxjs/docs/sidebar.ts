@@ -42,13 +42,22 @@ export default {
           link: '/Components/VXBtn/'
         },
         {
+          text: 'BtnGroup 按钮组',
+          link: '/Components/VXBtnGroup/'
+        },
+        {
+          text: 'Chip 徽章',
+          link: '/Components/VXChip/'
+        },
+        {
           text: 'Label 标签',
           link: '/Components/VXLabel/'
         },
-        {
-          text: 'Toolbar 提示条',
-          link: '/Components/VXToolbar/'
-        },
+        // we should use v-alert instead of vx-tool-bar
+        // {
+        //   text: 'Toolbar 提示条',
+        //   link: '/Components/VXToolbar/'
+        // },
         {
           text: 'Filter 筛选组件',
           link: '/Components/Filter/'
