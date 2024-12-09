@@ -7,16 +7,14 @@ const virtualEle = ref()
 const parentEle = ref()
 const currentEle = ref()
 const container = ref()
+const containerDataID = ref()
 const height = ref()
 let resizable = false
 const props = defineProps({
   srcdoc: { type: String, required: true },
-  iframeHeightName: { type: String, required: true },
-  iframeHeight: { type: String, required: true },
   width: { type: String },
   virtualElementText: { type: String, default: 'New Component' },
-  virtualElementHeight: { type: Number, default: 100 },
-  containerDataId: { type: String }
+  virtualElementHeight: { type: Number, default: 100 }
 })
 const virtualHeight = props.virtualElementHeight
 
@@ -42,7 +40,8 @@ const resizeObserver = new ResizeObserver((entries) => {
       resizeContainer(entry)
     } else {
       setIframeHeight()
-      scrollToCurrentContainer(props.containerDataId)
+      scrollToCurrentContainer(containerDataID.value)
+      containerDataID.value = ''
     }
   }
 })
@@ -69,30 +68,31 @@ onUnmounted(() => {
 })
 
 const setIframeHeight = () => {
-  height.value = iframe.value.contentWindow.document.documentElement.scrollHeight
+  const bodyEle = iframe.value.contentWindow.document.querySelector('body')
+  height.value = bodyEle.scrollHeight
   if (height.value < virtualHeight) {
     height.value = virtualHeight
   }
   setIframeContainerHeight(0)
-  document.cookie = `${props.iframeHeightName}=` + height.value + 'px'
 }
 
 const load = (event: any) => {
   if (!iframe.value || !iframe.value.contentWindow) {
+    emit('load', event)
     return
   }
   setIframeHeight()
-  scrollToCurrentContainer(props.containerDataId)
+  scrollToCurrentContainer(containerDataID.value)
   if (!resizable) {
     resizeObserver.observe(container.value)
     resizable = true
   }
-  const iframeDoc = iframe.value.contentDocument || iframe.value.contentWindow.document
+  const iframeDoc = iframe.value.contentWindow.document
   resizeObserver.observe(iframeDoc.body)
   emit('load', event)
 }
 const removeHighlightClass = () => {
-  const iframeDocument = iframe.value.contentDocument || iframe.value.contentWindow.document
+  const iframeDocument = iframe.value.contentWindow.document
   const elements = iframeDocument.querySelectorAll('.highlight')
   elements.forEach((el: Element) => (el as HTMLElement).classList.remove('highlight'))
 }
@@ -105,13 +105,14 @@ const scrollToCurrentContainer = (data: any) => {
     return
   }
   removeHighlightClass()
-  const current = iframe.value.contentWindow.document.body.querySelector(
-    "div[data-container-id='" + data + "']"
-  ) as HTMLElement
+  const current = findContainerByDataID(data)
   if (!current) {
     return
   }
   current.classList.add('highlight')
+  if (isElementInViewport(current)) {
+    return
+  }
   container.value.scrollTo({ top: current.offsetTop, behavior: 'smooth' })
 }
 
@@ -133,9 +134,7 @@ const addVirtualElement = (data: any) => {
   if (!iframe.value) {
     return
   }
-  const current = iframe.value.contentWindow.document.body.querySelector(
-    "div[data-container-id='" + data + "']"
-  ) as HTMLElement
+  const current = findContainerByDataID(data)
   if (!current) {
     return
   }
@@ -178,12 +177,54 @@ const appendVirtualElement = () => {
 const querySelector = (val: any) => {
   return container.value.querySelector(val)
 }
+
+const findContainerByDataID = (containerDataID: string): HTMLElement | undefined => {
+  if (!iframe.value) {
+    return
+  }
+  const iframeDocument = iframe.value.contentWindow.document
+  if (!iframeDocument) {
+    return
+  }
+  return iframeDocument.querySelector("div[data-container-id='" + containerDataID + "']")
+}
+const isElementInViewport = (element: HTMLElement) => {
+  if (!element) return false
+
+  const containerScrollTop = container.value.scrollTop
+  const containerHeight = container.value.clientHeight
+  const targetOffsetTop = element.offsetTop
+  const targetHeight = element.offsetHeight
+  return (
+    containerScrollTop <= targetOffsetTop &&
+    containerScrollTop + containerHeight >= targetOffsetTop + targetHeight
+  )
+}
+
+const updateIframeBody = (data: { body: string; containerDataID: string }) => {
+  if (!iframe.value) {
+    return
+  }
+  const iframeDocument = iframe.value.contentWindow.document
+  if (!iframeDocument) {
+    return
+  }
+  const bodyEle = iframeDocument.querySelector('body')
+  bodyEle.innerHTML = data.body
+  containerDataID.value = data.containerDataID
+  setTimeout(() => {
+    scrollToCurrentContainer(containerDataID.value)
+    containerDataID.value = ''
+  }, 0)
+}
+
 defineExpose({
   scrollToCurrentContainer,
   addVirtualElement,
   removeVirtualElement,
   appendVirtualElement,
-  querySelector
+  querySelector,
+  updateIframeBody
 })
 </script>
 
