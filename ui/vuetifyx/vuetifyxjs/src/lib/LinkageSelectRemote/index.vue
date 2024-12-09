@@ -72,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, reactive, ref } from 'vue'
+import { nextTick, onMounted, reactive, ref, computed } from 'vue'
 import Autocomplete from '@/lib/LinkageSelectRemote/components/LinkSelectAutoComplete.vue'
 
 import get from 'lodash/get'
@@ -107,6 +107,7 @@ const props = defineProps({
   levelStart: { type: Number, default: 0 },
   levelStep: { type: Number, default: 1 }
 })
+const resolvedErrorMessages = computed(() => props.errorMessages || [])
 
 const emit = defineEmits(['update:modelValue'])
 
@@ -180,10 +181,10 @@ const parentValue = (level: number): string => {
 }
 
 const errorMessage = (level: number): string => {
-  if (level > props.errorMessages.length - 1) {
+  if (level > resolvedErrorMessages.value.length - 1) {
     return ''
   }
-  return props.errorMessages[level]
+  return resolvedErrorMessages.value[level]
 }
 
 onMounted(() => {
