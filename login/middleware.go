@@ -2,11 +2,14 @@ package login
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/huandu/go-clone"
 )
 
 type ContextUserKey int
@@ -37,6 +40,8 @@ func MockCurrentUser(user any) func(next http.Handler) http.Handler {
 		})
 	}
 }
+
+var ErrShouldNotExtend = errors.New("should not extend session")
 
 func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) http.Handler {
 	mustLogin := true
@@ -165,22 +170,31 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 			}
 
 			if b.autoExtendSession && time.Now().Sub(claims.IssuedAt.Time).Seconds() > float64(b.sessionMaxAge)/10 {
-				oldSessionToken := b.mustGetSessionToken(*claims)
-
-				claims.RegisteredClaims = b.genBaseSessionClaim(claims.UserID)
-				b.setAuthCookiesFromUserClaims(w, claims, secureSalt)
-
 				if b.afterExtendSessionHook != nil {
-					setCookieForRequest(r, &http.Cookie{Name: b.authCookieName, Value: b.mustGetSessionToken(*claims)})
-					if herr := b.wrapHook(b.afterExtendSessionHook)(r, user, oldSessionToken); herr != nil {
-						if !mustLogin {
-							next.ServeHTTP(w, r)
+					oldSessionToken := b.mustGetSessionToken(*claims)
+
+					newClaims := clone.Clone(claims).(*UserClaims)
+					newClaims.RegisteredClaims = b.genBaseSessionClaim(claims.UserID)
+					newSessionToken := b.mustGetSessionToken(*newClaims)
+					if herr := b.wrapHook(b.afterExtendSessionHook)(r, user, oldSessionToken, newSessionToken); herr != nil {
+						if !errors.Is(herr, ErrShouldNotExtend) {
+							if !mustLogin {
+								next.ServeHTTP(w, r)
+								return
+							}
+							setNoticeOrPanic(w, herr)
+							http.Redirect(w, r, b.LogoutURL, http.StatusFound)
 							return
 						}
-						setNoticeOrPanic(w, herr)
-						http.Redirect(w, r, b.LogoutURL, http.StatusFound)
-						return
+					} else {
+						claims = newClaims
+						b.setAuthCookiesFromUserClaims(w, claims, secureSalt)
+						setCookieForRequest(r, &http.Cookie{Name: b.authCookieName, Value: b.mustGetSessionToken(*claims)})
 					}
+				} else {
+					claims.RegisteredClaims = b.genBaseSessionClaim(claims.UserID)
+					b.setAuthCookiesFromUserClaims(w, claims, secureSalt)
+					setCookieForRequest(r, &http.Cookie{Name: b.authCookieName, Value: b.mustGetSessionToken(*claims)})
 				}
 			}
 
