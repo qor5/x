@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onUnmounted, ref, watch } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 
 const emit = defineEmits(['load'])
 const iframe = ref()
@@ -56,6 +56,11 @@ const setIframeDisplay = () => {
   }
 }
 
+onMounted(() => {
+  nextTick(() => {
+    setIframeDisplay()
+  })
+})
 watch(
   () => props.width,
   () => {
@@ -245,6 +250,7 @@ defineExpose({
       scrolling="no"
       @load="load"
       :style="{
+        width: width,
         display: 'block',
         border: 'none',
         padding: 0,
