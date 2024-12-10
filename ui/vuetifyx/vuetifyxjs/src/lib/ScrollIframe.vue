@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onUnmounted, ref, watch } from 'vue'
 
 const emit = defineEmits(['load'])
 const iframe = ref()
@@ -17,7 +17,6 @@ const props = defineProps({
   virtualElementHeight: { type: Number, default: 100 }
 })
 const virtualHeight = props.virtualElementHeight
-
 const resizeContainer = (entry: ResizeObserverEntry) => {
   if (!container.value) {
     return
@@ -45,9 +44,8 @@ const resizeObserver = new ResizeObserver((entries) => {
     }
   }
 })
-
-onMounted(() => {
-  const iframeWidth = iframe.value.offsetWidth
+const setIframeDisplay = () => {
+  const iframeWidth = iframe.value.style.width.replace('px', '')
   const containerWidth = container.value.offsetWidth
   if (iframeWidth <= containerWidth) {
     container.value.style.display = 'flex'
@@ -56,7 +54,17 @@ onMounted(() => {
     container.value.style.display = ''
     container.value.style.justifyContent = ''
   }
-})
+}
+
+watch(
+  () => props.width,
+  () => {
+    iframe.value.style.width = props.width
+    nextTick(() => {
+      setIframeDisplay()
+    })
+  }
+)
 onUnmounted(() => {
   if (!container.value) {
     return
@@ -237,7 +245,6 @@ defineExpose({
       scrolling="no"
       @load="load"
       :style="{
-        width: width,
         display: 'block',
         border: 'none',
         padding: 0,
