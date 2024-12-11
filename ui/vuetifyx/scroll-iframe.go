@@ -23,16 +23,6 @@ func (b *VXScrollIframeBuilder) Srcdoc(v interface{}) (r *VXScrollIframeBuilder)
 	return b
 }
 
-func (b *VXScrollIframeBuilder) IframeHeight(v interface{}) (r *VXScrollIframeBuilder) {
-	b.tag.Attr(":iframe-height", h.JSONString(v))
-	return b
-}
-
-func (b *VXScrollIframeBuilder) IframeHeightName(v interface{}) (r *VXScrollIframeBuilder) {
-	b.tag.Attr(":iframe-height-name", h.JSONString(v))
-	return b
-}
-
 func (b *VXScrollIframeBuilder) Width(v interface{}) (r *VXScrollIframeBuilder) {
 	b.tag.Attr(":width", h.JSONString(v))
 	return b
