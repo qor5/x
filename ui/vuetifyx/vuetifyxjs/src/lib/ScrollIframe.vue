@@ -226,6 +226,7 @@ const updateIframeBody = (data: { body: string; containerDataID: string }) => {
   const bodyEle = iframeDocument.querySelector('body')
   bodyEle.innerHTML = data.body
   containerDataID.value = data.containerDataID
+  setIframeDisplay()
   setTimeout(() => {
     scrollToCurrentContainer(containerDataID.value)
     containerDataID.value = ''
