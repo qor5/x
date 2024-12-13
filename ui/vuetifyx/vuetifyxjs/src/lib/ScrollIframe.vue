@@ -14,6 +14,7 @@ const props = defineProps({
   srcdoc: { type: String, required: true },
   width: { type: String },
   virtualElementText: { type: String, default: 'New Component' },
+  backgroundColor: { type: String, default: '' },
   virtualElementHeight: { type: Number, default: 100 }
 })
 const virtualHeight = props.virtualElementHeight
@@ -242,7 +243,15 @@ defineExpose({
 </script>
 
 <template>
-  <div ref="container" :style="{ height: 'calc(100vh - 88px)', width: '100%', overflow: 'auto' }">
+  <div
+    ref="container"
+    :style="{
+      height: 'calc(100vh - 88px)',
+      width: '100%',
+      overflow: 'auto',
+      backgroundColor: backgroundColor
+    }"
+  >
     <iframe
       ref="iframe"
       :srcdoc="srcdoc"
@@ -254,7 +263,8 @@ defineExpose({
         display: 'block',
         border: 'none',
         padding: 0,
-        margin: 0
+        margin: 0,
+        backgroundColor: '#FFF'
       }"
     >
     </iframe>
