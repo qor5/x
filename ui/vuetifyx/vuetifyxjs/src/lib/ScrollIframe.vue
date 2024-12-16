@@ -40,7 +40,7 @@ const resizeObserver = new ResizeObserver((entries) => {
       resizeContainer(entry)
     } else {
       setIframeHeight()
-      scrollToCurrentContainer(containerDataID.value)
+      scrollToCurrentContainer(containerDataID.value, false)
       containerDataID.value = ''
     }
   }
@@ -96,7 +96,7 @@ const load = (event: any) => {
     return
   }
   setIframeHeight()
-  scrollToCurrentContainer(containerDataID.value)
+  scrollToCurrentContainer(containerDataID.value, false)
   if (!resizable) {
     resizeObserver.observe(container.value)
     resizable = true
@@ -114,7 +114,7 @@ const removeHighlightClass = () => {
 const setIframeContainerHeight = (h: number) => {
   iframe.value.style.height = height.value + h + 'px'
 }
-const scrollToCurrentContainer = (data: any) => {
+const scrollToCurrentContainer = (data: any, isUpdate: boolean) => {
   if (!iframe.value || !data) {
     return
   }
@@ -124,7 +124,8 @@ const scrollToCurrentContainer = (data: any) => {
     return
   }
   current.classList.add('highlight')
-  if (isElementInViewport(current)) {
+  const inView = isElementInViewport(current)
+  if (isUpdate && inView) {
     return
   }
   container.value.scrollTo({ top: current.offsetTop, behavior: 'smooth' })
@@ -209,13 +210,14 @@ const isElementInViewport = (element: HTMLElement) => {
   const containerHeight = container.value.clientHeight
   const targetOffsetTop = element.offsetTop
   const targetHeight = element.offsetHeight
-  return (
-    containerScrollTop <= targetOffsetTop &&
-    containerScrollTop + containerHeight >= targetOffsetTop + targetHeight
-  )
+  const containerTop = containerScrollTop
+  const containerBottom = containerScrollTop + containerHeight
+  const targetTop = targetOffsetTop
+  const targetBottom = targetOffsetTop + targetHeight
+  return targetBottom >= containerTop && targetTop <= containerBottom
 }
 
-const updateIframeBody = (data: { body: string; containerDataID: string }) => {
+const updateIframeBody = (data: { body: string; containerDataID: string; isUpdate: boolean }) => {
   if (!iframe.value) {
     return
   }
@@ -228,7 +230,7 @@ const updateIframeBody = (data: { body: string; containerDataID: string }) => {
   containerDataID.value = data.containerDataID
   setIframeDisplay()
   setTimeout(() => {
-    scrollToCurrentContainer(containerDataID.value)
+    scrollToCurrentContainer(containerDataID.value, data.isUpdate)
     containerDataID.value = ''
   }, 0)
 }
