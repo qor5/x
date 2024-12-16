@@ -23,16 +23,6 @@ func (b *VXScrollIframeBuilder) Srcdoc(v interface{}) (r *VXScrollIframeBuilder)
 	return b
 }
 
-func (b *VXScrollIframeBuilder) IframeHeight(v interface{}) (r *VXScrollIframeBuilder) {
-	b.tag.Attr(":iframe-height", h.JSONString(v))
-	return b
-}
-
-func (b *VXScrollIframeBuilder) IframeHeightName(v interface{}) (r *VXScrollIframeBuilder) {
-	b.tag.Attr(":iframe-height-name", h.JSONString(v))
-	return b
-}
-
 func (b *VXScrollIframeBuilder) Width(v interface{}) (r *VXScrollIframeBuilder) {
 	b.tag.Attr(":width", h.JSONString(v))
 	return b
@@ -43,6 +33,10 @@ func (b *VXScrollIframeBuilder) VirtualElementText(v string) (r *VXScrollIframeB
 }
 func (b *VXScrollIframeBuilder) virtualElementHeight(v int) (r *VXScrollIframeBuilder) {
 	b.tag.Attr(":virtual-element-height", h.JSONString(v))
+	return b
+}
+func (b *VXScrollIframeBuilder) BackgroundColor(v string) (r *VXScrollIframeBuilder) {
+	b.tag.Attr(":background-color", h.JSONString(v))
 	return b
 }
 
