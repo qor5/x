@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import {nextTick, onMounted, onUnmounted, ref, watch} from 'vue'
 
 const emit = defineEmits(['load'])
 const iframe = ref()
@@ -7,15 +7,14 @@ const virtualEle = ref()
 const parentEle = ref()
 const currentEle = ref()
 const container = ref()
-const containerDataID = ref()
 const height = ref()
 let resizable = false
 const props = defineProps({
-  srcdoc: { type: String, required: true },
-  width: { type: String },
-  virtualElementText: { type: String, default: 'New Component' },
-  backgroundColor: { type: String, default: '' },
-  virtualElementHeight: { type: Number, default: 100 }
+  srcdoc: {type: String, required: true},
+  width: {type: String},
+  virtualElementText: {type: String, default: 'New Component'},
+  backgroundColor: {type: String, default: ''},
+  virtualElementHeight: {type: Number, default: 100}
 })
 const virtualHeight = props.virtualElementHeight
 const resizeContainer = (entry: ResizeObserverEntry) => {
@@ -36,13 +35,8 @@ const resizeContainer = (entry: ResizeObserverEntry) => {
 }
 const resizeObserver = new ResizeObserver((entries) => {
   for (let entry of entries) {
-    if (entry.target.tagName.toLowerCase() == 'div') {
-      resizeContainer(entry)
-    } else {
-      setIframeHeight()
-      scrollToCurrentContainer(containerDataID.value, false)
-      containerDataID.value = ''
-    }
+    resizeContainer(entry)
+
   }
 })
 const setIframeDisplay = () => {
@@ -76,7 +70,6 @@ onUnmounted(() => {
     return
   }
   resizeObserver.unobserve(container.value)
-  resizeObserver.unobserve(iframe.value)
   resizeObserver.disconnect()
   resizable = false
 })
@@ -96,13 +89,11 @@ const load = (event: any) => {
     return
   }
   setIframeHeight()
-  scrollToCurrentContainer(containerDataID.value, false)
   if (!resizable) {
     resizeObserver.observe(container.value)
     resizable = true
   }
   const iframeDoc = iframe.value.contentWindow.document
-  resizeObserver.observe(iframeDoc.body)
   emit('load', event)
 }
 const removeHighlightClass = () => {
@@ -114,6 +105,7 @@ const removeHighlightClass = () => {
 const setIframeContainerHeight = (h: number) => {
   iframe.value.style.height = height.value + h + 'px'
 }
+
 
 const createVirtualElement = () => {
   removeHighlightClass()
@@ -162,7 +154,7 @@ const appendVirtualElement = () => {
   }
   if (app == currentEle.value) {
     if (virtualEle.value) {
-      container.value.scrollTo({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
+      container.value.scrollTo({top: virtualEle.value.offsetTop, behavior: 'smooth'})
     }
     return
   }
@@ -171,7 +163,7 @@ const appendVirtualElement = () => {
   currentEle.value = app
   parentEle.value = app
   app.appendChild(virtualEle.value)
-  container.value.scrollTo({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
+  container.value.scrollTo({top: virtualEle.value.offsetTop, behavior: 'smooth'})
 }
 const querySelector = (val: any) => {
   return container.value.querySelector(val)
@@ -191,7 +183,7 @@ const scrollToCurrentContainer = (data: any, isUpdate: boolean) => {
   if (isUpdate && inView) {
     return
   }
-  container.value.scrollTo({ top: current.offsetTop, behavior: 'smooth' })
+  container.value.scrollTo({top: current.offsetTop, behavior: 'smooth'})
 }
 const findContainerByDataID = (containerDataID: string): HTMLElement | undefined => {
   if (!iframe.value) {
@@ -218,12 +210,13 @@ const isElementInViewport = (element: HTMLElement) => {
 }
 const preloadImage = (src: string) => {
   return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.src = src
-    img.onload = () => resolve(src)
-    img.onerror = () => reject(new Error(`Failed to load image: ${src}`))
-  })
+    const img = new Image();
+    img.src = src;
+    img.onload = () => resolve(src);
+    img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+  });
 }
+
 
 const updateBody = (data: { body: string; containerDataID: string; isUpdate: boolean }) => {
   if (!iframe.value) {
@@ -234,32 +227,31 @@ const updateBody = (data: { body: string; containerDataID: string; isUpdate: boo
     return
   }
   const bodyEle = iframeDocument.querySelector('body')
-  bodyEle.innerHTML = data.body
+  bodyEle.innerHTML = data.body;
   setTimeout(() => {
+    setIframeHeight()
     setIframeDisplay()
-    containerDataID.value = data.containerDataID
-    scrollToCurrentContainer(containerDataID.value, data.isUpdate)
-    containerDataID.value = ''
-  }, 500)
+    scrollToCurrentContainer(data.containerDataID, data.isUpdate)
+  }, 200)
 }
 const updateIframeBody = (data: { body: string; containerDataID: string; isUpdate: boolean }) => {
-  const tempDiv = document.createElement('div')
-  tempDiv.innerHTML = data.body
-  const imgElements = tempDiv.querySelectorAll('img')
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = data.body;
+  const imgElements = tempDiv.querySelectorAll("img");
   const imageSrcs = Array.from(imgElements)
-    .map((img) => img.src)
-    .filter((src) => src)
+    .map(img => img.src)
+    .filter(src => src);
   if (imageSrcs.length === 0) {
     updateBody(data)
-    return
+    return;
   }
   Promise.all(imageSrcs.map(preloadImage))
     .then(() => {
       updateBody(data)
     })
-    .catch((err) => {
+    .catch(err => {
       updateBody(data)
-    })
+    });
 }
 
 defineExpose({
