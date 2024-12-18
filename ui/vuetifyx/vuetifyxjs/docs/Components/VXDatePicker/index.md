@@ -118,6 +118,7 @@ const value5 = ref(['', ''])
       <vx-date-picker
         v-model="valueDateTime"
         label="vx-date-picker (datetimepicker)"
+        format="YYYY-MM-DD HH:mm"
         type="datetimepicker"
         placeholder="Choose Datetime"
       />

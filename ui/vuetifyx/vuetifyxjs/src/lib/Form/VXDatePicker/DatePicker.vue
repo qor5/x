@@ -141,11 +141,7 @@ function convertValueForInputAndDatePicker(
     inputValue.value = formatStr ? dayjs(value).format(formatStr) : value
     datePickerValue.value = value ? dayjs(value).valueOf() : ''
   }
-
-  shouldEmit &&
-    emitDatePickerValue(datePickerValue.value, {
-      formatStr
-    })
+  shouldEmit && emitDatePickerValue(datePickerValue.value)
 }
 
 function onClickAppendInner() {

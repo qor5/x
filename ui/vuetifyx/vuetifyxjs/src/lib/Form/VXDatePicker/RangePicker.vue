@@ -208,7 +208,7 @@ function onDatePickerValueChange(value: number, position: 0 | 1) {
     data = datePickerValue.value.map((item, i) => (position === i ? value : item))
   }
 
-  emitDatePickerValue(data, { needConfirm: props.needConfirm, formatStr })
+  emitDatePickerValue(data, { needConfirm: props.needConfirm })
 }
 
 function convertValueForInputAndDatePicker(value: (string | number)[], shouldEmit?: boolean) {
@@ -228,8 +228,7 @@ function convertValueForInputAndDatePicker(value: (string | number)[], shouldEmi
     }
   }
 
-  shouldEmit &&
-    emitDatePickerValue(datePickerValue.value, { needConfirm: props.needConfirm, formatStr })
+  shouldEmit && emitDatePickerValue(datePickerValue.value, { needConfirm: props.needConfirm })
 }
 
 function onInputBlur(obj: FocusEvent | string | number, position: 0 | 1) {
@@ -298,13 +297,13 @@ function onClickConfirm() {
     new Promise((resolve) => {
       emit('click:confirm', { next: resolve, value: tempData.value || [] })
     }).then(() => {
-      emitDatePickerValue(tempData.value || [], { formatStr })
+      emitDatePickerValue(tempData.value || [])
       reset()
       showMenu.value = false
     })
   } else {
     console.log(tempData.value, 'tempData.value')
-    emitDatePickerValue(tempData.value || [], { formatStr })
+    emitDatePickerValue(tempData.value || [])
     reset()
     showMenu.value = false
   }
