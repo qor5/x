@@ -157,10 +157,6 @@ const changeStatus = (val: any, level: number) => {
     //@ts-ignore
     parentIDValue[i] = parentValue(i)
   }
-  if (value.value.every((x) => !x)) {
-    emit('update:modelValue', [])
-    return
-  }
   emit('update:modelValue', value.value)
 }
 const parentValue = (level: number): string => {
