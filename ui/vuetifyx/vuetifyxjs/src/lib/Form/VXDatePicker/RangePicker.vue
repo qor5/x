@@ -72,7 +72,7 @@
           <date-picker-base
             class="d-inline-block overflow-hidden"
             :model-value="datePickerValue[0]"
-            :format="format"
+            :format-str="formatStr"
             :type="type"
             @update:modelValue="onDatePickerValueChange($event, 0)"
             :date-picker-props="datePickerProps[0]"
@@ -82,7 +82,7 @@
           <date-picker-base
             class="d-inline-block overflow-hidden"
             :model-value="datePickerValue[1]"
-            :format="format"
+            :format-str="formatStr"
             :type="type"
             @update:modelValue="onDatePickerValueChange($event, 1)"
             :date-picker-props="datePickerProps[1]"
@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, computed, PropType, watch } from 'vue'
+import { defineEmits, ref, computed, PropType, watch, watchEffect } from 'vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import datePickerBase from './DatePickerBase.vue'
 import { useDatePicker, datePickerType } from '@/lib/composables/useDatePicker'
@@ -163,13 +163,26 @@ const showClearIcon = computed(
     inputValue.value.some((item) => Boolean(item))
 )
 
+// this flag is used to format initial modelValue with formatStr
+let onceEmitFlag = true
+
 watch(
   () => props.modelValue,
   () => {
-    convertValueForInputAndDatePicker(props.modelValue)
+    // debugger
+    convertValueForInputAndDatePicker(props.modelValue, onceEmitFlag)
+    onceEmitFlag = false
   },
   { immediate: true }
 )
+
+// func: reset all temporal datepicker selected data when showMenu is false
+watch(showMenu, (value) => {
+  // console.log(value, 'showMenu')
+  if (!value) {
+    setTimeout(() => convertValueForInputAndDatePicker(props.modelValue), 300)
+  }
+})
 
 watch(
   () => tempData,
@@ -190,10 +203,12 @@ function onDatePickerValueChange(value: number, position: 0 | 1) {
     if (position === 0) data[0] = value
     else data.push(value)
   } else {
+    datePickerValue.value[position] = value
+
     data = datePickerValue.value.map((item, i) => (position === i ? value : item))
   }
 
-  emitDatePickerValue(data, props.needConfirm)
+  emitDatePickerValue(data, { needConfirm: props.needConfirm })
 }
 
 function convertValueForInputAndDatePicker(value: (string | number)[], shouldEmit?: boolean) {
@@ -207,15 +222,13 @@ function convertValueForInputAndDatePicker(value: (string | number)[], shouldEmi
         ? value.map((item) => (item ? dayjs(item).format(formatStr) : ''))
         : value
       datePickerValue.value = value.map((item) => (item ? dayjs(item).valueOf() : item))
-
-      // console.log(inputValue.value)
     } else {
       inputValue.value = formatStr ? [dayjs(value).format(formatStr)] : ['']
       datePickerValue.value = [value ? dayjs(value).valueOf() : value]
     }
   }
 
-  shouldEmit && emitDatePickerValue(datePickerValue.value, props.needConfirm)
+  shouldEmit && emitDatePickerValue(datePickerValue.value, { needConfirm: props.needConfirm })
 }
 
 function onInputBlur(obj: FocusEvent | string | number, position: 0 | 1) {

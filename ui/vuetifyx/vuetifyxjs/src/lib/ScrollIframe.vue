@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import {nextTick, onMounted, onUnmounted, ref, watch} from 'vue'
 
 const emit = defineEmits(['load'])
 const iframe = ref()
@@ -7,14 +7,14 @@ const virtualEle = ref()
 const parentEle = ref()
 const currentEle = ref()
 const container = ref()
-const containerDataID = ref()
 const height = ref()
 let resizable = false
 const props = defineProps({
-  srcdoc: { type: String, required: true },
-  width: { type: String },
-  virtualElementText: { type: String, default: 'New Component' },
-  virtualElementHeight: { type: Number, default: 100 }
+  srcdoc: {type: String, required: true},
+  width: {type: String},
+  virtualElementText: {type: String, default: 'New Component'},
+  backgroundColor: {type: String, default: ''},
+  virtualElementHeight: {type: Number, default: 100}
 })
 const virtualHeight = props.virtualElementHeight
 const resizeContainer = (entry: ResizeObserverEntry) => {
@@ -35,13 +35,8 @@ const resizeContainer = (entry: ResizeObserverEntry) => {
 }
 const resizeObserver = new ResizeObserver((entries) => {
   for (let entry of entries) {
-    if (entry.target.tagName.toLowerCase() == 'div') {
-      resizeContainer(entry)
-    } else {
-      setIframeHeight()
-      scrollToCurrentContainer(containerDataID.value)
-      containerDataID.value = ''
-    }
+    resizeContainer(entry)
+
   }
 })
 const setIframeDisplay = () => {
@@ -75,7 +70,6 @@ onUnmounted(() => {
     return
   }
   resizeObserver.unobserve(container.value)
-  resizeObserver.unobserve(iframe.value)
   resizeObserver.disconnect()
   resizable = false
 })
@@ -95,13 +89,11 @@ const load = (event: any) => {
     return
   }
   setIframeHeight()
-  scrollToCurrentContainer(containerDataID.value)
   if (!resizable) {
     resizeObserver.observe(container.value)
     resizable = true
   }
   const iframeDoc = iframe.value.contentWindow.document
-  resizeObserver.observe(iframeDoc.body)
   emit('load', event)
 }
 const removeHighlightClass = () => {
@@ -113,21 +105,7 @@ const removeHighlightClass = () => {
 const setIframeContainerHeight = (h: number) => {
   iframe.value.style.height = height.value + h + 'px'
 }
-const scrollToCurrentContainer = (data: any) => {
-  if (!iframe.value || !data) {
-    return
-  }
-  removeHighlightClass()
-  const current = findContainerByDataID(data)
-  if (!current) {
-    return
-  }
-  current.classList.add('highlight')
-  if (isElementInViewport(current)) {
-    return
-  }
-  container.value.scrollTo({ top: current.offsetTop, behavior: 'smooth' })
-}
+
 
 const createVirtualElement = () => {
   removeHighlightClass()
@@ -176,7 +154,7 @@ const appendVirtualElement = () => {
   }
   if (app == currentEle.value) {
     if (virtualEle.value) {
-      container.value.scrollTo({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
+      container.value.scrollTo({top: virtualEle.value.offsetTop, behavior: 'smooth'})
     }
     return
   }
@@ -185,12 +163,28 @@ const appendVirtualElement = () => {
   currentEle.value = app
   parentEle.value = app
   app.appendChild(virtualEle.value)
-  container.value.scrollTo({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
+  container.value.scrollTo({top: virtualEle.value.offsetTop, behavior: 'smooth'})
 }
 const querySelector = (val: any) => {
   return container.value.querySelector(val)
 }
 
+const scrollToCurrentContainer = (data: any, isUpdate: boolean) => {
+  if (!iframe.value || !data) {
+    return
+  }
+  removeHighlightClass()
+  const current = findContainerByDataID(data)
+  if (!current) {
+    return
+  }
+  current.classList.add('highlight')
+  const inView = isElementInViewport(current)
+  if (isUpdate && inView) {
+    return
+  }
+  container.value.scrollTo({top: current.offsetTop, behavior: 'smooth'})
+}
 const findContainerByDataID = (containerDataID: string): HTMLElement | undefined => {
   if (!iframe.value) {
     return
@@ -208,13 +202,23 @@ const isElementInViewport = (element: HTMLElement) => {
   const containerHeight = container.value.clientHeight
   const targetOffsetTop = element.offsetTop
   const targetHeight = element.offsetHeight
-  return (
-    containerScrollTop <= targetOffsetTop &&
-    containerScrollTop + containerHeight >= targetOffsetTop + targetHeight
-  )
+  const containerTop = containerScrollTop
+  const containerBottom = containerScrollTop + containerHeight
+  const targetTop = targetOffsetTop
+  const targetBottom = targetOffsetTop + targetHeight
+  return targetBottom >= containerTop && targetTop <= containerBottom
+}
+const preloadImage = (src: string) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = src;
+    img.onload = () => resolve(src);
+    img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+  });
 }
 
-const updateIframeBody = (data: { body: string; containerDataID: string }) => {
+
+const updateBody = (data: { body: string; containerDataID: string; isUpdate: boolean }) => {
   if (!iframe.value) {
     return
   }
@@ -223,12 +227,31 @@ const updateIframeBody = (data: { body: string; containerDataID: string }) => {
     return
   }
   const bodyEle = iframeDocument.querySelector('body')
-  bodyEle.innerHTML = data.body
-  containerDataID.value = data.containerDataID
+  bodyEle.innerHTML = data.body;
   setTimeout(() => {
-    scrollToCurrentContainer(containerDataID.value)
-    containerDataID.value = ''
-  }, 0)
+    setIframeHeight()
+    setIframeDisplay()
+    scrollToCurrentContainer(data.containerDataID, data.isUpdate)
+  }, 200)
+}
+const updateIframeBody = (data: { body: string; containerDataID: string; isUpdate: boolean }) => {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = data.body;
+  const imgElements = tempDiv.querySelectorAll("img");
+  const imageSrcs = Array.from(imgElements)
+    .map(img => img.src)
+    .filter(src => src);
+  if (imageSrcs.length === 0) {
+    updateBody(data)
+    return;
+  }
+  Promise.all(imageSrcs.map(preloadImage))
+    .then(() => {
+      updateBody(data)
+    })
+    .catch(err => {
+      updateBody(data)
+    });
 }
 
 defineExpose({
@@ -242,7 +265,15 @@ defineExpose({
 </script>
 
 <template>
-  <div ref="container" :style="{ height: 'calc(100vh - 88px)', width: '100%', overflow: 'auto' }">
+  <div
+    ref="container"
+    :style="{
+      height: 'calc(100vh - 88px)',
+      width: '100%',
+      overflow: 'auto',
+      backgroundColor: backgroundColor
+    }"
+  >
     <iframe
       ref="iframe"
       :srcdoc="srcdoc"
@@ -254,7 +285,8 @@ defineExpose({
         display: 'block',
         border: 'none',
         padding: 0,
-        margin: 0
+        margin: 0,
+        backgroundColor: '#FFF'
       }"
     >
     </iframe>
