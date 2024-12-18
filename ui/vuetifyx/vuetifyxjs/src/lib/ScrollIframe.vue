@@ -7,7 +7,6 @@ const virtualEle = ref()
 const parentEle = ref()
 const currentEle = ref()
 const container = ref()
-const containerDataID = ref()
 const height = ref()
 let resizable = false
 const props = defineProps({
@@ -36,13 +35,8 @@ const resizeContainer = (entry: ResizeObserverEntry) => {
 }
 const resizeObserver = new ResizeObserver((entries) => {
   for (let entry of entries) {
-    if (entry.target.tagName.toLowerCase() == 'div') {
-      resizeContainer(entry)
-    } else {
-      setIframeHeight()
-      scrollToCurrentContainer(containerDataID.value, false)
-      containerDataID.value = ''
-    }
+    resizeContainer(entry)
+
   }
 })
 const setIframeDisplay = () => {
@@ -76,7 +70,6 @@ onUnmounted(() => {
     return
   }
   resizeObserver.unobserve(container.value)
-  resizeObserver.unobserve(iframe.value)
   resizeObserver.disconnect()
   resizable = false
 })
@@ -96,13 +89,11 @@ const load = (event: any) => {
     return
   }
   setIframeHeight()
-  scrollToCurrentContainer(containerDataID.value, false)
   if (!resizable) {
     resizeObserver.observe(container.value)
     resizable = true
   }
   const iframeDoc = iframe.value.contentWindow.document
-  resizeObserver.observe(iframeDoc.body)
   emit('load', event)
 }
 const removeHighlightClass = () => {
@@ -238,11 +229,10 @@ const updateBody = (data: { body: string; containerDataID: string; isUpdate: boo
   const bodyEle = iframeDocument.querySelector('body')
   bodyEle.innerHTML = data.body;
   setTimeout(() => {
+    setIframeHeight()
     setIframeDisplay()
-    containerDataID.value = data.containerDataID
-    scrollToCurrentContainer(containerDataID.value, data.isUpdate)
-    containerDataID.value = ''
-  }, 500)
+    scrollToCurrentContainer(data.containerDataID, data.isUpdate)
+  }, 200)
 }
 const updateIframeBody = (data: { body: string; containerDataID: string; isUpdate: boolean }) => {
   const tempDiv = document.createElement("div");
