@@ -62,3 +62,31 @@
     }
   }
 }
+
+.pageBuilder-right-drawer {
+  .v-toolbar__content {
+    height: 56px !important;
+    border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  }
+
+  .v-card-text > div > .wrapper-field-label {
+    font-weight: 500;
+    font-size: 14px !important;
+    line-height: 20px;
+    opacity: 1;
+    color: #616161;
+  }
+
+  .wrapper-field-label + .v-card {
+    border: 0;
+    padding-left: 0 !important;
+
+    .v-label {
+      font-weight: 500;
+      font-size: 14px !important;
+      line-height: 20px;
+      opacity: 1;
+      color: #212121;
+    }
+  }
+}

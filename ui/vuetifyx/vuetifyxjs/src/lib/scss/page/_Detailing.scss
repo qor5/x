@@ -105,4 +105,15 @@
       border-block-end-width: 0;
     }
   }
+
+  // fix extra padding in media-box-thumb(app config)
+  .section-body .v-row + .v-row {
+    &:has(.media-box-thumb) {
+      margin-top: -12px;
+    }
+
+    .media-box-thumb {
+      padding-top: 20px;
+    }
+  }
 }
