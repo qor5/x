@@ -41,7 +41,7 @@
 
 ### 值类型
 
-- 组件拥有很强的传入值适应性，可以传入各种类型的值并格式化字符串、时间戳、日期类型都可
+- 组件拥有很强的传入值适应性，可以传入各种类型的值并格式化字符串、时间戳、日期类型都可，最终都会被格式化成默认格式或者传入的format格式
 - vx-range-picker 可以切换值选中模式，当 `needConfirm` 为 `true` 时，需要点击确认按钮值才生效
 
 :::demo
@@ -89,9 +89,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import Datepicker from '@/lib/Datepicker.vue'
+
 const value1 = ref(new Date())
-const value2 = ref(Date.now())
+const value2 = ref(1733390010891)
 const value3 = ref('2024/11/1')
 const value4 = ref(['2024/11/1', '2024/12/1 12:21'])
 const value5 = ref(['', ''])
@@ -111,17 +111,18 @@ const value5 = ref(['', ''])
   <v-row>
     <v-col cols="6">
       <vx-date-picker v-model="value" label="vx-date-picker (datepicker)" placeholder="Start at" />
-      <div>selected value: {{ value ? new Date(value) : 'unselected' }}</div>
+      <div>selected value: {{ value || 'unselected' }}</div>
     </v-col>
 
     <v-col cols="6">
       <vx-date-picker
         v-model="valueDateTime"
         label="vx-date-picker (datetimepicker)"
+        format="YYYY-MM-DD HH:mm"
         type="datetimepicker"
         placeholder="Choose Datetime"
       />
-      <div>selected value: {{ valueDateTime ? new Date(valueDateTime) : 'unselected' }}</div>
+      <div>selected value: {{ valueDateTime || 'unselected' }}</div>
     </v-col>
 
     <v-col cols="6">
@@ -160,8 +161,8 @@ const rangeValueDateTime = ref(['', ''])
 ### 日期格式化 format
 
 - datepicker 默认格式是 YYYY-MM-DD
-- datetimepicker 默认格式是 YYYY-MM-DD HH:mm
-- format 不仅影响展示，也影响选择以后格式化的值，原则是格式化未覆盖到的值会被重置成0（time部分）
+- datetimepicker 默认格式是 YYYY-MM-DD HH:mm:ss
+- **format 不仅影响展示也影响组件的可选项，以及绑定的 modelValue**
 
 :::demo
 
@@ -172,27 +173,26 @@ const rangeValueDateTime = ref(['', ''])
       <vx-date-picker
         v-model="value"
         format="YYYY/MM-DD"
-        label="vx-date-picker (datepicker)"
+        label="type: datepicker (YYYY/MM-DD)"
         placeholder="Start at"
       />
-      <div>selected value: {{ value ? new Date(value) : 'unselected' }}</div>
+      <div>selected value: {{ value || 'unselected' }}</div>
     </v-col>
 
     <v-col cols="6">
       <vx-date-picker
         v-model="valueDateTime"
-        label="vx-date-picker (datetimepicker)"
+        label="type: datetimepicker (default format)"
         type="datetimepicker"
-        format="YYYY/MM/DD/HH/mm/ss"
         placeholder="Choose Datetime"
       />
-      <div>selected value: {{ valueDateTime ? new Date(valueDateTime) : 'unselected' }}</div>
+      <div>selected value: {{ valueDateTime || 'unselected' }}</div>
     </v-col>
 
     <v-col cols="6">
       <vx-range-picker
         v-model="rangeValueDate"
-        label="vx-range-picker (datepicker)"
+        label="type: datepicker(default format YYYY-MM-DD)"
         :placeholder="['Start at', 'End at']"
       />
       <div>selected value: {{ rangeValueDate ? rangeValueDate : 'unselected' }}</div>
@@ -201,7 +201,7 @@ const rangeValueDateTime = ref(['', ''])
     <v-col cols="6">
       <vx-range-picker
         v-model="rangeValueDateTime"
-        label="vx-range-picker (datetimepicker)"
+        label="type：datetimepicker (YYYY/MM/DD HH:mm)"
         format="YYYY/MM/DD HH:mm"
         type="datetimepicker"
         :placeholder="['Start at', 'End at']"
