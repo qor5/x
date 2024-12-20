@@ -24,7 +24,7 @@ func (b *VXBtnGroupBuilder) BaseColor(v string) (r *VXBtnGroupBuilder) {
 }
 
 func (b *VXBtnGroupBuilder) DividerColor(v string) (r *VXBtnGroupBuilder) {
-	b.tag.Attr(":divider-color", v)
+	b.tag.Attr("divider-color", v)
 	return b
 }
 
