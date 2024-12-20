@@ -12,7 +12,9 @@
         <slot name="prepend" />
       </template>
 
-      <slot />
+      <template v-if="!isDefaultSlotReallyEmpty" #default>
+        <slot />
+      </template>
 
       <template v-if="slots.append" #append>
         <slot name="append" />
@@ -33,6 +35,10 @@ const props = defineProps({
     type: String,
     default: 'default'
   }
+})
+
+const isDefaultSlotReallyEmpty = computed(() => {
+  return !slots.default || !slots.default().length
 })
 
 const presetsSizeOptions = computed(() => {
