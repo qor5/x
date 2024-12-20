@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/qor5/web/v3"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -12,15 +11,20 @@ type VXChipBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VXChip(children ...h.HTMLComponent) (r *VXChipBuilder) {
+func VXChip(text string) (r *VXChipBuilder) {
 	r = &VXChipBuilder{
-		tag: h.Tag("vx-btn").Children(children...),
+		tag: h.Tag("vx-chip").Children(h.Text(text)),
 	}
 	return
 }
 
-func (b *VXChipBuilder) Presets(v string) (r *VXChipBuilder) {
-	b.tag.Attr("presets", v)
+func (b *VXChipBuilder) Label(v bool) (r *VXChipBuilder) {
+	b.tag.Attr(":label", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXChipBuilder) Filter(v bool) (r *VXChipBuilder) {
+	b.tag.Attr(":filter", fmt.Sprint(v))
 	return b
 }
 
@@ -29,28 +33,18 @@ func (b *VXChipBuilder) Round(v bool) (r *VXChipBuilder) {
 	return b
 }
 
-func (b *VXChipBuilder) Symbol(v interface{}) (r *VXChipBuilder) {
-	b.tag.Attr(":symbol", h.JSONString(v))
+func (b *VXChipBuilder) Presets(v string) (r *VXChipBuilder) {
+	b.tag.Attr("presets", v)
 	return b
 }
 
-func (b *VXChipBuilder) Flat(v bool) (r *VXChipBuilder) {
-	b.tag.Attr(":flat", fmt.Sprint(v))
+func (b *VXChipBuilder) ActiveClass(v string) (r *VXChipBuilder) {
+	b.tag.Attr("active-class", v)
 	return b
 }
 
-func (b *VXChipBuilder) Active(v bool) (r *VXChipBuilder) {
-	b.tag.Attr(":active", fmt.Sprint(v))
-	return b
-}
-
-func (b *VXChipBuilder) BaseColor(v string) (r *VXChipBuilder) {
-	b.tag.Attr("base-color", v)
-	return b
-}
-
-func (b *VXChipBuilder) PrependIcon(v interface{}) (r *VXChipBuilder) {
-	b.tag.Attr(":prepend-icon", h.JSONString(v))
+func (b *VXChipBuilder) AppendAvatar(v string) (r *VXChipBuilder) {
+	b.tag.Attr("append-avatar", v)
 	return b
 }
 
@@ -59,23 +53,48 @@ func (b *VXChipBuilder) AppendIcon(v interface{}) (r *VXChipBuilder) {
 	return b
 }
 
-func (b *VXChipBuilder) Block(v bool) (r *VXChipBuilder) {
-	b.tag.Attr(":block", fmt.Sprint(v))
+func (b *VXChipBuilder) Closable(v bool) (r *VXChipBuilder) {
+	b.tag.Attr(":closable", fmt.Sprint(v))
 	return b
 }
 
-func (b *VXChipBuilder) Readonly(v bool) (r *VXChipBuilder) {
-	b.tag.Attr(":readonly", fmt.Sprint(v))
+func (b *VXChipBuilder) CloseIcon(v interface{}) (r *VXChipBuilder) {
+	b.tag.Attr(":close-icon", h.JSONString(v))
 	return b
 }
 
-func (b *VXChipBuilder) Slim(v bool) (r *VXChipBuilder) {
-	b.tag.Attr(":slim", fmt.Sprint(v))
+func (b *VXChipBuilder) CloseLabel(v string) (r *VXChipBuilder) {
+	b.tag.Attr("close-label", v)
 	return b
 }
 
-func (b *VXChipBuilder) Stacked(v bool) (r *VXChipBuilder) {
-	b.tag.Attr(":stacked", fmt.Sprint(v))
+func (b *VXChipBuilder) Draggable(v bool) (r *VXChipBuilder) {
+	b.tag.Attr(":draggable", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXChipBuilder) FilterIcon(v string) (r *VXChipBuilder) {
+	b.tag.Attr("filter-icon", v)
+	return b
+}
+
+func (b *VXChipBuilder) Link(v bool) (r *VXChipBuilder) {
+	b.tag.Attr(":link", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXChipBuilder) Pill(v bool) (r *VXChipBuilder) {
+	b.tag.Attr(":pill", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXChipBuilder) PrependAvatar(v string) (r *VXChipBuilder) {
+	b.tag.Attr("prepend-avatar", v)
+	return b
+}
+
+func (b *VXChipBuilder) PrependIcon(v interface{}) (r *VXChipBuilder) {
+	b.tag.Attr(":prepend-icon", h.JSONString(v))
 	return b
 }
 
@@ -94,6 +113,11 @@ func (b *VXChipBuilder) Text(v string) (r *VXChipBuilder) {
 	return b
 }
 
+func (b *VXChipBuilder) ModelValue(v bool) (r *VXChipBuilder) {
+	b.tag.Attr(":model-value", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXChipBuilder) Border(v interface{}) (r *VXChipBuilder) {
 	b.tag.Attr(":border", h.JSONString(v))
 	return b
@@ -101,36 +125,6 @@ func (b *VXChipBuilder) Border(v interface{}) (r *VXChipBuilder) {
 
 func (b *VXChipBuilder) Density(v interface{}) (r *VXChipBuilder) {
 	b.tag.Attr(":density", h.JSONString(v))
-	return b
-}
-
-func (b *VXChipBuilder) Height(v interface{}) (r *VXChipBuilder) {
-	b.tag.Attr(":height", h.JSONString(v))
-	return b
-}
-
-func (b *VXChipBuilder) MaxHeight(v interface{}) (r *VXChipBuilder) {
-	b.tag.Attr(":max-height", h.JSONString(v))
-	return b
-}
-
-func (b *VXChipBuilder) MaxWidth(v interface{}) (r *VXChipBuilder) {
-	b.tag.Attr(":max-width", h.JSONString(v))
-	return b
-}
-
-func (b *VXChipBuilder) MinHeight(v interface{}) (r *VXChipBuilder) {
-	b.tag.Attr(":min-height", h.JSONString(v))
-	return b
-}
-
-func (b *VXChipBuilder) MinWidth(v interface{}) (r *VXChipBuilder) {
-	b.tag.Attr(":min-width", h.JSONString(v))
-	return b
-}
-
-func (b *VXChipBuilder) Width(v interface{}) (r *VXChipBuilder) {
-	b.tag.Attr(":width", h.JSONString(v))
 	return b
 }
 
@@ -146,21 +140,6 @@ func (b *VXChipBuilder) Disabled(v bool) (r *VXChipBuilder) {
 
 func (b *VXChipBuilder) SelectedClass(v string) (r *VXChipBuilder) {
 	b.tag.Attr("selected-class", v)
-	return b
-}
-
-func (b *VXChipBuilder) Loading(v interface{}) (r *VXChipBuilder) {
-	b.tag.Attr(":loading", h.JSONString(v))
-	return b
-}
-
-func (b *VXChipBuilder) Location(v interface{}) (r *VXChipBuilder) {
-	b.tag.Attr(":location", h.JSONString(v))
-	return b
-}
-
-func (b *VXChipBuilder) Position(v interface{}) (r *VXChipBuilder) {
-	b.tag.Attr(":position", h.JSONString(v))
 	return b
 }
 
@@ -219,11 +198,6 @@ func (b *VXChipBuilder) Variant(v interface{}) (r *VXChipBuilder) {
 	return b
 }
 
-func (b *VXChipBuilder) Icon(v interface{}) (r *VXChipBuilder) {
-	b.tag.Attr(":icon", h.JSONString(v))
-	return b
-}
-
 func (b *VXChipBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
 }
@@ -270,14 +244,4 @@ func (b *VXChipBuilder) Bind(name string, value string) (r *VXChipBuilder) {
 
 func (b *VXChipBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
-}
-
-func (b *VXChipBuilder) OnClick(eventFuncId string) (r *VXChipBuilder) {
-	b.tag.Attr("@click", web.POST().EventFunc(eventFuncId).Go())
-	return b
-}
-
-func (b *VXChipBuilder) AttrIf(key, value interface{}, add bool) (r *VXChipBuilder) {
-	b.tag.AttrIf(key, value, add)
-	return b
 }

@@ -1,9 +1,10 @@
 package vuetifyx
 
 import (
-	"github.com/qor5/web/v3"
-	"fmt"
 	"context"
+	"fmt"
+
+	"github.com/qor5/web/v3"
 	h "github.com/theplant/htmlgo"
 )
 
@@ -11,11 +12,11 @@ type VXBtnBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-
-func VXBtn(children ...h.HTMLComponent) (r *VXBtnBuilder) {
+func VXBtn(name string) (r *VXBtnBuilder) {
 	r = &VXBtnBuilder{
-		tag: h.Tag("vx-btn").Children(children...),
+		tag: h.Tag("vx-btn").Text(name),
 	}
+
 	return
 }
 
@@ -266,7 +267,6 @@ func (b *VXBtnBuilder) Bind(name string, value string) (r *VXBtnBuilder) {
 func (b *VXBtnBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	return b.tag.MarshalHTML(ctx)
 }
-
 
 func (b *VXBtnBuilder) OnClick(eventFuncId string) (r *VXBtnBuilder) {
 	b.tag.Attr("@click", web.POST().EventFunc(eventFuncId).Go())
