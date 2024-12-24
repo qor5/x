@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {nextTick, onMounted, onUnmounted, ref, watch} from 'vue'
+import { nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 
 const emit = defineEmits(['load'])
 const iframe = ref()
@@ -7,16 +7,64 @@ const virtualEle = ref()
 const parentEle = ref()
 const currentEle = ref()
 const container = ref()
-const height = ref()
+const storeAddVirtualEle = reactive({
+  height: 0,
+  containerDataID: ''
+})
 let resizable = false
 const props = defineProps({
-  srcdoc: {type: String, required: true},
-  width: {type: String},
-  virtualElementText: {type: String, default: 'New Component'},
-  backgroundColor: {type: String, default: ''},
-  virtualElementHeight: {type: Number, default: 100}
+  srcdoc: { type: String, required: true },
+  width: { type: String },
+  virtualElementText: { type: String, default: 'New Component' },
+  backgroundColor: { type: String, default: '' },
+  virtualElementHeight: { type: Number, default: 100 }
 })
 const virtualHeight = props.virtualElementHeight
+
+const diffAndUpdate = (oldNode: Node, newNode: Node) => {
+  if (oldNode.nodeType !== newNode.nodeType || oldNode.nodeName !== newNode.nodeName) {
+    const parent = oldNode.parentNode
+    if (parent) {
+      parent.replaceChild(newNode.cloneNode(true), oldNode)
+    }
+    return
+  }
+
+  if (oldNode.nodeType === Node.TEXT_NODE) {
+    if (oldNode.nodeValue !== newNode.nodeValue) {
+      oldNode.nodeValue = newNode.nodeValue
+    }
+    return
+  }
+  const oldElement = oldNode as Element
+  const newElement = newNode as Element
+  const oldAttrs = oldElement.attributes
+  const newAttrs = newElement.attributes
+  Array.from(oldAttrs).forEach((attr) => {
+    if (!newElement.hasAttribute(attr.name)) {
+      oldElement.removeAttribute(attr.name)
+    }
+  })
+  Array.from(newAttrs).forEach((attr) => {
+    if (oldElement.getAttribute(attr.name) !== attr.value) {
+      oldElement.setAttribute(attr.name, attr.value)
+    }
+  })
+
+  const oldChildren = Array.from(oldNode.childNodes)
+  const newChildren = Array.from(newNode.childNodes)
+  const maxLength = Math.max(oldChildren.length, newChildren.length)
+  for (let i = 0; i < maxLength; i++) {
+    if (!oldChildren[i] && newChildren[i]) {
+      oldNode.appendChild(newChildren[i].cloneNode(true))
+    } else if (oldChildren[i] && !newChildren[i]) {
+      oldChildren[i].remove()
+    } else if (oldChildren[i] && newChildren[i]) {
+      diffAndUpdate(oldChildren[i], newChildren[i])
+    }
+  }
+}
+
 const resizeContainer = (entry: ResizeObserverEntry) => {
   if (!container.value) {
     return
@@ -24,7 +72,7 @@ const resizeContainer = (entry: ResizeObserverEntry) => {
   if (
     iframe.value &&
     iframe.value.contentWindow &&
-    entry.contentRect.width >= iframe.value.contentWindow.document.documentElement.scrollWidth
+    entry.contentRect.width >= iframeDoc().documentElement.scrollWidth
   ) {
     container.value.style.display = 'flex'
     container.value.style.justifyContent = 'center'
@@ -36,7 +84,6 @@ const resizeContainer = (entry: ResizeObserverEntry) => {
 const resizeObserver = new ResizeObserver((entries) => {
   for (let entry of entries) {
     resizeContainer(entry)
-
   }
 })
 const setIframeDisplay = () => {
@@ -50,7 +97,9 @@ const setIframeDisplay = () => {
     container.value.style.justifyContent = ''
   }
 }
-
+const iframeDoc = () => {
+  return iframe.value.contentDocument || iframe.value.contentWindow?.document
+}
 onMounted(() => {
   nextTick(() => {
     setIframeDisplay()
@@ -74,40 +123,24 @@ onUnmounted(() => {
   resizable = false
 })
 
-const setIframeHeight = () => {
-  const bodyEle = iframe.value.contentWindow.document.querySelector('body')
-  height.value = bodyEle.scrollHeight
-  if (height.value < virtualHeight) {
-    height.value = virtualHeight
-  }
-  setIframeContainerHeight(0)
-}
-
 const load = (event: any) => {
   if (!iframe.value || !iframe.value.contentWindow) {
     emit('load', event)
     return
   }
-  setIframeHeight()
   if (!resizable) {
     resizeObserver.observe(container.value)
     resizable = true
   }
-  const iframeDoc = iframe.value.contentWindow.document
   emit('load', event)
 }
 const removeHighlightClass = () => {
-  const iframeDocument = iframe.value.contentWindow.document
-  const elements = iframeDocument.querySelectorAll('.highlight')
+  const elements = iframeDoc().querySelectorAll('.highlight')
   elements.forEach((el: Element) => (el as HTMLElement).classList.remove('highlight'))
 }
 
-const setIframeContainerHeight = (h: number) => {
-  iframe.value.style.height = height.value + h + 'px'
-}
-
-
 const createVirtualElement = () => {
+  storeScrollHeight()
   removeHighlightClass()
   virtualEle.value = document.createElement('div')
   virtualEle.value.style.height = virtualHeight + 'px'
@@ -119,7 +152,6 @@ const createVirtualElement = () => {
   virtualEle.value.style.justifyContent = 'center'
   virtualEle.value.style.alignItems = 'center'
   virtualEle.value.innerHTML = props.virtualElementText
-  setIframeContainerHeight(virtualHeight)
 }
 const addVirtualElement = (data: any) => {
   if (!iframe.value) {
@@ -137,6 +169,9 @@ const addVirtualElement = (data: any) => {
   currentEle.value = current
   parentEle.value = current.parentElement
   parentEle.value?.insertBefore(virtualEle.value, current.nextSibling)
+  if (!isElementCompletelyInViewport(virtualEle.value)) {
+    scrollTo({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
+  }
 }
 
 const removeVirtualElement = () => {
@@ -145,16 +180,17 @@ const removeVirtualElement = () => {
     virtualEle.value = null
     parentEle.value = null
     currentEle.value = null
+    restoreScrollHeight()
   }
 }
 const appendVirtualElement = () => {
-  const app = iframe.value.contentWindow.document.getElementById('app') as HTMLElement
+  const app = iframeDoc().getElementById('app') as HTMLElement
   if (!app) {
     return
   }
   if (app == currentEle.value) {
     if (virtualEle.value) {
-      container.value.scrollTo({top: virtualEle.value.offsetTop, behavior: 'smooth'})
+      scrollTo({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
     }
     return
   }
@@ -163,10 +199,31 @@ const appendVirtualElement = () => {
   currentEle.value = app
   parentEle.value = app
   app.appendChild(virtualEle.value)
-  container.value.scrollTo({top: virtualEle.value.offsetTop, behavior: 'smooth'})
+  scrollTo({ top: virtualEle.value.offsetTop, behavior: 'smooth' })
 }
 const querySelector = (val: any) => {
   return container.value.querySelector(val)
+}
+
+const scrollTo = (data: { top: number; behavior: string }) => {
+  iframe.value.contentWindow.scrollTo(data)
+}
+const storeScrollHeight = () => {
+  storeAddVirtualEle.height = iframe.value.contentWindow.scrollY
+  const hl = iframeDoc().querySelector('.highlight')
+  storeAddVirtualEle.containerDataID = ''
+  if (hl) {
+    storeAddVirtualEle.containerDataID = hl.getAttribute('data-container-id')
+  }
+}
+const restoreScrollHeight = () => {
+  scrollTo({ top: storeAddVirtualEle.height, behavior: 'smooth' })
+  storeAddVirtualEle.height = 0
+  const el = findContainerByDataID(storeAddVirtualEle.containerDataID)
+  if (el) {
+    el.classList.add('highlight')
+  }
+  storeAddVirtualEle.containerDataID = ''
 }
 
 const scrollToCurrentContainer = (data: any, isUpdate: boolean) => {
@@ -183,75 +240,80 @@ const scrollToCurrentContainer = (data: any, isUpdate: boolean) => {
   if (isUpdate && inView) {
     return
   }
-  container.value.scrollTo({top: current.offsetTop, behavior: 'smooth'})
+  scrollTo({ top: current.offsetTop, behavior: 'smooth' })
 }
 const findContainerByDataID = (containerDataID: string): HTMLElement | undefined => {
   if (!iframe.value) {
     return
   }
-  const iframeDocument = iframe.value.contentWindow.document
-  if (!iframeDocument) {
-    return
-  }
-  return iframeDocument.querySelector("div[data-container-id='" + containerDataID + "']")
+  return iframeDoc().querySelector("div[data-container-id='" + containerDataID + "']")
 }
 const isElementInViewport = (element: HTMLElement) => {
   if (!element) return false
+  const { containerTop, containerBottom, targetTop, targetBottom } = getPositionInfo(element)
 
-  const containerScrollTop = container.value.scrollTop
-  const containerHeight = container.value.clientHeight
+  return targetBottom >= containerTop && targetTop <= containerBottom
+}
+const getPositionInfo = (element: HTMLElement) => {
+  const doc = iframeDoc()
+  const containerScrollTop = doc.documentElement.scrollTop || doc.body.scrollTop
+  const containerHeight = iframe.value.clientHeight
   const targetOffsetTop = element.offsetTop
   const targetHeight = element.offsetHeight
+
   const containerTop = containerScrollTop
   const containerBottom = containerScrollTop + containerHeight
   const targetTop = targetOffsetTop
   const targetBottom = targetOffsetTop + targetHeight
-  return targetBottom >= containerTop && targetTop <= containerBottom
+  return { containerTop, containerBottom, targetTop, targetBottom }
+}
+
+const isElementCompletelyInViewport = (element: HTMLElement) => {
+  if (!element) return false
+  const { containerTop, containerBottom, targetTop, targetBottom } = getPositionInfo(element)
+  return targetTop >= containerTop && targetBottom <= containerBottom
 }
 const preloadImage = (src: string) => {
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.src = src;
-    img.onload = () => resolve(src);
-    img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
-  });
+    const img = new Image()
+    img.src = src
+    img.onload = () => resolve(src)
+    img.onerror = () => reject(new Error(`Failed to load image: ${src}`))
+  })
 }
 
-
-const updateBody = (data: { body: string; containerDataID: string; isUpdate: boolean }) => {
+const updateBody = (
+  data: { body: string; containerDataID: string; isUpdate: boolean },
+  temp: Node
+) => {
   if (!iframe.value) {
     return
   }
-  const iframeDocument = iframe.value.contentWindow.document
-  if (!iframeDocument) {
-    return
-  }
-  const bodyEle = iframeDocument.querySelector('body')
-  bodyEle.innerHTML = data.body;
+  const bodyEle = iframeDoc().querySelector('body')
+  diffAndUpdate(bodyEle, temp)
   setTimeout(() => {
-    setIframeHeight()
     setIframeDisplay()
     scrollToCurrentContainer(data.containerDataID, data.isUpdate)
   }, 200)
 }
 const updateIframeBody = (data: { body: string; containerDataID: string; isUpdate: boolean }) => {
-  const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = data.body;
-  const imgElements = tempDiv.querySelectorAll("img");
+  const temp = document.createElement('body')
+  temp.innerHTML = data.body
+  const imgElements = temp.querySelectorAll('img')
   const imageSrcs = Array.from(imgElements)
-    .map(img => img.src)
-    .filter(src => src);
+    .map((img) => img.src)
+    .filter((src) => src)
   if (imageSrcs.length === 0) {
-    updateBody(data)
-    return;
+    updateBody(data, temp)
+    return
   }
   Promise.all(imageSrcs.map(preloadImage))
     .then(() => {
-      updateBody(data)
+      updateBody(data, temp)
     })
-    .catch(err => {
-      updateBody(data)
-    });
+    .catch((err) => {
+      updateBody(data, temp)
+    })
 }
 
 defineExpose({
@@ -268,8 +330,8 @@ defineExpose({
   <div
     ref="container"
     :style="{
-      height: 'calc(100vh - 88px)',
       width: '100%',
+      height: '100%',
       overflow: 'auto',
       backgroundColor: backgroundColor
     }"
@@ -278,14 +340,16 @@ defineExpose({
       ref="iframe"
       :srcdoc="srcdoc"
       frameborder="0"
-      scrolling="no"
       @load="load"
+      scrolling="yes"
       :style="{
+        height: 'calc(100vh - 88px)',
         width: width,
         display: 'block',
         border: 'none',
         padding: 0,
         margin: 0,
+        overflow: 'auto',
         backgroundColor: '#FFF'
       }"
     >
