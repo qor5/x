@@ -39,6 +39,10 @@ func (b *VXScrollIframeBuilder) BackgroundColor(v string) (r *VXScrollIframeBuil
 	b.tag.Attr(":background-color", h.JSONString(v))
 	return b
 }
+func (b *VXScrollIframeBuilder) UpdateDifferent(v bool) (r *VXScrollIframeBuilder) {
+	b.tag.Attr(":update-different", h.JSONString(v))
+	return b
+}
 
 func (b *VXScrollIframeBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
