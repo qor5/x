@@ -17,39 +17,42 @@ const props = defineProps({
   width: { type: String },
   virtualElementText: { type: String, default: 'New Component' },
   backgroundColor: { type: String, default: '' },
-  virtualElementHeight: { type: Number, default: 100 }
+  virtualElementHeight: { type: Number, default: 100 },
+  updateDifferent: { type: Boolean, default: false }
 })
 const virtualHeight = props.virtualElementHeight
 
-const diffAndUpdate = (oldNode: Node, newNode: Node) => {
-  if (oldNode.nodeType !== newNode.nodeType || oldNode.nodeName !== newNode.nodeName) {
-    const parent = oldNode.parentNode
-    if (parent) {
-      parent.replaceChild(newNode.cloneNode(true), oldNode)
+const diffAndUpdate = (oldNode: Node, newNode: Node, deep: number = 0) => {
+  if (deep > 0) {
+    if (oldNode.nodeType !== newNode.nodeType || oldNode.nodeName !== newNode.nodeName) {
+      const parent = oldNode.parentNode
+      if (parent) {
+        parent.replaceChild(newNode.cloneNode(true), oldNode)
+      }
+      return
     }
-    return
-  }
 
-  if (oldNode.nodeType === Node.TEXT_NODE) {
-    if (oldNode.nodeValue !== newNode.nodeValue) {
-      oldNode.nodeValue = newNode.nodeValue
+    if (oldNode.nodeType === Node.TEXT_NODE) {
+      if (oldNode.nodeValue !== newNode.nodeValue) {
+        oldNode.nodeValue = newNode.nodeValue
+      }
+      return
     }
-    return
+    const oldElement = oldNode as Element
+    const newElement = newNode as Element
+    const oldAttrs = oldElement.attributes
+    const newAttrs = newElement.attributes
+    Array.from(oldAttrs).forEach((attr) => {
+      if (!newElement.hasAttribute(attr.name)) {
+        oldElement.removeAttribute(attr.name)
+      }
+    })
+    Array.from(newAttrs).forEach((attr) => {
+      if (oldElement.getAttribute(attr.name) !== attr.value) {
+        oldElement.setAttribute(attr.name, attr.value)
+      }
+    })
   }
-  const oldElement = oldNode as Element
-  const newElement = newNode as Element
-  const oldAttrs = oldElement.attributes
-  const newAttrs = newElement.attributes
-  Array.from(oldAttrs).forEach((attr) => {
-    if (!newElement.hasAttribute(attr.name)) {
-      oldElement.removeAttribute(attr.name)
-    }
-  })
-  Array.from(newAttrs).forEach((attr) => {
-    if (oldElement.getAttribute(attr.name) !== attr.value) {
-      oldElement.setAttribute(attr.name, attr.value)
-    }
-  })
 
   const oldChildren = Array.from(oldNode.childNodes)
   const newChildren = Array.from(newNode.childNodes)
@@ -60,7 +63,7 @@ const diffAndUpdate = (oldNode: Node, newNode: Node) => {
     } else if (oldChildren[i] && !newChildren[i]) {
       oldChildren[i].remove()
     } else if (oldChildren[i] && newChildren[i]) {
-      diffAndUpdate(oldChildren[i], newChildren[i])
+      diffAndUpdate(oldChildren[i], newChildren[i], deep + 1)
     }
   }
 }
@@ -206,6 +209,11 @@ const querySelector = (val: any) => {
 }
 
 const scrollTo = (data: { top: number; behavior: string }) => {
+  const mainElement = iframeDoc().querySelector('.pagebuilder-main') as HTMLElement
+  if (mainElement) {
+    const mainPaddingTop = parseFloat(window.getComputedStyle(mainElement).paddingTop) || 0
+    data.top -= mainPaddingTop
+  }
   iframe.value.contentWindow.scrollTo(data)
 }
 const storeScrollHeight = () => {
@@ -290,7 +298,11 @@ const updateBody = (
     return
   }
   const bodyEle = iframeDoc().querySelector('body')
-  diffAndUpdate(bodyEle, temp)
+  if (props.updateDifferent) {
+    diffAndUpdate(bodyEle, temp)
+  } else {
+    bodyEle.innerHTML = data.body
+  }
   setTimeout(() => {
     setIframeDisplay()
     scrollToCurrentContainer(data.containerDataID, data.isUpdate)
