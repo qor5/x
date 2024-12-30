@@ -167,7 +167,7 @@ const addVirtualElement = (data: any) => {
   if (currentEle.value == current) {
     return
   }
-  removeVirtualElement()
+  removeVirtualElement(true)
   createVirtualElement()
   currentEle.value = current
   parentEle.value = current.parentElement
@@ -177,13 +177,15 @@ const addVirtualElement = (data: any) => {
   }
 }
 
-const removeVirtualElement = () => {
+const removeVirtualElement = (createEle: boolean = false) => {
   if (virtualEle.value && parentEle.value) {
     parentEle.value.removeChild(virtualEle.value)
     virtualEle.value = null
     parentEle.value = null
     currentEle.value = null
-    restoreScrollHeight()
+    if (!createEle) {
+      restoreScrollHeight()
+    }
   }
 }
 const appendVirtualElement = () => {
@@ -197,7 +199,7 @@ const appendVirtualElement = () => {
     }
     return
   }
-  removeVirtualElement()
+  removeVirtualElement(true)
   createVirtualElement()
   currentEle.value = app
   parentEle.value = app
@@ -298,11 +300,7 @@ const updateBody = (
     return
   }
   const bodyEle = iframeDoc().querySelector('body')
-  if (props.updateDifferent) {
-    diffAndUpdate(bodyEle, temp)
-  } else {
-    bodyEle.innerHTML = data.body
-  }
+  bodyEle.innerHTML = data.body
   setTimeout(() => {
     setIframeDisplay()
     scrollToCurrentContainer(data.containerDataID, data.isUpdate)
