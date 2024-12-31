@@ -188,8 +188,8 @@ func (b *VXChipBuilder) Theme(v string) (r *VXChipBuilder) {
 	return b
 }
 
-func (b *VXChipBuilder) Color(v string) (r *VXChipBuilder) {
-	b.tag.Attr("color", v)
+func (b *VXChipBuilder) Color(v interface{}) (r *VXChipBuilder) {
+	b.tag.Attr(":color", h.JSONString(v))
 	return b
 }
 
