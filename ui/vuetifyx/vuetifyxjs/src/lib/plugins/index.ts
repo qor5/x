@@ -35,8 +35,7 @@ import VXBtnGroup from '@/lib/Common/VXBtnGroup.vue'
 import VXChip from '@/lib/Common/VXChip.vue'
 import VXAvatar from '@/lib/VXAvatar.vue'
 import VXTabs from '@/lib/Tabs/VXTabs.vue'
-import VXBreadcrumbs from '@/lib/Breadcrumbs/VXBreadcrumbs.vue'
-import VXTreeview from '@/lib/Treeview/VXTreeview.vue'
+import VXIframeEmailEditor from '@/lib/IframeEmailEditor.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 import LinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
 
@@ -73,9 +72,8 @@ const vuetifyx = {
     app.component('vx-restore-scroll-listener', RestoreScrollListener)
     app.component('vx-scroll-iframe', ScrollIframe)
     app.component('vx-send-variables', SendVariables)
-    app.component('vx-breadcrumbs', VXBreadcrumbs)
-    app.component('vx-treeview', VXTreeview)
     app.component('vx-messagelistener', MessageListener)
+    app.component('vx-iframe-email-editor', VXIframeEmailEditor)
   }
 }
 
