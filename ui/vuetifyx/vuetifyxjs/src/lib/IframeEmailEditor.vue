@@ -32,13 +32,18 @@ function onIframeLoad() {
 }
 
 function handleMessageFromIframe(event: MessageEvent) {
-  if (event.origin !== new URL(props.src).origin) return
+  if (event.origin !== getPropsOrigin(props.src)) return
   // console.log('Message from iframe:', event.data)
+}
+
+function getPropsOrigin(src: string) {
+  return src.startsWith('http') ? new URL(src).origin : window.location.origin
 }
 
 function sendMessageToIframe(message: unknown) {
   if (iframe && iframe.value.contentWindow) {
-    iframe.value.contentWindow.postMessage(message, new URL(props.src).origin)
+    const origin = getPropsOrigin(props.src)
+    iframe.value.contentWindow.postMessage(message, origin)
   }
 }
 
@@ -48,7 +53,7 @@ async function emit(eventName: string, data: unknown) {
 
   return new Promise((resolve, reject) => {
     const handleResponse = (event: MessageEvent) => {
-      if (event.origin !== new URL(props.src).origin) return
+      if (event.origin !== getPropsOrigin(props.src)) return
       if (event.data.requestId === requestId) {
         window.removeEventListener('message', handleResponse)
         if (event.data.error) {
