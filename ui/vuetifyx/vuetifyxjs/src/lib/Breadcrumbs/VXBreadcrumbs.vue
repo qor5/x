@@ -41,6 +41,7 @@ const defaultOptions = computed(() => {
 })
 
 const isDefaultSlotReallyEmpty = computed(() => {
+  /* @ts-ignore */
   return !slots.default || !slots.default().length
 })
 
