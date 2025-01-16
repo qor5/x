@@ -1,68 +1,77 @@
-# VXTreeview
+# vx-treeview
 
-这是一个基本示例，你可以用 `markdown` 语法 和 `vue3`、`vuetify` 在此处写任何组件代码
+树状视图组件
 
+## API
 
-## vuetifyx 组件开发流程
+### Props
 
-### 1.新建组件
-在 `qor5/x/vuetifyx/src/lib` 里新建任何 vue 组件, 比如 `qor5/x/vuetifyx/src/lib/richEditor/index.vue`
+| Name  | Introduction           | Type    | Default Value |
+| ----- | ---------------------- | ------- | ------------- |
+| items | 树状视图项目组成的数组 | `Array` | undefined     |
 
-### 2.注册组件
-在 `qor5/x/vuetifyx/src/lib/plugins/index.vue` 里注册组件，这样注册可以确保生产环境和本地环境都可用
+> 除此之外所有的 [v-treeview](https://vuetifyjs.com/en/api/v-treeview/) 原生 props 都可使用 v-bind:[props]="[value]" 实现或覆盖
 
-1. vuetify 组件不用注册，直接用就行，比如 `v-btn`
-2. vuetifyx 组件请以 `vx-` 开头
+### Slots
 
-```ts
-// qor5/x/vuetifyx/src/lib/plugins/index.vue
+#### v-slot:default
 
-import TextField from '@/lib/Form/TextFiled.vue'
+默认内容区域插槽
 
-const vuetifyx = {
-  install: (app: App) => {
-    app.component('vx-datepicker', Datepicker)
-    app.component('vx-selectmany', SelectMany)
-    app.component('vx-linkageselect', LinkageSelect)
-    app.component('vx-filter', Filter)
-    app.component('vx-autocomplete', Autocomplete)
-    app.component('vx-textdatepicker', TextDatepicker)
-    app.component('vx-draggable', draggable)
-    app.component('vx-restore-scroll-listener', RestoreScrollListener)
-    app.component('vx-scroll-iframe', ScrollIframe)
-    app.component('vx-send-variables', SendVariables)
-    app.component('vx-messagelistener', MessageListener)
-    app.component('vx-overlay', Overlay)
-    app.component('vx-text-field', TextField)
-    // 在此注册你的新组件
-    // app.component('vx-rich-editor', TextField)
-  }
-}
-```
+#### v-slot:prepend
 
-### 3. 直接在当前文档使用
+前置插槽
 
-可以在当前 markdown 里倒入任何本地局部示例组件，比如
+#### v-slot:divider
 
-`import VueJsonPretty from 'vue-json-pretty'`
+分割线插槽
+
+### Slot Usage
 
 :::demo
 
 ```vue
 <script setup lang="ts">
-import VueJsonPretty from 'vue-json-pretty'
+const linkUsageItems = [
+  {
+    id: 1,
+    title: 'Node 1 :'
+  },
+  {
+    id: 5,
+    title: 'Node 5 :'
+  },
 
+  {
+    id: 19,
+    title: 'Node 19 :',
+    children: [
+      {
+        id: 20,
+        title: 'Node 20 :',
+        children: [
+          { id: 21, title: 'Node 21 :' },
+          { id: 22, title: 'Node 22 :' },
+          { id: 23, title: 'Node 23 :' }
+        ]
+      },
+      { id: 24, title: 'Node 24 :' },
+      { id: 25, title: 'Node 25 :' }
+    ]
+  }
+]
 </script>
 <template>
-  <v-btn color="primary">hello world</v-btn>
-
-  <VueJsonPretty :data="value"></VueJsonPretty>
-  你可以任意更改这里的代码
+  <v-row>
+    <v-col cols="6">
+      <vx-treeview :items="linkUsageItems">
+        <template v-slot:prepend="{ item, isOpen }">
+          <v-icon icon="mdi-plus-circle-outline" size="small" color="grey-darken-3" />
+        </template>
+      </vx-treeview>
+    </v-col>
+  </v-row>
 </template>
 ```
 
-<style scoped></style>
 :::
-
-### 4. 为组件撰写必要说明和参数
-目前先随意，后期会有规范
