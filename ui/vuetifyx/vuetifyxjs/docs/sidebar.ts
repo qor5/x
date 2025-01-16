@@ -53,11 +53,6 @@ export default {
           text: 'Label 标签',
           link: '/Components/VXLabel/'
         },
-        // we should use v-alert instead of vx-tool-bar
-        // {
-        //   text: 'Toolbar 提示条',
-        //   link: '/Components/VXToolbar/'
-        // },
         {
           text: 'Filter 筛选组件',
           link: '/Components/Filter/'
@@ -69,6 +64,14 @@ export default {
         {
           text: 'Pagination 分页器',
           link: '/Components/VXPagination/'
+        },
+        {
+          text: 'Breadcrumbs 面包屑',
+          link: '/Components/VXBreadcrumbs/'
+        },
+        {
+          text: 'Treeview 树组件',
+          link: '/Components/VXTreeview/'
         }
       ]
     },
