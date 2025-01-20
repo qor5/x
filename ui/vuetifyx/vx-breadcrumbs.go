@@ -11,7 +11,7 @@ type VXBreadcrumbsBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VBreadcrumbs(children ...h.HTMLComponent) (r *VXBreadcrumbsBuilder) {
+func VXBreadcrumbs(children ...h.HTMLComponent) (r *VXBreadcrumbsBuilder) {
 	r = &VXBreadcrumbsBuilder{
 		tag: h.Tag("vx-breadcrumbs").Children(children...),
 	}

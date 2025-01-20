@@ -11,7 +11,7 @@ type VXTreeviewBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-func VTreeview(children ...h.HTMLComponent) (r *VXTreeviewBuilder) {
+func VXTreeview(children ...h.HTMLComponent) (r *VXTreeviewBuilder) {
 	r = &VXTreeviewBuilder{
 		tag: h.Tag("vx-treeview").Children(children...),
 	}
