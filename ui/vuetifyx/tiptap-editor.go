@@ -40,6 +40,7 @@ func (b *VXTiptapEditorBuilder) Attr(vs ...any) (r *VXTiptapEditorBuilder) {
 	b.tag.Attr(vs...)
 	return b
 }
+
 func (b *VXTiptapEditorBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
 }
@@ -220,6 +221,9 @@ func TiptapExtensions() []*VXTiptapEditorExtension {
 		},
 		{
 			Name: "Link",
+			Options: map[string]any{
+				"hrefRules": fmt.Sprintf("%q", "[value=> value !=3 || '123']"),
+			},
 		},
 		{
 			Name: "Image",

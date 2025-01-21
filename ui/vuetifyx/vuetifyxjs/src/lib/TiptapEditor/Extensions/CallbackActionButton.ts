@@ -1,4 +1,4 @@
-import type { GeneralOptions } from 'vuetify-pro-tiptap'
+import type { GeneralOptions } from '../source/lib'
 import { Extension } from '@tiptap/core'
 
 import CallbackActionButton from './CallbackActionButton.vue'
