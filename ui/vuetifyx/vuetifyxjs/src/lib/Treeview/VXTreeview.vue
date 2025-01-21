@@ -6,11 +6,10 @@
     v-bind="rootAttrs"
   >
     <v-treeview v-bind="combinedProps">
-      <template v-if="slots.prepend" v-slot:prepend="{ item, isOpen, isActive, isSelected, select }"
+      <template v-if="slots.prepend" v-slot:prepend="{ item, isActive, isSelected, select }"
         ><slot
           name="prepend"
           :item="item"
-          :isOpen="isOpen"
           :isActive="isActive"
           :isSelected="isSelected"
           :select="select"
