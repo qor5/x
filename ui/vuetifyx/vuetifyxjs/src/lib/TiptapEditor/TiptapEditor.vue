@@ -41,9 +41,10 @@ import {
   TextAlign,
   Underline,
   useContext,
-  Video,
-  VuetifyTiptap
-} from 'vuetify-pro-tiptap'
+  Video
+} from './source'
+//@ts-ignore
+import { VuetifyTiptap } from './source/lib/vuetify-pro-tiptap.js'
 import { Extension } from '@tiptap/core'
 import ImageGlue from '@/lib/TiptapEditor/Extensions/ImageGlue.vue'
 import Callback from '@/lib/TiptapEditor/Extensions/CallbackActionButton'
