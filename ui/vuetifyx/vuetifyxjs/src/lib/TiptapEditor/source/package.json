@@ -52,7 +52,8 @@
   },
   "scripts": {
     "dev": "vite serve --config vite-example.config.ts",
-    "build:lib": "pnpm check:types && vite build && pnpm build:styles",
+    "watch-build": "pnpm check:types && vite build --watch  && pnpm build:styles",
+    "build:lib": "pnpm check:types && vite build  && pnpm build:styles",
     "build:examples": "pnpm build:lib && pnpm check:types && vite build --config vite-example.config.ts",
     "build:styles": "pnpm sass ./src/styles:./lib/styles --style=compressed --no-source-map",
     "lint:css": "stylelint **/*.{css,less,scss,vue}",

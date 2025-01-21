@@ -57,7 +57,7 @@ function close() {
   setTimeout(() => props.destroy?.(), 300)
 }
 
-watch(dialog, val => {
+watch(dialog, (val) => {
   if (!val) return
 
   attrs.value = {
@@ -82,9 +82,9 @@ watch(dialog, val => {
       </VToolbar>
 
       <VCardText>
-        <VTextField v-model="attrs.href" :label="t('editor.link.dialog.link')" autofocus />
+        <vx-field v-model="attrs.href" :label="t('editor.link.dialog.link')" autofocus />
 
-        <VTextField v-model="attrs.rel" :label="t('editor.link.dialog.rel')" hide-details />
+        <vx-field v-model="attrs.rel" :label="t('editor.link.dialog.rel')" hide-details />
 
         <VCheckbox
           v-model="attrs.target"

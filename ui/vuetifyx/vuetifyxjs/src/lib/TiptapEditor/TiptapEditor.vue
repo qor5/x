@@ -43,7 +43,7 @@ import {
   useContext,
   Video,
   VuetifyTiptap
-} from './source/lib'
+} from './source/lib/vuetify-pro-tiptap'
 import { Extension } from '@tiptap/core'
 import ImageGlue from '@/lib/TiptapEditor/Extensions/ImageGlue.vue'
 import Callback from '@/lib/TiptapEditor/Extensions/CallbackActionButton'
