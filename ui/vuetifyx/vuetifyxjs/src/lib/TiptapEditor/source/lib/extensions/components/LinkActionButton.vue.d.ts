@@ -9,7 +9,7 @@ interface Props {
     color?: string;
     action?: ButtonViewReturnComponentProps['action'];
     isActive?: ButtonViewReturnComponentProps['isActive'];
-    hrefRules?: (boolean | string)[];
+    hrefRules?: string;
 }
 declare function __VLS_template(): {
     attrs: Partial<{}>;
@@ -21,7 +21,7 @@ declare function __VLS_template(): {
                 rel?: string | undefined;
                 editor: Editor;
                 value: string | undefined;
-                hrefRules: (string | boolean)[];
+                hrefRules: string;
             };
         }): any;
     };
@@ -36,7 +36,7 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
     color: undefined;
     action: undefined;
     isActive: undefined;
-    hrefRules: () => never[];
+    hrefRules: string;
 }>>, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<import('vue').ExtractPropTypes<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
     icon: undefined;
     tooltip: undefined;
@@ -44,7 +44,7 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
     color: undefined;
     action: undefined;
     isActive: undefined;
-    hrefRules: () => never[];
+    hrefRules: string;
 }>>> & Readonly<{}>, {
     color: string;
     action: (value?: unknown) => void;
@@ -52,7 +52,7 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
     icon: keyof IconsOptions;
     tooltip: string;
     disabled: boolean;
-    hrefRules: (boolean | string)[];
+    hrefRules: string;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, true, {}, any>;
 declare const _default: __VLS_WithTemplateSlots<typeof __VLS_component, __VLS_TemplateResult["slots"]>;
 export default _default;

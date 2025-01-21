@@ -13,13 +13,13 @@ interface Props {
   rel?: string
   editor: Editor
   destroy?: () => void
-  hrefRules?: any[]
+  hrefRules?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   value: undefined,
   target: '_blank',
-  hrefRules: () => [],
+  hrefRules: '',
   rel: undefined,
   destroy: undefined
 })
@@ -34,6 +34,25 @@ const generateLinkAttrs = (): LinkAttrs => ({
 
 const attrs = ref(generateLinkAttrs())
 const form = ref()
+
+const evalHrefRules = computed(() => {
+  if (!props.hrefRules) return []
+
+  if (Array.isArray(props.hrefRules)) {
+    return props.hrefRules
+  }
+
+  if (
+    typeof props.hrefRules === 'string' &&
+    props.hrefRules.startsWith('[') &&
+    props.hrefRules.endsWith(']')
+  ) {
+    // eslint-disable-next-line no-new-func
+    return new Function(`return ${props.hrefRules}`)()
+  }
+
+  return props.hrefRules
+})
 
 const dialog = ref<boolean>(false)
 
@@ -66,6 +85,7 @@ function close() {
 
 watch(dialog, (val) => {
   if (!val) return
+  // console.log('props', props)
   attrs.value = {
     href: props.value,
     target: props.target,
@@ -90,7 +110,7 @@ watch(dialog, (val) => {
         <VCardText>
           <vx-field
             v-model="attrs.href"
-            :rules="props.hrefRules"
+            :rules="evalHrefRules"
             :label="t('editor.link.dialog.link')"
             autofocus
           />

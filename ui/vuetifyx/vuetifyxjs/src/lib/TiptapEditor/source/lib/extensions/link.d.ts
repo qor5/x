@@ -6,6 +6,6 @@ import { LinkOptions as TiptapLinkOptions } from '@tiptap/extension-link';
 export interface LinkOptions extends TiptapLinkOptions, GeneralOptions<LinkOptions> {
     /** Component for the link dialog */
     dialogComponent: any;
-    hrefRules: (string | boolean)[];
+    hrefRules: string;
 }
 export declare const Link: import('@tiptap/core').Mark<LinkOptions, any>;

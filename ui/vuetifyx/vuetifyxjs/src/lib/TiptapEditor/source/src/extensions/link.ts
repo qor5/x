@@ -15,7 +15,7 @@ import LinkActionButton from './components/LinkActionButton.vue'
 export interface LinkOptions extends TiptapLinkOptions, GeneralOptions<LinkOptions> {
   /** Component for the link dialog */
   dialogComponent: any
-  hrefRules: (string | boolean)[]
+  hrefRules: string
 }
 
 export const Link = /* @__PURE__*/ TiptapLink.extend<LinkOptions>({
@@ -23,7 +23,7 @@ export const Link = /* @__PURE__*/ TiptapLink.extend<LinkOptions>({
     return {
       ...this.parent?.(),
       openOnClick: false,
-      hrefRules: [],
+      hrefRules: '',
       dialogComponent: () => LinkDialog,
       button: ({ editor, extension, t }) => {
         const { dialogComponent, hrefRules } = extension.options

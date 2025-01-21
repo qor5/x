@@ -18,7 +18,7 @@ interface Props {
   color?: string
   action?: ButtonViewReturnComponentProps['action']
   isActive?: ButtonViewReturnComponentProps['isActive']
-  hrefRules?: (boolean | string)[]
+  hrefRules?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -28,7 +28,7 @@ const props = withDefaults(defineProps<Props>(), {
   color: undefined,
   action: undefined,
   isActive: undefined,
-  hrefRules: () => []
+  hrefRules: ''
 })
 
 const attrs = ref<LinkAttrs>({

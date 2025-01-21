@@ -5,18 +5,18 @@ interface Props {
     rel?: string;
     editor: Editor;
     destroy?: () => void;
-    hrefRules?: any[];
+    hrefRules?: string;
 }
 declare const _default: import('vue').DefineComponent<import('vue').ExtractPropTypes<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
     value: undefined;
     target: string;
-    hrefRules: () => never[];
+    hrefRules: string;
     rel: undefined;
     destroy: undefined;
 }>>, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<import('vue').ExtractPropTypes<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
     value: undefined;
     target: string;
-    hrefRules: () => never[];
+    hrefRules: string;
     rel: undefined;
     destroy: undefined;
 }>>> & Readonly<{}>, {
@@ -24,7 +24,7 @@ declare const _default: import('vue').DefineComponent<import('vue').ExtractPropT
     target: "_self" | "_blank";
     rel: string;
     destroy: () => void;
-    hrefRules: any[];
+    hrefRules: string;
 }, {}, {}, {}, string, import('vue').ComponentProvideOptions, true, {}, any>;
 export default _default;
 type __VLS_WithDefaults<P, D> = {
