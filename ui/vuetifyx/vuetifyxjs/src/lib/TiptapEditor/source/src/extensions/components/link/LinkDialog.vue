@@ -108,7 +108,7 @@ watch(dialog, (val) => {
         </VCardText>
 
         <VCardActions>
-          <VBtn :disabled="isDisabled" type="submit">
+          <VBtn :disabled="isDisabled" type="submit" class="ml-auto">
             {{ t('editor.link.dialog.button.apply') }}
           </VBtn>
         </VCardActions>
