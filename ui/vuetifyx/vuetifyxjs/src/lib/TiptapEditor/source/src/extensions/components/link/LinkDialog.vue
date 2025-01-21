@@ -13,11 +13,13 @@ interface Props {
   rel?: string
   editor: Editor
   destroy?: () => void
+  hrefRules?: any[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
   value: undefined,
   target: '_blank',
+  hrefRules: () => [],
   rel: undefined,
   destroy: undefined
 })
@@ -31,6 +33,7 @@ const generateLinkAttrs = (): LinkAttrs => ({
 })
 
 const attrs = ref(generateLinkAttrs())
+const form = ref()
 
 const dialog = ref<boolean>(false)
 
@@ -41,7 +44,11 @@ const isDisabled = computed(() => {
   return props.value === href && props.target === target && props.rel === rel
 })
 
-function apply() {
+async function apply() {
+  const { valid } = await form.value.validate()
+
+  if (!valid) return
+
   const { href, target, rel } = attrs.value
 
   if (href) {
@@ -59,7 +66,6 @@ function close() {
 
 watch(dialog, (val) => {
   if (!val) return
-
   attrs.value = {
     href: props.value,
     target: props.target,
@@ -80,27 +86,33 @@ watch(dialog, (val) => {
           <VIcon :icon="getIcon('close')" />
         </VBtn>
       </VToolbar>
+      <v-form ref="form" @submit.prevent="apply()">
+        <VCardText>
+          <vx-field
+            v-model="attrs.href"
+            :rules="props.hrefRules"
+            :label="t('editor.link.dialog.link')"
+            autofocus
+          />
 
-      <VCardText>
-        <vx-field v-model="attrs.href" :label="t('editor.link.dialog.link')" autofocus />
+          <vx-field v-model="attrs.rel" :label="t('editor.link.dialog.rel')" hide-details />
 
-        <vx-field v-model="attrs.rel" :label="t('editor.link.dialog.rel')" hide-details />
+          <VCheckbox
+            v-model="attrs.target"
+            :label="t('editor.link.dialog.openInNewTab')"
+            color="primary"
+            false-value="_self"
+            true-value="_blank"
+            hide-details
+          />
+        </VCardText>
 
-        <VCheckbox
-          v-model="attrs.target"
-          :label="t('editor.link.dialog.openInNewTab')"
-          color="primary"
-          false-value="_self"
-          true-value="_blank"
-          hide-details
-        />
-      </VCardText>
-
-      <VCardActions>
-        <VBtn :disabled="isDisabled" @click="apply">
-          {{ t('editor.link.dialog.button.apply') }}
-        </VBtn>
-      </VCardActions>
+        <VCardActions>
+          <VBtn :disabled="isDisabled" type="submit">
+            {{ t('editor.link.dialog.button.apply') }}
+          </VBtn>
+        </VCardActions>
+      </v-form>
     </VCard>
   </VDialog>
 </template>

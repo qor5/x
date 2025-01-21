@@ -67,7 +67,7 @@ export const vuetifyProTipTap = createVuetifyProTipTap({
         list: {
           ...NODE_TYPE_MENU
         },
-        defaultBubbleList: editor => {
+        defaultBubbleList: (editor) => {
           // You can customize the bubble menu here
           return defaultBubbleList(editor) // default customize bubble list
         }
