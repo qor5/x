@@ -4,12 +4,12 @@ interface Props {
     nudgeTop?: string | number;
     more?: boolean;
 }
-declare const _default: import('vue').DefineComponent<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
+declare const _default: import('vue').DefineComponent<import('vue').ExtractPropTypes<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
     modelValue: string;
     nudgeLeft: number;
     nudgeTop: number;
     more: boolean;
-}>, {}, unknown, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
+}>>, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     "update:modelValue": (color: string) => void;
     change: (color: string) => void;
 }, string, import('vue').PublicProps, Readonly<import('vue').ExtractPropTypes<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
@@ -17,15 +17,15 @@ declare const _default: import('vue').DefineComponent<__VLS_WithDefaults<__VLS_T
     nudgeLeft: number;
     nudgeTop: number;
     more: boolean;
-}>>> & {
-    "onUpdate:modelValue"?: ((color: string) => any) | undefined;
+}>>> & Readonly<{
     onChange?: ((color: string) => any) | undefined;
-}, {
+    "onUpdate:modelValue"?: ((color: string) => any) | undefined;
+}>, {
     modelValue: string;
     nudgeLeft: string | number;
     nudgeTop: string | number;
     more: boolean;
-}, {}>;
+}, {}, {}, {}, string, import('vue').ComponentProvideOptions, true, {}, any>;
 export default _default;
 type __VLS_WithDefaults<P, D> = {
     [K in keyof Pick<P, keyof P>]: K extends keyof D ? __VLS_PrettifyLocal<P[K] & {

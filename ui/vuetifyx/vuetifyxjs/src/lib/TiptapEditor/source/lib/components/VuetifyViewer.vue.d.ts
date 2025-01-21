@@ -10,15 +10,16 @@ interface Props {
     extensions?: AnyExtension[];
 }
 declare function __VLS_template(): {
+    attrs: Partial<{}>;
     slots: {
         before?(_: {}): any;
         after?(_: {}): any;
     };
     refs: {};
-    attrs: Partial<{}>;
+    rootEl: HTMLDivElement;
 };
 type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
-declare const __VLS_component: import('vue').DefineComponent<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
+declare const __VLS_component: import('vue').DefineComponent<import('vue').ExtractPropTypes<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
     value: string;
     dark: undefined;
     dense: boolean;
@@ -26,7 +27,7 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_WithDefaults<
     xss: boolean;
     xssOptions: () => IWhiteList;
     extensions: () => never[];
-}>, {}, unknown, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<import('vue').ExtractPropTypes<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
+}>>, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<import('vue').ExtractPropTypes<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
     value: string;
     dark: undefined;
     dense: boolean;
@@ -34,7 +35,7 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_WithDefaults<
     xss: boolean;
     xssOptions: () => IWhiteList;
     extensions: () => never[];
-}>>>, {
+}>>> & Readonly<{}>, {
     markdownTheme: string | false;
     extensions: AnyExtension[];
     value: string | JSONContent;
@@ -42,7 +43,7 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_WithDefaults<
     dense: boolean;
     xss: boolean | string[];
     xssOptions: IWhiteList;
-}, {}>;
+}, {}, {}, {}, string, import('vue').ComponentProvideOptions, true, {}, any>;
 declare const _default: __VLS_WithTemplateSlots<typeof __VLS_component, __VLS_TemplateResult["slots"]>;
 export default _default;
 type __VLS_WithDefaults<P, D> = {

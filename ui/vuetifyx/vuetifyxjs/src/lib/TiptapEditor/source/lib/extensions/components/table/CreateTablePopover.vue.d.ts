@@ -7,7 +7,7 @@ export interface CreateTablePayload extends GridSize {
 }
 declare const _default: import('vue').DefineComponent<{}, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     "create-table": (payload: CreateTablePayload) => void;
-}, string, import('vue').PublicProps, Readonly<import('vue').ExtractPropTypes<{}>> & {
+}, string, import('vue').PublicProps, Readonly<{}> & Readonly<{
     "onCreate-table"?: ((payload: CreateTablePayload) => any) | undefined;
-}, {}, {}>;
+}>, {}, {}, {}, {}, string, import('vue').ComponentProvideOptions, true, {}, any>;
 export default _default;

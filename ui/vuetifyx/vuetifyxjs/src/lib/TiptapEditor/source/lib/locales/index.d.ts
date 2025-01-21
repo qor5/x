@@ -33,7 +33,7 @@ export declare class Locale {
 }
 export declare const locale: Locale;
 export declare const useLocale: () => {
-    lang: import('vue').Ref<string>;
+    lang: import('vue').Ref<string, string>;
     t: import('vue').ComputedRef<(path: string) => string>;
 };
 export { 

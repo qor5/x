@@ -15,6 +15,7 @@ interface Props {
     isActive?: ButtonViewReturnComponentProps['isActive'];
 }
 declare function __VLS_template(): {
+    attrs: Partial<{}>;
     slots: {
         dialog?(_: {
             props: {
@@ -30,15 +31,15 @@ declare function __VLS_template(): {
                 };
                 imageTabs: ImageTab[];
                 hiddenTabs: ImageTabKey[];
-                upload: ((file: File) => Promise<string>) | undefined;
+                upload: (file: File) => Promise<string>;
             };
         }): any;
     };
     refs: {};
-    attrs: Partial<{}>;
+    rootEl: any;
 };
 type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
-declare const __VLS_component: import('vue').DefineComponent<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
+declare const __VLS_component: import('vue').DefineComponent<import('vue').ExtractPropTypes<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
     upload: undefined;
     imageTabs: () => never[];
     hiddenTabs: () => never[];
@@ -48,7 +49,7 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_WithDefaults<
     color: undefined;
     action: undefined;
     isActive: undefined;
-}>, {}, unknown, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<import('vue').ExtractPropTypes<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
+}>>, {}, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<import('vue').ExtractPropTypes<__VLS_WithDefaults<__VLS_TypePropsToOption<Props>, {
     upload: undefined;
     imageTabs: () => never[];
     hiddenTabs: () => never[];
@@ -58,7 +59,7 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_WithDefaults<
     color: undefined;
     action: undefined;
     isActive: undefined;
-}>>>, {
+}>>> & Readonly<{}>, {
     color: string;
     action: (value?: unknown) => void;
     isActive: () => boolean;
@@ -68,7 +69,7 @@ declare const __VLS_component: import('vue').DefineComponent<__VLS_WithDefaults<
     disabled: boolean;
     imageTabs: ImageTab[];
     hiddenTabs: ImageTabKey[];
-}, {}>;
+}, {}, {}, {}, string, import('vue').ComponentProvideOptions, true, {}, any>;
 declare const _default: __VLS_WithTemplateSlots<typeof __VLS_component, __VLS_TemplateResult["slots"]>;
 export default _default;
 type __VLS_WithDefaults<P, D> = {
