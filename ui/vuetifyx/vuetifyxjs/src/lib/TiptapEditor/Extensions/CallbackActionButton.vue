@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ActionButton } from '../source'
+//@ts-ignore
+import { ActionButton } from '../lib/vuetify-pro-tiptap.js'
 import type { Editor } from '@tiptap/vue-3'
 import { Extension } from '@tiptap/core'
 import { computed } from 'vue'
