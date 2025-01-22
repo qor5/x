@@ -221,9 +221,6 @@ func TiptapExtensions() []*VXTiptapEditorExtension {
 		},
 		{
 			Name: "Link",
-			Options: map[string]any{
-				"hrefRules": fmt.Sprintf("%q", "[value=> value !=3 || '123']"),
-			},
 		},
 		{
 			Name: "Image",
