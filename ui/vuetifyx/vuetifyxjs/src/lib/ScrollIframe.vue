@@ -68,25 +68,9 @@ const diffAndUpdate = (oldNode: Node, newNode: Node, deep: number = 0) => {
   }
 }
 
-const resizeContainer = (entry: ResizeObserverEntry) => {
-  if (!container.value) {
-    return
-  }
-  if (
-    iframe.value &&
-    iframe.value.contentWindow &&
-    entry.contentRect.width >= iframeDoc().documentElement.scrollWidth
-  ) {
-    container.value.style.display = 'flex'
-    container.value.style.justifyContent = 'center'
-  } else {
-    container.value.style.display = ''
-    container.value.style.justifyContent = ''
-  }
-}
 const resizeObserver = new ResizeObserver((entries) => {
   for (let entry of entries) {
-    resizeContainer(entry)
+    setIframeDisplay()
   }
 })
 const setIframeDisplay = () => {
