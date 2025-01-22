@@ -55,7 +55,7 @@ const extensions = ref([
   { name: 'OrderedList', options: { divider: true } },
   //   // { name: 'TaskList' },
   { name: 'Indent', options: { divider: true } },
-  { name: 'Link' },
+  { name: 'Link', options: { divider: true, hrefRules:'' } },
   { name: 'Image' },
   // { name: 'ImageGlue', options: {
   //   onClick:({editor, value, window}:{editor: any, value:any, window: any}) => {

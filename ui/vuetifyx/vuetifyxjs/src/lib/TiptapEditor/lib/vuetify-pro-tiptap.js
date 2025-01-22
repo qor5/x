@@ -22685,7 +22685,7 @@ const uS = /* @__PURE__ */ Ue.create({
     return {
       ...(t = this.parent) == null ? void 0 : t.call(this),
       openOnClick: !1,
-      hrefRules: '[value => !value.startsWith("^http://") || "URL should not start with http://"]',
+      hrefRules: '[value => !/^http:\\/\\//.test(value) || "URL should not start with http://"]',
       dialogComponent: () => cS,
       button: ({ editor: e, extension: n, t: r }) => {
         const { dialogComponent: i, hrefRules: o } = n.options;
