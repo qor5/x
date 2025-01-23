@@ -31,14 +31,14 @@
 import { ref } from 'vue'
 
 const extensions = ref([
-//   { 
-//     name: 'BaseKit', 
-//     options: { 
-//         placeholder: { 
-//             placeholder: 'Enter some text...' 
-//         }
-//     }
-//   },
+  //   {
+  //     name: 'BaseKit',
+  //     options: {
+  //         placeholder: {
+  //             placeholder: 'Enter some text...'
+  //         }
+  //     }
+  //   },
   { name: 'Bold' },
   { name: 'Italic' },
   { name: 'Underline' },
@@ -50,12 +50,12 @@ const extensions = ref([
   { name: 'FontSize' },
   { name: 'Color' },
   { name: 'Highlight', options: { divider: true } },
-//   // { name: 'SubAndSuperScript', options: { divider: true } },
+  //   // { name: 'SubAndSuperScript', options: { divider: true } },
   { name: 'BulletList' },
   { name: 'OrderedList', options: { divider: true } },
-//   // { name: 'TaskList' },
+  //   // { name: 'TaskList' },
   { name: 'Indent', options: { divider: true } },
-  { name: 'Link' },
+  { name: 'Link', options: { divider: true, hrefRules:'' } },
   { name: 'Image' },
   // { name: 'ImageGlue', options: {
   //   onClick:({editor, value, window}:{editor: any, value:any, window: any}) => {
@@ -70,11 +70,11 @@ const extensions = ref([
   { name: 'HorizontalRule' },
   { name: 'CodeBlock', options: { divider: true } },
   { name: 'Clear' },
-  { name: 'History', options: { divider: true } },
-//   { name: 'Fullscreen' },
-  // { 
-  //   name: 'Callback', 
-  //   options: { 
+  { name: 'History', options: { divider: true } }
+  //   { name: 'Fullscreen' },
+  // {
+  //   name: 'Callback',
+  //   options: {
   //       divider: true,
   //       tooltip: "Image",
   //       icon:"mdi-image",
@@ -99,11 +99,11 @@ const extensions = ref([
 
 // slack-like
 // const extensions = ref([
-//   { 
-//     name: 'BaseKit', 
-//     options: { 
-//         placeholder: { 
-//             placeholder: 'Jot something down...' 
+//   {
+//     name: 'BaseKit',
+//     options: {
+//         placeholder: {
+//             placeholder: 'Jot something down...'
 //         }
 //     }
 //   },
@@ -148,4 +148,5 @@ const content = ref(`<h2>
           </blockquote>`)
 </script>
 ```
+
 :::
