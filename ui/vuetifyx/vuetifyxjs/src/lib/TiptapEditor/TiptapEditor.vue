@@ -44,7 +44,7 @@ import {
   Video,
   VuetifyTiptap
   //@ts-ignore
-} from './lib/vuetify-pro-tiptap.js'
+} from 'vuetify-pro-tiptap'
 
 import { Extension } from '@tiptap/core'
 import ImageGlue from '@/lib/TiptapEditor/Extensions/ImageGlue.vue'

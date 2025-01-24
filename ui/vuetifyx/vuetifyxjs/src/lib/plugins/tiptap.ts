@@ -3,8 +3,8 @@ import {
   VuetifyViewer,
   createVuetifyProTipTap
   // @ts-ignore
-} from '../TiptapEditor/lib/vuetify-pro-tiptap'
-import '../TiptapEditor/lib/style.css'
+} from 'vuetify-pro-tiptap'
+import 'vuetify-pro-tiptap/style.css'
 
 export const vuetifyProTipTap = createVuetifyProTipTap({
   lang: 'en',
