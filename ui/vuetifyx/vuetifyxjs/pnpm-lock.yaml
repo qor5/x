@@ -56,8 +56,8 @@ importers:
         specifier: ^3.6.14
         version: 3.6.14(typescript@5.5.4)(vite-plugin-vuetify@2.0.4)(vue-i18n@9.14.2(vue@3.5.3(typescript@5.5.4)))(vue@3.5.3(typescript@5.5.4))
       vuetify-pro-tiptap:
-        specifier: file:/Users/danielchan/thePlant/vuetify-pro-tiptap
-        version: file:../../../../vuetify-pro-tiptap(@tiptap/suggestion@2.11.3(@tiptap/core@2.11.3(@tiptap/pm@2.11.3))(@tiptap/pm@2.11.3))(vue@3.5.3(typescript@5.5.4))(vuetify@3.6.14)
+        specifier: https://github.com/qor5/vuetify-pro-tiptap.git
+        version: https://codeload.github.com/qor5/vuetify-pro-tiptap/tar.gz/654d01e554eac30fecb4747b579be24a4f9cc91a(@tiptap/suggestion@2.11.3(@tiptap/core@2.11.3(@tiptap/pm@2.11.3))(@tiptap/pm@2.11.3))(vue@3.5.3(typescript@5.5.4))(vuetify@3.6.14)
     devDependencies:
       '@babel/types':
         specifier: ^7.24.7
@@ -2782,8 +2782,9 @@ packages:
     peerDependencies:
       vue: ^3.0.1
 
-  vuetify-pro-tiptap@file:../../../../vuetify-pro-tiptap:
-    resolution: {directory: ../../../../vuetify-pro-tiptap, type: directory}
+  vuetify-pro-tiptap@https://codeload.github.com/qor5/vuetify-pro-tiptap/tar.gz/654d01e554eac30fecb4747b579be24a4f9cc91a:
+    resolution: {tarball: https://codeload.github.com/qor5/vuetify-pro-tiptap/tar.gz/654d01e554eac30fecb4747b579be24a4f9cc91a}
+    version: 2.5.7
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     peerDependencies:
       vue: ^3.2.0
@@ -5817,7 +5818,7 @@ snapshots:
       sortablejs: 1.14.0
       vue: 3.5.3(typescript@5.5.4)
 
-  vuetify-pro-tiptap@file:../../../../vuetify-pro-tiptap(@tiptap/suggestion@2.11.3(@tiptap/core@2.11.3(@tiptap/pm@2.11.3))(@tiptap/pm@2.11.3))(vue@3.5.3(typescript@5.5.4))(vuetify@3.6.14):
+  vuetify-pro-tiptap@https://codeload.github.com/qor5/vuetify-pro-tiptap/tar.gz/654d01e554eac30fecb4747b579be24a4f9cc91a(@tiptap/suggestion@2.11.3(@tiptap/core@2.11.3(@tiptap/pm@2.11.3))(@tiptap/pm@2.11.3))(vue@3.5.3(typescript@5.5.4))(vuetify@3.6.14):
     dependencies:
       '@tiptap/core': 2.11.3(@tiptap/pm@2.11.3)
       '@tiptap/extension-blockquote': 2.11.3(@tiptap/core@2.11.3(@tiptap/pm@2.11.3))
