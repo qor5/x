@@ -24,9 +24,7 @@
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
-    "src/**/*.vue",
-    "../../../../vuetify-pro-tiptap/vite-example.config.ts",
-    "../../../../vuetify-pro-tiptap/vite.config.ts"
+    "src/**/*.vue"
   ],
   "references": [
     {
