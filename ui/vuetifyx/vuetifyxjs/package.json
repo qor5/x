@@ -17,7 +17,6 @@
   "dependencies": {
     "@mdi/font": "7.0.96",
     "@tiptap/core": "^2.11.3",
-    "@tiptap/suggestion": "^2.7.0",
     "@tiptap/vue-3": "^2.11.3",
     "@vitejs/plugin-vue-jsx": "^4.0.1",
     "@vueuse/core": "^11.0.3",
@@ -26,7 +25,6 @@
     "lodash": "^4.17.21",
     "resize-observer-polyfill": "^1.5.1",
     "roboto-fontface": "^0.10.0",
-    "search-insights": ">=1.0.0 <3.0.0-0",
     "vue-i18n": "^9.14.2",
     "vue-json-pretty": "^2.4.0",
     "vuedraggable": "^4.1.0",
