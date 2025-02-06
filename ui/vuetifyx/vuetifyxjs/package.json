@@ -15,7 +15,7 @@
     "docs:preview": "vitepress preview docs --port 8080"
   },
   "dependencies": {
-    "@mdi/font": "7.0.96",
+    "@mdi/font": "7.4.47",
     "@tiptap/core": "^2.11.3",
     "@tiptap/vue-3": "^2.11.3",
     "@vitejs/plugin-vue-jsx": "^4.0.1",
