@@ -5,9 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
-  '@vitepress-code-preview/container@1.0.8':
+  '@vitepress-code-preview/container':
     hash: dow3z5ai6lnbkwbvwn5334eypm
-    path: patches/@vitepress-code-preview__container@1.0.8.patch
+    path: patches/@vitepress-code-preview__container.patch
 
 importers:
 
