@@ -64,7 +64,8 @@
 }
 
 .pageBuilder-right-drawer {
-  .v-toolbar__content {
+
+  .pageBuilder-right-drawer .v-toolbar__content:not(.vuetify-pro-tiptap .v-toolbar__content) {
     height: 56px !important;
     border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   }

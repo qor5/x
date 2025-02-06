@@ -79,7 +79,7 @@ export function registerPlugins(app: App) {
   app.use(i18n)
   app.use(vuetify)
   app.use(vuetifyx)
-  app.use(vuetifyProTipTap)
+  app.use(vuetifyProTipTap as any)
   // fix warning injected property "decorationClasses" is a ref and will be auto-unwrapped
   // https://github.com/ueberdosis/tiptap/issues/1719
   // app.config.unwrapInjectedRef = true
