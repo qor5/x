@@ -16,9 +16,10 @@
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
-    "@tiptap/core": "^2.6.6",
-    "@tiptap/vue-3": "^2.6.6",
+    "@tiptap/core": "^2.11.3",
+    "@tiptap/vue-3": "^2.11.3",
     "@vitejs/plugin-vue-jsx": "^4.0.1",
+    "@vueuse/core": "^11.0.3",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",
     "lodash": "^4.17.21",
@@ -28,8 +29,7 @@
     "vue-json-pretty": "^2.4.0",
     "vuedraggable": "^4.1.0",
     "vuetify": "^3.6.14",
-    "vuetify-pro-tiptap": "^2.5.4",
-    "@vueuse/core": "^11.0.3"
+    "vuetify-pro-tiptap": "https://github.com/qor5/vuetify-pro-tiptap.git"
   },
   "devDependencies": {
     "@babel/types": "^7.24.7",
