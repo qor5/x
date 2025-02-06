@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, defineExpose, computed, useSlots, PropType, defineOptions } from 'vue'
+import { defineEmits, ref, defineExpose, computed, useSlots, PropType, defineOptions, Slots } from 'vue'
 import VXLabel from '../Common/VXLabel.vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import useBindingValue from '@/lib/composables/useBindingValue'
@@ -90,7 +90,7 @@ import { forwardRefs } from '@/lib/composables/forwardRefs'
 const { filteredAttrs, rootAttrs } = useFilteredAttrs()
 const vInputRef = ref()
 const vInputFocus = ref(false)
-const slots = useSlots()
+const slots: Slots = useSlots()
 const hasAppendInnerSlot = slots['append-inner'] !== undefined
 const hasPrependInnerSlot = slots['prepend-inner'] !== undefined
 const emit = defineEmits(['update:modelValue'])
