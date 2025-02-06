@@ -65,7 +65,7 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "@vitepress-code-preview/container@1.0.8": "patches/@vitepress-code-preview__container@1.0.8.patch"
+      "@vitepress-code-preview/container": "patches/@vitepress-code-preview__container.patch"
     }
   }
 }
