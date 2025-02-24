@@ -22,7 +22,11 @@
       density="compact"
       color="primary"
       @update:model-value="onUpdateModelValue"
-    />
+    >
+      <template v-if="hasItemSlot" #item="{ props, index, item }">
+        <slot name="item" :props="props" :index="index" :item="item" />
+      </template>
+    </v-autocomplete>
     <v-select
       v-else
       :closable-chips="closableChips"
@@ -44,17 +48,23 @@
       density="compact"
       color="primary"
       @update:model-value="onUpdateModelValue"
-    />
+    >
+      <template v-if="hasItemSlot" #item="{ props, index, item }">
+        <slot name="item" :props="props" :index="index" :item="item" />
+      </template>
+    </v-select>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, watch, PropType } from 'vue'
+import { defineEmits, ref, watch, PropType, useSlots, Slots } from 'vue'
 import VXLabel from '../Common/VXLabel.vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 const { filteredAttrs } = useFilteredAttrs()
 
 const emit = defineEmits(['update:modelValue'])
+const slots: Slots = useSlots()
+const hasItemSlot = slots['item'] !== undefined
 const props = defineProps({
   modelValue: null,
   type: String,
