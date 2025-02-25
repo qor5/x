@@ -1,4 +1,9 @@
-import { VuetifyTiptap, VuetifyViewer, createVuetifyProTipTap } from 'vuetify-pro-tiptap'
+import {
+  VuetifyTiptap,
+  VuetifyViewer,
+  createVuetifyProTipTap
+  // @ts-ignore
+} from 'vuetify-pro-tiptap'
 import 'vuetify-pro-tiptap/style.css'
 
 export const vuetifyProTipTap = createVuetifyProTipTap({

@@ -15,9 +15,9 @@
     "docs:preview": "vitepress preview docs --port 8080"
   },
   "dependencies": {
-    "@mdi/font": "7.0.96",
-    "@tiptap/core": "^2.6.6",
-    "@tiptap/vue-3": "^2.6.6",
+    "@mdi/font": "7.4.47",
+    "@tiptap/core": "^2.11.3",
+    "@tiptap/vue-3": "^2.11.3",
     "@vitejs/plugin-vue-jsx": "^4.0.1",
     "@vueuse/core": "^11.0.3",
     "date-fns": "^3.6.0",
@@ -29,7 +29,7 @@
     "vue-json-pretty": "^2.4.0",
     "vuedraggable": "^4.1.0",
     "vuetify": "^3.6.14",
-    "vuetify-pro-tiptap": "^2.5.4"
+    "vuetify-pro-tiptap": "https://github.com/qor5/vuetify-pro-tiptap.git"
   },
   "devDependencies": {
     "@babel/types": "^7.24.7",
@@ -65,7 +65,7 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "@vitepress-code-preview/container@1.0.8": "patches/@vitepress-code-preview__container@1.0.8.patch"
+      "@vitepress-code-preview/container": "patches/@vitepress-code-preview__container.patch"
     }
   }
 }

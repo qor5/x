@@ -38,8 +38,7 @@ const props = defineProps({
 })
 
 const isDefaultSlotReallyEmpty = computed(() => {
-  /* @ts-ignore */
-  return !slots.default || !slots.default([]).length
+  return !slots.default || !slots.default({}).length
 })
 
 const presetsSizeOptions = computed(() => {
