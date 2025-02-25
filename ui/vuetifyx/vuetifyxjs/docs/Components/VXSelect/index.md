@@ -6,7 +6,7 @@
 
 #### v-slot:prepend-inner
 
-可以自定义input文字前固定位置的图标的插槽
+可以自定义input文字前固定位置的图标的插槽, `selectedItems` 可以用来控制当前选中项
 
 slot scope
 
@@ -15,6 +15,7 @@ slot scope
   isActive: Ref<boolean>
   isFocused: Ref<boolean>
   controlRef: Ref<HTMLElement | undefined>
+  selectedItems: Array<{string, any}>
   focus: () => void
   blur: () => void
 }
