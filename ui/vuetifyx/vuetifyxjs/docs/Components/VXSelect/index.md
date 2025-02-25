@@ -186,7 +186,7 @@ const items = ref([
 
 ### Slot（item）
 
-item 的原始数据在 item.raw 里
+item 的原始数据在 item.raw 里， 如果不希望 prepend 的区域i元素变暗，使用`style: "--v-medium-emphasis-opacity:1"` 来控制
 
 :::demo
 
@@ -207,13 +207,13 @@ item 的原始数据在 item.raw 里
         closable-chips
       >
         <template v-slot:prepend-inner="{ selectedItems }">
-          <v-icon :icon="selectedItems[0].icon" />
+          <v-icon :icon="selectedItems[0].icon" style="--v-medium-emphasis-opacity:1"/>
         </template>
 
         <template v-slot:item="{ props, item }">
           <v-list-item v-bind="props" :title="item.title">
             <template v-slot:prepend>
-              <v-icon :icon="item.raw.icon" />
+              <v-icon :icon="item.raw.icon" style="--v-medium-emphasis-opacity:1"/>
             </template>
           </v-list-item>
         </template> </vx-select
