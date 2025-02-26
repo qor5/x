@@ -726,7 +726,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 	var ouser goth.User
 	ouser, err = gothic.CompleteUserAuth(w, r)
 	if err != nil {
-		setFailCodeFlash(w, FailCodeCompleteUserAuthFailed)
+		SetFailCodeFlash(w, FailCodeCompleteUserAuthFailed)
 		return
 	}
 
@@ -739,7 +739,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 
 	userID := ouser.UserID
 	if userID == "" {
-		setFailCodeFlash(w, FailCodeCompleteUserAuthFailed)
+		SetFailCodeFlash(w, FailCodeCompleteUserAuthFailed)
 		return
 	}
 
@@ -755,7 +755,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 				if err != gorm.ErrRecordNotFound {
 					panic(err)
 				}
-				setFailCodeFlash(w, FailCodeUserNotFound)
+				SetFailCodeFlash(w, FailCodeUserNotFound)
 				return
 			}
 			err = user.(OAuthUser).InitOAuthUserID(b.db, b.newUserObject(), ouser.Provider, identifier, ouser.UserID)
@@ -768,7 +768,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 				if err != gorm.ErrRecordNotFound {
 					panic(err)
 				}
-				setFailCodeFlash(w, FailCodeUserNotFound)
+				SetFailCodeFlash(w, FailCodeUserNotFound)
 				return
 			}
 		}
@@ -857,7 +857,7 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 	if b.recaptchaEnabled {
 		token := r.FormValue("token")
 		if !recaptchaTokenCheck(b, token) {
-			setFailCodeFlash(w, FailCodeIncorrectRecaptchaToken)
+			SetFailCodeFlash(w, FailCodeIncorrectRecaptchaToken)
 			http.Redirect(w, r, b.loginPageURL, http.StatusFound)
 			return
 		}
@@ -900,7 +900,7 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 		default:
 			panic(err)
 		}
-		setFailCodeFlash(w, code)
+		SetFailCodeFlash(w, code)
 		b.setWrongLoginInputFlash(w, WrongLoginInputFlash{
 			Account:  account,
 			Password: password,
@@ -1162,7 +1162,7 @@ func (b *Builder) sendResetPasswordLink(w http.ResponseWriter, r *http.Request) 
 	if b.recaptchaEnabled {
 		token := r.FormValue("token")
 		if !recaptchaTokenCheck(b, token) {
-			setFailCodeFlash(w, FailCodeIncorrectRecaptchaToken)
+			SetFailCodeFlash(w, FailCodeIncorrectRecaptchaToken)
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
 		}
@@ -1177,7 +1177,7 @@ func (b *Builder) sendResetPasswordLink(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if account == "" {
-		setFailCodeFlash(w, FailCodeAccountIsRequired)
+		SetFailCodeFlash(w, FailCodeAccountIsRequired)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
@@ -1275,12 +1275,12 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 		failRedirectURL = MustSetQuery(failRedirectURL, "totp", "1")
 	}
 	if userID == "" {
-		setFailCodeFlash(w, FailCodeUserNotFound)
+		SetFailCodeFlash(w, FailCodeUserNotFound)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
 	if token == "" {
-		setFailCodeFlash(w, FailCodeInvalidToken)
+		SetFailCodeFlash(w, FailCodeInvalidToken)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
@@ -1288,12 +1288,12 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	confirmPassword := r.FormValue("confirm_password")
 	if password == "" {
-		setFailCodeFlash(w, FailCodePasswordCannotBeEmpty)
+		SetFailCodeFlash(w, FailCodePasswordCannotBeEmpty)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
 	if confirmPassword != password {
-		setFailCodeFlash(w, FailCodePasswordNotMatch)
+		SetFailCodeFlash(w, FailCodePasswordNotMatch)
 		b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
 			Password:        password,
 			ConfirmPassword: confirmPassword,
@@ -1305,7 +1305,7 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 	u, err := b.findUserByID(userID)
 	if err != nil {
 		if err == ErrUserNotFound {
-			setFailCodeFlash(w, FailCodeUserNotFound)
+			SetFailCodeFlash(w, FailCodeUserNotFound)
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
 		}
@@ -1314,12 +1314,12 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	storedToken, _, expired := u.(UserPasser).GetResetPasswordToken()
 	if expired {
-		setFailCodeFlash(w, FailCodeTokenExpired)
+		SetFailCodeFlash(w, FailCodeTokenExpired)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
 	if token != storedToken {
-		setFailCodeFlash(w, FailCodeInvalidToken)
+		SetFailCodeFlash(w, FailCodeInvalidToken)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
@@ -1357,7 +1357,7 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 			default:
 				panic(err)
 			}
-			setFailCodeFlash(w, fc)
+			SetFailCodeFlash(w, fc)
 			b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
 				Password:        password,
 				ConfirmPassword: confirmPassword,
@@ -1459,7 +1459,7 @@ func (b *Builder) doFormChangePassword(w http.ResponseWriter, r *http.Request) {
 	err := b.ChangePassword(r, oldPassword, password, confirmPassword, otp)
 	if err != nil {
 		if ne, ok := err.(*NoticeError); ok {
-			setNoticeFlash(w, ne)
+			SetNoticeFlash(w, ne)
 		} else {
 			var fc FailCode
 			switch err {
@@ -1476,7 +1476,7 @@ func (b *Builder) doFormChangePassword(w http.ResponseWriter, r *http.Request) {
 			default:
 				panic(err)
 			}
-			setFailCodeFlash(w, fc)
+			SetFailCodeFlash(w, fc)
 		}
 
 		b.setWrongChangePasswordInputFlash(w, WrongChangePasswordInputFlash{
@@ -1509,7 +1509,7 @@ func (b *Builder) totpDo(w http.ResponseWriter, r *http.Request) {
 	user, err := b.findUserByID(claims.UserID)
 	if err != nil {
 		if err == ErrUserNotFound {
-			setFailCodeFlash(w, FailCodeUserNotFound)
+			SetFailCodeFlash(w, FailCodeUserNotFound)
 			http.Redirect(w, r, b.LogoutURL, http.StatusFound)
 			return
 		}
@@ -1546,7 +1546,7 @@ func (b *Builder) totpDo(w http.ResponseWriter, r *http.Request) {
 		default:
 			panic(err)
 		}
-		setFailCodeFlash(w, fc)
+		SetFailCodeFlash(w, fc)
 		failRedirectURL = b.totpValidatePageURL
 		if !isTOTPSetup {
 			failRedirectURL = b.totpSetupPageURL
