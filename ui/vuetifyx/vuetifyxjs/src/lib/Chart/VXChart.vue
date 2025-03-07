@@ -7,13 +7,14 @@
 <script setup lang="ts">
 import * as echarts from 'echarts'
 import { ref, onMounted, defineProps, onBeforeUnmount, watch, computed, shallowRef } from 'vue'
+import { chartPresets } from './presets.config'
 
 // 定义图表选项类型
 interface ChartSeriesItem {
   type?: string
   name?: string
   data?: any[]
-  radius?: string
+  radius?: string | string[]
   [key: string]: any
 }
 
@@ -26,9 +27,12 @@ interface ChartOptions {
   [key: string]: any
 }
 
+// 定义预设类型
+type PresetType = 'barChart' | 'pieChart' | ''
+
 const props = defineProps({
   presets: {
-    type: String,
+    type: String as () => PresetType,
     validator: (value: string) => ['barChart', 'pieChart', ''].includes(value),
     default: ''
   },
@@ -58,73 +62,62 @@ const defaultOptions: ChartOptions = {
   series: []
 }
 
-// 预设配置
+// 获取预设配置
 const getPresetOptions = (): ChartOptions => {
-  switch (props.presets) {
-    case 'barChart':
-      return {
-        ...defaultOptions,
-        xAxis: {
-          type: 'category',
-          data: ['类别1', '类别2', '类别3', '类别4', '类别5']
-        },
-        yAxis: {
-          type: 'value'
-        },
-        series: [
-          {
-            type: 'bar',
-            data: [10, 20, 30, 40, 50]
-          }
-        ]
-      }
-    case 'pieChart':
-      return {
-        ...defaultOptions,
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
-        },
-        series: [
-          {
-            name: '数据',
-            type: 'pie',
-            radius: '50%',
-            data: [
-              { value: 335, name: '直接访问' },
-              { value: 310, name: '邮件营销' },
-              { value: 234, name: '联盟广告' },
-              { value: 135, name: '视频广告' },
-              { value: 1548, name: '搜索引擎' }
-            ]
-          }
-        ]
-      }
-    default:
-      return defaultOptions
+  if (props.presets && props.presets in chartPresets) {
+    return chartPresets[props.presets as keyof typeof chartPresets]
   }
+  return defaultOptions
+}
+
+// 深度合并对象
+const deepMerge = (target: any, source: any): any => {
+  const result = { ...target }
+
+  for (const key in source) {
+    if (source[key] instanceof Object && key in target && target[key] instanceof Object) {
+      result[key] = deepMerge(target[key], source[key])
+    } else {
+      result[key] = source[key]
+    }
+  }
+
+  return result
 }
 
 // 合并配置
 const mergedOptions = computed((): ChartOptions => {
   const baseOptions = props.presets ? getPresetOptions() : defaultOptions
-  return {
-    ...baseOptions,
-    ...props.options,
-    // 确保series中的每个项目都有type属性
-    series: ((props.options.series || baseOptions.series || []) as ChartSeriesItem[]).map(
-      (item: ChartSeriesItem) => {
-        if (!item.type) {
-          // 如果series项没有type，根据preset设置默认type
-          return {
-            ...item,
-            type: props.presets === 'pieChart' ? 'pie' : 'bar'
-          }
-        }
-        return item
-      }
-    )
+
+  // 处理series数据
+  let mergedSeries: ChartSeriesItem[] = []
+
+  if (props.options.series && props.options.series.length > 0) {
+    // 如果用户提供了series数据，则使用用户的数据
+    mergedSeries = props.options.series.map((userSeries: ChartSeriesItem, index: number) => {
+      // 获取对应的预设series配置
+      const presetSeries =
+        baseOptions.series && baseOptions.series[index]
+          ? baseOptions.series[index]
+          : baseOptions.series && baseOptions.series[0]
+            ? baseOptions.series[0]
+            : {}
+
+      // 合并预设和用户配置
+      return deepMerge(presetSeries, userSeries)
+    })
+  } else if (baseOptions.series) {
+    // 如果用户没有提供series，则使用预设的series
+    mergedSeries = baseOptions.series
   }
+
+  // 合并其他配置
+  const result = deepMerge(baseOptions, props.options)
+
+  // 确保series被正确设置
+  result.series = mergedSeries
+
+  return result
 })
 
 const initChart = () => {
