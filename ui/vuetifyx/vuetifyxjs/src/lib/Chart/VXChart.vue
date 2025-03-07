@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import * as echarts from 'echarts'
-import { ref, onMounted, defineProps, onBeforeUnmount, watch, computed } from 'vue'
+import { ref, onMounted, defineProps, onBeforeUnmount, watch, computed, shallowRef } from 'vue'
 
 // 定义图表选项类型
 interface ChartSeriesItem {
@@ -38,7 +38,7 @@ const props = defineProps({
   }
 })
 
-const vxChart = ref<echarts.EChartsType | null>(null)
+const vxChart = shallowRef<echarts.EChartsType | null>(null)
 const vxChartRoot = ref<HTMLElement | null>(null)
 
 // 默认配置，确保基础属性都存在
