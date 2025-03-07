@@ -6,7 +6,25 @@
 
 <script setup lang="ts">
 import * as echarts from 'echarts'
-import { ref, onMounted, defineProps, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, defineProps, onBeforeUnmount, watch, computed } from 'vue'
+
+// 定义图表选项类型
+interface ChartSeriesItem {
+  type?: string
+  name?: string
+  data?: any[]
+  radius?: string
+  [key: string]: any
+}
+
+interface ChartOptions {
+  tooltip?: any
+  grid?: any
+  xAxis?: any
+  yAxis?: any
+  series?: ChartSeriesItem[]
+  [key: string]: any
+}
 
 const props = defineProps({
   presets: {
@@ -15,7 +33,7 @@ const props = defineProps({
     default: ''
   },
   options: {
-    type: Object,
+    type: Object as () => ChartOptions,
     default: () => ({})
   }
 })
@@ -23,18 +41,104 @@ const props = defineProps({
 const vxChart = ref<echarts.EChartsType | null>(null)
 const vxChartRoot = ref<HTMLElement | null>(null)
 
+// 默认配置，确保基础属性都存在
+const defaultOptions: ChartOptions = {
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'shadow'
+    }
+  },
+  grid: {
+    left: '3%',
+    right: '4%',
+    bottom: '3%',
+    containLabel: true
+  },
+  series: []
+}
+
+// 预设配置
+const getPresetOptions = (): ChartOptions => {
+  switch (props.presets) {
+    case 'barChart':
+      return {
+        ...defaultOptions,
+        xAxis: {
+          type: 'category',
+          data: ['类别1', '类别2', '类别3', '类别4', '类别5']
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            type: 'bar',
+            data: [10, 20, 30, 40, 50]
+          }
+        ]
+      }
+    case 'pieChart':
+      return {
+        ...defaultOptions,
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b}: {c} ({d}%)'
+        },
+        series: [
+          {
+            name: '数据',
+            type: 'pie',
+            radius: '50%',
+            data: [
+              { value: 335, name: '直接访问' },
+              { value: 310, name: '邮件营销' },
+              { value: 234, name: '联盟广告' },
+              { value: 135, name: '视频广告' },
+              { value: 1548, name: '搜索引擎' }
+            ]
+          }
+        ]
+      }
+    default:
+      return defaultOptions
+  }
+}
+
+// 合并配置
+const mergedOptions = computed((): ChartOptions => {
+  const baseOptions = props.presets ? getPresetOptions() : defaultOptions
+  return {
+    ...baseOptions,
+    ...props.options,
+    // 确保series中的每个项目都有type属性
+    series: ((props.options.series || baseOptions.series || []) as ChartSeriesItem[]).map(
+      (item: ChartSeriesItem) => {
+        if (!item.type) {
+          // 如果series项没有type，根据preset设置默认type
+          return {
+            ...item,
+            type: props.presets === 'pieChart' ? 'pie' : 'bar'
+          }
+        }
+        return item
+      }
+    )
+  }
+})
+
 const initChart = () => {
   if (vxChartRoot.value) {
     vxChart.value = echarts.init(vxChartRoot.value)
-    vxChart.value.setOption(props.options)
+    vxChart.value.setOption(mergedOptions.value)
   }
 }
 
 watch(
-  () => props.options,
-  (newOptions) => {
+  () => [props.options, props.presets],
+  () => {
     if (vxChart.value) {
-      vxChart.value.setOption(newOptions)
+      vxChart.value.setOption(mergedOptions.value, true)
     }
   },
   { deep: true }

@@ -53,6 +53,7 @@ const chartData = ref({
     }
   },
   yAxis: {
+    type: 'value', // 明确指定y轴类型
     // 去掉y轴的分隔线
     splitLine: {
       show: false
