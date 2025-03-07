@@ -14,6 +14,7 @@ export interface ChartOptions {
   yAxis?: any
   series?: ChartSeriesItem[]
   animation?: boolean
+  animationThreshold?: number
   animationDuration?: number
   animationEasing?: string
   animationDelay?: number | Function
@@ -23,24 +24,75 @@ export interface ChartOptions {
   [key: string]: any
 }
 
-// 通用动画配置
-const animationConfig = {
+// 轻量级动画配置 - 默认使用
+export const lightAnimationConfig = {
   animation: true,
-  animationDuration: 1000,
+  // 设置较高的动画阈值，只有数据量小时才启用动画
+  animationThreshold: 2000,
+  // 减少动画持续时间
+  animationDuration: 300,
   animationEasing: 'cubicOut',
-  animationDelay: (idx: number) => idx * 150,
-  animationDurationUpdate: 800,
+  // 减少延迟时间
+  animationDelay: (idx: number) => Math.max(idx * 10, 0),
+  // 更新动画更快
+  animationDurationUpdate: 200,
   animationEasingUpdate: 'cubicInOut',
+  animationDelayUpdate: (idx: number) => Math.max(idx * 5, 0)
+}
+
+// 增长动画预设 - 渐入增长效果
+export const fadeInGrowthAnimation = {
+  animation: true,
+  animationThreshold: 5000,
+  animationDuration: 1000,
+  animationEasing: 'cubicIn', // 先慢后快
+  animationDelay: (idx: number) => idx * 100,
+  animationDurationUpdate: 500,
+  animationEasingUpdate: 'cubicInOut'
+}
+
+// 增长动画预设 - 弹性增长效果
+export const bounceGrowthAnimation = {
+  animation: true,
+  animationThreshold: 5000,
+  animationDuration: 1200,
+  animationEasing: 'elasticOut', // 弹性效果
+  animationDelay: (idx: number) => idx * 120,
+  animationDurationUpdate: 600,
+  animationEasingUpdate: 'elasticOut'
+}
+
+// 增长动画预设 - 波浪增长效果
+export const waveGrowthAnimation = {
+  animation: true,
+  animationThreshold: 5000,
+  animationDuration: 1500,
+  animationEasing: 'backOut', // 回弹效果
+  animationDelay: (idx: number) => idx * 80,
+  animationDurationUpdate: 800,
+  animationEasingUpdate: 'backOut'
+}
+
+// 增长动画预设 - 顺序增长效果
+export const sequentialGrowthAnimation = {
+  animation: true,
+  animationThreshold: 5000,
+  animationDuration: 800,
+  animationEasing: 'linear',
+  // 较长的延迟，使每个元素依次显示
+  animationDelay: (idx: number) => idx * 200,
+  animationDurationUpdate: 400,
+  animationEasingUpdate: 'linear',
   animationDelayUpdate: (idx: number) => idx * 100
 }
 
 // 柱状图预设配置
 export const barChartPreset: ChartOptions = {
-  ...animationConfig,
+  // 默认使用动画配置
+  ...lightAnimationConfig,
   title: {
     text: ''
   },
-  // 优化tooltip提示框
   tooltip: {
     trigger: 'item',
     formatter: '{b}: {c}',
@@ -53,20 +105,16 @@ export const barChartPreset: ChartOptions = {
     shadowBlur: 5,
     shadowColor: 'rgba(0, 0, 0, 0.1)'
   },
-  // 隐藏图例
   legend: {
     show: false
   },
   xAxis: {
-    // 去掉x轴的分隔线
     splitLine: {
       show: false
     },
-    // 隐藏x轴刻度线
     axisTick: {
       show: false
     },
-    // 显示x轴标签
     axisLabel: {
       show: true,
       color: '#666',
@@ -74,26 +122,21 @@ export const barChartPreset: ChartOptions = {
       fontWeight: 'bold',
       margin: 12
     },
-    // 隐藏x轴线
     axisLine: {
       show: false
     }
   },
   yAxis: {
-    type: 'value', // 明确指定y轴类型
-    // 去掉y轴的分隔线
+    type: 'value',
     splitLine: {
       show: false
     },
-    // 隐藏y轴刻度
     axisLabel: {
       show: false
     },
-    // 隐藏y轴线
     axisLine: {
       show: false
     },
-    // 隐藏y轴刻度线
     axisTick: {
       show: false
     }
@@ -101,24 +144,20 @@ export const barChartPreset: ChartOptions = {
   series: [
     {
       type: 'bar',
-      // 在柱子顶部显示数值
       label: {
         show: true,
         position: 'top',
         fontSize: 14,
         color: '#666'
       },
-      // 调整柱子样式
       itemStyle: {
-        borderRadius: [8, 8, 8, 8], // 柱子顶部和底部都有8px圆角
-        color: 'rgba(62, 99, 221, 1)' // 柱子颜色为蓝色
+        borderRadius: [8, 8, 8, 8],
+        color: 'rgba(62, 99, 221, 1)'
       },
-      // 设置柱子宽度为固定的32px
       barWidth: 32,
-      // 添加鼠标悬停效果
       emphasis: {
         itemStyle: {
-          color: 'rgba(62, 99, 221, 0.8)' // 悬停时颜色稍微变淡
+          color: 'rgba(62, 99, 221, 0.8)'
         }
       }
     }
@@ -127,7 +166,8 @@ export const barChartPreset: ChartOptions = {
 
 // 饼图预设配置
 export const pieChartPreset: ChartOptions = {
-  ...animationConfig,
+  // 默认使用动画配置
+  ...lightAnimationConfig,
   title: {
     text: ''
   },
@@ -157,38 +197,37 @@ export const pieChartPreset: ChartOptions = {
   series: [
     {
       type: 'pie',
-      radius: ['55%', '70%'], // 进一步调整环形图内外半径，使环形更瘦
+      radius: ['55%', '70%'],
       center: ['50%', '50%'],
       avoidLabelOverlap: true,
       itemStyle: {
-        borderRadius: 0, // 移除圆角，使扇区之间没有间隔
+        borderRadius: 0,
         borderColor: '#fff',
-        borderWidth: 0 // 移除边框，消除扇区间隔
+        borderWidth: 0
       },
       label: {
-        show: false // 隐藏标签
+        show: false
       },
       emphasis: {
         label: {
-          show: false // 高亮时也不显示标签
+          show: false
         },
         itemStyle: {
-          color: 'rgba(62, 99, 221, 1)', // 与柱状图相同的高亮颜色
+          color: 'rgba(62, 99, 221, 1)',
           shadowBlur: 10,
           shadowOffsetX: 0,
           shadowColor: 'rgba(0, 0, 0, 0.5)'
         }
       },
       labelLine: {
-        show: false // 隐藏引导线
+        show: false
       },
-      // 默认颜色配置
       color: [
-        'rgba(230, 237, 254, 1)', // 最浅的蓝色
-        'rgba(200, 216, 248, 1)', // 稍微深一点的蓝色
-        'rgba(170, 195, 242, 1)', // 中等深度的蓝色
-        'rgba(140, 174, 236, 1)', // 较深的蓝色
-        'rgba(110, 153, 230, 1)' // 最深的蓝色
+        'rgba(230, 237, 254, 1)',
+        'rgba(200, 216, 248, 1)',
+        'rgba(170, 195, 242, 1)',
+        'rgba(140, 174, 236, 1)',
+        'rgba(110, 153, 230, 1)'
       ]
     }
   ]
@@ -198,6 +237,15 @@ export const pieChartPreset: ChartOptions = {
 export const chartPresets = {
   barChart: barChartPreset,
   pieChart: pieChartPreset
+}
+
+// 导出所有动画预设
+export const animationPresets = {
+  light: lightAnimationConfig,
+  fadeInGrowth: fadeInGrowthAnimation,
+  bounceGrowth: bounceGrowthAnimation,
+  waveGrowth: waveGrowthAnimation,
+  sequentialGrowth: sequentialGrowthAnimation
 }
 
 export default chartPresets

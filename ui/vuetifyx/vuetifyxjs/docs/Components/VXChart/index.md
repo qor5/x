@@ -23,21 +23,6 @@ const chartData = ref({
     }
   ]
 })
-
-// 添加手动触发resize的函数
-const chartRef = ref(null)
-const triggerResize = () => {
-  if (chartRef.value && chartRef.value.$el) {
-    // 手动触发一次resize事件
-    window.dispatchEvent(new Event('resize'))
-  }
-}
-
-// 在组件挂载后触发一次resize
-onMounted(() => {
-  // 延迟执行以确保图表已完全渲染
-  setTimeout(triggerResize, 300)
-})
 </script>
 <template>
   <div class="chart-container">
@@ -98,21 +83,6 @@ const pieChartData = ref({
       ]
     }
   ]
-})
-
-// 添加手动触发resize的函数
-const pieChartRef = ref(null)
-const triggerPieResize = () => {
-  if (pieChartRef.value && pieChartRef.value.$el) {
-    // 手动触发一次resize事件
-    window.dispatchEvent(new Event('resize'))
-  }
-}
-
-// 在组件挂载后触发一次resize
-onMounted(() => {
-  // 延迟执行以确保图表已完全渲染
-  setTimeout(triggerPieResize, 300)
 })
 </script>
 <template>

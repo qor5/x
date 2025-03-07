@@ -1,25 +1,34 @@
 <template>
   <div class="vx-chart-wrap">
-    <div ref="vxChartRoot"></div>
+    <div :id="chartId"></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import * as echarts from 'echarts'
+import { ref, onMounted, defineProps, onBeforeUnmount, watch, computed, nextTick } from 'vue'
 import {
-  ref,
-  onMounted,
-  defineProps,
-  onBeforeUnmount,
-  watch,
-  computed,
-  shallowRef,
-  nextTick
-} from 'vue'
-import { chartPresets, ChartOptions, ChartSeriesItem } from './presets.config'
+  chartPresets,
+  ChartOptions,
+  ChartSeriesItem,
+  lightAnimationConfig,
+  animationPresets
+} from './presets.config'
 
 // 定义预设类型
 type PresetType = 'barChart' | 'pieChart' | ''
+
+// 定义动画类型
+type AnimationType =
+  | 'light'
+  | 'fadeInGrowth'
+  | 'bounceGrowth'
+  | 'waveGrowth'
+  | 'sequentialGrowth'
+  | ''
+
+// 生成唯一ID
+const chartId = `vx-chart-${Math.random().toString(36).substring(2, 10)}`
 
 const props = defineProps({
   presets: {
@@ -42,13 +51,24 @@ const props = defineProps({
   loading: {
     type: Boolean,
     default: false
+  },
+  // 是否启用动画，默认开启
+  enableAnimation: {
+    type: Boolean,
+    default: true
+  },
+  // 动画类型
+  animationType: {
+    type: String as () => AnimationType,
+    validator: (value: string) =>
+      ['light', 'fadeInGrowth', 'bounceGrowth', 'waveGrowth', 'sequentialGrowth', ''].includes(
+        value
+      ),
+    default: 'light'
   }
 })
 
-const vxChart = shallowRef<echarts.EChartsType | null>(null)
-const vxChartRoot = ref<HTMLElement | null>(null)
-
-// 默认配置，确保基础属性都存在
+// 默认配置
 const defaultOptions: ChartOptions = {
   tooltip: {
     trigger: 'axis',
@@ -62,16 +82,45 @@ const defaultOptions: ChartOptions = {
     bottom: '3%',
     containLabel: true
   },
+  // 默认开启动画
   animation: true,
-  animationDuration: 800,
-  animationEasing: 'cubicInOut',
   series: []
+}
+
+// 获取动画配置
+const getAnimationConfig = (): any => {
+  if (!props.enableAnimation) {
+    return {
+      animation: false,
+      animationDuration: 0,
+      animationEasing: undefined,
+      animationDelay: undefined,
+      animationDurationUpdate: 0,
+      animationEasingUpdate: undefined,
+      animationDelayUpdate: undefined
+    }
+  }
+
+  if (props.animationType && props.animationType in animationPresets) {
+    return animationPresets[props.animationType as keyof typeof animationPresets]
+  }
+
+  return lightAnimationConfig
 }
 
 // 获取预设配置
 const getPresetOptions = (): ChartOptions => {
   if (props.presets && props.presets in chartPresets) {
-    return chartPresets[props.presets as keyof typeof chartPresets]
+    const presetOptions = chartPresets[props.presets as keyof typeof chartPresets]
+
+    // 获取动画配置
+    const animationConfig = getAnimationConfig()
+
+    // 合并预设和动画配置
+    return {
+      ...presetOptions,
+      ...animationConfig
+    }
   }
   return defaultOptions
 }
@@ -130,41 +179,49 @@ const mergedOptions = computed(() => {
   // 确保series被正确设置
   result.series = mergedSeries
 
+  // 如果用户没有明确设置animation，则应用动画配置
+  if (props.options.animation === undefined) {
+    const animationConfig = getAnimationConfig()
+    Object.assign(result, animationConfig)
+  }
+
   return result
 })
 
+// 获取图表实例
+const getChartInstance = (): echarts.EChartsType | null => {
+  const chartDom = document.getElementById(chartId)
+  if (!chartDom) return null
+
+  return echarts.getInstanceByDom(chartDom) || echarts.init(chartDom, props.theme)
+}
+
 // 初始化图表
 const initChart = async () => {
-  if (!vxChartRoot.value) return
-
   // 确保DOM已更新
   await nextTick()
 
-  // 如果已经存在图表实例，先销毁
-  if (vxChart.value) {
-    vxChart.value.dispose()
-  }
-
-  // 创建新的图表实例
-  vxChart.value = echarts.init(vxChartRoot.value, props.theme)
+  const chartInstance = getChartInstance()
+  if (!chartInstance) return
 
   // 设置图表配置
-  vxChart.value.setOption(mergedOptions.value as any)
+  chartInstance.setOption(mergedOptions.value as any, true)
 
   // 设置加载状态
   if (props.loading) {
-    vxChart.value.showLoading()
+    chartInstance.showLoading()
   } else {
-    vxChart.value.hideLoading()
+    chartInstance.hideLoading()
   }
 }
 
 // 监听配置变化
 watch(
-  () => [props.options, props.presets],
+  () => [props.options, props.presets, props.enableAnimation, props.animationType],
   () => {
-    if (vxChart.value) {
-      vxChart.value.setOption(mergedOptions.value as any, true)
+    const chartInstance = getChartInstance()
+    if (chartInstance) {
+      chartInstance.setOption(mergedOptions.value as any, true)
     }
   },
   { deep: true }
@@ -174,12 +231,13 @@ watch(
 watch(
   () => props.loading,
   (loading) => {
-    if (!vxChart.value) return
+    const chartInstance = getChartInstance()
+    if (!chartInstance) return
 
     if (loading) {
-      vxChart.value.showLoading()
+      chartInstance.showLoading()
     } else {
-      vxChart.value.hideLoading()
+      chartInstance.hideLoading()
     }
   }
 )
@@ -188,14 +246,23 @@ watch(
 watch(
   () => props.theme,
   () => {
+    // 主题变化时，需要重新初始化图表
+    const chartDom = document.getElementById(chartId)
+    if (chartDom) {
+      const instance = echarts.getInstanceByDom(chartDom)
+      if (instance) {
+        instance.dispose()
+      }
+    }
     initChart()
   }
 )
 
 // 处理窗口大小变化
 const handleResize = () => {
-  if (vxChart.value) {
-    vxChart.value.resize()
+  const chartInstance = getChartInstance()
+  if (chartInstance) {
+    chartInstance.resize()
   }
 }
 
@@ -212,9 +279,12 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
 
-  if (vxChart.value) {
-    vxChart.value.dispose()
-    vxChart.value = null
+  const chartDom = document.getElementById(chartId)
+  if (chartDom) {
+    const instance = echarts.getInstanceByDom(chartDom)
+    if (instance) {
+      instance.dispose()
+    }
   }
 })
 </script>
