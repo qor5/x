@@ -6,26 +6,17 @@
 
 <script setup lang="ts">
 import * as echarts from 'echarts'
-import { ref, onMounted, defineProps, onBeforeUnmount, watch, computed, shallowRef } from 'vue'
-import { chartPresets } from './presets.config'
-
-// 定义图表选项类型
-interface ChartSeriesItem {
-  type?: string
-  name?: string
-  data?: any[]
-  radius?: string | string[]
-  [key: string]: any
-}
-
-interface ChartOptions {
-  tooltip?: any
-  grid?: any
-  xAxis?: any
-  yAxis?: any
-  series?: ChartSeriesItem[]
-  [key: string]: any
-}
+import {
+  ref,
+  onMounted,
+  defineProps,
+  onBeforeUnmount,
+  watch,
+  computed,
+  shallowRef,
+  nextTick
+} from 'vue'
+import { chartPresets, ChartOptions, ChartSeriesItem } from './presets.config'
 
 // 定义预设类型
 type PresetType = 'barChart' | 'pieChart' | ''
@@ -39,6 +30,18 @@ const props = defineProps({
   options: {
     type: Object as () => ChartOptions,
     default: () => ({})
+  },
+  theme: {
+    type: String,
+    default: ''
+  },
+  autoResize: {
+    type: Boolean,
+    default: true
+  },
+  loading: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -59,6 +62,9 @@ const defaultOptions: ChartOptions = {
     bottom: '3%',
     containLabel: true
   },
+  animation: true,
+  animationDuration: 800,
+  animationEasing: 'cubicInOut',
   series: []
 }
 
@@ -75,10 +81,17 @@ const deepMerge = (target: any, source: any): any => {
   const result = { ...target }
 
   for (const key in source) {
-    if (source[key] instanceof Object && key in target && target[key] instanceof Object) {
-      result[key] = deepMerge(target[key], source[key])
-    } else {
-      result[key] = source[key]
+    if (source[key] !== undefined) {
+      if (
+        source[key] instanceof Object &&
+        key in target &&
+        target[key] instanceof Object &&
+        !(source[key] instanceof Array)
+      ) {
+        result[key] = deepMerge(target[key], source[key])
+      } else {
+        result[key] = source[key]
+      }
     }
   }
 
@@ -86,7 +99,7 @@ const deepMerge = (target: any, source: any): any => {
 }
 
 // 合并配置
-const mergedOptions = computed((): ChartOptions => {
+const mergedOptions = computed(() => {
   const baseOptions = props.presets ? getPresetOptions() : defaultOptions
 
   // 处理series数据
@@ -100,7 +113,7 @@ const mergedOptions = computed((): ChartOptions => {
         baseOptions.series && baseOptions.series[index]
           ? baseOptions.series[index]
           : baseOptions.series && baseOptions.series[0]
-            ? baseOptions.series[0]
+            ? { ...baseOptions.series[0] }
             : {}
 
       // 合并预设和用户配置
@@ -108,7 +121,7 @@ const mergedOptions = computed((): ChartOptions => {
     })
   } else if (baseOptions.series) {
     // 如果用户没有提供series，则使用预设的series
-    mergedSeries = baseOptions.series
+    mergedSeries = JSON.parse(JSON.stringify(baseOptions.series))
   }
 
   // 合并其他配置
@@ -120,36 +133,85 @@ const mergedOptions = computed((): ChartOptions => {
   return result
 })
 
-const initChart = () => {
-  if (vxChartRoot.value) {
-    vxChart.value = echarts.init(vxChartRoot.value)
-    vxChart.value.setOption(mergedOptions.value)
+// 初始化图表
+const initChart = async () => {
+  if (!vxChartRoot.value) return
+
+  // 确保DOM已更新
+  await nextTick()
+
+  // 如果已经存在图表实例，先销毁
+  if (vxChart.value) {
+    vxChart.value.dispose()
+  }
+
+  // 创建新的图表实例
+  vxChart.value = echarts.init(vxChartRoot.value, props.theme)
+
+  // 设置图表配置
+  vxChart.value.setOption(mergedOptions.value as any)
+
+  // 设置加载状态
+  if (props.loading) {
+    vxChart.value.showLoading()
+  } else {
+    vxChart.value.hideLoading()
   }
 }
 
+// 监听配置变化
 watch(
   () => [props.options, props.presets],
   () => {
     if (vxChart.value) {
-      vxChart.value.setOption(mergedOptions.value, true)
+      vxChart.value.setOption(mergedOptions.value as any, true)
     }
   },
   { deep: true }
 )
 
+// 监听加载状态
+watch(
+  () => props.loading,
+  (loading) => {
+    if (!vxChart.value) return
+
+    if (loading) {
+      vxChart.value.showLoading()
+    } else {
+      vxChart.value.hideLoading()
+    }
+  }
+)
+
+// 监听主题变化
+watch(
+  () => props.theme,
+  () => {
+    initChart()
+  }
+)
+
+// 处理窗口大小变化
 const handleResize = () => {
   if (vxChart.value) {
     vxChart.value.resize()
   }
 }
 
-onMounted(() => {
-  initChart()
-  window.addEventListener('resize', handleResize)
+// 组件挂载后初始化图表
+onMounted(async () => {
+  await initChart()
+
+  if (props.autoResize) {
+    window.addEventListener('resize', handleResize)
+  }
 })
 
+// 组件卸载前清理资源
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
+
   if (vxChart.value) {
     vxChart.value.dispose()
     vxChart.value = null
@@ -161,6 +223,7 @@ onBeforeUnmount(() => {
 .vx-chart-wrap {
   width: 100%;
   height: 100%;
+  position: relative;
 
   div {
     width: 100%;
