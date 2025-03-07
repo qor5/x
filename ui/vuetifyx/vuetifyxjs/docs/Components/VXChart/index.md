@@ -43,9 +43,10 @@ const chartData = ref({
     // 显示x轴标签
     axisLabel: {
       show: true,
-      color: '#999',
-      fontSize: 12,
-      margin: 12 // 增加与轴线的距离
+      color: '#666',
+      fontSize: 14,
+      fontWeight: 'bold',
+      margin: 12
     },
     // 隐藏x轴线
     axisLine: {
@@ -149,13 +150,7 @@ import { ref, onMounted } from 'vue'
 
 const pieChartData = ref({
   title: {
-    text: 'Age',
-    left: 'center',
-    top: 10,
-    textStyle: {
-      fontSize: 16,
-      fontWeight: 'normal'
-    }
+    text: 'Age'
   },
   tooltip: {
     trigger: 'item',
