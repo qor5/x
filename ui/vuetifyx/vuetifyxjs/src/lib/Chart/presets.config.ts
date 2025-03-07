@@ -1,5 +1,5 @@
 // 定义图表选项类型
-interface ChartSeriesItem {
+export interface ChartSeriesItem {
   type?: string
   name?: string
   data?: any[]
@@ -7,17 +7,36 @@ interface ChartSeriesItem {
   [key: string]: any
 }
 
-interface ChartOptions {
+export interface ChartOptions {
   tooltip?: any
   grid?: any
   xAxis?: any
   yAxis?: any
   series?: ChartSeriesItem[]
+  animation?: boolean
+  animationDuration?: number
+  animationEasing?: string
+  animationDelay?: number | Function
+  animationDurationUpdate?: number
+  animationEasingUpdate?: string
+  animationDelayUpdate?: number | Function
   [key: string]: any
+}
+
+// 通用动画配置
+const animationConfig = {
+  animation: true,
+  animationDuration: 1000,
+  animationEasing: 'cubicOut',
+  animationDelay: (idx: number) => idx * 150,
+  animationDurationUpdate: 800,
+  animationEasingUpdate: 'cubicInOut',
+  animationDelayUpdate: (idx: number) => idx * 100
 }
 
 // 柱状图预设配置
 export const barChartPreset: ChartOptions = {
+  ...animationConfig,
   title: {
     text: ''
   },
@@ -108,6 +127,7 @@ export const barChartPreset: ChartOptions = {
 
 // 饼图预设配置
 export const pieChartPreset: ChartOptions = {
+  ...animationConfig,
   title: {
     text: ''
   },

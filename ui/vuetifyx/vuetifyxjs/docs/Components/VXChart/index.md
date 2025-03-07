@@ -135,10 +135,13 @@ onMounted(() => {
 
 ### VXChart 组件参数说明
 
-| 参数名  | 类型   | 默认值 | 说明                                     |
-| ------- | ------ | ------ | ---------------------------------------- |
-| presets | String | ''     | 预设样式，可选值：'barChart'、'pieChart' |
-| options | Object | {}     | 图表配置项，会与预设样式合并             |
+| 参数名     | 类型    | 默认值 | 说明                                     |
+| ---------- | ------- | ------ | ---------------------------------------- |
+| presets    | String  | ''     | 预设样式，可选值：'barChart'、'pieChart' |
+| options    | Object  | {}     | 图表配置项，会与预设样式合并             |
+| theme      | String  | ''     | 图表主题，可选值取决于echarts支持的主题  |
+| autoResize | Boolean | true   | 是否自动调整大小以适应容器变化           |
+| loading    | Boolean | false  | 是否显示加载状态                         |
 
 ### 预设样式说明
 
@@ -150,6 +153,7 @@ onMounted(() => {
 - 顶部显示数值标签
 - 隐藏了Y轴刻度和线条
 - 优化的提示框样式
+- 平滑的动画效果
 
 #### pieChart 饼图预设
 
@@ -159,6 +163,7 @@ onMounted(() => {
 - 底部居中的图例
 - 环形图设计（内半径55%，外半径70%）
 - 优化的提示框，显示名称、数值和百分比
+- 平滑的动画效果
 
 ### 使用说明
 
@@ -190,4 +195,10 @@ onMounted(() => {
     series: [{ data: customData }]
   }"
 ></vx-chart>
+```
+
+4. 使用加载状态
+
+```vue
+<vx-chart presets="barChart" :options="chartData" :loading="isLoading"></vx-chart>
 ```
