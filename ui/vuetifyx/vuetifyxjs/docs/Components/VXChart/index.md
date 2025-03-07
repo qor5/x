@@ -13,90 +13,13 @@ const chartData = ref({
   title: {
     text: 'Location'
   },
-  // 优化tooltip提示框
-  tooltip: {
-    trigger: 'item',
-    formatter: '{b}: {c}',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderColor: '#eee',
-    borderWidth: 1,
-    textStyle: {
-      color: '#333'
-    },
-    shadowBlur: 5,
-    shadowColor: 'rgba(0, 0, 0, 0.1)'
-  },
-  // 隐藏图例
-  legend: {
-    show: false
-  },
   xAxis: {
-    data: ['Location', 'Location', 'Location', 'Location', 'Location', 'Location'],
-    // 去掉x轴的分隔线
-    splitLine: {
-      show: false
-    },
-    // 隐藏x轴刻度线
-    axisTick: {
-      show: false
-    },
-    // 显示x轴标签
-    axisLabel: {
-      show: true,
-      color: '#666',
-      fontSize: 14,
-      fontWeight: 'bold',
-      margin: 12
-    },
-    // 隐藏x轴线
-    axisLine: {
-      show: false
-    }
-  },
-  yAxis: {
-    type: 'value', // 明确指定y轴类型
-    // 去掉y轴的分隔线
-    splitLine: {
-      show: false
-    },
-    // 隐藏y轴刻度
-    axisLabel: {
-      show: false
-    },
-    // 隐藏y轴线
-    axisLine: {
-      show: false
-    },
-    // 隐藏y轴刻度线
-    axisTick: {
-      show: false
-    }
+    data: ['Location', 'Location', 'Location', 'Location', 'Location', 'Location']
   },
   series: [
     {
       name: '销量',
-      type: 'bar',
-      data: [5, 20, 36, 10, 10, 20],
-      // 在柱子顶部显示数值
-      label: {
-        show: true,
-        position: 'top',
-        fontSize: 14,
-        color: '#666'
-      },
-      // 调整柱子样式
-      itemStyle: {
-        borderRadius: [8, 8, 8, 8], // 柱子顶部和底部都有8px圆角
-        color: 'rgba(62, 99, 221, 1)' // 柱子颜色为蓝色
-      },
-      // 设置柱子宽度为固定的32px
-      barWidth: 32,
-      // 添加鼠标悬停效果
-      emphasis: {
-        itemStyle: {
-          color: 'rgba(62, 99, 221, 0.8)' // 悬停时颜色稍微变淡
-        }
-      }
+      data: [5, 20, 36, 10, 10, 20]
     }
   ]
 })
@@ -118,7 +41,7 @@ onMounted(() => {
 </script>
 <template>
   <div class="chart-container">
-    <vx-chart ref="chartRef" :options="chartData"></vx-chart>
+    <vx-chart ref="chartRef" presets="barChart" :options="chartData"></vx-chart>
   </div>
 </template>
 ```
@@ -152,86 +75,25 @@ const pieChartData = ref({
   title: {
     text: 'Age'
   },
-  tooltip: {
-    trigger: 'item',
-    formatter: '{b}: {c} ({d}%)',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderColor: '#eee',
-    borderWidth: 1,
-    textStyle: {
-      color: '#333'
-    },
-    shadowBlur: 5,
-    shadowColor: 'rgba(0, 0, 0, 0.1)'
-  },
-  legend: {
-    orient: 'horizontal',
-    bottom: 10,
-    left: 'center',
-    itemWidth: 10,
-    itemHeight: 10,
-    textStyle: {
-      fontSize: 12,
-      color: '#666'
-    }
-  },
   series: [
     {
       name: '年龄分布',
-      type: 'pie',
-      radius: ['55%', '70%'], // 进一步调整环形图内外半径，使环形更瘦
-      center: ['50%', '50%'],
-      avoidLabelOverlap: true,
-      itemStyle: {
-        borderRadius: 0, // 移除圆角，使扇区之间没有间隔
-        borderColor: '#fff',
-        borderWidth: 0 // 移除边框，消除扇区间隔
-      },
-      label: {
-        show: false // 隐藏标签
-      },
-      emphasis: {
-        label: {
-          show: false // 高亮时也不显示标签
-        },
-        itemStyle: {
-          color: 'rgba(62, 99, 221, 1)', // 与柱状图相同的高亮颜色
-          shadowBlur: 10,
-          shadowOffsetX: 0,
-          shadowColor: 'rgba(0, 0, 0, 0.5)'
-        }
-      },
-      labelLine: {
-        show: false // 隐藏引导线
-      },
       data: [
         {
           value: 20,
-          name: '0-18',
-          itemStyle: {
-            color: 'rgba(230, 237, 254, 1)' // 最浅的蓝色
-          }
+          name: '0-18'
         },
         {
           value: 35,
-          name: '18-35',
-          itemStyle: {
-            color: 'rgba(200, 216, 248, 1)' // 稍微深一点的蓝色
-          }
+          name: '18-35'
         },
         {
           value: 30,
-          name: '35-60',
-          itemStyle: {
-            color: 'rgba(170, 195, 242, 1)' // 中等深度的蓝色
-          }
+          name: '35-60'
         },
         {
           value: 15,
-          name: '60-100',
-          itemStyle: {
-            color: 'rgba(140, 174, 236, 1)' // 最深的蓝色
-          }
+          name: '60-100'
         }
       ]
     }
@@ -255,7 +117,7 @@ onMounted(() => {
 </script>
 <template>
   <div class="chart-container">
-    <vx-chart ref="pieChartRef" :options="pieChartData"></vx-chart>
+    <vx-chart ref="pieChartRef" presets="pieChart" :options="pieChartData"></vx-chart>
   </div>
 </template>
 ```
@@ -271,15 +133,61 @@ onMounted(() => {
 
 :::
 
-### 饼图配置说明
+### VXChart 组件参数说明
 
-- **title**: 设置图表标题为"Age"
-- **tooltip**: 自定义提示框，显示名称、数值和百分比
-- **legend**: 在底部居中显示图例
-- **series**:
-  - 使用更瘦的环形饼图（内半径55%，外半径70%）
-  - 移除扇区圆角和边框，使各部分之间没有间隔
-  - 为各个部分设置相近的浅蓝色系列颜色，形成微妙的色彩过渡
-  - 高亮色与柱状图保持一致(rgba(62, 99, 221, 1))
-  - 隐藏标签和引导线，仅在悬停时显示tooltip
-  - 设置鼠标悬停效果
+| 参数名  | 类型   | 默认值 | 说明                                     |
+| ------- | ------ | ------ | ---------------------------------------- |
+| presets | String | ''     | 预设样式，可选值：'barChart'、'pieChart' |
+| options | Object | {}     | 图表配置项，会与预设样式合并             |
+
+### 预设样式说明
+
+#### barChart 柱状图预设
+
+柱状图预设提供了美观的柱状图样式，包括：
+
+- 蓝色主题的柱子，带有圆角
+- 顶部显示数值标签
+- 隐藏了Y轴刻度和线条
+- 优化的提示框样式
+
+#### pieChart 饼图预设
+
+饼图预设提供了环形饼图样式，包括：
+
+- 蓝色渐变主题
+- 底部居中的图例
+- 环形图设计（内半径55%，外半径70%）
+- 优化的提示框，显示名称、数值和百分比
+
+### 使用说明
+
+1. 基本使用：只需传入数据，使用预设样式
+
+```vue
+<vx-chart
+  presets="barChart"
+  :options="{
+    xAxis: { data: ['A', 'B', 'C'] },
+    series: [{ data: [10, 20, 30] }]
+  }"
+></vx-chart>
+```
+
+2. 完全自定义：不使用预设，完全自定义配置
+
+```vue
+<vx-chart :options="customOptions"></vx-chart>
+```
+
+3. 混合使用：使用预设，但覆盖部分配置
+
+```vue
+<vx-chart
+  presets="pieChart"
+  :options="{
+    title: { text: '自定义标题' },
+    series: [{ data: customData }]
+  }"
+></vx-chart>
+```
