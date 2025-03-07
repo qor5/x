@@ -40,33 +40,15 @@ const props = defineProps({
     type: Object as () => ChartOptions,
     default: () => ({})
   },
-  theme: {
-    type: String,
-    default: ''
-  },
-  autoResize: {
-    type: Boolean,
-    default: true
-  },
   loading: {
     type: Boolean,
-    default: false
-  },
-  // 是否启用动画，默认开启
-  enableAnimation: {
-    type: Boolean,
     default: true
-  },
-  // 动画类型
-  animationType: {
-    type: String as () => AnimationType,
-    validator: (value: string) =>
-      ['light', 'fadeInGrowth', 'bounceGrowth', 'waveGrowth', 'sequentialGrowth', ''].includes(
-        value
-      ),
-    default: 'light'
   }
 })
+
+// 内部使用的配置
+const enableAnimation = true
+const animationType: AnimationType = 'light'
 
 // 默认配置
 const defaultOptions: ChartOptions = {
@@ -89,7 +71,7 @@ const defaultOptions: ChartOptions = {
 
 // 获取动画配置
 const getAnimationConfig = (): any => {
-  if (!props.enableAnimation) {
+  if (!enableAnimation) {
     return {
       animation: false,
       animationDuration: 0,
@@ -101,8 +83,8 @@ const getAnimationConfig = (): any => {
     }
   }
 
-  if (props.animationType && props.animationType in animationPresets) {
-    return animationPresets[props.animationType as keyof typeof animationPresets]
+  if (animationType && animationType in animationPresets) {
+    return animationPresets[animationType as keyof typeof animationPresets]
   }
 
   return lightAnimationConfig
@@ -193,7 +175,7 @@ const getChartInstance = (): echarts.EChartsType | null => {
   const chartDom = document.getElementById(chartId)
   if (!chartDom) return null
 
-  return echarts.getInstanceByDom(chartDom) || echarts.init(chartDom, props.theme)
+  return echarts.getInstanceByDom(chartDom) || echarts.init(chartDom)
 }
 
 // 初始化图表
@@ -217,7 +199,7 @@ const initChart = async () => {
 
 // 监听配置变化
 watch(
-  () => [props.options, props.presets, props.enableAnimation, props.animationType],
+  () => [props.options, props.presets],
   () => {
     const chartInstance = getChartInstance()
     if (chartInstance) {
@@ -242,22 +224,6 @@ watch(
   }
 )
 
-// 监听主题变化
-watch(
-  () => props.theme,
-  () => {
-    // 主题变化时，需要重新初始化图表
-    const chartDom = document.getElementById(chartId)
-    if (chartDom) {
-      const instance = echarts.getInstanceByDom(chartDom)
-      if (instance) {
-        instance.dispose()
-      }
-    }
-    initChart()
-  }
-)
-
 // 处理窗口大小变化
 const handleResize = () => {
   const chartInstance = getChartInstance()
@@ -270,9 +236,7 @@ const handleResize = () => {
 onMounted(async () => {
   await initChart()
 
-  if (props.autoResize) {
-    window.addEventListener('resize', handleResize)
-  }
+  window.addEventListener('resize', handleResize)
 })
 
 // 组件卸载前清理资源
