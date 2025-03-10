@@ -22,23 +22,84 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const chartData = ref({
+// 定义7天和14天的数据
+const sevenDaysData = {
   title: {
     text: 'Daily Active Users'
   },
   xAxis: {
-    data: ['Location', 'Location', 'Location', 'Location', 'Location', 'Location']
+    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   },
   series: [
     {
-      name: '销量',
-      data: [5, 20, 36, 10, 10, 20]
+      name: '用户数',
+      data: [5, 20, 36, 10, 10, 20, 30]
     }
   ]
-})
+}
+
+const fourteenDaysData = {
+  title: {
+    text: 'Daily Active Users'
+  },
+  xAxis: {
+    data: [
+      'Week 1',
+      'Week 1',
+      'Week 1',
+      'Week 1',
+      'Week 1',
+      'Week 1',
+      'Week 1',
+      'Week 2',
+      'Week 2',
+      'Week 2',
+      'Week 2',
+      'Week 2',
+      'Week 2',
+      'Week 2'
+    ]
+  },
+  series: [
+    {
+      name: '用户数',
+      data: [5, 20, 36, 10, 10, 20, 30, 15, 25, 40, 20, 15, 25, 35]
+    }
+  ]
+}
+
+// 当前选中的时间范围
+const selectedRange = ref('7days')
+
+// 当前图表数据
+const chartData = ref(sevenDaysData)
+
+// 切换时间范围
+const switchRange = (range) => {
+  selectedRange.value = range
+  chartData.value = range === '7days' ? sevenDaysData : fourteenDaysData
+}
 </script>
 <template>
   <div class="chart-container vx-border vx-border-gray-500 vx-rounded-lg vx-mb-5">
+    <div class="chart-header">
+      <div class="chart-tabs">
+        <button
+          class="tab-button"
+          :class="{ active: selectedRange === '7days' }"
+          @click="switchRange('7days')"
+        >
+          Past 7 Days
+        </button>
+        <button
+          class="tab-button"
+          :class="{ active: selectedRange === '14days' }"
+          @click="switchRange('14days')"
+        >
+          Past 14 Days
+        </button>
+      </div>
+    </div>
     <vx-chart ref="chartRef" presets="barChart" :options="chartData"></vx-chart>
   </div>
 </template>
@@ -47,6 +108,36 @@ const chartData = ref({
 .chart-container {
   width: 100%;
   height: 400px;
+  position: relative;
+}
+
+.chart-header {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
+.chart-tabs {
+  display: flex;
+  background-color: #f5f5f5;
+  border-radius: 20px;
+  padding: 2px;
+}
+
+.tab-button {
+  border: none;
+  background: transparent;
+  padding: 6px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.tab-button.active {
+  background-color: #1976d2;
+  color: white;
 }
 </style>
 ```
