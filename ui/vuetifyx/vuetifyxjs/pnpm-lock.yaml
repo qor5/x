@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   '@vitepress-code-preview/container':
-    hash: dow3z5ai6lnbkwbvwn5334eypm
+    hash: 405db9b01bef68eb6e69fa24ea7acce9e49941c2fab7291c8ca77efa57eedb2b
     path: patches/@vitepress-code-preview__container.patch
 
 importers:
@@ -85,7 +85,7 @@ importers:
         version: 5.2.1(vite@5.3.6(@types/node@20.17.17)(sass@1.84.0))(vue@3.5.13(typescript@5.7.3))
       '@vitepress-code-preview/container':
         specifier: 1.0.8
-        version: 1.0.8(patch_hash=dow3z5ai6lnbkwbvwn5334eypm)(vue@3.5.13(typescript@5.7.3))
+        version: 1.0.8(patch_hash=405db9b01bef68eb6e69fa24ea7acce9e49941c2fab7291c8ca77efa57eedb2b)(vue@3.5.13(typescript@5.7.3))
       '@vitepress-code-preview/plugin':
         specifier: ^1.0.6
         version: 1.0.6
@@ -4326,7 +4326,7 @@ snapshots:
       vite: 5.4.14(@types/node@20.17.17)(sass@1.84.0)
       vue: 3.5.13(typescript@5.7.3)
 
-  '@vitepress-code-preview/container@1.0.8(patch_hash=dow3z5ai6lnbkwbvwn5334eypm)(vue@3.5.13(typescript@5.7.3))':
+  '@vitepress-code-preview/container@1.0.8(patch_hash=405db9b01bef68eb6e69fa24ea7acce9e49941c2fab7291c8ca77efa57eedb2b)(vue@3.5.13(typescript@5.7.3))':
     dependencies:
       '@floating-ui/vue': 1.1.6(vue@3.5.13(typescript@5.7.3))
       vue: 3.5.13(typescript@5.7.3)
