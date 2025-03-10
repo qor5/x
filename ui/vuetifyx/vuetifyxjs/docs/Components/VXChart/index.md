@@ -24,7 +24,7 @@ import { ref } from 'vue'
 
 const chartData = ref({
   title: {
-    text: 'Location'
+    text: 'Daily Active Users'
   },
   xAxis: {
     data: ['Location', 'Location', 'Location', 'Location', 'Location', 'Location']
@@ -38,7 +38,7 @@ const chartData = ref({
 })
 </script>
 <template>
-  <div class="chart-container">
+  <div class="chart-container vx-border vx-border-gray-500 vx-rounded-lg vx-mb-5">
     <vx-chart ref="chartRef" presets="barChart" :options="chartData"></vx-chart>
   </div>
 </template>
@@ -47,8 +47,72 @@ const chartData = ref({
 .chart-container {
   width: 100%;
   height: 400px;
-  border: 1px solid #eee;
-  margin-bottom: 20px;
+}
+</style>
+```
+
+:::
+
+### 自定义显示/隐藏元素
+
+可以通过配置选项来控制图表元素的显示或隐藏：
+
+```vue
+<vx-chart
+  presets="barChart"
+  :options="{
+    // 隐藏y轴标签
+    yAxis: {
+      axisLabel: { show: false },
+      // 隐藏横向虚线
+      splitLine: { show: false }
+    }
+    // 其他配置...
+  }"
+></vx-chart>
+```
+
+:::demo
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const customBarChartData = ref({
+  title: {
+    text: 'Age'
+  },
+  xAxis: {
+    data: ['0-18', '18-25', '25-65', '65+']
+  },
+  yAxis: {
+    // 隐藏y轴标签
+    axisLabel: {
+      show: false
+    },
+    // 隐藏横向虚线
+    splitLine: {
+      show: false
+    }
+  },
+  series: [
+    {
+      name: '数据',
+      data: [100, 300, 500, 200]
+    }
+  ]
+})
+</script>
+<template>
+  <div class="chart-container vx-border vx-border-gray-500 vx-rounded-lg vx-mb-5">
+    <vx-chart ref="customBarChartRef" presets="barChart" :options="customBarChartData"></vx-chart>
+  </div>
+</template>
+
+<style scoped>
+.chart-container {
+  width: 100%;
+  height: 400px;
 }
 </style>
 ```
@@ -65,27 +129,19 @@ import { ref } from 'vue'
 
 const pieChartData = ref({
   title: {
-    text: 'Age'
+    text: 'Gender'
   },
   series: [
     {
       name: '年龄分布',
       data: [
         {
-          value: 20,
-          name: '0-18'
+          value: 10,
+          name: 'Male 10%'
         },
         {
-          value: 35,
-          name: '18-35'
-        },
-        {
-          value: 30,
-          name: '35-60'
-        },
-        {
-          value: 15,
-          name: '60-100'
+          value: 90,
+          name: 'Female 90%'
         }
       ]
     }
@@ -93,7 +149,7 @@ const pieChartData = ref({
 })
 </script>
 <template>
-  <div class="chart-container">
+  <div class="chart-container vx-border vx-border-gray-500 vx-rounded-lg vx-mb-5">
     <vx-chart ref="pieChartRef" presets="pieChart" :options="pieChartData"></vx-chart>
   </div>
 </template>
@@ -102,8 +158,6 @@ const pieChartData = ref({
 .chart-container {
   width: 100%;
   height: 400px;
-  border: 1px solid #eee;
-  margin-bottom: 20px;
 }
 </style>
 ```
