@@ -90,8 +90,12 @@ export const sequentialGrowthAnimation = {
 export const barChartPreset: ChartOptions = {
   // 默认使用动画配置
   ...lightAnimationConfig,
-  title: {
-    text: ''
+  grid: {
+    top: '40px',
+    left: '3%',
+    right: '3%',
+    bottom: '8%',
+    containLabel: true
   },
   tooltip: {
     trigger: 'item',
@@ -117,10 +121,10 @@ export const barChartPreset: ChartOptions = {
     },
     axisLabel: {
       show: true,
-      color: '#666',
+      color: 'rgb(97,97,97)',
       fontSize: 14,
       fontWeight: 'bold',
-      margin: 12
+      margin: 8
     },
     axisLine: {
       show: false
@@ -129,10 +133,17 @@ export const barChartPreset: ChartOptions = {
   yAxis: {
     type: 'value',
     splitLine: {
-      show: false
+      show: true,
+      lineStyle: {
+        type: 'dashed',
+        color: '#E5E7EB'
+      }
     },
     axisLabel: {
-      show: false
+      show: true,
+      color: '#666',
+      fontSize: 12,
+      margin: 8
     },
     axisLine: {
       show: false
@@ -147,14 +158,15 @@ export const barChartPreset: ChartOptions = {
       label: {
         show: true,
         position: 'top',
-        fontSize: 14,
-        color: '#666'
+        fontSize: 16,
+        color: 'rgb(97,97,97)'
       },
       itemStyle: {
-        borderRadius: [8, 8, 8, 8],
+        borderRadius: [0, 0, 0, 0],
         color: 'rgba(62, 99, 221, 1)'
       },
       barWidth: 32,
+      barGap: '30%',
       emphasis: {
         itemStyle: {
           color: 'rgba(62, 99, 221, 0.8)'
@@ -168,9 +180,6 @@ export const barChartPreset: ChartOptions = {
 export const pieChartPreset: ChartOptions = {
   // 默认使用动画配置
   ...lightAnimationConfig,
-  title: {
-    text: ''
-  },
   tooltip: {
     trigger: 'item',
     formatter: '{b}: {c} ({d}%)',
@@ -185,19 +194,27 @@ export const pieChartPreset: ChartOptions = {
   },
   legend: {
     orient: 'horizontal',
-    bottom: 10,
+    bottom: 0,
     left: 'center',
     itemWidth: 10,
     itemHeight: 10,
+    itemGap: 24,
+    icon: 'circle',
     textStyle: {
-      fontSize: 12,
-      color: '#666'
+      fontSize: 16,
+      color: 'rgb(97,97,97)',
+      fontWeight: 510
     }
+  },
+  grid: {
+    top: '10%',
+    bottom: '15%',
+    containLabel: true
   },
   series: [
     {
       type: 'pie',
-      radius: ['55%', '70%'],
+      radius: ['65%', '80%'],
       center: ['50%', '50%'],
       avoidLabelOverlap: true,
       itemStyle: {
@@ -213,21 +230,22 @@ export const pieChartPreset: ChartOptions = {
           show: false
         },
         itemStyle: {
-          color: 'rgba(62, 99, 221, 1)',
-          shadowBlur: 10,
+          shadowBlur: 5,
           shadowOffsetX: 0,
-          shadowColor: 'rgba(0, 0, 0, 0.5)'
+          shadowColor: 'rgba(0, 0, 0, 0.2)'
         }
       },
       labelLine: {
         show: false
       },
       color: [
-        'rgba(230, 237, 254, 1)',
-        'rgba(200, 216, 248, 1)',
-        'rgba(170, 195, 242, 1)',
-        'rgba(140, 174, 236, 1)',
-        'rgba(110, 153, 230, 1)'
+        'rgba(52, 81, 178, 1)', // 最深色
+        'rgba(141, 164, 239, 1)', // 次深色
+        'rgba(162, 181, 243, 1)', // 减淡1
+        'rgba(183, 198, 247, 1)', // 减淡2
+        'rgba(204, 215, 251, 1)', // 减淡3
+        'rgba(225, 232, 255, 1)', // 减淡4
+        'rgba(236, 241, 255, 1)' // 减淡5
       ]
     }
   ]

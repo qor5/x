@@ -1,6 +1,7 @@
 <template>
   <div class="vx-chart-wrap">
-    <div :id="chartId"></div>
+    <div v-if="chartTitle" class="vx-chart-title">{{ chartTitle }}</div>
+    <div :id="chartId" class="vx-chart-container"></div>
   </div>
 </template>
 
@@ -44,6 +45,11 @@ const props = defineProps({
     type: Boolean,
     default: false
   }
+})
+
+// 提取标题
+const chartTitle = computed(() => {
+  return props.options.title?.text || ''
 })
 
 // 内部使用的配置
@@ -161,6 +167,11 @@ const mergedOptions = computed(() => {
   // 确保series被正确设置
   result.series = mergedSeries
 
+  // 从ECharts配置中移除标题
+  if (result.title) {
+    delete result.title
+  }
+
   // 如果用户没有明确设置animation，则应用动画配置
   if (props.options.animation === undefined) {
     const animationConfig = getAnimationConfig()
@@ -258,10 +269,21 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   position: relative;
+  display: flex;
+  flex-direction: column;
 
-  div {
+  .vx-chart-title {
+    font-size: 18px;
+
+    font-weight: 510;
+    color: rgb(33, 33, 33);
+    margin: 16px 0 0 16px;
+    text-align: left;
+  }
+
+  .vx-chart-container {
+    flex: 1;
     width: 100%;
-    height: 100%;
     min-height: 300px;
   }
 }
