@@ -9,7 +9,7 @@
             ? Array.from({ length: props.options.length }, (_, i) => i)
             : [0]
         "
-        :current-index="currentIndex"
+        :currentIndex="currentIndex"
         :toggle="toggle"
       ></slot>
     </div>
