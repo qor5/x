@@ -46,6 +46,7 @@ declare module 'vue' {
     VXAvatar: typeof import('./src/lib/VXAvatar.vue')['default']
     VXBtn: typeof import('./src/lib/Common/VXBtn.vue')['default']
     VXBtnGroup: typeof import('./src/lib/Common/VXBtnGroup.vue')['default']
+    VXChart: typeof import('./src/lib/Chart/VXChart.vue')['default']
     VXCheckbox: typeof import('./src/lib/Form/VXCheckbox.vue')['default']
     VXChip: typeof import('./src/lib/Common/VXChip.vue')['default']
     VXDialog: typeof import('./src/lib/Common/VXDialog.vue')['default']
