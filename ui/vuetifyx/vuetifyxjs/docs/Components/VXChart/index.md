@@ -6,11 +6,11 @@
 
 ### Props
 
-| 参数名  | 说明                                     | 类型               | 默认值 |
-| ------- | ---------------------------------------- | ------------------ | ------ |
-| presets | 预设样式，可选值：'barChart'、'pieChart' | String             | ''     |
-| options | 图表配置项，会与预设样式合并             | Object \| Object[] | {}     |
-| loading | 是否显示加载状态                         | Boolean            | false  |
+| 参数名  | 说明                                     | 类型              | 默认值 |
+| ------- | ---------------------------------------- | ----------------- | ------ |
+| presets | 预设样式，可选值：'barChart'、'pieChart' | String            | ''     |
+| options | 图表配置项，会与预设样式合并             | Object \ Object[] | {}     |
+| loading | 是否显示加载状态                         | Boolean           | false  |
 
 ### Slots
 
