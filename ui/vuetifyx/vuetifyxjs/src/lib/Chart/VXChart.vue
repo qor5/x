@@ -1,13 +1,34 @@
 <template>
   <div class="vx-chart-wrap">
-    <div v-if="chartTitle" class="vx-chart-title">{{ chartTitle }}</div>
+    <div class="d-flex align-center justify-space-between">
+      <div v-if="chartTitle" class="vx-chart-title">{{ chartTitle }}</div>
+      <slot
+        name="action"
+        :list="
+          Array.isArray(props.options)
+            ? Array.from({ length: props.options.length }, (_, i) => i)
+            : [0]
+        "
+        :current-index="currentIndex"
+        :toggle="toggle"
+      ></slot>
+    </div>
     <div :id="chartId" class="vx-chart-container"></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import * as echarts from 'echarts'
-import { ref, onMounted, defineProps, onBeforeUnmount, watch, computed, nextTick } from 'vue'
+import {
+  ref,
+  onMounted,
+  defineProps,
+  onBeforeUnmount,
+  watch,
+  computed,
+  nextTick,
+  PropType
+} from 'vue'
 import {
   chartPresets,
   ChartOptions,
@@ -31,6 +52,22 @@ type AnimationType =
 // 生成唯一ID
 const chartId = `vx-chart-${Math.random().toString(36).substring(2, 10)}`
 
+// 当前显示的图表索引
+const currentIndex = ref(0)
+
+// 切换显示的图表
+const toggle = (index: number) => {
+  if (Array.isArray(props.options) && index >= 0 && index < props.options.length) {
+    currentIndex.value = index
+
+    // 更新图表
+    const chartInstance = getChartInstance()
+    if (chartInstance && Array.isArray(mergedOptions.value)) {
+      chartInstance.setOption(mergedOptions.value[index] as any, true)
+    }
+  }
+}
+
 const props = defineProps({
   presets: {
     type: String as () => PresetType,
@@ -38,7 +75,7 @@ const props = defineProps({
     default: ''
   },
   options: {
-    type: Object as () => ChartOptions,
+    type: [Object, Array] as PropType<ChartOptions | ChartOptions[]>,
     default: () => ({})
   },
   loading: {
@@ -49,6 +86,12 @@ const props = defineProps({
 
 // 提取标题
 const chartTitle = computed(() => {
+  // 检查 options 是否为数组
+  if (Array.isArray(props.options)) {
+    // 如果是数组，返回当前选中的图表配置的标题
+    return props.options[currentIndex.value]?.title?.text || ''
+  }
+  // 如果是对象，直接返回标题
   return props.options.title?.text || ''
 })
 
@@ -139,13 +182,63 @@ const deepMerge = (target: any, source: any): any => {
 const mergedOptions = computed(() => {
   const baseOptions = props.presets ? getPresetOptions() : defaultOptions
 
-  // 处理series数据
+  // 处理 options 是数组的情况
+  if (Array.isArray(props.options)) {
+    // 对数组中的每一项应用预设配置
+    const mergedOptionsArray = props.options.map((optionItem) => {
+      // 处理单个配置项的 series 数据
+      let itemMergedSeries: ChartSeriesItem[] = []
+
+      if (optionItem.series && optionItem.series.length > 0) {
+        // 如果用户提供了 series 数据，则使用用户的数据
+        itemMergedSeries = optionItem.series.map((userSeries: ChartSeriesItem, index: number) => {
+          // 获取对应的预设 series 配置
+          const presetSeries =
+            baseOptions.series && baseOptions.series[index]
+              ? baseOptions.series[index]
+              : baseOptions.series && baseOptions.series[0]
+                ? { ...baseOptions.series[0] }
+                : {}
+
+          // 合并预设和用户配置
+          return deepMerge(presetSeries, userSeries)
+        })
+      } else if (baseOptions.series) {
+        // 如果用户没有提供 series，则使用预设的 series
+        itemMergedSeries = JSON.parse(JSON.stringify(baseOptions.series))
+      }
+
+      // 合并其他配置
+      const itemResult = deepMerge(baseOptions, optionItem)
+
+      // 确保 series 被正确设置
+      itemResult.series = itemMergedSeries
+
+      // 从 ECharts 配置中移除标题
+      if (itemResult.title) {
+        delete itemResult.title
+      }
+
+      // 如果用户没有明确设置 animation，则应用动画配置
+      if (optionItem.animation === undefined) {
+        const animationConfig = getAnimationConfig()
+        Object.assign(itemResult, animationConfig)
+      }
+
+      return itemResult
+    })
+
+    return mergedOptionsArray
+  }
+
+  // 处理 options 是对象的情况
+  // 处理 series 数据
   let mergedSeries: ChartSeriesItem[] = []
 
   if (props.options.series && props.options.series.length > 0) {
-    // 如果用户提供了series数据，则使用用户的数据
+    // 如果用户提供了 series 数据，则使用用户的数据
     mergedSeries = props.options.series.map((userSeries: ChartSeriesItem, index: number) => {
-      // 获取对应的预设series配置
+      // 获取对应的预设 series 配置
       const presetSeries =
         baseOptions.series && baseOptions.series[index]
           ? baseOptions.series[index]
@@ -157,22 +250,22 @@ const mergedOptions = computed(() => {
       return deepMerge(presetSeries, userSeries)
     })
   } else if (baseOptions.series) {
-    // 如果用户没有提供series，则使用预设的series
+    // 如果用户没有提供 series，则使用预设的 series
     mergedSeries = JSON.parse(JSON.stringify(baseOptions.series))
   }
 
   // 合并其他配置
   const result = deepMerge(baseOptions, props.options)
 
-  // 确保series被正确设置
+  // 确保 series 被正确设置
   result.series = mergedSeries
 
-  // 从ECharts配置中移除标题
+  // 从 ECharts 配置中移除标题
   if (result.title) {
     delete result.title
   }
 
-  // 如果用户没有明确设置animation，则应用动画配置
+  // 如果用户没有明确设置 animation，则应用动画配置
   if (props.options.animation === undefined) {
     const animationConfig = getAnimationConfig()
     Object.assign(result, animationConfig)
@@ -198,7 +291,13 @@ const initChart = async () => {
   if (!chartInstance) return
 
   // 设置图表配置
-  chartInstance.setOption(mergedOptions.value as any, true)
+  // 判断 mergedOptions 是否为数组
+  if (Array.isArray(mergedOptions.value)) {
+    // 如果是数组，使用当前索引的配置项初始化图表
+    chartInstance.setOption(mergedOptions.value[currentIndex.value] as any, true)
+  } else {
+    chartInstance.setOption(mergedOptions.value as any, true)
+  }
 
   // 设置加载状态
   if (props.loading) {
@@ -214,7 +313,13 @@ watch(
   () => {
     const chartInstance = getChartInstance()
     if (chartInstance) {
-      chartInstance.setOption(mergedOptions.value as any, true)
+      // 判断 mergedOptions 是否为数组
+      if (Array.isArray(mergedOptions.value)) {
+        // 如果是数组，使用当前索引的配置项更新图表
+        chartInstance.setOption(mergedOptions.value[currentIndex.value] as any, true)
+      } else {
+        chartInstance.setOption(mergedOptions.value as any, true)
+      }
     }
   },
   { deep: true }
@@ -231,6 +336,17 @@ watch(
       chartInstance.showLoading()
     } else {
       chartInstance.hideLoading()
+    }
+  }
+)
+
+// 监听当前索引变化
+watch(
+  () => currentIndex.value,
+  (newIndex) => {
+    const chartInstance = getChartInstance()
+    if (chartInstance && Array.isArray(mergedOptions.value)) {
+      chartInstance.setOption(mergedOptions.value[newIndex] as any, true)
     }
   }
 )

@@ -6,11 +6,17 @@
 
 ### Props
 
-| 参数名  | 说明                                     | 类型    | 默认值 |
-| ------- | ---------------------------------------- | ------- | ------ |
-| presets | 预设样式，可选值：'barChart'、'pieChart' | String  | ''     |
-| options | 图表配置项，会与预设样式合并             | Object  | {}     |
-| loading | 是否显示加载状态                         | Boolean | false  |
+| 参数名  | 说明                                     | 类型               | 默认值 |
+| ------- | ---------------------------------------- | ------------------ | ------ |
+| presets | 预设样式，可选值：'barChart'、'pieChart' | String             | ''     |
+| options | 图表配置项，会与预设样式合并             | Object \| Object[] | {}     |
+| loading | 是否显示加载状态                         | Boolean            | false  |
+
+### Slots
+
+| 名称   | 说明                                     | 插槽 Props                                                                                                         |
+| ------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| action | 图表操作区域，通常用于切换不同的图表配置 | list: number[]（可用索引列表）<br>current-index: number（当前索引）<br>toggle: (index: number) => void（切换函数） |
 
 ## 示例
 
@@ -23,86 +29,74 @@
 import { ref } from 'vue'
 
 // 定义7天和14天的数据
-const sevenDaysData = {
-  title: {
-    text: 'Daily Active Users'
-  },
-  xAxis: {
-    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  },
-  series: [
-    {
-      type: "bar",
-      name: '用户数',
-      data: [5, 20, 36, 10, 10, 20, 30]
-    }
-  ]
-}
-
-const fourteenDaysData = {
-  title: {
-    text: 'Daily Active Users'
-  },
-  xAxis: {
-    data: [
-      'Week 1',
-      'Week 1',
-      'Week 1',
-      'Week 1',
-      'Week 1',
-      'Week 1',
-      'Week 1',
-      'Week 2',
-      'Week 2',
-      'Week 2',
-      'Week 2',
-      'Week 2',
-      'Week 2',
-      'Week 2'
+const chartData = ref([
+  {
+    title: {
+      text: 'Daily Active Users (7 Days)'
+    },
+    xAxis: {
+      data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    },
+    series: [
+      {
+        type: 'bar',
+        name: '用户数',
+        data: [5, 20, 36, 10, 10, 20, 30]
+      }
     ]
   },
-  series: [
-    {
-      type: "bar",
-      name: '用户数',
-      data: [5, 20, 36, 10, 10, 20, 30, 15, 25, 40, 20, 15, 25, 35]
-    }
-  ]
-}
-
-// 当前选中的时间范围
-const selectedRange = ref('7days')
-
-// 当前图表数据
-const chartData = ref(sevenDaysData)
-
-// 切换时间范围
-const switchRange = (range) => {
-  selectedRange.value = range
-  chartData.value = range === '7days' ? sevenDaysData : fourteenDaysData
-}
+  {
+    title: {
+      text: 'Daily Active Users (14 Days)'
+    },
+    xAxis: {
+      data: [
+        'Week 1',
+        'Week 1',
+        'Week 1',
+        'Week 1',
+        'Week 1',
+        'Week 1',
+        'Week 1',
+        'Week 2',
+        'Week 2',
+        'Week 2',
+        'Week 2',
+        'Week 2',
+        'Week 2',
+        'Week 2'
+      ]
+    },
+    series: [
+      {
+        type: 'bar',
+        name: '用户数',
+        data: [5, 20, 36, 10, 10, 20, 30, 15, 25, 40, 20, 15, 25, 35]
+      }
+    ]
+  }
+])
 </script>
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
-    <div class="chart-header">
-      <div class="chart-tabs">
-        <button
-          class="tab-button"
-          :class="{ active: selectedRange === '7days' }"
-          @click="switchRange('7days')"
-        >
-          Past 7 Days
-        </button>
-        <button
-          class="tab-button"
-          :class="{ active: selectedRange === '14days' }"
-          @click="switchRange('14days')"
-        >
-          Past 14 Days
-        </button>
-      </div>
-    </div>
-    <vx-chart ref="chartRef" presets="barChart" :options="chartData"></vx-chart>
+    <vx-chart ref="chartRef" presets="barChart" :options="chartData">
+      <template #action="{ list, 'current-index': currentIndex, toggle }">
+        <div class="d-flex rounded-pill bg-grey-lighten-4 pa-1 mt-4 mr-4">
+          <button
+            v-for="(_, idx) in list"
+            :key="idx"
+            class="text-body-2 rounded-pill px-3 py-1 text-no-wrap border-0"
+            :class="
+              currentIndex === idx ? 'bg-primary text-white' : 'bg-transparent text-medium-emphasis'
+            "
+            style="cursor: pointer; transition: all 0.3s;"
+            @click="toggle(idx)"
+          >
+            {{ idx === 0 ? 'Past 7 Days' : 'Past 14 Days' }}
+          </button>
+        </div>
+      </template>
+    </vx-chart>
   </div>
 </template>
 
@@ -111,35 +105,6 @@ const switchRange = (range) => {
   width: 100%;
   height: 400px;
   position: relative;
-}
-
-.chart-header {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 10;
-}
-
-.chart-tabs {
-  display: flex;
-  background-color: #f5f5f5;
-  border-radius: 20px;
-  padding: 2px;
-}
-
-.tab-button {
-  border: none;
-  background: transparent;
-  padding: 6px 12px;
-  border-radius: 16px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s;
-}
-
-.tab-button.active {
-  background-color: #1976d2;
-  color: white;
 }
 </style>
 ```
@@ -251,6 +216,113 @@ const pieChartData = ref({
 .chart-container {
   width: 100%;
   height: 400px;
+}
+</style>
+```
+
+:::
+
+### 多图表切换示例
+
+使用 `options` 数组和 `action` 插槽可以实现多图表切换功能：
+
+:::demo
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+
+// 定义多个图表配置
+const multiChartData = ref([
+  {
+    title: {
+      text: '销售额'
+    },
+    xAxis: {
+      data: ['1月', '2月', '3月', '4月', '5月', '6月']
+    },
+    series: [
+      {
+        type: 'bar',
+        name: '销售额',
+        data: [120, 200, 150, 80, 70, 110]
+      }
+    ]
+  },
+  {
+    title: {
+      text: '利润'
+    },
+    xAxis: {
+      data: ['1月', '2月', '3月', '4月', '5月', '6月']
+    },
+    series: [
+      {
+        type: 'line',
+        name: '利润',
+        data: [20, 40, 35, 15, 10, 25],
+        smooth: true,
+        itemStyle: {
+          color: '#4CAF50'
+        },
+        lineStyle: {
+          width: 3,
+          color: '#4CAF50'
+        }
+      }
+    ]
+  },
+  {
+    title: {
+      text: '用户数'
+    },
+    xAxis: {
+      data: ['1月', '2月', '3月', '4月', '5月', '6月']
+    },
+    series: [
+      {
+        type: 'bar',
+        name: '用户数',
+        data: [500, 800, 1200, 1500, 1800, 2200],
+        itemStyle: {
+          color: '#FF9800'
+        }
+      }
+    ]
+  }
+])
+
+// 标签文本
+const tabLabels = ['销售额', '利润', '用户数']
+</script>
+<template>
+  <div class="chart-container border border-gray-500 rounded-lg">
+    <vx-chart presets="barChart" :options="multiChartData">
+      <template #action="{ list, 'current-index': currentIndex, toggle }">
+        <div class="d-flex rounded-pill bg-grey-lighten-4 pa-1 mt-4 mr-4">
+          <button
+            v-for="idx in list"
+            :key="idx"
+            class="text-body-2 rounded-pill px-3 py-1 text-no-wrap border-0"
+            :class="
+              currentIndex === idx ? 'bg-primary text-white' : 'bg-transparent text-medium-emphasis'
+            "
+            style="cursor: pointer; transition: all 0.3s;"
+            @click="toggle(idx)"
+          >
+            {{ tabLabels[idx] }}
+          </button>
+        </div>
+      </template>
+    </vx-chart>
+  </div>
+</template>
+
+<style scoped>
+.chart-container {
+  width: 100%;
+  height: 400px;
+  position: relative;
 }
 </style>
 ```
