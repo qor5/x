@@ -32,6 +32,7 @@ const sevenDaysData = {
   },
   series: [
     {
+      type: "bar",
       name: '用户数',
       data: [5, 20, 36, 10, 10, 20, 30]
     }
@@ -62,6 +63,7 @@ const fourteenDaysData = {
   },
   series: [
     {
+      type: "bar",
       name: '用户数',
       data: [5, 20, 36, 10, 10, 20, 30, 15, 25, 40, 20, 15, 25, 35]
     }
@@ -81,7 +83,7 @@ const switchRange = (range) => {
 }
 </script>
 <template>
-  <div class="chart-container vx-border vx-border-gray-500 vx-rounded-lg vx-mb-5">
+  <div class="chart-container border border-gray-500 rounded-lg">
     <div class="chart-header">
       <div class="chart-tabs">
         <button
@@ -195,7 +197,7 @@ const customBarChartData = ref({
 })
 </script>
 <template>
-  <div class="chart-container vx-border vx-border-gray-500 vx-rounded-lg vx-mb-5">
+  <div class="chart-container border border-gray-500 rounded-lg">
     <vx-chart ref="customBarChartRef" presets="barChart" :options="customBarChartData"></vx-chart>
   </div>
 </template>
@@ -240,7 +242,7 @@ const pieChartData = ref({
 })
 </script>
 <template>
-  <div class="chart-container vx-border vx-border-gray-500 vx-rounded-lg vx-mb-5">
+  <div class="chart-container border border-gray-500 rounded-lg">
     <vx-chart ref="pieChartRef" presets="pieChart" :options="pieChartData"></vx-chart>
   </div>
 </template>
