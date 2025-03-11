@@ -10,19 +10,19 @@ import (
 
 type (
 	VXChartOptionTitle struct {
-		Text string `json:"text"`
+		Text string `json:"text,omitempty"`
 	}
 	VXChartOptionXAxis struct {
-		Data []string `json:"data"`
+		Data []string `json:"data,omitempty"`
 	}
 	VXChartOptionSeries struct {
-		Name string        `json:"name"`
-		Data []interface{} `json:"data"`
+		Name string        `json:"name,omitempty"`
+		Data []interface{} `json:"data,omitempty"`
 	}
 	VXChartOption struct {
-		Title  VXChartOptionTitle  `json:"title,omitempty"`
-		XAxis  VXChartOptionXAxis  `json:"xAxis,omitempty"`
-		Series VXChartOptionSeries `json:"series,omitempty"`
+		Title  *VXChartOptionTitle    `json:"title,omitempty"`
+		XAxis  *VXChartOptionXAxis    `json:"xAxis,omitempty"`
+		Series *[]VXChartOptionSeries `json:"series,omitempty"`
 	}
 )
 
