@@ -362,6 +362,8 @@ const handleResize = () => {
 // 组件挂载后初始化图表
 onMounted(async () => {
   await initChart()
+  // fix: sometimes the chart is not displayed correctly
+  handleResize()
 
   window.addEventListener('resize', handleResize)
 })
