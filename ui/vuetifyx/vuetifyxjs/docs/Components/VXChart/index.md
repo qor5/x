@@ -14,9 +14,9 @@
 
 ### Slots
 
-| 名称   | 说明                                     | 插槽 Props                                                                                                         |
-| ------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| action | 图表操作区域，通常用于切换不同的图表配置 | list: number[]（可用索引列表）<br>current-index: number（当前索引）<br>toggle: (index: number) => void（切换函数） |
+| 名称   | 说明                                     | 插槽 Props                                                                                                        |
+| ------ | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| action | 图表操作区域，通常用于切换不同的图表配置 | list: number[]（可用索引列表）<br>currentIndex: number（当前索引）<br>toggle: (index: number) => void（切换函数） |
 
 ## 示例
 
@@ -80,7 +80,7 @@ const chartData = ref([
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
     <vx-chart ref="chartRef" presets="barChart" :options="chartData">
-      <template #action="{ list, 'current-index': currentIndex, toggle }">
+      <template #action="{ list, currentIndex, toggle }">
         <div class="d-flex rounded-pill bg-grey-lighten-4 pa-1 mt-4 mr-4">
           <button
             v-for="(_, idx) in list"
@@ -298,7 +298,7 @@ const tabLabels = ['销售额', '利润', '用户数']
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
     <vx-chart presets="barChart" :options="multiChartData">
-      <template #action="{ list, 'current-index': currentIndex, toggle }">
+      <template #action="{ list, currentIndex, toggle }">
         <div class="d-flex rounded-pill bg-grey-lighten-4 pa-1 mt-4 mr-4">
           <button
             v-for="idx in list"
