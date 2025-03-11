@@ -18,9 +18,108 @@
 | ------ | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | action | 图表操作区域，通常用于切换不同的图表配置 | list: number[]（可用索引列表）<br>currentIndex: number（当前索引）<br>toggle: (index: number) => void（切换函数） |
 
-## 示例
+## 预设类型
+
+VXChart 组件提供了两种预设类型，可以通过 `presets` 属性指定：
+
+- `barChart`：柱状图预设，适用于展示分类数据的数量对比
+- `pieChart`：饼图预设，适用于展示占比数据
+
+## 基础示例
 
 ### 柱状图示例
+
+使用 `barChart` 预设可以快速创建美观的柱状图：
+
+:::demo
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const barChartData = ref({
+  title: {
+    text: '年龄分布'
+  },
+  xAxis: {
+    data: ['0-18', '18-25', '25-65', '65+']
+  },
+  series: [
+    {
+      name: '人数',
+      data: [100, 300, 500, 200]
+    }
+  ]
+})
+</script>
+<template>
+  <div class="chart-container border border-gray-500 rounded-lg">
+    <vx-chart presets="barChart" :options="barChartData"></vx-chart>
+  </div>
+</template>
+
+<style scoped>
+.chart-container {
+  width: 100%;
+  height: 400px;
+}
+</style>
+```
+
+:::
+
+### 饼图示例
+
+使用 `pieChart` 预设可以快速创建美观的饼图：
+
+:::demo
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const pieChartData = ref({
+  title: {
+    text: '性别比例'
+  },
+  series: [
+    {
+      name: '性别分布',
+      data: [
+        {
+          value: 10,
+          name: '男性 10%'
+        },
+        {
+          value: 90,
+          name: '女性 90%'
+        }
+      ]
+    }
+  ]
+})
+</script>
+<template>
+  <div class="chart-container border border-gray-500 rounded-lg">
+    <vx-chart presets="pieChart" :options="pieChartData"></vx-chart>
+  </div>
+</template>
+
+<style scoped>
+.chart-container {
+  width: 100%;
+  height: 400px;
+}
+</style>
+```
+
+:::
+
+## 功能扩展
+
+### 多图表切换
+
+使用 `options` 数组和 `action` 插槽可以实现多图表切换功能：
 
 :::demo
 
@@ -79,7 +178,7 @@ const chartData = ref([
 </script>
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart ref="chartRef" presets="barChart" :options="chartData">
+    <vx-chart presets="barChart" :options="chartData">
       <template #action="{ list, currentIndex, toggle }">
         <div class="d-flex rounded-pill bg-grey-lighten-4 pa-1 mt-4 mr-4">
           <button
@@ -115,21 +214,6 @@ const chartData = ref([
 
 可以通过配置选项来控制图表元素的显示或隐藏：
 
-```vue
-<vx-chart
-  presets="barChart"
-  :options="{
-    // 隐藏y轴标签
-    yAxis: {
-      axisLabel: { show: false },
-      // 隐藏横向虚线
-      splitLine: { show: false }
-    }
-    // 其他配置...
-  }"
-></vx-chart>
-```
-
 :::demo
 
 ```vue
@@ -138,7 +222,7 @@ import { ref } from 'vue'
 
 const customBarChartData = ref({
   title: {
-    text: 'Age'
+    text: '年龄分布'
   },
   xAxis: {
     data: ['0-18', '18-25', '25-65', '65+']
@@ -163,7 +247,7 @@ const customBarChartData = ref({
 </script>
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart ref="customBarChartRef" presets="barChart" :options="customBarChartData"></vx-chart>
+    <vx-chart presets="barChart" :options="customBarChartData"></vx-chart>
   </div>
 </template>
 
@@ -171,158 +255,6 @@ const customBarChartData = ref({
 .chart-container {
   width: 100%;
   height: 400px;
-}
-</style>
-```
-
-:::
-
-### 饼图示例
-
-:::demo
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue'
-
-const pieChartData = ref({
-  title: {
-    text: 'Gender'
-  },
-  series: [
-    {
-      name: '年龄分布',
-      data: [
-        {
-          value: 10,
-          name: 'Male 10%'
-        },
-        {
-          value: 90,
-          name: 'Female 90%'
-        }
-      ]
-    }
-  ]
-})
-</script>
-<template>
-  <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart ref="pieChartRef" presets="pieChart" :options="pieChartData"></vx-chart>
-  </div>
-</template>
-
-<style scoped>
-.chart-container {
-  width: 100%;
-  height: 400px;
-}
-</style>
-```
-
-:::
-
-### 多图表切换示例
-
-使用 `options` 数组和 `action` 插槽可以实现多图表切换功能：
-
-:::demo
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue'
-
-// 定义多个图表配置
-const multiChartData = ref([
-  {
-    title: {
-      text: '销售额'
-    },
-    xAxis: {
-      data: ['1月', '2月', '3月', '4月', '5月', '6月']
-    },
-    series: [
-      {
-        type: 'bar',
-        name: '销售额',
-        data: [120, 200, 150, 80, 70, 110]
-      }
-    ]
-  },
-  {
-    title: {
-      text: '利润'
-    },
-    xAxis: {
-      data: ['1月', '2月', '3月', '4月', '5月', '6月']
-    },
-    series: [
-      {
-        type: 'line',
-        name: '利润',
-        data: [20, 40, 35, 15, 10, 25],
-        smooth: true,
-        itemStyle: {
-          color: '#4CAF50'
-        },
-        lineStyle: {
-          width: 3,
-          color: '#4CAF50'
-        }
-      }
-    ]
-  },
-  {
-    title: {
-      text: '用户数'
-    },
-    xAxis: {
-      data: ['1月', '2月', '3月', '4月', '5月', '6月']
-    },
-    series: [
-      {
-        type: 'bar',
-        name: '用户数',
-        data: [500, 800, 1200, 1500, 1800, 2200],
-        itemStyle: {
-          color: '#FF9800'
-        }
-      }
-    ]
-  }
-])
-
-// 标签文本
-const tabLabels = ['销售额', '利润', '用户数']
-</script>
-<template>
-  <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart presets="barChart" :options="multiChartData">
-      <template #action="{ list, currentIndex, toggle }">
-        <div class="d-flex rounded-pill bg-grey-lighten-4 pa-1 mt-4 mr-4">
-          <button
-            v-for="idx in list"
-            :key="idx"
-            class="text-body-2 rounded-pill px-3 py-1 text-no-wrap border-0"
-            :class="
-              currentIndex === idx ? 'bg-primary text-white' : 'bg-transparent text-medium-emphasis'
-            "
-            style="cursor: pointer; transition: all 0.3s;"
-            @click="toggle(idx)"
-          >
-            {{ tabLabels[idx] }}
-          </button>
-        </div>
-      </template>
-    </vx-chart>
-  </div>
-</template>
-
-<style scoped>
-.chart-container {
-  width: 100%;
-  height: 400px;
-  position: relative;
 }
 </style>
 ```
