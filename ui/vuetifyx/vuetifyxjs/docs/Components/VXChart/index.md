@@ -180,15 +180,20 @@ const chartData = ref([
   <div class="chart-container border border-gray-500 rounded-lg">
     <vx-chart presets="barChart" :options="chartData">
       <template #action="{ list, currentIndex, toggle }">
-        <div class="d-flex rounded-pill bg-grey-lighten-4 pa-1 mt-4 mr-4">
+        <div
+          class="d-flex align-center bg-grey-lighten-3 rounded pa-1 mr-4 mt-4"
+          style="height: 32px;"
+        >
           <button
             v-for="(_, idx) in list"
             :key="idx"
-            class="text-body-2 rounded-pill px-3 py-1 text-no-wrap border-0"
-            :class="
-              currentIndex === idx ? 'bg-primary text-white' : 'bg-transparent text-medium-emphasis'
+            class="text-body-2 rounded text-no-wrap border-0 flex-grow-1 d-flex align-center justify-center rounded px-2"
+            style="height: 24px; cursor: pointer; transition: all 0.3s;"
+            :style="
+              currentIndex === idx
+                ? 'background-color: #fff; color: #4a4a4a;'
+                : 'background-color: transparent; color: rgb(117, 117, 117);'
             "
-            style="cursor: pointer; transition: all 0.3s;"
             @click="toggle(idx)"
           >
             {{ idx === 0 ? 'Past 7 Days' : 'Past 14 Days' }}
@@ -204,57 +209,6 @@ const chartData = ref([
   width: 100%;
   height: 400px;
   position: relative;
-}
-</style>
-```
-
-:::
-
-### 自定义显示/隐藏元素
-
-可以通过配置选项来控制图表元素的显示或隐藏：
-
-:::demo
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue'
-
-const customBarChartData = ref({
-  title: {
-    text: '年龄分布'
-  },
-  xAxis: {
-    data: ['0-18', '18-25', '25-65', '65+']
-  },
-  yAxis: {
-    // 隐藏y轴标签
-    axisLabel: {
-      show: false
-    },
-    // 隐藏横向虚线
-    splitLine: {
-      show: false
-    }
-  },
-  series: [
-    {
-      name: '数据',
-      data: [100, 300, 500, 200]
-    }
-  ]
-})
-</script>
-<template>
-  <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart presets="barChart" :options="customBarChartData"></vx-chart>
-  </div>
-</template>
-
-<style scoped>
-.chart-container {
-  width: 100%;
-  height: 400px;
 }
 </style>
 ```
