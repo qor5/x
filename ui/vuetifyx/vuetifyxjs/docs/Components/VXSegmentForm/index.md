@@ -7,7 +7,7 @@
 ```vue
 <script setup lang="ts"></script>
 <template>
-  <vx-segment-form> </vx-segment-form>
+  <vx-segment-form></vx-segment-form>
 </template>
 ```
 

@@ -37,7 +37,7 @@ import VXAvatar from '@/lib/VXAvatar.vue'
 import VXTabs from '@/lib/Tabs/VXTabs.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 import LinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
-
+import VXSegmentForm from '@/lib/Form/VXSegmentForm/index.vue'
 declare const window: any
 
 const vuetifyx = {
@@ -72,6 +72,7 @@ const vuetifyx = {
     app.component('vx-scroll-iframe', ScrollIframe)
     app.component('vx-send-variables', SendVariables)
     app.component('vx-messagelistener', MessageListener)
+    app.component('vx-segment-form', VXSegmentForm)
   }
 }
 
