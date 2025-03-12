@@ -251,10 +251,64 @@ export const pieChartPreset: ChartOptions = {
   ]
 }
 
+// 漏斗图预设配置
+export const funnelChartPreset: ChartOptions = {
+  // 默认使用动画配置
+  ...lightAnimationConfig,
+  tooltip: {
+    trigger: 'item',
+    formatter: '{a} <br/>{b} : {c}',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderColor: '#eee',
+    borderWidth: 1,
+    textStyle: {
+      color: '#333'
+    },
+    shadowBlur: 5,
+    shadowColor: 'rgba(0, 0, 0, 0.1)'
+  },
+  legend: {
+    orient: 'vertical',
+    left: 'left',
+    align: 'left',
+    textAlign: 'left',
+    padding: [10, 0, 0, 10],
+  },
+  title: {
+    left: 'left',
+    textAlign: 'left',
+    padding: [10, 0, 0, 10]
+  },
+  color: ['#8DA0FB', '#405DE6', '#23398A', '#7DA1FA', '#6B96F9', '#5A8BF8', '#477FD6'], // 增加更多颜色备用
+  series: [
+    {
+      name: 'Funnel',
+      type: 'funnel',
+      orient: 'horizontal',
+      funnelAlign: 'bottom',
+      left: '10%',
+      top: 60,
+      bottom: 60,
+      width: '80%',
+      min: 0,
+      max: 2000000,
+      minSize: '0%',
+      maxSize: '100%',
+      sort: 'descending',
+      emphasis: {
+        label: {
+          fontSize: 20
+        }
+      }
+    }
+  ]
+}
+
 // 导出所有预设
 export const chartPresets = {
   barChart: barChartPreset,
-  pieChart: pieChartPreset
+  pieChart: pieChartPreset,
+  funnelChart: funnelChartPreset
 }
 
 // 导出所有动画预设

@@ -38,7 +38,7 @@ import {
 } from './presets.config'
 
 // 定义预设类型
-type PresetType = 'barChart' | 'pieChart' | ''
+type PresetType = 'barChart' | 'pieChart' | 'funnelChart' | ''
 
 // 定义动画类型
 type AnimationType =
@@ -71,7 +71,7 @@ const toggle = (index: number) => {
 const props = defineProps({
   presets: {
     type: String as () => PresetType,
-    validator: (value: string) => ['barChart', 'pieChart', ''].includes(value),
+    validator: (value: string) => ['barChart', 'pieChart', 'funnelChart', ''].includes(value),
     default: ''
   },
   options: {
@@ -214,6 +214,13 @@ const mergedOptions = computed(() => {
       // 确保 series 被正确设置
       itemResult.series = itemMergedSeries
 
+      // 为漏斗图类型自动设置 legend.data
+      if (props.presets === 'funnelChart' && itemMergedSeries.length > 0 && itemMergedSeries[0].data) {
+        // 从 series 数据中提取 legend 数据
+        if (!itemResult.legend) itemResult.legend = {}
+        itemResult.legend.data = itemMergedSeries[0].data.map((item: any) => item.name)
+      }
+
       // 从 ECharts 配置中移除标题
       if (itemResult.title) {
         delete itemResult.title
@@ -260,6 +267,13 @@ const mergedOptions = computed(() => {
   // 确保 series 被正确设置
   result.series = mergedSeries
 
+  // 为漏斗图类型自动设置 legend.data
+  if (props.presets === 'funnelChart' && mergedSeries.length > 0 && mergedSeries[0].data) {
+    // 从 series 数据中提取 legend 数据
+    if (!result.legend) result.legend = {}
+    result.legend.data = mergedSeries[0].data.map((item: any) => item.name)
+  }
+
   // 从 ECharts 配置中移除标题
   if (result.title) {
     delete result.title
@@ -294,6 +308,9 @@ const initChart = async () => {
   // 判断 mergedOptions 是否为数组
   if (Array.isArray(mergedOptions.value)) {
     // 如果是数组，使用当前索引的配置项初始化图表
+    console.log("--------------------")
+    console.log(mergedOptions.value[currentIndex.value])
+    console.log("--------------------")
     chartInstance.setOption(mergedOptions.value[currentIndex.value] as any, true)
   } else {
     chartInstance.setOption(mergedOptions.value as any, true)
