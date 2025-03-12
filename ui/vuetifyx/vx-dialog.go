@@ -11,8 +11,10 @@ type VXDialogBuilder struct {
 	tag *h.HTMLTagBuilder
 }
 
-type VXDialogType string
-type VXDialogSize string
+type (
+	VXDialogType string
+	VXDialogSize string
+)
 
 const (
 	DialogDefault VXDialogType = "default"
@@ -75,6 +77,11 @@ func (b *VXDialogBuilder) DisableOk(v bool) (r *VXDialogBuilder) {
 	return b
 }
 
+func (b *VXDialogBuilder) LoadingOk(v bool) (r *VXDialogBuilder) {
+	b.tag.Attr(":disable-ok", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXDialogBuilder) HideOk(v bool) (r *VXDialogBuilder) {
 	b.tag.Attr(":hide-ok", fmt.Sprint(v))
 	return b
@@ -119,6 +126,7 @@ func (b *VXDialogBuilder) Width(v int) (r *VXDialogBuilder) {
 	b.tag.Attr(":width", h.JSONString(v))
 	return b
 }
+
 func (b *VXDialogBuilder) Height(v int) (r *VXDialogBuilder) {
 	b.tag.Attr(":height", h.JSONString(v))
 	return b
@@ -133,9 +141,11 @@ func (b *VXDialogBuilder) Attr(vs ...interface{}) (r *VXDialogBuilder) {
 	b.tag.Attr(vs...)
 	return b
 }
+
 func (b *VXDialogBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
 }
+
 func (b *VXDialogBuilder) Children(children ...h.HTMLComponent) (r *VXDialogBuilder) {
 	b.tag.Children(children...)
 	return b
