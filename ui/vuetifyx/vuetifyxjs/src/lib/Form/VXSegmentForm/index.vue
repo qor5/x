@@ -5,11 +5,11 @@
       <div v-if="editorModelList.length > 0" class="content">
         <VXSegmentItemGroup
           v-for="(item, idx) in editorModelList"
-          :key="idx"
-          :item="item"
+          :key="getItemKey(item, idx)"
+          :modelValue="item"
           :index="idx"
-          :options="options"
           @on-remove="handleRemoveGroup"
+          @update:modelValue="handleUpdateModelValue"
         />
       </div>
     </div>
@@ -18,11 +18,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, computed, watch, PropType } from 'vue'
+import { ref, defineProps, PropType, provide, computed } from 'vue'
 import VXConditionSwitch from './ConditionSwitch.vue'
 import VXSegmentItemGroup from './SegmentItemGroup.vue'
 import type { ConditionItemType, OptionsType } from './type'
-import { useCondition } from './useUtils'
+import { useCondition, genRecordModel, useItemKeys } from './useUtils'
+
 const props = defineProps({
   modelValue: {
     type: Object as PropType<{ [key: string]: ConditionItemType[] }>,
@@ -34,23 +35,24 @@ const props = defineProps({
   }
 })
 
-const { condition, getConditionKey } = useCondition()
-const emit = defineEmits(['update:modelValue'])
-const editorModelList = ref<ConditionItemType[]>([])
+provide('segmentOptions', props.options)
 
-// 初始化
-if (Object.keys(props.modelValue).length > 0) {
-  const key = Object.keys(props.modelValue)[0]
-  condition.value = getConditionKey(key, 'internal')
-  editorModelList.value = props.modelValue[key] ?? []
-}
+const { condition, getConditionKey, editorModelList } = useCondition(props)
+const { getItemKey } = useItemKeys()
+const emit = defineEmits(['update:modelValue'])
 
 function handleConditionChange(condition: string) {
   // console.log(savedFormModel.value)
 }
 
 function handleAddRule() {
-  editorModelList.value.push({})
+  const newItem = {
+    union: [genRecordModel()]
+  }
+  // 为新项预先生成一个唯一键
+  getItemKey(newItem, editorModelList.value.length)
+  editorModelList.value.push(newItem)
+  handleUpdateModelValue()
 }
 
 function handleUpdateModelValue() {
@@ -61,6 +63,7 @@ function handleUpdateModelValue() {
 
 function handleRemoveGroup(idx: number) {
   editorModelList.value.splice(idx, 1)
+  handleUpdateModelValue()
 }
 </script>
 

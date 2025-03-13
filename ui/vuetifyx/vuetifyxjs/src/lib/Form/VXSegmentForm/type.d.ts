@@ -4,6 +4,7 @@ export type TagType = {
   tag: {
     builderID: string
     params: Record<string, any>
+    values: string[]
   }
 }
 

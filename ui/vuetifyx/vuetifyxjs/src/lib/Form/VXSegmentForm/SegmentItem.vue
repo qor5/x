@@ -2,46 +2,34 @@
   <div class="vx-segment-item-wrap">
     <div class="condition-group">
       <vx-select
-        style="min-width: 100px"
-        placeholder="Select"
+        v-model="selectedOption"
+        :items="optionsForSelect"
+        style="min-width: 150px"
+        item-title="name"
+        item-value="id"
+        placeholder="Select a type"
         hide-details
-        :items="['Number', 'String']"
-      ></vx-select>
+        @update:modelValue="handleSelectChange"
+      >
+        <template #item="{ props, item }">
+          <template v-if="item.raw.category">
+            <v-list-subheader class="text-primary font-weight-medium">{{
+              item.raw.category
+            }}</v-list-subheader>
+          </template>
+          <template v-else>
+            <v-list-item v-bind="props" class="pl-8">
+              <template #title>
+                <span>{{ item.raw.name }}</span>
+              </template>
+            </v-list-item>
+          </template>
+        </template>
+      </vx-select>
 
-      <span class="condition-text">of</span>
+      <!-- cascade select -->
 
-      <vx-select
-        style="min-width: 100px"
-        placeholder="Select"
-        :items="['View Products']"
-        hide-details
-      ></vx-select>
-
-      <span class="condition-text">from</span>
-
-      <vx-select
-        style="min-width: 100px"
-        placeholder="Select"
-        :items="['0']"
-        hide-details
-      ></vx-select>
-
-      <span class="condition-text">to</span>
-      <vx-select
-        style="min-width: 100px"
-        placeholder="Select"
-        :items="['20']"
-        hide-details
-      ></vx-select>
-
-      <span class="condition-text">in</span>
-
-      <vx-select
-        style="min-width: 100px"
-        placeholder="Select"
-        :items="['Last 7 Days']"
-        hide-details
-      ></vx-select>
+      <!-- <span class="condition-text">of</span> -->
     </div>
     <v-icon class="delete-icon" color="rgb(158, 158, 158)" size="24" @click="handleRemove"
       >mdi-minus-circle-outline</v-icon
@@ -50,9 +38,53 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits } from 'vue'
+import { defineEmits, inject, computed, ref, defineProps, PropType } from 'vue'
+import type { OptionsType } from './type'
 
-const emit = defineEmits(['on-remove'])
+const segmentNestedOptions = inject<OptionsType[]>('segmentOptions', [])
+const selectedOption = ref<OptionsType | null>(null)
+
+const props = defineProps({
+  modelValue: {
+    type: Object as PropType<Record<string, any>>,
+    default: () => ({})
+  }
+})
+
+const optionsForSelect = computed(() => {
+  return segmentNestedOptions.reduce<
+    Array<{
+      id: string
+      category?: string
+      name?: string
+      description?: string
+      categoryID?: string
+    }>
+  >((acc, item) => {
+    if ('builders' in item) {
+      acc.push({
+        id: item.id,
+        category: item.name,
+        description: item.description
+      })
+
+      acc.push(
+        ...item.builders.map((builder) => ({
+          id: builder.id,
+          name: builder.name,
+          categoryID: builder.categoryID
+        }))
+      )
+    }
+    return acc
+  }, [])
+})
+
+const emit = defineEmits(['on-remove', 'on-select'])
+
+function handleSelectChange(value: OptionsType) {
+  emit('on-select', value)
+}
 
 const handleRemove = () => {
   emit('on-remove')
