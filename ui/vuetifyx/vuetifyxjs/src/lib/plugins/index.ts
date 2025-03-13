@@ -44,8 +44,7 @@ declare const window: any
 
 const vuetifyx = {
   install: (app: App) => {
-    app.component('vx-chart', VXChart),
-    app.component('vx-date-picker', VXDatepicker)
+    app.component('vx-chart', VXChart), app.component('vx-date-picker', VXDatepicker)
     app.component('vx-range-picker', VXRangepicker)
     app.component('vx-datepicker', DatepickerOld)
     app.component('vx-datetimepicker', DatetimepickerOld)
