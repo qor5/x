@@ -13,7 +13,7 @@
           :modelValue="item"
           :index="idx"
           @on-remove="handleRemoveGroup"
-          @on-data-change="handleUpdateModelValue(idx, $event)"
+          @on-data-change="handleUpdateModelValue"
         />
       </div>
     </div>

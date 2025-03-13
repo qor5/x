@@ -40,7 +40,7 @@ import { useCondition, genRecordModel, useItemKeys } from './useUtils'
 
 const props = defineProps({
   modelValue: {
-    type: Object as PropType<ConditionItemType>,
+    type: Object as any,
     default: () => ({})
   },
   index: {
@@ -85,7 +85,7 @@ const handleDataChange = (value: any) => {
   emit('on-data-change', { idx: props.index, value: groupForm.value })
 }
 
-const handleSelectChange = (item, value: any) => {
+const handleSelectChange = (item: any, value: any) => {
   // emit('on-data-change', getFormData())
   item.tag.builderID = value
   emit('on-data-change', { idx: props.index, value: groupForm.value })
@@ -94,6 +94,7 @@ const handleSelectChange = (item, value: any) => {
 function handleAddItem() {
   const newItem = genRecordModel()
   getItemKey(newItem, groupForm.value.list.length)
+  // @ts-ignore :TODO: fix this
   groupForm.value.list.push(newItem)
   emit('on-data-change', { idx: props.index, value: groupForm.value })
 }

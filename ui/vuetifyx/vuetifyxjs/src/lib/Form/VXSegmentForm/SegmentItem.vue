@@ -95,7 +95,7 @@ watch(
 const compMap = ref<Record<string, any>>({})
 
 const currentBuilder = computed(() => {
-  const key = selectedOption.value || ''
+  const key = selectedOption.value?.id || ''
   return (compMap.value as Record<string, any>)[key] || []
 })
 
