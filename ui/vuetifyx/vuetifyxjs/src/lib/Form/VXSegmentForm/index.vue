@@ -1,15 +1,19 @@
 <template>
   <div class="vx-segment-form">
-    <VXConditionSwitch v-if="editorModelList.length > 0" v-model="condition" />
+    <VXConditionSwitch
+      v-if="form.list.length > 0"
+      v-model="form.condition"
+      @change="handleConditionChange"
+    />
     <div class="vx-segment-form-block">
-      <div v-if="editorModelList.length > 0" class="content">
+      <div v-if="form.list.length > 0" class="content">
         <VXSegmentItemGroup
-          v-for="(item, idx) in editorModelList"
+          v-for="(item, idx) in form.list"
           :key="getItemKey(item, idx)"
           :modelValue="item"
           :index="idx"
           @on-remove="handleRemoveGroup"
-          @update:modelValue="handleUpdateModelValue"
+          @on-data-change="handleUpdateModelValue(idx, $event)"
         />
       </div>
     </div>
@@ -18,11 +22,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, PropType, provide, computed } from 'vue'
+import { ref, defineProps, PropType, provide, watch } from 'vue'
 import VXConditionSwitch from './ConditionSwitch.vue'
 import VXSegmentItemGroup from './SegmentItemGroup.vue'
 import type { ConditionItemType, OptionsType } from './type'
-import { useCondition, genRecordModel, useItemKeys } from './useUtils'
+import { useCondition, genRecordModel, useItemKeys, convertModel } from './useUtils'
 
 const props = defineProps({
   modelValue: {
@@ -37,33 +41,50 @@ const props = defineProps({
 
 provide('segmentOptions', props.options)
 
-const { condition, getConditionKey, editorModelList } = useCondition(props)
 const { getItemKey } = useItemKeys()
 const emit = defineEmits(['update:modelValue'])
+const form = ref<any>({
+  condition: 'And',
+  list: []
+})
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (newVal) {
+      form.value = convertModel(newVal)
+    }
+  },
+  { immediate: true }
+)
 
 function handleConditionChange(condition: string) {
-  // console.log(savedFormModel.value)
+  emitDataChange()
 }
 
 function handleAddRule() {
   const newItem = {
-    union: [genRecordModel()]
+    condition: 'Or',
+    list: [genRecordModel()]
   }
-  // 为新项预先生成一个唯一键
-  getItemKey(newItem, editorModelList.value.length)
-  editorModelList.value.push(newItem)
-  handleUpdateModelValue()
+  getItemKey(newItem, form.value.list.length)
+  form.value.list.push(newItem)
+  emitDataChange()
 }
 
-function handleUpdateModelValue() {
-  emit('update:modelValue', {
-    [getConditionKey(condition.value, 'external')]: editorModelList.value
-  })
+function handleUpdateModelValue({ idx, value }: { idx: number; value: any }) {
+  form.value.list[idx] = value
+  emitDataChange()
 }
 
 function handleRemoveGroup(idx: number) {
-  editorModelList.value.splice(idx, 1)
-  handleUpdateModelValue()
+  form.value.list.splice(idx, 1)
+  emitDataChange()
+}
+
+function emitDataChange() {
+  // emit('update:modelValue', form.value)
+  console.log(JSON.stringify(form.value, null, 2))
 }
 </script>
 

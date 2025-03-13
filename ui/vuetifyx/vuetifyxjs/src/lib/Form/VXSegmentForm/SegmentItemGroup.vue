@@ -2,15 +2,20 @@
   <div class="vx-segment-item-wrap">
     <div class="condition-left">
       <div class="connect-decoration" />
-      <VXConditionSwitch class="vx-switcher" v-model="condition" type="dropdown" />
+      <VXConditionSwitch
+        class="vx-switcher"
+        v-model="groupForm.condition"
+        type="dropdown"
+        @change="handleDataChange"
+      />
     </div>
     <div class="content-right">
       <VXSegmentItem
         class="segment-item-record"
-        v-for="(item, idx) in editorModelList"
+        v-for="(item, idx) in groupForm.list"
         :key="getItemKey(item, idx)"
         :modelValue="item"
-        @on-select="handleSelectChange(idx, $event)"
+        @on-select="handleSelectChange(item, $event)"
         @on-remove="handleRemoveItem(idx)"
       />
       <div class="add-btn">
@@ -27,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, PropType, watch } from 'vue'
+import { ref, defineEmits, PropType, watch, computed } from 'vue'
 import VXConditionSwitch from './ConditionSwitch.vue'
 import VXSegmentItem from './SegmentItem.vue'
 import type { ConditionItemType } from './type'
@@ -44,44 +49,53 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['on-remove', 'update:modelValue'])
+const groupForm = ref({
+  condition: 'And',
+  list: []
+})
 
-// 创建一个包装对象来适配 useCondition 函数
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    groupForm.value = newVal
+  },
+  { deep: true, immediate: true }
+)
+
+const emit = defineEmits(['on-remove', 'on-data-change'])
+
 const wrappedProps = {
   modelValue: {
     union: 'union' in props.modelValue ? (props.modelValue as any).union : [props.modelValue]
   }
 }
-const { condition, editorModelList } = useCondition(wrappedProps as any)
+
 const { getItemKey } = useItemKeys()
 
 const handleRemoveItem = (idx: number) => {
-  console.log('尝试删除索引:', idx)
-  console.log('删除前的列表:', JSON.stringify(editorModelList.value))
-
-  if (editorModelList.value.length > 1) {
-    // 确保我们删除的是正确的索引
-    const itemToRemove = editorModelList.value[idx]
-    console.log('要删除的项目:', JSON.stringify(itemToRemove))
-
-    editorModelList.value = editorModelList.value.filter((_, index) => index !== idx)
-
-    console.log('删除后的列表:', JSON.stringify(editorModelList.value))
+  if (groupForm.value.list.length > 1) {
+    groupForm.value.list = groupForm.value.list.filter((_, index) => index !== idx)
   } else {
     emit('on-remove', props.index)
   }
+  emit('on-data-change', { idx: props.index, value: groupForm.value })
 }
 
-const handleSelectChange = (idx: number, value: any) => {
-  console.log(idx, value)
-  editorModelList.value[idx].tag.builderID = value
+const handleDataChange = (value: any) => {
+  emit('on-data-change', { idx: props.index, value: groupForm.value })
 }
 
-const handleAddItem = () => {
+const handleSelectChange = (item, value: any) => {
+  // emit('on-data-change', getFormData())
+  item.tag.builderID = value
+  emit('on-data-change', { idx: props.index, value: groupForm.value })
+}
+
+function handleAddItem() {
   const newItem = genRecordModel()
-  // 为新项预先生成一个唯一键
-  getItemKey(newItem, editorModelList.value.length)
-  editorModelList.value.push(newItem)
+  getItemKey(newItem, groupForm.value.list.length)
+  groupForm.value.list.push(newItem)
+  emit('on-data-change', { idx: props.index, value: groupForm.value })
 }
 </script>
 <style scoped lang="scss">

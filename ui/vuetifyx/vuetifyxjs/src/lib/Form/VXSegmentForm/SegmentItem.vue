@@ -28,8 +28,41 @@
       </vx-select>
 
       <!-- cascade select -->
+      <template v-for="item in currentBuilder" :key="item.key">
+        <span v-if="item.type === 'TEXT'" class="condition-text">{{ item.text }}</span>
+        <vx-select
+          v-else-if="item.type === 'SELECT'"
+          v-model="item.defaultValue"
+          item-title="label"
+          item-value="value"
+          style="min-width: 150px"
+          placeholder="Select a value"
+          :items="item.options"
+          :multiple="item.multiple"
+          hide-details
+        />
 
-      <!-- <span class="condition-text">of</span> -->
+        <vx-field
+          v-else-if="item.type === 'NUMBER_INPUT'"
+          type="number"
+          v-model="item.defaultValue"
+          item-title="label"
+          item-value="value"
+          style="min-width: 50px"
+          :items="item.options"
+          :multiple="item.multiple"
+          hide-details
+        />
+
+        <vx-date-picker
+          v-else-if="item.type === 'DATE_PICKER'"
+          :type="item.includeTime ? 'datetimepicker' : 'datepicker'"
+          v-model="item.defaultValue"
+          :style="item.includeTime ? 'min-width: 220px' : 'min-width:150px'"
+          placeholder="Select a date"
+          hide-details
+        />
+      </template>
     </div>
     <v-icon class="delete-icon" color="rgb(158, 158, 158)" size="24" @click="handleRemove"
       >mdi-minus-circle-outline</v-icon
@@ -38,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, inject, computed, ref, defineProps, PropType } from 'vue'
+import { defineEmits, inject, computed, ref, defineProps, PropType, watch } from 'vue'
 import type { OptionsType } from './type'
 
 const segmentNestedOptions = inject<OptionsType[]>('segmentOptions', [])
@@ -49,6 +82,21 @@ const props = defineProps({
     type: Object as PropType<Record<string, any>>,
     default: () => ({})
   }
+})
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    selectedOption.value = newVal.tag.builderID || null
+  },
+  { deep: true, immediate: true }
+)
+
+const compMap = ref<Record<string, any>>({})
+
+const currentBuilder = computed(() => {
+  const key = selectedOption.value || ''
+  return (compMap.value as Record<string, any>)[key] || []
 })
 
 const optionsForSelect = computed(() => {
@@ -69,21 +117,26 @@ const optionsForSelect = computed(() => {
       })
 
       acc.push(
-        ...item.builders.map((builder) => ({
-          id: builder.id,
-          name: builder.name,
-          categoryID: builder.categoryID
-        }))
+        ...item.builders.map((builder) => {
+          compMap.value[builder.id] = builder.view.fragments
+
+          return {
+            id: builder.id,
+            name: builder.name,
+            categoryID: builder.categoryID
+          }
+        })
       )
     }
     return acc
   }, [])
 })
 
-const emit = defineEmits(['on-remove', 'on-select'])
+const emit = defineEmits(['on-remove', 'on-select', 'update:modelValue'])
 
 function handleSelectChange(value: OptionsType) {
   emit('on-select', value)
+  console.log(currentBuilder.value)
 }
 
 const handleRemove = () => {

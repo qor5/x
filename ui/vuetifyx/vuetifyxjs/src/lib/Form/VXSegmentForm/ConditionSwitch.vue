@@ -49,10 +49,8 @@ const items = ['And', 'Or']
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
-// 创建本地状态来跟踪 modelValue
 const localModelValue = ref(props.modelValue)
 
-// 监听 props.modelValue 的变化，更新本地状态
 watch(
   () => props.modelValue,
   (newValue) => {
@@ -75,8 +73,9 @@ const activeBackgroundStyle = computed(() => {
 
 const handleChange = (event: Event) => {
   const value = (event.target as HTMLSelectElement).value
-  emit('change', value)
+
   emit('update:modelValue', value)
+  emit('change', value)
 }
 </script>
 
@@ -131,8 +130,8 @@ const handleChange = (event: Event) => {
       left: 0;
       width: 100%;
       height: 24px;
-      opacity: 0; // 使select不可见
-      z-index: 2; // 确保select在最上层可交互
+      opacity: 0;
+      z-index: 2;
       cursor: pointer;
     }
 
@@ -146,7 +145,7 @@ const handleChange = (event: Event) => {
       display: flex;
       align-items: center;
       justify-content: center;
-      pointer-events: none; // 防止干扰select的点击
+      pointer-events: none;
     }
 
     .select-value {
@@ -155,7 +154,7 @@ const handleChange = (event: Event) => {
     }
 
     .select-arrow {
-      margin-left: 4px; // 固定间隔4px
+      margin-left: 4px;
       display: flex;
       align-items: center;
       justify-content: center;

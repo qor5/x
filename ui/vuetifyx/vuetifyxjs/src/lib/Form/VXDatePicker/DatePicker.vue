@@ -1,8 +1,13 @@
 <template>
   <div class="vx-datepicker-wrap">
-    <vx-label class="mb-2" :tooltip="tips" :label-for="name" :required-symbol="required">{{
-      label
-    }}</vx-label>
+    <vx-label
+      v-if="label"
+      class="mb-2"
+      :tooltip="tips"
+      :label-for="name"
+      :required-symbol="required"
+      >{{ label }}</vx-label
+    >
     <vx-field
       v-model="inputValue"
       :placeholder="placeholder"
