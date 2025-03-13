@@ -40,7 +40,7 @@ import VXBreadcrumbs from '@/lib/Breadcrumbs/VXBreadcrumbs.vue'
 import VXTreeview from '@/lib/Treeview/VXTreeview.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 import LinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
-
+import VXSegmentForm from '@/lib/Form/VXSegmentForm/index.vue'
 declare const window: any
 
 const vuetifyx = {
@@ -78,6 +78,7 @@ const vuetifyx = {
     app.component('vx-treeview', VXTreeview)
     app.component('vx-messagelistener', MessageListener)
     app.component('vx-iframe-email-editor', VXIframeEmailEditor)
+    app.component('vx-segment-form', VXSegmentForm)
   }
 }
 

@@ -31,6 +31,10 @@ export default {
         {
           text: 'DatePicker 时间选择器',
           link: '/Components/VXDatePicker/'
+        },
+        {
+          text: 'SegmentForm 分段表单',
+          link: '/Components/VXSegmentForm/'
         }
       ]
     },

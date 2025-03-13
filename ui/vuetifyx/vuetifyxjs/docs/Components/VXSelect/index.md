@@ -207,13 +207,13 @@ item 的原始数据在 item.raw 里， 如果不希望 prepend 的区域i元素
         closable-chips
       >
         <template v-slot:prepend-inner="{ selectedItems }">
-          <v-icon :icon="selectedItems[0].icon" style="--v-medium-emphasis-opacity:1"/>
+          <v-icon :icon="selectedItems[0].icon" style="--v-medium-emphasis-opacity:1" />
         </template>
 
         <template v-slot:item="{ props, item }">
           <v-list-item v-bind="props" :title="item.title">
             <template v-slot:prepend>
-              <v-icon :icon="item.raw.icon" style="--v-medium-emphasis-opacity:1"/>
+              <v-icon :icon="item.raw.icon" style="--v-medium-emphasis-opacity:1" />
             </template>
           </v-list-item>
         </template> </vx-select
