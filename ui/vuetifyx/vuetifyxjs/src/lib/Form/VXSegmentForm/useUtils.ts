@@ -37,18 +37,18 @@ export const convertModel = (model: ConditionItemType) => {
   return {
     condition: 'And',
     list: [
-      {
-        condition: 'Or',
-        list: [
-          {
-            tag: {
-              builderID: '',
-              params: {},
-              values: []
-            }
-          }
-        ]
-      }
+      // {
+      //   condition: 'Or',
+      //   list: [
+      //     {
+      //       tag: {
+      //         builderID: '',
+      //         params: {},
+      //         values: []
+      //       }
+      //     }
+      //   ]
+      // }
     ]
   }
 }
