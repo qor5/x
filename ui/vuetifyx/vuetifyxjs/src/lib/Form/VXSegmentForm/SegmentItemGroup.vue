@@ -17,13 +17,17 @@
 import { ref, defineEmits } from 'vue'
 import VXConditionSwitch from './ConditionSwitch.vue'
 import VXSegmentItem from './SegmentItem.vue'
+import type { ConditionItemType, OptionsType } from './type'
+import { useCondition } from './useUtils'
 
 const props = defineProps<{
   item: ConditionItemType
+  options: OptionsType[]
   index: number
 }>()
 
 const emit = defineEmits(['on-remove'])
+const { condition } = useCondition('Or')
 
 const handleRemove = () => {
   emit('on-remove', props.index)

@@ -1,10 +1,6 @@
 <template>
   <div class="vx-segment-form">
-    <VXConditionSwitch
-      v-if="editorModelList.length > 0"
-      v-model="condition"
-      @change="handleConditionChange"
-    />
+    <VXConditionSwitch v-if="editorModelList.length > 0" v-model="condition" />
     <div class="vx-segment-form-block">
       <div v-if="editorModelList.length > 0" class="content">
         <VXSegmentItemGroup
@@ -12,6 +8,7 @@
           :key="idx"
           :item="item"
           :index="idx"
+          :options="options"
           @on-remove="handleRemoveGroup"
         />
       </div>
@@ -21,137 +18,48 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, computed } from 'vue'
+import { ref, defineProps, computed, watch, PropType } from 'vue'
 import VXConditionSwitch from './ConditionSwitch.vue'
 import VXSegmentItemGroup from './SegmentItemGroup.vue'
-
-type ConditionType = 'intersect' | 'union'
-
-type TagType = {
-  tag: {
-    builderID: string
-    params: Record<string, any>
-  }
-}
-
-type ConditionItemType =
-  | TagType
-  | {
-      [key in ConditionType]?: ConditionItemType[]
-    }
-
-type SavedFormType = {
-  [key in ConditionType]?: ConditionItemType[]
-}
-
+import type { ConditionItemType, OptionsType } from './type'
+import { useCondition } from './useUtils'
 const props = defineProps({
   modelValue: {
-    type: Object,
+    type: Object as PropType<{ [key: string]: ConditionItemType[] }>,
     default: () => ({})
   },
   options: {
-    type: Object,
-    default: () => ({})
+    type: Array as PropType<OptionsType[]>,
+    default: () => []
   }
 })
 
-const condition = ref('And')
-
+const { condition, getConditionKey } = useCondition()
+const emit = defineEmits(['update:modelValue'])
 const editorModelList = ref<ConditionItemType[]>([])
 
-const getConditionKey = (condition: string) => {
-  return condition === 'And' ? 'intersect' : 'union'
+// 初始化
+if (Object.keys(props.modelValue).length > 0) {
+  const key = Object.keys(props.modelValue)[0]
+  condition.value = getConditionKey(key, 'internal')
+  editorModelList.value = props.modelValue[key] ?? []
 }
 
-const level1Condition = computed(() => {
-  return getConditionKey(condition.value)
-})
-
-const currentGroupModel = computed(() => {
-  return form.value[level1Condition.value]
-})
-
-const form = computed(() => {
-  return {
-    [level1Condition.value]: [
-      // {
-      //   intersect: [
-      //     {
-      //       tag: {
-      //         builderID: 'user_gender',
-      //         params: {
-      //           operator: 'EQ',
-      //           value: 'FEMALE'
-      //         }
-      //       }
-      //     },
-      //     {
-      //       tag: {
-      //         builderID: 'user_age',
-      //         params: {
-      //           max: 35,
-      //           min: 25,
-      //           operator: 'BETWEEN'
-      //         }
-      //       }
-      //     },
-      //     {
-      //       tag: {
-      //         builderID: 'user_city',
-      //         params: {
-      //           operator: 'IN',
-      //           values: ['TOKYO', 'OSAKA']
-      //         }
-      //       }
-      //     },
-      //     {
-      //       union: [
-      //         {
-      //           tag: {
-      //             builderID: 'user_signup_source',
-      //             params: {
-      //               operator: 'EQ',
-      //               value: 'WEBSITE'
-      //             }
-      //           }
-      //         },
-      //         {
-      //           tag: {
-      //             builderID: 'user_signup_source',
-      //             params: {
-      //               operator: 'EQ',
-      //               value: 'MOBILE_APP'
-      //             }
-      //           }
-      //         }
-      //       ]
-      //     }
-      //   ]
-      // },
-      // {
-      //   tag: {
-      //     builderID: 'event_purchase',
-      //     params: {
-      //       accumulation: 'DAYS',
-      //       countOperator: 'GTE',
-      //       countValue: 2,
-      //       timeRange: '30D'
-      //     }
-      //   }
-      // }
-    ]
-  }
-})
-
-const handleConditionChange = (condition: string) => {
-  console.log(form.value)
+function handleConditionChange(condition: string) {
+  // console.log(savedFormModel.value)
 }
 
-const handleAddRule = () => {
+function handleAddRule() {
   editorModelList.value.push({})
 }
 
-const handleRemoveGroup = (idx: number) => {
+function handleUpdateModelValue() {
+  emit('update:modelValue', {
+    [getConditionKey(condition.value, 'external')]: editorModelList.value
+  })
+}
+
+function handleRemoveGroup(idx: number) {
   editorModelList.value.splice(idx, 1)
 }
 </script>

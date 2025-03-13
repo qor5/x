@@ -15,11 +15,11 @@
     </template>
     <template v-else>
       <div class="vx-condition-select-wrap">
-        <select v-model="props.modelValue" class="vx-condition-select" @change="handleChange">
+        <select v-model="localModelValue" class="vx-condition-select" @change="handleChange">
           <option v-for="item in items" :key="item" :value="item">{{ item }}</option>
         </select>
         <div class="select-display">
-          <div class="select-value">{{ props.modelValue }}</div>
+          <div class="select-value">{{ localModelValue }}</div>
           <div class="select-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24">
               <path d="M7 10l5 5 5-5z" />
@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, computed } from 'vue'
+import { ref, defineProps, computed, watch } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -49,6 +49,17 @@ const items = ['And', 'Or']
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
+// 创建本地状态来跟踪 modelValue
+const localModelValue = ref(props.modelValue)
+
+// 监听 props.modelValue 的变化，更新本地状态
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    localModelValue.value = newValue
+  }
+)
+
 const handleClick = (item: string) => {
   emit('update:modelValue', item)
   emit('change', item)
@@ -63,7 +74,9 @@ const activeBackgroundStyle = computed(() => {
 })
 
 const handleChange = (event: Event) => {
-  emit('update:modelValue', (event.target as HTMLSelectElement).value)
+  const value = (event.target as HTMLSelectElement).value
+  emit('change', value)
+  emit('update:modelValue', value)
 }
 </script>
 
