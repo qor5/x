@@ -1536,8 +1536,10 @@ const options = ref([
   <vx-dialog title="Creat New Segment" width="840" okText="Save">
     <vx-field label="Title" v-model="segmentName" />
 
-    <vx-label class="mb-4">Conditions</vx-label>
-    <vx-segment-form v-model="modelValue" :options="options" />
+    <div style="min-height: 752px">
+      <vx-label class="mb-4">Conditions</vx-label>
+      <vx-segment-form v-model="modelValue" :options="options" />
+    </div>
 
     <template v-slot:activator="{ props: { activatorProps } }">
       <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>

@@ -75,10 +75,10 @@ const { getItemKey } = useItemKeys()
 const handleRemoveItem = (idx: number) => {
   if (groupForm.value.list.length > 1) {
     groupForm.value.list = groupForm.value.list.filter((_, index) => index !== idx)
+    emit('on-data-change', { idx: props.index, value: groupForm.value })
   } else {
     emit('on-remove', props.index)
   }
-  emit('on-data-change', { idx: props.index, value: groupForm.value })
 }
 
 const handleDataChange = (value: any) => {
