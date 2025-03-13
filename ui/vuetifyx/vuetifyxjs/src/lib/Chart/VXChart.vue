@@ -20,21 +20,21 @@
 <script setup lang="ts">
 import * as echarts from 'echarts'
 import {
-  ref,
-  onMounted,
-  defineProps,
-  onBeforeUnmount,
-  watch,
   computed,
+  defineProps,
   nextTick,
-  PropType
+  onBeforeUnmount,
+  onMounted,
+  PropType,
+  ref,
+  watch
 } from 'vue'
 import {
-  chartPresets,
+  animationPresets,
   ChartOptions,
+  chartPresets,
   ChartSeriesItem,
-  lightAnimationConfig,
-  animationPresets
+  lightAnimationConfig
 } from './presets.config'
 
 // 定义预设类型
@@ -215,7 +215,11 @@ const mergedOptions = computed(() => {
       itemResult.series = itemMergedSeries
 
       // 为漏斗图类型自动设置 legend.data
-      if (props.presets === 'funnelChart' && itemMergedSeries.length > 0 && itemMergedSeries[0].data) {
+      if (
+        props.presets === 'funnelChart' &&
+        itemMergedSeries.length > 0 &&
+        itemMergedSeries[0].data
+      ) {
         // 从 series 数据中提取 legend 数据
         if (!itemResult.legend) itemResult.legend = {}
         itemResult.legend.data = itemMergedSeries[0].data.map((item: any) => item.name)
@@ -308,9 +312,6 @@ const initChart = async () => {
   // 判断 mergedOptions 是否为数组
   if (Array.isArray(mergedOptions.value)) {
     // 如果是数组，使用当前索引的配置项初始化图表
-    console.log("--------------------")
-    console.log(mergedOptions.value[currentIndex.value])
-    console.log("--------------------")
     chartInstance.setOption(mergedOptions.value[currentIndex.value] as any, true)
   } else {
     chartInstance.setOption(mergedOptions.value as any, true)
@@ -375,13 +376,19 @@ const handleResize = () => {
     chartInstance.resize()
   }
 }
+const resizeObserver = new ResizeObserver(() => {
+  handleResize()
+})
 
 // 组件挂载后初始化图表
 onMounted(async () => {
   await initChart()
+  const chartDom = document.getElementById(chartId)
+  if (chartDom) {
+    resizeObserver.observe(chartDom)
+  }
   // fix: sometimes the chart is not displayed correctly
   handleResize()
-
   window.addEventListener('resize', handleResize)
 })
 
@@ -391,11 +398,16 @@ onBeforeUnmount(() => {
 
   const chartDom = document.getElementById(chartId)
   if (chartDom) {
+    resizeObserver.unobserve(chartDom)
+    resizeObserver.disconnect()
     const instance = echarts.getInstanceByDom(chartDom)
     if (instance) {
       instance.dispose()
     }
   }
+})
+defineExpose({
+  handleResize
 })
 </script>
 

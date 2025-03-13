@@ -272,7 +272,7 @@ export const funnelChartPreset: ChartOptions = {
     left: 'left',
     align: 'left',
     textAlign: 'left',
-    padding: [10, 0, 0, 10],
+    padding: [10, 0, 0, 10]
   },
   title: {
     left: 'left',
@@ -287,8 +287,8 @@ export const funnelChartPreset: ChartOptions = {
       orient: 'horizontal',
       funnelAlign: 'bottom',
       left: '10%',
-      top: 60,
-      bottom: 60,
+      top: '20%',
+      bottom: '10%',
       width: '80%',
       min: 0,
       max: 2000000,
