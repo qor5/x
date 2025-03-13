@@ -1533,12 +1533,7 @@ const options = ref([
 <template>
   <vx-segment-form v-model="modelValue" :options="options" />
   <br />
-  <vx-dialog
-    title="Creat New Segment"
-    width="840"
-    text="This is an info description line This is an info description lineThis is an info description lineThis is an info description lineThis is an info description line"
-    okText="Save"
-  >
+  <vx-dialog title="Creat New Segment" width="840" okText="Save">
     <vx-field label="Title" v-model="segmentName" />
 
     <vx-label class="mb-4">Conditions</vx-label>
