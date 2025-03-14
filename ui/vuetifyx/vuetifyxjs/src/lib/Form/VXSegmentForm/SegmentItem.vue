@@ -49,7 +49,7 @@
           v-else-if="fragment.type === 'NUMBER_INPUT'"
           type="number"
           v-model="tagParams[fragment.key]"
-          style="min-width: 50px"
+          style="min-width: 60px"
           hide-details
           @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
         />
@@ -59,7 +59,7 @@
           :type="fragment.includeTime ? 'datetimepicker' : 'datepicker'"
           v-model="tagParams[fragment.key]"
           :style="fragment.includeTime ? 'min-width: 220px' : 'min-width:150px'"
-          placeholder="Select a date"
+          :placeholder="fragment.includeTime ? 'Select a datetime' : 'Select a date'"
           hide-details
           @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
         />
@@ -230,6 +230,7 @@ function handleSelectChange(value: string) {
 
 // Handle fragment value changes
 function handleFragmentValueChange(key: string, value: any) {
+  console.log('handleFragmentValueChange', key, value)
   tagParams[key] = value
   updateModel()
 }

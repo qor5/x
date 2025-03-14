@@ -115,9 +115,6 @@ function emitDataChange() {
   }
 
   emit('update:modelValue', externalFormat)
-
-  console.log('Current form state:', JSON.stringify(form.value, null, 2))
-  console.log('Emitted model:', JSON.stringify(externalFormat, null, 2))
 }
 </script>
 

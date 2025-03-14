@@ -16,7 +16,6 @@
         :key="getItemKey(item, idx)"
         :modelValue="item"
         @on-remove="() => handleRemoveItem(idx)"
-        @on-select="(builderID) => handleSelectChange(idx, builderID)"
         @update:modelValue="(value) => handleUpdateItem(idx, value)"
       />
       <div class="add-btn">
@@ -75,53 +74,8 @@ watch(
 
       // 只在外部数据变化时更新本地列表
       if (Array.isArray(newVal.list)) {
-        // 如果列表长度不同，需要合并而不是直接替换
-        if (groupForm.value.list.length !== newVal.list.length) {
-          // 保留本地未完成项，合并外部有效项
-          const mergedList = [...groupForm.value.list]
-
-          // 更新已存在的项
-          newVal.list.forEach((item, index) => {
-            if (index < mergedList.length) {
-              // 如果本地项是空项（没有tag或builderID），且外部项有效，则用外部项替换
-              if (
-                (!mergedList[index].tag || !mergedList[index].tag.builderID) &&
-                item.tag &&
-                item.tag.builderID
-              ) {
-                mergedList[index] = item
-              }
-              // 如果两者都有效但不同，则更新
-              else if (
-                mergedList[index].tag &&
-                mergedList[index].tag.builderID &&
-                JSON.stringify(mergedList[index]) !== JSON.stringify(item)
-              ) {
-                mergedList[index] = item
-              }
-            } else {
-              // 添加新项
-              mergedList.push(item)
-            }
-          })
-
-          groupForm.value.list = mergedList
-        } else {
-          // 逐项更新，但保留本地未完成项
-          newVal.list.forEach((item, index) => {
-            // 只有当本地项有效时才更新，或者外部项有效而本地项无效时
-            const localItem = groupForm.value.list[index]
-            const localItemValid = localItem && localItem.tag && localItem.tag.builderID
-            const newItemValid = item && item.tag && item.tag.builderID
-
-            if (
-              (localItemValid && JSON.stringify(localItem) !== JSON.stringify(item)) ||
-              (!localItemValid && newItemValid)
-            ) {
-              groupForm.value.list[index] = item
-            }
-          })
-        }
+        // 如果列表长度不同，直接替换
+        groupForm.value.list = newVal.list
       }
     }
   },
@@ -146,11 +100,6 @@ const handleRemoveItem = (idx: number) => {
 const handleDataChange = () => {
   // 向上发送更新事件
   emit('on-data-change', { idx: props.index, value: { ...groupForm.value } })
-}
-
-// Handle builder selection for debugging
-const handleSelectChange = (idx: number, builderID: string) => {
-  console.log(`Selected builder ${builderID} for item at index ${idx}`)
 }
 
 // Update item in the group

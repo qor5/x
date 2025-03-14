@@ -22,6 +22,12 @@
 | datePickerProps | vuetify [原生参数](https://vuetifyjs.com/en/api/v-date-picker/)，用于控制时间选择组件 | `Object`                 | -             |
 | modelValue      | 绑定的值，见[值类型](./#支持的值类型)                                                 | `String` `Number` `Date` | -             |
 
+#### vx-date-picker events
+
+| Name | Payload  | Introduction                                           |
+| ---- | -------- | ------------------------------------------------------ |
+| blur | `string` | 某些情况如果期望失焦或者关闭了下拉后获取值时用这个事件 |
+
 #### vx-range-picker props
 
 > 和 vx-date-picker 最大的不同在于，其大多数接收的都是数组
@@ -38,6 +44,7 @@
 | Name          | Payload                                   | Introduction                                                                              |
 | ------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------- |
 | click:confirm | `{ value: Ref<number[]>, next: Promise }` | 配置了 needconfirm 可以结合 click:confirm [实现对值的校验](.md#配合-datepickerprops-控制) |
+| blur          | `string`                                  | 某些情况如果期望失焦或者关闭了下拉后获取值时用这个事件                                    |
 
 ### 值类型
 
