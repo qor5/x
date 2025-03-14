@@ -59,7 +59,7 @@ export function useDatePicker<EmitFnType>(props: any, emit: EmitFnType) {
     }
 
     extraEmitEvents?.forEach((event) => {
-      ;(emit as any)(event, value)
+      ;(emit as any)(event, emitModelValueFormat(value))
     })
   }
 
