@@ -16,10 +16,6 @@ export function useItemKeys() {
   }
 }
 
-export function useCondition(props: { modelValue: { [key: string]: ConditionItemType[] } }) {
-  return {}
-}
-
 function getConditionKey(condition: string, type: 'external'): 'intersect' | 'union'
 function getConditionKey(condition: string, type: 'internal'): 'And' | 'Or'
 function getConditionKey(
