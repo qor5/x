@@ -7,6 +7,8 @@
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
+import VueJsonPretty from 'vue-json-pretty'
+import 'vue-json-pretty/lib/styles.css'
 
 const modelValue = ref({})
 const options = ref([
@@ -1532,6 +1534,7 @@ const options = ref([
 
 <template>
   <vx-segment-form v-model="modelValue" :options="options" />
+  <VueJsonPretty :data="modelValue" />
   <br />
   <vx-dialog title="Creat New Segment" width="840" okText="Save">
     <vx-field label="Title" v-model="segmentName" />
