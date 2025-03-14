@@ -28,39 +28,40 @@
       </vx-select>
 
       <!-- cascade select -->
-      <template v-for="item in currentBuilder" :key="item.key">
-        <span v-if="item.type === 'TEXT'" class="condition-text">{{ item.text }}</span>
+      <template v-for="fragment in visibleFragments" :key="fragment.key">
+        <span v-if="fragment.type === 'TEXT'" class="condition-text">{{
+          fragment.text || ''
+        }}</span>
         <vx-select
-          v-else-if="item.type === 'SELECT'"
-          v-model="item.defaultValue"
+          v-else-if="fragment.type === 'SELECT'"
+          v-model="tagParams[fragment.key]"
           item-title="label"
           item-value="value"
           style="min-width: 150px"
-          placeholder="Select a value"
-          :items="item.options"
-          :multiple="item.multiple"
+          :placeholder="fragment.multiple ? 'Select values' : 'Select a value'"
+          :items="fragment.options"
+          :multiple="fragment.multiple"
           hide-details
+          @update:modelValue="handleFragmentValueChange(fragment.key, $event)"
         />
 
         <vx-field
-          v-else-if="item.type === 'NUMBER_INPUT'"
+          v-else-if="fragment.type === 'NUMBER_INPUT'"
           type="number"
-          v-model="item.defaultValue"
-          item-title="label"
-          item-value="value"
+          v-model="tagParams[fragment.key]"
           style="min-width: 50px"
-          :items="item.options"
-          :multiple="item.multiple"
           hide-details
+          @update:modelValue="handleFragmentValueChange(fragment.key, $event)"
         />
 
         <vx-date-picker
-          v-else-if="item.type === 'DATE_PICKER'"
-          :type="item.includeTime ? 'datetimepicker' : 'datepicker'"
-          v-model="item.defaultValue"
-          :style="item.includeTime ? 'min-width: 220px' : 'min-width:150px'"
+          v-else-if="fragment.type === 'DATE_PICKER'"
+          :type="fragment.includeTime ? 'datetimepicker' : 'datepicker'"
+          v-model="tagParams[fragment.key]"
+          :style="fragment.includeTime ? 'min-width: 220px' : 'min-width:150px'"
           placeholder="Select a date"
           hide-details
+          @update:modelValue="handleFragmentValueChange(fragment.key, $event)"
         />
       </template>
     </div>
@@ -71,11 +72,27 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, inject, computed, ref, defineProps, PropType, watch } from 'vue'
+import { defineEmits, inject, computed, ref, defineProps, PropType, watch, reactive } from 'vue'
 import type { OptionsType } from './type'
+import isEqual from 'lodash/isEqual' // Import lodash isEqual method
+
+// Extended FragmentType interface to include all possible properties
+interface ExtendedFragmentType {
+  defaultValue: any
+  key: string
+  multiple?: boolean
+  options?: Array<{ label: string; value: string }>
+  required: boolean
+  skipIf: null | Record<string, any>
+  skipUnless: null | Record<string, any>
+  type: 'SELECT' | 'DATE_PICKER' | 'NUMBER_INPUT' | 'TEXT'
+  validation: null | string
+  text?: string
+  includeTime?: boolean
+}
 
 const segmentNestedOptions = inject<OptionsType[]>('segmentOptions', [])
-const selectedOption = ref<OptionsType | null>(null)
+const selectedOption = ref<string | null>(null)
 
 const props = defineProps({
   modelValue: {
@@ -84,20 +101,72 @@ const props = defineProps({
   }
 })
 
+// Store parameters for the current tag instance
+const tagParams = reactive<Record<string, any>>({})
+
+// Initialize tag params and watch model changes
 watch(
   () => props.modelValue,
   (newVal) => {
-    selectedOption.value = newVal.tag.builderID || null
+    if (newVal && newVal.tag) {
+      selectedOption.value = newVal.tag.builderID || null
+
+      // Initialize tag parameters from model
+      if (newVal.tag.params && Object.keys(newVal.tag.params).length > 0) {
+        Object.keys(newVal.tag.params).forEach((key) => {
+          tagParams[key] = newVal.tag.params[key]
+        })
+      }
+    }
   },
   { deep: true, immediate: true }
 )
 
-const compMap = ref<Record<string, any>>({})
+const compMap = ref<Record<string, ExtendedFragmentType[]>>({})
 
-const currentBuilder = computed(() => {
+// Get current selected builder's fragments
+const currentFragments = computed(() => {
   const key = selectedOption.value || ''
-  // @ts-ignore :TODO: fix this
-  return (compMap.value as Record<string, any>)[key] || []
+  return compMap.value[key] || []
+})
+
+// Visible fragments filtered by skipIf and skipUnless conditions
+const visibleFragments = computed(() => {
+  return currentFragments.value.filter((fragment) => {
+    if (fragment.skipIf && skipIf(fragment.skipIf)) return false
+    if (fragment.skipUnless && !skipIf(fragment.skipUnless)) return false
+    return true
+  })
+
+  function skipIf(conditionObj: Record<string, any> | null): boolean {
+    if (!conditionObj || Object.keys(conditionObj).length === 0) return false
+
+    return Object.entries(conditionObj).every(([key, condition]) => {
+      if (!key.startsWith('$')) {
+        key = '$' + key
+        condition = { EQ: condition }
+      }
+      const fieldName = key.substring(1)
+      const fieldValue = tagParams[fieldName] === undefined ? null : tagParams[fieldName]
+
+      if (!condition || typeof condition !== 'object' || Object.keys(condition).length === 0)
+        return false
+
+      return Object.entries(condition).every(([operator, value]) => {
+        switch (operator) {
+          case 'IN':
+            if (Array.isArray(value)) {
+              return value.some((item) => isEqual(fieldValue, item))
+            }
+            return false
+          case 'EQ':
+            return isEqual(fieldValue, value)
+          default:
+            return false
+        }
+      })
+    })
+  }
 })
 
 const optionsForSelect = computed(() => {
@@ -119,7 +188,7 @@ const optionsForSelect = computed(() => {
 
       acc.push(
         ...item.builders.map((builder) => {
-          compMap.value[builder.id] = builder.view.fragments
+          compMap.value[builder.id] = builder.view.fragments as ExtendedFragmentType[]
 
           return {
             id: builder.id,
@@ -135,9 +204,47 @@ const optionsForSelect = computed(() => {
 
 const emit = defineEmits(['on-remove', 'on-select', 'update:modelValue'])
 
-function handleSelectChange(value: OptionsType) {
+// Handle builder selection
+function handleSelectChange(value: string) {
   emit('on-select', value)
-  console.log(currentBuilder.value)
+
+  // Reset tag parameters
+  Object.keys(tagParams).forEach((key) => {
+    delete tagParams[key]
+  })
+
+  // Initialize parameters with default values from fragments
+  if (compMap.value[value]) {
+    compMap.value[value].forEach((fragment) => {
+      if (fragment.key) {
+        tagParams[fragment.key] = fragment.defaultValue
+      }
+    })
+  }
+
+  // Update model
+  updateModel()
+}
+
+// Handle fragment value changes
+function handleFragmentValueChange(key: string, value: any) {
+  tagParams[key] = value
+  updateModel()
+}
+
+// Update the entire model
+function updateModel() {
+  if (!selectedOption.value) return
+
+  const updatedModel = {
+    ...props.modelValue,
+    tag: {
+      builderID: selectedOption.value,
+      params: { ...tagParams }
+    }
+  }
+
+  emit('update:modelValue', updatedModel)
 }
 
 const handleRemove = () => {

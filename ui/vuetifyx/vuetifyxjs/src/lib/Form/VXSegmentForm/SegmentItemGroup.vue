@@ -15,8 +15,9 @@
         v-for="(item, idx) in groupForm.list"
         :key="getItemKey(item, idx)"
         :modelValue="item"
-        @on-select="handleSelectChange(item, $event)"
-        @on-remove="handleRemoveItem(idx)"
+        @on-remove="() => handleRemoveItem(idx)"
+        @on-select="(builderID) => handleSelectChange(idx, builderID)"
+        @update:modelValue="(value) => handleUpdateItem(idx, value)"
       />
       <div class="add-btn">
         <vx-btn
@@ -38,10 +39,19 @@ import VXSegmentItem from './SegmentItem.vue'
 import type { ConditionItemType } from './type'
 import { useCondition, genRecordModel, useItemKeys } from './useUtils'
 
+// Group condition type definition
+interface GroupFormType {
+  condition: string
+  list: Array<Record<string, any>>
+}
+
 const props = defineProps({
   modelValue: {
-    type: Object as any,
-    default: () => ({})
+    type: Object as PropType<GroupFormType>,
+    default: () => ({
+      condition: 'And',
+      list: []
+    })
   },
   index: {
     type: Number,
@@ -49,7 +59,7 @@ const props = defineProps({
   }
 })
 
-const groupForm = ref({
+const groupForm = ref<GroupFormType>({
   condition: 'And',
   list: []
 })
@@ -57,21 +67,21 @@ const groupForm = ref({
 watch(
   () => props.modelValue,
   (newVal) => {
-    groupForm.value = newVal
+    if (newVal) {
+      groupForm.value = {
+        condition: newVal.condition || 'And',
+        list: Array.isArray(newVal.list) ? newVal.list : []
+      }
+    }
   },
   { deep: true, immediate: true }
 )
 
 const emit = defineEmits(['on-remove', 'on-data-change'])
 
-const wrappedProps = {
-  modelValue: {
-    union: 'union' in props.modelValue ? (props.modelValue as any).union : [props.modelValue]
-  }
-}
-
 const { getItemKey } = useItemKeys()
 
+// Remove an item from group
 const handleRemoveItem = (idx: number) => {
   if (groupForm.value.list.length > 1) {
     groupForm.value.list = groupForm.value.list.filter((_, index) => index !== idx)
@@ -81,16 +91,23 @@ const handleRemoveItem = (idx: number) => {
   }
 }
 
-const handleDataChange = (value: any) => {
+// Handle condition type change (And/Or)
+const handleDataChange = () => {
   emit('on-data-change', { idx: props.index, value: groupForm.value })
 }
 
-const handleSelectChange = (item: any, value: any) => {
-  // emit('on-data-change', getFormData())
-  item.tag.builderID = value
+// Handle builder selection for debugging
+const handleSelectChange = (idx: number, builderID: string) => {
+  console.log(`Selected builder ${builderID} for item at index ${idx}`)
+}
+
+// Update item in the group
+const handleUpdateItem = (idx: number, updatedItem: Record<string, any>) => {
+  groupForm.value.list[idx] = updatedItem
   emit('on-data-change', { idx: props.index, value: groupForm.value })
 }
 
+// Add new condition item
 function handleAddItem() {
   const newItem = genRecordModel()
   getItemKey(newItem, groupForm.value.list.length)

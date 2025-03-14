@@ -63,7 +63,7 @@ const handleClick = (item: string) => {
   emit('change', item)
 }
 
-// 计算高亮背景的位置
+// Calculate position for the active background highlight
 const activeBackgroundStyle = computed(() => {
   const index = items.findIndex((item) => item.toLowerCase() === props.modelValue.toLowerCase())
   return {

@@ -83,8 +83,41 @@ function handleRemoveGroup(idx: number) {
 }
 
 function emitDataChange() {
-  // emit('update:modelValue', form.value)
-  console.log(JSON.stringify(form.value, null, 2))
+  const isValid =
+    form.value.list.length > 0 &&
+    form.value.list.every(
+      (group: any) =>
+        group.list &&
+        group.list.length > 0 &&
+        group.list.every((item: any) => item.tag && item.tag.builderID)
+    )
+
+  if (!isValid) {
+    console.log('Form data is incomplete, not emitting update')
+    return
+  }
+
+  // Convert condition types to intersect/union format
+  const getConditionKey = (condition: string): string => {
+    return condition === 'And' ? 'intersect' : 'union'
+  }
+
+  // Create the nested structure with intersect/union
+  const externalFormat = {
+    [getConditionKey(form.value.condition)]: form.value.list.map((group: any) => ({
+      [getConditionKey(group.condition)]: group.list.map((item: any) => ({
+        tag: {
+          builderID: item.tag.builderID,
+          params: item.tag.params || {}
+        }
+      }))
+    }))
+  }
+
+  emit('update:modelValue', externalFormat)
+
+  console.log('Current form state:', JSON.stringify(form.value, null, 2))
+  console.log('Emitted model:', JSON.stringify(externalFormat, null, 2))
 }
 </script>
 
