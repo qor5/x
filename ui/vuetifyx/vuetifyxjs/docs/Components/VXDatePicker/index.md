@@ -2,6 +2,17 @@
 
 包含了时间选择 `vx-date-picker` 和时间区间选择 `vx-range-picker`
 
+**目录**：
+
+- [Props](#props)
+- [Events](#events)
+- [值类型](#值类型)
+- [组件类型](#组件类型)
+- [日期格式化 format](#日期格式化-format)
+- [配合 datePickerProps 控制](#配合-datepickerprops-控制)
+- [各种状态](#各种状态)
+- [blur 事件示例](#blur-事件示例)
+
 ### Props
 
 #### 公共props
@@ -22,12 +33,6 @@
 | datePickerProps | vuetify [原生参数](https://vuetifyjs.com/en/api/v-date-picker/)，用于控制时间选择组件 | `Object`                 | -             |
 | modelValue      | 绑定的值，见[值类型](./#支持的值类型)                                                 | `String` `Number` `Date` | -             |
 
-#### vx-date-picker events
-
-| Name | Payload  | Introduction                                           |
-| ---- | -------- | ------------------------------------------------------ |
-| blur | `string` | 某些情况如果期望失焦或者关闭了下拉后获取值时用这个事件 |
-
 #### vx-range-picker props
 
 > 和 vx-date-picker 最大的不同在于，其大多数接收的都是数组
@@ -39,12 +44,20 @@
 | datePickerProps | vuetify [原生参数](https://vuetifyjs.com/en/api/v-date-picker/)，用于控制时间选择组件 | `datePickerProps[]`            | -             |
 | modelValue      | 绑定的值，见[值类型](./#支持的值类型)                                                 | `string[]` `number[]` `Date[]` | -             |
 
+### Events
+
+#### vx-date-picker events
+
+| Name | Payload  | Introduction                                                                                |
+| ---- | -------- | ------------------------------------------------------------------------------------------- |
+| blur | `string` | 某些情况如果期望失焦或者关闭了下拉后获取值时用这个事件，查看[blur 事件示例](#blur-事件示例) |
+
 #### vx-range-picker events
 
-| Name          | Payload                                   | Introduction                                                                              |
-| ------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------- |
-| click:confirm | `{ value: Ref<number[]>, next: Promise }` | 配置了 needconfirm 可以结合 click:confirm [实现对值的校验](.md#配合-datepickerprops-控制) |
-| blur          | `string`                                  | 某些情况如果期望失焦或者关闭了下拉后获取值时用这个事件                                    |
+| Name          | Payload                                   | Introduction                                                                                |
+| ------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------- |
+| click:confirm | `{ value: Ref<number[]>, next: Promise }` | 配置了 needconfirm 可以结合 click:confirm [实现对值的校验](.md#配合-datepickerprops-控制)   |
+| blur          | `string`                                  | 某些情况如果期望失焦或者关闭了下拉后获取值时用这个事件，查看[blur 事件示例](#blur-事件示例) |
 
 ### 值类型
 
@@ -385,6 +398,72 @@ const rangeValue1 = ref([])
     </v-col>
   </v-row>
 </template>
+```
+
+:::
+
+### blur 事件示例
+
+blur 事件在组件失焦或关闭下拉菜单时触发，可用于获取当前值或执行其他操作。
+
+:::demo
+
+```vue
+<template>
+  <v-row class="pl-3 text-primary mt-2"><b>vx-date-picker blur 事件</b></v-row>
+  <v-row>
+    <v-col cols="6">
+      <vx-date-picker
+        v-model="dateValue"
+        label="vx-date-picker blur 事件示例"
+        placeholder="选择日期"
+        clearable
+        @blur="onDatePickerBlur"
+      />
+      <div class="text-caption">blur 事件触发次数: {{ blurCount }}</div>
+      <div class="text-caption">最后一次 blur 事件值: {{ lastBlurValue }}</div>
+    </v-col>
+  </v-row>
+
+  <v-row class="pl-3 text-primary mt-5"><b>vx-range-picker blur 事件</b></v-row>
+  <v-row>
+    <v-col cols="6">
+      <vx-range-picker
+        v-model="rangeValue"
+        label="vx-range-picker blur 事件示例"
+        :placeholder="['开始日期', '结束日期']"
+        clearable
+        @blur="onRangePickerBlur"
+      />
+      <div class="text-caption">blur 事件触发次数: {{ rangeBlurCount }}</div>
+      <div class="text-caption">最后一次 blur 事件值: {{ lastRangeBlurValue }}</div>
+    </v-col>
+  </v-row>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const dateValue = ref(new Date())
+const rangeValue = ref(['2024/11/1', '2024/12/1'])
+
+const blurCount = ref(0)
+const lastBlurValue = ref('')
+const rangeBlurCount = ref(0)
+const lastRangeBlurValue = ref('')
+
+function onDatePickerBlur(value) {
+  blurCount.value++
+  lastBlurValue.value = value
+  console.log('Date picker blur event:', value)
+}
+
+function onRangePickerBlur(value) {
+  rangeBlurCount.value++
+  lastRangeBlurValue.value = value
+  console.log('Range picker blur event:', value)
+}
+</script>
 ```
 
 :::
