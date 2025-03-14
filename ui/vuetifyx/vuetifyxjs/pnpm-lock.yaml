@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   '@vitepress-code-preview/container':
-    hash: dow3z5ai6lnbkwbvwn5334eypm
+    hash: 405db9b01bef68eb6e69fa24ea7acce9e49941c2fab7291c8ca77efa57eedb2b
     path: patches/@vitepress-code-preview__container.patch
 
 importers:
@@ -34,6 +34,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
+      echarts:
+        specifier: ^5.6.0
+        version: 5.6.0
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -44,8 +47,8 @@ importers:
         specifier: ^0.10.0
         version: 0.10.0
       vue-i18n:
-        specifier: ^9.14.2
-        version: 9.14.2(vue@3.5.13(typescript@5.7.3))
+        specifier: ^9.14.3
+        version: 9.14.3(vue@3.5.13(typescript@5.7.3))
       vue-json-pretty:
         specifier: ^2.4.0
         version: 2.4.0(vue@3.5.13(typescript@5.7.3))
@@ -82,7 +85,7 @@ importers:
         version: 5.2.1(vite@5.3.6(@types/node@20.17.17)(sass@1.84.0))(vue@3.5.13(typescript@5.7.3))
       '@vitepress-code-preview/container':
         specifier: 1.0.8
-        version: 1.0.8(patch_hash=dow3z5ai6lnbkwbvwn5334eypm)(vue@3.5.13(typescript@5.7.3))
+        version: 1.0.8(patch_hash=405db9b01bef68eb6e69fa24ea7acce9e49941c2fab7291c8ca77efa57eedb2b)(vue@3.5.13(typescript@5.7.3))
       '@vitepress-code-preview/plugin':
         specifier: ^1.0.6
         version: 1.0.6
@@ -697,16 +700,16 @@ packages:
       '@types/node':
         optional: true
 
-  '@intlify/core-base@9.14.2':
-    resolution: {integrity: sha512-DZyQ4Hk22sC81MP4qiCDuU+LdaYW91A6lCjq8AWPvY3+mGMzhGDfOCzvyR6YBQxtlPjFqMoFk9ylnNYRAQwXtQ==}
+  '@intlify/core-base@9.14.3':
+    resolution: {integrity: sha512-nbJ7pKTlXFnaXPblyfiH6awAx1C0PWNNuqXAR74yRwgi5A/Re/8/5fErLY0pv4R8+EHj3ZaThMHdnuC/5OBa6g==}
     engines: {node: '>= 16'}
 
-  '@intlify/message-compiler@9.14.2':
-    resolution: {integrity: sha512-YsKKuV4Qv4wrLNsvgWbTf0E40uRv+Qiw1BeLQ0LAxifQuhiMe+hfTIzOMdWj/ZpnTDj4RSZtkXjJM7JDiiB5LQ==}
+  '@intlify/message-compiler@9.14.3':
+    resolution: {integrity: sha512-ANwC226BQdd+MpJ36rOYkChSESfPwu3Ss2Faw0RHTOknYLoHTX6V6e/JjIKVDMbzs0/H/df/rO6yU0SPiWHqNg==}
     engines: {node: '>= 16'}
 
-  '@intlify/shared@9.14.2':
-    resolution: {integrity: sha512-uRAHAxYPeF+G5DBIboKpPgC/Waecd4Jz8ihtkpJQD5ycb5PwXp0k/+hBGl5dAjwF7w+l74kz/PKA8r8OK//RUw==}
+  '@intlify/shared@9.14.3':
+    resolution: {integrity: sha512-hJXz9LA5VG7qNE00t50bdzDv8Z4q9fpcL81wj4y4duKavrv0KM8YNLTwXNEFINHjTsfrG9TXvPuEjVaAvZ7yWg==}
     engines: {node: '>= 16'}
 
   '@isaacs/cliui@8.0.2':
@@ -1755,6 +1758,9 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
+  echarts@5.6.0:
+    resolution: {integrity: sha512-oTbVTsXfKuEhxftHqL5xprgLoc0k7uScAwtryCgWF6hPYFLRwOUHiFmHGCBKP5NPFNkDVopOieyUqYGH8Fa3kA==}
+
   editorconfig@1.0.4:
     resolution: {integrity: sha512-L9Qe08KWTlqYMVvMcTIvMAdl1cDUubzRNYL+WfA4bLDMHe4nemKkpmYzkznE1FwLKu0EEmy6obgQKzMJrg4x9Q==}
     engines: {node: '>=14'}
@@ -2734,6 +2740,9 @@ packages:
       '@swc/wasm':
         optional: true
 
+  tslib@2.3.0:
+    resolution: {integrity: sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==}
+
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
@@ -2972,8 +2981,8 @@ packages:
       '@vue/composition-api':
         optional: true
 
-  vue-i18n@9.14.2:
-    resolution: {integrity: sha512-JK9Pm80OqssGJU2Y6F7DcM8RFHqVG4WkuCqOZTVsXkEzZME7ABejAUqUdA931zEBedc4thBgSUWxeQh4uocJAQ==}
+  vue-i18n@9.14.3:
+    resolution: {integrity: sha512-C+E0KE8ihKjdYCQx8oUkXX+8tBItrYNMnGJuzEPevBARQFUN2tKez6ZVOvBrWH0+KT5wEk3vOWjNk7ygb2u9ig==}
     engines: {node: '>= 16'}
     peerDependencies:
       vue: ^3.0.0
@@ -3124,6 +3133,9 @@ packages:
   zeed-dom@0.15.1:
     resolution: {integrity: sha512-dtZ0aQSFyZmoJS0m06/xBN1SazUBPL5HpzlAcs/KcRW0rzadYw12deQBjeMhGKMMeGEp7bA9vmikMLaO4exBcg==}
     engines: {node: '>=14.13.1'}
+
+  zrender@5.6.1:
+    resolution: {integrity: sha512-OFXkDJKcrlx5su2XbzJvj/34Q3m6PvyCZkVPHGYpcCJ52ek4U/ymZyfuV1nKE23AyBJ51E/6Yr0mhZ7xGTO4ag==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -3747,17 +3759,17 @@ snapshots:
     optionalDependencies:
       '@types/node': 20.17.17
 
-  '@intlify/core-base@9.14.2':
+  '@intlify/core-base@9.14.3':
     dependencies:
-      '@intlify/message-compiler': 9.14.2
-      '@intlify/shared': 9.14.2
+      '@intlify/message-compiler': 9.14.3
+      '@intlify/shared': 9.14.3
 
-  '@intlify/message-compiler@9.14.2':
+  '@intlify/message-compiler@9.14.3':
     dependencies:
-      '@intlify/shared': 9.14.2
+      '@intlify/shared': 9.14.3
       source-map-js: 1.2.1
 
-  '@intlify/shared@9.14.2': {}
+  '@intlify/shared@9.14.3': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -4314,7 +4326,7 @@ snapshots:
       vite: 5.4.14(@types/node@20.17.17)(sass@1.84.0)
       vue: 3.5.13(typescript@5.7.3)
 
-  '@vitepress-code-preview/container@1.0.8(patch_hash=dow3z5ai6lnbkwbvwn5334eypm)(vue@3.5.13(typescript@5.7.3))':
+  '@vitepress-code-preview/container@1.0.8(patch_hash=405db9b01bef68eb6e69fa24ea7acce9e49941c2fab7291c8ca77efa57eedb2b)(vue@3.5.13(typescript@5.7.3))':
     dependencies:
       '@floating-ui/vue': 1.1.6(vue@3.5.13(typescript@5.7.3))
       vue: 3.5.13(typescript@5.7.3)
@@ -4790,6 +4802,11 @@ snapshots:
   diff@4.0.2: {}
 
   eastasianwidth@0.2.0: {}
+
+  echarts@5.6.0:
+    dependencies:
+      tslib: 2.3.0
+      zrender: 5.6.1
 
   editorconfig@1.0.4:
     dependencies:
@@ -5938,6 +5955,8 @@ snapshots:
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
+  tslib@2.3.0: {}
+
   tslib@2.8.1: {}
 
   type-detect@4.1.0: {}
@@ -6194,10 +6213,10 @@ snapshots:
     dependencies:
       vue: 3.5.13(typescript@5.7.3)
 
-  vue-i18n@9.14.2(vue@3.5.13(typescript@5.7.3)):
+  vue-i18n@9.14.3(vue@3.5.13(typescript@5.7.3)):
     dependencies:
-      '@intlify/core-base': 9.14.2
-      '@intlify/shared': 9.14.2
+      '@intlify/core-base': 9.14.3
+      '@intlify/shared': 9.14.3
       '@vue/devtools-api': 6.6.4
       vue: 3.5.13(typescript@5.7.3)
 
@@ -6362,5 +6381,9 @@ snapshots:
     dependencies:
       css-what: 6.1.0
       entities: 5.0.0
+
+  zrender@5.6.1:
+    dependencies:
+      tslib: 2.3.0
 
   zwitch@2.0.4: {}

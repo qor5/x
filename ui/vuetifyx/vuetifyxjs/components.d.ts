@@ -22,6 +22,7 @@ declare module 'vue' {
     Filter: typeof import('./src/lib/Filter/index.vue')['default']
     FilterButton: typeof import('./src/lib/Filter/components/FilterButton.vue')['default']
     FilterButtonBody: typeof import('./src/lib/Filter/components/FilterButtonBody.vue')['default']
+    IframeEmailEditor: typeof import('./src/lib/IframeEmailEditor.vue')['default']
     ImageGlue: typeof import('./src/lib/TiptapEditor/Extensions/ImageGlue.vue')['default']
     ItemFilter: typeof import('./src/lib/Filter/components/ItemFilter.vue')['default']
     LinkageSelect: typeof import('./src/lib/LinkageSelect.vue')['default']
@@ -44,8 +45,10 @@ declare module 'vue' {
     TimeSelect: typeof import('./src/lib/Form/VXDatePicker/TimeSelect.vue')['default']
     TiptapEditor: typeof import('./src/lib/TiptapEditor/TiptapEditor.vue')['default']
     VXAvatar: typeof import('./src/lib/VXAvatar.vue')['default']
+    VXBreadcrumbs: typeof import('./src/lib/Breadcrumbs/VXBreadcrumbs.vue')['default']
     VXBtn: typeof import('./src/lib/Common/VXBtn.vue')['default']
     VXBtnGroup: typeof import('./src/lib/Common/VXBtnGroup.vue')['default']
+    VXChart: typeof import('./src/lib/Chart/VXChart.vue')['default']
     VXCheckbox: typeof import('./src/lib/Form/VXCheckbox.vue')['default']
     VXChip: typeof import('./src/lib/Common/VXChip.vue')['default']
     VXDialog: typeof import('./src/lib/Common/VXDialog.vue')['default']
@@ -55,5 +58,6 @@ declare module 'vue' {
     VXSelect: typeof import('./src/lib/Form/VXSelect.vue')['default']
     VXTabs: typeof import('./src/lib/Tabs/VXTabs.vue')['default']
     VXToolBar: typeof import('./src/lib/Common/VXToolBar.vue')['default']
+    VXTreeview: typeof import('./src/lib/Treeview/VXTreeview.vue')['default']
   }
 }
