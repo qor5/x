@@ -38,6 +38,7 @@ import VXTabs from '@/lib/Tabs/VXTabs.vue'
 import VXIframeEmailEditor from '@/lib/IframeEmailEditor.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 import LinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
+import VXSegmentForm from '@/lib/Form/VXSegmentForm/index.vue'
 import VXChart from '@/lib/Chart/VXChart.vue'
 
 declare const window: any
@@ -73,6 +74,7 @@ const vuetifyx = {
     app.component('vx-scroll-iframe', ScrollIframe)
     app.component('vx-send-variables', SendVariables)
     app.component('vx-messagelistener', MessageListener)
+    app.component('vx-segment-form', VXSegmentForm)
     app.component('vx-iframe-email-editor', VXIframeEmailEditor)
   }
 }
