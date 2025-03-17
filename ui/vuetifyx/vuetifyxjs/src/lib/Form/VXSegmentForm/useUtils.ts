@@ -16,23 +16,6 @@ export function useItemKeys() {
   }
 }
 
-export function useCondition(props: { modelValue: { [key: string]: ConditionItemType[] } }) {
-  return {}
-}
-
-function getConditionKey(condition: string, type: 'external'): 'intersect' | 'union'
-function getConditionKey(condition: string, type: 'internal'): 'And' | 'Or'
-function getConditionKey(
-  condition: string,
-  type: 'external' | 'internal' = 'external'
-): 'intersect' | 'union' | 'And' | 'Or' {
-  if (type === 'external') {
-    return condition === 'And' ? 'intersect' : 'union'
-  }
-
-  return condition === 'intersect' ? 'And' : 'Or'
-}
-
 // Convert external API format to internal form format
 export const convertModel = (model: any) => {
   // Return default structure if model is empty or invalid

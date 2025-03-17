@@ -26,7 +26,7 @@ import { ref, defineProps, PropType, provide, watch } from 'vue'
 import VXConditionSwitch from './ConditionSwitch.vue'
 import VXSegmentItemGroup from './SegmentItemGroup.vue'
 import type { ConditionItemType, OptionsType } from './type'
-import { useCondition, genRecordModel, useItemKeys, convertModel } from './useUtils'
+import { genRecordModel, useItemKeys, convertModel } from './useUtils'
 
 const props = defineProps({
   modelValue: {
@@ -115,9 +115,6 @@ function emitDataChange() {
   }
 
   emit('update:modelValue', externalFormat)
-
-  console.log('Current form state:', JSON.stringify(form.value, null, 2))
-  console.log('Emitted model:', JSON.stringify(externalFormat, null, 2))
 }
 </script>
 

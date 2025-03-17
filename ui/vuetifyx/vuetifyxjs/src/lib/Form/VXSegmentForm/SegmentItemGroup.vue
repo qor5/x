@@ -16,7 +16,6 @@
         :key="getItemKey(item, idx)"
         :modelValue="item"
         @on-remove="() => handleRemoveItem(idx)"
-        @on-select="(builderID) => handleSelectChange(idx, builderID)"
         @update:modelValue="(value) => handleUpdateItem(idx, value)"
       />
       <div class="add-btn">
@@ -68,9 +67,15 @@ watch(
   () => props.modelValue,
   (newVal) => {
     if (newVal) {
-      groupForm.value = {
-        condition: newVal.condition || 'And',
-        list: Array.isArray(newVal.list) ? newVal.list : []
+      // 只在外部数据变化时更新本地状态
+      if (groupForm.value.condition !== newVal.condition) {
+        groupForm.value.condition = newVal.condition || 'And'
+      }
+
+      // 只在外部数据变化时更新本地列表
+      if (Array.isArray(newVal.list)) {
+        // 如果列表长度不同，直接替换
+        groupForm.value.list = newVal.list
       }
     }
   },
@@ -93,27 +98,29 @@ const handleRemoveItem = (idx: number) => {
 
 // Handle condition type change (And/Or)
 const handleDataChange = () => {
-  emit('on-data-change', { idx: props.index, value: groupForm.value })
-}
-
-// Handle builder selection for debugging
-const handleSelectChange = (idx: number, builderID: string) => {
-  console.log(`Selected builder ${builderID} for item at index ${idx}`)
+  // 向上发送更新事件
+  emit('on-data-change', { idx: props.index, value: { ...groupForm.value } })
 }
 
 // Update item in the group
 const handleUpdateItem = (idx: number, updatedItem: Record<string, any>) => {
+  // 更新本地状态
   groupForm.value.list[idx] = updatedItem
-  emit('on-data-change', { idx: props.index, value: groupForm.value })
+
+  // 向上发送更新事件
+  emit('on-data-change', { idx: props.index, value: { ...groupForm.value } })
 }
 
 // Add new condition item
 function handleAddItem() {
   const newItem = genRecordModel()
   getItemKey(newItem, groupForm.value.list.length)
-  // @ts-ignore :TODO: fix this
+
+  // 更新本地状态
   groupForm.value.list.push(newItem)
-  emit('on-data-change', { idx: props.index, value: groupForm.value })
+
+  // 向上发送更新事件
+  emit('on-data-change', { idx: props.index, value: { ...groupForm.value } })
 }
 </script>
 <style scoped lang="scss">

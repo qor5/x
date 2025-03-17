@@ -28,7 +28,7 @@
       </vx-select>
 
       <!-- cascade select -->
-      <template v-for="fragment in visibleFragments" :key="fragment.key">
+      <template v-for="(fragment, index) in visibleFragments" :key="getItemKey(fragment, index)">
         <span v-if="fragment.type === 'TEXT'" class="condition-text">{{
           fragment.text || ''
         }}</span>
@@ -42,16 +42,16 @@
           :items="fragment.options"
           :multiple="fragment.multiple"
           hide-details
-          @update:modelValue="handleFragmentValueChange(fragment.key, $event)"
+          @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
         />
 
         <vx-field
           v-else-if="fragment.type === 'NUMBER_INPUT'"
           type="number"
           v-model="tagParams[fragment.key]"
-          style="min-width: 50px"
+          style="min-width: 60px"
           hide-details
-          @update:modelValue="handleFragmentValueChange(fragment.key, $event)"
+          @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
         />
 
         <vx-date-picker
@@ -59,9 +59,9 @@
           :type="fragment.includeTime ? 'datetimepicker' : 'datepicker'"
           v-model="tagParams[fragment.key]"
           :style="fragment.includeTime ? 'min-width: 220px' : 'min-width:150px'"
-          placeholder="Select a date"
+          :placeholder="fragment.includeTime ? 'Select a datetime' : 'Select a date'"
           hide-details
-          @update:modelValue="handleFragmentValueChange(fragment.key, $event)"
+          @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
         />
       </template>
     </div>
@@ -75,6 +75,7 @@
 import { defineEmits, inject, computed, ref, defineProps, PropType, watch, reactive } from 'vue'
 import type { OptionsType } from './type'
 import isEqual from 'lodash/isEqual' // Import lodash isEqual method
+import { useItemKeys } from './useUtils' // 引入useItemKeys
 
 // Extended FragmentType interface to include all possible properties
 interface ExtendedFragmentType {
@@ -93,6 +94,7 @@ interface ExtendedFragmentType {
 
 const segmentNestedOptions = inject<OptionsType[]>('segmentOptions', [])
 const selectedOption = ref<string | null>(null)
+const { getItemKey } = useItemKeys() // 使用useItemKeys
 
 const props = defineProps({
   modelValue: {
@@ -228,6 +230,7 @@ function handleSelectChange(value: string) {
 
 // Handle fragment value changes
 function handleFragmentValueChange(key: string, value: any) {
+  console.log('handleFragmentValueChange', key, value)
   tagParams[key] = value
   updateModel()
 }

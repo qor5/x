@@ -1,12 +1,33 @@
-# VXSegmantForm
+# VXSegmentForm
 
-这是一个基本示例，你可以用 `markdown` 语法 和 `vue3`、`vuetify` 在此处写任何组件代码
+这是一个用于构建分段表单的组件，可以用于创建复杂的条件筛选器。
+
+## API
+
+### Props
+
+| 名称       | 介绍                   | 类型     | 默认值 |
+| ---------- | ---------------------- | -------- | ------ |
+| modelValue | 表单的值，用于双向绑定 | `Object` | `{}`   |
+| options    | 分段表单的选项配置     | `Array`  | `[]`   |
+
+### Events
+
+| 名称              | 载荷     | 介绍               |
+| ----------------- | -------- | ------------------ |
+| update:modelValue | `Object` | 当表单值更新时触发 |
+
+## 基本用法
+
+VXSegmentForm 组件允许用户通过添加规则来构建复杂的条件筛选逻辑。
 
 :::demo
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
+import VueJsonPretty from 'vue-json-pretty'
+import 'vue-json-pretty/lib/styles.css'
 
 const modelValue = ref({})
 const options = ref([
@@ -1532,6 +1553,7 @@ const options = ref([
 
 <template>
   <vx-segment-form v-model="modelValue" :options="options" />
+  <VueJsonPretty :data="modelValue" />
   <br />
   <vx-dialog title="Creat New Segment" width="840" okText="Save">
     <vx-field label="Title" v-model="segmentName" />
