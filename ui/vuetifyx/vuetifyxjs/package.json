@@ -67,5 +67,8 @@
     "patchedDependencies": {
       "@vitepress-code-preview/container": "patches/@vitepress-code-preview__container.patch"
     }
+  },
+  "engines": {
+    "pnpm": "9.14.4"
   }
 }
