@@ -8,7 +8,8 @@
         item-title="name"
         item-value="id"
         placeholder="Select a type"
-        hide-details
+        :error-messages="shouldShowError ? errorMessages : ''"
+        :hide-details="!shouldShowError"
         @update:modelValue="handleSelectChange"
       >
         <template #item="{ props, item }">
@@ -32,28 +33,42 @@
         <span v-if="fragment.type === 'TEXT'" class="condition-text">{{
           fragment.text || ''
         }}</span>
-        <vx-select
-          v-else-if="fragment.type === 'SELECT'"
-          v-model="tagParams[fragment.key]"
-          item-title="label"
-          item-value="value"
-          style="min-width: 150px"
-          :placeholder="fragment.multiple ? 'Select values' : 'Select a value'"
-          :items="fragment.options"
-          :multiple="fragment.multiple"
-          hide-details
-          @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
-        />
+
+        <template v-else-if="fragment.type === 'SELECT'">
+          <vx-select
+            v-if="fragment.multiple"
+            v-model="tagParams[fragment.key]"
+            item-title="label"
+            item-value="value"
+            style="min-width: 150px"
+            :placeholder="'Select values'"
+            :items="fragment.options"
+            multiple
+            hide-details
+            @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+          />
+
+          <vx-select
+            v-else
+            v-model="tagParams[fragment.key]"
+            item-title="label"
+            item-value="value"
+            style="min-width: 150px"
+            :placeholder="'Select a value'"
+            :items="fragment.options"
+            hide-details
+            @update:modelValue="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+          />
+        </template>
 
         <vx-field
           v-else-if="fragment.type === 'NUMBER_INPUT'"
           type="number"
           v-model="tagParams[fragment.key]"
-          style="min-width: 60px"
+          style="min-width: 70px"
           hide-details
           @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
         />
-
         <vx-date-picker
           v-else-if="fragment.type === 'DATE_PICKER'"
           :type="fragment.includeTime ? 'datetimepicker' : 'datepicker'"
@@ -94,12 +109,16 @@ interface ExtendedFragmentType {
 
 const segmentNestedOptions = inject<OptionsType[]>('segmentOptions', [])
 const selectedOption = ref<string | null>(null)
-const { getItemKey } = useItemKeys() // 使用useItemKeys
+const { getItemKey } = useItemKeys()
 
 const props = defineProps({
   modelValue: {
     type: Object as PropType<Record<string, any>>,
     default: () => ({})
+  },
+  validate: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -206,8 +225,16 @@ const optionsForSelect = computed(() => {
 
 const emit = defineEmits(['on-remove', 'on-select', 'update:modelValue'])
 
+const shouldShowError = computed(() => {
+  return props.validate && !selectedOption.value && userInteracted.value
+})
+
+// 跟踪用户是否已与该字段交互
+const userInteracted = ref(false)
+
 // Handle builder selection
 function handleSelectChange(value: string) {
+  userInteracted.value = true
   emit('on-select', value)
 
   // Reset tag parameters
@@ -253,6 +280,23 @@ function updateModel() {
 const handleRemove = () => {
   emit('on-remove')
 }
+
+function triggerValidation() {
+  userInteracted.value = true
+  return !!selectedOption.value
+}
+
+const errorMessages = computed(() => {
+  return !selectedOption.value ? 'Type cannot be empty' : ''
+})
+
+// Expose validation method
+defineExpose({
+  isValid: () => {
+    userInteracted.value = true
+    return !!selectedOption.value
+  }
+})
 </script>
 
 <style scoped lang="scss">

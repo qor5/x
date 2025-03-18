@@ -12,6 +12,8 @@
           :key="getItemKey(item, idx)"
           :modelValue="item"
           :index="idx"
+          :validate="showValidation"
+          ref="itemGroupRefs"
           @on-remove="handleRemoveGroup"
           @on-data-change="handleUpdateModelValue"
         />
@@ -22,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, PropType, provide, watch } from 'vue'
+import { ref, defineProps, PropType, provide, watch, computed } from 'vue'
 import VXConditionSwitch from './ConditionSwitch.vue'
 import VXSegmentItemGroup from './SegmentItemGroup.vue'
 import type { ConditionItemType, OptionsType } from './type'
@@ -47,6 +49,9 @@ const form = ref<any>({
   condition: 'And',
   list: []
 })
+
+const showValidation = ref(false)
+const itemGroupRefs = ref<any[]>([])
 
 watch(
   () => props.modelValue,
@@ -116,6 +121,35 @@ function emitDataChange() {
 
   emit('update:modelValue', externalFormat)
 }
+
+function validate() {
+  showValidation.value = true
+
+  if (!itemGroupRefs.value || itemGroupRefs.value.length === 0) {
+    return false
+  }
+
+  const result = itemGroupRefs.value.every((group: any) => {
+    if (group && typeof group.validate === 'function') {
+      return group.validate()
+    }
+    return false
+  })
+
+  return result
+}
+
+function resetValidation() {
+  showValidation.value = false
+}
+
+defineExpose({
+  validate,
+  resetValidation,
+  isValid: () => {
+    return validate()
+  }
+})
 </script>
 
 <style lang="scss" scoped>

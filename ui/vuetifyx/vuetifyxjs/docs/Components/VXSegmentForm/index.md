@@ -11,6 +11,16 @@
 | modelValue | 表单的值，用于双向绑定 | `Object` | `{}`   |
 | options    | 分段表单的选项配置     | `Array`  | `[]`   |
 
+### Methods
+
+| 名称            | 返回类型  | 介绍                               |
+| --------------- | --------- | ---------------------------------- |
+| validate        | `Boolean` | 验证表单项是否有效，并显示错误信息 |
+| resetValidation | `void`    | 重置验证状态，清除错误信息         |
+| isValid         | `Boolean` | 验证表单是否有效，返回验证结果     |
+
+> 目前只校验 第一项 select，其余后端校验
+
 ### Events
 
 | 名称              | 载荷     | 介绍               |
@@ -30,6 +40,7 @@ import VueJsonPretty from 'vue-json-pretty'
 import 'vue-json-pretty/lib/styles.css'
 
 const modelValue = ref({})
+const formRef = ref(null)
 const options = ref([
   {
     id: 'demographics',
@@ -1549,18 +1560,47 @@ const options = ref([
     ]
   }
 ])
+
+const reset = () => {
+  modelValue.value = []
+  if (formRef.value) {
+    formRef.value.resetValidation()
+  }
+}
+
+const save = () => {
+  if (formRef.value && formRef.value.validate()) {
+    // 这里可以添加保存逻辑
+    console.log('表单验证通过，可以保存数据', modelValue.value)
+  } else {
+    console.log('表单验证失败')
+  }
+}
+
+const clearValidation = () => {
+  if (formRef.value) {
+    formRef.value.resetValidation()
+  }
+}
 </script>
 
 <template>
-  <vx-segment-form v-model="modelValue" :options="options" />
+  <vx-segment-form ref="formRef" v-model="modelValue" :options="options" />
+  <div class="text-right mt-4">
+    <div class="d-flex justify-end">
+      <vx-btn class="mr-2" color="grey" @click="reset">Reset</vx-btn>
+      <vx-btn class="mr-2" color="secondary" @click="clearValidation">Clear Validation</vx-btn>
+      <vx-btn @click="save">Save</vx-btn>
+    </div>
+  </div>
   <VueJsonPretty :data="modelValue" />
   <br />
-  <vx-dialog title="Creat New Segment" width="840" okText="Save">
+  <vx-dialog title="Create New Segment" width="840" okText="Save">
     <vx-field label="Title" v-model="segmentName" />
 
     <div style="min-height: 752px">
       <vx-label class="mb-4">Conditions</vx-label>
-      <vx-segment-form v-model="modelValue" :options="options" />
+      <vx-segment-form ref="dialogFormRef" v-model="modelValue" :options="options" />
     </div>
 
     <template v-slot:activator="{ props: { activatorProps } }">
@@ -1571,5 +1611,3 @@ const options = ref([
 ```
 
 <style scoped></style>
-
-:::
