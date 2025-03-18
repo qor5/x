@@ -35,10 +35,6 @@ export default {
         {
           text: 'SegmentForm 分段表单',
           link: '/Components/VXSegmentForm/'
-        },
-        {
-          text: 'SegmentForm 分段表单',
-          link: '/Components/VXSegmentForm/index1'
         }
       ]
     },

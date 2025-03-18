@@ -67,7 +67,7 @@
           v-model="tagParams[fragment.key]"
           style="min-width: 70px"
           hide-details
-          @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+          @mouseleave="debouncedHandleFragmentValueChange(fragment.key, tagParams[fragment.key])"
         />
         <vx-date-picker
           v-else-if="fragment.type === 'DATE_PICKER'"
@@ -91,6 +91,7 @@ import { defineEmits, inject, computed, ref, defineProps, PropType, watch, react
 import type { OptionsType } from './type'
 import isEqual from 'lodash/isEqual' // Import lodash isEqual method
 import { useItemKeys } from './useUtils' // 引入useItemKeys
+import { debounce } from 'lodash'
 
 // Extended FragmentType interface to include all possible properties
 interface ExtendedFragmentType {
@@ -297,6 +298,10 @@ defineExpose({
     return !!selectedOption.value
   }
 })
+
+const debouncedHandleFragmentValueChange = debounce((key: string, value: any) => {
+  handleFragmentValueChange(key, value)
+}, 0)
 </script>
 
 <style scoped lang="scss">
