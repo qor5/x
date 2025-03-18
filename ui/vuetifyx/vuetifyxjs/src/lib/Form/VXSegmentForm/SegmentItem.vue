@@ -8,7 +8,8 @@
         item-title="name"
         item-value="id"
         placeholder="Select a type"
-        hide-details
+        :error-messages="shouldShowError ? errorMessages : ''"
+        :hide-details="!shouldShowError"
         @update:modelValue="handleSelectChange"
       >
         <template #item="{ props, item }">
@@ -108,12 +109,16 @@ interface ExtendedFragmentType {
 
 const segmentNestedOptions = inject<OptionsType[]>('segmentOptions', [])
 const selectedOption = ref<string | null>(null)
-const { getItemKey } = useItemKeys() // 使用useItemKeys
+const { getItemKey } = useItemKeys()
 
 const props = defineProps({
   modelValue: {
     type: Object as PropType<Record<string, any>>,
     default: () => ({})
+  },
+  validate: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -220,8 +225,16 @@ const optionsForSelect = computed(() => {
 
 const emit = defineEmits(['on-remove', 'on-select', 'update:modelValue'])
 
+const shouldShowError = computed(() => {
+  return props.validate && !selectedOption.value && userInteracted.value
+})
+
+// 跟踪用户是否已与该字段交互
+const userInteracted = ref(false)
+
 // Handle builder selection
 function handleSelectChange(value: string) {
+  userInteracted.value = true
   emit('on-select', value)
 
   // Reset tag parameters
@@ -267,6 +280,23 @@ function updateModel() {
 const handleRemove = () => {
   emit('on-remove')
 }
+
+function triggerValidation() {
+  userInteracted.value = true
+  return !!selectedOption.value
+}
+
+const errorMessages = computed(() => {
+  return !selectedOption.value ? 'Type cannot be empty' : ''
+})
+
+// Expose validation method
+defineExpose({
+  isValid: () => {
+    userInteracted.value = true
+    return !!selectedOption.value
+  }
+})
 </script>
 
 <style scoped lang="scss">

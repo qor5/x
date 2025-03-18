@@ -15,6 +15,8 @@
         v-for="(item, idx) in groupForm.list"
         :key="getItemKey(item, idx)"
         :modelValue="item"
+        :validate="validate"
+        ref="segmentItemRefs"
         @on-remove="() => handleRemoveItem(idx)"
         @update:modelValue="(value) => handleUpdateItem(idx, value)"
       />
@@ -36,7 +38,7 @@ import { ref, defineEmits, PropType, watch, computed } from 'vue'
 import VXConditionSwitch from './ConditionSwitch.vue'
 import VXSegmentItem from './SegmentItem.vue'
 import type { ConditionItemType } from './type'
-import { useCondition, genRecordModel, useItemKeys } from './useUtils'
+import { genRecordModel, useItemKeys } from './useUtils'
 
 // Group condition type definition
 interface GroupFormType {
@@ -55,6 +57,10 @@ const props = defineProps({
   index: {
     type: Number,
     default: 0
+  },
+  validate: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -86,6 +92,22 @@ const emit = defineEmits(['on-remove', 'on-data-change'])
 
 const { getItemKey } = useItemKeys()
 
+const segmentItemRefs = ref<any[]>([])
+
+// Validate all items in this group
+defineExpose({
+  validate: () => {
+    if (!segmentItemRefs.value || segmentItemRefs.value.length === 0) return true
+
+    return segmentItemRefs.value.every((item: any) => {
+      if (item && typeof item.isValid === 'function') {
+        return item.isValid()
+      }
+      return true
+    })
+  }
+})
+
 // Remove an item from group
 const handleRemoveItem = (idx: number) => {
   if (groupForm.value.list.length > 1) {
@@ -98,16 +120,13 @@ const handleRemoveItem = (idx: number) => {
 
 // Handle condition type change (And/Or)
 const handleDataChange = () => {
-  // 向上发送更新事件
   emit('on-data-change', { idx: props.index, value: { ...groupForm.value } })
 }
 
 // Update item in the group
 const handleUpdateItem = (idx: number, updatedItem: Record<string, any>) => {
-  // 更新本地状态
   groupForm.value.list[idx] = updatedItem
 
-  // 向上发送更新事件
   emit('on-data-change', { idx: props.index, value: { ...groupForm.value } })
 }
 
@@ -116,10 +135,8 @@ function handleAddItem() {
   const newItem = genRecordModel()
   getItemKey(newItem, groupForm.value.list.length)
 
-  // 更新本地状态
   groupForm.value.list.push(newItem)
 
-  // 向上发送更新事件
   emit('on-data-change', { idx: props.index, value: { ...groupForm.value } })
 }
 </script>
