@@ -88,6 +88,13 @@ function handleRemoveGroup(idx: number) {
 }
 
 function emitDataChange() {
+  // Check if we have form data
+  if (form.value.list.length === 0) {
+    // Handle case when all groups are removed - emit an empty structure
+    emit('update:modelValue', {})
+    return
+  }
+
   const isValid =
     form.value.list.length > 0 &&
     form.value.list.every(

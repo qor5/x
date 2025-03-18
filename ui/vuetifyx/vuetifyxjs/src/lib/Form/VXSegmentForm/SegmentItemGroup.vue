@@ -111,10 +111,18 @@ defineExpose({
 // Remove an item from group
 const handleRemoveItem = (idx: number) => {
   if (groupForm.value.list.length > 1) {
+    // Remove the item
     groupForm.value.list = groupForm.value.list.filter((_, index) => index !== idx)
     emit('on-data-change', { idx: props.index, value: groupForm.value })
   } else {
+    // When it's the last item in the group, notify parent to remove the entire group
     emit('on-remove', props.index)
+
+    // We still need to update the list to be empty in our local data
+    groupForm.value.list = []
+
+    // Also emit data change with the empty list to ensure proper model update
+    emit('on-data-change', { idx: props.index, value: { ...groupForm.value, list: [] } })
   }
 }
 
