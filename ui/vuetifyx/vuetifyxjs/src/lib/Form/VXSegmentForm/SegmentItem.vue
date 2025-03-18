@@ -32,28 +32,42 @@
         <span v-if="fragment.type === 'TEXT'" class="condition-text">{{
           fragment.text || ''
         }}</span>
-        <vx-select
-          v-else-if="fragment.type === 'SELECT'"
-          v-model="tagParams[fragment.key]"
-          item-title="label"
-          item-value="value"
-          style="min-width: 150px"
-          :placeholder="fragment.multiple ? 'Select values' : 'Select a value'"
-          :items="fragment.options"
-          :multiple="fragment.multiple"
-          hide-details
-          @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
-        />
+
+        <template v-else-if="fragment.type === 'SELECT'">
+          <vx-select
+            v-if="fragment.multiple"
+            v-model="tagParams[fragment.key]"
+            item-title="label"
+            item-value="value"
+            style="min-width: 150px"
+            :placeholder="'Select values'"
+            :items="fragment.options"
+            multiple
+            hide-details
+            @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+          />
+
+          <vx-select
+            v-else
+            v-model="tagParams[fragment.key]"
+            item-title="label"
+            item-value="value"
+            style="min-width: 150px"
+            :placeholder="'Select a value'"
+            :items="fragment.options"
+            hide-details
+            @update:modelValue="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+          />
+        </template>
 
         <vx-field
           v-else-if="fragment.type === 'NUMBER_INPUT'"
           type="number"
           v-model="tagParams[fragment.key]"
-          style="min-width: 60px"
+          style="min-width: 70px"
           hide-details
           @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
         />
-
         <vx-date-picker
           v-else-if="fragment.type === 'DATE_PICKER'"
           :type="fragment.includeTime ? 'datetimepicker' : 'datepicker'"

@@ -1549,10 +1549,20 @@ const options = ref([
     ]
   }
 ])
+
+const reset = () => {
+  modelValue.value = []
+}
 </script>
 
 <template>
   <vx-segment-form v-model="modelValue" :options="options" />
+  <div class="text-right">
+    <div class="d-flex justify-end">
+      <vx-btn class="mr-2" color="grey" @click="reset">Reset</vx-btn>
+      <vx-btn>Save</vx-btn>
+    </div>
+  </div>
   <VueJsonPretty :data="modelValue" />
   <br />
   <vx-dialog title="Creat New Segment" width="840" okText="Save">
@@ -1571,5 +1581,3 @@ const options = ref([
 ```
 
 <style scoped></style>
-
-:::
