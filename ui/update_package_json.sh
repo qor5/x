@@ -5,7 +5,6 @@ $ROOT/../../web/corejs
 $ROOT/codehighlight/codehighlightjs 
 $ROOT/overlay/overlayjs
 $ROOT/tiptap/tiptapjs 
-$ROOT/docs/docsjs
 "
 for i in $PKGS
 do
