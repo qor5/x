@@ -20,7 +20,7 @@ jobs:
           node-version: '18'
 
       - name: Install pnpm
-        run: npm install -g pnpm@9.14.4
+        run: npm install -g pnpm@9.15.5
 
       - name: Build project
         run: |
