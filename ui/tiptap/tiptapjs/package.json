@@ -39,11 +39,11 @@
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
     "@types/node": "^20.17.24",
-    "@vitejs/plugin-vue": "^5.2.2",
+    "@vitejs/plugin-vue": "^5.2.3",
     "@vue/tsconfig": "^0.5.1",
     "npm-run-all2": "^6.2.6",
     "prettier": "^3.5.3",
-    "sass": "^1.85.1",
+    "sass": "^1.86.0",
     "typescript": "~5.4.5",
     "vite": "^5.4.14",
     "vite-svg-loader": "^5.1.0",
