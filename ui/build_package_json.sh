@@ -2,7 +2,6 @@ ROOT=$(pwd)
 
 PKGS="
 $ROOT/../../web/corejs 
-$ROOT/codehighlight/codehighlightjs 
 $ROOT/tiptap/tiptapjs 
 $ROOT/vuetifyx/vuetifyxjs
 $ROOT/cropper/cropperjs
