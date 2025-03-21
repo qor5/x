@@ -698,11 +698,10 @@ func (b *Builder) completeUserAuthCallback(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write([]byte(fmt.Sprintf(`
 <script>
-window.location.href="%s";
+window.location.href=%q;
 </script>
-<a href="%s">complete</a>
+<a href=%q>complete</a>
     `, completeURL, completeURL)))
-	return
 }
 
 func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *http.Request) {
