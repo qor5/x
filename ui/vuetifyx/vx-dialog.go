@@ -78,7 +78,7 @@ func (b *VXDialogBuilder) DisableOk(v bool) (r *VXDialogBuilder) {
 }
 
 func (b *VXDialogBuilder) LoadingOk(v bool) (r *VXDialogBuilder) {
-	b.tag.Attr(":disable-ok", fmt.Sprint(v))
+	b.tag.Attr(":loading-ok", fmt.Sprint(v))
 	return b
 }
 

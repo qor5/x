@@ -104,6 +104,15 @@ export default {
           link: '/Components/VXField/sendVariables'
         }
       ]
+    },
+    {
+      text: 'Chart',
+      items: [
+        {
+          text: 'Chart',
+          link: '/Components/VXChart/'
+        }
+      ]
     }
   ]
 }
