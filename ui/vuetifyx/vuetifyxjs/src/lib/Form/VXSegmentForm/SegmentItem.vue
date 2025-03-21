@@ -91,8 +91,9 @@ import { defineEmits, inject, computed, ref, defineProps, PropType, watch, react
 import type { OptionsType } from './type'
 import isEqual from 'lodash/isEqual' // Import lodash isEqual method
 import { useItemKeys } from './useUtils' // 引入useItemKeys
-import { debounce } from 'lodash'
+import pkg from 'lodash'
 
+const { debounce } = pkg
 // Extended FragmentType interface to include all possible properties
 interface ExtendedFragmentType {
   defaultValue: any
