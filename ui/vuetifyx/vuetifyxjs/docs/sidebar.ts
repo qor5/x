@@ -68,6 +68,14 @@ export default {
         {
           text: 'Pagination 分页器',
           link: '/Components/VXPagination/'
+        },
+        {
+          text: 'Breadcrumbs 面包屑',
+          link: '/Components/VXBreadcrumbs/'
+        },
+        {
+          text: 'Treeview 树组件',
+          link: '/Components/VXTreeview/'
         }
       ]
     },

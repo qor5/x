@@ -10,5 +10,5 @@ $ROOT/redactor/redactorjs
 for i in $PKGS
 do
     echo "$i" && \
-    cd $i && pnpm update && pnpm install && pnpm build
+    cd $i && pnpm install && pnpm build
 done
