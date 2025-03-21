@@ -39,13 +39,13 @@ import VXBreadcrumbs from '@/lib/Breadcrumbs/VXBreadcrumbs.vue'
 import VXTreeview from '@/lib/Treeview/VXTreeview.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 import LinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
+import VXChart from '@/lib/Chart/VXChart.vue'
 
 declare const window: any
 
 const vuetifyx = {
   install: (app: App) => {
-    // datepicker
-    app.component('vx-date-picker', VXDatepicker)
+    app.component('vx-chart', VXChart), app.component('vx-date-picker', VXDatepicker)
     app.component('vx-range-picker', VXRangepicker)
     app.component('vx-datepicker', DatepickerOld)
     app.component('vx-datetimepicker', DatetimepickerOld)
