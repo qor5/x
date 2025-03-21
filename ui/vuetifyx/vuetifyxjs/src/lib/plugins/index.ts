@@ -40,13 +40,15 @@ import VXBreadcrumbs from '@/lib/Breadcrumbs/VXBreadcrumbs.vue'
 import VXTreeview from '@/lib/Treeview/VXTreeview.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 import LinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
+import VXSegmentForm from '@/lib/Form/VXSegmentForm/index.vue'
 import VXChart from '@/lib/Chart/VXChart.vue'
 
 declare const window: any
 
 const vuetifyx = {
   install: (app: App) => {
-    app.component('vx-chart', VXChart), app.component('vx-date-picker', VXDatepicker)
+    app.component('vx-chart', VXChart)
+    app.component('vx-date-picker', VXDatepicker)
     app.component('vx-range-picker', VXRangepicker)
     app.component('vx-datepicker', DatepickerOld)
     app.component('vx-datetimepicker', DatetimepickerOld)
@@ -77,6 +79,7 @@ const vuetifyx = {
     app.component('vx-breadcrumbs', VXBreadcrumbs)
     app.component('vx-treeview', VXTreeview)
     app.component('vx-messagelistener', MessageListener)
+    app.component('vx-segment-form', VXSegmentForm)
     app.component('vx-iframe-email-editor', VXIframeEmailEditor)
   }
 }
