@@ -18,6 +18,7 @@ import (
 	"github.com/pquerna/otp/totp"
 	"github.com/qor5/web/v3"
 	h "github.com/theplant/htmlgo"
+	"html"
 	"golang.org/x/text/language"
 	"gorm.io/gorm"
 
@@ -695,13 +696,14 @@ func (b *Builder) completeUserAuthCallback(w http.ResponseWriter, r *http.Reques
 	}
 
 	completeURL := fmt.Sprintf("%s?%s", b.oauthCallbackCompleteURL, r.URL.Query().Encode())
+	escapedCompleteURL := html.EscapeString(completeURL)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write([]byte(fmt.Sprintf(`
 <script>
 window.location.href=%q;
 </script>
 <a href=%q>complete</a>
-    `, completeURL, completeURL)))
+    `, escapedCompleteURL, escapedCompleteURL)))
 }
 
 func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *http.Request) {
