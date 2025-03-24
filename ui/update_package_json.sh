@@ -2,15 +2,13 @@ ROOT=$(pwd)
 
 PKGS="
 $ROOT/../../web/corejs 
-$ROOT/codehighlight/codehighlightjs 
-$ROOT/overlay/overlayjs
 $ROOT/tiptap/tiptapjs 
-$ROOT/docs/docsjs
+$ROOT/vuetifyx/vuetifyxjs
+$ROOT/cropper/cropperjs
+$ROOT/redactor/redactorjs
 "
 for i in $PKGS
 do
     echo "$i" && \
-    rm $i/pnpm-lock.yaml
-    cd $i && pnpm update && pnpm install && \
-    cd $i/.. && ./build.sh
+    cd $i && pnpm update && pnpm install && pnpm build
 done

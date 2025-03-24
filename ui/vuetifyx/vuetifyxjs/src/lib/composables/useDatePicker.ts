@@ -33,9 +33,11 @@ export function useDatePicker<EmitFnType>(props: any, emit: EmitFnType) {
   function emitDatePickerValue(
     value: number | string | (number | string)[],
     {
-      needConfirm
+      needConfirm,
+      extraEmitEvents
     }: {
       needConfirm?: boolean
+      extraEmitEvents?: string[]
     } = {
       needConfirm: false
     }
@@ -55,6 +57,10 @@ export function useDatePicker<EmitFnType>(props: any, emit: EmitFnType) {
     } else {
       ;(emit as any)('update:modelValue', emitModelValueFormat(value))
     }
+
+    extraEmitEvents?.forEach((event) => {
+      ;(emit as any)(event, emitModelValueFormat(value))
+    })
   }
 
   return {

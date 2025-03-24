@@ -6,36 +6,37 @@
 
 ### Props
 
-| Name          | Introduction                                                | Type                                                            | Default Value |
-| ------------- | ----------------------------------------------------------- | --------------------------------------------------------------- | ------------- |
-| title         | 弹窗标题                                                    | `String`                                                        | -             |
-| text          | 弹窗内容，适合纯文本                                        | `String`                                                        | -             |
-| size          | [弹窗尺寸](./#弹窗尺寸), 默认尺寸定宽，large 尺寸定最大宽度 | `'default'`｜ `'large'`                                         | `'default'`   |
-| type          | 弹窗[预设样式](./#预设样式)                                 | `'default'` ｜ `'info'` ｜ `'success'` ｜ `'warn'` ｜ `'error'` | `'default'`   |
-| okText        | 确认按钮文案                                                | `String`                                                        | `OK`          |
-| cancelText    | 取消按钮文案                                                | `String`                                                        | `Cancel`      |
-| width         | 弹窗宽度                                                    | `Number`                                                        | -             |
-| maxWidth      | 弹窗最大宽度                                                | `Number`                                                        | -             |
-| contentHeight | 弹窗内容高度                                                | `Number`                                                        | -             |
+| Name             | Introduction                                                | Type                                                            | Default Value |
+| ---------------- | ----------------------------------------------------------- | --------------------------------------------------------------- | ------------- |
+| title            | 弹窗标题                                                    | `String`                                                        | -             |
+| text             | 弹窗内容，适合纯文本                                        | `String`                                                        | -             |
+| size             | [弹窗尺寸](./#弹窗尺寸), 默认尺寸定宽，large 尺寸定最大宽度 | `'default'`｜ `'large'`                                         | `'default'`   |
+| type             | 弹窗[预设样式](./#预设样式)                                 | `'default'` ｜ `'info'` ｜ `'success'` ｜ `'warn'` ｜ `'error'` | `'default'`   |
+| okText           | 确认按钮文案                                                | `String`                                                        | `OK`          |
+| cancelText       | 取消按钮文案                                                | `String`                                                        | `Cancel`      |
+| width            | 弹窗宽度                                                    | `Number`                                                        | -             |
+| maxWidth         | 弹窗最大宽度                                                | `Number`                                                        | -             |
+| contentHeight    | 弹窗内容高度                                                | `Number`                                                        | -             |
 | disableOk        | 禁用确认按钮                                                | `Boolean`                                                       | `false`       |
-| hideOk        | 隐藏确认按钮                                                | `Boolean`                                                       | `false`       |
-| hideCancel    | 隐藏取消按钮                                                | `Boolean`                                                       | `false`       |
-| hideClose    | 隐藏右上角关闭按钮                                               | `Boolean`                                                       | `false`       |
-| hideFooter    | 隐藏底部操作按钮区域                                        | `Boolean`                                                       | `false`       |
-| noClickAnimation    | 取消点击弹窗外的弹性动效                                      | `Boolean`                                                       | `false`       |
-| model-value   | 控制弹窗显示与否                                            | `Boolean`                                                       | `false`       |
+| loadingOk        | 确认按钮loading                                             | `Boolean`                                                       | `false`       |
+| hideOk           | 隐藏确认按钮                                                | `Boolean`                                                       | `false`       |
+| hideCancel       | 隐藏取消按钮                                                | `Boolean`                                                       | `false`       |
+| hideClose        | 隐藏右上角关闭按钮                                          | `Boolean`                                                       | `false`       |
+| hideFooter       | 隐藏底部操作按钮区域                                        | `Boolean`                                                       | `false`       |
+| noClickAnimation | 取消点击弹窗外的弹性动效                                    | `Boolean`                                                       | `false`       |
+| model-value      | 控制弹窗显示与否                                            | `Boolean`                                                       | `false`       |
 
 > 除此之外所有的 [v-dialog](https://vuetifyjs.com/en/api/v-dialog/) 原生 props 都可使用 v-bind:[props]="[value]" 实现或覆盖
 
 ### Events
 
-| Name              | Payload                       | Introduction                                                                  |
-| ----------------- | ----------------------------- | ----------------------------------------------------------------------------- |
-| click:ok          | `{ isActive: Ref<isActive>, isLoading: Ref<false> }` | 点击 OK 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) , 可以通过回调函数接收 isLoading 控制 okbtn 的loading状态      |
-| click:cancel      | `{ isActive: Ref<isActive> }` | 点击 Cancel 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调)   |
-| click:close       | `{ isActive: Ref<isActive> }` | 点击右上角关闭图标时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) |
-| click:outside       | `PointerEvent` | 点击弹窗以外的区域触发 |
-| update:modelValue | `boolean`                     | 弹窗 model 值改变时触发                                                       |
+| Name              | Payload                                              | Introduction                                                                                                                      |
+| ----------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| click:ok          | `{ isActive: Ref<isActive>, isLoading: Ref<false> }` | 点击 OK 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调) , 可以通过回调函数接收 isLoading 控制 okbtn 的loading状态 |
+| click:cancel      | `{ isActive: Ref<isActive> }`                        | 点击 Cancel 按钮时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调)                                                       |
+| click:close       | `{ isActive: Ref<isActive> }`                        | 点击右上角关闭图标时触发，使用此事件回调需要[手动关闭弹窗](./#按钮及事件回调)                                                     |
+| click:outside     | `PointerEvent`                                       | 点击弹窗以外的区域触发                                                                                                            |
+| update:modelValue | `boolean`                                            | 弹窗 model 值改变时触发                                                                                                           |
 
 ### Slots
 
@@ -203,7 +204,8 @@ const dialogVisible = ref(false)
 
 ## 弹窗尺寸
 
-- 预设尺寸： 
+- 预设尺寸：
+
   - 默认尺寸是 `size: "default"`, 此时**固定宽度**，用作大多数场景的及时反馈
   - 大尺寸是 `size: "large"`, 此时宽度靠内容撑开，最大宽度 665px，比较适合一些操作反馈类的弹窗
 
@@ -268,7 +270,7 @@ const dialogVisible = ref(false)
         </vx-dialog>
       </v-col>
 
-            <v-col cols="3" class="text-center">
+      <v-col cols="3" class="text-center">
         <div class="mb-2">内容区域滚动条</div>
         <vx-dialog
           title="Confirm"
@@ -359,7 +361,7 @@ function onCancel({ isActive }) {
 
 :::
 
-## 区域隐藏/禁用/显示
+## 区域隐藏/loading/禁用/显示
 
 :::demo
 
@@ -381,7 +383,7 @@ function onCancel({ isActive }) {
         </vx-dialog>
       </v-col>
 
-       <v-col cols="3" class="text-center">
+      <v-col cols="3" class="text-center">
         <div class="mb-2">hideOk</div>
         <vx-dialog
           title="Confirm"
@@ -395,7 +397,7 @@ function onCancel({ isActive }) {
         </vx-dialog>
       </v-col>
 
-       <v-col cols="3" class="text-center">
+      <v-col cols="3" class="text-center">
         <div class="mb-2">hideClose</div>
         <vx-dialog
           title="Confirm"
@@ -409,7 +411,7 @@ function onCancel({ isActive }) {
         </vx-dialog>
       </v-col>
 
-       <v-col cols="3" class="text-center">
+      <v-col cols="3" class="text-center">
         <div class="mb-2">hideFooter</div>
         <vx-dialog
           title="Confirm"
@@ -429,6 +431,19 @@ function onCancel({ isActive }) {
           title="Confirm"
           text="This is an info description line This is an info description"
           disableOk
+        >
+          <template v-slot:activator="{ props: { activatorProps } }">
+            <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
+          </template>
+        </vx-dialog>
+      </v-col>
+
+      <v-col cols="3" class="text-center">
+        <div class="mb-2">loadingOk</div>
+        <vx-dialog
+          title="Confirm"
+          text="This is an info description line This is an info description"
+          loadingOk
         >
           <template v-slot:activator="{ props: { activatorProps } }">
             <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>

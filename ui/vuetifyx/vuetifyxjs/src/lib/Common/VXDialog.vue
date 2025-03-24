@@ -50,7 +50,7 @@
                 :disabled="disableOk"
                 color="primary"
                 :size="props.size === 'default' ? 'small' : 'default'"
-                :loading="isOkBtnLoading"
+                :loading="isOkBtnLoading || loadingOk"
                 variant="flat"
                 @click="onOk(isActive)"
                 >{{ okText }}</v-btn
@@ -93,6 +93,10 @@ const props = defineProps({
   },
   text: String,
   disableOk: {
+    type: Boolean,
+    default: false
+  },
+  loadingOk: {
     type: Boolean,
     default: false
   },

@@ -1,6 +1,8 @@
 <template>
   <div class="vx-select-wrap">
-    <VXLabel :tooltip="tips" class="mb-2" :required-symbol="required">{{ label }}</VXLabel>
+    <VXLabel v-if="label" :tooltip="tips" class="mb-2" :required-symbol="required">{{
+      label
+    }}</VXLabel>
     <v-autocomplete
       v-if="type === 'autocomplete'"
       :closable-chips="closableChips"
@@ -143,7 +145,7 @@ function onUpdateModelValue(value: any) {
 
 <style lang="scss" scoped>
 .vx-select-wrap {
-  margin-bottom: 2px;
+  // margin-bottom: 2px;
 
   .v-input {
     &.v-input--disabled {

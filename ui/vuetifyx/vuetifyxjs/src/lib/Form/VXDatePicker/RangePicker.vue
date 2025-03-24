@@ -119,7 +119,7 @@ const current = ref()
 const isStartInputFocus = ref(false)
 const isEndInputFocus = ref(false)
 
-const emit = defineEmits(['update:modelValue', 'click:confirm'])
+const emit = defineEmits(['update:modelValue', 'click:confirm', 'blur'])
 const props = defineProps({
   modelValue: {
     type: Array as PropType<(string | number)[]>,
@@ -170,7 +170,7 @@ watch(
   () => props.modelValue,
   () => {
     // debugger
-    convertValueForInputAndDatePicker(props.modelValue, onceEmitFlag)
+    convertValueForInputAndDatePicker({ value: props.modelValue, shouldEmit: onceEmitFlag })
     onceEmitFlag = false
   },
   { immediate: true }
@@ -180,7 +180,14 @@ watch(
 watch(showMenu, (value) => {
   // console.log(value, 'showMenu')
   if (!value) {
-    setTimeout(() => convertValueForInputAndDatePicker(props.modelValue), 300)
+    setTimeout(
+      () =>
+        convertValueForInputAndDatePicker({
+          value: props.modelValue,
+          extraEmitEvents: ['blur', 'update:modelValue']
+        }),
+      300
+    )
   }
 })
 
@@ -188,7 +195,8 @@ watch(
   () => tempData,
   (value) => {
     console.log('needConfirm')
-    props.needConfirm && convertValueForInputAndDatePicker(tempData.value as (string | number)[])
+    props.needConfirm &&
+      convertValueForInputAndDatePicker({ value: tempData.value as (string | number)[] })
   }
 )
 
@@ -211,7 +219,15 @@ function onDatePickerValueChange(value: number, position: 0 | 1) {
   emitDatePickerValue(data, { needConfirm: props.needConfirm })
 }
 
-function convertValueForInputAndDatePicker(value: (string | number)[], shouldEmit?: boolean) {
+function convertValueForInputAndDatePicker({
+  value,
+  shouldEmit,
+  extraEmitEvents
+}: {
+  value: (string | number)[]
+  shouldEmit?: boolean
+  extraEmitEvents?: string[]
+}) {
   //case: no init value
   if (!value || value.length === 0) {
     inputValue.value = ['', '']
@@ -228,7 +244,8 @@ function convertValueForInputAndDatePicker(value: (string | number)[], shouldEmi
     }
   }
 
-  shouldEmit && emitDatePickerValue(datePickerValue.value, { needConfirm: props.needConfirm })
+  shouldEmit &&
+    emitDatePickerValue(datePickerValue.value, { needConfirm: props.needConfirm, extraEmitEvents })
 }
 
 function onInputBlur(obj: FocusEvent | string | number, position: 0 | 1) {
@@ -261,10 +278,11 @@ function onInputBlur(obj: FocusEvent | string | number, position: 0 | 1) {
   // the first time select date will trigger blur event
   if (!value) return
 
-  convertValueForInputAndDatePicker(
-    inputValue.value.map((item, i) => (i === position ? value : item)),
-    true
-  )
+  convertValueForInputAndDatePicker({
+    value: inputValue.value.map((item, i) => (i === position ? value : item)),
+    shouldEmit: true,
+    extraEmitEvents: ['blur']
+  })
 }
 
 function onClickEditDate(index: number) {

@@ -17,8 +17,7 @@ $border-radius-custom: 4px;
   $border-radius-root: $border-radius-custom !default,
 
   // Global Radius as per breakeven point
-  $rounded:
-    (
+  $rounded: (
       0: 0,
       'sm': $border-radius-custom * 0.5,
       null: $border-radius-custom,
@@ -31,8 +30,7 @@ $border-radius-custom: 4px;
     ),
 
   // Global Typography
-  $typography:
-    (
+  $typography: (
       'h1': (
         'size': 60px,
         'weight': 500,
@@ -125,8 +123,7 @@ $border-radius-custom: 4px;
     !default,
 
   // Custom Shadows
-  $shadow-key-umbra:
-    (
+  $shadow-key-umbra: (
       0: (
         0 0 0 0 rgba(var(--v-shadow-key-umbra-color), 1)
       ),

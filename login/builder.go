@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html/template"
 	"io/fs"
 	"net/http"
 	"net/url"
@@ -694,15 +695,40 @@ func (b *Builder) completeUserAuthCallback(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	completeURL := fmt.Sprintf("%s?%s", b.oauthCallbackCompleteURL, r.URL.Query().Encode())
+	q := r.URL.Query()
+	callbackURL := b.oauthCallbackCompleteURL
+	if len(q) > 0 {
+		callbackURL = callbackURL + "?" + q.Encode()
+	}
+
+	// Use html/template to safely handle user input and prevent XSS attacks
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write([]byte(fmt.Sprintf(`
-<script>
-window.location.href="%s";
-</script>
-<a href="%s">complete</a>
-    `, completeURL, completeURL)))
-	return
+
+	tmpl := template.Must(template.New("callback").Parse(`
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Auth Redirect</title>
+</head>
+<body>
+    <script>
+    window.location.href="{{.CompleteURL}}";
+    </script>
+    <p>If the page doesn't redirect automatically, <a href="{{.CompleteURL}}">click here</a> to continue.</p>
+</body>
+</html>
+`))
+
+	data := struct {
+		CompleteURL string
+	}{
+		CompleteURL: callbackURL,
+	}
+
+	if err := tmpl.Execute(w, data); err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
 
 func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *http.Request) {
