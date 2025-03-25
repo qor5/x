@@ -45,7 +45,6 @@
 
     <!-- number -->
     <template v-else-if="type === 'number'">
-      {{ excludeModelValueAttrs }}
       <v-number-input
         ref="vInputRef"
         class="number-field"
