@@ -50,8 +50,10 @@
         class="number-field"
         control-variant="stacked"
         v-model:focused="vInputFocus"
+        :model-value="Number(modelValue)"
+        :on-update:model-value="onUpdateModelValue"
         inset
-        v-bind="combinedProps"
+        v-bind="combinedPropsWithNumberModelValue"
       >
         <template
           v-if="hasPrependInnerSlot"
@@ -97,6 +99,7 @@ import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import useBindingValue from '@/lib/composables/useBindingValue'
 import { forwardRefs } from '@/lib/composables/forwardRefs'
 const { filteredAttrs, rootAttrs } = useFilteredAttrs()
+
 const vInputRef = ref()
 const vInputFocus = ref(false)
 const slots: Slots = useSlots()
@@ -136,6 +139,11 @@ const combinedProps = computed(() => ({
   name: props.name,
   'onUpdate:modelValue': onUpdateModelValue,
   ...filteredAttrs.value // passthrough the props that defined by vuetify
+}))
+
+const combinedPropsWithNumberModelValue = computed(() => ({
+  ...combinedProps.value,
+  modelValue: +bindingValue.value
 }))
 
 defineExpose(
