@@ -45,6 +45,7 @@ declare module 'vue' {
     SendVariables: typeof import('./src/lib/SendVariables.vue')['default']
     StringItem: typeof import('./src/lib/Filter/components/StringItem.vue')['default']
     TextDatepicker: typeof import('./src/lib/TextDatepicker.vue')['default']
+    TimePicker: typeof import('./src/lib/Form/VXDatePicker/TimePicker.vue')['default']
     TimeSelect: typeof import('./src/lib/Form/VXDatePicker/TimeSelect.vue')['default']
     TiptapEditor: typeof import('./src/lib/TiptapEditor/TiptapEditor.vue')['default']
     VXAvatar: typeof import('./src/lib/VXAvatar.vue')['default']

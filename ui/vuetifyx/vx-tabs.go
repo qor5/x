@@ -43,6 +43,11 @@ func (b *VXTabsBuilder) FixedTabs(v bool) (r *VXTabsBuilder) {
 	return b
 }
 
+func (b *VXTabsBuilder) Pill(v bool) (r *VXTabsBuilder) {
+	b.tag.Attr(":pill", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXTabsBuilder) Items(v interface{}) (r *VXTabsBuilder) {
 	b.tag.Attr(":items", h.JSONString(v))
 	return b

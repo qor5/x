@@ -29,8 +29,16 @@ export default {
           link: '/Components/TiptapEditor/'
         },
         {
-          text: 'DatePicker 时间选择器',
+          text: 'DatePicker 日期选择器',
           link: '/Components/VXDatePicker/'
+        },
+        {
+          text: 'RangePicker 日期区间选择器',
+          link: '/Components/VXRangePicker/'
+        },
+        {
+          text: 'TimePicker 时间选择器',
+          link: '/Components/VXTimePicker/'
         },
         {
           text: 'SegmentForm 分段表单',
