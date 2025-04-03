@@ -41,6 +41,7 @@ import VXTreeview from '@/lib/Treeview/VXTreeview.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 import LinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
 import VXSegmentForm from '@/lib/Form/VXSegmentForm/index.vue'
+import VXModelProxy from '@/lib/VXModelProxy.vue'
 import VXChart from '@/lib/Chart/VXChart.vue'
 
 declare const window: any
@@ -81,6 +82,7 @@ const vuetifyx = {
     app.component('vx-messagelistener', MessageListener)
     app.component('vx-segment-form', VXSegmentForm)
     app.component('vx-iframe-email-editor', VXIframeEmailEditor)
+    app.component('vx-model-proxy', VXModelProxy)
   }
 }
 
