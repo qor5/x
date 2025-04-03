@@ -23,6 +23,7 @@ import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
 import VXRangepicker from '@/lib/Form/VXDatePicker/RangePicker.vue'
 import VXDatepicker from '@/lib/Form/VXDatePicker/DatePicker.vue'
+import VXTimePicker from '@/lib/Form/VXDatePicker/TimePicker.vue'
 import VXField from '@/lib/Form/VXField.vue'
 import VXSelect from '@/lib/Form/VXSelect.vue'
 import VXCheckbox from '../Form/VXCheckbox.vue'
@@ -49,6 +50,7 @@ const vuetifyx = {
   install: (app: App) => {
     app.component('vx-chart', VXChart)
     app.component('vx-date-picker', VXDatepicker)
+    app.component('vx-time-picker', VXTimePicker)
     app.component('vx-range-picker', VXRangepicker)
     app.component('vx-datepicker', DatepickerOld)
     app.component('vx-datetimepicker', DatetimepickerOld)
