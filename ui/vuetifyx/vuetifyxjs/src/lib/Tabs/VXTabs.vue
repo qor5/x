@@ -1,5 +1,6 @@
 <template>
   <v-tabs
+    v-if="!pill"
     class="vx-tabs-wrap"
     :class="[
       {
@@ -10,6 +11,19 @@
     :model-value="bindingValue"
     :v-bind="attrs"
     color="primary"
+    @update:model-value="onUpdateModelValue"
+  >
+    <slot></slot>
+  </v-tabs>
+
+  <v-tabs
+    v-else
+    class="vx-tabs-wrap pill-style"
+    :model-value="bindingValue"
+    :v-bind="attrs"
+    :ripple="false"
+    :hide-slider="true"
+    color="#212121"
     @update:model-value="onUpdateModelValue"
   >
     <slot></slot>
@@ -27,7 +41,10 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  widthContain: Boolean
+  pill: {
+    type: Boolean,
+    default: false
+  }
 })
 const emit = defineEmits(['update:modelValue'])
 const { bindingValue, onUpdateModelValue } = useBindingValue(props, emit)
@@ -53,6 +70,58 @@ const { bindingValue, onUpdateModelValue } = useBindingValue(props, emit)
       border-block-end-style: solid;
       border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
     }
+  }
+}
+
+.vx-tabs-wrap.pill-style {
+  &:deep(.v-tab) {
+    border-radius: 4px;
+    padding: 0 8px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 400;
+    background-color: #eee;
+    color: #757575;
+    height: 24px;
+    min-height: 24px;
+    line-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+
+    &::before,
+    &::after {
+      display: none !important;
+      opacity: 0 !important;
+      background-color: transparent !important;
+    }
+
+    .v-ripple__container {
+      display: none !important;
+      opacity: 0 !important;
+    }
+
+    &.v-tab--selected {
+      background-color: #fff;
+      color: #212121;
+    }
+  }
+
+  &:deep(.v-slide-group__content) {
+    gap: 4px;
+    background-color: #eee;
+    border-radius: 4px;
+    padding: 4px;
+    height: 32px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &:deep(.v-tabs__bar) {
+    height: auto;
   }
 }
 
