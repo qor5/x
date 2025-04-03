@@ -1,8 +1,14 @@
 <template>
   <div class="vx-datepicker-wrap">
-    <vx-label class="mb-2" :tooltip="tips" :label-for="name" :required-symbol="required">{{
-      label
-    }}</vx-label>
+    <vx-label
+      v-if="label"
+      class="mb-2"
+      :tooltip="tips"
+      :label-for="name"
+      :required-symbol="required"
+      >{{ label }}</vx-label
+    >
+
     <vx-field
       v-model="inputValue"
       :placeholder="placeholder"
@@ -50,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, computed, PropType, watchEffect, ref } from 'vue'
+import { defineEmits, computed, PropType, watchEffect, watch, ref } from 'vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import datePickerBase from './DatePickerBase.vue'
 import { useDatePicker, datePickerType } from '@/lib/composables/useDatePicker'
@@ -81,7 +87,7 @@ const inputRef = ref()
 const datePickerValue = ref()
 const isHovering = ref(false)
 const isFocus = computed(() => showMenu.value)
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'blur'])
 const { showMenu, formatStr, emitDatePickerValue } = useDatePicker(props, emit)
 
 const showClearIcon = computed(
@@ -91,8 +97,18 @@ const minWidth = computed(() => ({
   minWidth: props.type === 'datepicker' ? '140px' : '190px'
 }))
 
+watch(
+  () => showMenu.value,
+  (oldVal, newVal) => {
+    // this state is when finished select data and dropdown is closed
+    if (!oldVal && newVal) {
+      emitDatePickerValue(datePickerValue.value, { extraEmitEvents: ['blur'] })
+    }
+  }
+)
+
 watchEffect(() => {
-  convertValueForInputAndDatePicker(props.modelValue, true)
+  convertValueForInputAndDatePicker({ value: props.modelValue, shouldEmit: true })
 })
 
 function onInputBlur(obj: FocusEvent | string, closeMenu: boolean = false) {
@@ -126,13 +142,18 @@ function onInputBlur(obj: FocusEvent | string, closeMenu: boolean = false) {
   // the first time select date will trigger blur event
   if (!value) return
 
-  convertValueForInputAndDatePicker(value, true)
+  convertValueForInputAndDatePicker({ value, shouldEmit: true, extraEmitEvents: ['blur'] })
 }
 
-function convertValueForInputAndDatePicker(
-  value: string | number | undefined | Date,
+function convertValueForInputAndDatePicker({
+  value,
+  shouldEmit,
+  extraEmitEvents
+}: {
+  value: string | number | undefined | Date
   shouldEmit?: boolean
-) {
+  extraEmitEvents?: string[]
+}) {
   //case: no init value
   if (!value) {
     inputValue.value = ''
@@ -141,7 +162,7 @@ function convertValueForInputAndDatePicker(
     inputValue.value = formatStr ? dayjs(value).format(formatStr) : value
     datePickerValue.value = value ? dayjs(value).valueOf() : ''
   }
-  shouldEmit && emitDatePickerValue(datePickerValue.value)
+  shouldEmit && emitDatePickerValue(datePickerValue.value, { extraEmitEvents })
 }
 
 function onClickAppendInner() {
@@ -173,6 +194,10 @@ function onClickAppendInner() {
 
     & input:not(.input-cover) {
       display: none;
+    }
+
+    .v-field {
+      cursor: pointer;
     }
   }
 }

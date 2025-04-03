@@ -1,6 +1,8 @@
 <template>
   <div class="vx-select-wrap">
-    <VXLabel :tooltip="tips" class="mb-2" :required-symbol="required">{{ label }}</VXLabel>
+    <VXLabel v-if="label" :tooltip="tips" class="mb-2" :required-symbol="required">{{
+      label
+    }}</VXLabel>
     <v-autocomplete
       v-if="type === 'autocomplete'"
       :closable-chips="closableChips"
@@ -22,7 +24,26 @@
       density="compact"
       color="primary"
       @update:model-value="onUpdateModelValue"
-    />
+    >
+      <template
+        v-if="hasPrependInnerSlot"
+        #prepend-inner="{ isActive, isFocused, controlRef, focus, blur }"
+      >
+        <slot
+          name="prepend-inner"
+          :isActive="isActive"
+          :isFocused="isFocused"
+          :controlRef="controlRef"
+          :focus="focus"
+          :blur="blur"
+          :selectedItems="selectedItems"
+        />
+      </template>
+
+      <template v-if="hasItemSlot" #item="{ props, index, item }">
+        <slot name="item" :props="props" :index="index" :item="item" />
+      </template>
+    </v-autocomplete>
     <v-select
       v-else
       :closable-chips="closableChips"
@@ -44,17 +65,39 @@
       density="compact"
       color="primary"
       @update:model-value="onUpdateModelValue"
-    />
+    >
+      <template
+        v-if="hasPrependInnerSlot"
+        #prepend-inner="{ isActive, isFocused, controlRef, focus, blur }"
+      >
+        <slot
+          name="prepend-inner"
+          :isActive="isActive"
+          :isFocused="isFocused"
+          :controlRef="controlRef"
+          :focus="focus"
+          :blur="blur"
+          :selectedItems="selectedItems"
+        />
+      </template>
+
+      <template v-if="hasItemSlot" #item="{ props, index, item }">
+        <slot name="item" :props="props" :index="index" :item="item" />
+      </template>
+    </v-select>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, watch, PropType } from 'vue'
+import { defineEmits, ref, watch, PropType, useSlots, Slots, computed } from 'vue'
 import VXLabel from '../Common/VXLabel.vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 const { filteredAttrs } = useFilteredAttrs()
 
 const emit = defineEmits(['update:modelValue'])
+const slots: Slots = useSlots()
+const hasPrependInnerSlot = slots['prepend-inner'] !== undefined
+const hasItemSlot = slots['item'] !== undefined
 const props = defineProps({
   modelValue: null,
   type: String,
@@ -78,6 +121,18 @@ const props = defineProps({
 
 const selectValue = ref(props.modelValue)
 
+const selectedItems = computed(() => {
+  return props.items?.filter((item: any) => {
+    if (props.multiple) {
+      return selectValue.value?.includes(props.itemValue ? item[props.itemValue] : item)
+    }
+
+    return Array.isArray(selectValue.value)
+      ? selectValue.value[0] === (props.itemValue ? item[props.itemValue] : item)
+      : selectValue.value === (props.itemValue ? item[props.itemValue] : item)
+  })
+})
+
 watch(
   () => props.modelValue,
   (newVal) => (selectValue.value = newVal)
@@ -90,7 +145,7 @@ function onUpdateModelValue(value: any) {
 
 <style lang="scss" scoped>
 .vx-select-wrap {
-  margin-bottom: 2px;
+  // margin-bottom: 2px;
 
   .v-input {
     &.v-input--disabled {
