@@ -225,6 +225,10 @@ function onConfirm() {
       pointer-events: none;
     }
 
+    .v-field {
+      cursor: pointer;
+    }
+
     & input:not(.input-cover) {
       display: none;
     }
