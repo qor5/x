@@ -319,12 +319,15 @@ const dataTextErrorMessages = ref('This is a description')
 <template>
   <v-row>
     <v-col cols="4" sm="4">
-      <vx-field type="number" :model-value="123456" label="Password" />
+      <vx-field type="number" v-model="a" label="Password" />
     </v-col>
   </v-row>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { ref } from 'vue'
+const a = ref('0')
+</script>
 
 <style scoped lang="css">
 * {
