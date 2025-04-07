@@ -209,6 +209,9 @@ function onChooseValue(type: 'hour' | 'minute' | 'second', value: number) {
   }
 
   .time-select {
+    &:deep(*) {
+      cursor: pointer;
+    }
     &:deep(.v-field__prepend-inner) {
       cursor: pointer;
       position: absolute;
