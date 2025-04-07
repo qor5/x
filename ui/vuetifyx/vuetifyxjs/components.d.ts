@@ -58,6 +58,7 @@ declare module 'vue' {
     VXDialog: typeof import('./src/lib/Common/VXDialog.vue')['default']
     VXField: typeof import('./src/lib/Form/VXField.vue')['default']
     VXLabel: typeof import('./src/lib/Common/VXLabel.vue')['default']
+    VXModelProxy: typeof import('./src/lib/VXModelProxy.vue')['default']
     VXPagination: typeof import('./src/lib/Common/VXPagination.vue')['default']
     VXSegmentForm: typeof import('./src/lib/Form/VXSegmentForm/index.vue')['default']
     VXSelect: typeof import('./src/lib/Form/VXSelect.vue')['default']
