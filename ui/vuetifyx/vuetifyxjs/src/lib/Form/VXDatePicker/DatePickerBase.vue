@@ -97,10 +97,14 @@ function onYearOrMonthChange(value: number | unknown | Date, type: 'year' | 'mon
 }
 
 function onTimeSelected(time: string) {
-  // only emitValue when date is selected
-  if (dateOfPicker.value) {
-    emit('update:modelValue', emitValue(dateStr.value, timeStr.value))
+  // If no date is selected, use current date
+  if (!dateOfPicker.value) {
+    // Set current date
+    dateOfPicker.value = new Date()
   }
+
+  // now emitValue when time is selected (with current date if none selected)
+  emit('update:modelValue', emitValue(dateStr.value, timeStr.value))
 }
 
 const combinedProps = computed(() => ({
