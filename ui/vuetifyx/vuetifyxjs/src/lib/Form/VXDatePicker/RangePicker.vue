@@ -382,6 +382,15 @@ function onClickConfirm() {
   }
 }
 
+.vx-range-picker-wrap {
+  :deep(.v-field) {
+    &,
+    * {
+      cursor: pointer;
+    }
+  }
+}
+
 .vx-date-picker-group {
   &:deep(.v-picker-wrap) {
     padding-bottom: 0;

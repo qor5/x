@@ -236,6 +236,10 @@ function onClickAppendInner() {
     & input:not(.input-cover) {
       display: none;
     }
+
+    .v-field {
+      cursor: pointer;
+    }
   }
 }
 </style>
