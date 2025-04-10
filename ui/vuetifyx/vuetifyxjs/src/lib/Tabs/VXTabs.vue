@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, PropType, defineOptions } from 'vue'
+import { defineProps, PropType } from 'vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import useBindingValue from '@/lib/composables/useBindingValue'
 const { filteredAttrs } = useFilteredAttrs()
