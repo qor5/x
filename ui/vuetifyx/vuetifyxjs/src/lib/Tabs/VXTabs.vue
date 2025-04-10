@@ -1,40 +1,43 @@
 <template>
-  <v-tabs
-    v-if="!pill"
-    class="vx-tabs-wrap"
-    :class="[
-      {
-        'underline-border-contain': underlineBorder === 'contain',
-        'underline-border-full': underlineBorder === 'full'
-      }
-    ]"
-    :model-value="bindingValue"
-    :v-bind="attrs"
-    color="primary"
-    @update:model-value="onUpdateModelValue"
-  >
-    <slot></slot>
-  </v-tabs>
+  <div class="vx-tabs-wrap">
+    <v-tabs
+      v-if="!pill"
+      class="vx-tabs"
+      :class="[
+        {
+          'underline-border-contain': underlineBorder === 'contain',
+          'underline-border-full': underlineBorder === 'full'
+        }
+      ]"
+      :model-value="bindingValue"
+      :v-bind="filteredAttrs"
+      color="primary"
+      @update:model-value="onUpdateModelValue"
+    >
+      <slot></slot>
+    </v-tabs>
 
-  <v-tabs
-    v-else
-    class="vx-tabs-wrap pill-style"
-    :model-value="bindingValue"
-    :v-bind="attrs"
-    :ripple="false"
-    :hide-slider="true"
-    color="#212121"
-    @update:model-value="onUpdateModelValue"
-  >
-    <slot></slot>
-  </v-tabs>
+    <v-tabs
+      v-else
+      class="vx-tabs pill-style"
+      :model-value="bindingValue"
+      :v-bind="filteredAttrs"
+      :ripple="false"
+      :hide-slider="true"
+      color="#212121"
+      @update:model-value="onUpdateModelValue"
+    >
+      <slot></slot>
+    </v-tabs>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, PropType, computed } from 'vue'
+import { defineProps, PropType, defineOptions } from 'vue'
 import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import useBindingValue from '@/lib/composables/useBindingValue'
-const { attrs } = useFilteredAttrs()
+const { filteredAttrs } = useFilteredAttrs()
+
 const props = defineProps({
   modelValue: [String, Number, Array] as PropType<string | string[]>,
   underlineBorder: {
@@ -48,14 +51,16 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue'])
 const { bindingValue, onUpdateModelValue } = useBindingValue(props, emit)
-
-// defineOptions({
-//   inheritAttrs: false
-// })
 </script>
 
 <style lang="scss" scoped>
-.vx-tabs-wrap.v-tabs--horizontal {
+.vx-tabs-wrap {
+  &:deep(.v-slide-group__content) {
+    border-block-end-width: 0;
+  }
+}
+
+.vx-tabs-wrap .vx-tabs.v-tabs--horizontal {
   &.underline-border-contain {
     &:deep(.v-btn) {
       border-block-end-width: thin;
@@ -66,6 +71,7 @@ const { bindingValue, onUpdateModelValue } = useBindingValue(props, emit)
 
   &.underline-border-full {
     &:deep(.v-slide-group__content) {
+      flex: 1;
       border-block-end-width: thin;
       border-block-end-style: solid;
       border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
@@ -73,7 +79,7 @@ const { bindingValue, onUpdateModelValue } = useBindingValue(props, emit)
   }
 }
 
-.vx-tabs-wrap.pill-style {
+.vx-tabs-wrap .vx-tabs.pill-style {
   &:deep(.v-tab) {
     border-radius: 4px;
     padding: 0 8px;
@@ -125,7 +131,7 @@ const { bindingValue, onUpdateModelValue } = useBindingValue(props, emit)
   }
 }
 
-.vx-tabs-wrap {
+.vx-tabs-wrap .vx-tabs {
   &:deep(.v-slide-group__container) {
     .v-tab.v-tab.v-btn {
       min-width: auto;
