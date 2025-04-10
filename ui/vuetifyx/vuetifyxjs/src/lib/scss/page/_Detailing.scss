@@ -106,6 +106,10 @@
     }
   }
 
+  .vx-tabs-wrap > .v-slide-group {
+    border-block-end-width: 0 !important;
+  }
+
   // fix extra padding in media-box-thumb(app config)
   .section-body .v-row + .v-row {
     &:has(.media-box-thumb) {
