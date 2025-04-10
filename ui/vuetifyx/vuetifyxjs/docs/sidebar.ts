@@ -1,15 +1,6 @@
 export default {
   '/': [
     {
-      text: '导航',
-      items: [
-        {
-          text: 'Navigator 导航栏',
-          link: '/Components/Navigator/'
-        }
-      ]
-    },
-    {
       text: '数据录入',
       items: [
         {
