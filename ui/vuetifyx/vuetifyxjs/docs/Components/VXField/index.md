@@ -322,6 +322,7 @@ const dataTextErrorMessages = ref('This is a description')
       <vx-field type="number" v-model="a" label="Password" />
     </v-col>
   </v-row>
+  v-model:{{ a }}
 </template>
 
 <script lang="ts" setup>
