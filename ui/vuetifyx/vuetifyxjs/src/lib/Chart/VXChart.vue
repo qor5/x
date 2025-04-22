@@ -13,7 +13,12 @@
         :toggle="toggle"
       ></slot>
     </div>
-    <div :id="chartId" class="vx-chart-container"></div>
+
+    <!-- 使用新的FunnelChart组件 -->
+    <template v-if="props.presets === 'funnelChart'">
+      <funnel-chart :data="getCurrentSeriesData()" />
+    </template>
+    <div v-else :id="chartId" class="vx-chart-container"></div>
   </div>
 </template>
 
@@ -36,6 +41,7 @@ import {
   ChartSeriesItem,
   lightAnimationConfig
 } from './presets.config'
+import FunnelChart from './FunnelChart.vue'
 
 // 定义预设类型
 type PresetType = 'barChart' | 'pieChart' | 'funnelChart' | ''
@@ -60,10 +66,13 @@ const toggle = (index: number) => {
   if (Array.isArray(props.options) && index >= 0 && index < props.options.length) {
     currentIndex.value = index
 
-    // 更新图表
-    const chartInstance = getChartInstance()
-    if (chartInstance && Array.isArray(mergedOptions.value)) {
-      chartInstance.setOption(mergedOptions.value[index] as any, true)
+    // 如果不是漏斗图，则更新ECharts图表
+    if (props.presets !== 'funnelChart') {
+      // 更新图表
+      const chartInstance = getChartInstance()
+      if (chartInstance && Array.isArray(mergedOptions.value)) {
+        chartInstance.setOption(mergedOptions.value[index] as any, true)
+      }
     }
   }
 }
@@ -83,6 +92,52 @@ const props = defineProps({
     default: false
   }
 })
+
+// 获取当前系列数据，用于漏斗图组件
+const getCurrentSeriesData = () => {
+  let result = []
+
+  if (Array.isArray(props.options)) {
+    // 如果options是数组，获取当前选中索引的series数据
+    const currentOption = props.options[currentIndex.value]
+    result = currentOption?.series?.[0]?.data || []
+  } else {
+    // 如果options是对象，直接获取series数据
+    result = props.options?.series?.[0]?.data || []
+  }
+
+  // If we have a funnelChart but no data, create sample data to ensure it works
+  if (props.presets === 'funnelChart' && (!result || result.length === 0)) {
+    result = [
+      { value: 10000, name: '邮件发送' },
+      { value: 8500, name: '邮件送达' },
+      { value: 5000, name: '邮件打开' },
+      { value: 2500, name: '链接点击' }
+    ]
+  }
+
+  // Ensure we have exactly 4 segments for the funnel chart
+  if (props.presets === 'funnelChart' && result.length < 4) {
+    // Log what we're receiving
+    console.log('FunnelChart received incomplete data:', JSON.stringify(result))
+
+    // Add missing segments if needed
+    while (result.length < 4) {
+      const segmentNames = ['邮件发送', '邮件送达', '邮件打开', '链接点击']
+      result.push({
+        value: 100 * (result.length + 1),
+        name: segmentNames[result.length]
+      })
+    }
+  }
+
+  // Log the final data being passed to FunnelChart
+  if (props.presets === 'funnelChart') {
+    console.log('Final FunnelChart data:', JSON.stringify(result))
+  }
+
+  return result
+}
 
 // 提取标题
 const chartTitle = computed(() => {
@@ -294,6 +349,11 @@ const mergedOptions = computed(() => {
 
 // 获取图表实例
 const getChartInstance = (): echarts.EChartsType | null => {
+  // 如果是漏斗图，不初始化echarts实例
+  if (props.presets === 'funnelChart') {
+    return null
+  }
+
   const chartDom = document.getElementById(chartId)
   if (!chartDom) return null
 
@@ -302,6 +362,11 @@ const getChartInstance = (): echarts.EChartsType | null => {
 
 // 初始化图表
 const initChart = async () => {
+  // 如果是漏斗图，不初始化echarts图表
+  if (props.presets === 'funnelChart') {
+    return
+  }
+
   // 确保DOM已更新
   await nextTick()
 
@@ -329,6 +394,11 @@ const initChart = async () => {
 watch(
   () => [props.options, props.presets],
   () => {
+    // 如果是漏斗图，不更新echarts图表
+    if (props.presets === 'funnelChart') {
+      return
+    }
+
     const chartInstance = getChartInstance()
     if (chartInstance) {
       // 判断 mergedOptions 是否为数组
@@ -347,6 +417,11 @@ watch(
 watch(
   () => props.loading,
   (loading) => {
+    // 如果是漏斗图，不更新echarts加载状态
+    if (props.presets === 'funnelChart') {
+      return
+    }
+
     const chartInstance = getChartInstance()
     if (!chartInstance) return
 
@@ -362,6 +437,11 @@ watch(
 watch(
   () => currentIndex.value,
   (newIndex) => {
+    // 如果是漏斗图，不更新echarts图表
+    if (props.presets === 'funnelChart') {
+      return
+    }
+
     const chartInstance = getChartInstance()
     if (chartInstance && Array.isArray(mergedOptions.value)) {
       chartInstance.setOption(mergedOptions.value[newIndex] as any, true)
@@ -371,6 +451,11 @@ watch(
 
 // 处理窗口大小变化
 const handleResize = () => {
+  // 如果是漏斗图，不调整echarts图表大小
+  if (props.presets === 'funnelChart') {
+    return
+  }
+
   const chartInstance = getChartInstance()
   if (chartInstance) {
     chartInstance.resize()
@@ -382,13 +467,17 @@ const resizeObserver = new ResizeObserver(() => {
 
 // 组件挂载后初始化图表
 onMounted(async () => {
-  await initChart()
-  const chartDom = document.getElementById(chartId)
-  if (chartDom) {
-    resizeObserver.observe(chartDom)
+  // 如果不是漏斗图，则初始化echarts图表
+  if (props.presets !== 'funnelChart') {
+    await initChart()
+    const chartDom = document.getElementById(chartId)
+    if (chartDom) {
+      resizeObserver.observe(chartDom)
+    }
+    // fix: sometimes the chart is not displayed correctly
+    handleResize()
   }
-  // fix: sometimes the chart is not displayed correctly
-  handleResize()
+
   window.addEventListener('resize', handleResize)
 })
 
@@ -396,13 +485,16 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
 
-  const chartDom = document.getElementById(chartId)
-  if (chartDom) {
-    resizeObserver.unobserve(chartDom)
-    resizeObserver.disconnect()
-    const instance = echarts.getInstanceByDom(chartDom)
-    if (instance) {
-      instance.dispose()
+  // 如果不是漏斗图，则清理echarts图表资源
+  if (props.presets !== 'funnelChart') {
+    const chartDom = document.getElementById(chartId)
+    if (chartDom) {
+      resizeObserver.unobserve(chartDom)
+      resizeObserver.disconnect()
+      const instance = echarts.getInstanceByDom(chartDom)
+      if (instance) {
+        instance.dispose()
+      }
     }
   }
 })

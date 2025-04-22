@@ -268,38 +268,53 @@ export const funnelChartPreset: ChartOptions = {
     shadowColor: 'rgba(0, 0, 0, 0.1)'
   },
   legend: {
-    orient: 'vertical',
-    left: 'left',
-    align: 'left',
-    textAlign: 'left',
-    padding: [10, 0, 0, 10]
+    show: false // 隐藏图例，因为我们有自定义UI
   },
   title: {
     left: 'left',
     textAlign: 'left',
     padding: [10, 0, 0, 10]
   },
-  color: ['#8DA0FB', '#405DE6', '#23398A', '#7DA1FA', '#6B96F9', '#5A8BF8', '#477FD6'], // 增加更多颜色备用
+  // 为四个漏斗段设置匹配的颜色
+  color: ['#e7edfc', '#91a3e9', '#4662d5', '#3a50ac'],
   series: [
     {
-      name: 'Funnel',
+      name: 'Funnel', // 使用通用名称，会被用户传入的series name覆盖
       type: 'funnel',
       orient: 'horizontal',
       funnelAlign: 'bottom',
-      left: '10%',
-      top: '20%',
-      bottom: '10%',
-      width: '80%',
+      left: '0',
+      top: '0',
+      bottom: '5%',
+      width: '100%',
+      height: '100%',
+      // 确保小值也能被看到
       min: 0,
-      max: 2000000,
-      minSize: '0%',
+      minSize: '30%',
       maxSize: '100%',
-      sort: 'descending',
-      emphasis: {
-        label: {
-          fontSize: 20
-        }
+      // 不排序，保持原始数据顺序
+      sort: 'none',
+      // 增加段之间的间隔
+      gap: 0,
+      // 标签配置
+      label: {
+        show: false,
+        position: 'inside',
+        formatter: '{b}',
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#fff'
+      },
+      labelLine: {
+        show: true
       }
+      // 强调效果
+      // emphasis: {
+      //   label: {
+      //     fontSize: 16,
+      //     fontWeight: 'bold'
+      //   }
+      // }
     }
   ]
 }
