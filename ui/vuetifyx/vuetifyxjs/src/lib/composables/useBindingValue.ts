@@ -1,7 +1,13 @@
 import { ref, watch } from 'vue'
 
-export default function useBindingValue<EmitFnType>(props: Record<string, any>, emit: EmitFnType) {
-  const bindingValue = ref(props.modelValue)
+export default function useBindingValue<EmitFnType>(
+  props: Record<string, any>,
+  emit: EmitFnType,
+  modelValueFormatter?: (value: any) => any
+) {
+  const bindingValue = ref(
+    modelValueFormatter ? modelValueFormatter(props.modelValue) : props.modelValue
+  )
   const bindingFocus = ref(false)
 
   function onUpdateModelValue(value: any) {

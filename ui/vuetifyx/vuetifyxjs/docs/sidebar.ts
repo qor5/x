@@ -1,15 +1,6 @@
 export default {
   '/': [
     {
-      text: '导航',
-      items: [
-        {
-          text: 'Navigator 导航栏',
-          link: '/Components/Navigator/'
-        }
-      ]
-    },
-    {
       text: '数据录入',
       items: [
         {
@@ -29,8 +20,16 @@ export default {
           link: '/Components/TiptapEditor/'
         },
         {
-          text: 'DatePicker 时间选择器',
+          text: 'DatePicker 日期选择器',
           link: '/Components/VXDatePicker/'
+        },
+        {
+          text: 'RangePicker 日期区间选择器',
+          link: '/Components/VXRangePicker/'
+        },
+        {
+          text: 'TimePicker 时间选择器',
+          link: '/Components/VXTimePicker/'
         },
         {
           text: 'SegmentForm 分段表单',
@@ -76,6 +75,10 @@ export default {
         {
           text: 'Treeview 树组件',
           link: '/Components/VXTreeview/'
+        },
+        {
+          text: 'Tabs 选项卡',
+          link: '/Components/VXTabs/'
         }
       ]
     },
@@ -96,16 +99,16 @@ export default {
       text: '其他',
       items: [
         {
-          text: 'Tabs 选项卡',
-          link: '/Components/VXTabs/'
-        },
-        {
           text: 'ScrollIframe 组件',
           link: '/Components/ScrollIframe/'
         },
         {
           text: 'SendVariables 组件',
           link: '/Components/VXField/sendVariables'
+        },
+        {
+          text: 'VXModelProxy 组件',
+          link: '/Components/VXModelProxy/'
         }
       ]
     },

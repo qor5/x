@@ -50,10 +50,9 @@
         class="number-field"
         control-variant="stacked"
         v-model:focused="vInputFocus"
-        :model-value="Number(modelValue)"
         :on-update:model-value="onUpdateModelValue"
         inset
-        v-bind="combinedPropsWithNumberModelValue"
+        v-bind="combinedProps"
       >
         <template
           v-if="hasPrependInnerSlot"
@@ -118,7 +117,18 @@ const props = defineProps({
   passwordVisibleDefault: Boolean
 })
 const passwordVisible = ref(props.passwordVisibleDefault)
-const { bindingValue, onUpdateModelValue } = useBindingValue(props, emit)
+const { bindingValue, onUpdateModelValue } = useBindingValue(props, emit, modelValueFormatter)
+
+// fix: when modelValue is a string, the number input will not work
+function modelValueFormatter(value: any) {
+  if (props.type === 'number' && typeof value !== 'number') {
+    if (['', null].includes(value)) {
+      return undefined
+    }
+    return Number(value)
+  }
+  return value
+}
 
 const passwordFieldType = computed(() => {
   if (props.passwordVisibleToggle === undefined) return 'password'
@@ -139,11 +149,6 @@ const combinedProps = computed(() => ({
   name: props.name,
   'onUpdate:modelValue': onUpdateModelValue,
   ...filteredAttrs.value // passthrough the props that defined by vuetify
-}))
-
-const combinedPropsWithNumberModelValue = computed(() => ({
-  ...combinedProps.value,
-  modelValue: +bindingValue.value
 }))
 
 defineExpose(
