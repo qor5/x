@@ -238,7 +238,13 @@ const funnelChartData = ref({
 </script>
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart presets="funnelChart" :options="funnelChartData"></vx-chart>
+    <vx-chart presets="funnelChart" :options="funnelChartData">
+      <template #action>
+        <span class="text-caption mr-4 px-1 py-0 rounded" style="background:#F5F5F5;"
+          >Data updates on everyday's 00:00
+        </span>
+      </template>
+    </vx-chart>
   </div>
 </template>
 

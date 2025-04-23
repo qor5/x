@@ -43,7 +43,7 @@
         <div class="summary-value">89,935</div>
       </div>
     </div> -->
-    <div class="funnel-cols-container" :style="containerStyles">
+    <div class="funnel-cols-container mt-6" :style="containerStyles">
       <div class="funnel-cols">
         <!-- 动态生成漏斗列 -->
         <div class="funnel-col" v-for="(item, index) in internalData" :key="index">
