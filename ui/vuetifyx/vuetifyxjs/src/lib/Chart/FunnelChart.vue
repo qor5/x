@@ -118,17 +118,6 @@ interface FunnelItem {
 
 interface FunnelChartProps {
   data: FunnelItem[]
-  icons?: {
-    sent?: string
-    delivered?: string
-    opened?: string
-    clicked?: string
-  }
-  dataSource?: {
-    url?: string
-    refreshInterval?: number
-    fetchFn?: () => Promise<FunnelItem[]>
-  }
 }
 
 const props = defineProps<FunnelChartProps>()
@@ -136,7 +125,6 @@ const chartInstance = ref<echarts.EChartsType | null>(null)
 const containerRef = ref<HTMLElement | null>(null)
 const containerWidth = ref(0)
 const internalData = ref<FunnelItem[]>([])
-const refreshTimer = ref<number | null>(null)
 const observer = ref<ResizeObserver | null>(null)
 
 watch(
@@ -222,43 +210,6 @@ const getStatTrend = (item: FunnelItem, index: number, statIndex: number) => {
     return { icon: 'mdi-arrow-bottom-left', text: '-1.01% this week', color: '#F44336' }
   }
 }
-
-const fetchData = async () => {
-  try {
-    if (props.dataSource?.fetchFn) {
-      const data = await props.dataSource.fetchFn()
-      internalData.value = data
-    } else if (props.dataSource?.url) {
-      const response = await fetch(props.dataSource.url)
-      const data = await response.json()
-      internalData.value = data
-    }
-  } catch (error) {
-    console.error('FunnelChart: Error fetching data', error)
-  }
-}
-
-const setupDataSync = () => {
-  if (props.dataSource?.refreshInterval && (props.dataSource.url || props.dataSource.fetchFn)) {
-    if (refreshTimer.value) {
-      clearInterval(refreshTimer.value)
-    }
-
-    refreshTimer.value = window.setInterval(() => {
-      fetchData()
-    }, props.dataSource.refreshInterval)
-
-    fetchData()
-  }
-}
-
-watch(
-  () => props.dataSource,
-  () => {
-    setupDataSync()
-  },
-  { deep: true }
-)
 
 const scaleFactor = computed(() => {
   if (containerWidth.value < 700 && containerWidth.value >= 534) {
@@ -457,9 +408,6 @@ onMounted(() => {
     handleResize()
     updateContainerWidth()
   })
-
-  // Setup external data source sync
-  setupDataSync()
 })
 
 // Cleanup observer
@@ -467,11 +415,6 @@ onBeforeUnmount(() => {
   if (containerRef.value && observer.value) {
     observer.value.unobserve(containerRef.value)
     observer.value.disconnect()
-  }
-
-  // Clear any interval timers
-  if (refreshTimer.value) {
-    clearInterval(refreshTimer.value)
   }
 
   window.removeEventListener('resize', handleResize)
