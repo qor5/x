@@ -16,7 +16,11 @@
 
     <!-- 使用新的FunnelChart组件 -->
     <template v-if="props.presets === 'funnelChart'">
-      <funnel-chart :data="getCurrentSeriesData()" />
+      <funnel-chart
+        :data="getCurrentSeriesData()"
+        :icons="getFunnelIcons()"
+        :dataSource="getFunnelDataSource()"
+      />
     </template>
     <div v-else :id="chartId" class="vx-chart-container"></div>
   </div>
@@ -90,6 +94,24 @@ const props = defineProps({
   loading: {
     type: Boolean,
     default: false
+  },
+  // Add new props for funnel chart
+  funnelIcons: {
+    type: Object as PropType<{
+      sent?: string
+      delivered?: string
+      opened?: string
+      clicked?: string
+    }>,
+    default: () => ({})
+  },
+  dataSource: {
+    type: Object as PropType<{
+      url?: string
+      refreshInterval?: number
+      fetchFn?: () => Promise<any[]>
+    }>,
+    default: () => ({})
   }
 })
 
@@ -105,37 +127,6 @@ const getCurrentSeriesData = () => {
     // 如果options是对象，直接获取series数据
     result = props.options?.series?.[0]?.data || []
   }
-
-  // If we have a funnelChart but no data, create sample data to ensure it works
-  if (props.presets === 'funnelChart' && (!result || result.length === 0)) {
-    result = [
-      { value: 10000, name: '邮件发送' },
-      { value: 8500, name: '邮件送达' },
-      { value: 5000, name: '邮件打开' },
-      { value: 2500, name: '链接点击' }
-    ]
-  }
-
-  // Ensure we have exactly 4 segments for the funnel chart
-  if (props.presets === 'funnelChart' && result.length < 4) {
-    // Log what we're receiving
-    console.log('FunnelChart received incomplete data:', JSON.stringify(result))
-
-    // Add missing segments if needed
-    while (result.length < 4) {
-      const segmentNames = ['邮件发送', '邮件送达', '邮件打开', '链接点击']
-      result.push({
-        value: 100 * (result.length + 1),
-        name: segmentNames[result.length]
-      })
-    }
-  }
-
-  // Log the final data being passed to FunnelChart
-  if (props.presets === 'funnelChart') {
-    console.log('Final FunnelChart data:', JSON.stringify(result))
-  }
-
   return result
 }
 
@@ -498,6 +489,17 @@ onBeforeUnmount(() => {
     }
   }
 })
+
+// Get icons for funnel chart
+const getFunnelIcons = () => {
+  return props.funnelIcons || {}
+}
+
+// Get data source configuration for funnel chart
+const getFunnelDataSource = () => {
+  return props.dataSource || {}
+}
+
 defineExpose({
   handleResize
 })

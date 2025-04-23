@@ -132,10 +132,105 @@ const funnelChartData = ref({
     {
       name: '邮件营销',
       data: [
-        { value: 10000, name: '邮件发送' },
-        { value: 8500, name: '邮件送达' },
-        { value: 5000, name: '邮件打开' },
-        { value: 2500, name: '链接点击' }
+        {
+          value: 10010,
+          name: 'Email Sent',
+          extraData: {
+            icon: 'mdi-near-me',
+            labelList: [
+              {
+                type: 'primary',
+                text: '10,010'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-top-right',
+                text: '+1.01% this week'
+              }
+            ]
+          }
+        },
+        {
+          value: 8500,
+          name: 'Email Delivered',
+          extraData: {
+            icon: 'mdi-email-mark-as-unread',
+            labelList: [
+              {
+                type: 'primary',
+                text: '8,500'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-top-right',
+                text: '+1.01% this week'
+              },
+              {
+                type: 'primary',
+                text: '84.9%'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-top-right',
+                text: '+1.01% this week'
+              }
+            ]
+          }
+        },
+        {
+          value: 5000,
+          name: 'Email Opened',
+          extraData: {
+            icon: 'mdi-check-all',
+            labelList: [
+              {
+                type: 'primary',
+                text: '5,000'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-top-right',
+                text: '+1.01% this week'
+              },
+              {
+                type: 'primary',
+                text: '58.8%'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-bottom-left',
+                text: '-1.01% this week'
+              }
+            ]
+          }
+        },
+        {
+          value: 2500,
+          name: 'Link Clicked',
+          extraData: {
+            icon: 'mdi-link',
+            labelList: [
+              {
+                type: 'primary',
+                text: '2,500'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-top-right',
+                text: '+1.01% this week'
+              },
+              {
+                type: 'primary',
+                text: '50.0%'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-top-right',
+                text: '+1.01% this week'
+              }
+            ]
+          }
+        }
       ]
     }
   ]
@@ -151,127 +246,6 @@ const funnelChartData = ref({
 .chart-container {
   width: 100%;
   height: 400px; /* 增加高度以便更好地显示所有段 */
-}
-</style>
-```
-
-:::
-
-漏斗图组件被优化为显示正好4个数据段（发送、送达、打开、点击），这种标准化格式适用于大多数邮件营销场景。如果传入少于4个数据段，组件会自动添加缺失的段以确保一致的显示效果。
-
-可以通过传入不同数量的数据项来创建适合业务需求的漏斗图，组件会自动从数据项中提取名称生成图例：
-
-```vue
-<script setup>
-const yourFunnelData = ref({
-  series: [
-    {
-      name: '用户行为',
-      data: [
-        { value: 100000, name: '浏览网站' },
-        { value: 60000, name: '浏览产品' },
-        { value: 30000, name: '加入购物车' },
-        { value: 10000, name: '完成购买' }
-      ]
-    }
-  ]
-})
-</script>
-```
-
-也可以传入数组格式的 options，实现多个漏斗图切换：
-
-:::demo
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue'
-
-// 定义不同时间段的转化数据
-const funnelData = ref([
-  {
-    title: {
-      text: 'User Activity (7 Days)'
-    },
-    series: [
-      {
-        name: '7 days',
-        data: [
-          { value: 1840863, name: 'View Website' },
-          { value: 1200000, name: 'View Products' },
-          { value: 588604, name: 'Add Products To Cart' },
-          { value: 202022, name: 'Purchase Products' }
-        ]
-      }
-    ]
-  },
-  {
-    title: {
-      text: 'User Activity (14 Days)'
-    },
-    series: [
-      {
-        name: '14 days',
-        data: [
-          { value: 3209035, name: 'View Website' },
-          { value: 2209035, name: 'View Products' },
-          { value: 706324, name: 'Add Products To Cart' },
-          { value: 242426, name: 'Purchase Products' }
-        ]
-      }
-    ]
-  },
-  {
-    title: {
-      text: 'User Activity (30 Days)'
-    },
-    series: [
-      {
-        name: '30 days',
-        data: [
-          { value: 3977208, name: 'View Website' },
-          { value: 2577208, name: 'View Products' },
-          { value: 824045, name: 'Add Products To Cart' },
-          { value: 282830, name: 'Purchase Products' }
-        ]
-      }
-    ]
-  }
-])
-</script>
-<template>
-  <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart presets="funnelChart" :options="funnelData">
-      <template #action="{ list, currentIndex, toggle }">
-        <div
-          class="d-flex align-center bg-grey-lighten-3 rounded pa-1 mr-4 mt-4"
-          style="height: 32px;"
-        >
-          <button
-            v-for="(_, idx) in list"
-            :key="idx"
-            class="text-body-2 rounded text-no-wrap border-0 flex-grow-1 d-flex align-center justify-center rounded px-2"
-            style="height: 24px; cursor: pointer; transition: all 0.3s;"
-            :style="
-              currentIndex === idx
-                ? 'background-color: #fff; color: #4a4a4a;'
-                : 'background-color: transparent; color: rgb(117, 117, 117);'
-            "
-            @click="toggle(idx)"
-          >
-            {{ idx === 0 ? 'Past 7 Days' : idx === 1 ? 'Past 14 Days' : 'Past 30 Days' }}
-          </button>
-        </div>
-      </template>
-    </vx-chart>
-  </div>
-</template>
-
-<style scoped>
-.chart-container {
-  width: 100%;
-
-  position: relative;
 }
 </style>
 ```

@@ -257,7 +257,7 @@ export const funnelChartPreset: ChartOptions = {
   ...lightAnimationConfig,
   tooltip: {
     trigger: 'item',
-    formatter: '{a} <br/>{b} : {c}',
+    formatter: '{b} : {c}',
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderColor: '#eee',
     borderWidth: 1,
@@ -279,7 +279,7 @@ export const funnelChartPreset: ChartOptions = {
   color: ['#e7edfc', '#91a3e9', '#4662d5', '#3a50ac'],
   series: [
     {
-      name: 'Funnel', // 使用通用名称，会被用户传入的series name覆盖
+      name: '', // 使用通用名称，会被用户传入的series name覆盖
       type: 'funnel',
       orient: 'horizontal',
       funnelAlign: 'bottom',
@@ -297,24 +297,9 @@ export const funnelChartPreset: ChartOptions = {
       // 增加段之间的间隔
       gap: 0,
       // 标签配置
-      label: {
-        show: false,
-        position: 'inside',
-        formatter: '{b}',
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#fff'
-      },
       labelLine: {
-        show: true
+        show: false
       }
-      // 强调效果
-      // emphasis: {
-      //   label: {
-      //     fontSize: 16,
-      //     fontWeight: 'bold'
-      //   }
-      // }
     }
   ]
 }

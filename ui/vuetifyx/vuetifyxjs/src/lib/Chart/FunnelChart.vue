@@ -45,103 +45,44 @@
     </div> -->
     <div class="funnel-cols-container" :style="containerStyles">
       <div class="funnel-cols">
-        <!-- Email Sent Column -->
-        <div class="funnel-col">
+        <!-- 动态生成漏斗列 -->
+        <div class="funnel-col" v-for="(item, index) in internalData" :key="index">
           <div class="funnel-card" :style="cardStyles">
-            <div class="funnel-card-text" :style="cardTextStyles">Email Sent</div>
+            <div class="funnel-card-text" :style="cardTextStyles">{{ item.name }}</div>
             <div class="funnel-card-icon" :style="iconStyles">
-              <v-icon icon="mdi-near-me" color="#3E63DD" :size="iconSize" />
+              <v-icon :icon="getDefaultIcon(index)" color="#3E63DD" :size="iconSize" />
             </div>
           </div>
+          <!-- 主数值卡片 -->
           <div class="funnel-stat-card" :style="statCardStyles">
             <div class="funnel-stat-value" :style="statValueStyles">
-              {{ formatNumber(data[0]?.value || 0) }}
+              {{ getStatValue(item, index, 0) }}
             </div>
             <div class="funnel-stat-trend" :style="statTrendStyles">
-              <v-icon icon="mdi-arrow-top-right" color="#4CAF50" :size="iconSize" />
-              <span class="trend-text" :style="trendTextStyles">+1.01% this week</span>
+              <v-icon
+                :icon="getStatTrend(item, index, 0).icon"
+                :color="getStatTrend(item, index, 0).color"
+                :size="iconSize"
+              />
+              <span class="trend-text" :style="trendTextStyles">{{
+                getStatTrend(item, index, 0).text
+              }}</span>
             </div>
           </div>
-        </div>
-
-        <!-- Email Delivered Column -->
-        <div class="funnel-col">
-          <div class="funnel-card" :style="cardStyles">
-            <div class="funnel-card-text" :style="cardTextStyles">Email Delivered</div>
-            <div class="funnel-card-icon" :style="iconStyles">
-              <v-icon icon="mdi-email-mark-as-unread" color="#3E63DD" :size="iconSize" />
-            </div>
-          </div>
-          <div class="funnel-stat-card" :style="statCardStyles">
+          <!-- 转化率卡片 (对第一个阶段不显示) -->
+          <div class="funnel-stat-card" :style="statCardStyles" v-if="index > 0">
             <div class="funnel-stat-value" :style="statValueStyles">
-              {{ formatNumber(data[1]?.value || 0) }}
+              {{ getStatValue(item, index, 1) }}
             </div>
             <div class="funnel-stat-trend" :style="statTrendStyles">
-              <v-icon icon="mdi-arrow-top-right" color="#4CAF50" :size="iconSize" />
-              <span class="trend-text" :style="trendTextStyles">+1.01% this week</span>
-            </div>
-          </div>
-          <div class="funnel-stat-card" :style="statCardStyles">
-            <div class="funnel-stat-value" :style="statValueStyles">
-              {{ calculateDeliveryRate() }}%
-            </div>
-            <div class="funnel-stat-trend" :style="statTrendStyles">
-              <v-icon icon="mdi-arrow-top-right" color="#4CAF50" :size="iconSize" />
-              <span class="trend-text" :style="trendTextStyles">+1.01% this week</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Email Opened Column -->
-        <div class="funnel-col">
-          <div class="funnel-card" :style="cardStyles">
-            <div class="funnel-card-text" :style="cardTextStyles">Email Opened</div>
-            <div class="funnel-card-icon" :style="iconStyles">
-              <v-icon icon="mdi-check-all" color="#3E63DD" :size="iconSize" />
-            </div>
-          </div>
-          <div class="funnel-stat-card" :style="statCardStyles">
-            <div class="funnel-stat-value" :style="statValueStyles">
-              {{ formatNumber(data[2]?.value || 0) }}
-            </div>
-            <div class="funnel-stat-trend" :style="statTrendStyles">
-              <v-icon icon="mdi-arrow-top-right" color="#4CAF50" :size="iconSize" />
-              <span class="trend-text" :style="trendTextStyles">+1.01% this week</span>
-            </div>
-          </div>
-          <div class="funnel-stat-card" :style="statCardStyles">
-            <div class="funnel-stat-value" :style="statValueStyles">{{ calculateOpenRate() }}%</div>
-            <div class="funnel-stat-trend" :style="statTrendStyles">
-              <v-icon icon="mdi-arrow-bottom-left" color="#F44336" :size="iconSize" />
-              <span class="trend-text" :style="trendTextStyles">-1.01% this week</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Link Clicked Column -->
-        <div class="funnel-col">
-          <div class="funnel-card" :style="cardStyles">
-            <div class="funnel-card-text" :style="cardTextStyles">Link Clicked</div>
-            <div class="funnel-card-icon" :style="iconStyles">
-              <v-icon icon="mdi-link" color="#3E63DD" :size="iconSize" />
-            </div>
-          </div>
-          <div class="funnel-stat-card" :style="statCardStyles">
-            <div class="funnel-stat-value" :style="statValueStyles">
-              {{ formatNumber(data[3]?.value || 0) }}
-            </div>
-            <div class="funnel-stat-trend" :style="statTrendStyles">
-              <v-icon icon="mdi-arrow-top-right" color="#4CAF50" :size="iconSize" />
-              <span class="trend-text" :style="trendTextStyles">+1.01% this week</span>
-            </div>
-          </div>
-          <div class="funnel-stat-card" :style="statCardStyles">
-            <div class="funnel-stat-value" :style="statValueStyles">
-              {{ calculateClickRate() }}%
-            </div>
-            <div class="funnel-stat-trend" :style="statTrendStyles">
-              <v-icon icon="mdi-arrow-top-right" color="#4CAF50" :size="iconSize" />
-              <span class="trend-text" :style="trendTextStyles">+1.01% this week</span>
+              <v-icon
+                :icon="getStatTrend(item, index, 1).icon"
+                :color="getStatTrend(item, index, 1).color"
+                :size="iconSize"
+              />
+              <span class="trend-text" :style="trendTextStyles">{{
+                getStatTrend(item, index, 1).text
+              }}</span>
             </div>
           </div>
         </div>
@@ -158,35 +99,177 @@ import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import * as echarts from 'echarts'
 import { funnelChartPreset } from './presets.config'
 
+interface LabelItem {
+  type: string
+  text: string
+  icon?: string
+}
+
+interface ExtraData {
+  icon?: string
+  labelList?: LabelItem[]
+}
+
 interface FunnelItem {
   value: number
   name: string
+  extraData?: ExtraData
 }
 
 interface FunnelChartProps {
   data: FunnelItem[]
+  icons?: {
+    sent?: string
+    delivered?: string
+    opened?: string
+    clicked?: string
+  }
+  dataSource?: {
+    url?: string
+    refreshInterval?: number
+    fetchFn?: () => Promise<FunnelItem[]>
+  }
 }
 
 const props = defineProps<FunnelChartProps>()
 const chartInstance = ref<echarts.EChartsType | null>(null)
 const containerRef = ref<HTMLElement | null>(null)
 const containerWidth = ref(0)
+const internalData = ref<FunnelItem[]>([])
+const refreshTimer = ref<number | null>(null)
+const observer = ref<ResizeObserver | null>(null)
+
+watch(
+  () => props.data,
+  (newData) => {
+    internalData.value = [...newData]
+  },
+  { immediate: true }
+)
+
+const defaultIcons = {
+  sent: 'mdi-near-me',
+  delivered: 'mdi-email-mark-as-unread',
+  opened: 'mdi-check-all',
+  clicked: 'mdi-link'
+}
+
+// 获取默认图标，根据索引位置
+const getDefaultIcon = (index: number) => {
+  switch (index) {
+    case 0:
+      return defaultIcons.sent
+    case 1:
+      return defaultIcons.delivered
+    case 2:
+      return defaultIcons.opened
+    case 3:
+      return defaultIcons.clicked
+    default:
+      return 'mdi-check'
+  }
+}
+
+// 获取可配置的图标对象
+const icons = computed(() => ({
+  ...defaultIcons,
+  ...(props.icons || {})
+}))
+
+// 根据item和索引位置获取统计值
+const getStatValue = (item: FunnelItem, index: number, statIndex: number) => {
+  // statIndex 0: 主数值, 1: 转化率
+  if (item.extraData?.labelList && item.extraData.labelList.length > statIndex * 2) {
+    // 找到对应的主要标签（type为primary）
+    const primaryLabels = item.extraData.labelList.filter((l) => l.type === 'primary')
+    if (primaryLabels.length > statIndex) {
+      return primaryLabels[statIndex].text
+    }
+  }
+
+  // 默认值处理
+  if (statIndex === 0) {
+    // 主数值
+    return formatNumber(item.value || 0)
+  } else {
+    // 转化率，除了第一个元素，其他都计算相对于前一个的转化率
+    if (index > 0 && internalData.value[index - 1].value) {
+      return `${((item.value / internalData.value[index - 1].value) * 100).toFixed(1)}%`
+    }
+    return '0%'
+  }
+}
+
+// 根据item和索引位置获取趋势信息
+const getStatTrend = (item: FunnelItem, index: number, statIndex: number) => {
+  // 查找对应的次要标签（type为secondary）
+  if (item.extraData?.labelList) {
+    const secondaryLabels = item.extraData.labelList.filter((l) => l.type === 'secondary')
+    if (secondaryLabels.length > statIndex) {
+      const label = secondaryLabels[statIndex]
+      return {
+        icon: label.icon,
+        text: label.text,
+        color: label.icon?.includes('bottom') ? '#F44336' : '#4CAF50'
+      }
+    }
+  }
+
+  // 默认趋势值
+  if (statIndex === 0 || index % 2 === 0) {
+    return { icon: 'mdi-arrow-top-right', text: '+1.01% this week', color: '#4CAF50' }
+  } else {
+    return { icon: 'mdi-arrow-bottom-left', text: '-1.01% this week', color: '#F44336' }
+  }
+}
+
+const fetchData = async () => {
+  try {
+    if (props.dataSource?.fetchFn) {
+      const data = await props.dataSource.fetchFn()
+      internalData.value = data
+    } else if (props.dataSource?.url) {
+      const response = await fetch(props.dataSource.url)
+      const data = await response.json()
+      internalData.value = data
+    }
+  } catch (error) {
+    console.error('FunnelChart: Error fetching data', error)
+  }
+}
+
+const setupDataSync = () => {
+  if (props.dataSource?.refreshInterval && (props.dataSource.url || props.dataSource.fetchFn)) {
+    if (refreshTimer.value) {
+      clearInterval(refreshTimer.value)
+    }
+
+    refreshTimer.value = window.setInterval(() => {
+      fetchData()
+    }, props.dataSource.refreshInterval)
+
+    fetchData()
+  }
+}
+
+watch(
+  () => props.dataSource,
+  () => {
+    setupDataSync()
+  },
+  { deep: true }
+)
+
 const scaleFactor = computed(() => {
-  // When width is less than 700px but more than 534px, scale proportionally
   if (containerWidth.value < 700 && containerWidth.value >= 534) {
-    // Linear interpolation between 1.0 and 0.7 based on width between 700 and 534
     const ratio = (containerWidth.value - 534) / (700 - 534)
     return 0.7 + ratio * 0.3
-  }
-  // When width is less than or equal to 534px, fix scale at 70%
-  else if (containerWidth.value < 534) {
+  } else if (containerWidth.value < 534) {
     return 0.7
   }
-  // Default full size
   return 1
 })
 
-// Computed styles based on scale factor
 const containerStyles = computed(() => {
   return {
     height: `${580 * scaleFactor.value}px`
@@ -252,128 +335,121 @@ const visualStyles = computed(() => {
   }
 })
 
-// Computed icon size based on scale factor
 const iconSize = computed(() => {
   return Math.round(20 * scaleFactor.value)
 })
 
-// Format number to include commas
 const formatNumber = (num: number): string => {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
-// Calculate delivery rate (second value / first value * 100)
 const calculateDeliveryRate = () => {
-  if (!props.data || props.data.length < 2 || !props.data[0].value) return 0
-  return ((props.data[1].value / props.data[0].value) * 100).toFixed(1)
+  if (!internalData.value || internalData.value.length < 2 || !internalData.value[0].value) return 0
+  return ((internalData.value[1].value / internalData.value[0].value) * 100).toFixed(1)
 }
 
-// Calculate open rate (third value / second value * 100)
 const calculateOpenRate = () => {
-  if (!props.data || props.data.length < 3 || !props.data[1].value) return 0
-  return ((props.data[2].value / props.data[1].value) * 100).toFixed(1)
+  if (!internalData.value || internalData.value.length < 3 || !internalData.value[1].value) return 0
+  return ((internalData.value[2].value / internalData.value[1].value) * 100).toFixed(1)
 }
 
-// Calculate click rate (fourth value / third value * 100)
 const calculateClickRate = () => {
-  if (!props.data || props.data.length < 4 || !props.data[2].value) return 0
-  return ((props.data[3].value / props.data[2].value) * 100).toFixed(1)
+  if (!internalData.value || internalData.value.length < 4 || !internalData.value[2].value) return 0
+  return ((internalData.value[3].value / internalData.value[2].value) * 100).toFixed(1)
 }
 
-// Initialize and configure the echarts instance
 const initECharts = () => {
   const chartDom = document.getElementById('funnel-echarts-container')
   if (!chartDom) return
 
-  console.log('Initializing funnel chart with data:', JSON.stringify(props.data))
-
-  // Ensure we have 4 data points for the funnel chart
-  if (!props.data || props.data.length < 4) {
-    console.warn('FunnelChart: Missing data segments, expected 4 but got:', props.data?.length)
+  if (!internalData.value || internalData.value.length < 2) {
+    console.warn('FunnelChart: Missing data segments', internalData.value?.length)
   }
 
-  // Create echarts instance
-  chartInstance.value = echarts.init(chartDom)
+  const containerWidth = chartDom.clientWidth
+  const chartWidth = containerWidth < 534 ? 534 : containerWidth
 
-  // Configure chart
+  chartInstance.value = echarts.init(chartDom, null, {
+    width: chartWidth,
+    height: 300 * scaleFactor.value
+  })
+
   updateEChartsOptions()
+
+  setTimeout(() => {
+    if (chartInstance.value) {
+      handleResize()
+    }
+  }, 100)
 }
 
-// Update chart options when data changes
 const updateEChartsOptions = () => {
   if (!chartInstance.value) return
 
-  console.log('Updating funnel chart with data:', JSON.stringify(props.data))
+  const ensuredData = [...(internalData.value || [])]
 
-  // Get data with fallbacks to ensure we always have 4 segments
-  const ensuredData = [...(props.data || [])]
-
-  console.log('Final funnel chart data:', JSON.stringify(ensuredData))
-
-  // Start with preset options
   const options = JSON.parse(JSON.stringify(funnelChartPreset))
 
-  // Update series data with our ensured data
   options.series[0].data = ensuredData
 
-  // Log the applied options
-  console.log('Applied funnel chart options:', JSON.stringify(options.series[0]))
-
-  // Apply options
   chartInstance.value.clear()
   chartInstance.value.setOption(options)
 }
 
-// Resize chart when window size changes
 const handleResize = () => {
   if (chartInstance.value) {
-    // Get the container width
     const containerWidth = document.getElementById('funnel-echarts-container')?.clientWidth || 0
 
-    // If container is smaller than 534px, set chart to 534px width
-    if (containerWidth < 534 && chartInstance.value) {
+    if (containerWidth < 534) {
       chartInstance.value.resize({
         width: 534,
-        height: chartInstance.value.getHeight()
+        height: 300 * scaleFactor.value
       })
     } else {
-      chartInstance.value.resize()
+      chartInstance.value.resize({
+        width: containerWidth,
+        height: 300 * scaleFactor.value
+      })
     }
   }
 }
 
-// Update container width
 const updateContainerWidth = () => {
   if (containerRef.value) {
     containerWidth.value = containerRef.value.clientWidth
-    console.log('Container width updated:', containerWidth.value)
+
+    if (chartInstance.value) {
+      handleResize()
+    }
   }
 }
 
-// Watch for data changes
 watch(
-  () => props.data,
+  internalData,
   () => {
     updateEChartsOptions()
   },
   { deep: true }
 )
 
-// Initialize chart on component mount
+watch(scaleFactor, () => {
+  if (chartInstance.value) {
+    handleResize()
+  }
+})
+
 onMounted(() => {
   containerRef.value = document.querySelector('.funnel-chart-container')
   updateContainerWidth()
 
-  // Set up ResizeObserver to monitor container width changes
-  const observer = new ResizeObserver((entries) => {
+  observer.value = new ResizeObserver((entries) => {
     for (const entry of entries) {
       containerWidth.value = entry.contentRect.width
-      console.log('Container width changed:', containerWidth.value)
     }
   })
 
-  if (containerRef.value) {
-    observer.observe(containerRef.value)
+  if (containerRef.value && observer.value) {
+    observer.value.observe(containerRef.value)
   }
 
   initECharts()
@@ -382,16 +458,22 @@ onMounted(() => {
     updateContainerWidth()
   })
 
-  // Cleanup observer
-  onBeforeUnmount(() => {
-    if (containerRef.value) {
-      observer.unobserve(containerRef.value)
-    }
-  })
+  // Setup external data source sync
+  setupDataSync()
 })
 
-// Clean up on component unmount
+// Cleanup observer
 onBeforeUnmount(() => {
+  if (containerRef.value && observer.value) {
+    observer.value.unobserve(containerRef.value)
+    observer.value.disconnect()
+  }
+
+  // Clear any interval timers
+  if (refreshTimer.value) {
+    clearInterval(refreshTimer.value)
+  }
+
   window.removeEventListener('resize', handleResize)
   if (chartInstance.value) {
     chartInstance.value.dispose()
@@ -617,7 +699,6 @@ onBeforeUnmount(() => {
   font-weight: 510;
   letter-spacing: 0.15px;
   color: #212121;
-  // margin-left: 12px;
 }
 
 .funnel-card-icon {
@@ -674,7 +755,7 @@ onBeforeUnmount(() => {
   height: 580px;
   min-width: 534px;
   .funnel-cols {
-    // pointer-events: none;
+    pointer-events: none;
     position: absolute;
     top: 0;
     left: 0;
