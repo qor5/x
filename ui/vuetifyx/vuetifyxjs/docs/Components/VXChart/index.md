@@ -251,7 +251,6 @@ const funnelChartData = ref({
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 400px; /* 增加高度以便更好地显示所有段 */
 }
 </style>
 ```

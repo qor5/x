@@ -158,11 +158,11 @@ const getDefaultIcon = (index: number) => {
   }
 }
 
-// 获取可配置的图标对象
-const icons = computed(() => ({
-  ...defaultIcons,
-  ...(props.icons || {})
-}))
+// // 获取可配置的图标对象
+// const icons = computed(() => ({
+//   ...defaultIcons,
+//   ...(props.icons || {})
+// }))
 
 // 根据item和索引位置获取统计值
 const getStatValue = (item: FunnelItem, index: number, statIndex: number) => {
