@@ -1,6 +1,6 @@
 <template>
   <div class="funnel-chart-container">
-    <!-- 添加顶部标题栏 Frame 427323478 -->
+    <!-- 添加顶部标题栏 Frame 427323478
     <div class="funnel-header">
       <div class="campaign-name-container">
         <h1 class="campaign-name">Campaign Name</h1>
@@ -13,10 +13,10 @@
           <span class="badge-text">Last Updated: 13:28 07/12/2024</span>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- 顶部统计卡片 Frame 427323603 -->
-    <div class="funnel-summary-cards">
+    <!-- <div class="funnel-summary-cards">
       <div class="summary-card">
         <div class="summary-tag blue">
           <div class="tag-dot blue-dot"></div>
@@ -42,101 +42,113 @@
         <div class="summary-desc">Campaign manually paused</div>
         <div class="summary-value">89,935</div>
       </div>
-    </div>
-    <div class="funnel-cols-container">
+    </div> -->
+    <div class="funnel-cols-container" :style="containerStyles">
       <div class="funnel-cols">
         <!-- Email Sent Column -->
         <div class="funnel-col">
-          <div class="funnel-card">
-            <div class="funnel-card-text">Email Sent</div>
-            <div class="funnel-card-icon">
-              <v-icon icon="mdi-send" color="#212121" />
+          <div class="funnel-card" :style="cardStyles">
+            <div class="funnel-card-text" :style="cardTextStyles">Email Sent</div>
+            <div class="funnel-card-icon" :style="iconStyles">
+              <v-icon icon="mdi-near-me" color="#3E63DD" :size="iconSize" />
             </div>
           </div>
-          <div class="funnel-stat-card">
-            <div class="funnel-stat-value">{{ formatNumber(data[0]?.value || 0) }}</div>
-            <div class="funnel-stat-trend">
-              <v-icon icon="mdi-arrow-up" color="#4CAF50" size="20" />
-              <span class="trend-text">+1.01% this week</span>
+          <div class="funnel-stat-card" :style="statCardStyles">
+            <div class="funnel-stat-value" :style="statValueStyles">
+              {{ formatNumber(data[0]?.value || 0) }}
+            </div>
+            <div class="funnel-stat-trend" :style="statTrendStyles">
+              <v-icon icon="mdi-arrow-top-right" color="#4CAF50" :size="iconSize" />
+              <span class="trend-text" :style="trendTextStyles">+1.01% this week</span>
             </div>
           </div>
         </div>
 
         <!-- Email Delivered Column -->
         <div class="funnel-col">
-          <div class="funnel-card">
-            <div class="funnel-card-text">Email Delivered</div>
-            <div class="funnel-card-icon">
-              <v-icon icon="mdi-email-check" color="#212121" />
+          <div class="funnel-card" :style="cardStyles">
+            <div class="funnel-card-text" :style="cardTextStyles">Email Delivered</div>
+            <div class="funnel-card-icon" :style="iconStyles">
+              <v-icon icon="mdi-email-mark-as-unread" color="#3E63DD" :size="iconSize" />
             </div>
           </div>
-          <div class="funnel-stat-card">
-            <div class="funnel-stat-value">{{ formatNumber(data[1]?.value || 0) }}</div>
-            <div class="funnel-stat-trend">
-              <v-icon icon="mdi-arrow-up" color="#4CAF50" size="20" />
-              <span class="trend-text">+1.01% this week</span>
+          <div class="funnel-stat-card" :style="statCardStyles">
+            <div class="funnel-stat-value" :style="statValueStyles">
+              {{ formatNumber(data[1]?.value || 0) }}
+            </div>
+            <div class="funnel-stat-trend" :style="statTrendStyles">
+              <v-icon icon="mdi-arrow-top-right" color="#4CAF50" :size="iconSize" />
+              <span class="trend-text" :style="trendTextStyles">+1.01% this week</span>
             </div>
           </div>
-          <div class="funnel-stat-card">
-            <div class="funnel-stat-value">{{ calculateDeliveryRate() }}%</div>
-            <div class="funnel-stat-trend">
-              <v-icon icon="mdi-arrow-up" color="#4CAF50" size="20" />
-              <span class="trend-text">+1.01% this week</span>
+          <div class="funnel-stat-card" :style="statCardStyles">
+            <div class="funnel-stat-value" :style="statValueStyles">
+              {{ calculateDeliveryRate() }}%
+            </div>
+            <div class="funnel-stat-trend" :style="statTrendStyles">
+              <v-icon icon="mdi-arrow-top-right" color="#4CAF50" :size="iconSize" />
+              <span class="trend-text" :style="trendTextStyles">+1.01% this week</span>
             </div>
           </div>
         </div>
 
         <!-- Email Opened Column -->
         <div class="funnel-col">
-          <div class="funnel-card">
-            <div class="funnel-card-text">Email Opened</div>
-            <div class="funnel-card-icon">
-              <v-icon icon="mdi-check-all" color="#212121" />
+          <div class="funnel-card" :style="cardStyles">
+            <div class="funnel-card-text" :style="cardTextStyles">Email Opened</div>
+            <div class="funnel-card-icon" :style="iconStyles">
+              <v-icon icon="mdi-check-all" color="#3E63DD" :size="iconSize" />
             </div>
           </div>
-          <div class="funnel-stat-card">
-            <div class="funnel-stat-value">{{ formatNumber(data[2]?.value || 0) }}</div>
-            <div class="funnel-stat-trend">
-              <v-icon icon="mdi-arrow-up" color="#4CAF50" size="20" />
-              <span class="trend-text">+1.01% this week</span>
+          <div class="funnel-stat-card" :style="statCardStyles">
+            <div class="funnel-stat-value" :style="statValueStyles">
+              {{ formatNumber(data[2]?.value || 0) }}
+            </div>
+            <div class="funnel-stat-trend" :style="statTrendStyles">
+              <v-icon icon="mdi-arrow-top-right" color="#4CAF50" :size="iconSize" />
+              <span class="trend-text" :style="trendTextStyles">+1.01% this week</span>
             </div>
           </div>
-          <div class="funnel-stat-card">
-            <div class="funnel-stat-value">{{ calculateOpenRate() }}%</div>
-            <div class="funnel-stat-trend">
-              <v-icon icon="mdi-arrow-down" color="#F44336" size="20" />
-              <span class="trend-text">-1.01% this week</span>
+          <div class="funnel-stat-card" :style="statCardStyles">
+            <div class="funnel-stat-value" :style="statValueStyles">{{ calculateOpenRate() }}%</div>
+            <div class="funnel-stat-trend" :style="statTrendStyles">
+              <v-icon icon="mdi-arrow-bottom-left" color="#F44336" :size="iconSize" />
+              <span class="trend-text" :style="trendTextStyles">-1.01% this week</span>
             </div>
           </div>
         </div>
 
         <!-- Link Clicked Column -->
         <div class="funnel-col">
-          <div class="funnel-card">
-            <div class="funnel-card-text">Link Clicked</div>
-            <div class="funnel-card-icon">
-              <v-icon icon="mdi-link" color="#212121" />
+          <div class="funnel-card" :style="cardStyles">
+            <div class="funnel-card-text" :style="cardTextStyles">Link Clicked</div>
+            <div class="funnel-card-icon" :style="iconStyles">
+              <v-icon icon="mdi-link" color="#3E63DD" :size="iconSize" />
             </div>
           </div>
-          <div class="funnel-stat-card">
-            <div class="funnel-stat-value">{{ formatNumber(data[3]?.value || 0) }}</div>
-            <div class="funnel-stat-trend">
-              <v-icon icon="mdi-arrow-up" color="#4CAF50" size="20" />
-              <span class="trend-text">+1.01% this week</span>
+          <div class="funnel-stat-card" :style="statCardStyles">
+            <div class="funnel-stat-value" :style="statValueStyles">
+              {{ formatNumber(data[3]?.value || 0) }}
+            </div>
+            <div class="funnel-stat-trend" :style="statTrendStyles">
+              <v-icon icon="mdi-arrow-top-right" color="#4CAF50" :size="iconSize" />
+              <span class="trend-text" :style="trendTextStyles">+1.01% this week</span>
             </div>
           </div>
-          <div class="funnel-stat-card">
-            <div class="funnel-stat-value">{{ calculateClickRate() }}%</div>
-            <div class="funnel-stat-trend">
-              <v-icon icon="mdi-arrow-up" color="#4CAF50" size="20" />
-              <span class="trend-text">+1.01% this week</span>
+          <div class="funnel-stat-card" :style="statCardStyles">
+            <div class="funnel-stat-value" :style="statValueStyles">
+              {{ calculateClickRate() }}%
+            </div>
+            <div class="funnel-stat-trend" :style="statTrendStyles">
+              <v-icon icon="mdi-arrow-top-right" color="#4CAF50" :size="iconSize" />
+              <span class="trend-text" :style="trendTextStyles">+1.01% this week</span>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Actual Funnel Visual with echarts -->
-      <div id="funnel-echarts-container" class="funnel-visual"></div>
+      <div id="funnel-echarts-container" class="funnel-visual" :style="visualStyles"></div>
     </div>
   </div>
 </template>
@@ -157,6 +169,93 @@ interface FunnelChartProps {
 
 const props = defineProps<FunnelChartProps>()
 const chartInstance = ref<echarts.EChartsType | null>(null)
+const containerRef = ref<HTMLElement | null>(null)
+const containerWidth = ref(0)
+const scaleFactor = computed(() => {
+  // When width is less than 700px but more than 534px, scale proportionally
+  if (containerWidth.value < 700 && containerWidth.value >= 534) {
+    // Linear interpolation between 1.0 and 0.7 based on width between 700 and 534
+    const ratio = (containerWidth.value - 534) / (700 - 534)
+    return 0.7 + ratio * 0.3
+  }
+  // When width is less than or equal to 534px, fix scale at 70%
+  else if (containerWidth.value < 534) {
+    return 0.7
+  }
+  // Default full size
+  return 1
+})
+
+// Computed styles based on scale factor
+const containerStyles = computed(() => {
+  return {
+    height: `${580 * scaleFactor.value}px`
+  }
+})
+
+const cardStyles = computed(() => {
+  return {
+    padding: scaleFactor.value === 1 ? '22px 12px' : '15px 8px',
+    height: `${68 * scaleFactor.value}px`,
+    marginBottom: `${24 * scaleFactor.value}px`
+  }
+})
+
+const cardTextStyles = computed(() => {
+  return {
+    fontSize: `${16 * scaleFactor.value}px`,
+    lineHeight: `${20 * scaleFactor.value}px`
+  }
+})
+
+const iconStyles = computed(() => {
+  return {
+    width: `${44 * scaleFactor.value}px`,
+    height: `${44 * scaleFactor.value}px`,
+    borderRadius: `${12 * scaleFactor.value}px`
+  }
+})
+
+const statCardStyles = computed(() => {
+  return {
+    marginBottom: `${24 * scaleFactor.value}px`,
+    padding: `0 ${12 * scaleFactor.value}px`
+  }
+})
+
+const statValueStyles = computed(() => {
+  return {
+    fontSize: `${28 * scaleFactor.value}px`,
+    marginBottom: `${12 * scaleFactor.value}px`,
+    lineHeight: `${32 * scaleFactor.value}px`
+  }
+})
+
+const statTrendStyles = computed(() => {
+  return {
+    fontSize: `${14 * scaleFactor.value}px`,
+    lineHeight: `${18 * scaleFactor.value}px`
+  }
+})
+
+const trendTextStyles = computed(() => {
+  return {
+    marginLeft: `${12 * scaleFactor.value}px`,
+    lineHeight: `${18 * scaleFactor.value}px`
+  }
+})
+
+const visualStyles = computed(() => {
+  return {
+    height: `${300 * scaleFactor.value}px`,
+    minWidth: '534px'
+  }
+})
+
+// Computed icon size based on scale factor
+const iconSize = computed(() => {
+  return Math.round(20 * scaleFactor.value)
+})
 
 // Format number to include commas
 const formatNumber = (num: number): string => {
@@ -228,7 +327,26 @@ const updateEChartsOptions = () => {
 // Resize chart when window size changes
 const handleResize = () => {
   if (chartInstance.value) {
-    chartInstance.value.resize()
+    // Get the container width
+    const containerWidth = document.getElementById('funnel-echarts-container')?.clientWidth || 0
+
+    // If container is smaller than 534px, set chart to 534px width
+    if (containerWidth < 534 && chartInstance.value) {
+      chartInstance.value.resize({
+        width: 534,
+        height: chartInstance.value.getHeight()
+      })
+    } else {
+      chartInstance.value.resize()
+    }
+  }
+}
+
+// Update container width
+const updateContainerWidth = () => {
+  if (containerRef.value) {
+    containerWidth.value = containerRef.value.clientWidth
+    console.log('Container width updated:', containerWidth.value)
   }
 }
 
@@ -243,8 +361,33 @@ watch(
 
 // Initialize chart on component mount
 onMounted(() => {
+  containerRef.value = document.querySelector('.funnel-chart-container')
+  updateContainerWidth()
+
+  // Set up ResizeObserver to monitor container width changes
+  const observer = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      containerWidth.value = entry.contentRect.width
+      console.log('Container width changed:', containerWidth.value)
+    }
+  })
+
+  if (containerRef.value) {
+    observer.observe(containerRef.value)
+  }
+
   initECharts()
-  window.addEventListener('resize', handleResize)
+  window.addEventListener('resize', () => {
+    handleResize()
+    updateContainerWidth()
+  })
+
+  // Cleanup observer
+  onBeforeUnmount(() => {
+    if (containerRef.value) {
+      observer.unobserve(containerRef.value)
+    }
+  })
 })
 
 // Clean up on component unmount
@@ -474,10 +617,11 @@ onBeforeUnmount(() => {
   font-weight: 510;
   letter-spacing: 0.15px;
   color: #212121;
-  margin-left: 12px;
+  // margin-left: 12px;
 }
 
 .funnel-card-icon {
+  flex-shrink: 0;
   width: 44px;
   height: 44px;
   background-color: #ffffff;
@@ -485,7 +629,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 12px;
+  // margin-right: 12px;
 }
 
 .funnel-stat-card {
@@ -527,9 +671,10 @@ onBeforeUnmount(() => {
 
 .funnel-cols-container {
   position: relative;
-  height: 550px;
+  height: 580px;
+  min-width: 534px;
   .funnel-cols {
-    pointer-events: none;
+    // pointer-events: none;
     position: absolute;
     top: 0;
     left: 0;
@@ -537,6 +682,55 @@ onBeforeUnmount(() => {
     bottom: 0;
 
     z-index: 2;
+  }
+}
+
+/* Media query for smaller screens */
+@media screen and (max-width: 700px) {
+  .funnel-cols-container {
+    height: 406px; /* 580px * 0.7 = 406px */
+  }
+
+  .funnel-chart-container {
+    overflow-x: auto;
+  }
+
+  .funnel-card {
+    padding: 15px 8px;
+    height: 48px;
+    margin-bottom: 17px;
+  }
+
+  .funnel-card-text {
+    font-size: 11.2px;
+  }
+
+  .funnel-card-icon {
+    width: 31px;
+    height: 31px;
+    border-radius: 8px;
+  }
+
+  .funnel-stat-card {
+    margin-bottom: 17px;
+    padding: 0 8px;
+  }
+
+  .funnel-stat-value {
+    font-size: 19.6px;
+    margin-bottom: 8px;
+  }
+
+  .funnel-stat-trend {
+    font-size: 9.8px;
+  }
+
+  .trend-text {
+    margin-left: 8px;
+  }
+
+  .funnel-visual {
+    height: 210px;
   }
 }
 </style>
