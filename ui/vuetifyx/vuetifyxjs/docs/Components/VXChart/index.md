@@ -6,11 +6,11 @@
 
 ### Props
 
-| 参数名  | 说明                                     | 类型              | 默认值 |
-| ------- | ---------------------------------------- | ----------------- | ------ |
+| 参数名  | 说明                                                    | 类型              | 默认值 |
+| ------- | ------------------------------------------------------- | ----------------- | ------ |
 | presets | 预设样式，可选值：'barChart'、'pieChart'、'funnelChart' | String            | ''     |
-| options | 图表配置项，会与预设样式合并             | Object \ Object[] | {}     |
-| loading | 是否显示加载状态                         | Boolean           | false  |
+| options | 图表配置项，会与预设样式合并                            | Object \ Object[] | {}     |
+| loading | 是否显示加载状态                                        | Boolean           | false  |
 
 ### Slots
 
@@ -62,7 +62,6 @@ const barChartData = ref({
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 400px;
 }
 </style>
 ```
@@ -109,7 +108,6 @@ const pieChartData = ref({
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 400px;
 }
 </style>
 ```
@@ -128,15 +126,16 @@ import { ref } from 'vue'
 
 const funnelChartData = ref({
   title: {
-    text: '销售转化漏斗'
+    text: '邮件营销漏斗'
   },
   series: [
     {
-      name: '转化漏斗',
+      name: '邮件营销',
       data: [
-        { value: 1840863, name: 'View Products' },
-        { value: 588604, name: 'Add Products To Cart' },
-        { value: 202022, name: 'Purchase Products' }
+        { value: 10000, name: '邮件发送' },
+        { value: 8500, name: '邮件送达' },
+        { value: 5000, name: '邮件打开' },
+        { value: 2500, name: '链接点击' }
       ]
     }
   ]
@@ -151,25 +150,31 @@ const funnelChartData = ref({
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 400px;
+  height: 400px; /* 增加高度以便更好地显示所有段 */
 }
 </style>
 ```
 
 :::
 
+漏斗图组件被优化为显示正好4个数据段（发送、送达、打开、点击），这种标准化格式适用于大多数邮件营销场景。如果传入少于4个数据段，组件会自动添加缺失的段以确保一致的显示效果。
+
 可以通过传入不同数量的数据项来创建适合业务需求的漏斗图，组件会自动从数据项中提取名称生成图例：
 
 ```vue
 <script setup>
 const yourFunnelData = ref({
-  series: [{
-    name: '用户行为',
-    data: yourDataArray.map(item => ({
-      value: item.count,
-      name: item.label
-    }))
-  }]
+  series: [
+    {
+      name: '用户行为',
+      data: [
+        { value: 100000, name: '浏览网站' },
+        { value: 60000, name: '浏览产品' },
+        { value: 30000, name: '加入购物车' },
+        { value: 10000, name: '完成购买' }
+      ]
+    }
+  ]
 })
 </script>
 ```
@@ -186,45 +191,48 @@ import { ref } from 'vue'
 const funnelData = ref([
   {
     title: {
-      text: "User Activity (7 Days)"
+      text: 'User Activity (7 Days)'
     },
     series: [
       {
-        name: "7 days",
+        name: '7 days',
         data: [
-          { value: 1840863, name: "View Products" },
-          { value: 588604, name: "Add Products To Cart" },
-          { value: 202022, name: "Purchase Products" }
+          { value: 1840863, name: 'View Website' },
+          { value: 1200000, name: 'View Products' },
+          { value: 588604, name: 'Add Products To Cart' },
+          { value: 202022, name: 'Purchase Products' }
         ]
       }
     ]
   },
   {
     title: {
-      text: "User Activity (14 Days)"
+      text: 'User Activity (14 Days)'
     },
     series: [
       {
-        name: "14 days",
+        name: '14 days',
         data: [
-          { value: 2209035.6, name: "View Products" },
-          { value: 706324.8, name: "Add Products To Cart" },
-          { value: 242426.4, name: "Purchase Products" }
+          { value: 3209035, name: 'View Website' },
+          { value: 2209035, name: 'View Products' },
+          { value: 706324, name: 'Add Products To Cart' },
+          { value: 242426, name: 'Purchase Products' }
         ]
       }
     ]
   },
   {
     title: {
-      text: "User Activity (30 Days)"
+      text: 'User Activity (30 Days)'
     },
     series: [
       {
-        name: "30 days",
+        name: '30 days',
         data: [
-          { value: 2577208.2, name: "View Products" },
-          { value: 824045.6, name: "Add Products To Cart" },
-          { value: 282830.8, name: "Purchase Products" }
+          { value: 3977208, name: 'View Website' },
+          { value: 2577208, name: 'View Products' },
+          { value: 824045, name: 'Add Products To Cart' },
+          { value: 282830, name: 'Purchase Products' }
         ]
       }
     ]
@@ -262,7 +270,7 @@ const funnelData = ref([
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 400px;
+
   position: relative;
 }
 </style>
@@ -364,7 +372,7 @@ const chartData = ref([
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 400px;
+
   position: relative;
 }
 </style>
@@ -418,16 +426,18 @@ const chartData = ref([
   :options="{
     title: { text: '自定义漏斗图' },
     tooltip: {
-      formatter: '{b}: {c}人 ({d}%)'  // 自定义提示格式
+      formatter: '{b}: {c}人 ({d}%)' // 自定义提示格式
     },
-    color: ['#FF6B6B', '#FFD166', '#06D6A0', '#118AB2', '#073B4C'],  // 自定义颜色
-    series: [{
-      name: '用户行为',
-      data: myFunnelData,
-      label: {
-        position: 'right'  // 将标签放在右侧（默认在左侧）
+    color: ['#FF6B6B', '#FFD166', '#06D6A0', '#118AB2', '#073B4C'], // 自定义颜色
+    series: [
+      {
+        name: '用户行为',
+        data: myFunnelData,
+        label: {
+          position: 'right' // 将标签放在右侧（默认在左侧）
+        }
       }
-    }]
+    ]
   }"
 ></vx-chart>
 ```
