@@ -50,7 +50,7 @@
           <div class="funnel-card" :style="cardStyles">
             <div class="funnel-card-text" :style="cardTextStyles">{{ item.name }}</div>
             <div class="funnel-card-icon" :style="iconStyles">
-              <v-icon :icon="getDefaultIcon(index)" color="#3E63DD" :size="iconSize" />
+              <v-icon :icon="item.extraData?.icon" color="#3E63DD" :size="iconSize" />
             </div>
           </div>
           <!-- 主数值卡片 -->
@@ -135,35 +135,6 @@ watch(
   { immediate: true }
 )
 
-const defaultIcons = {
-  sent: 'mdi-near-me',
-  delivered: 'mdi-email-mark-as-unread',
-  opened: 'mdi-check-all',
-  clicked: 'mdi-link'
-}
-
-// 获取默认图标，根据索引位置
-const getDefaultIcon = (index: number) => {
-  switch (index) {
-    case 0:
-      return defaultIcons.sent
-    case 1:
-      return defaultIcons.delivered
-    case 2:
-      return defaultIcons.opened
-    case 3:
-      return defaultIcons.clicked
-    default:
-      return 'mdi-check'
-  }
-}
-
-// // 获取可配置的图标对象
-// const icons = computed(() => ({
-//   ...defaultIcons,
-//   ...(props.icons || {})
-// }))
-
 // 根据item和索引位置获取统计值
 const getStatValue = (item: FunnelItem, index: number, statIndex: number) => {
   // statIndex 0: 主数值, 1: 转化率
@@ -175,17 +146,7 @@ const getStatValue = (item: FunnelItem, index: number, statIndex: number) => {
     }
   }
 
-  // 默认值处理
-  if (statIndex === 0) {
-    // 主数值
-    return formatNumber(item.value || 0)
-  } else {
-    // 转化率，除了第一个元素，其他都计算相对于前一个的转化率
-    if (index > 0 && internalData.value[index - 1].value) {
-      return `${((item.value / internalData.value[index - 1].value) * 100).toFixed(1)}%`
-    }
-    return '0%'
-  }
+  return ''
 }
 
 // 根据item和索引位置获取趋势信息
@@ -203,12 +164,7 @@ const getStatTrend = (item: FunnelItem, index: number, statIndex: number) => {
     }
   }
 
-  // 默认趋势值
-  if (statIndex === 0 || index % 2 === 0) {
-    return { icon: 'mdi-arrow-top-right', text: '+1.01% this week', color: '#4CAF50' }
-  } else {
-    return { icon: 'mdi-arrow-bottom-left', text: '-1.01% this week', color: '#F44336' }
-  }
+  return { icon: '', text: '', color: '' }
 }
 
 const scaleFactor = computed(() => {
@@ -223,7 +179,7 @@ const scaleFactor = computed(() => {
 
 const containerStyles = computed(() => {
   return {
-    height: `${580 * scaleFactor.value}px`
+    height: `${541 * scaleFactor.value}px`
   }
 })
 
@@ -281,7 +237,6 @@ const trendTextStyles = computed(() => {
 
 const visualStyles = computed(() => {
   return {
-    height: `${300 * scaleFactor.value}px`,
     minWidth: '534px'
   }
 })
@@ -292,21 +247,6 @@ const iconSize = computed(() => {
 
 const formatNumber = (num: number): string => {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-}
-
-const calculateDeliveryRate = () => {
-  if (!internalData.value || internalData.value.length < 2 || !internalData.value[0].value) return 0
-  return ((internalData.value[1].value / internalData.value[0].value) * 100).toFixed(1)
-}
-
-const calculateOpenRate = () => {
-  if (!internalData.value || internalData.value.length < 3 || !internalData.value[1].value) return 0
-  return ((internalData.value[2].value / internalData.value[1].value) * 100).toFixed(1)
-}
-
-const calculateClickRate = () => {
-  if (!internalData.value || internalData.value.length < 4 || !internalData.value[2].value) return 0
-  return ((internalData.value[3].value / internalData.value[2].value) * 100).toFixed(1)
 }
 
 const initECharts = () => {
@@ -322,7 +262,7 @@ const initECharts = () => {
 
   chartInstance.value = echarts.init(chartDom, null, {
     width: chartWidth,
-    height: 300 * scaleFactor.value
+    height: 280 * scaleFactor.value
   })
 
   updateEChartsOptions()
@@ -350,18 +290,11 @@ const updateEChartsOptions = () => {
 const handleResize = () => {
   if (chartInstance.value) {
     const containerWidth = document.getElementById('funnel-echarts-container')?.clientWidth || 0
-
-    if (containerWidth < 534) {
-      chartInstance.value.resize({
-        width: 534,
-        height: 300 * scaleFactor.value
-      })
-    } else {
-      chartInstance.value.resize({
-        width: containerWidth,
-        height: 300 * scaleFactor.value
-      })
-    }
+    // console.log('containerWidth', containerWidth)
+    chartInstance.value.resize({
+      width: containerWidth,
+      height: 280 * scaleFactor.value * (containerWidth < 797 ? 0.8 : 0.93)
+    })
   }
 }
 
@@ -686,7 +619,6 @@ onBeforeUnmount(() => {
 }
 
 .funnel-visual {
-  height: 300px;
   width: 100%;
   position: absolute;
   bottom: 0;
@@ -695,7 +627,7 @@ onBeforeUnmount(() => {
 
 .funnel-cols-container {
   position: relative;
-  height: 580px;
+  height: 541px;
   min-width: 534px;
   .funnel-cols {
     pointer-events: none;

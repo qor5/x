@@ -133,25 +133,25 @@ const funnelChartData = ref({
       name: '邮件营销',
       data: [
         {
-          value: 10010,
+          value: 1000,
           name: 'Email Sent',
           extraData: {
             icon: 'mdi-near-me',
             labelList: [
               {
                 type: 'primary',
-                text: '10,010'
+                text: '1000'
               },
               {
                 type: 'secondary',
-                icon: 'mdi-arrow-top-right',
-                text: '+1.01% this week'
+                icon: '',
+                text: ''
               }
             ]
           }
         },
         {
-          value: 8500,
+          value: 800,
           name: 'Email Delivered',
           extraData: {
             icon: 'mdi-email-mark-as-unread',
@@ -162,8 +162,8 @@ const funnelChartData = ref({
               },
               {
                 type: 'secondary',
-                icon: 'mdi-arrow-top-right',
-                text: '+1.01% this week'
+                icon: '',
+                text: ''
               },
               {
                 type: 'primary',
@@ -178,7 +178,7 @@ const funnelChartData = ref({
           }
         },
         {
-          value: 5000,
+          value: 400,
           name: 'Email Opened',
           extraData: {
             icon: 'mdi-check-all',
@@ -205,7 +205,7 @@ const funnelChartData = ref({
           }
         },
         {
-          value: 2500,
+          value: 200,
           name: 'Link Clicked',
           extraData: {
             icon: 'mdi-link',
