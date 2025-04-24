@@ -6,11 +6,11 @@
 
 ### Props
 
-| 参数名  | 说明                                     | 类型              | 默认值 |
-| ------- | ---------------------------------------- | ----------------- | ------ |
+| 参数名  | 说明                                                    | 类型              | 默认值 |
+| ------- | ------------------------------------------------------- | ----------------- | ------ |
 | presets | 预设样式，可选值：'barChart'、'pieChart'、'funnelChart' | String            | ''     |
-| options | 图表配置项，会与预设样式合并             | Object \ Object[] | {}     |
-| loading | 是否显示加载状态                         | Boolean           | false  |
+| options | 图表配置项，会与预设样式合并                            | Object \ Object[] | {}     |
+| loading | 是否显示加载状态                                        | Boolean           | false  |
 
 ### Slots
 
@@ -62,7 +62,6 @@ const barChartData = ref({
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 400px;
 }
 </style>
 ```
@@ -109,7 +108,6 @@ const pieChartData = ref({
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 400px;
 }
 </style>
 ```
@@ -128,15 +126,111 @@ import { ref } from 'vue'
 
 const funnelChartData = ref({
   title: {
-    text: '销售转化漏斗'
+    text: '邮件营销漏斗'
   },
   series: [
     {
-      name: '转化漏斗',
+      name: '邮件营销',
       data: [
-        { value: 1840863, name: 'View Products' },
-        { value: 588604, name: 'Add Products To Cart' },
-        { value: 202022, name: 'Purchase Products' }
+        {
+          value: 1000,
+          name: 'Email Sent',
+          extraData: {
+            icon: 'mdi-near-me',
+            labelList: [
+              {
+                type: 'primary',
+                text: '1000'
+              },
+              {
+                type: 'secondary',
+                icon: '',
+                text: ''
+              }
+            ]
+          }
+        },
+        {
+          value: 800,
+          name: 'Email Delivered',
+          extraData: {
+            icon: 'mdi-email-mark-as-unread',
+            labelList: [
+              {
+                type: 'primary',
+                text: '8,500'
+              },
+              {
+                type: 'secondary',
+                icon: '',
+                text: ''
+              },
+              {
+                type: 'primary',
+                text: '84.9%'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-top-right',
+                text: '+1.01% this week'
+              }
+            ]
+          }
+        },
+        {
+          value: 400,
+          name: 'Email Opened',
+          extraData: {
+            icon: 'mdi-check-all',
+            labelList: [
+              {
+                type: 'primary',
+                text: '5,000'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-top-right',
+                text: '+1.01% this week'
+              },
+              {
+                type: 'primary',
+                text: '58.8%'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-bottom-left',
+                text: '-1.01% this week'
+              }
+            ]
+          }
+        },
+        {
+          value: 200,
+          name: 'Link Clicked',
+          extraData: {
+            icon: 'mdi-link',
+            labelList: [
+              {
+                type: 'primary',
+                text: '2,500'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-top-right',
+                text: '+1.01% this week'
+              },
+              {
+                type: 'primary',
+                text: '50.0%'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-top-right',
+                text: '+1.01% this week'
+              }
+            ]
+          }
+        }
       ]
     }
   ]
@@ -144,116 +238,11 @@ const funnelChartData = ref({
 </script>
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart presets="funnelChart" :options="funnelChartData"></vx-chart>
-  </div>
-</template>
-
-<style scoped>
-.chart-container {
-  width: 100%;
-  height: 400px;
-}
-</style>
-```
-
-:::
-
-可以通过传入不同数量的数据项来创建适合业务需求的漏斗图，组件会自动从数据项中提取名称生成图例：
-
-```vue
-<script setup>
-const yourFunnelData = ref({
-  series: [{
-    name: '用户行为',
-    data: yourDataArray.map(item => ({
-      value: item.count,
-      name: item.label
-    }))
-  }]
-})
-</script>
-```
-
-也可以传入数组格式的 options，实现多个漏斗图切换：
-
-:::demo
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue'
-
-// 定义不同时间段的转化数据
-const funnelData = ref([
-  {
-    title: {
-      text: "User Activity (7 Days)"
-    },
-    series: [
-      {
-        name: "7 days",
-        data: [
-          { value: 1840863, name: "View Products" },
-          { value: 588604, name: "Add Products To Cart" },
-          { value: 202022, name: "Purchase Products" }
-        ]
-      }
-    ]
-  },
-  {
-    title: {
-      text: "User Activity (14 Days)"
-    },
-    series: [
-      {
-        name: "14 days",
-        data: [
-          { value: 2209035.6, name: "View Products" },
-          { value: 706324.8, name: "Add Products To Cart" },
-          { value: 242426.4, name: "Purchase Products" }
-        ]
-      }
-    ]
-  },
-  {
-    title: {
-      text: "User Activity (30 Days)"
-    },
-    series: [
-      {
-        name: "30 days",
-        data: [
-          { value: 2577208.2, name: "View Products" },
-          { value: 824045.6, name: "Add Products To Cart" },
-          { value: 282830.8, name: "Purchase Products" }
-        ]
-      }
-    ]
-  }
-])
-</script>
-<template>
-  <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart presets="funnelChart" :options="funnelData">
-      <template #action="{ list, currentIndex, toggle }">
-        <div
-          class="d-flex align-center bg-grey-lighten-3 rounded pa-1 mr-4 mt-4"
-          style="height: 32px;"
-        >
-          <button
-            v-for="(_, idx) in list"
-            :key="idx"
-            class="text-body-2 rounded text-no-wrap border-0 flex-grow-1 d-flex align-center justify-center rounded px-2"
-            style="height: 24px; cursor: pointer; transition: all 0.3s;"
-            :style="
-              currentIndex === idx
-                ? 'background-color: #fff; color: #4a4a4a;'
-                : 'background-color: transparent; color: rgb(117, 117, 117);'
-            "
-            @click="toggle(idx)"
-          >
-            {{ idx === 0 ? 'Past 7 Days' : idx === 1 ? 'Past 14 Days' : 'Past 30 Days' }}
-          </button>
-        </div>
+    <vx-chart presets="funnelChart" :options="funnelChartData">
+      <template #action>
+        <span class="text-caption mr-4 px-1 py-0 rounded" style="background:#F5F5F5;"
+          >Data updates on everyday's 00:00
+        </span>
       </template>
     </vx-chart>
   </div>
@@ -262,8 +251,6 @@ const funnelData = ref([
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 400px;
-  position: relative;
 }
 </style>
 ```
@@ -364,7 +351,7 @@ const chartData = ref([
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 400px;
+
   position: relative;
 }
 </style>
@@ -418,16 +405,18 @@ const chartData = ref([
   :options="{
     title: { text: '自定义漏斗图' },
     tooltip: {
-      formatter: '{b}: {c}人 ({d}%)'  // 自定义提示格式
+      formatter: '{b}: {c}人 ({d}%)' // 自定义提示格式
     },
-    color: ['#FF6B6B', '#FFD166', '#06D6A0', '#118AB2', '#073B4C'],  // 自定义颜色
-    series: [{
-      name: '用户行为',
-      data: myFunnelData,
-      label: {
-        position: 'right'  // 将标签放在右侧（默认在左侧）
+    color: ['#FF6B6B', '#FFD166', '#06D6A0', '#118AB2', '#073B4C'], // 自定义颜色
+    series: [
+      {
+        name: '用户行为',
+        data: myFunnelData,
+        label: {
+          position: 'right' // 将标签放在右侧（默认在左侧）
+        }
       }
-    }]
+    ]
   }"
 ></vx-chart>
 ```
