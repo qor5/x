@@ -146,11 +146,13 @@ const handleChange = (event: Event) => {
       align-items: center;
       justify-content: center;
       pointer-events: none;
+      overflow: hidden;
     }
 
     .select-value {
       font-size: 12px;
       color: rgba(66, 66, 66, 1);
+      white-space: nowrap;
     }
 
     .select-arrow {
