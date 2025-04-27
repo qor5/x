@@ -146,7 +146,6 @@ const handleChange = (event: Event) => {
       align-items: center;
       justify-content: center;
       pointer-events: none;
-      overflow: hidden;
     }
 
     .select-value {
