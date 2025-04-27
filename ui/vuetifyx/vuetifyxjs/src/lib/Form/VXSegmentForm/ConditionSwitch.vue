@@ -151,6 +151,7 @@ const handleChange = (event: Event) => {
     .select-value {
       font-size: 12px;
       color: rgba(66, 66, 66, 1);
+      white-space: nowrap;
     }
 
     .select-arrow {
