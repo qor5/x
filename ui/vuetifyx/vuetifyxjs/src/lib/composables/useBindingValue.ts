@@ -23,7 +23,7 @@ export default function useBindingValue<EmitFnType>(
   watch(
     () => props.modelValue,
     (newVal) => {
-      bindingValue.value = newVal
+      bindingValue.value = modelValueFormatter ? modelValueFormatter(newVal) : newVal
     }
   )
 
