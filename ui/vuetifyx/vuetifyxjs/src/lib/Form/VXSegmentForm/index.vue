@@ -84,10 +84,10 @@ function handleUpdateModelValue({ idx, value }: { idx: number; value: any }) {
 
 function handleRemoveGroup(idx: number) {
   form.value.list.splice(idx, 1)
-  emitDataChange()
+  emitDataChange('remove')
 }
 
-function emitDataChange() {
+function emitDataChange(type: string = 'update') {
   // Check if we have form data
   if (form.value.list.length === 0) {
     // Handle case when all groups are removed - emit an empty structure
@@ -103,11 +103,6 @@ function emitDataChange() {
         group.list.length > 0 &&
         group.list.every((item: any) => item.tag && item.tag.builderID)
     )
-
-  if (!isValid) {
-    console.log('Form data is incomplete, not emitting update')
-    return
-  }
 
   // Convert condition types to intersect/union format
   const getConditionKey = (condition: string): string => {
@@ -136,14 +131,9 @@ function validate() {
     return false
   }
 
-  const result = itemGroupRefs.value.every((group: any) => {
-    if (group && typeof group.validate === 'function') {
-      return group.validate()
-    }
-    return false
-  })
+  const resultList = itemGroupRefs.value.filter((group: any) => !group.validate())
 
-  return result
+  return resultList.length === 0
 }
 
 function resetValidation() {
