@@ -74,6 +74,8 @@ const resizeObserver = new ResizeObserver((entries) => {
   }
 })
 const setIframeDisplay = () => {
+  if (!iframe.value) return
+
   const iframeWidth = iframe.value.style.width.replace('px', '')
   const containerWidth = container.value.offsetWidth
   if (iframeWidth <= containerWidth) {

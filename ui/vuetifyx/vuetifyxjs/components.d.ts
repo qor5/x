@@ -23,6 +23,7 @@ declare module 'vue' {
     Filter: typeof import('./src/lib/Filter/index.vue')['default']
     FilterButton: typeof import('./src/lib/Filter/components/FilterButton.vue')['default']
     FilterButtonBody: typeof import('./src/lib/Filter/components/FilterButtonBody.vue')['default']
+    FunnelChart: typeof import('./src/lib/Chart/FunnelChart.vue')['default']
     IframeEmailEditor: typeof import('./src/lib/IframeEmailEditor.vue')['default']
     ImageGlue: typeof import('./src/lib/TiptapEditor/Extensions/ImageGlue.vue')['default']
     ItemFilter: typeof import('./src/lib/Filter/components/ItemFilter.vue')['default']

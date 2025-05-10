@@ -1,9 +1,11 @@
 <template>
-  <slot :model-value="internalModelValue" @update:model-value="handleUpdateModelValue"></slot>
+  <div>
+    <slot :model-value="internalModelValue" @update:model-value="handleUpdateModelValue"></slot>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, useAttrs } from 'vue'
+import { computed } from 'vue'
 
 // Use inherited-attrs: false to prevent attrs from being applied to the root element
 defineOptions({
