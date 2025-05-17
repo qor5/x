@@ -67,7 +67,7 @@
           v-else-if="fragment.type === 'NUMBER_INPUT'"
           type="number"
           v-model="tagParams[fragment.key]"
-          style="min-width: 70px"
+          style="min-width: 75px"
           :error-messages="shouldValidateField(fragment.key) ? 'This field cannot be empty' : ''"
           :hide-details="!shouldValidateField(fragment.key)"
           @mouseleave="debouncedHandleFragmentValueChange(fragment.key, tagParams[fragment.key])"
