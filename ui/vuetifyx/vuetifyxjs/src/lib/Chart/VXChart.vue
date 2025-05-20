@@ -17,7 +17,7 @@
     <!-- 使用新的FunnelChart组件 -->
     <template v-if="props.presets === 'funnelChart'">
       <funnel-chart
-        :data="getCurrentSeriesData()"
+        :data="getCurrentSeriesDataForFunnel()"
         :icons="getFunnelIcons()"
         :dataSource="getFunnelDataSource()"
       />
@@ -112,11 +112,17 @@ const props = defineProps({
       fetchFn?: () => Promise<any[]>
     }>,
     default: () => ({})
+  },
+  mergeOptionsCallback: {
+    type: Function as PropType<
+      (options: ChartOptions, mergeCallbackOptions: { seriesData: any[] }) => void
+    >,
+    default: () => {}
   }
 })
 
 // 获取当前系列数据，用于漏斗图组件
-const getCurrentSeriesData = () => {
+const getCurrentSeriesDataForFunnel = () => {
   let result = []
 
   if (Array.isArray(props.options)) {
@@ -186,7 +192,9 @@ const getAnimationConfig = (): any => {
 }
 
 // 获取预设配置
-const getPresetOptions = (): ChartOptions => {
+const getChatOptions = (): ChartOptions => {
+  let chatOptions: ChartOptions = {}
+
   if (props.presets && props.presets in chartPresets) {
     const presetOptions = chartPresets[props.presets as keyof typeof chartPresets]
 
@@ -194,12 +202,14 @@ const getPresetOptions = (): ChartOptions => {
     const animationConfig = getAnimationConfig()
 
     // 合并预设和动画配置
-    return {
+    chatOptions = {
       ...presetOptions,
       ...animationConfig
     }
+  } else {
+    chatOptions = defaultOptions
   }
-  return defaultOptions
+  return chatOptions
 }
 
 // 深度合并对象
@@ -226,7 +236,7 @@ const deepMerge = (target: any, source: any): any => {
 
 // 合并配置
 const mergedOptions = computed(() => {
-  const baseOptions = props.presets ? getPresetOptions() : defaultOptions
+  const baseOptions = getChatOptions()
 
   // 处理 options 是数组的情况
   if (Array.isArray(props.options)) {
@@ -338,6 +348,23 @@ const mergedOptions = computed(() => {
   return result
 })
 
+// 获取当前系列数据
+const currentSeriesData = computed(() => {
+  if (Array.isArray(mergedOptions.value)) {
+    return mergedOptions.value[currentIndex.value]?.series?.[0]?.data || []
+  }
+  return mergedOptions.value?.series?.[0]?.data || []
+})
+
+const invokeMergeOptionsCallback = (
+  options: ChartOptions,
+  mergeCallbackOptions: { seriesData: any[] }
+) => {
+  if (props.mergeOptionsCallback) {
+    props.mergeOptionsCallback(options, mergeCallbackOptions)
+  }
+}
+
 // 获取图表实例
 const getChartInstance = (): echarts.EChartsType | null => {
   // 如果是漏斗图，不初始化echarts实例
@@ -367,9 +394,15 @@ const initChart = async () => {
   // 设置图表配置
   // 判断 mergedOptions 是否为数组
   if (Array.isArray(mergedOptions.value)) {
+    invokeMergeOptionsCallback(mergedOptions.value[currentIndex.value], {
+      seriesData: currentSeriesData.value
+    })
     // 如果是数组，使用当前索引的配置项初始化图表
     chartInstance.setOption(mergedOptions.value[currentIndex.value] as any, true)
   } else {
+    invokeMergeOptionsCallback(mergedOptions.value, {
+      seriesData: currentSeriesData.value
+    })
     chartInstance.setOption(mergedOptions.value as any, true)
   }
 

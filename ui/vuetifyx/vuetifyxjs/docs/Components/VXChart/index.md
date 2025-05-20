@@ -87,21 +87,36 @@ const pieChartData = ref({
       name: '性别分布',
       data: [
         {
-          value: 10,
-          name: '男性 10%'
+          value: 10.111,
+          name: '男性'
         },
         {
-          value: 90,
-          name: '女性 90%'
+          value: 89.889,
+          name: '女性'
         }
       ]
     }
   ]
 })
+
+const mergeOptionsCallback = function (options, { seriesData }) {
+  options.legend = {
+    ...options.legend,
+    formatter: (name) => {
+      const item = seriesData.find((i) => i.name === name)
+      const percent = ((item.value / 100) * 100).toFixed(2)
+      return `${name} ${percent}%`
+    }
+  }
+}
 </script>
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart presets="pieChart" :options="pieChartData"></vx-chart>
+    <vx-chart
+      presets="pieChart"
+      :options="pieChartData"
+      :mergeOptionsCallback="mergeOptionsCallback"
+    ></vx-chart>
   </div>
 </template>
 

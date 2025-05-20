@@ -42,8 +42,14 @@ func (b *VXChartBuilder) Presets(v string) (r *VXChartBuilder) {
 	b.tag.Attr(":presets", h.JSONString(v))
 	return b
 }
+
 func (b *VXChartBuilder) Options(v interface{}) (r *VXChartBuilder) {
 	b.tag.Attr(":options", h.JSONString(v))
+	return b
+}
+
+func (b *VXChartBuilder) mergeOptionsCallback(v interface{}) (r *VXChartBuilder) {
+	b.tag.Attr(":mergeOptionsCallback", h.JSONString(v))
 	return b
 }
 
