@@ -428,8 +428,14 @@ watch(
       // 判断 mergedOptions 是否为数组
       if (Array.isArray(mergedOptions.value)) {
         // 如果是数组，使用当前索引的配置项更新图表
+        invokeMergeOptionsCallback(mergedOptions.value[currentIndex.value], {
+          seriesData: currentSeriesData.value
+        })
         chartInstance.setOption(mergedOptions.value[currentIndex.value] as any, true)
       } else {
+        invokeMergeOptionsCallback(mergedOptions.value, {
+          seriesData: currentSeriesData.value
+        })
         chartInstance.setOption(mergedOptions.value as any, true)
       }
     }
@@ -468,6 +474,9 @@ watch(
 
     const chartInstance = getChartInstance()
     if (chartInstance && Array.isArray(mergedOptions.value)) {
+      invokeMergeOptionsCallback(mergedOptions.value[newIndex], {
+        seriesData: currentSeriesData.value
+      })
       chartInstance.setOption(mergedOptions.value[newIndex] as any, true)
     }
   }
