@@ -115,7 +115,7 @@ const mergeOptionsCallback = function (options, { seriesData }) {
     <vx-chart
       presets="pieChart"
       :options="pieChartData"
-      :mergeOptionsCallback="mergeOptionsCallback"
+      :merge-options-callback="mergeOptionsCallback"
     ></vx-chart>
   </div>
 </template>

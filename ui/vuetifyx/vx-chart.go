@@ -49,7 +49,7 @@ func (b *VXChartBuilder) Options(v interface{}) (r *VXChartBuilder) {
 }
 
 func (b *VXChartBuilder) MergeOptionsCallback(v string) (r *VXChartBuilder) {
-	b.tag.Attr(":mergeOptionsCallback", v)
+	b.tag.Attr(":merge-options-callback", v)
 	return b
 }
 
