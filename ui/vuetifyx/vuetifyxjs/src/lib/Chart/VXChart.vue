@@ -18,8 +18,7 @@
     <template v-if="props.presets === 'funnelChart'">
       <funnel-chart
         :data="getCurrentSeriesDataForFunnel()"
-        :icons="getFunnelIcons()"
-        :dataSource="getFunnelDataSource()"
+        :merge-options-callback="mergeOptionsCallback"
       />
     </template>
     <div v-else :id="chartId" class="vx-chart-container"></div>
@@ -46,6 +45,7 @@ import {
   lightAnimationConfig
 } from './presets.config'
 import FunnelChart from './FunnelChart.vue'
+import { useVxChartMergeOptsCallback } from './useVxChartMergeOpts'
 
 // 定义预设类型
 type PresetType = 'barChart' | 'pieChart' | 'funnelChart' | ''
@@ -96,15 +96,6 @@ const props = defineProps({
     default: false
   },
   // Add new props for funnel chart
-  funnelIcons: {
-    type: Object as PropType<{
-      sent?: string
-      delivered?: string
-      opened?: string
-      clicked?: string
-    }>,
-    default: () => ({})
-  },
   dataSource: {
     type: Object as PropType<{
       url?: string
@@ -120,6 +111,8 @@ const props = defineProps({
     default: () => {}
   }
 })
+
+const { invokeMergeOptionsCallback } = useVxChartMergeOptsCallback(props)
 
 // 获取当前系列数据，用于漏斗图组件
 const getCurrentSeriesDataForFunnel = () => {
@@ -356,15 +349,6 @@ const currentSeriesData = computed(() => {
   return mergedOptions.value?.series?.[0]?.data || []
 })
 
-const invokeMergeOptionsCallback = (
-  options: ChartOptions,
-  mergeCallbackOptions: { seriesData: any[] }
-) => {
-  if (props.mergeOptionsCallback) {
-    props.mergeOptionsCallback(options, mergeCallbackOptions)
-  }
-}
-
 // 获取图表实例
 const getChartInstance = (): echarts.EChartsType | null => {
   // 如果是漏斗图，不初始化echarts实例
@@ -531,16 +515,6 @@ onBeforeUnmount(() => {
     }
   }
 })
-
-// Get icons for funnel chart
-const getFunnelIcons = () => {
-  return props.funnelIcons || {}
-}
-
-// Get data source configuration for funnel chart
-const getFunnelDataSource = () => {
-  return props.dataSource || {}
-}
 
 defineExpose({
   handleResize

@@ -6,11 +6,12 @@
 
 ### Props
 
-| 参数名  | 说明                                                    | 类型              | 默认值 |
-| ------- | ------------------------------------------------------- | ----------------- | ------ |
-| presets | 预设样式，可选值：'barChart'、'pieChart'、'funnelChart' | String            | ''     |
-| options | 图表配置项，会与预设样式合并                            | Object \ Object[] | {}     |
-| loading | 是否显示加载状态                                        | Boolean           | false  |
+| 参数名               | 说明                                                                                                                                          | 类型              | 默认值   |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | -------- |
+| presets              | 预设样式，可选值：'barChart'、'pieChart'、'funnelChart'                                                                                       | String            | ''       |
+| options              | 图表配置项，会与预设样式合并                                                                                                                  | Object \ Object[] | {}       |
+| mergeOptionsCallback | 可以使用这个回调来修改当前的配置参数, 当需要自定义vx-chart配置的时候格外有用，详见 [#饼图示例](./#饼图示例) ，目前只支持 pieChart 和 barChart | Function          | () => {} |
+| loading              | 是否显示加载状态                                                                                                                              | Boolean           | false    |
 
 ### Slots
 
@@ -71,6 +72,11 @@ const barChartData = ref({
 ### 饼图示例
 
 使用 `pieChart` 预设可以快速创建美观的饼图：
+
+当你想自定义图例时可以使用 `mergeOptionsCallback`, 回调函数支持两个参数
+
+- options - 当前图表配置项
+- data - 一些图表数据对象
 
 :::demo
 
