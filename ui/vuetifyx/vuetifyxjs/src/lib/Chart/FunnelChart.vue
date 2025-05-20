@@ -95,10 +95,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { computed, ref, onMounted, PropType, onBeforeUnmount, watch } from 'vue'
 import * as echarts from 'echarts'
 import { funnelChartPreset } from './presets.config'
-
+import { useVxChartMergeOptsCallback } from './useVxChartMergeOpts'
 interface LabelItem {
   type: string
   text: string
@@ -116,11 +116,17 @@ interface FunnelItem {
   extraData?: ExtraData
 }
 
-interface FunnelChartProps {
-  data: FunnelItem[]
-}
-
-const props = defineProps<FunnelChartProps>()
+const props = defineProps({
+  data: {
+    type: Array as PropType<FunnelItem[]>,
+    required: true
+  },
+  mergeOptionsCallback: {
+    type: Function as PropType<(options: any, mergeCallbackOptions: { seriesData: any[] }) => void>,
+    required: false
+  }
+})
+// const { invokeMergeOptionsCallback } = useVxChartMergeOptsCallback(props)
 const chartInstance = ref<echarts.EChartsType | null>(null)
 const containerRef = ref<HTMLElement | null>(null)
 const containerWidth = ref(0)
