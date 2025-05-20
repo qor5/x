@@ -48,8 +48,8 @@ func (b *VXChartBuilder) Options(v interface{}) (r *VXChartBuilder) {
 	return b
 }
 
-func (b *VXChartBuilder) mergeOptionsCallback(v interface{}) (r *VXChartBuilder) {
-	b.tag.Attr(":mergeOptionsCallback", h.JSONString(v))
+func (b *VXChartBuilder) MergeOptionsCallback(v string) (r *VXChartBuilder) {
+	b.tag.Attr(":mergeOptionsCallback", v)
 	return b
 }
 
