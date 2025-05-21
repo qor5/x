@@ -42,8 +42,10 @@ import {
   Underline,
   useContext,
   Video,
-  VuetifyTiptap
   //@ts-ignore
+  VuetifyTiptap,
+  //@ts-ignore
+  HtmlView
 } from 'vuetify-pro-tiptap'
 
 import { Extension } from '@tiptap/core'
@@ -101,7 +103,8 @@ const extensionMap = {
   Fullscreen,
   History,
   Callback,
-  ImageGlue
+  ImageGlue,
+  HtmlView
 }
 type ExtensionName = keyof typeof extensionMap
 
