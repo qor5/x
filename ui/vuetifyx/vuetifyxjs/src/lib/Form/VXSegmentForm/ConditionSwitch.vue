@@ -1,12 +1,12 @@
 <template>
-  <div class="vx-condition-switch-wrap">
+  <div class="vx-condition-switch-wrap" :class="{ 'disabled': disabled }">
     <template v-if="type === 'switch'">
       <div class="vx-condition-btn-group">
         <div class="active-background" :style="activeBackgroundStyle"></div>
         <div
           v-for="item in items"
           :key="item"
-          @click="handleClick(item)"
+          @click="!disabled && handleClick(item)"
           :class="{ active: modelValue === item }"
         >
           {{ item }}
@@ -15,7 +15,7 @@
     </template>
     <template v-else>
       <div class="vx-condition-select-wrap">
-        <select v-model="localModelValue" class="vx-condition-select" @change="handleChange">
+        <select v-model="localModelValue" class="vx-condition-select" @change="handleChange" :disabled="disabled">
           <option v-for="item in items" :key="item" :value="item">{{ item }}</option>
         </select>
         <div class="select-display">
@@ -43,6 +43,10 @@ const props = defineProps({
     type: String,
     enum: ['switch', 'dropdown'],
     default: 'switch'
+  },
+  disabled: {
+    type: Boolean,
+    default: false
   }
 })
 const items = ['And', 'Or']
@@ -59,6 +63,7 @@ watch(
 )
 
 const handleClick = (item: string) => {
+  if (props.disabled) return;
   emit('update:modelValue', item)
   emit('change', item)
 }
@@ -72,6 +77,7 @@ const activeBackgroundStyle = computed(() => {
 })
 
 const handleChange = (event: Event) => {
+  if (props.disabled) return;
   const value = (event.target as HTMLSelectElement).value
 
   emit('update:modelValue', value)
@@ -81,6 +87,19 @@ const handleChange = (event: Event) => {
 
 <style lang="scss" scoped>
 .vx-condition-switch-wrap {
+  &.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    
+    .vx-condition-btn-group div {
+      cursor: not-allowed;
+    }
+    
+    .vx-condition-select {
+      cursor: not-allowed;
+    }
+  }
+  
   .vx-condition-btn-group {
     background-color: rgb(238, 238, 238);
     width: 96px;

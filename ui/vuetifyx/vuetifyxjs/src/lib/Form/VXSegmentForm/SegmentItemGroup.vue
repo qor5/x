@@ -1,5 +1,5 @@
 <template>
-  <div class="vx-segment-item-wrap">
+  <div class="vx-segment-item-wrap" :class="{ 'readonly': readonly }">
     <div class="condition-left">
       <div class="connect-decoration" />
       <VXConditionSwitch
@@ -7,6 +7,7 @@
         v-model="groupForm.condition"
         type="dropdown"
         @change="handleDataChange"
+        :disabled="readonly"
       />
     </div>
     <div class="content-right">
@@ -16,11 +17,12 @@
         :key="getItemKey(item, idx)"
         :modelValue="item"
         :validate="validate"
+        :readonly="readonly"
         ref="segmentItemRefs"
         @on-remove="() => handleRemoveItem(idx)"
         @update:modelValue="(value) => handleUpdateItem(idx, value)"
       />
-      <div class="add-btn">
+      <div class="add-btn" v-if="!readonly">
         <vx-btn
           icon="mdi-plus"
           rounded
@@ -59,6 +61,10 @@ const props = defineProps({
     default: 0
   },
   validate: {
+    type: Boolean,
+    default: false
+  },
+  readonly: {
     type: Boolean,
     default: false
   }
@@ -140,6 +146,10 @@ function handleAddItem() {
 <style scoped lang="scss">
 .vx-segment-item-wrap {
   display: flex;
+  
+  &.readonly {
+    opacity: 0.9;
+  }
 }
 .condition-left {
   display: flex;
