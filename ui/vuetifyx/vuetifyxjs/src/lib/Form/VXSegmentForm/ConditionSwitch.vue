@@ -88,7 +88,6 @@ const handleChange = (event: Event) => {
 <style lang="scss" scoped>
 .vx-condition-switch-wrap {
   &.disabled {
-    opacity: 0.7;
     cursor: not-allowed;
     
     .vx-condition-btn-group div {

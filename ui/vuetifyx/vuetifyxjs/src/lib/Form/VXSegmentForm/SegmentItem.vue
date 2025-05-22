@@ -354,7 +354,6 @@ const debouncedHandleFragmentValueChange = debounce((key: string, value: any) =>
   margin-right: 25px;
   
   &.readonly {
-    opacity: 0.9;
     background: rgb(245, 245, 245);
   }
 }

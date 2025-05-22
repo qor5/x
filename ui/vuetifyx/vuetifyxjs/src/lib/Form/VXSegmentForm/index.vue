@@ -162,10 +162,6 @@ defineExpose({
 
 <style lang="scss" scoped>
 .vx-segment-form {
-  &.readonly {
-    opacity: 0.9;
-  }
-  
   .vx-segment-form-block .content {
     position: relative;
     padding: 16px 0 16px 24px;

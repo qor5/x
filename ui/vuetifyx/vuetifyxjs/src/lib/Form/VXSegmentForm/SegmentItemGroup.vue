@@ -146,10 +146,6 @@ function handleAddItem() {
 <style scoped lang="scss">
 .vx-segment-item-wrap {
   display: flex;
-  
-  &.readonly {
-    opacity: 0.9;
-  }
 }
 .condition-left {
   display: flex;
