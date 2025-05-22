@@ -10,6 +10,7 @@
 | ---------- | ---------------------- | -------- | ------ |
 | modelValue | 表单的值，用于双向绑定 | `Object` | `{}`   |
 | options    | 分段表单的选项配置     | `Array`  | `[]`   |
+| readonly   | 是否为只读模式         | `Boolean`| `false`|
 
 ### Methods
 
@@ -1585,7 +1586,7 @@ const clearValidation = () => {
 </script>
 
 <template>
-  <vx-segment-form ref="formRef" v-model="modelValue" :options="options" />
+  <vx-segment-form ref="formRef" v-model="modelValue" :options="options" :readonly="readonly" />
   <div class="text-right mt-4">
     <div class="d-flex justify-end">
       <vx-btn class="mr-2" color="grey" @click="reset">Reset</vx-btn>
@@ -1611,3 +1612,303 @@ const clearValidation = () => {
 ```
 
 <style scoped></style>
+
+## 只读模式
+
+VXSegmentForm 组件支持只读模式，适用于查看已创建的条件而不允许编辑。
+
+:::demo
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import VueJsonPretty from 'vue-json-pretty'
+import 'vue-json-pretty/lib/styles.css'
+
+// 预设一个带有条件的表单值
+const readonlyModelValue = ref({
+  intersect: [
+    {
+      union: [
+        {
+          tag: {
+            builderID: "user_gender",
+            params: {
+              operator: "EQ",
+              value: "MALE"
+            }
+          }
+        }
+      ]
+    },
+    {
+      union: [
+        {
+          tag: {
+            builderID: "user_age",
+            params: {
+              operator: "BETWEEN",
+              min: 18,
+              max: 35
+            }
+          }
+        }
+      ]
+    }
+  ]
+})
+
+// 控制只读状态的变量
+const isReadonly = ref(true)
+
+// 使用与前面示例相同的选项
+const options = ref([
+  {
+    id: 'demographics',
+    name: 'Demographics',
+    description: 'Demographic filters',
+    builders: [
+      {
+        id: 'user_gender',
+        name: 'User Gender',
+        description: 'Filter users by gender',
+        categoryID: 'demographics',
+        view: {
+          fragments: [
+            {
+              defaultValue: 'EQ',
+              key: 'operator',
+              multiple: false,
+              options: [
+                {
+                  label: 'equals',
+                  value: 'EQ'
+                },
+                {
+                  label: 'not equals',
+                  value: 'NE'
+                },
+                {
+                  label: 'in',
+                  value: 'IN'
+                },
+                {
+                  label: 'not in',
+                  value: 'NOT_IN'
+                }
+              ],
+              required: true,
+              skipIf: null,
+              skipUnless: null,
+              type: 'SELECT',
+              validation: null
+            },
+            {
+              defaultValue: null,
+              key: 'value',
+              multiple: false,
+              options: [
+                {
+                  label: 'Male',
+                  value: 'MALE'
+                },
+                {
+                  label: 'Female',
+                  value: 'FEMALE'
+                },
+                {
+                  label: 'Other',
+                  value: 'OTHER'
+                }
+              ],
+              required: true,
+              skipIf: {
+                $operator: {
+                  IN: ['IN', 'NOT_IN']
+                }
+              },
+              skipUnless: null,
+              type: 'SELECT',
+              validation: null
+            },
+            {
+              defaultValue: null,
+              key: 'values',
+              multiple: true,
+              options: [
+                {
+                  label: 'Male',
+                  value: 'MALE'
+                },
+                {
+                  label: 'Female',
+                  value: 'FEMALE'
+                },
+                {
+                  label: 'Other',
+                  value: 'OTHER'
+                }
+              ],
+              required: true,
+              skipIf: null,
+              skipUnless: {
+                $operator: {
+                  IN: ['IN', 'NOT_IN']
+                }
+              },
+              type: 'SELECT',
+              validation: null
+            }
+          ]
+        }
+      },
+      {
+        id: 'user_age',
+        name: 'User Age',
+        description: 'Filter users by age range',
+        categoryID: 'demographics',
+        view: {
+          fragments: [
+            {
+              defaultValue: null,
+              key: 'operator',
+              multiple: false,
+              options: [
+                {
+                  label: 'Equals',
+                  value: 'EQ'
+                },
+                {
+                  label: 'Not Equals',
+                  value: 'NE'
+                },
+                {
+                  label: 'Less Than',
+                  value: 'LT'
+                },
+                {
+                  label: 'Less Than or Equals',
+                  value: 'LTE'
+                },
+                {
+                  label: 'Greater Than',
+                  value: 'GT'
+                },
+                {
+                  label: 'Greater Than or Equals',
+                  value: 'GTE'
+                },
+                {
+                  label: 'Between',
+                  value: 'BETWEEN'
+                }
+              ],
+              required: true,
+              skipIf: null,
+              skipUnless: null,
+              type: 'SELECT',
+              validation: null
+            },
+            {
+              defaultValue: null,
+              key: 'value',
+              max: 120,
+              min: 0,
+              required: true,
+              skipIf: {
+                operator: 'BETWEEN'
+              },
+              skipUnless: null,
+              type: 'NUMBER_INPUT',
+              validation: null
+            },
+            {
+              defaultValue: null,
+              key: 'min',
+              max: 120,
+              min: 0,
+              required: true,
+              skipIf: null,
+              skipUnless: {
+                $operator: {
+                  IN: ['BETWEEN']
+                }
+              },
+              type: 'NUMBER_INPUT',
+              validation: null
+            },
+            {
+              defaultValue: null,
+              key: 'max',
+              max: 120,
+              min: 0,
+              required: true,
+              skipIf: null,
+              skipUnless: {
+                $operator: {
+                  IN: ['BETWEEN']
+                }
+              },
+              type: 'NUMBER_INPUT',
+              validation: null
+            }
+          ]
+        }
+      }
+    ]
+  }
+])
+
+const toggleReadonlyMode = () => {
+  isReadonly.value = !isReadonly.value;
+}
+</script>
+
+<template>
+  <h3>只读模式演示</h3>
+  <vx-segment-form 
+    v-model="readonlyModelValue" 
+    :options="options" 
+    :readonly="isReadonly" 
+  />
+  
+  <div class="text-right mt-4">
+    <div class="d-flex justify-end">
+      <vx-btn @click="toggleReadonlyMode">
+        {{ isReadonly ? '切换到编辑模式' : '切换到只读模式' }}
+      </vx-btn>
+    </div>
+  </div>
+  
+  <div class="mt-4">
+    <p>当前模式: <b>{{ isReadonly ? '只读' : '编辑' }}</b></p>
+    <p>表单数据:</p>
+    <VueJsonPretty :data="readonlyModelValue" />
+  </div>
+</template>
+```
+
+<style scoped></style>
+
+:::
+
+## API更新
+
+### Props
+
+| 名称       | 介绍                   | 类型      | 默认值 |
+| ---------- | ---------------------- | --------- | ------ |
+| modelValue | 表单的值，用于双向绑定 | `Object`  | `{}`   |
+| options    | 分段表单的选项配置     | `Array`   | `[]`   |
+| readonly   | 是否为只读模式         | `Boolean` | `false`|
+
+## 在Go代码中使用
+
+在Go代码中，您可以使用`Readonly`方法来设置表单的只读状态：
+
+```go
+VXSegmentForm("").
+    Options(options).
+    Readonly(true).  // 设置为只读状态
+    Bind("model-value", "formData")
+```
