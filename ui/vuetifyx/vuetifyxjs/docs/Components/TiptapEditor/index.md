@@ -72,7 +72,7 @@ const extensions = ref([
   {
     name: 'HtmlView',
     options: {
-      divider: true
+      divider: true,
       allowedAttributes: ['class', 'style', 'id', 'data-abc']
     }
   },
