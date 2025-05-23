@@ -1,9 +1,10 @@
 <template>
-  <div class="vx-segment-form">
+  <div class="vx-segment-form" :class="{ 'readonly': readonly }">
     <VXConditionSwitch
       v-if="form.list.length > 0"
       v-model="form.condition"
       @change="handleConditionChange"
+      :disabled="readonly"
     />
     <div class="vx-segment-form-block">
       <div v-if="form.list.length > 0" class="content">
@@ -13,13 +14,19 @@
           :modelValue="item"
           :index="idx"
           :validate="showValidation"
+          :readonly="readonly"
           ref="itemGroupRefs"
           @on-remove="handleRemoveGroup"
           @on-data-change="handleUpdateModelValue"
         />
       </div>
     </div>
-    <vx-btn prepend-icon="mdi-plus" presets="x-small" @click="handleAddRule">Add Rule</vx-btn>
+    <vx-btn 
+      prepend-icon="mdi-plus" 
+      presets="x-small" 
+      @click="handleAddRule"
+      v-if="!readonly"
+    >Add Rule</vx-btn>
   </div>
 </template>
 
@@ -38,6 +45,10 @@ const props = defineProps({
   options: {
     type: Array as PropType<OptionsType[]>,
     default: () => []
+  },
+  readonly: {
+    type: Boolean,
+    default: false
   }
 })
 

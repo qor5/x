@@ -1,5 +1,5 @@
 <template>
-  <div class="vx-segment-item-wrap">
+  <div class="vx-segment-item-wrap" :class="{ 'readonly': readonly }">
     <div class="condition-group">
       <vx-select
         v-model="selectedOption"
@@ -11,6 +11,7 @@
         :error-messages="shouldShowError ? errorMessages : ''"
         :hide-details="!shouldShowError"
         @update:modelValue="handleSelectChange"
+        :disabled="readonly"
       >
         <template #item="{ props, item }">
           <template v-if="item.raw.category">
@@ -47,6 +48,7 @@
             :error-messages="shouldValidateField(fragment.key) ? 'This field cannot be empty' : ''"
             :hide-details="!shouldValidateField(fragment.key)"
             @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+            :disabled="readonly"
           />
 
           <vx-select
@@ -60,6 +62,7 @@
             :error-messages="shouldValidateField(fragment.key) ? 'This field cannot be empty' : ''"
             :hide-details="!shouldValidateField(fragment.key)"
             @update:modelValue="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+            :disabled="readonly"
           />
         </template>
 
@@ -71,6 +74,7 @@
           :error-messages="shouldValidateField(fragment.key) ? 'This field cannot be empty' : ''"
           :hide-details="!shouldValidateField(fragment.key)"
           @mouseleave="debouncedHandleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+          :disabled="readonly"
         />
         <vx-date-picker
           v-else-if="fragment.type === 'DATE_PICKER'"
@@ -81,12 +85,17 @@
           :error-messages="shouldValidateField(fragment.key) ? 'This field cannot be empty' : ''"
           :hide-details="!shouldValidateField(fragment.key)"
           @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+          :disabled="readonly"
         />
       </template>
     </div>
-    <v-icon class="delete-icon" color="rgb(158, 158, 158)" size="24" @click="handleRemove"
-      >mdi-minus-circle-outline</v-icon
-    >
+    <v-icon 
+      class="delete-icon" 
+      color="rgb(158, 158, 158)" 
+      size="24" 
+      @click="handleRemove"
+      v-if="!readonly"
+    >mdi-minus-circle-outline</v-icon>
   </div>
 </template>
 
@@ -123,6 +132,10 @@ const props = defineProps({
     default: () => ({})
   },
   validate: {
+    type: Boolean,
+    default: false
+  },
+  readonly: {
     type: Boolean,
     default: false
   }
@@ -339,6 +352,10 @@ const debouncedHandleFragmentValueChange = debounce((key: string, value: any) =>
   border: 1px solid rgb(224, 224, 224);
   padding: 8px;
   margin-right: 25px;
+  
+  &.readonly {
+    background: rgb(245, 245, 245);
+  }
 }
 .condition-group {
   display: flex;
