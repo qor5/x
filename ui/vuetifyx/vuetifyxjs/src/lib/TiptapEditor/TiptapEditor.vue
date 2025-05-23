@@ -45,7 +45,8 @@ import {
   //@ts-ignore
   VuetifyTiptap,
   //@ts-ignore
-  HtmlView
+  HtmlView,
+  Paragraph
 } from 'vuetify-pro-tiptap'
 
 import { Extension } from '@tiptap/core'
@@ -104,7 +105,8 @@ const extensionMap = {
   History,
   Callback,
   ImageGlue,
-  HtmlView
+  HtmlView,
+  Paragraph
 }
 type ExtensionName = keyof typeof extensionMap
 

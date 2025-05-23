@@ -60,7 +60,7 @@ importers:
         version: 3.7.18(typescript@5.8.2)(vite-plugin-vuetify@2.1.0)(vue@3.5.13(typescript@5.8.2))
       vuetify-pro-tiptap:
         specifier: github:qor5/vuetify-pro-tiptap
-        version: https://codeload.github.com/qor5/vuetify-pro-tiptap/tar.gz/9bb9ca22515643b7aee871f6b0f19f63123330bf(@tiptap/suggestion@2.12.0(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5))(vue@3.5.13(typescript@5.8.2))(vuetify@3.7.18)
+        version: git+https://git@github.com:qor5/vuetify-pro-tiptap.git#6617b0836ffa984aeee381494ba43fc132609c25(@tiptap/suggestion@2.12.0(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5))(vue@3.5.13(typescript@5.8.2))(vuetify@3.7.18)
     devDependencies:
       '@babel/types':
         specifier: ^7.26.10
@@ -3033,8 +3033,8 @@ packages:
     peerDependencies:
       vue: ^3.0.1
 
-  vuetify-pro-tiptap@https://codeload.github.com/qor5/vuetify-pro-tiptap/tar.gz/9bb9ca22515643b7aee871f6b0f19f63123330bf:
-    resolution: {tarball: https://codeload.github.com/qor5/vuetify-pro-tiptap/tar.gz/9bb9ca22515643b7aee871f6b0f19f63123330bf}
+  vuetify-pro-tiptap@git+https://git@github.com:qor5/vuetify-pro-tiptap.git#6617b0836ffa984aeee381494ba43fc132609c25:
+    resolution: {commit: 6617b0836ffa984aeee381494ba43fc132609c25, repo: git@github.com:qor5/vuetify-pro-tiptap.git, type: git}
     version: 2.5.7
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     peerDependencies:
@@ -6309,7 +6309,7 @@ snapshots:
       sortablejs: 1.14.0
       vue: 3.5.13(typescript@5.8.2)
 
-  vuetify-pro-tiptap@https://codeload.github.com/qor5/vuetify-pro-tiptap/tar.gz/9bb9ca22515643b7aee871f6b0f19f63123330bf(@tiptap/suggestion@2.12.0(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5))(vue@3.5.13(typescript@5.8.2))(vuetify@3.7.18):
+  vuetify-pro-tiptap@git+https://git@github.com:qor5/vuetify-pro-tiptap.git#6617b0836ffa984aeee381494ba43fc132609c25(@tiptap/suggestion@2.12.0(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5))(vue@3.5.13(typescript@5.8.2))(vuetify@3.7.18):
     dependencies:
       '@tiptap/core': 2.11.5(@tiptap/pm@2.11.5)
       '@tiptap/extension-blockquote': 2.12.0(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))

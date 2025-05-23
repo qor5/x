@@ -31,14 +31,14 @@
 import { ref } from 'vue'
 
 const extensions = ref([
-  //   {
-  //     name: 'BaseKit',
-  //     options: {
-  //         placeholder: {
-  //             placeholder: 'Enter some text...'
-  //         }
+  // {
+  //   name: 'BaseKit',
+  //   options: {
+  //     placeholder: {
+  //       placeholder: 'Enter some text...'
   //     }
-  //   },
+  //   }
+  // },
   { name: 'Bold' },
   { name: 'Italic' },
   { name: 'Underline' },
@@ -50,10 +50,10 @@ const extensions = ref([
   { name: 'FontSize' },
   { name: 'Color' },
   { name: 'Highlight', options: { divider: true } },
-  //   // { name: 'SubAndSuperScript', options: { divider: true } },
+  // { name: 'SubAndSuperScript', options: { divider: true } },
   { name: 'BulletList' },
   { name: 'OrderedList', options: { divider: true } },
-  //   // { name: 'TaskList' },
+  // { name: 'TaskList' },
   { name: 'Indent', options: { divider: true } },
   { name: 'Link', options: { divider: true } },
   { name: 'Image' },
@@ -69,55 +69,16 @@ const extensions = ref([
   { name: 'Blockquote' },
   { name: 'HorizontalRule' },
   { name: 'CodeBlock', options: { divider: true } },
-  { name: 'HtmlView', options: { divider: true } },
+  {
+    name: 'HtmlView',
+    options: {
+      divider: true
+      allowedAttributes: ['class', 'style', 'id', 'data-abc']
+    }
+  },
   { name: 'Clear' },
   { name: 'History', options: { divider: true } }
-  //   { name: 'Fullscreen' },
-  // {
-  //   name: 'Callback',
-  //   options: {
-  //       divider: true,
-  //       tooltip: "Image",
-  //       icon:"mdi-image",
-  //       isDisabled: ({editor}: {editor: any, extension: any}) => {
-  //           return !editor.can().setImage({})
-  //       },
-  //       isActive: ({editor}: {editor: any, extension: any}) => {
-  //           return () => editor.isActive('image') || false
-  //       },
-  //       onAction: ({editor}: {editor: any, extension: any}) => {
-  //           editor.chain().focus().setImage({
-  //               display: 'block', // 'block' 'inline' 'left' 'right'
-  //               src: 'https://picsum.photos/300/200',
-  //               alt: 'Random image',
-  //               width: 300,
-  //               height: 200,
-  //           }).run()
-  //       }
-  //   }
-  // },
 ])
-
-// slack-like
-// const extensions = ref([
-//   {
-//     name: 'BaseKit',
-//     options: {
-//         placeholder: {
-//             placeholder: 'Jot something down...'
-//         }
-//     }
-//   },
-//   { name: 'Bold' },
-//   { name: 'Italic' },
-//   { name: 'Strike', options: { divider: true } },
-//   { name: 'Link' , options: { divider: true } },
-//   { name: 'OrderedList'},
-//   { name: 'BulletList', options: { divider: true } },
-//   { name: 'Blockquote',  options: { divider: true }  },
-//   { name: 'Code'},
-//   { name: 'CodeBlock'},
-// ])
 
 const content = ref(`<h2>
             Hi there,
@@ -151,3 +112,52 @@ const content = ref(`<h2>
 ```
 
 :::
+
+## 属性继承机制
+
+编辑器现在支持统一的属性管理机制：
+
+### 1. 全局属性配置
+
+通过 `HtmlView` 扩展的 `allowedAttributes` 选项，可以全局控制所有支持的扩展允许哪些 HTML 属性：
+
+```javascript
+{
+  name: 'HtmlView',
+  options: {
+    allowedAttributes: ['class', 'style', 'id', 'data-testid', 'title', 'aria-label']
+  }
+}
+```
+
+### 2. 自动继承
+
+支持属性继承的扩展（如 `Heading`、`Blockquote`）会自动从全局配置中继承 `allowedAttributes`，无需单独配置。
+
+### 3. 局部覆盖
+
+如果需要为特定扩展设置不同的属性配置，可以在扩展的选项中单独指定：
+
+```javascript
+{
+  name: 'Heading',
+  options: {
+    allowedAttributes: ['class', 'id'] // 覆盖全局配置
+  }
+}
+```
+
+### 4. 支持的扩展
+
+目前支持属性继承的扩展包括：
+
+- `Heading` - 标题元素
+- `Blockquote` - 引用块元素
+- 更多扩展正在逐步支持中...
+
+### 5. 使用示例
+
+1. 在富文本模式下创建标题或引用块
+2. 切换到 HTML 视图模式
+3. 手动添加配置的属性（如 `class`、`style`、`data-testid` 等）
+4. 切换回富文本模式 - 属性会被保留
