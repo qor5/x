@@ -23,6 +23,11 @@ func (b *VXSegmentFormBuilder) Options(v interface{}) (r *VXSegmentFormBuilder) 
 	return b
 }
 
+func (b *VXSegmentFormBuilder) Readonly(v bool) (r *VXSegmentFormBuilder) {
+	b.tag.Attr(":readonly", fmt.Sprintf("%v", v))
+	return b
+}
+
 func (b *VXSegmentFormBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
 }
