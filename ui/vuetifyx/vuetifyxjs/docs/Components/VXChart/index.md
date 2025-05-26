@@ -10,14 +10,17 @@
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | -------- |
 | presets              | 预设样式，可选值：'barChart'、'pieChart'、'funnelChart'                                                                                       | String            | ''       |
 | options              | 图表配置项，会与预设样式合并                                                                                                                  | Object \ Object[] | {}       |
+| height               | 设置图表高度                                                                                                                                  | String            | 'auto'   |
 | mergeOptionsCallback | 可以使用这个回调来修改当前的配置参数, 当需要自定义vx-chart配置的时候格外有用，详见 [#饼图示例](./#饼图示例) ，目前只支持 pieChart 和 barChart | Function          | () => {} |
 | loading              | 是否显示加载状态                                                                                                                              | Boolean           | false    |
 
 ### Slots
 
-| 名称   | 说明                                     | 插槽 Props                                                                                                        |
-| ------ | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| action | 图表操作区域，通常用于切换不同的图表配置 | list: number[]（可用索引列表）<br>currentIndex: number（当前索引）<br>toggle: (index: number) => void（切换函数） |
+| 名称        | 说明                                     | 插槽 Props                                                                                                        |
+| ----------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| title       | 支持自定义标题                           | currentIndex: number（当前索引）                                                                                  |
+| description | 图表标题和图表之间的区域                 | currentIndex: number（当前索引）                                                                                  |
+| action      | 图表操作区域，通常用于切换不同的图表配置 | list: number[]（可用索引列表）<br>currentIndex: number（当前索引）<br>toggle: (index: number) => void（切换函数） |
 
 ## 预设类型
 
@@ -135,7 +138,159 @@ const mergeOptionsCallback = function (options, { seriesData }) {
 
 :::
 
-### 漏斗图示例
+### 漏斗图
+
+使用 `funnelChart` 预设可以快速创建美观的漏斗图，用于展示转化流程和各环节的数据。以下展示最简单的用法
+
+:::demo
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const funnelChartData = ref([
+  {
+    title: {
+      text: 'Event Funnel Chart(Past 7 days)'
+    },
+    series: [
+      {
+        name: '邮件营销',
+        data: [
+          {
+            value: 1000,
+            name: 'Email Sent',
+            extraData: {
+              style: 'plain',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '1000'
+                }
+              ]
+            }
+          },
+          {
+            value: 800,
+            name: 'Email Delivered',
+            extraData: {
+              style: 'plain',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '8,500'
+                }
+              ]
+            }
+          },
+          {
+            value: 200,
+            name: 'Link Clicked',
+            extraData: {
+              style: 'plain',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '2,500'
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    title: {
+      text: 'Event Funnel Chart(Past 14 days)'
+    },
+    series: [
+      {
+        name: '邮件营销',
+        data: [
+          {
+            value: 500,
+            name: 'Email Sent',
+            extraData: {
+              style: 'plain',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '1000'
+                }
+              ]
+            }
+          },
+          {
+            value: 200,
+            name: 'Email Delivered',
+            extraData: {
+              style: 'plain',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '8,500'
+                }
+              ]
+            }
+          },
+          {
+            value: 50,
+            name: 'Link Clicked',
+            extraData: {
+              style: 'plain',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '2,500'
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+])
+</script>
+<template>
+  <div class="chart-container border border-gray-500 rounded-lg">
+    <vx-chart presets="funnelChart" :options="funnelChartData" height="380">
+      <template #action="{ list, currentIndex, toggle }">
+        <div
+          class="d-flex align-center bg-grey-lighten-3 rounded pa-1 mr-4 mt-4"
+          style="height: 32px;"
+        >
+          <button
+            v-for="(_, idx) in list"
+            :key="idx"
+            class="text-body-2 rounded text-no-wrap border-0 flex-grow-1 d-flex align-center justify-center rounded px-2"
+            style="height: 24px; cursor: pointer; transition: all 0.3s;"
+            :style="
+              currentIndex === idx
+                ? 'background-color: #fff; color: #4a4a4a;'
+                : 'background-color: transparent; color: rgb(117, 117, 117);'
+            "
+            @click="toggle(idx)"
+          >
+            {{ idx === 0 ? 'Past 7 Days' : 'Past 14 Days' }}
+          </button>
+        </div>
+      </template>
+    </vx-chart>
+  </div>
+</template>
+
+<style scoped>
+.chart-container {
+  width: 100%;
+}
+</style>
+```
+
+:::
+
+#### 漏斗图进阶配置
 
 使用 `funnelChart` 预设可以快速创建美观的漏斗图，用于展示转化流程和各环节的数据。**新版本支持无限多列的智能缩放算法**，能够根据列数和容器宽度自动调整元素大小和布局：
 
@@ -144,6 +299,30 @@ const mergeOptionsCallback = function (options, { seriesData }) {
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
+
+const addtionalDataList = ref([
+  {
+    name: 'Dropped',
+    icon: 'mdi-cancel',
+    valueStr: '89,935'
+  },
+  {
+    name: 'Aborted',
+    icon: 'mdi-close-octagon-outline',
+    tips: 'it is tips',
+    valueStr: '89,935'
+  },
+  {
+    name: 'Bounced',
+    icon: 'mdi-lock-reset',
+    valueStr: '89,935'
+  },
+  {
+    name: 'Complaint',
+    icon: 'mdi-emoticon-sad-outline',
+    valueStr: '89,935'
+  }
+])
 
 const funnelChartData = ref({
   title: {
@@ -251,6 +430,34 @@ const funnelChartData = ref({
               }
             ]
           }
+        },
+        {
+          value: 100,
+          name: 'Link Clicked2',
+          extraData: {
+            icon: 'mdi-link',
+
+            labelList: [
+              {
+                type: 'primary',
+                text: '2,500'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-top-right',
+                text: '+1.01% this week'
+              },
+              {
+                type: 'primary',
+                text: '50.0%'
+              },
+              {
+                type: 'secondary',
+                icon: 'mdi-arrow-top-right',
+                text: '+1.01% this week'
+              }
+            ]
+          }
         }
       ]
     }
@@ -260,12 +467,83 @@ const funnelChartData = ref({
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
     <vx-chart presets="funnelChart" :options="funnelChartData">
-      <template #action>
-        <span class="text-caption mr-4 px-1 py-0 rounded" style="background:#F5F5F5;"
-          >Data updates on everyday's 00:00
-        </span>
+      <template #title="{ currentIndex }"
+        ><div class="d-flex align-center" style="font-size:35px">
+          Campaign Name
+          <span
+            class="rounded pa-1 ml-4 text-caption"
+            style="font-size:16px;background:#eee;font-weight:400;line-height:1;"
+            >Weekly</span
+          >
+        </div></template
+      >
+      <template #description="{ currentIndex }">
+        <div class="mt-6 ml-3">
+          <span class="text-caption mr-4 px-1 py-1 rounded" style="background:#F5F5F5;"
+            >Last Updated: 0:05 25/05/09; Data will be updated at 0:05
+          </span>
+        </div>
+      </template>
+
+      <template #action="{ list, currentIndex, toggle }">
+        <div
+          class="d-flex align-center bg-grey-lighten-3 rounded pa-1 mr-4 mt-4"
+          style="height: 32px;"
+        >
+          <button
+            v-for="(_, idx) in list"
+            :key="idx"
+            class="text-body-2 rounded text-no-wrap border-0 flex-grow-1 d-flex align-center justify-center rounded px-2"
+            style="height: 24px; cursor: pointer; transition: all 0.3s;"
+            :style="
+              currentIndex === idx
+                ? 'background-color: #fff; color: #4a4a4a;'
+                : 'background-color: transparent; color: rgb(117, 117, 117);'
+            "
+            @click="toggle(idx)"
+          >
+            {{ idx === 0 ? 'Summary' : 'By Week' }}
+          </button>
+        </div>
       </template>
     </vx-chart>
+
+    <div class=" mt-4">
+      <div class="d-flex justify-space-between w-100 ga-4">
+        <div v-for="(item, i) in addtionalDataList" class="border pa-3 rounded-lg" style="flex:1;">
+          <div
+            class="d-flex border pa-2 rounded-lg justify-space-between align-center"
+            style="background: #f9e6e4;border-color:#eb9091!important;"
+          >
+            <vx-label :tooltip="item.tips" tooltip-icon-color="error">
+              <span style="color: #e6484e;">{{ item.name }}</span>
+            </vx-label>
+
+            <div
+              class="d-flex rounded-lg justify-center align-center"
+              style="background:#fff;width:32px; height:32px;"
+            >
+              <v-icon :icon="item.icon" size="16" color="error" />
+            </div>
+          </div>
+
+          <div v-if="i === 0" class="mt-8 text-bold " style="font-size: 20px;font-weight: 510;">
+            <div class="pb-3">
+              <div style="font-size:12px; font-weight:510;color: #616161">This Week</div>
+              <div>89,935</div>
+            </div>
+            <div>
+              <div style="font-size:12px; font-weight:510;color: #616161">Last Week</div>
+              <div style="color: #9e9e9e">89,935</div>
+            </div>
+          </div>
+
+          <div v-else class="mt-8 text-bold" style="font-size: 24px;font-weight: 510;">
+            {{ item.valueStr }}
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -277,174 +555,6 @@ const funnelChartData = ref({
 ```
 
 :::
-
-### 多列漏斗图示例（智能缩放）
-
-展示新的智能缩放算法如何处理更多列的情况：
-
-:::demo
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue'
-
-const multiColumnFunnelData = ref({
-  title: {
-    text: '完整用户转化漏斗 (8个阶段)'
-  },
-  series: [
-    {
-      name: '用户转化',
-      data: [
-        {
-          value: 10000,
-          name: 'Visitors',
-          extraData: {
-            icon: 'mdi-account-group',
-            labelList: [
-              { type: 'primary', text: '10,000' },
-              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+5.2% this month' }
-            ]
-          }
-        },
-        {
-          value: 8500,
-          name: 'Page Views',
-          extraData: {
-            icon: 'mdi-eye',
-            labelList: [
-              { type: 'primary', text: '8,500' },
-              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+3.1% this month' },
-              { type: 'primary', text: '85.0%' },
-              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+2.1% conversion' }
-            ]
-          }
-        },
-        {
-          value: 6200,
-          name: 'Engaged Users',
-          extraData: {
-            icon: 'mdi-heart',
-            labelList: [
-              { type: 'primary', text: '6,200' },
-              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+1.8% this month' },
-              { type: 'primary', text: '72.9%' },
-              { type: 'secondary', icon: 'mdi-arrow-bottom-left', text: '-1.2% conversion' }
-            ]
-          }
-        },
-        {
-          value: 4800,
-          name: 'Sign Ups',
-          extraData: {
-            icon: 'mdi-account-plus',
-            labelList: [
-              { type: 'primary', text: '4,800' },
-              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+4.5% this month' },
-              { type: 'primary', text: '77.4%' },
-              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+3.2% conversion' }
-            ]
-          }
-        },
-        {
-          value: 3600,
-          name: 'Email Verified',
-          extraData: {
-            icon: 'mdi-email-check',
-            labelList: [
-              { type: 'primary', text: '3,600' },
-              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+2.1% this month' },
-              { type: 'primary', text: '75.0%' },
-              { type: 'secondary', icon: 'mdi-arrow-bottom-left', text: '-0.8% conversion' }
-            ]
-          }
-        },
-        {
-          value: 2000,
-          name: 'Email Verified2',
-          extraData: {
-            icon: 'mdi-email-check',
-            labelList: [
-              { type: 'primary', text: '3,600' },
-              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+2.1% this month' },
-              { type: 'primary', text: '75.0%' },
-              { type: 'secondary', icon: 'mdi-arrow-bottom-left', text: '-0.8% conversion' }
-            ]
-          }
-        },
-        {
-          value: 1000,
-          name: 'Email Verified3',
-          extraData: {
-            icon: 'mdi-email-check',
-            labelList: [
-              { type: 'primary', text: '3,600' },
-              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+2.1% this month' },
-              { type: 'primary', text: '75.0%' },
-              { type: 'secondary', icon: 'mdi-arrow-bottom-left', text: '-0.8% conversion' }
-            ]
-          }
-        }
-      ]
-    }
-  ]
-})
-</script>
-<template>
-  <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart presets="funnelChart" :options="multiColumnFunnelData">
-      <template #action>
-        <span class="text-caption mr-4 px-1 py-0 rounded" style="background:#E3F2FD;"
-          >智能缩放算法自动适配 8 列布局
-        </span>
-      </template>
-    </vx-chart>
-  </div>
-</template>
-
-<style scoped>
-.chart-container {
-  width: 100%;
-  min-height: 400px;
-}
-</style>
-```
-
-:::
-
-> **注意**：漏斗图的图例（legend）数据会根据传入的 series[0].data 中的 name 字段自动生成，不需要手动指定 legend.data。
-
-## 漏斗图智能缩放算法
-
-新版本的漏斗图组件采用了智能缩放算法，具有以下特性：
-
-### 🎯 核心特性
-
-- **无限列支持**：支持任意数量的列，从 2 列到 20+ 列
-- **智能缩放**：根据列数和容器宽度自动计算最佳缩放比例
-- **自适应布局**：元素大小、间距、字体大小都会根据列数智能调整
-- **响应式设计**：在不同屏幕尺寸下都能保持良好的显示效果
-
-### 📐 缩放策略
-
-| 列数范围 | 缩放策略 | 特点                                |
-| -------- | -------- | ----------------------------------- |
-| 1-3 列   | 标准缩放 | 保持最佳视觉效果，元素大小适中      |
-| 4-6 列   | 适度缩放 | 每增加一列减少 10% 大小，保持可读性 |
-| 7+ 列    | 激进缩放 | 更大幅度缩放，启用紧凑模式          |
-
-### 🔧 技术细节
-
-- **最小宽度保护**：每列最小宽度 120px，确保内容可读
-- **自适应间距**：列数超过 4 列时自动减少间距
-- **平滑过渡**：所有缩放变化都有 0.3s 的过渡动画
-- **性能优化**：使用 computed 属性缓存计算结果
-
-### 📱 响应式支持
-
-- **移动端优化**：在小屏幕上自动切换为垂直布局
-- **容器适配**：根据父容器宽度动态调整
-- **最小宽度限制**：确保在任何情况下都不会过度压缩
 
 ## 功能扩展
 

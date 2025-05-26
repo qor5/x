@@ -1,7 +1,9 @@
 <template>
   <div class="vx-chart-wrap">
     <div class="d-flex align-center justify-space-between">
-      <div v-if="chartTitle" class="vx-chart-title">{{ chartTitle }}</div>
+      <div v-if="chartTitle" class="vx-chart-title">
+        <slot name="title" :currentIndex="currentIndex">{{ chartTitle }}</slot>
+      </div>
       <slot
         name="action"
         :list="
@@ -14,13 +16,17 @@
       ></slot>
     </div>
 
+    <slot name="description" :currentIndex="currentIndex" />
+
     <!-- 使用新的FunnelChart组件 -->
     <template v-if="props.presets === 'funnelChart'">
       <funnel-chart
+        :height="props.height"
         :data="getCurrentSeriesDataForFunnel()"
         :merge-options-callback="mergeOptionsCallback"
       />
     </template>
+
     <div v-else :id="chartId" class="vx-chart-container"></div>
   </div>
 </template>
@@ -103,6 +109,10 @@ const props = defineProps({
       fetchFn?: () => Promise<any[]>
     }>,
     default: () => ({})
+  },
+  height: {
+    type: String,
+    default: 'auto'
   },
   mergeOptionsCallback: {
     type: Function as PropType<
@@ -349,6 +359,13 @@ const currentSeriesData = computed(() => {
   return mergedOptions.value?.series?.[0]?.data || []
 })
 
+const chartHeight = computed(() => {
+  if (props.height !== 'auto') {
+    return props.height + 'px'
+  }
+  return '300px'
+})
+
 // 获取图表实例
 const getChartInstance = (): echarts.EChartsType | null => {
   // 如果是漏斗图，不初始化echarts实例
@@ -541,7 +558,7 @@ defineExpose({
   .vx-chart-container {
     flex: 1;
     width: 100%;
-    min-height: 300px;
+    min-height: v-bind(chartHeight);
   }
 }
 </style>

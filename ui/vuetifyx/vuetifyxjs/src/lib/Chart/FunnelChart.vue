@@ -1,48 +1,5 @@
 <template>
   <div class="funnel-chart-container">
-    <!-- 添加顶部标题栏 Frame 427323478
-    <div class="funnel-header">
-      <div class="campaign-name-container">
-        <h1 class="campaign-name">Campaign Name</h1>
-      </div>
-      <div class="badge-container">
-        <div class="badge light-badge">
-          <span class="badge-text">Created On: 13:28 07/12/2024</span>
-        </div>
-        <div class="badge light-badge">
-          <span class="badge-text">Last Updated: 13:28 07/12/2024</span>
-        </div>
-      </div>
-    </div> -->
-
-    <!-- 顶部统计卡片 Frame 427323603 -->
-    <!-- <div class="funnel-summary-cards">
-      <div class="summary-card">
-        <div class="summary-tag blue">
-          <div class="tag-dot blue-dot"></div>
-          <div class="tag-text blue-text">Planed email amount</div>
-        </div>
-        <div class="summary-value">3000</div>
-      </div>
-
-      <div class="summary-card">
-        <div class="summary-tag red">
-          <div class="tag-dot red-dot"></div>
-          <div class="tag-text red-text">Dropped</div>
-        </div>
-        <div class="summary-desc">because of user withdrew their email consent</div>
-        <div class="summary-value">89,935</div>
-      </div>
-
-      <div class="summary-card">
-        <div class="summary-tag orange">
-          <div class="tag-dot orange-dot"></div>
-          <div class="tag-text orange-text">Aborted</div>
-        </div>
-        <div class="summary-desc">Campaign manually paused</div>
-        <div class="summary-value">89,935</div>
-      </div>
-    </div> -->
     <div class="funnel-cols-container mt-6" :style="containerStyles">
       <div class="funnel-cols" :style="colsStyles">
         <!-- 动态生成漏斗列 -->
@@ -50,16 +7,24 @@
           class="funnel-col"
           v-for="(item, index) in internalData"
           :key="index"
-          :style="colStyles"
+          :style="colStyles(item)"
         >
-          <div class="funnel-card" :style="cardStyles">
+          <!-- 处理简单样式 -->
+          <div v-if="item.extraData?.style === 'plain'">
+            <div class="funnel-card-text" :style="cardTextStylesForPlainStyle(item)">
+              {{ item.name }}
+            </div>
+          </div>
+          <!-- 处理带icon的样式 -->
+          <div v-else class="funnel-card" :style="cardStyles" :title="item.name">
             <div class="funnel-card-text" :style="cardTextStyles">{{ item.name }}</div>
             <div class="funnel-card-icon" :style="iconStyles">
               <v-icon :icon="item.extraData?.icon" color="#3E63DD" :size="iconSize" />
             </div>
           </div>
+
           <!-- 主数值卡片 -->
-          <div class="funnel-stat-card" :style="statCardStyles">
+          <div class="funnel-stat-card" :style="statCardStyles(item)">
             <div class="funnel-stat-value" :style="statValueStyles">
               {{ getStatValue(item, index, 0) }}
             </div>
@@ -75,7 +40,7 @@
             </div>
           </div>
           <!-- 转化率卡片 (对第一个阶段不显示) -->
-          <div class="funnel-stat-card" :style="statCardStyles" v-if="index > 0">
+          <div class="funnel-stat-card" :style="statCardStyles(item)" v-if="index > 0">
             <div class="funnel-stat-value" :style="statValueStyles">
               {{ getStatValue(item, index, 1) }}
             </div>
@@ -103,7 +68,6 @@
 import { computed, ref, onMounted, PropType, onBeforeUnmount, watch } from 'vue'
 import * as echarts from 'echarts'
 import { funnelChartPreset } from './presets.config'
-import { useVxChartMergeOptsCallback } from './useVxChartMergeOpts'
 
 interface LabelItem {
   type: string
@@ -113,6 +77,7 @@ interface LabelItem {
 
 interface ExtraData {
   icon?: string
+  style?: 'plain' | 'default'
   labelList?: LabelItem[]
 }
 
@@ -127,7 +92,7 @@ const SCALE_CONFIG = {
   // 基础尺寸配置
   BASE_CONTAINER_HEIGHT: 541,
   BASE_CARD_HEIGHT: 68,
-  BASE_CARD_PADDING: { vertical: 22, horizontal: 12 },
+  BASE_CARD_PADDING: { vertical: 16, horizontal: 14 },
   BASE_ICON_SIZE: 44,
   BASE_ICON_BORDER_RADIUS: 12,
   BASE_MARGIN_BOTTOM: 24,
@@ -135,7 +100,7 @@ const SCALE_CONFIG = {
 
   // 字体大小配置
   BASE_FONT_SIZES: {
-    cardText: 16,
+    cardText: 18,
     statValue: 28,
     statTrend: 14,
     icon: 20
@@ -177,11 +142,30 @@ const props = defineProps({
     type: Array as PropType<FunnelItem[]>,
     required: true
   },
+  height: {
+    type: String,
+    default: 'auto'
+  },
   mergeOptionsCallback: {
     type: Function as PropType<(options: any, mergeCallbackOptions: { seriesData: any[] }) => void>,
     required: false
   }
 })
+
+if (props.height !== 'auto') {
+  SCALE_CONFIG.BASE_CONTAINER_HEIGHT = parseInt(props.height)
+}
+
+watch(
+  () => props.height,
+  (newHeight) => {
+    if (newHeight !== 'auto') {
+      SCALE_CONFIG.BASE_CONTAINER_HEIGHT = parseInt(newHeight)
+    } else {
+      SCALE_CONFIG.BASE_CONTAINER_HEIGHT = 541
+    }
+  }
+)
 
 // 生成唯一的图表ID
 const chartId = `funnel-chart-${Math.random().toString(36).substring(2, 10)}`
@@ -295,7 +279,7 @@ const scalingMetrics = computed(() => {
   return {
     scaleFactor,
     colWidth: idealColWidth,
-    isCompact: colCount > 4,
+    isCompact: width < 800,
     adaptiveSpacing
   }
 })
@@ -319,17 +303,13 @@ const colsStyles = computed(() => {
     display: 'flex',
     // 当列数很多时，确保每列平均分配宽度
     ...(colCount > 6 && {
-      justifyContent: 'space-between',
-      // 当使用gap时，移除边框避免重复
-      '& .funnel-col': {
-        borderRight: 'none'
-      }
+      justifyContent: 'space-between'
     })
   }
 })
 
 // 单列样式
-const colStyles = computed(() => {
+const colStyles = (item: FunnelItem) => {
   const { scaleFactor, adaptiveSpacing, isCompact } = scalingMetrics.value
   const colCount = internalData.value.length
 
@@ -339,6 +319,10 @@ const colStyles = computed(() => {
   const baseStyles = {
     padding: `${16 * scaleFactor * adaptiveSpacing}px ${isCompact ? 4 : 16 * scaleFactor * adaptiveSpacing}px`,
     minWidth: `${SCALE_CONFIG.BREAKPOINTS.MIN_COL_WIDTH * scaleFactor}px`
+  }
+
+  if (item.extraData?.style === 'plain') {
+    baseStyles.padding = `${16 * scaleFactor * adaptiveSpacing}px`
   }
 
   if (colCount > 6) {
@@ -357,7 +341,7 @@ const colStyles = computed(() => {
       maxWidth: 'none'
     }
   }
-})
+}
 
 // 卡片样式
 const cardStyles = computed(() => {
@@ -378,11 +362,23 @@ const cardStyles = computed(() => {
 // 卡片文字样式
 const cardTextStyles = computed(() => {
   const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+
   return {
     fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.cardText * scaleFactor * adaptiveSpacing}px`,
     lineHeight: `${SCALE_CONFIG.BASE_LINE_HEIGHTS.cardText * scaleFactor * adaptiveSpacing}px`
   }
 })
+
+const cardTextStylesForPlainStyle = (item: FunnelItem) => {
+  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+
+  return {
+    fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.cardText * 0.835 * scaleFactor * adaptiveSpacing}px`,
+    lineHeight: `${SCALE_CONFIG.BASE_LINE_HEIGHTS.cardText * 0.835 * scaleFactor * adaptiveSpacing}px`,
+    color: '#616161',
+    marginBottom: '16px'
+  }
+}
 
 // 图标样式
 const iconStyles = computed(() => {
@@ -397,13 +393,18 @@ const iconStyles = computed(() => {
 })
 
 // 统计卡片样式
-const statCardStyles = computed(() => {
+const statCardStyles = (item: FunnelItem) => {
   const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+
   return {
     marginBottom: `${SCALE_CONFIG.BASE_MARGIN_BOTTOM * scaleFactor * adaptiveSpacing}px`,
-    padding: `0 ${SCALE_CONFIG.BASE_STAT_PADDING * scaleFactor * adaptiveSpacing}px`
+    padding: `0 ${SCALE_CONFIG.BASE_STAT_PADDING * scaleFactor * adaptiveSpacing}px`,
+    paddingLeft:
+      item.extraData?.style === 'plain'
+        ? '0'
+        : `${SCALE_CONFIG.BASE_STAT_PADDING * scaleFactor * adaptiveSpacing}px`
   }
-})
+}
 
 // 统计数值样式
 const statValueStyles = computed(() => {
@@ -769,11 +770,13 @@ onBeforeUnmount(() => {
 
 /* 漏斗图列样式 - 优化版 */
 .funnel-cols {
+  position: relative;
   display: flex;
   width: 100%;
   flex: 1;
   transition: gap 0.3s ease;
   box-sizing: border-box;
+  z-index: 1;
 
   /* 当有gap时，移除所有边框 */
   &[style*='gap'] {
@@ -900,7 +903,7 @@ onBeforeUnmount(() => {
   width: 100%;
   position: absolute;
   bottom: 0;
-  z-index: 1;
+  z-index: 2;
 }
 
 .funnel-cols-container {
@@ -908,7 +911,8 @@ onBeforeUnmount(() => {
   transition: all 0.3s ease;
 
   .funnel-cols {
-    pointer-events: none;
+    // pointer-events: none;
+    flex-direction: row;
     position: absolute;
     top: 0;
     left: 0;
