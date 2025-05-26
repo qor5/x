@@ -129,17 +129,30 @@ const { invokeMergeOptionsCallback } = useVxChartMergeOptsCallback(props)
 
 // 获取当前系列数据，用于漏斗图组件
 const getCurrentSeriesDataForFunnel = () => {
-  let result = []
-
   if (Array.isArray(props.options)) {
-    // 如果options是数组，获取当前选中索引的series数据
+    // 如果options是数组，返回当前选中索引的完整配置
     const currentOption = props.options[currentIndex.value]
-    result = currentOption?.series?.[0]?.data || []
+    return {
+      title: currentOption?.title,
+      series: (currentOption?.series || []).map((s) => ({
+        name: s.name || '',
+        type: s.type as 'funnel' | 'line' | undefined,
+        data: s.data || [],
+        smooth: s.smooth
+      }))
+    }
   } else {
-    // 如果options是对象，直接获取series数据
-    result = props.options?.series?.[0]?.data || []
+    // 如果options是对象，返回完整的配置
+    return {
+      title: props.options?.title,
+      series: (props.options?.series || []).map((s) => ({
+        name: s.name || '',
+        type: s.type as 'funnel' | 'line' | undefined,
+        data: s.data || [],
+        smooth: s.smooth
+      }))
+    }
   }
-  return result
 }
 
 // 提取标题

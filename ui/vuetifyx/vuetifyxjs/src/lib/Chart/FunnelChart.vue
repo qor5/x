@@ -134,6 +134,7 @@ interface LabelItem {
 interface ExtraData {
   icon?: string
   style?: 'plain' | 'default'
+  hideLabel?: boolean
   labelList?: LabelItem[]
 }
 
@@ -141,6 +142,20 @@ interface FunnelItem {
   value: number
   name: string
   extraData?: ExtraData
+}
+
+interface SeriesData {
+  name: string
+  type?: 'funnel' | 'line'
+  data: FunnelItem[] | number[]
+  smooth?: boolean
+}
+
+interface ChartData {
+  title?: {
+    text: string
+  }
+  series: SeriesData[]
 }
 
 // 缩放配置常量
@@ -198,7 +213,7 @@ const SCALE_CONFIG = {
 
 const props = defineProps({
   data: {
-    type: Array as PropType<FunnelItem[]>,
+    type: [Array, Object] as PropType<FunnelItem[] | ChartData>,
     required: true
   },
   height: {
@@ -233,15 +248,46 @@ const chartInstance = ref<echarts.EChartsType | null>(null)
 const containerRef = ref<HTMLElement | null>(null)
 const containerWidth = ref(0)
 const internalData = ref<FunnelItem[]>([])
+const lineSeriesData = ref<SeriesData[]>([])
+const lineChartOverlays = ref<echarts.EChartsType[]>([])
 const observer = ref<ResizeObserver | null>(null)
+
+// 处理数据格式，支持新旧两种格式
+const processData = (data: FunnelItem[] | ChartData) => {
+  if (Array.isArray(data)) {
+    // 旧格式：直接是 FunnelItem 数组
+    internalData.value = [...data]
+    lineSeriesData.value = []
+  } else {
+    // 新格式：ChartData 对象
+    const funnelSeries = data.series.find((s) => !s.type || s.type === 'funnel')
+    const lineSeries = data.series.filter((s) => s.type === 'line')
+
+    if (funnelSeries && Array.isArray(funnelSeries.data)) {
+      internalData.value = [...(funnelSeries.data as FunnelItem[])]
+    } else {
+      internalData.value = []
+    }
+
+    lineSeriesData.value = [...lineSeries]
+  }
+}
 
 watch(
   () => props.data,
   (newData) => {
-    internalData.value = [...newData]
+    processData(newData)
   },
   { immediate: true }
 )
+
+// 获取图表标题
+const chartTitle = computed(() => {
+  if (!Array.isArray(props.data) && props.data.title) {
+    return props.data.title.text
+  }
+  return ''
+})
 
 // 根据item和索引位置获取统计值
 const getStatValue = (item: FunnelItem, index: number, statIndex: number) => {
@@ -574,10 +620,170 @@ const updateEChartsOptions = () => {
 
   const options = JSON.parse(JSON.stringify(funnelChartPreset))
 
+  // 设置漏斗图数据
   options.series[0].data = ensuredData
+
+  // 如果有折线图数据，我们将创建一个独立的图表实例来避免坐标系冲突
+  if (lineSeriesData.value.length > 0) {
+    // 先渲染漏斗图
+    if (props.mergeOptionsCallback) {
+      props.mergeOptionsCallback(options, { seriesData: options.series })
+    }
+
+    chartInstance.value.clear()
+    chartInstance.value.setOption(options)
+
+    // 然后在漏斗图上叠加折线图
+    setTimeout(() => {
+      addLineChartOverlay()
+    }, 100)
+
+    return
+  }
+
+  // 如果没有折线图，正常渲染漏斗图
+  if (props.mergeOptionsCallback) {
+    props.mergeOptionsCallback(options, { seriesData: options.series })
+  }
 
   chartInstance.value.clear()
   chartInstance.value.setOption(options)
+}
+
+// 清理折线图叠加层
+const cleanupLineChartOverlays = () => {
+  // 清理所有折线图实例
+  lineChartOverlays.value.forEach((chart) => {
+    if (chart) {
+      chart.dispose()
+    }
+  })
+  lineChartOverlays.value = []
+
+  // 移除DOM元素
+  const chartDom = document.getElementById(chartId)
+  if (chartDom) {
+    const overlays = chartDom.querySelectorAll('.line-chart-overlay')
+    overlays.forEach((overlay) => overlay.remove())
+  }
+}
+
+// 添加折线图叠加层
+const addLineChartOverlay = () => {
+  if (!chartInstance.value || lineSeriesData.value.length === 0) return
+
+  // 先清理之前的叠加层
+  cleanupLineChartOverlays()
+
+  const chartDom = document.getElementById(chartId)
+  if (!chartDom) return
+
+  // 创建叠加层容器
+  const overlay = document.createElement('div')
+  overlay.className = 'line-chart-overlay'
+  overlay.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  `
+
+  // 创建折线图容器
+  const lineChartContainer = document.createElement('div')
+  lineChartContainer.style.cssText = `
+    width: 100%;
+    height: 100%;
+  `
+  overlay.appendChild(lineChartContainer)
+  chartDom.appendChild(overlay)
+
+  // 创建独立的折线图实例
+  const lineChart = echarts.init(lineChartContainer, null, {
+    width: chartDom.clientWidth,
+    height: chartDom.clientHeight
+  })
+
+  // 处理折线图数据
+  const ensuredData = [...(internalData.value || [])]
+  const lineSeriesOptions = lineSeriesData.value
+    .map((lineSeries) => {
+      let lineData = lineSeries.data
+
+      if (!Array.isArray(lineData)) {
+        console.warn('Line chart data must be an array')
+        return null
+      }
+
+      // 格式化数据
+      const formattedData = lineData.map((item) => {
+        if (typeof item === 'number') {
+          return item
+        } else if (typeof item === 'object' && item !== null && 'value' in item) {
+          return item.value
+        } else if (typeof item === 'string') {
+          const num = parseFloat(item)
+          return isNaN(num) ? 0 : num
+        }
+        return 0
+      })
+
+      // 调整数据长度
+      while (formattedData.length < ensuredData.length) {
+        formattedData.push(0)
+      }
+      if (formattedData.length > ensuredData.length) {
+        formattedData.splice(ensuredData.length)
+      }
+
+      return {
+        name: lineSeries.name,
+        type: 'line',
+        data: formattedData,
+        smooth: lineSeries.smooth || false,
+        lineStyle: {
+          width: 3,
+          color: '#3e63dd'
+        },
+        itemStyle: {
+          color: '#3e63dd'
+        },
+        symbol: 'none',
+        symbolSize: 0
+      }
+    })
+    .filter(Boolean)
+
+  // 配置独立的折线图
+  const lineChartOption = {
+    backgroundColor: 'transparent',
+    grid: {
+      left: '0%',
+      right: '0%',
+      top: '0%',
+      bottom: '0%',
+      containLabel: false
+    },
+    xAxis: {
+      type: 'category',
+      data: ensuredData.map((item) => item.name),
+      show: false,
+      boundaryGap: false
+    },
+    yAxis: {
+      type: 'value',
+      show: false,
+      min: 0
+    },
+    series: lineSeriesOptions
+  }
+
+  lineChart.setOption(lineChartOption)
+
+  // 保存折线图实例以便后续清理
+  lineChartOverlays.value.push(lineChart)
 }
 
 const handleResize = () => {
@@ -607,7 +813,7 @@ const updateContainerWidth = () => {
 }
 
 watch(
-  internalData,
+  [internalData, lineSeriesData],
   () => {
     updateEChartsOptions()
   },
@@ -653,6 +859,10 @@ onBeforeUnmount(() => {
   }
 
   window.removeEventListener('resize', handleResize)
+
+  // 清理折线图叠加层
+  cleanupLineChartOverlays()
+
   if (chartInstance.value) {
     chartInstance.value.dispose()
     chartInstance.value = null

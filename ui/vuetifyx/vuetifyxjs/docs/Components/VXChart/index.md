@@ -423,11 +423,12 @@ const funnelChartData = ref([
   },
   {
     title: {
-      text: '邮件营销漏斗'
+      text: '邮件营销漏斗 - 带折线图'
     },
     series: [
       {
         name: '邮件营销',
+        type: 'funnel', // 明确指定为漏斗图
         data: [
           {
             value: 1000,
@@ -507,7 +508,6 @@ const funnelChartData = ref([
             name: 'Link Clicked2',
             extraData: {
               icon: 'mdi-link',
-
               labelList: [
                 {
                   type: 'primary',
@@ -528,7 +528,7 @@ const funnelChartData = ref([
         ]
       },
       {
-        name: '数据量',
+        name: '转化率趋势',
         type: 'line',
         data: [120, 132, 101, 134, 90],
         smooth: true // 可选：是否平滑曲线
@@ -576,7 +576,7 @@ const funnelChartData = ref([
               ><i class="d-inline-block mr-2" style="width:12px;height:2px;background:#3e63dd" /><b
                 class="mr-2"
                 style="color:#616161;"
-                >This Week</b
+                >Last Week</b
               >
               25/05/01-25/05/07
             </span>
