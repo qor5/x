@@ -276,7 +276,7 @@ export const funnelChartPreset: ChartOptions = {
     padding: [10, 0, 0, 10]
   },
   // 为四个漏斗段设置匹配的颜色
-  color: ['#e7edfc', '#91a3e9', '#4662d5', '#3a50ac'],
+  color: ['#e7edfc', '#91a3e9', '#4662d5', '#3a50ac', '#181d46'],
   series: [
     {
       name: '', // 使用通用名称，会被用户传入的series name覆盖
