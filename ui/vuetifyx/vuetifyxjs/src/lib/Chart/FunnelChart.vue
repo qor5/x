@@ -70,7 +70,7 @@
             >
             <!-- 主数值 -->
             <div style="line-height: 1">
-              <div class="funnel-stat-value" :style="statValueStyles">
+              <div class="funnel-stat-value lighter" :style="statValueStyles">
                 {{ getStatValue(item, index, 1) }}
               </div>
               <!-- 趋势 -->
@@ -221,7 +221,7 @@ const props = defineProps({
     default: 'auto'
   },
   mergeOptionsCallback: {
-    type: Function as PropType<(options: any, mergeCallbackOptions: { seriesData: any[] }) => void>,
+    type: Function as PropType<(options: any, mergeCallbackOptions: any) => void>,
     required: false
   }
 })
@@ -641,7 +641,9 @@ const updateEChartsOptions = () => {
     return
   }
 
-  // 如果没有折线图，正常渲染漏斗图
+  // 如果没有折线图，清理叠加层并正常渲染漏斗图
+  cleanupLineChartOverlays()
+
   if (props.mergeOptionsCallback) {
     props.mergeOptionsCallback(options, { seriesData: options.series })
   }
@@ -744,7 +746,7 @@ const addLineChartOverlay = () => {
         data: formattedData,
         smooth: lineSeries.smooth || false,
         lineStyle: {
-          width: 3,
+          width: 2,
           color: '#3e63dd'
         },
         itemStyle: {
@@ -816,6 +818,18 @@ watch(
   [internalData, lineSeriesData],
   () => {
     updateEChartsOptions()
+  },
+  { deep: true }
+)
+
+// 监听折线图数据变化，当没有折线图时清理叠加层
+watch(
+  () => lineSeriesData.value,
+  (newLineData) => {
+    if (!newLineData || newLineData.length === 0) {
+      // 如果没有折线图数据，清理所有叠加层
+      cleanupLineChartOverlays()
+    }
   },
   { deep: true }
 )
@@ -1154,6 +1168,10 @@ onBeforeUnmount(() => {
   transition: all 0.3s ease;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  &.lighter {
+    color: #9e9e9e;
+  }
 }
 
 .funnel-stat-trend {

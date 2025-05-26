@@ -14,12 +14,6 @@
 | mergeOptionsCallback | 可以使用这个回调来修改当前的配置参数, 当需要自定义vx-chart配置的时候格外有用，详见 [#饼图示例](./#饼图示例) ，目前只支持 pieChart 和 barChart | Function          | () => {} |
 | loading              | 是否显示加载状态                                                                                                                              | Boolean           | false    |
 
-### Events
-
-| 名称            | 载荷     | 介绍                               |
-| --------------- | -------- | ---------------------------------- |
-| on-change-index | `Number` | 当图表有多个配置，切换了配置后触发 |
-
 ### Slots
 
 | 名称        | 说明                                     | 插槽 Props                                                                                                        |
@@ -258,17 +252,10 @@ const funnelChartData = ref([
     ]
   }
 ])
-
-const onChangeIndex = (idx) => {}
 </script>
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart
-      presets="funnelChart"
-      :options="funnelChartData"
-      height="380"
-      @on-change-index="onChangeIndex"
-    >
+    <vx-chart presets="funnelChart" :options="funnelChartData" height="380">
       <template #action="{ list, currentIndex, toggle }">
         <div
           class="d-flex align-center bg-grey-lighten-3 rounded pa-1 mr-4 mt-4"
@@ -431,7 +418,7 @@ const funnelChartData = ref([
         type: 'funnel', // 明确指定为漏斗图
         data: [
           {
-            value: 1000,
+            value: 1200,
             name: 'Email Sent',
             extraData: {
               icon: 'mdi-near-me',
@@ -448,7 +435,7 @@ const funnelChartData = ref([
             }
           },
           {
-            value: 800,
+            value: 700,
             name: 'Email Delivered',
             extraData: {
               icon: 'mdi-email-mark-as-unread',
@@ -465,7 +452,7 @@ const funnelChartData = ref([
             }
           },
           {
-            value: 400,
+            value: 300,
             name: 'Email Opened',
             extraData: {
               icon: 'mdi-check-all',
@@ -482,7 +469,7 @@ const funnelChartData = ref([
             }
           },
           {
-            value: 200,
+            value: 100,
             name: 'Link Clicked',
             extraData: {
               icon: 'mdi-link',
@@ -504,7 +491,7 @@ const funnelChartData = ref([
             }
           },
           {
-            value: 100,
+            value: 50,
             name: 'Link Clicked2',
             extraData: {
               icon: 'mdi-link',
@@ -536,10 +523,27 @@ const funnelChartData = ref([
     ]
   }
 ])
+
+// 通过mergeOptionsCallback控制漏斗图颜色
+const funnelMergeOptionsCallback = (options, { currentIndex }) => {
+  // 当切换到第二个配置(idx = 1)时，将所有漏斗段设置为浅蓝色
+  if (currentIndex === 1 && options.series && options.series[0] && options.series[0].data) {
+    options.series[0].data = options.series[0].data.map((item) => ({
+      ...item,
+      itemStyle: {
+        color: '#e6edfe'
+      }
+    }))
+  }
+}
 </script>
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart presets="funnelChart" :options="funnelChartData">
+    <vx-chart
+      presets="funnelChart"
+      :options="funnelChartData"
+      :merge-options-callback="funnelMergeOptionsCallback"
+    >
       <template #title="{ currentIndex }"
         ><div class="d-flex align-center" style="font-size:35px">
           Campaign Name

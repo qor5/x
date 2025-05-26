@@ -23,7 +23,7 @@
       <funnel-chart
         :height="props.height"
         :data="getCurrentSeriesDataForFunnel()"
-        :merge-options-callback="mergeOptionsCallback"
+        :merge-options-callback="funnelMergeOptionsCallback"
       />
     </template>
 
@@ -126,6 +126,14 @@ const props = defineProps({
 })
 
 const { invokeMergeOptionsCallback } = useVxChartMergeOptsCallback(props)
+
+// 为漏斗图创建合并选项回调，传递当前索引信息
+const funnelMergeOptionsCallback = (options: any, data: any) => {
+  // 调用外部传入的mergeOptionsCallback，并传递currentIndex
+  if (props.mergeOptionsCallback) {
+    props.mergeOptionsCallback(options, { ...data, currentIndex: currentIndex.value })
+  }
+}
 
 // 获取当前系列数据，用于漏斗图组件
 const getCurrentSeriesDataForFunnel = () => {
