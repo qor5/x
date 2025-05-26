@@ -44,9 +44,14 @@
       </div>
     </div> -->
     <div class="funnel-cols-container mt-6" :style="containerStyles">
-      <div class="funnel-cols">
+      <div class="funnel-cols" :style="colsStyles">
         <!-- 动态生成漏斗列 -->
-        <div class="funnel-col" v-for="(item, index) in internalData" :key="index">
+        <div
+          class="funnel-col"
+          v-for="(item, index) in internalData"
+          :key="index"
+          :style="colStyles"
+        >
           <div class="funnel-card" :style="cardStyles">
             <div class="funnel-card-text" :style="cardTextStyles">{{ item.name }}</div>
             <div class="funnel-card-icon" :style="iconStyles">
@@ -62,7 +67,7 @@
               <v-icon
                 :icon="getStatTrend(item, index, 0).icon"
                 :color="getStatTrend(item, index, 0).color"
-                :size="iconSize"
+                :size="trendIconSize"
               />
               <span class="trend-text" :style="trendTextStyles">{{
                 getStatTrend(item, index, 0).text
@@ -78,7 +83,7 @@
               <v-icon
                 :icon="getStatTrend(item, index, 1).icon"
                 :color="getStatTrend(item, index, 1).color"
-                :size="iconSize"
+                :size="trendIconSize"
               />
               <span class="trend-text" :style="trendTextStyles">{{
                 getStatTrend(item, index, 1).text
@@ -89,7 +94,7 @@
       </div>
 
       <!-- Actual Funnel Visual with echarts -->
-      <div id="funnel-echarts-container" class="funnel-visual" :style="visualStyles"></div>
+      <div :id="chartId" class="funnel-visual" :style="visualStyles"></div>
     </div>
   </div>
 </template>
@@ -99,6 +104,7 @@ import { computed, ref, onMounted, PropType, onBeforeUnmount, watch } from 'vue'
 import * as echarts from 'echarts'
 import { funnelChartPreset } from './presets.config'
 import { useVxChartMergeOptsCallback } from './useVxChartMergeOpts'
+
 interface LabelItem {
   type: string
   text: string
@@ -116,6 +122,56 @@ interface FunnelItem {
   extraData?: ExtraData
 }
 
+// 缩放配置常量
+const SCALE_CONFIG = {
+  // 基础尺寸配置
+  BASE_CONTAINER_HEIGHT: 541,
+  BASE_CARD_HEIGHT: 68,
+  BASE_CARD_PADDING: { vertical: 22, horizontal: 12 },
+  BASE_ICON_SIZE: 44,
+  BASE_ICON_BORDER_RADIUS: 12,
+  BASE_MARGIN_BOTTOM: 24,
+  BASE_STAT_PADDING: 12,
+
+  // 字体大小配置
+  BASE_FONT_SIZES: {
+    cardText: 16,
+    statValue: 28,
+    statTrend: 14,
+    icon: 20
+  },
+
+  // 行高配置
+  BASE_LINE_HEIGHTS: {
+    cardText: 20,
+    statValue: 32,
+    statTrend: 18
+  },
+
+  // 间距配置
+  BASE_SPACINGS: {
+    trendTextMargin: 12
+  },
+
+  // 断点配置
+  BREAKPOINTS: {
+    // 最小宽度，低于此宽度使用最小缩放
+    MIN_WIDTH: 400,
+    // 舒适宽度，高于此宽度使用标准缩放
+    COMFORTABLE_WIDTH: 800,
+    // 每列的理想最小宽度
+    MIN_COL_WIDTH: 120,
+    // 每列的理想最大宽度
+    MAX_COL_WIDTH: 200
+  },
+
+  // 缩放范围
+  SCALE_RANGE: {
+    MIN: 0.6,
+    MAX: 1.2
+  }
+}
+
 const props = defineProps({
   data: {
     type: Array as PropType<FunnelItem[]>,
@@ -126,7 +182,10 @@ const props = defineProps({
     required: false
   }
 })
-// const { invokeMergeOptionsCallback } = useVxChartMergeOptsCallback(props)
+
+// 生成唯一的图表ID
+const chartId = `funnel-chart-${Math.random().toString(36).substring(2, 10)}`
+
 const chartInstance = ref<echarts.EChartsType | null>(null)
 const containerRef = ref<HTMLElement | null>(null)
 const containerWidth = ref(0)
@@ -173,82 +232,224 @@ const getStatTrend = (item: FunnelItem, index: number, statIndex: number) => {
   return { icon: '', text: '', color: '' }
 }
 
-const scaleFactor = computed(() => {
-  if (containerWidth.value < 700 && containerWidth.value >= 534) {
-    const ratio = (containerWidth.value - 534) / (700 - 534)
-    return 0.7 + ratio * 0.3
-  } else if (containerWidth.value < 534) {
-    return 0.7
+// 智能缩放算法
+const scalingMetrics = computed(() => {
+  const colCount = internalData.value.length
+  const width = containerWidth.value
+
+  if (colCount === 0 || width === 0) {
+    return {
+      scaleFactor: 1,
+      colWidth: SCALE_CONFIG.BREAKPOINTS.MIN_COL_WIDTH,
+      isCompact: false,
+      adaptiveSpacing: 1
+    }
   }
-  return 1
+
+  // 计算每列的理想宽度
+  const idealColWidth = Math.max(
+    SCALE_CONFIG.BREAKPOINTS.MIN_COL_WIDTH,
+    Math.min(SCALE_CONFIG.BREAKPOINTS.MAX_COL_WIDTH, width / colCount)
+  )
+
+  // 计算基于列数的缩放因子
+  let scaleFactor = 1
+
+  if (colCount <= 3) {
+    // 3列及以下，使用标准缩放
+    scaleFactor = Math.max(
+      SCALE_CONFIG.SCALE_RANGE.MIN,
+      Math.min(SCALE_CONFIG.SCALE_RANGE.MAX, width / SCALE_CONFIG.BREAKPOINTS.COMFORTABLE_WIDTH)
+    )
+  } else if (colCount <= 6) {
+    // 4-6列，适度缩放
+    const baseScale = width / SCALE_CONFIG.BREAKPOINTS.COMFORTABLE_WIDTH
+    const colPenalty = (colCount - 3) * 0.1 // 每增加一列减少10%
+    scaleFactor = Math.max(SCALE_CONFIG.SCALE_RANGE.MIN, Math.min(1, baseScale - colPenalty))
+  } else {
+    // 7列及以上，更激进的缩放
+    const baseScale = width / SCALE_CONFIG.BREAKPOINTS.COMFORTABLE_WIDTH
+    const colPenalty = (colCount - 6) * 0.15 + 0.3 // 基础减少30%，每增加一列再减少15%
+    scaleFactor = Math.max(SCALE_CONFIG.SCALE_RANGE.MIN, Math.min(0.8, baseScale - colPenalty))
+  }
+
+  // 宽度约束调整
+  if (width < SCALE_CONFIG.BREAKPOINTS.MIN_WIDTH) {
+    scaleFactor *= 0.8
+  } else if (width < SCALE_CONFIG.BREAKPOINTS.COMFORTABLE_WIDTH) {
+    const widthRatio =
+      (width - SCALE_CONFIG.BREAKPOINTS.MIN_WIDTH) /
+      (SCALE_CONFIG.BREAKPOINTS.COMFORTABLE_WIDTH - SCALE_CONFIG.BREAKPOINTS.MIN_WIDTH)
+    scaleFactor *= 0.8 + widthRatio * 0.2
+  }
+
+  // 确保缩放因子在合理范围内
+  scaleFactor = Math.max(
+    SCALE_CONFIG.SCALE_RANGE.MIN,
+    Math.min(SCALE_CONFIG.SCALE_RANGE.MAX, scaleFactor)
+  )
+
+  // 计算自适应间距因子
+  const adaptiveSpacing = colCount > 4 ? Math.max(0.5, 1 - (colCount - 4) * 0.1) : 1
+
+  return {
+    scaleFactor,
+    colWidth: idealColWidth,
+    isCompact: colCount > 4,
+    adaptiveSpacing
+  }
 })
 
+// 容器样式
 const containerStyles = computed(() => {
+  const { scaleFactor } = scalingMetrics.value
   return {
-    height: `${541 * scaleFactor.value}px`
+    height: `${SCALE_CONFIG.BASE_CONTAINER_HEIGHT * scaleFactor}px`,
+    minWidth: `${Math.max(400, internalData.value.length * SCALE_CONFIG.BREAKPOINTS.MIN_COL_WIDTH)}px`
   }
 })
 
+// 列容器样式
+const colsStyles = computed(() => {
+  const { isCompact } = scalingMetrics.value
+  const colCount = internalData.value.length
+
+  return {
+    width: '100%', // 确保填充整个容器宽度
+    display: 'flex',
+    // 当列数很多时，确保每列平均分配宽度
+    ...(colCount > 6 && {
+      justifyContent: 'space-between',
+      // 当使用gap时，移除边框避免重复
+      '& .funnel-col': {
+        borderRight: 'none'
+      }
+    })
+  }
+})
+
+// 单列样式
+const colStyles = computed(() => {
+  const { scaleFactor, adaptiveSpacing, isCompact } = scalingMetrics.value
+  const colCount = internalData.value.length
+
+  // 计算每列应该占用的宽度百分比
+  const colWidthPercent = colCount > 0 ? 100 / colCount : 100
+
+  const baseStyles = {
+    padding: `${16 * scaleFactor * adaptiveSpacing}px ${isCompact ? 4 : 16 * scaleFactor * adaptiveSpacing}px`,
+    minWidth: `${SCALE_CONFIG.BREAKPOINTS.MIN_COL_WIDTH * scaleFactor}px`
+  }
+
+  if (colCount > 6) {
+    // 当列数大于6时，使用flex-basis确保平均分配宽度
+    return {
+      ...baseStyles,
+      flex: `1 1 ${colWidthPercent}%`,
+      maxWidth: `${colWidthPercent}%`,
+      width: `${colWidthPercent}%`
+    }
+  } else {
+    // 列数较少时，使用原来的逻辑
+    return {
+      ...baseStyles,
+      flex: '1',
+      maxWidth: 'none'
+    }
+  }
+})
+
+// 卡片样式
 const cardStyles = computed(() => {
+  const { scaleFactor, adaptiveSpacing, isCompact } = scalingMetrics.value
+  const verticalPadding = SCALE_CONFIG.BASE_CARD_PADDING.vertical * scaleFactor * adaptiveSpacing
+  const horizontalPadding =
+    SCALE_CONFIG.BASE_CARD_PADDING.horizontal * scaleFactor * adaptiveSpacing
+
   return {
-    padding: scaleFactor.value === 1 ? '22px 12px' : '15px 8px',
-    height: `${68 * scaleFactor.value}px`,
-    marginBottom: `${24 * scaleFactor.value}px`
+    padding: isCompact
+      ? `${Math.max(8, verticalPadding * 0.7)}px ${Math.max(6, horizontalPadding * 0.8)}px`
+      : `${verticalPadding}px ${horizontalPadding}px`,
+    height: `${SCALE_CONFIG.BASE_CARD_HEIGHT * scaleFactor * adaptiveSpacing}px`,
+    marginBottom: `${SCALE_CONFIG.BASE_MARGIN_BOTTOM * scaleFactor * adaptiveSpacing}px`
   }
 })
 
+// 卡片文字样式
 const cardTextStyles = computed(() => {
+  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
   return {
-    fontSize: `${16 * scaleFactor.value}px`,
-    lineHeight: `${20 * scaleFactor.value}px`
+    fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.cardText * scaleFactor * adaptiveSpacing}px`,
+    lineHeight: `${SCALE_CONFIG.BASE_LINE_HEIGHTS.cardText * scaleFactor * adaptiveSpacing}px`
   }
 })
 
+// 图标样式
 const iconStyles = computed(() => {
+  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+  const size = SCALE_CONFIG.BASE_ICON_SIZE * scaleFactor * adaptiveSpacing
+
   return {
-    width: `${44 * scaleFactor.value}px`,
-    height: `${44 * scaleFactor.value}px`,
-    borderRadius: `${12 * scaleFactor.value}px`
+    width: `${size}px`,
+    height: `${size}px`,
+    borderRadius: `${SCALE_CONFIG.BASE_ICON_BORDER_RADIUS * scaleFactor * adaptiveSpacing}px`
   }
 })
 
+// 统计卡片样式
 const statCardStyles = computed(() => {
+  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
   return {
-    marginBottom: `${24 * scaleFactor.value}px`,
-    padding: `0 ${12 * scaleFactor.value}px`
+    marginBottom: `${SCALE_CONFIG.BASE_MARGIN_BOTTOM * scaleFactor * adaptiveSpacing}px`,
+    padding: `0 ${SCALE_CONFIG.BASE_STAT_PADDING * scaleFactor * adaptiveSpacing}px`
   }
 })
 
+// 统计数值样式
 const statValueStyles = computed(() => {
+  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
   return {
-    fontSize: `${28 * scaleFactor.value}px`,
-    marginBottom: `${12 * scaleFactor.value}px`,
-    lineHeight: `${32 * scaleFactor.value}px`
+    fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.statValue * scaleFactor * adaptiveSpacing}px`,
+    marginBottom: `${SCALE_CONFIG.BASE_STAT_PADDING * scaleFactor * adaptiveSpacing}px`,
+    lineHeight: `${SCALE_CONFIG.BASE_LINE_HEIGHTS.statValue * scaleFactor * adaptiveSpacing}px`
   }
 })
 
+// 统计趋势样式
 const statTrendStyles = computed(() => {
+  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
   return {
-    fontSize: `${14 * scaleFactor.value}px`,
-    lineHeight: `${18 * scaleFactor.value}px`
+    fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.statTrend * scaleFactor * adaptiveSpacing}px`,
+    lineHeight: `${SCALE_CONFIG.BASE_LINE_HEIGHTS.statTrend * scaleFactor * adaptiveSpacing}px`
   }
 })
 
+// 趋势文字样式
 const trendTextStyles = computed(() => {
+  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
   return {
-    marginLeft: `${12 * scaleFactor.value}px`,
-    lineHeight: `${18 * scaleFactor.value}px`
+    marginLeft: `${SCALE_CONFIG.BASE_SPACINGS.trendTextMargin * scaleFactor * adaptiveSpacing}px`,
+    lineHeight: `${SCALE_CONFIG.BASE_LINE_HEIGHTS.statTrend * scaleFactor * adaptiveSpacing}px`
   }
 })
 
+// 可视化区域样式
 const visualStyles = computed(() => {
   return {
-    minWidth: '534px'
+    minWidth: `${Math.max(400, internalData.value.length * SCALE_CONFIG.BREAKPOINTS.MIN_COL_WIDTH)}px`
   }
 })
 
+// 图标大小
 const iconSize = computed(() => {
-  return Math.round(20 * scaleFactor.value)
+  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+  return Math.round(SCALE_CONFIG.BASE_FONT_SIZES.icon * scaleFactor * adaptiveSpacing)
+})
+
+// 趋势图标大小
+const trendIconSize = computed(() => {
+  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+  return Math.round(SCALE_CONFIG.BASE_FONT_SIZES.icon * scaleFactor * adaptiveSpacing * 0.8)
 })
 
 const formatNumber = (num: number): string => {
@@ -256,7 +457,7 @@ const formatNumber = (num: number): string => {
 }
 
 const initECharts = () => {
-  const chartDom = document.getElementById('funnel-echarts-container')
+  const chartDom = document.getElementById(chartId)
   if (!chartDom) return
 
   if (!internalData.value || internalData.value.length < 2) {
@@ -264,11 +465,12 @@ const initECharts = () => {
   }
 
   const containerWidth = chartDom.clientWidth
-  const chartWidth = containerWidth < 534 ? 534 : containerWidth
+  const minWidth = Math.max(400, internalData.value.length * SCALE_CONFIG.BREAKPOINTS.MIN_COL_WIDTH)
+  const chartWidth = containerWidth < minWidth ? minWidth : containerWidth
 
   chartInstance.value = echarts.init(chartDom, null, {
     width: chartWidth,
-    height: 280 * scaleFactor.value
+    height: getChartHeight()
   })
 
   updateEChartsOptions()
@@ -278,6 +480,23 @@ const initECharts = () => {
       handleResize()
     }
   }, 100)
+}
+
+// 动态计算图表高度
+const getChartHeight = () => {
+  const { scaleFactor } = scalingMetrics.value
+  const baseHeight = 280
+  const colCount = internalData.value.length
+
+  // 根据列数调整高度
+  let heightMultiplier = 1
+  if (colCount > 6) {
+    heightMultiplier = 0.8
+  } else if (colCount > 4) {
+    heightMultiplier = 0.9
+  }
+
+  return baseHeight * scaleFactor * heightMultiplier
 }
 
 const updateEChartsOptions = () => {
@@ -295,11 +514,16 @@ const updateEChartsOptions = () => {
 
 const handleResize = () => {
   if (chartInstance.value) {
-    const containerWidth = document.getElementById('funnel-echarts-container')?.clientWidth || 0
-    // console.log('containerWidth', containerWidth)
+    const containerWidth = document.getElementById(chartId)?.clientWidth || 0
+    const minWidth = Math.max(
+      400,
+      internalData.value.length * SCALE_CONFIG.BREAKPOINTS.MIN_COL_WIDTH
+    )
+    const chartWidth = Math.max(containerWidth, minWidth)
+
     chartInstance.value.resize({
-      width: containerWidth,
-      height: 280 * scaleFactor.value * (containerWidth < 797 ? 0.8 : 0.93)
+      width: chartWidth,
+      height: getChartHeight()
     })
   }
 }
@@ -322,11 +546,15 @@ watch(
   { deep: true }
 )
 
-watch(scaleFactor, () => {
-  if (chartInstance.value) {
-    handleResize()
-  }
-})
+watch(
+  scalingMetrics,
+  () => {
+    if (chartInstance.value) {
+      handleResize()
+    }
+  },
+  { deep: true }
+)
 
 onMounted(() => {
   containerRef.value = document.querySelector('.funnel-chart-container')
@@ -539,22 +767,43 @@ onBeforeUnmount(() => {
   align-self: flex-start;
 }
 
-/* 漏斗图列样式 */
+/* 漏斗图列样式 - 优化版 */
 .funnel-cols {
   display: flex;
   width: 100%;
   flex: 1;
+  transition: gap 0.3s ease;
+  box-sizing: border-box;
+
+  /* 当有gap时，移除所有边框 */
+  &[style*='gap'] {
+    .funnel-col {
+      border-right: none !important;
+      border-left: 1px solid #e0e0e0;
+
+      &:first-child {
+        border-left: none;
+      }
+    }
+  }
 }
 
 .funnel-col {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 16px;
   border-right: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+  min-width: 0; /* 允许flex收缩 */
+  box-sizing: border-box;
+  overflow: hidden; /* 防止内容溢出 */
 
   &:last-child {
     border-right: none;
+  }
+
+  /* 当列数很多时，减少边框宽度 */
+  &:nth-child(n + 7) {
+    border-right-width: 0.5px;
   }
 }
 
@@ -562,13 +811,12 @@ onBeforeUnmount(() => {
   background-color: #f5f5f5;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
-  padding: 22px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  height: 68px;
   box-sizing: border-box;
+  transition: all 0.3s ease;
+  min-height: 0; /* 允许高度收缩 */
 }
 
 .funnel-card-text {
@@ -577,27 +825,37 @@ onBeforeUnmount(() => {
     -apple-system,
     BlinkMacSystemFont,
     sans-serif;
-  font-size: 16px;
   font-weight: 510;
   letter-spacing: 0.15px;
   color: #212121;
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+  transition: font-size 0.3s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* 当列数很多时，允许文字换行 */
+  white-space: nowrap;
+
+  /* 高列数时允许换行 */
+  .funnel-col:nth-child(n + 7) & {
+    white-space: normal;
+    line-height: 1.2;
+  }
 }
 
 .funnel-card-icon {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
   background-color: #ffffff;
-  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  // margin-right: 12px;
+  transition: all 0.3s ease;
 }
 
 .funnel-stat-card {
-  margin-bottom: 24px;
-  padding: 0 12px;
+  transition: all 0.3s ease;
+  min-height: 0; /* 允许高度收缩 */
 }
 
 .funnel-stat-value {
@@ -606,22 +864,36 @@ onBeforeUnmount(() => {
     -apple-system,
     BlinkMacSystemFont,
     sans-serif;
-  font-size: 28px;
   font-weight: 510;
   letter-spacing: -0.12px;
   color: #212121;
-  margin-bottom: 12px;
+  word-break: break-word;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .funnel-stat-trend {
   display: flex;
   align-items: center;
   color: #616161;
-  font-size: 14px;
+  transition: all 0.3s ease;
+  min-height: 0;
 }
 
 .trend-text {
-  margin-left: 12px;
+  transition: all 0.3s ease;
+  word-break: break-word;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  /* 高列数时允许换行 */
+  .funnel-col:nth-child(n + 7) & {
+    white-space: normal;
+    line-height: 1.2;
+  }
 }
 
 .funnel-visual {
@@ -633,8 +905,8 @@ onBeforeUnmount(() => {
 
 .funnel-cols-container {
   position: relative;
-  height: 541px;
-  min-width: 534px;
+  transition: all 0.3s ease;
+
   .funnel-cols {
     pointer-events: none;
     position: absolute;
@@ -642,8 +914,53 @@ onBeforeUnmount(() => {
     left: 0;
     right: 0;
     bottom: 0;
-
     z-index: 2;
+  }
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .funnel-col {
+    border-bottom: 1px solid #e0e0e0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .funnel-cols {
+    flex-direction: column;
+  }
+}
+
+/* 高列数优化 - 更精细的控制 */
+.funnel-cols {
+  /* 7列及以上时的特殊处理 */
+  &:has(.funnel-col:nth-child(7)) {
+    .funnel-col {
+      border-right-width: 0.5px;
+
+      .funnel-card-text,
+      .trend-text {
+        font-size: 0.9em;
+        line-height: 1.2;
+      }
+    }
+  }
+
+  /* 10列及以上时的更激进优化 */
+  &:has(.funnel-col:nth-child(10)) {
+    .funnel-col {
+      .funnel-card-text,
+      .trend-text {
+        font-size: 0.8em;
+        line-height: 1.1;
+      }
+
+      .funnel-stat-value {
+        font-size: 0.9em;
+      }
+    }
   }
 }
 </style>

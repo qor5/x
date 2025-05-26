@@ -25,7 +25,7 @@ VXChart 组件提供了三种预设类型，可以通过 `presets` 属性指定�
 
 - `barChart`：柱状图预设，适用于展示分类数据的数量对比
 - `pieChart`：饼图预设，适用于展示占比数据
-- `funnelChart`：漏斗图预设，适用于展示转化数据
+- `funnelChart`：漏斗图预设，适用于展示转化数据，**支持无限多列的智能缩放**
 
 ## 基础示例
 
@@ -137,7 +137,7 @@ const mergeOptionsCallback = function (options, { seriesData }) {
 
 ### 漏斗图示例
 
-使用 `funnelChart` 预设可以快速创建美观的漏斗图，用于展示转化流程和各环节的数据：
+使用 `funnelChart` 预设可以快速创建美观的漏斗图，用于展示转化流程和各环节的数据。**新版本支持无限多列的智能缩放算法**，能够根据列数和容器宽度自动调整元素大小和布局：
 
 :::demo
 
@@ -278,7 +278,173 @@ const funnelChartData = ref({
 
 :::
 
+### 多列漏斗图示例（智能缩放）
+
+展示新的智能缩放算法如何处理更多列的情况：
+
+:::demo
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const multiColumnFunnelData = ref({
+  title: {
+    text: '完整用户转化漏斗 (8个阶段)'
+  },
+  series: [
+    {
+      name: '用户转化',
+      data: [
+        {
+          value: 10000,
+          name: 'Visitors',
+          extraData: {
+            icon: 'mdi-account-group',
+            labelList: [
+              { type: 'primary', text: '10,000' },
+              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+5.2% this month' }
+            ]
+          }
+        },
+        {
+          value: 8500,
+          name: 'Page Views',
+          extraData: {
+            icon: 'mdi-eye',
+            labelList: [
+              { type: 'primary', text: '8,500' },
+              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+3.1% this month' },
+              { type: 'primary', text: '85.0%' },
+              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+2.1% conversion' }
+            ]
+          }
+        },
+        {
+          value: 6200,
+          name: 'Engaged Users',
+          extraData: {
+            icon: 'mdi-heart',
+            labelList: [
+              { type: 'primary', text: '6,200' },
+              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+1.8% this month' },
+              { type: 'primary', text: '72.9%' },
+              { type: 'secondary', icon: 'mdi-arrow-bottom-left', text: '-1.2% conversion' }
+            ]
+          }
+        },
+        {
+          value: 4800,
+          name: 'Sign Ups',
+          extraData: {
+            icon: 'mdi-account-plus',
+            labelList: [
+              { type: 'primary', text: '4,800' },
+              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+4.5% this month' },
+              { type: 'primary', text: '77.4%' },
+              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+3.2% conversion' }
+            ]
+          }
+        },
+        {
+          value: 3600,
+          name: 'Email Verified',
+          extraData: {
+            icon: 'mdi-email-check',
+            labelList: [
+              { type: 'primary', text: '3,600' },
+              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+2.1% this month' },
+              { type: 'primary', text: '75.0%' },
+              { type: 'secondary', icon: 'mdi-arrow-bottom-left', text: '-0.8% conversion' }
+            ]
+          }
+        },
+        {
+          value: 2000,
+          name: 'Email Verified2',
+          extraData: {
+            icon: 'mdi-email-check',
+            labelList: [
+              { type: 'primary', text: '3,600' },
+              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+2.1% this month' },
+              { type: 'primary', text: '75.0%' },
+              { type: 'secondary', icon: 'mdi-arrow-bottom-left', text: '-0.8% conversion' }
+            ]
+          }
+        },
+        {
+          value: 1000,
+          name: 'Email Verified3',
+          extraData: {
+            icon: 'mdi-email-check',
+            labelList: [
+              { type: 'primary', text: '3,600' },
+              { type: 'secondary', icon: 'mdi-arrow-top-right', text: '+2.1% this month' },
+              { type: 'primary', text: '75.0%' },
+              { type: 'secondary', icon: 'mdi-arrow-bottom-left', text: '-0.8% conversion' }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+})
+</script>
+<template>
+  <div class="chart-container border border-gray-500 rounded-lg">
+    <vx-chart presets="funnelChart" :options="multiColumnFunnelData">
+      <template #action>
+        <span class="text-caption mr-4 px-1 py-0 rounded" style="background:#E3F2FD;"
+          >智能缩放算法自动适配 8 列布局
+        </span>
+      </template>
+    </vx-chart>
+  </div>
+</template>
+
+<style scoped>
+.chart-container {
+  width: 100%;
+  min-height: 400px;
+}
+</style>
+```
+
+:::
+
 > **注意**：漏斗图的图例（legend）数据会根据传入的 series[0].data 中的 name 字段自动生成，不需要手动指定 legend.data。
+
+## 漏斗图智能缩放算法
+
+新版本的漏斗图组件采用了智能缩放算法，具有以下特性：
+
+### 🎯 核心特性
+
+- **无限列支持**：支持任意数量的列，从 2 列到 20+ 列
+- **智能缩放**：根据列数和容器宽度自动计算最佳缩放比例
+- **自适应布局**：元素大小、间距、字体大小都会根据列数智能调整
+- **响应式设计**：在不同屏幕尺寸下都能保持良好的显示效果
+
+### 📐 缩放策略
+
+| 列数范围 | 缩放策略 | 特点                                |
+| -------- | -------- | ----------------------------------- |
+| 1-3 列   | 标准缩放 | 保持最佳视觉效果，元素大小适中      |
+| 4-6 列   | 适度缩放 | 每增加一列减少 10% 大小，保持可读性 |
+| 7+ 列    | 激进缩放 | 更大幅度缩放，启用紧凑模式          |
+
+### 🔧 技术细节
+
+- **最小宽度保护**：每列最小宽度 120px，确保内容可读
+- **自适应间距**：列数超过 4 列时自动减少间距
+- **平滑过渡**：所有缩放变化都有 0.3s 的过渡动画
+- **性能优化**：使用 computed 属性缓存计算结果
+
+### 📱 响应式支持
+
+- **移动端优化**：在小屏幕上自动切换为垂直布局
+- **容器适配**：根据父容器宽度动态调整
+- **最小宽度限制**：确保在任何情况下都不会过度压缩
 
 ## 功能扩展
 
