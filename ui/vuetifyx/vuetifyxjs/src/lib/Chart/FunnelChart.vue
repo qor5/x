@@ -23,24 +23,80 @@
             </div>
           </div>
 
-          <!-- 主数值卡片 -->
-          <div class="funnel-stat-card" :style="statCardStyles(item)">
-            <div class="funnel-stat-value" :style="statValueStyles">
-              {{ getStatValue(item, index, 0) }}
-            </div>
-            <div class="funnel-stat-trend" :style="statTrendStyles">
-              <v-icon
-                :icon="getStatTrend(item, index, 0).icon"
-                :color="getStatTrend(item, index, 0).color"
-                :size="trendIconSize"
-              />
-              <span class="trend-text" :style="trendTextStyles">{{
-                getStatTrend(item, index, 0).text
-              }}</span>
+          <!-- 主数值卡片 本周 -->
+          <div
+            v-if="getStatValue(item, index, 0)"
+            class="funnel-stat-card"
+            :style="statCardStyles(item)"
+          >
+            <!-- plain 布局样式稍微有所不同 -->
+            <span
+              v-if="item.extraData?.style !== 'plain' && !item.extraData?.hideLabel"
+              class="trend-text"
+              :style="ThisWeekTextStyles"
+              >This Week</span
+            >
+            <!-- 主数值 -->
+            <div style="line-height: 1">
+              <div class="funnel-stat-value" :style="statValueStyles">
+                {{ getStatValue(item, index, 0) }}
+              </div>
+              <!-- 趋势 -->
+              <div class="funnel-stat-trend" :style="statTrendStyles">
+                <v-icon
+                  :icon="getStatTrend(item, index, 0).icon"
+                  :color="getStatTrend(item, index, 0).color"
+                  :size="trendIconSize"
+                />
+                <span class="trend-text" :style="trendTextStyles">{{
+                  getStatTrend(item, index, 0).text
+                }}</span>
+              </div>
             </div>
           </div>
+
+          <!-- 主数值卡片 上周-->
+          <div
+            v-if="getStatValue(item, index, 1)"
+            class="funnel-stat-card"
+            :style="statCardStyles(item)"
+          >
+            <!-- plain 布局样式稍微有所不同 -->
+            <span
+              v-if="item.extraData?.style !== 'plain' && !item.extraData?.hideLabel"
+              class="trend-text"
+              :style="ThisWeekTextStyles"
+              >Last Week</span
+            >
+            <!-- 主数值 -->
+            <div style="line-height: 1">
+              <div class="funnel-stat-value" :style="statValueStyles">
+                {{ getStatValue(item, index, 1) }}
+              </div>
+              <!-- 趋势 -->
+              <div class="funnel-stat-trend" :style="statTrendStyles">
+                <v-icon
+                  :icon="getStatTrend(item, index, 1).icon"
+                  :color="getStatTrend(item, index, 1).color"
+                  :size="trendIconSize"
+                />
+                <span class="trend-text" :style="trendTextStyles">{{
+                  getStatTrend(item, index, 1).text
+                }}</span>
+              </div>
+            </div>
+          </div>
+
           <!-- 转化率卡片 (对第一个阶段不显示) -->
-          <div class="funnel-stat-card" :style="statCardStyles(item)" v-if="index > 0">
+          <!-- <div class="funnel-stat-card" :style="statCardStyles(item)" v-if="index > 0">
+            <div
+              v-if="item.extraData?.style !== 'plain'"
+              class="trend-text"
+              style="line-height: 1"
+              :style="ThisWeekTextStyles"
+            >
+              Last Week
+            </div>
             <div class="funnel-stat-value" :style="statValueStyles">
               {{ getStatValue(item, index, 1) }}
             </div>
@@ -54,7 +110,7 @@
                 getStatTrend(item, index, 1).text
               }}</span>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -96,10 +152,12 @@ const SCALE_CONFIG = {
   BASE_ICON_SIZE: 44,
   BASE_ICON_BORDER_RADIUS: 12,
   BASE_MARGIN_BOTTOM: 24,
+  STAT_CARD_MARGIN_BOTTOM: 14,
   BASE_STAT_PADDING: 12,
 
   // 字体大小配置
   BASE_FONT_SIZES: {
+    thisWeekText: 14,
     cardText: 18,
     statValue: 28,
     statTrend: 14,
@@ -115,7 +173,8 @@ const SCALE_CONFIG = {
 
   // 间距配置
   BASE_SPACINGS: {
-    trendTextMargin: 12
+    trendTextMargin: 6,
+    trendMargin: 8
   },
 
   // 断点配置
@@ -186,8 +245,8 @@ watch(
 
 // 根据item和索引位置获取统计值
 const getStatValue = (item: FunnelItem, index: number, statIndex: number) => {
-  // statIndex 0: 主数值, 1: 转化率
-  if (item.extraData?.labelList && item.extraData.labelList.length > statIndex * 2) {
+  // statIndex 0: 1: 主数值 本周, 2: 主数值 上周
+  if (item.extraData?.labelList && item.extraData.labelList.length >= statIndex * 2) {
     // 找到对应的主要标签（type为primary）
     const primaryLabels = item.extraData.labelList.filter((l) => l.type === 'primary')
     if (primaryLabels.length > statIndex) {
@@ -397,7 +456,8 @@ const statCardStyles = (item: FunnelItem) => {
   const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
 
   return {
-    marginBottom: `${SCALE_CONFIG.BASE_MARGIN_BOTTOM * scaleFactor * adaptiveSpacing}px`,
+    lineHeight: '1.2',
+    marginBottom: `${SCALE_CONFIG.STAT_CARD_MARGIN_BOTTOM * scaleFactor * adaptiveSpacing}px`,
     padding: `0 ${SCALE_CONFIG.BASE_STAT_PADDING * scaleFactor * adaptiveSpacing}px`,
     paddingLeft:
       item.extraData?.style === 'plain'
@@ -411,7 +471,7 @@ const statValueStyles = computed(() => {
   const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
   return {
     fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.statValue * scaleFactor * adaptiveSpacing}px`,
-    marginBottom: `${SCALE_CONFIG.BASE_STAT_PADDING * scaleFactor * adaptiveSpacing}px`,
+    // marginBottom: `${SCALE_CONFIG.BASE_STAT_PADDING * scaleFactor * adaptiveSpacing}px`,
     lineHeight: `${SCALE_CONFIG.BASE_LINE_HEIGHTS.statValue * scaleFactor * adaptiveSpacing}px`
   }
 })
@@ -422,6 +482,13 @@ const statTrendStyles = computed(() => {
   return {
     fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.statTrend * scaleFactor * adaptiveSpacing}px`,
     lineHeight: `${SCALE_CONFIG.BASE_LINE_HEIGHTS.statTrend * scaleFactor * adaptiveSpacing}px`
+  }
+})
+
+const ThisWeekTextStyles = computed(() => {
+  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+  return {
+    fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.thisWeekText * scaleFactor * adaptiveSpacing}px`
   }
 })
 
@@ -862,6 +929,9 @@ onBeforeUnmount(() => {
 }
 
 .funnel-stat-value {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
   font-family:
     'SF Pro',
     -apple-system,
@@ -877,9 +947,11 @@ onBeforeUnmount(() => {
 }
 
 .funnel-stat-trend {
-  display: flex;
+  display: inline-flex;
+  vertical-align: middle;
   align-items: center;
   color: #616161;
+  font-weight: bold;
   transition: all 0.3s ease;
   min-height: 0;
 }

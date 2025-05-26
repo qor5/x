@@ -14,6 +14,12 @@
 | mergeOptionsCallback | 可以使用这个回调来修改当前的配置参数, 当需要自定义vx-chart配置的时候格外有用，详见 [#饼图示例](./#饼图示例) ，目前只支持 pieChart 和 barChart | Function          | () => {} |
 | loading              | 是否显示加载状态                                                                                                                              | Boolean           | false    |
 
+### Events
+
+| 名称            | 载荷     | 介绍                               |
+| --------------- | -------- | ---------------------------------- |
+| on-change-index | `Number` | 当图表有多个配置，切换了配置后触发 |
+
 ### Slots
 
 | 名称        | 说明                                     | 插槽 Props                                                                                                        |
@@ -252,10 +258,17 @@ const funnelChartData = ref([
     ]
   }
 ])
+
+const onChangeIndex = (idx) => {}
 </script>
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
-    <vx-chart presets="funnelChart" :options="funnelChartData" height="380">
+    <vx-chart
+      presets="funnelChart"
+      :options="funnelChartData"
+      height="380"
+      @on-change-index="onChangeIndex"
+    >
       <template #action="{ list, currentIndex, toggle }">
         <div
           class="d-flex align-center bg-grey-lighten-3 rounded pa-1 mr-4 mt-4"
@@ -264,7 +277,7 @@ const funnelChartData = ref([
           <button
             v-for="(_, idx) in list"
             :key="idx"
-            class="text-body-2 rounded text-no-wrap border-0 flex-grow-1 d-flex align-center justify-center rounded px-2"
+            class="text-body-2 text-no-wrap border-0 flex-grow-1 d-flex align-center justify-center rounded px-2"
             style="height: 24px; cursor: pointer; transition: all 0.3s;"
             :style="
               currentIndex === idx
@@ -324,145 +337,205 @@ const addtionalDataList = ref([
   }
 ])
 
-const funnelChartData = ref({
-  title: {
-    text: '邮件营销漏斗'
+const funnelChartData = ref([
+  {
+    title: {
+      text: '邮件营销漏斗'
+    },
+    series: [
+      {
+        name: '邮件营销',
+        data: [
+          {
+            value: 1000,
+            name: 'Email Sent',
+            extraData: {
+              icon: 'mdi-near-me',
+              hideLabel: true,
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '1000'
+                }
+              ]
+            }
+          },
+          {
+            value: 800,
+            name: 'Email Delivered',
+            extraData: {
+              icon: 'mdi-email-mark-as-unread',
+              hideLabel: true,
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '8,500'
+                }
+              ]
+            }
+          },
+          {
+            value: 400,
+            name: 'Email Opened',
+            extraData: {
+              icon: 'mdi-check-all',
+              hideLabel: true,
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '5,000'
+                }
+              ]
+            }
+          },
+          {
+            value: 200,
+            name: 'Link Clicked',
+            hideLabel: true,
+            extraData: {
+              icon: 'mdi-link',
+              hideLabel: true,
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '2,500'
+                }
+              ]
+            }
+          },
+          {
+            value: 100,
+            name: 'Link Clicked2',
+            extraData: {
+              icon: 'mdi-link',
+              hideLabel: true,
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '2,500'
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
   },
-  series: [
-    {
-      name: '邮件营销',
-      data: [
-        {
-          value: 1000,
-          name: 'Email Sent',
-          extraData: {
-            icon: 'mdi-near-me',
-            labelList: [
-              {
-                type: 'primary',
-                text: '1000'
-              },
-              {
-                type: 'secondary',
-                icon: '',
-                text: ''
-              }
-            ]
-          }
-        },
-        {
-          value: 800,
-          name: 'Email Delivered',
-          extraData: {
-            icon: 'mdi-email-mark-as-unread',
-            labelList: [
-              {
-                type: 'primary',
-                text: '8,500'
-              },
-              {
-                type: 'secondary',
-                icon: '',
-                text: ''
-              },
-              {
-                type: 'primary',
-                text: '84.9%'
-              },
-              {
-                type: 'secondary',
-                icon: 'mdi-arrow-top-right',
-                text: '+1.01% this week'
-              }
-            ]
-          }
-        },
-        {
-          value: 400,
-          name: 'Email Opened',
-          extraData: {
-            icon: 'mdi-check-all',
-            labelList: [
-              {
-                type: 'primary',
-                text: '5,000'
-              },
-              {
-                type: 'secondary',
-                icon: 'mdi-arrow-top-right',
-                text: '+1.01% this week'
-              },
-              {
-                type: 'primary',
-                text: '58.8%'
-              },
-              {
-                type: 'secondary',
-                icon: 'mdi-arrow-bottom-left',
-                text: '-1.01% this week'
-              }
-            ]
-          }
-        },
-        {
-          value: 200,
-          name: 'Link Clicked',
-          extraData: {
-            icon: 'mdi-link',
-            labelList: [
-              {
-                type: 'primary',
-                text: '2,500'
-              },
-              {
-                type: 'secondary',
-                icon: 'mdi-arrow-top-right',
-                text: '+1.01% this week'
-              },
-              {
-                type: 'primary',
-                text: '50.0%'
-              },
-              {
-                type: 'secondary',
-                icon: 'mdi-arrow-top-right',
-                text: '+1.01% this week'
-              }
-            ]
-          }
-        },
-        {
-          value: 100,
-          name: 'Link Clicked2',
-          extraData: {
-            icon: 'mdi-link',
+  {
+    title: {
+      text: '邮件营销漏斗'
+    },
+    series: [
+      {
+        name: '邮件营销',
+        data: [
+          {
+            value: 1000,
+            name: 'Email Sent',
+            extraData: {
+              icon: 'mdi-near-me',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '1000'
+                },
+                {
+                  type: 'primary',
+                  text: '4000'
+                }
+              ]
+            }
+          },
+          {
+            value: 800,
+            name: 'Email Delivered',
+            extraData: {
+              icon: 'mdi-email-mark-as-unread',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '8,500'
+                },
+                {
+                  type: 'primary',
+                  text: '4000'
+                }
+              ]
+            }
+          },
+          {
+            value: 400,
+            name: 'Email Opened',
+            extraData: {
+              icon: 'mdi-check-all',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '5,000'
+                },
+                {
+                  type: 'primary',
+                  text: '5,000'
+                }
+              ]
+            }
+          },
+          {
+            value: 200,
+            name: 'Link Clicked',
+            extraData: {
+              icon: 'mdi-link',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '2,500'
+                },
+                {
+                  type: 'secondary',
+                  icon: 'mdi-arrow-top-right',
+                  text: '+1.01%'
+                },
+                {
+                  type: 'primary',
+                  text: '3000'
+                }
+              ]
+            }
+          },
+          {
+            value: 100,
+            name: 'Link Clicked2',
+            extraData: {
+              icon: 'mdi-link',
 
-            labelList: [
-              {
-                type: 'primary',
-                text: '2,500'
-              },
-              {
-                type: 'secondary',
-                icon: 'mdi-arrow-top-right',
-                text: '+1.01% this week'
-              },
-              {
-                type: 'primary',
-                text: '50.0%'
-              },
-              {
-                type: 'secondary',
-                icon: 'mdi-arrow-top-right',
-                text: '+1.01% this week'
-              }
-            ]
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '2,500'
+                },
+                {
+                  type: 'secondary',
+                  icon: 'mdi-arrow-top-right',
+                  text: '+1.01%'
+                },
+                {
+                  type: 'primary',
+                  text: '2000'
+                }
+              ]
+            }
           }
-        }
-      ]
-    }
-  ]
-})
+        ]
+      },
+      {
+        name: '数据量',
+        type: 'line',
+        data: [120, 132, 101, 134, 90],
+        smooth: true // 可选：是否平滑曲线
+      }
+    ]
+  }
+])
 </script>
 <template>
   <div class="chart-container border border-gray-500 rounded-lg">
@@ -471,6 +544,7 @@ const funnelChartData = ref({
         ><div class="d-flex align-center" style="font-size:35px">
           Campaign Name
           <span
+            v-if="currentIndex === 1"
             class="rounded pa-1 ml-4 text-caption"
             style="font-size:16px;background:#eee;font-weight:400;line-height:1;"
             >Weekly</span
@@ -479,9 +553,34 @@ const funnelChartData = ref({
       >
       <template #description="{ currentIndex }">
         <div class="mt-6 ml-3">
-          <span class="text-caption mr-4 px-1 py-1 rounded" style="background:#F5F5F5;"
+          <span
+            v-if="currentIndex === 0"
+            class="text-caption mr-4 px-1 py-1 rounded"
+            style="background:#F5F5F5;"
             >Last Updated: 0:05 25/05/09; Data will be updated at 0:05
           </span>
+
+          <div v-else class="d-flex align-center">
+            <span
+              class="d-inline-flex align-center text-caption mr-2 px-1 py-1 rounded"
+              style="background:#F5F5F5;"
+              ><i
+                class="d-inline-block rounded mr-2"
+                style="width:12px; height:12px; background: #e6edfe"
+              /><b class="mr-2" style="color:#616161;">This Week</b>
+              25/05/01-25/05/07
+            </span>
+            <span
+              class="d-inline-flex align-center text-caption mr-4 px-1 py-1 rounded"
+              style="background:#F5F5F5;"
+              ><i class="d-inline-block mr-2" style="width:12px;height:2px;background:#3e63dd" /><b
+                class="mr-2"
+                style="color:#616161;"
+                >This Week</b
+              >
+              25/05/01-25/05/07
+            </span>
+          </div>
         </div>
       </template>
 
@@ -508,7 +607,7 @@ const funnelChartData = ref({
       </template>
     </vx-chart>
 
-    <div class=" mt-4">
+    <div class="mt-4">
       <div class="d-flex justify-space-between w-100 ga-4">
         <div v-for="(item, i) in addtionalDataList" class="border pa-3 rounded-lg" style="flex:1;">
           <div

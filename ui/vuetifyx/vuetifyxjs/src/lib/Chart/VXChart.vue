@@ -41,7 +41,8 @@ import {
   onMounted,
   PropType,
   ref,
-  watch
+  watch,
+  defineEmits
 } from 'vue'
 import {
   animationPresets,
@@ -70,6 +71,8 @@ const chartId = `vx-chart-${Math.random().toString(36).substring(2, 10)}`
 
 // 当前显示的图表索引
 const currentIndex = ref(0)
+
+const emit = defineEmits(['on-change-index'])
 
 // 切换显示的图表
 const toggle = (index: number) => {
@@ -467,7 +470,9 @@ watch(
 // 监听当前索引变化
 watch(
   () => currentIndex.value,
-  (newIndex) => {
+  (oldIndex, newIndex) => {
+    emit('on-change-index', newIndex)
+
     // 如果是漏斗图，不更新echarts图表
     if (props.presets === 'funnelChart') {
       return
