@@ -1,7 +1,9 @@
 <template>
   <div class="vx-chart-wrap">
     <div class="d-flex align-center justify-space-between">
-      <div v-if="chartTitle" class="vx-chart-title">{{ chartTitle }}</div>
+      <div v-if="chartTitle" class="vx-chart-title">
+        <slot name="title" :currentIndex="currentIndex">{{ chartTitle }}</slot>
+      </div>
       <slot
         name="action"
         :list="
@@ -14,13 +16,17 @@
       ></slot>
     </div>
 
+    <slot name="description" :currentIndex="currentIndex" />
+
     <!-- 使用新的FunnelChart组件 -->
     <template v-if="props.presets === 'funnelChart'">
       <funnel-chart
+        :height="props.height"
         :data="getCurrentSeriesDataForFunnel()"
-        :merge-options-callback="mergeOptionsCallback"
+        :merge-options-callback="funnelMergeOptionsCallback"
       />
     </template>
+
     <div v-else :id="chartId" class="vx-chart-container"></div>
   </div>
 </template>
@@ -35,7 +41,8 @@ import {
   onMounted,
   PropType,
   ref,
-  watch
+  watch,
+  defineEmits
 } from 'vue'
 import {
   animationPresets,
@@ -64,6 +71,8 @@ const chartId = `vx-chart-${Math.random().toString(36).substring(2, 10)}`
 
 // 当前显示的图表索引
 const currentIndex = ref(0)
+
+const emit = defineEmits(['on-change-index'])
 
 // 切换显示的图表
 const toggle = (index: number) => {
@@ -104,6 +113,10 @@ const props = defineProps({
     }>,
     default: () => ({})
   },
+  height: {
+    type: String,
+    default: 'auto'
+  },
   mergeOptionsCallback: {
     type: Function as PropType<
       (options: ChartOptions, mergeCallbackOptions: { seriesData: any[] }) => void
@@ -114,19 +127,40 @@ const props = defineProps({
 
 const { invokeMergeOptionsCallback } = useVxChartMergeOptsCallback(props)
 
+// 为漏斗图创建合并选项回调，传递当前索引信息
+const funnelMergeOptionsCallback = (options: any, data: any) => {
+  // 调用外部传入的mergeOptionsCallback，并传递currentIndex
+  if (props.mergeOptionsCallback) {
+    props.mergeOptionsCallback(options, { ...data, currentIndex: currentIndex.value })
+  }
+}
+
 // 获取当前系列数据，用于漏斗图组件
 const getCurrentSeriesDataForFunnel = () => {
-  let result = []
-
   if (Array.isArray(props.options)) {
-    // 如果options是数组，获取当前选中索引的series数据
+    // 如果options是数组，返回当前选中索引的完整配置
     const currentOption = props.options[currentIndex.value]
-    result = currentOption?.series?.[0]?.data || []
+    return {
+      title: currentOption?.title,
+      series: (currentOption?.series || []).map((s) => ({
+        name: s.name || '',
+        type: s.type as 'funnel' | 'line' | undefined,
+        data: s.data || [],
+        smooth: s.smooth
+      }))
+    }
   } else {
-    // 如果options是对象，直接获取series数据
-    result = props.options?.series?.[0]?.data || []
+    // 如果options是对象，返回完整的配置
+    return {
+      title: props.options?.title,
+      series: (props.options?.series || []).map((s) => ({
+        name: s.name || '',
+        type: s.type as 'funnel' | 'line' | undefined,
+        data: s.data || [],
+        smooth: s.smooth
+      }))
+    }
   }
-  return result
 }
 
 // 提取标题
@@ -349,6 +383,13 @@ const currentSeriesData = computed(() => {
   return mergedOptions.value?.series?.[0]?.data || []
 })
 
+const chartHeight = computed(() => {
+  if (props.height !== 'auto') {
+    return props.height + 'px'
+  }
+  return '300px'
+})
+
 // 获取图表实例
 const getChartInstance = (): echarts.EChartsType | null => {
   // 如果是漏斗图，不初始化echarts实例
@@ -450,7 +491,9 @@ watch(
 // 监听当前索引变化
 watch(
   () => currentIndex.value,
-  (newIndex) => {
+  (oldIndex, newIndex) => {
+    emit('on-change-index', newIndex)
+
     // 如果是漏斗图，不更新echarts图表
     if (props.presets === 'funnelChart') {
       return
@@ -541,7 +584,7 @@ defineExpose({
   .vx-chart-container {
     flex: 1;
     width: 100%;
-    min-height: 300px;
+    min-height: v-bind(chartHeight);
   }
 }
 </style>
