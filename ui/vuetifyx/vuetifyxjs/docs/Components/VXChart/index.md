@@ -424,10 +424,12 @@ const funnelChartData = ref([
               icon: 'mdi-near-me',
               labelList: [
                 {
+                  labelName: 'This Week',
                   type: 'primary',
                   text: '1000'
                 },
                 {
+                  labelName: 'Last Week',
                   type: 'primary',
                   text: '4000'
                 }

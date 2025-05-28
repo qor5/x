@@ -25,21 +25,21 @@
 
           <!-- 主数值卡片 本周 -->
           <div
-            v-if="getStatValue(item, index, 0)"
+            v-if="getStatObject(item, index, 0)?.text"
             class="funnel-stat-card"
             :style="statCardStyles(item)"
           >
             <!-- plain 布局样式稍微有所不同 -->
             <span
-              v-if="item.extraData?.style !== 'plain' && !item.extraData?.hideLabel"
+              v-if="item.extraData?.style !== 'plain' && getStatObject(item, index, 0)?.labelName"
               class="trend-text"
               :style="ThisWeekTextStyles"
-              >This Week</span
+              >{{ getStatObject(item, index, 0)?.labelName }}</span
             >
             <!-- 主数值 -->
             <div style="line-height: 1">
               <div class="funnel-stat-value" :style="statValueStyles">
-                {{ getStatValue(item, index, 0) }}
+                {{ getStatObject(item, index, 0)?.text }}
               </div>
               <!-- 趋势 -->
               <div class="funnel-stat-trend" :style="statTrendStyles">
@@ -57,21 +57,21 @@
 
           <!-- 主数值卡片 上周-->
           <div
-            v-if="getStatValue(item, index, 1)"
+            v-if="getStatObject(item, index, 1)?.text"
             class="funnel-stat-card"
             :style="statCardStyles(item)"
           >
             <!-- plain 布局样式稍微有所不同 -->
             <span
-              v-if="item.extraData?.style !== 'plain' && !item.extraData?.hideLabel"
+              v-if="item.extraData?.style !== 'plain' && getStatObject(item, index, 1)?.labelName"
               class="trend-text"
               :style="ThisWeekTextStyles"
-              >Last Week</span
+              >{{ getStatObject(item, index, 1)?.labelName }}</span
             >
             <!-- 主数值 -->
             <div style="line-height: 1">
               <div class="funnel-stat-value lighter" :style="statValueStyles">
-                {{ getStatValue(item, index, 1) }}
+                {{ getStatObject(item, index, 1)?.text }}
               </div>
               <!-- 趋势 -->
               <div class="funnel-stat-trend" :style="statTrendStyles">
@@ -81,7 +81,7 @@
                   :size="trendIconSize"
                 />
                 <span class="trend-text" :style="trendTextStyles">{{
-                  getStatTrend(item, index, 1).text
+                  getStatTrend(item, index, 1)?.text
                 }}</span>
               </div>
             </div>
@@ -98,7 +98,7 @@
               Last Week
             </div>
             <div class="funnel-stat-value" :style="statValueStyles">
-              {{ getStatValue(item, index, 1) }}
+              {{ getStatObject(item, index, 1) }}
             </div>
             <div class="funnel-stat-trend" :style="statTrendStyles">
               <v-icon
@@ -126,6 +126,7 @@ import * as echarts from 'echarts'
 import { funnelChartPreset } from './presets.config'
 
 interface LabelItem {
+  labelName?: string
   type: string
   text: string
   icon?: string
@@ -134,13 +135,13 @@ interface LabelItem {
 interface ExtraData {
   icon?: string
   style?: 'plain' | 'default'
-  hideLabel?: boolean
   labelList?: LabelItem[]
 }
 
 interface FunnelItem {
   value: number
   name: string
+  labelName?: string
   extraData?: ExtraData
 }
 
@@ -290,17 +291,21 @@ const chartTitle = computed(() => {
 })
 
 // 根据item和索引位置获取统计值
-const getStatValue = (item: FunnelItem, index: number, statIndex: number) => {
+const getStatObject = (item: FunnelItem, index: number, statIndex: number) => {
   // statIndex 0: 1: 主数值 本周, 2: 主数值 上周
   if (item.extraData?.labelList && item.extraData.labelList.length >= statIndex * 2) {
     // 找到对应的主要标签（type为primary）
     const primaryLabels = item.extraData.labelList.filter((l) => l.type === 'primary')
     if (primaryLabels.length > statIndex) {
-      return primaryLabels[statIndex].text
+      return primaryLabels[statIndex]
     }
   }
 
-  return ''
+  return {
+    labelName: '',
+    type: '',
+    text: ''
+  }
 }
 
 // 根据item和索引位置获取趋势信息
