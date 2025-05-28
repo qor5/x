@@ -16,8 +16,10 @@ type (
 		Data []string `json:"data,omitempty"`
 	}
 	VXChartOptionSeries struct {
-		Name string        `json:"name,omitempty"`
-		Data []interface{} `json:"data,omitempty"`
+		Name   string        `json:"name,omitempty"`
+		Type   string        `json:"type,omitempty"`
+		Smooth bool          `json:"smooth,omitempty"`
+		Data   []interface{} `json:"data,omitempty"`
 	}
 	VXChartOption struct {
 		Title  *VXChartOptionTitle    `json:"title,omitempty"`
