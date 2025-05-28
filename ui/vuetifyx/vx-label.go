@@ -44,7 +44,7 @@ func (b *VXLabelBuilder) RequiredSymbol(v bool) (r *VXLabelBuilder) {
 }
 
 func (b *VXLabelBuilder) TooltipIconColor(v string) (r *VXLabelBuilder) {
-	b.tag.Attr("type", v)
+	b.tag.Attr("tooltip-icon-color", v)
 	return b
 }
 
