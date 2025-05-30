@@ -290,7 +290,7 @@ export const funnelChartPreset: ChartOptions = {
       height: '100%',
       // 确保小值也能被看到
       min: 0,
-      minSize: '0%',
+      minSize: '1%',
       maxSize: '100%',
       // 不排序，保持原始数据顺序
       sort: 'none',

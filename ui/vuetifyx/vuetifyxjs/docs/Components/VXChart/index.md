@@ -184,7 +184,7 @@ const funnelChartData = ref([
             }
           },
           {
-            value: 500,
+            value: 50,
             name: 'Link Clicked',
             extraData: {
               style: 'plain',
@@ -197,7 +197,7 @@ const funnelChartData = ref([
             }
           },
           {
-            value: 200,
+            value: 100,
             name: 'Link Clicked1',
             extraData: {
               style: 'plain',
