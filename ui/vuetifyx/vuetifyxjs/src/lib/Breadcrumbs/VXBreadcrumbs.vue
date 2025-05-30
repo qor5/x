@@ -1,11 +1,9 @@
 <template>
   <div
     class="vx-breadcrumbs-wrap"
-    :class="[rootAttrs.class]"
-    :style="rootAttrs.style"
     v-bind="rootAttrs"
   >
-    <v-breadcrumbs v-bind="combinedProps">
+    <v-breadcrumbs v-bind="combinedProps" class="pa-0">
       <template v-if="!isDefaultSlotReallyEmpty" #default>
         <slot />
       </template>
