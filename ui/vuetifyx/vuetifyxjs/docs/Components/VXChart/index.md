@@ -158,7 +158,7 @@ const funnelChartData = ref([
         name: '邮件营销',
         data: [
           {
-            value: 1000,
+            value: 32502,
             name: 'Email Sent',
             extraData: {
               style: 'plain',
@@ -171,7 +171,7 @@ const funnelChartData = ref([
             }
           },
           {
-            value: 800,
+            value: 1000,
             name: 'Email Delivered',
             extraData: {
               style: 'plain',
@@ -184,8 +184,21 @@ const funnelChartData = ref([
             }
           },
           {
-            value: 200,
+            value: 50,
             name: 'Link Clicked',
+            extraData: {
+              style: 'plain',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '2,500'
+                }
+              ]
+            }
+          },
+          {
+            value: 100,
+            name: 'Link Clicked1',
             extraData: {
               style: 'plain',
               labelList: [
