@@ -6,7 +6,8 @@
       v-model="hourValue"
       class="time-select"
       type="number"
-      width="70"
+      width="48"
+      control-variant="hidden"
       maxlength="2"
       :disabled="disableHour"
       :min="0"
@@ -20,7 +21,7 @@
       </template>
 
       <v-menu v-model="showHourMenu" height="300" target="parent">
-        <v-list>
+        <v-list ref="hourListRef">
           <v-list-item
             :active="hourValue === item - 1"
             v-for="(item, index) in 24"
@@ -43,10 +44,11 @@
       v-model="minuteValue"
       class="time-select minute-field"
       type="number"
-      width="70"
+      width="48"
       :disabled="disableMinute"
       maxlength="2"
       :min="0"
+      control-variant="hidden"
       :max="59"
       hide-details
       @update:modelValue="onChooseValue('minute', $event)"
@@ -57,7 +59,7 @@
       </template>
 
       <v-menu height="300" v-model="showMinuteMenu" target="parent">
-        <v-list>
+        <v-list ref="minuteListRef">
           <v-list-item
             v-for="(item, index) in 60"
             :key="index"
@@ -80,10 +82,11 @@
       v-model="secondValue"
       class="time-select second-field"
       type="number"
-      width="70"
+      width="48"
       :disabled="disableSecond"
       maxlength="2"
       :min="0"
+      control-variant="hidden"
       :max="59"
       hide-details
       @update:modelValue="onChooseValue('second', $event)"
@@ -94,7 +97,7 @@
       </template>
 
       <v-menu height="300" v-model="showSecondMenu" target="parent">
-        <v-list>
+        <v-list ref="secondListRef">
           <v-list-item
             v-for="(item, index) in 60"
             :key="index"
@@ -112,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, watch, defineEmits, computed } from 'vue'
+import { ref, defineProps, watch, defineEmits, computed, nextTick } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -133,6 +136,9 @@ const showSecondMenu = ref(false)
 const inputFieldHour = ref()
 const inputFieldMinute = ref()
 const inputFieldSecond = ref()
+const hourListRef = ref()
+const minuteListRef = ref()
+const secondListRef = ref()
 const hourValue = ref(0)
 const minuteValue = ref(0)
 const secondValue = ref(0)
@@ -156,7 +162,7 @@ const payloadValue = computed(
 )
 
 const showArea = computed(() => {
-  // 分析当前的formatStr 是否包含hour、minute、second
+  // Analyze if current formatStr contains hour, minute, second
   const formatStr = props.formatStr
 
   if (!formatStr) {
@@ -178,15 +184,75 @@ function padZero(num: number): string {
   return num < 10 ? `0${num}` : `${num}`
 }
 
+// Fast positioning to selected item function
+function scrollToActiveItem(listRef: any, activeValue: number) {
+  setTimeout(() => {
+    // Try different ways to get the DOM element
+    let listElement = null
+
+    if (listRef?.value?.$el) {
+      listElement = listRef.value.$el
+    } else if (listRef?.value) {
+      listElement = listRef.value
+    }
+
+    if (!listElement) {
+      console.warn('Could not find list element')
+      return
+    }
+
+    const allItems = listElement.querySelectorAll('.v-list-item')
+
+    // Get the correct item by index (since activeValue corresponds to the index)
+    const targetItem = allItems[activeValue]
+
+    if (targetItem) {
+      // Direct positioning to center, no animation
+      targetItem.scrollIntoView({
+        behavior: 'auto',
+        block: 'center',
+        inline: 'nearest'
+      })
+    } else {
+      console.warn('Could not find target item at index:', activeValue)
+    }
+  }, 200)
+}
+
+// Watch menu display status and auto scroll to selected item
+watch(showHourMenu, (newVal) => {
+  if (newVal) {
+    scrollToActiveItem(hourListRef, hourValue.value)
+  } else {
+    inputFieldHour.value?.blur()
+  }
+})
+
+watch(showMinuteMenu, (newVal) => {
+  if (newVal) {
+    scrollToActiveItem(minuteListRef, minuteValue.value)
+  } else {
+    inputFieldMinute.value?.blur()
+  }
+})
+
+watch(showSecondMenu, (newVal) => {
+  if (newVal) {
+    scrollToActiveItem(secondListRef, secondValue.value)
+  } else {
+    inputFieldSecond.value?.blur()
+  }
+})
+
 function onChooseValue(type: 'hour' | 'minute' | 'second', value: number) {
   // console.log(type, value)
   if (type === 'hour') {
-    inputFieldHour.value.blur()
+    inputFieldHour.value?.blur()
     hourValue.value = value
   }
 
   if (type === 'minute') {
-    inputFieldMinute.value.blur()
+    inputFieldMinute.value?.blur()
     minuteValue.value = value
   }
 
