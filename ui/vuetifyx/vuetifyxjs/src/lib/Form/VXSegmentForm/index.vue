@@ -1,9 +1,10 @@
 <template>
-  <div class="vx-segment-form">
+  <div class="vx-segment-form" :class="{ 'readonly': readonly }">
     <VXConditionSwitch
       v-if="form.list.length > 0"
       v-model="form.condition"
       @change="handleConditionChange"
+      :disabled="readonly"
     />
     <div class="vx-segment-form-block">
       <div v-if="form.list.length > 0" class="content">
@@ -13,13 +14,19 @@
           :modelValue="item"
           :index="idx"
           :validate="showValidation"
+          :readonly="readonly"
           ref="itemGroupRefs"
           @on-remove="handleRemoveGroup"
           @on-data-change="handleUpdateModelValue"
         />
       </div>
     </div>
-    <vx-btn prepend-icon="mdi-plus" presets="x-small" @click="handleAddRule">Add Rule</vx-btn>
+    <vx-btn 
+      prepend-icon="mdi-plus" 
+      presets="x-small" 
+      @click="handleAddRule"
+      v-if="!readonly"
+    >Add Rule</vx-btn>
   </div>
 </template>
 
@@ -38,6 +45,10 @@ const props = defineProps({
   options: {
     type: Array as PropType<OptionsType[]>,
     default: () => []
+  },
+  readonly: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -84,10 +95,10 @@ function handleUpdateModelValue({ idx, value }: { idx: number; value: any }) {
 
 function handleRemoveGroup(idx: number) {
   form.value.list.splice(idx, 1)
-  emitDataChange()
+  emitDataChange('remove')
 }
 
-function emitDataChange() {
+function emitDataChange(type: string = 'update') {
   // Check if we have form data
   if (form.value.list.length === 0) {
     // Handle case when all groups are removed - emit an empty structure
@@ -103,11 +114,6 @@ function emitDataChange() {
         group.list.length > 0 &&
         group.list.every((item: any) => item.tag && item.tag.builderID)
     )
-
-  if (!isValid) {
-    console.log('Form data is incomplete, not emitting update')
-    return
-  }
 
   // Convert condition types to intersect/union format
   const getConditionKey = (condition: string): string => {
@@ -136,14 +142,9 @@ function validate() {
     return false
   }
 
-  const result = itemGroupRefs.value.every((group: any) => {
-    if (group && typeof group.validate === 'function') {
-      return group.validate()
-    }
-    return false
-  })
+  const resultList = itemGroupRefs.value.filter((group: any) => !group.validate())
 
-  return result
+  return resultList.length === 0
 }
 
 function resetValidation() {

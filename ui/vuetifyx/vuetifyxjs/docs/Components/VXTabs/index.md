@@ -9,6 +9,7 @@
 | Name            | Introduction           | Type                  | Default Value |
 | --------------- | ---------------------- | --------------------- | ------------- |
 | underlineBorder | tabs底部border样式控制 | `"contain"` ` "full"` | -             |
+| pill            | 胶囊样式tabs           | `Boolean`             | `false`       |
 
 > 除此之外所有的 [v-tabs](https://vuetifyjs.com/en/api/v-tabs/) 原生 props 都可使用 v-bind:[props]="[value]" 实现或覆盖
 
@@ -64,6 +65,35 @@ import { ref } from 'vue'
 const tab1 = ref(1)
 const tab2 = ref(2)
 const tab3 = ref(3)
+</script>
+
+<style scoped lang="css"></style>
+```
+
+:::
+
+### 胶囊样式
+
+:::demo
+
+```vue
+<template>
+  <v-row>
+    <v-col cols="12">
+      <vx-tabs pill v-model="pillTab">
+        <v-tab :value="1">Once</v-tab>
+        <v-tab :value="2">Daily</v-tab>
+        <v-tab :value="3">Weekly</v-tab>
+        <v-tab :value="4">Monthly</v-tab>
+      </vx-tabs>
+      <div class="text-caption mt-2">当前选中: {{ pillTab }}</div>
+    </v-col>
+  </v-row>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+const pillTab = ref(1)
 </script>
 
 <style scoped lang="css"></style>

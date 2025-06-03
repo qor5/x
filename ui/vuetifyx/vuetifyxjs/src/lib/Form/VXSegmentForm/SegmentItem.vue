@@ -1,5 +1,5 @@
 <template>
-  <div class="vx-segment-item-wrap">
+  <div class="vx-segment-item-wrap" :class="{ 'readonly': readonly }">
     <div class="condition-group">
       <vx-select
         v-model="selectedOption"
@@ -11,6 +11,7 @@
         :error-messages="shouldShowError ? errorMessages : ''"
         :hide-details="!shouldShowError"
         @update:modelValue="handleSelectChange"
+        :disabled="readonly"
       >
         <template #item="{ props, item }">
           <template v-if="item.raw.category">
@@ -44,8 +45,10 @@
             :placeholder="'Select values'"
             :items="fragment.options"
             multiple
-            hide-details
+            :error-messages="shouldValidateField(fragment.key) ? 'This field cannot be empty' : ''"
+            :hide-details="!shouldValidateField(fragment.key)"
             @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+            :disabled="readonly"
           />
 
           <vx-select
@@ -56,8 +59,10 @@
             style="min-width: 150px"
             :placeholder="'Select a value'"
             :items="fragment.options"
-            hide-details
+            :error-messages="shouldValidateField(fragment.key) ? 'This field cannot be empty' : ''"
+            :hide-details="!shouldValidateField(fragment.key)"
             @update:modelValue="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+            :disabled="readonly"
           />
         </template>
 
@@ -65,9 +70,11 @@
           v-else-if="fragment.type === 'NUMBER_INPUT'"
           type="number"
           v-model="tagParams[fragment.key]"
-          style="min-width: 70px"
-          hide-details
+          style="min-width: 75px"
+          :error-messages="shouldValidateField(fragment.key) ? 'This field cannot be empty' : ''"
+          :hide-details="!shouldValidateField(fragment.key)"
           @mouseleave="debouncedHandleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+          :disabled="readonly"
         />
         <vx-date-picker
           v-else-if="fragment.type === 'DATE_PICKER'"
@@ -75,14 +82,20 @@
           v-model="tagParams[fragment.key]"
           :style="fragment.includeTime ? 'min-width: 220px' : 'min-width:150px'"
           :placeholder="fragment.includeTime ? 'Select a datetime' : 'Select a date'"
-          hide-details
+          :error-messages="shouldValidateField(fragment.key) ? 'This field cannot be empty' : ''"
+          :hide-details="!shouldValidateField(fragment.key)"
           @blur="handleFragmentValueChange(fragment.key, tagParams[fragment.key])"
+          :disabled="readonly"
         />
       </template>
     </div>
-    <v-icon class="delete-icon" color="rgb(158, 158, 158)" size="24" @click="handleRemove"
-      >mdi-minus-circle-outline</v-icon
-    >
+    <v-icon 
+      class="delete-icon" 
+      color="rgb(158, 158, 158)" 
+      size="24" 
+      @click="handleRemove"
+      v-if="!readonly"
+    >mdi-minus-circle-outline</v-icon>
   </div>
 </template>
 
@@ -119,6 +132,10 @@ const props = defineProps({
     default: () => ({})
   },
   validate: {
+    type: Boolean,
+    default: false
+  },
+  readonly: {
     type: Boolean,
     default: false
   }
@@ -231,6 +248,19 @@ const shouldShowError = computed(() => {
   return props.validate && !selectedOption.value && userInteracted.value
 })
 
+// Check if a specific field should display validation error
+const shouldValidateField = (key: string) => {
+  return props.validate && userInteracted.value && isEmptyValue(tagParams[key])
+}
+
+// Check if a value is empty (null, undefined, or empty string)
+const isEmptyValue = (value: any) => {
+  if (Array.isArray(value)) {
+    return value.length === 0
+  }
+  return [null, undefined, ''].includes(value)
+}
+
 // 跟踪用户是否已与该字段交互
 const userInteracted = ref(false)
 
@@ -283,11 +313,6 @@ const handleRemove = () => {
   emit('on-remove')
 }
 
-function triggerValidation() {
-  userInteracted.value = true
-  return !!selectedOption.value
-}
-
 const errorMessages = computed(() => {
   return !selectedOption.value ? 'Type cannot be empty' : ''
 })
@@ -296,7 +321,21 @@ const errorMessages = computed(() => {
 defineExpose({
   isValid: () => {
     userInteracted.value = true
-    return !!selectedOption.value
+
+    // Check if main select is valid
+    const isMainSelectValid = ![null, undefined, ''].includes(selectedOption.value)
+
+    // Check if all visible fragment inputs are valid
+    const areAllFragmentsValid = visibleFragments.value.every((fragment) => {
+      // Skip TEXT type fragments as they don't have user input
+      if (fragment.type === 'TEXT') return true
+
+      // Check if the field value is not empty
+      return !isEmptyValue(tagParams[fragment.key])
+    })
+
+    // Return true only if everything is valid
+    return isMainSelectValid && areAllFragmentsValid
   }
 })
 
@@ -313,6 +352,10 @@ const debouncedHandleFragmentValueChange = debounce((key: string, value: any) =>
   border: 1px solid rgb(224, 224, 224);
   padding: 8px;
   margin-right: 25px;
+  
+  &.readonly {
+    background: rgb(245, 245, 245);
+  }
 }
 .condition-group {
   display: flex;

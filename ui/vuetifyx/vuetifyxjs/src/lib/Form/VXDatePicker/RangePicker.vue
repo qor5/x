@@ -204,6 +204,13 @@ function onDatePickerValueChange(value: number, position: 0 | 1) {
   let data = props.modelValue
   current.value = position
 
+  // Handle case where only time is selected and no date
+  if (!value && props.type === 'datetimepicker') {
+    // If only time is provided but no date, use current date
+    const currentDate = new Date()
+    value = currentDate.valueOf()
+  }
+
   if (datePickerValue.value.length === 0) {
     if (position === 0) data.push(value)
     else data = ['', value]
@@ -371,6 +378,15 @@ function onClickConfirm() {
           left: 12px;
         }
       }
+    }
+  }
+}
+
+.vx-range-picker-wrap {
+  :deep(.v-field) {
+    &,
+    * {
+      cursor: pointer;
     }
   }
 }

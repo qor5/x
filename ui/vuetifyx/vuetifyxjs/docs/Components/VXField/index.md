@@ -319,7 +319,18 @@ const dataTextErrorMessages = ref('This is a description')
 <template>
   <v-row>
     <v-col cols="4" sm="4">
-      <vx-field type="number" v-model="a" label="Password" />
+      <vx-field type="number" v-model="a" label="Password(string 0)" />
+      v-model:{{ a }}
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field type="number" v-model="b" label="Password(string '')" />
+      v-model:{{ b }}
+    </v-col>
+
+    <v-col cols="4" sm="4">
+      <vx-field type="number" v-model="c" label="Password(number 0)" />
+      v-model:{{ c }}
     </v-col>
   </v-row>
 </template>
@@ -327,6 +338,8 @@ const dataTextErrorMessages = ref('This is a description')
 <script lang="ts" setup>
 import { ref } from 'vue'
 const a = ref('0')
+const b = ref('')
+const c = ref(0)
 </script>
 
 <style scoped lang="css">

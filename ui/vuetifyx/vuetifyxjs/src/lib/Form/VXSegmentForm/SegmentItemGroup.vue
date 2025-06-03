@@ -1,5 +1,5 @@
 <template>
-  <div class="vx-segment-item-wrap">
+  <div class="vx-segment-item-wrap" :class="{ 'readonly': readonly }">
     <div class="condition-left">
       <div class="connect-decoration" />
       <VXConditionSwitch
@@ -7,6 +7,7 @@
         v-model="groupForm.condition"
         type="dropdown"
         @change="handleDataChange"
+        :disabled="readonly"
       />
     </div>
     <div class="content-right">
@@ -16,11 +17,12 @@
         :key="getItemKey(item, idx)"
         :modelValue="item"
         :validate="validate"
+        :readonly="readonly"
         ref="segmentItemRefs"
         @on-remove="() => handleRemoveItem(idx)"
         @update:modelValue="(value) => handleUpdateItem(idx, value)"
       />
-      <div class="add-btn">
+      <div class="add-btn" v-if="!readonly">
         <vx-btn
           icon="mdi-plus"
           rounded
@@ -61,6 +63,10 @@ const props = defineProps({
   validate: {
     type: Boolean,
     default: false
+  },
+  readonly: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -99,12 +105,7 @@ defineExpose({
   validate: () => {
     if (!segmentItemRefs.value || segmentItemRefs.value.length === 0) return true
 
-    return segmentItemRefs.value.every((item: any) => {
-      if (item && typeof item.isValid === 'function') {
-        return item.isValid()
-      }
-      return true
-    })
+    return segmentItemRefs.value.filter((item: any) => !item.isValid()).length === 0
   }
 })
 
@@ -117,12 +118,6 @@ const handleRemoveItem = (idx: number) => {
   } else {
     // When it's the last item in the group, notify parent to remove the entire group
     emit('on-remove', props.index)
-
-    // We still need to update the list to be empty in our local data
-    groupForm.value.list = []
-
-    // Also emit data change with the empty list to ensure proper model update
-    emit('on-data-change', { idx: props.index, value: { ...groupForm.value, list: [] } })
   }
 }
 

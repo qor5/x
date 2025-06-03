@@ -89,6 +89,7 @@ const isHovering = ref(false)
 const isFocus = computed(() => showMenu.value)
 const emit = defineEmits(['update:modelValue', 'blur'])
 const { showMenu, formatStr, emitDatePickerValue } = useDatePicker(props, emit)
+const timeStr = ref('00:00:00')
 
 const showClearIcon = computed(
   () => (isHovering.value || showMenu.value) && inputValue.value && props.clearable
@@ -107,9 +108,49 @@ watch(
   }
 )
 
+// Add watch for time selection with no date
+watch(
+  () => props.modelValue,
+  (value) => {
+    if (value && props.type === 'datetimepicker') {
+      // When value is changed and it has a time component but no date
+      const val = dayjs(value)
+      if (val.hour() !== 0 || val.minute() !== 0 || val.second() !== 0) {
+        // Has time component
+        if (val.year() === 1970 && val.month() === 0 && val.date() === 1) {
+          // Likely only time was set (Unix epoch date)
+          const currentDate = new Date()
+          const newDate = dayjs(currentDate)
+            .hour(val.hour())
+            .minute(val.minute())
+            .second(val.second())
+
+          emitDatePickerValue(newDate.valueOf())
+        }
+      }
+    }
+  }
+)
+
 watchEffect(() => {
   convertValueForInputAndDatePicker({ value: props.modelValue, shouldEmit: true })
 })
+
+// Add this watch effect to handle time-only selection
+watch(
+  () => datePickerValue.value,
+  (value) => {
+    if (!value && props.type === 'datetimepicker') {
+      // If only time is provided but no date, use current date
+      const currentDate = new Date()
+      datePickerValue.value = currentDate.valueOf()
+      // Update inputValue with formatted date+time
+      if (formatStr) {
+        inputValue.value = dayjs(currentDate).format(formatStr)
+      }
+    }
+  }
+)
 
 function onInputBlur(obj: FocusEvent | string, closeMenu: boolean = false) {
   // fix blur event is more quick than modelValue change event
@@ -194,6 +235,10 @@ function onClickAppendInner() {
 
     & input:not(.input-cover) {
       display: none;
+    }
+
+    .v-field {
+      cursor: pointer;
     }
   }
 }

@@ -23,6 +23,7 @@ import MessageListener from '@/lib/MessageListener.vue'
 import Overlay from '@/lib/Overlay.vue'
 import VXRangepicker from '@/lib/Form/VXDatePicker/RangePicker.vue'
 import VXDatepicker from '@/lib/Form/VXDatePicker/DatePicker.vue'
+import VXTimePicker from '@/lib/Form/VXDatePicker/TimePicker.vue'
 import VXField from '@/lib/Form/VXField.vue'
 import VXSelect from '@/lib/Form/VXSelect.vue'
 import VXCheckbox from '../Form/VXCheckbox.vue'
@@ -35,12 +36,13 @@ import VXBtnGroup from '@/lib/Common/VXBtnGroup.vue'
 import VXChip from '@/lib/Common/VXChip.vue'
 import VXAvatar from '@/lib/VXAvatar.vue'
 import VXTabs from '@/lib/Tabs/VXTabs.vue'
-import VXIframeEmailEditor from '@/lib/IframeEmailEditor.vue'
+import VXIframeEmitter from '@/lib/IframeEmitter.vue'
 import VXBreadcrumbs from '@/lib/Breadcrumbs/VXBreadcrumbs.vue'
 import VXTreeview from '@/lib/Treeview/VXTreeview.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 import LinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
 import VXSegmentForm from '@/lib/Form/VXSegmentForm/index.vue'
+import VXModelProxy from '@/lib/VXModelProxy.vue'
 import VXChart from '@/lib/Chart/VXChart.vue'
 
 declare const window: any
@@ -49,6 +51,7 @@ const vuetifyx = {
   install: (app: App) => {
     app.component('vx-chart', VXChart)
     app.component('vx-date-picker', VXDatepicker)
+    app.component('vx-time-picker', VXTimePicker)
     app.component('vx-range-picker', VXRangepicker)
     app.component('vx-datepicker', DatepickerOld)
     app.component('vx-datetimepicker', DatetimepickerOld)
@@ -80,7 +83,8 @@ const vuetifyx = {
     app.component('vx-treeview', VXTreeview)
     app.component('vx-messagelistener', MessageListener)
     app.component('vx-segment-form', VXSegmentForm)
-    app.component('vx-iframe-email-editor', VXIframeEmailEditor)
+    app.component('vx-iframe-emitter', VXIframeEmitter)
+    app.component('vx-model-proxy', VXModelProxy)
   }
 }
 
