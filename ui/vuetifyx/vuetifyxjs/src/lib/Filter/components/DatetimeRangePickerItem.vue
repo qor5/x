@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref} from 'vue'
+import { ref } from 'vue'
 import * as constants from '../Constants'
 import RangePicker from '@/lib/Form/VXDatePicker/RangePicker.vue'
 
@@ -31,11 +31,15 @@ const updateModelValue = (val: any) => {
 </script>
 
 <template>
-  <div style="width: 368px">
-    <range-picker :visible="datePickerVisible"
-                  clearable
-                  @update:model-value="updateModelValue"
-                  v-model="value" type="datepicker" v-bind="option"></range-picker>
+  <div style="width: 525px">
+    <range-picker
+      :visible="datePickerVisible"
+      clearable
+      @update:model-value="updateModelValue"
+      v-model="value"
+      type="datetimepicker"
+      v-bind="option"
+    ></range-picker>
   </div>
 </template>
 

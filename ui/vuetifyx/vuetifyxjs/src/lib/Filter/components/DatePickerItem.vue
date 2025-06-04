@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import Datepicker from '@/lib/Datepicker.vue'
+import Datepicker from '@/lib/Form/VXDatePicker/DatePicker.vue'
 
 const props = defineProps<{
   modelValue: any
@@ -23,10 +23,8 @@ if (options) {
   <div style="width: 200px">
     <datepicker
       v-model="modelValue.valueIs"
+      clearable
       :visible="datePickerVisible"
-      :hide-details="true"
-      :clear-text="translations['clear']"
-      :ok-text="translations['ok']"
       v-bind="option"
     />
   </div>

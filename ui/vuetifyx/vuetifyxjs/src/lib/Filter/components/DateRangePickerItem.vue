@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import * as constants from '../Constants'
-import Datepicker from '@/lib/Datepicker.vue'
+import RangePicker from '@/lib/Form/VXDatePicker/RangePicker.vue'
 
 const props = defineProps<{
   modelValue: any
@@ -13,44 +13,33 @@ props.modelValue.modifier = props.modelValue.modifier || constants.ModifierBetwe
 const datePickerVisible = ref(false)
 
 const emit = defineEmits(['update:modelValue'])
-const modifier = props.modelValue.modifier
 const options = props.modelValue.dateOptions
-const fromOption = ref()
-const toOption = ref()
+const option = ref()
 if (options) {
   if (options.length >= 1) {
-    fromOption.value = options[0]
+    option.value = options[0]
   }
-  if (options.length >= 2) {
-    toOption.value = options[1]
-  }
+}
+const value = ref([props.modelValue.valueFrom, props.modelValue.valueTo])
+
+const updateModelValue = (val: any) => {
+  value.value = val
+  props.modelValue.valueFrom = val[0]
+  props.modelValue.valueTo = val[1]
+  emit('update:modelValue', props.modelValue)
 }
 </script>
 
 <template>
-  <div style="width: 200px">
-    <datepicker
-      v-model="modelValue.valueFrom"
-      :key="modifier + 'form'"
+  <div style="width: 368px">
+    <range-picker
       :visible="datePickerVisible"
-      :hide-details="true"
-      :clear-text="translations['clear']"
-      :ok-text="translations['ok']"
-      :label="translations['startAt']"
-      v-bind="fromOption"
-    />
-    <div style="height: 34px" class="pl-2 pt-4">
-      <span>{{ translations['to'] }}</span>
-    </div>
-    <datepicker
-      v-model="modelValue.valueTo"
-      :key="modifier + 'to'"
-      :hide-details="true"
-      :clear-text="translations['clear']"
-      :ok-text="translations['ok']"
-      :label="translations['endAt']"
-      v-bind="toOption"
-    />
+      clearable
+      @update:model-value="updateModelValue"
+      v-model="value"
+      type="datepicker"
+      v-bind="option"
+    ></range-picker>
   </div>
 </template>
 
