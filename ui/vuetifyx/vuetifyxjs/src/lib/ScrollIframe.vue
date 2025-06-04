@@ -279,12 +279,18 @@ const preloadImage = (src: string) => {
 }
 
 const updateBody = (
-  data: { body: string; containerDataID: string; isUpdate: boolean },
+  data: { body: string; containerDataID: string; isUpdate: boolean; eventName: string },
   temp: Node
 ) => {
   if (!iframe.value) {
     return
   }
+  iframe.value.contentWindow.postMessage(
+    {
+      eventName: data.eventName
+    },
+    '*'
+  )
   const bodyEle = iframeDoc().querySelector('body')
   bodyEle.innerHTML = data.body
   setTimeout(() => {
@@ -292,7 +298,12 @@ const updateBody = (
     scrollToCurrentContainer(data.containerDataID, data.isUpdate)
   }, 200)
 }
-const updateIframeBody = (data: { body: string; containerDataID: string; isUpdate: boolean }) => {
+const updateIframeBody = (data: {
+  body: string
+  containerDataID: string
+  isUpdate: boolean
+  eventName: string
+}) => {
   const temp = document.createElement('body')
   temp.innerHTML = data.body
   const imgElements = temp.querySelectorAll('img')
