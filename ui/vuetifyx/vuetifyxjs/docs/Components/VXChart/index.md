@@ -363,6 +363,8 @@ const funnelChartData = ref([
           {
             value: 800,
             name: 'Email Delivered',
+            tooltip:
+              'SES delivery events confirm SMTP-level acceptance, but do not guarantee inbox placement or user visibility tooltip',
             extraData: {
               icon: 'mdi-email-mark-as-unread',
               hideLabel: true,

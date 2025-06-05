@@ -17,7 +17,13 @@
           </div>
           <!-- 处理带icon的样式 -->
           <div v-else class="funnel-card" :style="cardStyles" :title="item.name">
-            <div class="funnel-card-text" :style="cardTextStyles">{{ item.name }}</div>
+            <vx-label
+              class="funnel-card-text cardText mr-2"
+              :tooltip="item.tooltip"
+              tooltipLocation="top"
+              tooltip-icon-color="primary"
+              >{{ item.name }}</vx-label
+            >
             <div class="funnel-card-icon" :style="iconStyles">
               <v-icon :icon="item.extraData?.icon" color="#3E63DD" :size="iconSize" />
             </div>
@@ -86,31 +92,6 @@
               </div>
             </div>
           </div>
-
-          <!-- 转化率卡片 (对第一个阶段不显示) -->
-          <!-- <div class="funnel-stat-card" :style="statCardStyles(item)" v-if="index > 0">
-            <div
-              v-if="item.extraData?.style !== 'plain'"
-              class="trend-text"
-              style="line-height: 1"
-              :style="ThisWeekTextStyles"
-            >
-              Last Week
-            </div>
-            <div class="funnel-stat-value" :style="statValueStyles">
-              {{ getStatObject(item, index, 1) }}
-            </div>
-            <div class="funnel-stat-trend" :style="statTrendStyles">
-              <v-icon
-                :icon="getStatTrend(item, index, 1).icon"
-                :color="getStatTrend(item, index, 1).color"
-                :size="trendIconSize"
-              />
-              <span class="trend-text" :style="trendTextStyles">{{
-                getStatTrend(item, index, 1).text
-              }}</span>
-            </div>
-          </div> -->
         </div>
       </div>
 
@@ -143,6 +124,7 @@ interface FunnelItem {
   name: string
   labelName?: string
   extraData?: ExtraData
+  tooltip?: string
 }
 
 interface SeriesData {
@@ -470,13 +452,16 @@ const cardStyles = computed(() => {
 })
 
 // 卡片文字样式
-const cardTextStyles = computed(() => {
+const cardTextClassFontSize = computed(() => {
   const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
 
-  return {
-    fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.cardText * scaleFactor * adaptiveSpacing}px`,
-    lineHeight: `${SCALE_CONFIG.BASE_LINE_HEIGHTS.cardText * scaleFactor * adaptiveSpacing}px`
-  }
+  return `${SCALE_CONFIG.BASE_FONT_SIZES.cardText * scaleFactor * adaptiveSpacing}px`
+})
+
+const cardTextClassLineHeight = computed(() => {
+  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+
+  return `${SCALE_CONFIG.BASE_LINE_HEIGHTS.cardText * scaleFactor * adaptiveSpacing}px`
 })
 
 const cardTextStylesForPlainStyle = (item: FunnelItem) => {
@@ -1135,6 +1120,17 @@ onBeforeUnmount(() => {
   text-overflow: ellipsis;
   /* 当列数很多时，允许文字换行 */
   white-space: nowrap;
+
+  &.cardText * {
+    font-size: v-bind(cardTextClassFontSize) !important;
+    line-height: v-bind(cardTextClassLineHeight) !important;
+  }
+
+  &.cardText:deep(.text-subtitle-2) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
   /* 高列数时允许换行 */
   .funnel-col:nth-child(n + 7) & {
