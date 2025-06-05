@@ -1,5 +1,5 @@
 <template>
-  <div class="vx-segment-form" :class="{ 'readonly': readonly }">
+  <div class="vx-segment-form" :class="{ readonly: readonly }">
     <VXConditionSwitch
       v-if="form.list.length > 0"
       v-model="form.condition"
@@ -21,12 +21,9 @@
         />
       </div>
     </div>
-    <vx-btn 
-      prepend-icon="mdi-plus" 
-      presets="x-small" 
-      @click="handleAddRule"
-      v-if="!readonly"
-    >Add Rule</vx-btn>
+    <vx-btn prepend-icon="mdi-plus" presets="x-small" @click="handleAddRule" v-if="!readonly"
+      >Add Rule</vx-btn
+    >
   </div>
 </template>
 

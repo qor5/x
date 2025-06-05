@@ -165,10 +165,19 @@ export function filterData(data: any): any {
       if (op.itemType === 'DatetimeRangeItem') {
         pushDatetimeRangeItem(r, op)
       }
+      if (op.itemType === 'DatetimeRangePickerItem') {
+        pushDatetimeRangeItem(r, op)
+      }
       if (op.itemType === 'DateRangeItem') {
         pushDateRangeItem(r, op)
       }
+      if (op.itemType === 'DateRangePickerItem') {
+        pushDateRangeItem(r, op)
+      }
       if (op.itemType === 'DateItem') {
+        pushDateItem(r, op)
+      }
+      if (op.itemType === 'DatePickerItem') {
         pushDateItem(r, op)
       }
       if (op.itemType === 'NumberItem') {
