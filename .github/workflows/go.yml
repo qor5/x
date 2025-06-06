@@ -1,4 +1,6 @@
 name: go
+permissions:
+  contents: read
 
 on:
   push:

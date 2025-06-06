@@ -1,4 +1,6 @@
 name: Build and Commit Artifacts
+permissions:
+  contents: write
 
 on:
   pull_request:
@@ -12,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # 确保获取完整的提交历史
+          fetch-depth: 0 # Fetches the entire history for a correct commit
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -29,14 +31,15 @@ jobs:
           pnpm run build
 
       - name: Commit build artifacts
+        if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-          # 强制添加被 .gitignore 忽略的 dist 目录
+          # Forcefully add the dist directory, which is ignored by .gitignore
           git add ui/vuetifyx/vuetifyxjs/dist -f
 
-          # 检查是否有更改
+          # Check if there are any changes
           if ! git diff --cached --quiet; then
             git commit -m 'Add build artifacts'
             git push origin HEAD:${{ github.head_ref }}
