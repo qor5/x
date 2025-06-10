@@ -144,6 +144,9 @@ const (
 	ItemTypeDatetimeRange       FilterItemType = "DatetimeRangeItem"
 	ItemTypeDateRange           FilterItemType = "DateRangeItem"
 	ItemTypeDate                FilterItemType = "DateItem"
+	ItemTypeDatetimeRangePicker FilterItemType = "DatetimeRangePickerItem"
+	ItemTypeDateRangePicker     FilterItemType = "DateRangePickerItem"
+	ItemTypeDatePicker          FilterItemType = "DatePickerItem"
 	ItemTypeSelect              FilterItemType = "SelectItem"
 	ItemTypeMultipleSelect      FilterItemType = "MultipleSelectItem"
 	ItemTypeLinkageSelect       FilterItemType = "LinkageSelectItem"
@@ -326,13 +329,13 @@ func (fd FilterData) SetByQueryString(ctx *web.EventContext, qs string) (sqlCond
 		} else {
 			sqlc := fd.getSQLCondition(key, v[0])
 			if len(sqlc) > 0 {
-				if it.ItemType == ItemTypeDatetimeRange {
+				if it.ItemType == ItemTypeDatetimeRange || it.ItemType == ItemTypeDatetimeRangePicker {
 					var err error
 					val, err = time.ParseInLocation("2006-01-02 15:04", val.(string), time.Local)
 					if err != nil {
 						continue
 					}
-				} else if it.ItemType == ItemTypeDate || it.ItemType == ItemTypeDateRange {
+				} else if it.ItemType == ItemTypeDate || it.ItemType == ItemTypeDatePicker || it.ItemType == ItemTypeDateRange || it.ItemType == ItemTypeDateRangePicker {
 					var err error
 					val, err = time.ParseInLocation("2006-01-02", val.(string), time.Local)
 					if err != nil {
@@ -340,10 +343,10 @@ func (fd FilterData) SetByQueryString(ctx *web.EventContext, qs string) (sqlCond
 					}
 				}
 
-				if it.ItemType == ItemTypeDate {
+				if it.ItemType == ItemTypeDate || it.ItemType == ItemTypeDatePicker {
 					conds = append(conds, sqlcToCond(sqlc, "gte"), sqlcToCond(sqlc, "lt"))
 					sqlArgs = append(sqlArgs, val, val.(time.Time).Add(24*time.Hour))
-				} else if it.ItemType == ItemTypeDateRange {
+				} else if it.ItemType == ItemTypeDateRange || it.ItemType == ItemTypeDateRangePicker {
 					if mod == "gte" {
 						conds = append(conds, sqlcToCond(sqlc, "gte"))
 						sqlArgs = append(sqlArgs, val)
@@ -385,12 +388,12 @@ func (fd FilterData) SetByQueryString(ctx *web.EventContext, qs string) (sqlCond
 			if len(mv) == 2 {
 				it.Selected = true
 				it.Modifier = ModifierBetween
-				if it.ItemType == ItemTypeDatetimeRange {
+				if it.ItemType == ItemTypeDatetimeRange || it.ItemType == ItemTypeDatetimeRangePicker {
 					it.ValueFrom = mv["gte"]
 					it.ValueTo = mv["lt"]
 				}
 
-				if it.ItemType == ItemTypeNumber || it.ItemType == ItemTypeDateRange {
+				if it.ItemType == ItemTypeNumber || it.ItemType == ItemTypeDateRange || it.ItemType == ItemTypeDateRangePicker {
 					it.ValueFrom = mv["gte"]
 					it.ValueTo = mv["lte"]
 				}
@@ -450,7 +453,7 @@ func (fd FilterData) SetByQueryString(ctx *web.EventContext, qs string) (sqlCond
 						continue
 					}
 
-					if it.ItemType == ItemTypeDatetimeRange {
+					if it.ItemType == ItemTypeDatetimeRange || it.ItemType == ItemTypeDatetimeRangePicker {
 						it.ValueIs = v
 						if mod == "gte" {
 							it.ValueFrom = mv["gte"]
@@ -461,7 +464,7 @@ func (fd FilterData) SetByQueryString(ctx *web.EventContext, qs string) (sqlCond
 						continue
 					}
 
-					if it.ItemType == ItemTypeDateRange {
+					if it.ItemType == ItemTypeDateRange || it.ItemType == ItemTypeDateRangePicker {
 						it.ValueIs = v
 						if mod == "gte" {
 							it.ValueFrom = mv["gte"]
