@@ -1,6 +1,8 @@
 name: Build and Commit Artifacts
 permissions:
   contents: write
+  checks: write
+  pull-requests: read
 
 on:
   pull_request:

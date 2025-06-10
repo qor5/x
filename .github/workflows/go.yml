@@ -1,6 +1,8 @@
 name: go
 permissions:
   contents: read
+  checks: write
+  pull-requests: read
 
 on:
   push:
