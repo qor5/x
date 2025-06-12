@@ -329,9 +329,15 @@ func (fd FilterData) SetByQueryString(ctx *web.EventContext, qs string) (sqlCond
 		} else {
 			sqlc := fd.getSQLCondition(key, v[0])
 			if len(sqlc) > 0 {
-				if it.ItemType == ItemTypeDatetimeRange || it.ItemType == ItemTypeDatetimeRangePicker {
+				if it.ItemType == ItemTypeDatetimeRange {
 					var err error
 					val, err = time.ParseInLocation("2006-01-02 15:04", val.(string), time.Local)
+					if err != nil {
+						continue
+					}
+				} else if it.ItemType == ItemTypeDatetimeRangePicker {
+					var err error
+					val, err = time.ParseInLocation("2006-01-02 15:04:05", val.(string), time.Local)
 					if err != nil {
 						continue
 					}
