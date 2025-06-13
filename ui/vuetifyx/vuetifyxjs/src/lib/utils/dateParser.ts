@@ -1,16 +1,16 @@
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 
-// 启用自定义格式解析插件
+// Enable custom format parsing plugin
 dayjs.extend(customParseFormat)
 
 /**
- * 增强的日期解析器，支持更多日期格式，特别是中文年月日格式
+ * Enhanced date parser, supports more date formats, especially Chinese year-month-day formats
  */
 export class EnhancedDateParser {
-  // 支持的日期格式列表
+  // List of supported date formats
   private static readonly DATE_FORMATS = [
-    // 标准格式
+    // Standard formats
     'YYYY-MM-DD',
     'YYYY/MM/DD',
     'YYYY.MM.DD',
@@ -18,7 +18,7 @@ export class EnhancedDateParser {
     'YYYY/M/D',
     'YYYY.M.D',
 
-    // 带时间的格式
+    // Formats with time
     'YYYY-MM-DD HH:mm:ss',
     'YYYY-MM-DD HH:mm',
     'YYYY/MM/DD HH:mm:ss',
@@ -26,7 +26,7 @@ export class EnhancedDateParser {
     'YYYY.MM.DD HH:mm:ss',
     'YYYY.MM.DD HH:mm',
 
-    // 中文格式
+    // Chinese formats
     'YYYY年MM月DD日',
     'YYYY年M月D日',
     'YYYY年MM月DD日 HH:mm:ss',
@@ -34,7 +34,7 @@ export class EnhancedDateParser {
     'YYYY年M月D日 HH:mm:ss',
     'YYYY年M月D日 HH:mm',
 
-    // 短格式
+    // Short formats
     'MM-DD',
     'MM/DD',
     'MM.DD',
@@ -44,7 +44,7 @@ export class EnhancedDateParser {
     'MM月DD日',
     'M月D日',
 
-    // 其他常见格式
+    // Other common formats
     'DD-MM-YYYY',
     'DD/MM/YYYY',
     'DD.MM.YYYY',
@@ -53,7 +53,7 @@ export class EnhancedDateParser {
     'DD.M.YYYY'
   ]
 
-  // 中文数字映射
+  // Chinese number mapping
   private static readonly CHINESE_NUMBERS = {
     一: '1',
     二: '2',
@@ -89,7 +89,7 @@ export class EnhancedDateParser {
   }
 
   /**
-   * 预处理日期字符串，处理中文数字和特殊格式
+   * Preprocess date string, handle Chinese numbers and special formats
    */
   private static preprocessDateString(dateStr: string): string {
     if (!dateStr || typeof dateStr !== 'string') {
@@ -98,13 +98,13 @@ export class EnhancedDateParser {
 
     let processed = dateStr.trim()
 
-    // 替换中文数字
+    // Replace Chinese numbers
     Object.entries(this.CHINESE_NUMBERS).forEach(([chinese, arabic]) => {
       processed = processed.replace(new RegExp(chinese, 'g'), arabic)
     })
 
-    // 处理特殊的中文格式
-    // 处理"今天"、"明天"、"昨天"
+    // Handle special Chinese formats
+    // Handle "today", "tomorrow", "yesterday"
     const today = dayjs()
     if (processed.includes('今天') || processed === '今日') {
       return today.format('YYYY-MM-DD')
@@ -116,7 +116,7 @@ export class EnhancedDateParser {
       return today.subtract(1, 'day').format('YYYY-MM-DD')
     }
 
-    // 处理"大后天"、"后天"、"前天"、"大前天"
+    // Handle "the day after tomorrow", "the day before yesterday"
     if (processed.includes('大后天')) {
       return today.add(3, 'day').format('YYYY-MM-DD')
     }
@@ -130,7 +130,7 @@ export class EnhancedDateParser {
       return today.subtract(3, 'day').format('YYYY-MM-DD')
     }
 
-    // 处理只有月日的情况，自动补充当前年份
+    // Handle cases with only month and day, automatically fill in the current year
     const monthDayRegex = /^(\d{1,2})[月\/\-\.](\d{1,2})[日]?$/
     const monthDayMatch = processed.match(monthDayRegex)
     if (monthDayMatch) {
@@ -140,14 +140,14 @@ export class EnhancedDateParser {
       processed = `${currentYear}-${month}-${day}`
     }
 
-    // 处理年份简写（如：23年12月25日 -> 2023年12月25日）
+    // Handle short year (e.g. 23年12月25日 -> 2023年12月25日)
     const shortYearRegex = /^(\d{2})年/
     const shortYearMatch = processed.match(shortYearRegex)
     if (shortYearMatch) {
       const shortYear = parseInt(shortYearMatch[1])
       const currentYear = today.year()
       const currentCentury = Math.floor(currentYear / 100) * 100
-      // 如果简写年份小于当前年份的后两位，认为是当前世纪，否则是上个世纪
+      // If the short year is less than the last two digits of the current year, it is considered this century, otherwise last century
       const fullYear =
         shortYear <= currentYear % 100
           ? currentCentury + shortYear
@@ -159,29 +159,29 @@ export class EnhancedDateParser {
   }
 
   /**
-   * 尝试解析日期字符串，支持多种格式
+   * Try to parse date string, support multiple formats
    */
   static parseDate(dateInput: string | number | Date): dayjs.Dayjs | null {
     if (!dateInput) {
       return null
     }
 
-    // 如果已经是有效的Date对象或时间戳，直接使用dayjs解析
+    // If already a valid Date object or timestamp, use dayjs to parse directly
     if (typeof dateInput === 'number' || dateInput instanceof Date) {
       const parsed = dayjs(dateInput)
       return parsed.isValid() ? parsed : null
     }
 
-    // 预处理字符串
+    // Preprocess string
     const processedStr = this.preprocessDateString(dateInput)
 
-    // 首先尝试dayjs的默认解析
+    // First try dayjs default parsing
     let parsed = dayjs(processedStr)
     if (parsed.isValid()) {
       return parsed
     }
 
-    // 尝试各种格式
+    // Try various formats
     for (const format of this.DATE_FORMATS) {
       parsed = dayjs(processedStr, format, true) // strict mode
       if (parsed.isValid()) {
@@ -189,16 +189,16 @@ export class EnhancedDateParser {
       }
     }
 
-    // 尝试更宽松的解析
+    // Try more lenient parsing
     try {
-      // 使用正则表达式提取数字
+      // Use regex to extract numbers
       const numberRegex = /\d+/g
       const numbers = processedStr.match(numberRegex)
 
       if (numbers && numbers.length >= 2) {
         const [year, month, day, hour, minute, second] = numbers.map((num) => parseInt(num))
 
-        // 智能判断年份
+        // Smartly determine year
         let actualYear = year
         if (year < 100) {
           const currentYear = dayjs().year()
@@ -207,23 +207,23 @@ export class EnhancedDateParser {
             year <= currentYear % 100 ? currentCentury + year : currentCentury - 100 + year
         }
 
-        // 构建日期
+        // Build date
         if (numbers.length >= 3) {
-          // 有年月日
+          // Has year, month, day
           const dateStr = `${actualYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
           if (numbers.length >= 6) {
-            // 有时分秒
+            // Has hour, minute, second
             const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`
             parsed = dayjs(`${dateStr} ${timeStr}`)
           } else if (numbers.length >= 5) {
-            // 有时分
+            // Has hour, minute
             const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`
             parsed = dayjs(`${dateStr} ${timeStr}`)
           } else {
             parsed = dayjs(dateStr)
           }
         } else {
-          // 只有月日，使用当前年份
+          // Only month and day, use current year
           const currentYear = dayjs().year()
           const dateStr = `${currentYear}-${year.toString().padStart(2, '0')}-${month.toString().padStart(2, '0')}`
           parsed = dayjs(dateStr)
@@ -241,7 +241,7 @@ export class EnhancedDateParser {
   }
 
   /**
-   * 格式化日期
+   * Format date
    */
   static formatDate(
     date: dayjs.Dayjs | string | number | Date,
@@ -256,7 +256,7 @@ export class EnhancedDateParser {
   }
 
   /**
-   * 检查日期是否有效
+   * Check if date is valid
    */
   static isValidDate(dateInput: string | number | Date): boolean {
     const parsed = this.parseDate(dateInput)
@@ -264,14 +264,14 @@ export class EnhancedDateParser {
   }
 
   /**
-   * 获取支持的日期格式列表
+   * Get list of supported date formats
    */
   static getSupportedFormats(): string[] {
     return [...this.DATE_FORMATS]
   }
 
   /**
-   * 智能解析相对日期（如"3天后"、"2周前"等）
+   * Intelligently parse relative dates (e.g. "3 days later", "2 weeks ago", etc.)
    */
   static parseRelativeDate(dateStr: string): dayjs.Dayjs | null {
     if (!dateStr || typeof dateStr !== 'string') {
@@ -281,7 +281,7 @@ export class EnhancedDateParser {
     const str = dateStr.trim()
     const today = dayjs()
 
-    // 匹配相对日期模式
+    // Match relative date patterns
     const patterns = [
       { regex: /(\d+)天[后之]/, unit: 'day', direction: 1 },
       { regex: /(\d+)天[前之]/, unit: 'day', direction: -1 },

@@ -102,7 +102,7 @@ const minWidth = computed(() => ({
 watch(
   () => showMenu.value,
   (newVal, oldVal) => {
-    // 当下拉关闭时，发出 blur 事件（如果有值的话）
+    // When the dropdown closes, emit blur event (if there is a value)
     if (oldVal && !newVal && datePickerValue.value) {
       const formattedValue = dayjs(datePickerValue.value).format(formatStr.value)
       emit('blur', formattedValue)
@@ -148,12 +148,12 @@ function onInputBlur(obj: FocusEvent | string, closeMenu: boolean = false) {
     const target = obj.target as HTMLInputElement
     const inputText = target.value
 
-    // 如果用户没有输入任何内容，且已经有选择的值，则保持当前值不变
+    // If the user did not enter anything, and there is already a selected value, keep the current value unchanged
     if (!inputText && datePickerValue.value) {
       return
     }
 
-    // 如果用户输入了内容，尝试解析
+    // If the user entered something, try to parse it
     if (inputText) {
       convertValueForInputAndDatePicker({
         value: inputText,
@@ -186,10 +186,10 @@ function convertValueForInputAndDatePicker({
     datePickerValue.value = null
   } else {
     try {
-      // 首先尝试相对日期解析
+      // First try relative date parsing
       let parsedDate = EnhancedDateParser.parseRelativeDate(String(value))
 
-      // 如果相对日期解析失败，使用增强的日期解析器
+      // If relative date parsing fails, use the enhanced date parser
       if (!parsedDate) {
         parsedDate = EnhancedDateParser.parseDate(value)
       }
@@ -197,16 +197,16 @@ function convertValueForInputAndDatePicker({
       if (parsedDate && parsedDate.isValid()) {
         datePickerValue.value = parsedDate.valueOf()
 
-        // 显示值根据 format 格式化
+        // Display value is formatted according to format
         const currentFormatStr = formatStr.value
         if (currentFormatStr) {
           inputValue.value = parsedDate.format(currentFormatStr)
         } else {
-          inputValue.value = parsedDate.format('YYYY-MM-DD') // 默认格式
+          inputValue.value = parsedDate.format('YYYY-MM-DD') // Default format
         }
       } else {
         console.warn('Failed to parse date with enhanced parser:', value)
-        // 增强解析失败时，尝试原始dayjs解析作为fallback
+        // If enhanced parsing fails, try original dayjs parsing as fallback
         const fallbackDate = dayjs(value)
         if (fallbackDate.isValid()) {
           datePickerValue.value = fallbackDate.valueOf()
@@ -217,7 +217,7 @@ function convertValueForInputAndDatePicker({
             inputValue.value = fallbackDate.format('YYYY-MM-DD')
           }
         } else {
-          // 所有解析都失败时，保持原始输入但清空内部值
+          // If all parsing fails, keep the original input but clear internal value
           inputValue.value = String(value)
           datePickerValue.value = null
         }
@@ -229,7 +229,7 @@ function convertValueForInputAndDatePicker({
     }
   }
 
-  // 发出事件时，如果有值就发出格式化后的值，没有值就发出空字符串
+  // When emitting event, emit formatted value if there is a value, otherwise emit an empty string
   if (shouldEmit) {
     const emitValue = datePickerValue.value
       ? dayjs(datePickerValue.value).format(formatStr.value)
@@ -240,7 +240,7 @@ function convertValueForInputAndDatePicker({
 
 function onClickAppendInner() {
   if (showClearIcon.value) {
-    // 明确标记这是一个清空操作
+    // Explicitly mark this as a clear operation
     inputValue.value = ''
     datePickerValue.value = null
     emitDatePickerValue('', { extraEmitEvents: ['clear'] })
@@ -251,17 +251,17 @@ function onClickAppendInner() {
 }
 
 function onDatePickerUpdate(value: number) {
-  // 内部存储真实值（timestamp）
+  // Internally store the real value (timestamp)
   datePickerValue.value = value
 
-  // 显示值根据 format 格式化
+  // Display value is formatted according to format
   if (value) {
     inputValue.value = dayjs(value).format(formatStr.value)
   } else {
     inputValue.value = ''
   }
 
-  // 发出格式化后的值给父组件
+  // Emit formatted value to parent component
   const formattedValue = value ? dayjs(value).format(formatStr.value) : ''
   emitDatePickerValue(formattedValue)
 }

@@ -254,10 +254,10 @@ function convertValueForInputAndDatePicker({
         if (!item) return ''
 
         try {
-          // 首先尝试相对日期解析
+          // First try relative date parsing
           let parsedDate = EnhancedDateParser.parseRelativeDate(String(item))
 
-          // 如果相对日期解析失败，使用增强的日期解析器
+          // If relative date parsing fails, use the enhanced date parser
           if (!parsedDate) {
             parsedDate = EnhancedDateParser.parseDate(item)
           }
@@ -266,7 +266,7 @@ function convertValueForInputAndDatePicker({
             return parsedDate.format(formatStr.value)
           } else {
             console.warn('Failed to parse date with enhanced parser:', item)
-            // 增强解析失败时，尝试原始dayjs解析作为fallback
+            // If enhanced parsing fails, try original dayjs parsing as fallback
             const fallbackDate = dayjs(item)
             if (fallbackDate.isValid()) {
               return fallbackDate.format(formatStr.value)
@@ -284,10 +284,10 @@ function convertValueForInputAndDatePicker({
         if (!item) return item
 
         try {
-          // 首先尝试相对日期解析
+          // First try relative date parsing
           let parsedDate = EnhancedDateParser.parseRelativeDate(String(item))
 
-          // 如果相对日期解析失败，使用增强的日期解析器
+          // If relative date parsing fails, use the enhanced date parser
           if (!parsedDate) {
             parsedDate = EnhancedDateParser.parseDate(item)
           }
@@ -295,7 +295,7 @@ function convertValueForInputAndDatePicker({
           if (parsedDate && parsedDate.isValid()) {
             return parsedDate.valueOf()
           } else {
-            // 增强解析失败时，尝试原始dayjs解析作为fallback
+            // If enhanced parsing fails, try original dayjs parsing as fallback
             const fallbackDate = dayjs(item)
             if (fallbackDate.isValid()) {
               return fallbackDate.valueOf()
@@ -310,10 +310,10 @@ function convertValueForInputAndDatePicker({
       })
     } else {
       try {
-        // 首先尝试相对日期解析
+        // First try relative date parsing
         let parsedDate = EnhancedDateParser.parseRelativeDate(String(value))
 
-        // 如果相对日期解析失败，使用增强的日期解析器
+        // If relative date parsing fails, use the enhanced date parser
         if (!parsedDate) {
           parsedDate = EnhancedDateParser.parseDate(value)
         }
@@ -323,7 +323,7 @@ function convertValueForInputAndDatePicker({
           datePickerValue.value = [parsedDate.valueOf()]
         } else {
           console.warn('Failed to parse single date with enhanced parser:', value)
-          // 增强解析失败时，尝试原始dayjs解析作为fallback
+          // If enhanced parsing fails, try original dayjs parsing as fallback
           const fallbackDate = dayjs(value)
           if (fallbackDate.isValid()) {
             inputValue.value = [fallbackDate.format(formatStr.value)]
@@ -360,13 +360,13 @@ function onInputBlur(obj: FocusEvent | string | number, position: 0 | 1) {
   // the first time select date will trigger blur event
   if (!value) return
 
-  // 如果用户输入了内容，尝试使用增强的日期解析器
+  // If the user entered something, try to use the enhanced date parser
   if (value) {
     try {
-      // 首先尝试相对日期解析
+      // First try relative date parsing
       let parsedDate = EnhancedDateParser.parseRelativeDate(String(value))
 
-      // 如果相对日期解析失败，使用增强的日期解析器
+      // If relative date parsing fails, use the enhanced date parser
       if (!parsedDate) {
         parsedDate = EnhancedDateParser.parseDate(value)
       }
@@ -375,7 +375,7 @@ function onInputBlur(obj: FocusEvent | string | number, position: 0 | 1) {
         value = parsedDate.valueOf()
       } else {
         console.warn('Failed to parse date with enhanced parser:', value)
-        // 增强解析失败时，尝试原始dayjs解析作为fallback
+        // If enhanced parsing fails, try original dayjs parsing as fallback
         const fallbackDate = dayjs(value)
         if (fallbackDate.isValid()) {
           value = fallbackDate.valueOf()
