@@ -236,13 +236,13 @@ function convertValueForInputAndDatePicker({
   shouldEmit?: boolean
   extraEmitEvents?: string[]
 }) {
-  console.log('=== convertValueForInputAndDatePicker (RangePicker) ===', {
-    value,
-    shouldEmit,
-    extraEmitEvents,
-    currentDatePickerValue: datePickerValue.value,
-    currentInputValue: inputValue.value
-  })
+  // console.log('=== convertValueForInputAndDatePicker (RangePicker) ===', {
+  //   value,
+  //   shouldEmit,
+  //   extraEmitEvents,
+  //   currentDatePickerValue: datePickerValue.value,
+  //   currentInputValue: inputValue.value
+  // })
 
   //case: no init value
   if (!value || value.length === 0) {
