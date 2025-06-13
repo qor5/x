@@ -9,26 +9,32 @@ const props = defineProps({
   listenFunc: {
     required: true,
     type: Function
+  },
+  name: {
+    type: String,
+    required: true
   }
 })
 
+//@ts-ignore
+window.vxMessageListenerFunc = window.vxMessageListenerFunc || {}
 onMounted(() => {
   //@ts-ignore
-  if (!window.vxMessageListenerFunc) {
+  if (!window.vxMessageListenerFunc[props.name]) {
     //@ts-ignore
-    window.vxMessageListenerFunc = props.listenFunc
+    window.vxMessageListenerFunc[props.name] = props.listenFunc
     //@ts-ignore
-    window.addEventListener('message', window.vxMessageListenerFunc, false)
+    window.addEventListener(props.name, window.vxMessageListenerFunc[props.name], false)
   }
 })
 
 onUnmounted(() => {
   //@ts-ignore
-  if (window.vxMessageListenerFunc) {
+  if (window.vxMessageListenerFunc[props.name]) {
     //@ts-ignore
-    window.removeEventListener('message', window.vxMessageListenerFunc, false)
+    window.removeEventListener(props.name, window.vxMessageListenerFunc[props.name], false)
     //@ts-ignore
-    window.vxMessageListenerFunc = null
+    window.vxMessageListenerFunc[props.name] = null
   }
 })
 </script>
