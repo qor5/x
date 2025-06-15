@@ -62,9 +62,12 @@
     }
   }
 
-  //align media box btn to left: https://theplanttokyo.atlassian.net/browse/QOR5-1329
-  .media-box-wrap {
+  //fix:align media box btn to left: https://theplanttokyo.atlassian.net/browse/QOR5-1329
+  .v-card.v-card--variant-outlined .media-box-wrap {
     padding-left: 0;
+  }
+  .v-card.v-card--variant-flat .media-box-wrap {
+    padding-left: 12px;
   }
 }
 
