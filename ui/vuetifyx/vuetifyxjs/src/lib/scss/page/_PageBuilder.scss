@@ -61,6 +61,11 @@
       z-index: 901;
     }
   }
+
+  //align media box btn to left: https://theplanttokyo.atlassian.net/browse/QOR5-1329
+  .media-box-wrap {
+    padding-left: 0;
+  }
 }
 
 .pageBuilder-right-drawer {
