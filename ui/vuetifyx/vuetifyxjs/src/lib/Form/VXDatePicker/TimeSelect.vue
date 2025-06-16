@@ -21,7 +21,7 @@
       </template>
 
       <v-menu v-model="showHourMenu" height="300" target="parent">
-        <v-list ref="hourListRef">
+        <v-list ref="hourListRef" @click.stop>
           <v-list-item
             :active="hourValue === item - 1"
             v-for="(item, index) in 24"
@@ -59,7 +59,7 @@
       </template>
 
       <v-menu height="300" v-model="showMinuteMenu" target="parent">
-        <v-list ref="minuteListRef">
+        <v-list ref="minuteListRef" @click.stop>
           <v-list-item
             v-for="(item, index) in 60"
             :key="index"
@@ -97,7 +97,7 @@
       </template>
 
       <v-menu height="300" v-model="showSecondMenu" target="parent">
-        <v-list ref="secondListRef">
+        <v-list ref="secondListRef" @click.stop>
           <v-list-item
             v-for="(item, index) in 60"
             :key="index"
@@ -262,6 +262,12 @@ function onChooseValue(type: 'hour' | 'minute' | 'second', value: number) {
   }
 
   emit('update:modelValue', payloadValue.value)
+
+  nextTick(() => {
+    if (type === 'hour') showHourMenu.value = false
+    if (type === 'minute') showMinuteMenu.value = false
+    if (type === 'second') showSecondMenu.value = false
+  })
 }
 </script>
 
