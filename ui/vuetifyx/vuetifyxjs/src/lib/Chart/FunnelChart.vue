@@ -781,6 +781,16 @@ const handleResize = () => {
       width: chartWidth,
       height: getChartHeight()
     })
+
+    // 同时调整折线图叠加层的尺寸
+    lineChartOverlays.value.forEach((lineChart) => {
+      if (lineChart) {
+        lineChart.resize({
+          width: chartWidth,
+          height: getChartHeight()
+        })
+      }
+    })
   }
 }
 
@@ -790,6 +800,13 @@ const updateContainerWidth = () => {
 
     if (chartInstance.value) {
       handleResize()
+
+      // 如果有折线图数据，重新创建叠加层以确保正确的位置和尺寸
+      if (lineSeriesData.value.length > 0) {
+        setTimeout(() => {
+          addLineChartOverlay()
+        }, 100)
+      }
     }
   }
 }
@@ -831,6 +848,11 @@ onMounted(() => {
   observer.value = new ResizeObserver((entries) => {
     for (const entry of entries) {
       containerWidth.value = entry.contentRect.width
+
+      // 立即触发resize处理
+      if (chartInstance.value) {
+        handleResize()
+      }
     }
   })
 

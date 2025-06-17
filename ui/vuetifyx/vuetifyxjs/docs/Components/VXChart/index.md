@@ -529,15 +529,81 @@ const funnelChartData = ref([
                 }
               ]
             }
+          },
+          {
+            value: 50,
+            name: 'Link Clicked2',
+            extraData: {
+              icon: 'mdi-link',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '2,500'
+                },
+                {
+                  type: 'secondary',
+                  icon: 'mdi-arrow-top-right',
+                  text: '+1.01%'
+                },
+                {
+                  type: 'primary',
+                  text: '2000'
+                }
+              ]
+            }
+          },
+          {
+            value: 50,
+            name: 'Link Clicked2',
+            extraData: {
+              icon: 'mdi-link',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '2,500'
+                },
+                {
+                  type: 'secondary',
+                  icon: 'mdi-arrow-top-right',
+                  text: '+1.01%'
+                },
+                {
+                  type: 'primary',
+                  text: '2000'
+                }
+              ]
+            }
+          },
+          {
+            value: 50,
+            name: 'Link Clicked2',
+            extraData: {
+              icon: 'mdi-link',
+              labelList: [
+                {
+                  type: 'primary',
+                  text: '2,500'
+                },
+                {
+                  type: 'secondary',
+                  icon: 'mdi-arrow-top-right',
+                  text: '+1.01%'
+                },
+                {
+                  type: 'primary',
+                  text: '2000'
+                }
+              ]
+            }
           }
         ]
       },
       {
         name: '转化率趋势',
         type: 'line',
-        data: [120, 132, 101, 134, 90],
-        lineColor: 'red',
-        smooth: true // 可选：是否平滑曲线
+        data: [120, 132, 101, 134, 90, 70, 100, 50],
+        lineColor: 'green',
+        smooth: false // 可选：是否平滑曲线
       }
     ]
   }
