@@ -146,6 +146,8 @@ const getCurrentSeriesDataForFunnel = () => {
         name: s.name || '',
         type: s.type as 'funnel' | 'line' | undefined,
         data: s.data || [],
+        lineColor: s.lineColor,
+        isDisabled: s.isDisabled,
         smooth: s.smooth
       }))
     }
@@ -157,6 +159,8 @@ const getCurrentSeriesDataForFunnel = () => {
         name: s.name || '',
         type: s.type as 'funnel' | 'line' | undefined,
         data: s.data || [],
+        lineColor: s.lineColor,
+        isDisabled: s.isDisabled,
         smooth: s.smooth
       }))
     }

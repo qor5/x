@@ -129,9 +129,11 @@ interface FunnelItem {
 
 interface SeriesData {
   name: string
-  type?: 'funnel' | 'line'
+  type?: 'line' | 'funnel'
   data: FunnelItem[] | number[]
+  isDisabled?: boolean
   smooth?: boolean
+  lineColor?: string
 }
 
 interface ChartData {
@@ -256,6 +258,17 @@ const processData = (data: FunnelItem[] | ChartData) => {
   }
 }
 
+// 检查是否禁用漏斗图可视化
+const isFunnelChartDisabled = computed(() => {
+  if (Array.isArray(props.data)) {
+    return false // 旧格式不支持禁用
+  } else {
+    // 新格式：检查漏斗图系列是否被禁用
+    const funnelSeries = props.data.series?.find((s) => !s.type || s.type === 'funnel')
+    return funnelSeries?.isDisabled === true
+  }
+})
+
 watch(
   () => props.data,
   (newData) => {
@@ -263,14 +276,6 @@ watch(
   },
   { immediate: true }
 )
-
-// 获取图表标题
-const chartTitle = computed(() => {
-  if (!Array.isArray(props.data) && props.data.title) {
-    return props.data.title.text
-  }
-  return ''
-})
 
 // 根据item和索引位置获取统计值
 const getStatObject = (item: FunnelItem, index: number, statIndex: number) => {
@@ -613,33 +618,20 @@ const updateEChartsOptions = () => {
   // 设置漏斗图数据
   options.series[0].data = ensuredData
 
-  // 如果有折线图数据，我们将创建一个独立的图表实例来避免坐标系冲突
-  if (lineSeriesData.value.length > 0) {
-    // 先渲染漏斗图
-    if (props.mergeOptionsCallback) {
-      props.mergeOptionsCallback(options, { seriesData: options.series })
-    }
-
-    chartInstance.value.clear()
-    chartInstance.value.setOption(options)
-
-    // 然后在漏斗图上叠加折线图
-    setTimeout(() => {
-      addLineChartOverlay()
-    }, 100)
-
-    return
-  }
-
-  // 如果没有折线图，清理叠加层并正常渲染漏斗图
-  cleanupLineChartOverlays()
-
+  // 先渲染漏斗图
   if (props.mergeOptionsCallback) {
     props.mergeOptionsCallback(options, { seriesData: options.series })
   }
 
+  // 然后在漏斗图上叠加折线图
+  lineSeriesData.value.length > 0
+    ? setTimeout(() => {
+        addLineChartOverlay()
+      }, 100)
+    : cleanupLineChartOverlays()
+
   chartInstance.value.clear()
-  chartInstance.value.setOption(options)
+  !isFunnelChartDisabled.value && chartInstance.value.setOption(options)
 }
 
 // 清理折线图叠加层
@@ -679,7 +671,7 @@ const addLineChartOverlay = () => {
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
+    pointer-events: auto;
     z-index: 10;
   `
 
@@ -737,13 +729,23 @@ const addLineChartOverlay = () => {
         smooth: lineSeries.smooth || false,
         lineStyle: {
           width: 2,
-          color: '#3e63dd'
+          color: lineSeries.lineColor || '#3e63dd'
         },
         itemStyle: {
-          color: '#3e63dd'
+          color: lineSeries.lineColor || '#3e63dd'
         },
-        symbol: 'none',
-        symbolSize: 0
+        symbol: 'circle',
+        symbolSize: 6,
+        showSymbol: true,
+        emphasis: {
+          itemStyle: {
+            borderColor: '#fff',
+            borderWidth: 2,
+            shadowBlur: 5,
+            shadowColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          symbolSize: 8
+        }
       }
     })
     .filter(Boolean)
@@ -751,6 +753,18 @@ const addLineChartOverlay = () => {
   // 配置独立的折线图
   const lineChartOption = {
     backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b} : {c}',
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      borderColor: '#eee',
+      borderWidth: 1,
+      textStyle: {
+        color: '#333'
+      },
+      shadowBlur: 5,
+      shadowColor: 'rgba(0, 0, 0, 0.1)'
+    },
     grid: {
       left: '0%',
       right: '0%',

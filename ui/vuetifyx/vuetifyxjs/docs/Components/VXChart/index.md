@@ -430,6 +430,7 @@ const funnelChartData = ref([
     series: [
       {
         name: '邮件营销',
+        isDisabled: true,
         type: 'funnel', // 明确指定为漏斗图
         data: [
           {
@@ -535,6 +536,7 @@ const funnelChartData = ref([
         name: '转化率趋势',
         type: 'line',
         data: [120, 132, 101, 134, 90],
+        lineColor: 'red',
         smooth: true // 可选：是否平滑曲线
       }
     ]
@@ -545,6 +547,7 @@ const funnelChartData = ref([
 const funnelMergeOptionsCallback = (options, { currentIndex }) => {
   // 当切换到第二个配置(idx = 1)时，将所有漏斗段设置为浅蓝色
   if (currentIndex === 1 && options.series && options.series[0] && options.series[0].data) {
+    console.log(options)
     options.series[0].data = options.series[0].data.map((item) => ({
       ...item,
       itemStyle: {

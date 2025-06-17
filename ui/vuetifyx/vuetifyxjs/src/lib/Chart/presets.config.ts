@@ -4,6 +4,9 @@ export interface ChartSeriesItem {
   name?: string
   data?: any[]
   radius?: string | string[]
+  isDisabled?: boolean
+  lineColor?: string
+  smooth?: boolean
   [key: string]: any
 }
 
