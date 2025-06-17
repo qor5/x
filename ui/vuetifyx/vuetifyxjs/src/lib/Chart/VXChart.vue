@@ -1,7 +1,7 @@
 <template>
   <div class="vx-chart-wrap">
     <div class="d-flex align-center justify-space-between">
-      <div v-if="chartTitle" class="vx-chart-title">
+      <div class="vx-chart-title">
         <slot name="title" :currentIndex="currentIndex">{{ chartTitle }}</slot>
       </div>
       <slot
@@ -146,6 +146,8 @@ const getCurrentSeriesDataForFunnel = () => {
         name: s.name || '',
         type: s.type as 'funnel' | 'line' | undefined,
         data: s.data || [],
+        lineColor: s.lineColor,
+        isDisabled: s.isDisabled,
         smooth: s.smooth
       }))
     }
@@ -157,6 +159,8 @@ const getCurrentSeriesDataForFunnel = () => {
         name: s.name || '',
         type: s.type as 'funnel' | 'line' | undefined,
         data: s.data || [],
+        lineColor: s.lineColor,
+        isDisabled: s.isDisabled,
         smooth: s.smooth
       }))
     }
