@@ -104,7 +104,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, PropType, onBeforeUnmount, watch } from 'vue'
 import * as echarts from 'echarts'
-import { funnelChartPreset } from './presets.config'
+import { funnelChartPreset, presetsLineInFunnel } from './presets.config'
 
 interface LabelItem {
   labelName?: string
@@ -690,100 +690,76 @@ const addLineChartOverlay = () => {
     height: chartDom.clientHeight
   })
 
-  // 处理折线图数据
-  const ensuredData = [...(internalData.value || [])]
-  const lineSeriesOptions = lineSeriesData.value
-    .map((lineSeries) => {
-      let lineData = lineSeries.data
-
-      if (!Array.isArray(lineData)) {
-        console.warn('Line chart data must be an array')
-        return null
-      }
-
-      // 格式化数据
-      const formattedData = lineData.map((item) => {
-        if (typeof item === 'number') {
-          return item
-        } else if (typeof item === 'object' && item !== null && 'value' in item) {
-          return item.value
-        } else if (typeof item === 'string') {
-          const num = parseFloat(item)
-          return isNaN(num) ? 0 : num
-        }
-        return 0
-      })
-
-      // 调整数据长度
-      while (formattedData.length < ensuredData.length) {
-        formattedData.push(0)
-      }
-      if (formattedData.length > ensuredData.length) {
-        formattedData.splice(ensuredData.length)
-      }
-
-      return {
-        name: lineSeries.name,
-        type: 'line',
-        data: formattedData,
-        smooth: lineSeries.smooth || false,
-        lineStyle: {
-          width: 2,
-          color: lineSeries.lineColor || '#3e63dd'
-        },
-        itemStyle: {
-          color: lineSeries.lineColor || '#3e63dd'
-        },
-        symbol: 'circle',
-        symbolSize: 6,
-        showSymbol: true,
-        emphasis: {
-          itemStyle: {
-            borderColor: '#fff',
-            borderWidth: 2,
-            shadowBlur: 5,
-            shadowColor: 'rgba(0, 0, 0, 0.3)'
-          },
-          symbolSize: 8
-        }
-      }
-    })
-    .filter(Boolean)
-
   // 配置独立的折线图
+  const ensuredData = [...(internalData.value || [])]
+  const baseSeriesConfig = presetsLineInFunnel.series?.[0] || {
+    type: 'line',
+    smooth: false,
+    symbol: 'none',
+    symbolSize: 0,
+    showSymbol: false,
+    connectNulls: false,
+    lineStyle: { width: 2, color: '#3e63dd' }
+  }
+
   const lineChartOption = {
-    backgroundColor: 'transparent',
-    tooltip: {
-      trigger: 'item',
-      formatter: '{b} : {c}',
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      borderColor: '#eee',
-      borderWidth: 1,
-      textStyle: {
-        color: '#333'
-      },
-      shadowBlur: 5,
-      shadowColor: 'rgba(0, 0, 0, 0.1)'
-    },
-    grid: {
-      left: '0%',
-      right: '0%',
-      top: '0%',
-      bottom: '0%',
-      containLabel: false
-    },
+    backgroundColor: presetsLineInFunnel.backgroundColor,
+    tooltip: presetsLineInFunnel.tooltip,
+    grid: presetsLineInFunnel.grid,
     xAxis: {
-      type: 'category',
-      data: ensuredData.map((item) => item.name),
-      show: false,
-      boundaryGap: false
+      ...presetsLineInFunnel.xAxis,
+      min: 0,
+      max: ensuredData.length
     },
-    yAxis: {
-      type: 'value',
-      show: false,
-      min: 0
-    },
-    series: lineSeriesOptions
+    yAxis: presetsLineInFunnel.yAxis,
+    series: lineSeriesData.value
+      .map((lineSeries) => {
+        // 处理折线图数据
+        let lineData = lineSeries.data
+
+        if (!Array.isArray(lineData)) {
+          console.warn('Line chart data must be an array')
+          return null
+        }
+
+        // 格式化数据为中心坐标
+        const formattedData = lineData.map((item, index) => {
+          let value = 0
+          if (typeof item === 'number') {
+            value = item
+          } else if (typeof item === 'object' && item !== null && 'value' in item) {
+            value = item.value
+          } else if (typeof item === 'string') {
+            const num = parseFloat(item)
+            value = isNaN(num) ? 0 : num
+          }
+
+          // 返回 [x, y] 坐标格式，x为列的真正中心位置
+          return [index + 0.5, value]
+        })
+
+        // 调整数据长度
+        while (formattedData.length < ensuredData.length) {
+          const nextIndex = formattedData.length
+          formattedData.push([nextIndex + 0.5, 0])
+        }
+        if (formattedData.length > ensuredData.length) {
+          formattedData.splice(ensuredData.length)
+        }
+
+        // 以预设配置为基准，只覆盖数据相关属性
+        return {
+          ...baseSeriesConfig,
+          name: lineSeries.name,
+          data: formattedData,
+          smooth: lineSeries.smooth || baseSeriesConfig.smooth,
+          lineStyle: {
+            ...baseSeriesConfig.lineStyle,
+            color: lineSeries.lineColor || baseSeriesConfig.lineStyle?.color || '#3e63dd'
+          }
+        }
+      })
+      .filter(Boolean)
   }
 
   lineChart.setOption(lineChartOption)

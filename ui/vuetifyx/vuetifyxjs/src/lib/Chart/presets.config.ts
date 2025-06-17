@@ -89,6 +89,59 @@ export const sequentialGrowthAnimation = {
   animationDelayUpdate: (idx: number) => idx * 100
 }
 
+// 漏斗图中折线图预设配置
+export const presetsLineInFunnel: ChartOptions = {
+  backgroundColor: 'transparent',
+  tooltip: {
+    trigger: 'item',
+    formatter: '{b} : {c}',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderColor: '#eee',
+    borderWidth: 1,
+    textStyle: {
+      color: '#333'
+    },
+    shadowBlur: 5,
+    shadowColor: 'rgba(0, 0, 0, 0.1)'
+  },
+  grid: {
+    left: '0%',
+    right: '0%',
+    top: '0%',
+    bottom: '0%',
+    containLabel: false
+  },
+  xAxis: {
+    type: 'value',
+    show: false,
+    boundaryGap: false
+  },
+  yAxis: {
+    type: 'value',
+    show: false,
+    min: 0
+  },
+  series: [
+    {
+      type: 'line',
+      smooth: false,
+      symbol: 'none',
+      symbolSize: 0,
+      showSymbol: false,
+      connectNulls: false,
+      lineStyle: {
+        width: 2,
+        color: '#3e63dd'
+      },
+      emphasis: {
+        lineStyle: {
+          width: 3
+        }
+      }
+    }
+  ]
+}
+
 // 柱状图预设配置
 export const barChartPreset: ChartOptions = {
   // 默认使用动画配置
@@ -311,7 +364,8 @@ export const funnelChartPreset: ChartOptions = {
 export const chartPresets = {
   barChart: barChartPreset,
   pieChart: pieChartPreset,
-  funnelChart: funnelChartPreset
+  funnelChart: funnelChartPreset,
+  lineInFunnel: presetsLineInFunnel
 }
 
 // 导出所有动画预设
