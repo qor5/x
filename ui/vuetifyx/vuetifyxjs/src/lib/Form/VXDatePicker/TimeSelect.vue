@@ -14,13 +14,14 @@
       :max="23"
       hide-details
       @update:modelValue="onChooseValue('hour', $event)"
-      @click="!disableHour && (showHourMenu = true)"
+      @click="onTextFieldClick('hour')"
     >
       <template #prepend-inner>
         <div class="displayValue">{{ padZero(hourValue) }}</div>
       </template>
 
       <v-menu v-model="showHourMenu" height="300" target="parent">
+        <!-- @click.stop avoid close parent menu when click on list item -->
         <v-list ref="hourListRef" @click.stop>
           <v-list-item
             :active="hourValue === item - 1"
@@ -52,13 +53,14 @@
       :max="59"
       hide-details
       @update:modelValue="onChooseValue('minute', $event)"
-      @click="!disableMinute && (showMinuteMenu = true)"
+      @click="onTextFieldClick('minute')"
     >
       <template #prepend-inner>
         <div class="displayValue">{{ padZero(minuteValue) }}</div>
       </template>
 
       <v-menu height="300" v-model="showMinuteMenu" target="parent">
+        <!-- @click.stop avoid close parent menu when click on list item -->
         <v-list ref="minuteListRef" @click.stop>
           <v-list-item
             v-for="(item, index) in 60"
@@ -90,13 +92,14 @@
       :max="59"
       hide-details
       @update:modelValue="onChooseValue('second', $event)"
-      @click="!disableSecond && (showSecondMenu = true)"
+      @click="onTextFieldClick('second')"
     >
       <template #prepend-inner>
         <div class="displayValue">{{ padZero(secondValue) }}</div>
       </template>
 
       <v-menu height="300" v-model="showSecondMenu" target="parent">
+        <!-- @click.stop avoid close parent menu when click on list item -->
         <v-list ref="secondListRef" @click.stop>
           <v-list-item
             v-for="(item, index) in 60"
@@ -116,7 +119,7 @@
 
 <script setup lang="ts">
 import { ref, defineProps, watch, defineEmits, computed, nextTick } from 'vue'
-
+import { onClickOutside } from '@vueuse/core'
 const props = defineProps({
   modelValue: {
     type: String,
@@ -180,6 +183,59 @@ const showArea = computed(() => {
   }
 })
 
+function onTextFieldClick(type: 'hour' | 'minute' | 'second') {
+  const map = {
+    hour: {
+      disable: props.disableHour,
+      menu: showHourMenu
+    },
+    minute: {
+      disable: props.disableMinute,
+      menu: showMinuteMenu
+    },
+    second: {
+      disable: props.disableSecond,
+      menu: showSecondMenu
+    }
+  }
+  if (map[type].disable) return
+  map[type].menu.value = true
+}
+// fix: https://theplanttokyo.atlassian.net/browse/QOR5-1395
+// fix issue when click on text field, the nested sub-menu will be closed immediately
+;[
+  {
+    refValue: hourListRef,
+    showMenu: showHourMenu,
+    inputField: inputFieldHour
+  },
+  {
+    refValue: minuteListRef,
+    showMenu: showMinuteMenu,
+    inputField: inputFieldMinute
+  },
+  {
+    refValue: secondListRef,
+    showMenu: showSecondMenu,
+    inputField: inputFieldSecond
+  }
+].forEach(({ refValue, showMenu, inputField }) => {
+  onClickOutside(
+    refValue,
+    (ev: Event) => {
+      ev.stopPropagation()
+      inputField.value?.blur()
+      showMenu.value = false
+      if (!inputField.value?.$el.contains(ev.target as Node)) {
+        inputFieldHour.value?.$el.contains(ev.target as Node) && onTextFieldClick('hour')
+        inputFieldMinute.value?.$el.contains(ev.target as Node) && onTextFieldClick('minute')
+        inputFieldSecond.value?.$el.contains(ev.target as Node) && onTextFieldClick('second')
+      }
+    },
+    { capture: true }
+  )
+})
+
 function padZero(num: number): string {
   return num < 10 ? `0${num}` : `${num}`
 }
@@ -223,24 +279,18 @@ function scrollToActiveItem(listRef: any, activeValue: number) {
 watch(showHourMenu, (newVal) => {
   if (newVal) {
     scrollToActiveItem(hourListRef, hourValue.value)
-  } else {
-    inputFieldHour.value?.blur()
   }
 })
 
 watch(showMinuteMenu, (newVal) => {
   if (newVal) {
     scrollToActiveItem(minuteListRef, minuteValue.value)
-  } else {
-    inputFieldMinute.value?.blur()
   }
 })
 
 watch(showSecondMenu, (newVal) => {
   if (newVal) {
     scrollToActiveItem(secondListRef, secondValue.value)
-  } else {
-    inputFieldSecond.value?.blur()
   }
 })
 
