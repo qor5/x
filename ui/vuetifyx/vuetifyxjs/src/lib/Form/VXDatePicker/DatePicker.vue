@@ -39,6 +39,7 @@
         :close-delay="0"
         min-width="292"
         location-strategy="connected"
+        scroll-strategy="close"
       >
         <date-picker-base
           class="elevation-5 d-inline-block bg-background rounded-lg overflow-hidden"

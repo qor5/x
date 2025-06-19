@@ -38,6 +38,7 @@
         :open-delay="0"
         :close-delay="0"
         min-width="220"
+        scroll-strategy="close"
         location-strategy="connected"
       >
         <div class="elevation-5 d-inline-block bg-background rounded-lg overflow-hidden">
