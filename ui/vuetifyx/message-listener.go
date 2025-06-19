@@ -7,8 +7,7 @@ import (
 )
 
 type VXMessageListenerBuilder struct {
-	tag        *h.HTMLTagBuilder
-	listenFunc string
+	tag *h.HTMLTagBuilder
 }
 
 func VXMessageListener() (r *VXMessageListenerBuilder) {
@@ -19,14 +18,16 @@ func VXMessageListener() (r *VXMessageListenerBuilder) {
 }
 
 func (b *VXMessageListenerBuilder) ListenFunc(v string) (r *VXMessageListenerBuilder) {
-	b.listenFunc = v
+	b.tag.Attr(":listen-func", v)
+	return b
+}
+
+func (b *VXMessageListenerBuilder) Name(v string) (r *VXMessageListenerBuilder) {
+	b.tag.Attr("name", v)
 	return b
 }
 
 func (b *VXMessageListenerBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
-	if b.listenFunc != "" {
-		b.tag.Attr(":listen-func", b.listenFunc)
-	}
 
 	return b.tag.MarshalHTML(ctx)
 }
