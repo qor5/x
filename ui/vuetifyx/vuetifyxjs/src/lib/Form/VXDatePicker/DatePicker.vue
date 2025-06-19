@@ -45,7 +45,7 @@
           class="elevation-5 d-inline-block bg-background rounded-lg overflow-hidden"
           :model-value="datePickerValue"
           :type="type"
-          @update:modelValue="emitDatePickerValue"
+          @update:modelValue="onDatePickerUpdate"
           :format-str="formatStr"
           :datePickerProps="datePickerProps"
         />
@@ -62,6 +62,8 @@ import { useFilteredAttrs } from '@/lib/composables/useFilteredAttrs'
 import datePickerBase from './DatePickerBase.vue'
 import { useDatePicker, datePickerType } from '@/lib/composables/useDatePicker'
 import dayjs from 'dayjs'
+import { EnhancedDateParser } from '@/lib/utils/dateParser'
+
 const { filteredAttrs } = useFilteredAttrs()
 
 const props = defineProps({
@@ -90,7 +92,6 @@ const isHovering = ref(false)
 const isFocus = computed(() => showMenu.value)
 const emit = defineEmits(['update:modelValue', 'blur'])
 const { showMenu, formatStr, emitDatePickerValue } = useDatePicker(props, emit)
-const timeStr = ref('00:00:00')
 
 const showClearIcon = computed(
   () => (isHovering.value || showMenu.value) && inputValue.value && props.clearable
@@ -101,10 +102,11 @@ const minWidth = computed(() => ({
 
 watch(
   () => showMenu.value,
-  (oldVal, newVal) => {
-    // this state is when finished select data and dropdown is closed
-    if (!oldVal && newVal) {
-      emitDatePickerValue(datePickerValue.value, { extraEmitEvents: ['blur'] })
+  (newVal, oldVal) => {
+    // When the dropdown closes, emit blur event (if there is a value)
+    if (oldVal && !newVal && datePickerValue.value) {
+      const formattedValue = dayjs(datePickerValue.value).format(formatStr.value)
+      emit('blur', formattedValue)
     }
   }
 )
@@ -134,57 +136,33 @@ watch(
 )
 
 watchEffect(() => {
-  convertValueForInputAndDatePicker({ value: props.modelValue, shouldEmit: true })
+  convertValueForInputAndDatePicker({ value: props.modelValue })
 })
 
-// Add this watch effect to handle time-only selection
-watch(
-  () => datePickerValue.value,
-  (value) => {
-    if (!value && props.type === 'datetimepicker') {
-      // If only time is provided but no date, use current date
-      const currentDate = new Date()
-      datePickerValue.value = currentDate.valueOf()
-      // Update inputValue with formatted date+time
-      if (formatStr) {
-        inputValue.value = dayjs(currentDate).format(formatStr)
-      }
-    }
-  }
-)
-
 function onInputBlur(obj: FocusEvent | string, closeMenu: boolean = false) {
-  // fix blur event is more quick than modelValue change event
-  // dropdown visible condition is conflict with this event
   if (closeMenu) {
     showMenu.value = false
     inputRef.value.blur()
   }
 
-  let value
-
   if (obj instanceof FocusEvent) {
     const target = obj.target as HTMLInputElement
-    value = target.value
-  } else {
-    value = obj
-  }
+    const inputText = target.value
 
-  if (props.datePickerProps) {
-    const maxTimestamp = props.datePickerProps.max ? dayjs(props.datePickerProps.max).valueOf() : 0
-    const minTimestamp = props.datePickerProps.min ? dayjs(props.datePickerProps.min).valueOf() : 0
-    const current = dayjs(value).valueOf()
-    if (current > maxTimestamp) {
-      value = maxTimestamp
-    } else if (current < minTimestamp) {
-      value = minTimestamp
+    // If the user did not enter anything, and there is already a selected value, keep the current value unchanged
+    if (!inputText && datePickerValue.value) {
+      return
+    }
+
+    // If the user entered something, try to parse it
+    if (inputText) {
+      convertValueForInputAndDatePicker({
+        value: inputText,
+        shouldEmit: true,
+        extraEmitEvents: ['blur']
+      })
     }
   }
-
-  // the first time select date will trigger blur event
-  if (!value) return
-
-  convertValueForInputAndDatePicker({ value, shouldEmit: true, extraEmitEvents: ['blur'] })
 }
 
 function convertValueForInputAndDatePicker({
@@ -196,24 +174,97 @@ function convertValueForInputAndDatePicker({
   shouldEmit?: boolean
   extraEmitEvents?: string[]
 }) {
-  //case: no init value
+  // console.log('=== convertValueForInputAndDatePicker ===', {
+  //   value,
+  //   shouldEmit,
+  //   extraEmitEvents,
+  //   currentDatePickerValue: datePickerValue.value,
+  //   currentInputValue: inputValue.value
+  // })
+
   if (!value) {
     inputValue.value = ''
-    datePickerValue.value = ''
+    datePickerValue.value = null
   } else {
-    inputValue.value = formatStr ? dayjs(value).format(formatStr) : value
-    datePickerValue.value = value ? dayjs(value).valueOf() : ''
+    try {
+      // First try relative date parsing
+      let parsedDate = EnhancedDateParser.parseRelativeDate(String(value))
+
+      // If relative date parsing fails, use the enhanced date parser
+      if (!parsedDate) {
+        parsedDate = EnhancedDateParser.parseDate(value)
+      }
+
+      if (parsedDate && parsedDate.isValid()) {
+        datePickerValue.value = parsedDate.valueOf()
+
+        // Display value is formatted according to format
+        const currentFormatStr = formatStr.value
+        if (currentFormatStr) {
+          inputValue.value = parsedDate.format(currentFormatStr)
+        } else {
+          inputValue.value = parsedDate.format('YYYY-MM-DD') // Default format
+        }
+      } else {
+        console.warn('Failed to parse date with enhanced parser:', value)
+        // If enhanced parsing fails, try original dayjs parsing as fallback
+        const fallbackDate = dayjs(value)
+        if (fallbackDate.isValid()) {
+          datePickerValue.value = fallbackDate.valueOf()
+          const currentFormatStr = formatStr.value
+          if (currentFormatStr) {
+            inputValue.value = fallbackDate.format(currentFormatStr)
+          } else {
+            inputValue.value = fallbackDate.format('YYYY-MM-DD')
+          }
+        } else {
+          // If all parsing fails, keep the original input but clear internal value
+          inputValue.value = String(value)
+          datePickerValue.value = null
+        }
+      }
+    } catch (error) {
+      console.error('Date conversion error:', error)
+      inputValue.value = String(value)
+      datePickerValue.value = null
+    }
   }
-  shouldEmit && emitDatePickerValue(datePickerValue.value, { extraEmitEvents })
+
+  // When emitting event, emit formatted value if there is a value, otherwise emit an empty string
+  if (shouldEmit) {
+    const emitValue = datePickerValue.value
+      ? dayjs(datePickerValue.value).format(formatStr.value)
+      : ''
+    emitDatePickerValue(emitValue, { extraEmitEvents })
+  }
 }
 
 function onClickAppendInner() {
   if (showClearIcon.value) {
-    emitDatePickerValue('')
+    // Explicitly mark this as a clear operation
+    inputValue.value = ''
+    datePickerValue.value = null
+    emitDatePickerValue('', { extraEmitEvents: ['clear'] })
     showMenu.value = false
   } else {
     showMenu.value = true
   }
+}
+
+function onDatePickerUpdate(value: number) {
+  // Internally store the real value (timestamp)
+  datePickerValue.value = value
+
+  // Display value is formatted according to format
+  if (value) {
+    inputValue.value = dayjs(value).format(formatStr.value)
+  } else {
+    inputValue.value = ''
+  }
+
+  // Emit formatted value to parent component
+  const formattedValue = value ? dayjs(value).format(formatStr.value) : ''
+  emitDatePickerValue(formattedValue)
 }
 </script>
 
@@ -242,5 +293,14 @@ function onClickAppendInner() {
       cursor: pointer;
     }
   }
+}
+</style>
+
+<style lang="scss">
+.v-picker-wrap[data-v-e7884ff8]
+  .v-date-picker-month__days
+  .v-date-picker-month__day--selected
+  .v-btn[disabled] {
+  color: #fff;
 }
 </style>
