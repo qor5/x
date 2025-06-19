@@ -363,7 +363,7 @@ const c = ref(0)
     <v-col cols="6" sm="6">
       <vx-label class="mb-2">search bar</vx-label>
       <vx-field
-        :model-value="dataNoBinding"
+        v-model="dataNoBinding"
         Placeholder="Search"
         clearable
         @click:clear="dataNoBinding = ''"
@@ -381,7 +381,7 @@ import { ref } from 'vue'
 const dataNoBinding = ref('hello world')
 
 function onSearch() {
-  alert('search content is' + dataNoBinding.value)
+  alert('search content is ' + dataNoBinding.value)
 }
 </script>
 
