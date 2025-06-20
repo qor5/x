@@ -1,5 +1,5 @@
 <template>
-  <div class="vx-segment-item-wrap" :class="{ 'readonly': readonly }">
+  <div class="vx-segment-item-wrap" :class="{ readonly: readonly }">
     <div class="condition-group">
       <vx-select
         v-model="selectedOption"
@@ -89,13 +89,14 @@
         />
       </template>
     </div>
-    <v-icon 
-      class="delete-icon" 
-      color="rgb(158, 158, 158)" 
-      size="24" 
+    <v-icon
+      class="delete-icon"
+      color="rgb(158, 158, 158)"
+      size="24"
       @click="handleRemove"
       v-if="!readonly"
-    >mdi-minus-circle-outline</v-icon>
+      >mdi-minus-circle-outline</v-icon
+    >
   </div>
 </template>
 
@@ -352,7 +353,7 @@ const debouncedHandleFragmentValueChange = debounce((key: string, value: any) =>
   border: 1px solid rgb(224, 224, 224);
   padding: 8px;
   margin-right: 25px;
-  
+
   &.readonly {
     background: rgb(245, 245, 245);
   }

@@ -6,21 +6,23 @@
       v-model="hourValue"
       class="time-select"
       type="number"
-      width="70"
+      width="48"
+      control-variant="hidden"
       maxlength="2"
       :disabled="disableHour"
       :min="0"
       :max="23"
       hide-details
       @update:modelValue="onChooseValue('hour', $event)"
-      @click="!disableHour && (showHourMenu = true)"
+      @click="onTextFieldClick('hour')"
     >
       <template #prepend-inner>
         <div class="displayValue">{{ padZero(hourValue) }}</div>
       </template>
 
       <v-menu v-model="showHourMenu" height="300" target="parent">
-        <v-list>
+        <!-- @click.stop avoid close parent menu when click on list item -->
+        <v-list ref="hourListRef" @click.stop>
           <v-list-item
             :active="hourValue === item - 1"
             v-for="(item, index) in 24"
@@ -43,21 +45,23 @@
       v-model="minuteValue"
       class="time-select minute-field"
       type="number"
-      width="70"
+      width="48"
       :disabled="disableMinute"
       maxlength="2"
       :min="0"
+      control-variant="hidden"
       :max="59"
       hide-details
       @update:modelValue="onChooseValue('minute', $event)"
-      @click="!disableMinute && (showMinuteMenu = true)"
+      @click="onTextFieldClick('minute')"
     >
       <template #prepend-inner>
         <div class="displayValue">{{ padZero(minuteValue) }}</div>
       </template>
 
       <v-menu height="300" v-model="showMinuteMenu" target="parent">
-        <v-list>
+        <!-- @click.stop avoid close parent menu when click on list item -->
+        <v-list ref="minuteListRef" @click.stop>
           <v-list-item
             v-for="(item, index) in 60"
             :key="index"
@@ -80,21 +84,23 @@
       v-model="secondValue"
       class="time-select second-field"
       type="number"
-      width="70"
+      width="48"
       :disabled="disableSecond"
       maxlength="2"
       :min="0"
+      control-variant="hidden"
       :max="59"
       hide-details
       @update:modelValue="onChooseValue('second', $event)"
-      @click="!disableSecond && (showSecondMenu = true)"
+      @click="onTextFieldClick('second')"
     >
       <template #prepend-inner>
         <div class="displayValue">{{ padZero(secondValue) }}</div>
       </template>
 
       <v-menu height="300" v-model="showSecondMenu" target="parent">
-        <v-list>
+        <!-- @click.stop avoid close parent menu when click on list item -->
+        <v-list ref="secondListRef" @click.stop>
           <v-list-item
             v-for="(item, index) in 60"
             :key="index"
@@ -112,8 +118,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, watch, defineEmits, computed } from 'vue'
-
+import { ref, defineProps, watch, defineEmits, computed, nextTick } from 'vue'
+import { onClickOutside } from '@vueuse/core'
 const props = defineProps({
   modelValue: {
     type: String,
@@ -133,6 +139,9 @@ const showSecondMenu = ref(false)
 const inputFieldHour = ref()
 const inputFieldMinute = ref()
 const inputFieldSecond = ref()
+const hourListRef = ref()
+const minuteListRef = ref()
+const secondListRef = ref()
 const hourValue = ref(0)
 const minuteValue = ref(0)
 const secondValue = ref(0)
@@ -156,7 +165,7 @@ const payloadValue = computed(
 )
 
 const showArea = computed(() => {
-  // 分析当前的formatStr 是否包含hour、minute、second
+  // Analyze if current formatStr contains hour, minute, second
   const formatStr = props.formatStr
 
   if (!formatStr) {
@@ -174,19 +183,126 @@ const showArea = computed(() => {
   }
 })
 
+function onTextFieldClick(type: 'hour' | 'minute' | 'second') {
+  const map = {
+    hour: {
+      disable: props.disableHour,
+      menu: showHourMenu
+    },
+    minute: {
+      disable: props.disableMinute,
+      menu: showMinuteMenu
+    },
+    second: {
+      disable: props.disableSecond,
+      menu: showSecondMenu
+    }
+  }
+  if (map[type].disable) return
+  map[type].menu.value = true
+}
+// fix: https://theplanttokyo.atlassian.net/browse/QOR5-1395
+// fix issue when click on text field, the nested sub-menu will be closed immediately
+;[
+  {
+    refValue: hourListRef,
+    showMenu: showHourMenu,
+    inputField: inputFieldHour
+  },
+  {
+    refValue: minuteListRef,
+    showMenu: showMinuteMenu,
+    inputField: inputFieldMinute
+  },
+  {
+    refValue: secondListRef,
+    showMenu: showSecondMenu,
+    inputField: inputFieldSecond
+  }
+].forEach(({ refValue, showMenu, inputField }) => {
+  onClickOutside(
+    refValue,
+    (ev: Event) => {
+      ev.stopPropagation()
+      inputField.value?.blur()
+      showMenu.value = false
+      if (!inputField.value?.$el.contains(ev.target as Node)) {
+        inputFieldHour.value?.$el.contains(ev.target as Node) && onTextFieldClick('hour')
+        inputFieldMinute.value?.$el.contains(ev.target as Node) && onTextFieldClick('minute')
+        inputFieldSecond.value?.$el.contains(ev.target as Node) && onTextFieldClick('second')
+      }
+    },
+    { capture: true }
+  )
+})
+
 function padZero(num: number): string {
   return num < 10 ? `0${num}` : `${num}`
 }
 
+// Fast positioning to selected item function
+function scrollToActiveItem(listRef: any, activeValue: number) {
+  setTimeout(() => {
+    // Try different ways to get the DOM element
+    let listElement = null
+
+    if (listRef?.value?.$el) {
+      listElement = listRef.value.$el
+    } else if (listRef?.value) {
+      listElement = listRef.value
+    }
+
+    if (!listElement) {
+      console.warn('Could not find list element')
+      return
+    }
+
+    const allItems = listElement.querySelectorAll('.v-list-item')
+
+    // Get the correct item by index (since activeValue corresponds to the index)
+    const targetItem = allItems[activeValue]
+
+    if (targetItem) {
+      // Direct positioning to center, no animation
+      targetItem.scrollIntoView({
+        behavior: 'auto',
+        block: 'center',
+        inline: 'nearest'
+      })
+    } else {
+      console.warn('Could not find target item at index:', activeValue)
+    }
+  }, 200)
+}
+
+// Watch menu display status and auto scroll to selected item
+watch(showHourMenu, (newVal) => {
+  if (newVal) {
+    scrollToActiveItem(hourListRef, hourValue.value)
+  }
+})
+
+watch(showMinuteMenu, (newVal) => {
+  if (newVal) {
+    scrollToActiveItem(minuteListRef, minuteValue.value)
+  }
+})
+
+watch(showSecondMenu, (newVal) => {
+  if (newVal) {
+    scrollToActiveItem(secondListRef, secondValue.value)
+  }
+})
+
 function onChooseValue(type: 'hour' | 'minute' | 'second', value: number) {
   // console.log(type, value)
   if (type === 'hour') {
-    inputFieldHour.value.blur()
+    inputFieldHour.value?.blur()
     hourValue.value = value
   }
 
   if (type === 'minute') {
-    inputFieldMinute.value.blur()
+    inputFieldMinute.value?.blur()
     minuteValue.value = value
   }
 
@@ -196,6 +312,12 @@ function onChooseValue(type: 'hour' | 'minute' | 'second', value: number) {
   }
 
   emit('update:modelValue', payloadValue.value)
+
+  nextTick(() => {
+    if (type === 'hour') showHourMenu.value = false
+    if (type === 'minute') showMinuteMenu.value = false
+    if (type === 'second') showSecondMenu.value = false
+  })
 }
 </script>
 

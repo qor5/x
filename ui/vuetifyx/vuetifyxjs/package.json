@@ -73,6 +73,9 @@
   "pnpm": {
     "patchedDependencies": {
       "@vitepress-code-preview/container": "patches/@vitepress-code-preview__container.patch"
+    },
+    "overrides": {
+      "esbuild": "0.25.0"
     }
   },
   "engines": {
