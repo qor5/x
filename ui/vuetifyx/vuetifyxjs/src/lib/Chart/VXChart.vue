@@ -18,7 +18,7 @@
 
     <slot name="description" :currentIndex="currentIndex" />
 
-    <!-- 使用新的FunnelChart组件 -->
+    <!-- Use new FunnelChart component -->
     <template v-if="props.presets === 'funnelChart'">
       <funnel-chart
         :height="props.height"
@@ -54,10 +54,10 @@ import {
 import FunnelChart from './FunnelChart.vue'
 import { useVxChartMergeOptsCallback } from './useVxChartMergeOpts'
 
-// 定义预设类型
+// Define preset types
 type PresetType = 'barChart' | 'pieChart' | 'funnelChart' | ''
 
-// 定义动画类型
+// Define animation types
 type AnimationType =
   | 'light'
   | 'fadeInGrowth'
@@ -66,22 +66,22 @@ type AnimationType =
   | 'sequentialGrowth'
   | ''
 
-// 生成唯一ID
+// Generate unique ID
 const chartId = `vx-chart-${Math.random().toString(36).substring(2, 10)}`
 
-// 当前显示的图表索引
+// Current displayed chart index
 const currentIndex = ref(0)
 
 const emit = defineEmits(['on-change-index'])
 
-// 切换显示的图表
+// Toggle displayed chart
 const toggle = (index: number) => {
   if (Array.isArray(props.options) && index >= 0 && index < props.options.length) {
     currentIndex.value = index
 
-    // 如果不是漏斗图，则更新ECharts图表
+    // If not funnel chart, update ECharts chart
     if (props.presets !== 'funnelChart') {
-      // 更新图表
+      // Update chart
       const chartInstance = getChartInstance()
       if (chartInstance && Array.isArray(mergedOptions.value)) {
         chartInstance.setOption(mergedOptions.value[index] as any, true)
@@ -127,18 +127,18 @@ const props = defineProps({
 
 const { invokeMergeOptionsCallback } = useVxChartMergeOptsCallback(props)
 
-// 为漏斗图创建合并选项回调，传递当前索引信息
+// Create merge options callback for funnel chart, passing current index information
 const funnelMergeOptionsCallback = (options: any, data: any) => {
-  // 调用外部传入的mergeOptionsCallback，并传递currentIndex
+  // Call external mergeOptionsCallback and pass currentIndex
   if (props.mergeOptionsCallback) {
     props.mergeOptionsCallback(options, { ...data, currentIndex: currentIndex.value })
   }
 }
 
-// 获取当前系列数据，用于漏斗图组件
+// Get current series data for funnel chart component
 const getCurrentSeriesDataForFunnel = () => {
   if (Array.isArray(props.options)) {
-    // 如果options是数组，返回当前选中索引的完整配置
+    // If options is array, return complete configuration of current selected index
     const currentOption = props.options[currentIndex.value]
     return {
       title: currentOption?.title,
@@ -152,7 +152,7 @@ const getCurrentSeriesDataForFunnel = () => {
       }))
     }
   } else {
-    // 如果options是对象，返回完整的配置
+    // If options is object, return complete configuration
     return {
       title: props.options?.title,
       series: (props.options?.series || []).map((s) => ({
@@ -167,22 +167,22 @@ const getCurrentSeriesDataForFunnel = () => {
   }
 }
 
-// 提取标题
+// Extract title
 const chartTitle = computed(() => {
-  // 检查 options 是否为数组
+  // Check if options is array
   if (Array.isArray(props.options)) {
-    // 如果是数组，返回当前选中的图表配置的标题
+    // If array, return title of currently selected chart configuration
     return props.options[currentIndex.value]?.title?.text || ''
   }
-  // 如果是对象，直接返回标题
+  // If object, directly return title
   return props.options.title?.text || ''
 })
 
-// 内部使用的配置
+// Internal configuration
 const enableAnimation = true
 const animationType: AnimationType = 'light'
 
-// 默认配置
+// Default configuration
 const defaultOptions: ChartOptions = {
   tooltip: {
     trigger: 'axis',
@@ -196,12 +196,12 @@ const defaultOptions: ChartOptions = {
     bottom: '3%',
     containLabel: true
   },
-  // 默认开启动画
+  // Enable animation by default
   animation: true,
   series: []
 }
 
-// 获取动画配置
+// Get animation configuration
 const getAnimationConfig = (): any => {
   if (!enableAnimation) {
     return {
@@ -222,17 +222,17 @@ const getAnimationConfig = (): any => {
   return lightAnimationConfig
 }
 
-// 获取预设配置
+// Get preset configuration
 const getChatOptions = (): ChartOptions => {
   let chatOptions: ChartOptions = {}
 
   if (props.presets && props.presets in chartPresets) {
     const presetOptions = chartPresets[props.presets as keyof typeof chartPresets]
 
-    // 获取动画配置
+    // Get animation configuration
     const animationConfig = getAnimationConfig()
 
-    // 合并预设和动画配置
+    // Merge preset and animation configuration
     chatOptions = {
       ...presetOptions,
       ...animationConfig
@@ -243,7 +243,7 @@ const getChatOptions = (): ChartOptions => {
   return chatOptions
 }
 
-// 深度合并对象
+// Deep merge objects
 const deepMerge = (target: any, source: any): any => {
   const result = { ...target }
 
@@ -265,21 +265,21 @@ const deepMerge = (target: any, source: any): any => {
   return result
 }
 
-// 合并配置
+// Merge configuration
 const mergedOptions = computed(() => {
   const baseOptions = getChatOptions()
 
-  // 处理 options 是数组的情况
+  // Handle case where options is array
   if (Array.isArray(props.options)) {
-    // 对数组中的每一项应用预设配置
+    // Apply preset configuration to each item in array
     const mergedOptionsArray = props.options.map((optionItem) => {
-      // 处理单个配置项的 series 数据
+      // Process series data for single configuration item
       let itemMergedSeries: ChartSeriesItem[] = []
 
       if (optionItem.series && optionItem.series.length > 0) {
-        // 如果用户提供了 series 数据，则使用用户的数据
+        // If user provided series data, use user's data
         itemMergedSeries = optionItem.series.map((userSeries: ChartSeriesItem, index: number) => {
-          // 获取对应的预设 series 配置
+          // Get corresponding preset series configuration
           const presetSeries =
             baseOptions.series && baseOptions.series[index]
               ? baseOptions.series[index]
@@ -287,37 +287,37 @@ const mergedOptions = computed(() => {
                 ? { ...baseOptions.series[0] }
                 : {}
 
-          // 合并预设和用户配置
+          // Merge preset and user configuration
           return deepMerge(presetSeries, userSeries)
         })
       } else if (baseOptions.series) {
-        // 如果用户没有提供 series，则使用预设的 series
+        // If user didn't provide series, use preset series
         itemMergedSeries = JSON.parse(JSON.stringify(baseOptions.series))
       }
 
-      // 合并其他配置
+      // Merge other configurations
       const itemResult = deepMerge(baseOptions, optionItem)
 
-      // 确保 series 被正确设置
+      // Ensure series is set correctly
       itemResult.series = itemMergedSeries
 
-      // 为漏斗图类型自动设置 legend.data
+      // Automatically set legend.data for funnel chart type
       if (
         props.presets === 'funnelChart' &&
         itemMergedSeries.length > 0 &&
         itemMergedSeries[0].data
       ) {
-        // 从 series 数据中提取 legend 数据
+        // Extract legend data from series data
         if (!itemResult.legend) itemResult.legend = {}
         itemResult.legend.data = itemMergedSeries[0].data.map((item: any) => item.name)
       }
 
-      // 从 ECharts 配置中移除标题
+      // Remove title from ECharts configuration
       if (itemResult.title) {
         delete itemResult.title
       }
 
-      // 如果用户没有明确设置 animation，则应用动画配置
+      // If user didn't explicitly set animation, apply animation configuration
       if (optionItem.animation === undefined) {
         const animationConfig = getAnimationConfig()
         Object.assign(itemResult, animationConfig)
@@ -329,14 +329,14 @@ const mergedOptions = computed(() => {
     return mergedOptionsArray
   }
 
-  // 处理 options 是对象的情况
-  // 处理 series 数据
+  // Handle case where options is object
+  // Process series data
   let mergedSeries: ChartSeriesItem[] = []
 
   if (props.options.series && props.options.series.length > 0) {
-    // 如果用户提供了 series 数据，则使用用户的数据
+    // If user provided series data, use user's data
     mergedSeries = props.options.series.map((userSeries: ChartSeriesItem, index: number) => {
-      // 获取对应的预设 series 配置
+      // Get corresponding preset series configuration
       const presetSeries =
         baseOptions.series && baseOptions.series[index]
           ? baseOptions.series[index]
@@ -344,33 +344,33 @@ const mergedOptions = computed(() => {
             ? { ...baseOptions.series[0] }
             : {}
 
-      // 合并预设和用户配置
+      // Merge preset and user configuration
       return deepMerge(presetSeries, userSeries)
     })
   } else if (baseOptions.series) {
-    // 如果用户没有提供 series，则使用预设的 series
+    // If user didn't provide series, use preset series
     mergedSeries = JSON.parse(JSON.stringify(baseOptions.series))
   }
 
-  // 合并其他配置
+  // Merge other configurations
   const result = deepMerge(baseOptions, props.options)
 
-  // 确保 series 被正确设置
+  // Ensure series is set correctly
   result.series = mergedSeries
 
-  // 为漏斗图类型自动设置 legend.data
+  // Automatically set legend.data for funnel chart type
   if (props.presets === 'funnelChart' && mergedSeries.length > 0 && mergedSeries[0].data) {
-    // 从 series 数据中提取 legend 数据
+    // Extract legend data from series data
     if (!result.legend) result.legend = {}
     result.legend.data = mergedSeries[0].data.map((item: any) => item.name)
   }
 
-  // 从 ECharts 配置中移除标题
+  // Remove title from ECharts configuration
   if (result.title) {
     delete result.title
   }
 
-  // 如果用户没有明确设置 animation，则应用动画配置
+  // If user didn't explicitly set animation, apply animation configuration
   if (props.options.animation === undefined) {
     const animationConfig = getAnimationConfig()
     Object.assign(result, animationConfig)
@@ -379,7 +379,7 @@ const mergedOptions = computed(() => {
   return result
 })
 
-// 获取当前系列数据
+// Get current series data
 const currentSeriesData = computed(() => {
   if (Array.isArray(mergedOptions.value)) {
     return mergedOptions.value[currentIndex.value]?.series?.[0]?.data || []
@@ -394,9 +394,9 @@ const chartHeight = computed(() => {
   return '300px'
 })
 
-// 获取图表实例
+// Get chart instance
 const getChartInstance = (): echarts.EChartsType | null => {
-  // 如果是漏斗图，不初始化echarts实例
+  // If funnel chart, don't initialize echarts instance
   if (props.presets === 'funnelChart') {
     return null
   }
@@ -407,26 +407,26 @@ const getChartInstance = (): echarts.EChartsType | null => {
   return echarts.getInstanceByDom(chartDom) || echarts.init(chartDom)
 }
 
-// 初始化图表
+// Initialize chart
 const initChart = async () => {
-  // 如果是漏斗图，不初始化echarts图表
+  // If funnel chart, don't initialize echarts chart
   if (props.presets === 'funnelChart') {
     return
   }
 
-  // 确保DOM已更新
+  // Ensure DOM is updated
   await nextTick()
 
   const chartInstance = getChartInstance()
   if (!chartInstance) return
 
-  // 设置图表配置
-  // 判断 mergedOptions 是否为数组
+  // Set chart configuration
+  // Check if mergedOptions is array
   if (Array.isArray(mergedOptions.value)) {
     invokeMergeOptionsCallback(mergedOptions.value[currentIndex.value], {
       seriesData: currentSeriesData.value
     })
-    // 如果是数组，使用当前索引的配置项初始化图表
+    // If array, use current index configuration item to initialize chart
     chartInstance.setOption(mergedOptions.value[currentIndex.value] as any, true)
   } else {
     invokeMergeOptionsCallback(mergedOptions.value, {
@@ -435,7 +435,7 @@ const initChart = async () => {
     chartInstance.setOption(mergedOptions.value as any, true)
   }
 
-  // 设置加载状态
+  // Set loading state
   if (props.loading) {
     chartInstance.showLoading()
   } else {
@@ -443,20 +443,20 @@ const initChart = async () => {
   }
 }
 
-// 监听配置变化
+// Watch configuration changes
 watch(
   () => [props.options, props.presets],
   () => {
-    // 如果是漏斗图，不更新echarts图表
+    // If funnel chart, don't update echarts chart
     if (props.presets === 'funnelChart') {
       return
     }
 
     const chartInstance = getChartInstance()
     if (chartInstance) {
-      // 判断 mergedOptions 是否为数组
+      // Check if mergedOptions is array
       if (Array.isArray(mergedOptions.value)) {
-        // 如果是数组，使用当前索引的配置项更新图表
+        // If array, use current index configuration item to update chart
         invokeMergeOptionsCallback(mergedOptions.value[currentIndex.value], {
           seriesData: currentSeriesData.value
         })
@@ -472,11 +472,11 @@ watch(
   { deep: true }
 )
 
-// 监听加载状态
+// Watch loading state
 watch(
   () => props.loading,
   (loading) => {
-    // 如果是漏斗图，不更新echarts加载状态
+    // If funnel chart, don't update echarts loading state
     if (props.presets === 'funnelChart') {
       return
     }
@@ -492,13 +492,13 @@ watch(
   }
 )
 
-// 监听当前索引变化
+// Watch current index changes
 watch(
   () => currentIndex.value,
   (oldIndex, newIndex) => {
     emit('on-change-index', newIndex)
 
-    // 如果是漏斗图，不更新echarts图表
+    // If funnel chart, don't update echarts chart
     if (props.presets === 'funnelChart') {
       return
     }
@@ -513,9 +513,9 @@ watch(
   }
 )
 
-// 处理窗口大小变化
+// Handle window resize
 const handleResize = () => {
-  // 如果是漏斗图，不调整echarts图表大小
+  // If funnel chart, don't resize echarts chart
   if (props.presets === 'funnelChart') {
     return
   }
@@ -529,9 +529,9 @@ const resizeObserver = new ResizeObserver(() => {
   handleResize()
 })
 
-// 组件挂载后初始化图表
+// Initialize chart after component mounted
 onMounted(async () => {
-  // 如果不是漏斗图，则初始化echarts图表
+  // If not funnel chart, initialize echarts chart
   if (props.presets !== 'funnelChart') {
     await initChart()
     const chartDom = document.getElementById(chartId)
@@ -545,11 +545,11 @@ onMounted(async () => {
   window.addEventListener('resize', handleResize)
 })
 
-// 组件卸载前清理资源
+// Clean up resources before component unmounted
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
 
-  // 如果不是漏斗图，则清理echarts图表资源
+  // If not funnel chart, clean up echarts chart resources
   if (props.presets !== 'funnelChart') {
     const chartDom = document.getElementById(chartId)
     if (chartDom) {

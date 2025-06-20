@@ -573,28 +573,6 @@ const funnelChartData = ref([
                 }
               ]
             }
-          },
-          {
-            value: 50,
-            name: 'Link Clicked2',
-            extraData: {
-              icon: 'mdi-link',
-              labelList: [
-                {
-                  type: 'primary',
-                  text: '2,500'
-                },
-                {
-                  type: 'secondary',
-                  icon: 'mdi-arrow-top-right',
-                  text: '+1.01%'
-                },
-                {
-                  type: 'primary',
-                  text: '2000'
-                }
-              ]
-            }
           }
         ]
       },
