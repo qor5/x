@@ -18,8 +18,10 @@ type (
 	VXChartOptionSeries struct {
 		Name   string        `json:"name,omitempty"`
 		Type   string        `json:"type,omitempty"`
-		Smooth bool          `json:"smooth,omitempty"`
-		Data   []interface{} `json:"data,omitempty"`
+		Smooth    bool          `json:"smooth,omitempty"`
+		LineColor string        `json:"lineColor,omitempty"`
+		Data      []interface{} `json:"data,omitempty"`
+		IsDisabled bool          `json:"isDisabled,omitempty"`
 	}
 	VXChartOption struct {
 		Title  *VXChartOptionTitle    `json:"title,omitempty"`
