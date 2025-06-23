@@ -573,12 +573,14 @@ const ThisWeekTextStyles = computed(() => {
 
   if (useFixedSize) {
     return {
-      fontSize: '12px'
+      fontSize: '12px',
+      fontWeight: '590'
     }
   }
 
   return {
-    fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.thisWeekText * scaleFactor * adaptiveSpacing}px`
+    fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.thisWeekText * scaleFactor * adaptiveSpacing}px`,
+    fontWeight: '590'
   }
 })
 
