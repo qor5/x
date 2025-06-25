@@ -1,9 +1,12 @@
-// 定义图表选项类型
+// Define chart options types
 export interface ChartSeriesItem {
   type?: string
   name?: string
   data?: any[]
   radius?: string | string[]
+  isDisabled?: boolean
+  lineColor?: string
+  smooth?: boolean
   [key: string]: any
 }
 
@@ -24,71 +27,124 @@ export interface ChartOptions {
   [key: string]: any
 }
 
-// 轻量级动画配置 - 默认使用
+// Lightweight animation configuration - used by default
 export const lightAnimationConfig = {
   animation: true,
-  // 设置较高的动画阈值，只有数据量小时才启用动画
+  // Set higher animation threshold, only enable animation when data size is small
   animationThreshold: 2000,
-  // 减少动画持续时间
+  // Reduce animation duration
   animationDuration: 300,
   animationEasing: 'cubicOut',
-  // 减少延迟时间
+  // Reduce delay time
   animationDelay: (idx: number) => Math.max(idx * 10, 0),
-  // 更新动画更快
+  // Faster update animation
   animationDurationUpdate: 200,
   animationEasingUpdate: 'cubicInOut',
   animationDelayUpdate: (idx: number) => Math.max(idx * 5, 0)
 }
 
-// 增长动画预设 - 渐入增长效果
+// Growth animation preset - fade-in growth effect
 export const fadeInGrowthAnimation = {
   animation: true,
   animationThreshold: 5000,
   animationDuration: 1000,
-  animationEasing: 'cubicIn', // 先慢后快
+  animationEasing: 'cubicIn', // slow first then fast
   animationDelay: (idx: number) => idx * 100,
   animationDurationUpdate: 500,
   animationEasingUpdate: 'cubicInOut'
 }
 
-// 增长动画预设 - 弹性增长效果
+// Growth animation preset - elastic growth effect
 export const bounceGrowthAnimation = {
   animation: true,
   animationThreshold: 5000,
   animationDuration: 1200,
-  animationEasing: 'elasticOut', // 弹性效果
+  animationEasing: 'elasticOut', // elastic effect
   animationDelay: (idx: number) => idx * 120,
   animationDurationUpdate: 600,
   animationEasingUpdate: 'elasticOut'
 }
 
-// 增长动画预设 - 波浪增长效果
+// Growth animation preset - wave growth effect
 export const waveGrowthAnimation = {
   animation: true,
   animationThreshold: 5000,
   animationDuration: 1500,
-  animationEasing: 'backOut', // 回弹效果
+  animationEasing: 'backOut', // bounce back effect
   animationDelay: (idx: number) => idx * 80,
   animationDurationUpdate: 800,
   animationEasingUpdate: 'backOut'
 }
 
-// 增长动画预设 - 顺序增长效果
+// Growth animation preset - sequential growth effect
 export const sequentialGrowthAnimation = {
   animation: true,
   animationThreshold: 5000,
   animationDuration: 800,
   animationEasing: 'linear',
-  // 较长的延迟，使每个元素依次显示
+  // Longer delay to make each element display sequentially
   animationDelay: (idx: number) => idx * 200,
   animationDurationUpdate: 400,
   animationEasingUpdate: 'linear',
   animationDelayUpdate: (idx: number) => idx * 100
 }
 
-// 柱状图预设配置
+// Preset configuration for line chart in funnel chart
+export const presetsLineInFunnel: ChartOptions = {
+  backgroundColor: 'transparent',
+  tooltip: {
+    trigger: 'item',
+    formatter: '{b} : {c}',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderColor: '#eee',
+    borderWidth: 1,
+    textStyle: {
+      color: '#333'
+    },
+    shadowBlur: 5,
+    shadowColor: 'rgba(0, 0, 0, 0.1)'
+  },
+  grid: {
+    left: '0%',
+    right: '0%',
+    top: '0%',
+    bottom: '0%',
+    containLabel: false
+  },
+  xAxis: {
+    type: 'value',
+    show: false,
+    boundaryGap: false
+  },
+  yAxis: {
+    type: 'value',
+    show: false,
+    min: 0
+  },
+  series: [
+    {
+      type: 'line',
+      smooth: false,
+      symbol: 'none',
+      symbolSize: 0,
+      showSymbol: false,
+      connectNulls: false,
+      lineStyle: {
+        width: 2,
+        color: '#3e63dd'
+      },
+      emphasis: {
+        lineStyle: {
+          width: 3
+        }
+      }
+    }
+  ]
+}
+
+// Bar chart preset configuration
 export const barChartPreset: ChartOptions = {
-  // 默认使用动画配置
+  // Use animation configuration by default
   ...lightAnimationConfig,
   grid: {
     top: '40px',
@@ -176,9 +232,9 @@ export const barChartPreset: ChartOptions = {
   ]
 }
 
-// 饼图预设配置
+// Pie chart preset configuration
 export const pieChartPreset: ChartOptions = {
-  // 默认使用动画配置
+  // Use animation configuration by default
   ...lightAnimationConfig,
   tooltip: {
     trigger: 'item',
@@ -239,21 +295,21 @@ export const pieChartPreset: ChartOptions = {
         show: false
       },
       color: [
-        'rgba(52, 81, 178, 1)', // 最深色
-        'rgba(141, 164, 239, 1)', // 次深色
-        'rgba(162, 181, 243, 1)', // 减淡1
-        'rgba(183, 198, 247, 1)', // 减淡2
-        'rgba(204, 215, 251, 1)', // 减淡3
-        'rgba(225, 232, 255, 1)', // 减淡4
-        'rgba(236, 241, 255, 1)' // 减淡5
+        'rgba(52, 81, 178, 1)', // Darkest color
+        'rgba(141, 164, 239, 1)', // Second darkest color
+        'rgba(162, 181, 243, 1)', // Lighten 1
+        'rgba(183, 198, 247, 1)', // Lighten 2
+        'rgba(204, 215, 251, 1)', // Lighten 3
+        'rgba(225, 232, 255, 1)', // Lighten 4
+        'rgba(236, 241, 255, 1)' // Lighten 5
       ]
     }
   ]
 }
 
-// 漏斗图预设配置
+// Funnel chart preset configuration
 export const funnelChartPreset: ChartOptions = {
-  // 默认使用动画配置
+  // Use animation configuration by default
   ...lightAnimationConfig,
   tooltip: {
     trigger: 'item',
@@ -268,18 +324,18 @@ export const funnelChartPreset: ChartOptions = {
     shadowColor: 'rgba(0, 0, 0, 0.1)'
   },
   legend: {
-    show: false // 隐藏图例，因为我们有自定义UI
+    show: false // Hide legend because we have custom UI
   },
   title: {
     left: 'left',
     textAlign: 'left',
     padding: [10, 0, 0, 10]
   },
-  // 为四个漏斗段设置匹配的颜色
+  // Set matching colors for four funnel segments
   color: ['#e7edfc', '#91a3e9', '#4662d5', '#3a50ac', '#181d46'],
   series: [
     {
-      name: '', // 使用通用名称，会被用户传入的series name覆盖
+      name: '', // Use generic name, will be overridden by user-provided series name
       type: 'funnel',
       orient: 'horizontal',
       funnelAlign: 'bottom',
@@ -288,15 +344,15 @@ export const funnelChartPreset: ChartOptions = {
       bottom: '5%',
       width: '100%',
       height: '100%',
-      // 确保小值也能被看到
+      // Ensure small values can be seen
       min: 0,
       minSize: '1%',
       maxSize: '100%',
-      // 不排序，保持原始数据顺序
+      // No sorting, keep original data order
       sort: 'none',
-      // 增加段之间的间隔
+      // Increase spacing between segments
       gap: 0,
-      // 标签配置
+      // Label configuration
       labelLine: {
         show: false
       }
@@ -304,14 +360,15 @@ export const funnelChartPreset: ChartOptions = {
   ]
 }
 
-// 导出所有预设
+// Export all presets
 export const chartPresets = {
   barChart: barChartPreset,
   pieChart: pieChartPreset,
-  funnelChart: funnelChartPreset
+  funnelChart: funnelChartPreset,
+  lineInFunnel: presetsLineInFunnel
 }
 
-// 导出所有动画预设
+// Export all animation presets
 export const animationPresets = {
   light: lightAnimationConfig,
   fadeInGrowth: fadeInGrowthAnimation,
