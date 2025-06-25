@@ -1,6 +1,54 @@
-.common-container-editor {
+/** sync style with commonContainer PC style **/
+.common-container-editor .vuetify-pro-tiptap-editor__content.markdown-theme-github {
+  a,
+  a > span {
+    color: currentColor;
+    opacity: 0.8;
+    text-decoration: underline;
+  }
+
   h1,
   h2 {
     border-bottom: none !important;
+  }
+
+  h1 {
+    font-size: 48px;
+    line-height: 57px;
+  }
+
+  h2 {
+    font-size: 32px;
+    line-height: 38px;
+  }
+
+  h1 + p {
+    margin-top: 40px;
+  }
+
+  h2 + p {
+    margin-top: 24px;
+  }
+
+  h3 + p,
+  h4 + p,
+  h5 + p,
+  h6 + p {
+    margin-top: 16px;
+  }
+
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: rgb(51, 51, 51);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 29px;
+  }
+
+  p {
+    line-height: 19px;
+    font-size: 16px;
   }
 }
