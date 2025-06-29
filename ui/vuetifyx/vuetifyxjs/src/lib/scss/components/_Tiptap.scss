@@ -37,14 +37,28 @@
     margin-top: 16px;
   }
 
-  h3,
-  h4,
-  h5,
-  h6 {
-    color: rgb(51, 51, 51);
+  h3 {
     font-size: 24px;
     font-weight: 400;
     line-height: 29px;
+  }
+
+  h4 {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 24px;
+  }
+
+  h5 {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 19px;
+  }
+
+  h6 {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 17px;
   }
 
   p {
