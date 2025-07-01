@@ -1,4 +1,8 @@
 name: Build and Deploy Docs
+permissions:
+  contents: write
+  checks: write
+  pull-requests: read
 
 on:
   push:

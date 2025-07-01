@@ -32,6 +32,16 @@ const internalValue = ref([
     valueTo: ''
   },
   {
+    key: 'TestDatetimeRangePicker',
+    label: 'TestDatetimeRangePicker',
+    itemType: 'DatetimeRangePickerItem',
+    modifier: 'between',
+    selected: false,
+    folded: false,
+    valueFrom: '',
+    valueTo: ''
+  },
+  {
     key: 'TestDateRange',
     label: 'TestDateRange',
     itemType: 'DateRangeItem',
@@ -42,9 +52,26 @@ const internalValue = ref([
     valueTo: ''
   },
   {
+    key: 'TestDateRangePicker',
+    label: 'TestDateRangePicker',
+    itemType: 'DateRangePickerItem',
+    selected: false,
+    folded: false,
+    valueFrom: '',
+    valueTo: ''
+  },
+  {
     key: 'TestDate',
     label: 'TestDate',
     itemType: 'DateItem',
+    selected: false,
+    folded: false,
+    valueIs: ''
+  },
+  {
+    key: 'TestDatePicker',
+    label: 'TestDatePicker',
+    itemType: 'DatePickerItem',
     selected: false,
     folded: false,
     valueIs: ''

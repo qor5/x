@@ -121,8 +121,54 @@ const load = (event: any) => {
     resizeObserver.observe(container.value)
     resizable = true
   }
+
+  // Add click event listener to iframe body
+  addIframeClickListener()
+
   emit('load', event)
 }
+
+// Check if element or its parents have wrapper-shadow class
+const hasWrapperShadowInParentChain = (element: Element): boolean => {
+  let current: Element | null = element
+  while (current && current !== iframeDoc().body) {
+    if (current.classList && current.classList.contains('wrapper-shadow')) {
+      return true
+    }
+    current = current.parentElement
+  }
+  return false
+}
+
+// Add click event listener to iframe body
+const addIframeClickListener = () => {
+  const body = iframeDoc().querySelector('body')
+  if (!body) return
+
+  // Remove existing listener if any
+  body.removeEventListener('click', handleIframeClick)
+
+  // Add new click listener
+  body.addEventListener('click', handleIframeClick)
+}
+
+// Handle iframe body click events
+const handleIframeClick = (event: Event) => {
+  const target = event.target as Element
+  if (!target) return
+
+  // Check if clicked element or its parents have wrapper-shadow class
+  if (!hasWrapperShadowInParentChain(target)) {
+    // Send message to parent window
+    window.parent.postMessage(
+      {
+        msg_type: 'clickOutsideWrapperShadow'
+      },
+      '*'
+    )
+  }
+}
+
 const removeHighlightClass = () => {
   const elements = iframeDoc().querySelectorAll('.highlight')
   elements.forEach((el: Element) => (el as HTMLElement).classList.remove('highlight'))
@@ -279,12 +325,18 @@ const preloadImage = (src: string) => {
 }
 
 const updateBody = (
-  data: { body: string; containerDataID: string; isUpdate: boolean },
+  data: { body: string; containerDataID: string; isUpdate: boolean; eventName: string },
   temp: Node
 ) => {
   if (!iframe.value) {
     return
   }
+  iframe.value.contentWindow.postMessage(
+    {
+      eventName: data.eventName
+    },
+    '*'
+  )
   const bodyEle = iframeDoc().querySelector('body')
   bodyEle.innerHTML = data.body
   setTimeout(() => {
@@ -292,7 +344,12 @@ const updateBody = (
     scrollToCurrentContainer(data.containerDataID, data.isUpdate)
   }, 200)
 }
-const updateIframeBody = (data: { body: string; containerDataID: string; isUpdate: boolean }) => {
+const updateIframeBody = (data: {
+  body: string
+  containerDataID: string
+  isUpdate: boolean
+  eventName: string
+}) => {
   const temp = document.createElement('body')
   temp.innerHTML = data.body
   const imgElements = temp.querySelectorAll('img')

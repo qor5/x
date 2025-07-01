@@ -34,6 +34,8 @@
     "@tiptap/pm": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
     "@tiptap/vue-3": "^2.11.5",
+    "cross-spawn": "7.0.5",
+    "nanoid": "3.3.8",
     "vue": "^3.5.13"
   },
   "devDependencies": {
@@ -48,5 +50,10 @@
     "vite": "^5.4.19",
     "vite-svg-loader": "^5.1.0",
     "vue-tsc": "^2.2.8"
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "0.25.0"
+    }
   }
 }

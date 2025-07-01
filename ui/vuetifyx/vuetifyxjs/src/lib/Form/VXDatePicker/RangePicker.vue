@@ -108,6 +108,7 @@ const { filteredAttrs } = useFilteredAttrs()
 import dayjs from 'dayjs'
 import { useLocale } from 'vuetify'
 import { useHasEventListener } from '@/lib/composables/useEventListener'
+import { EnhancedDateParser } from '@/lib/utils/dateParser'
 const { hasEventListener } = useHasEventListener()
 const { t } = useLocale()
 const i18_save = t('$vuetify.datePicker.saveBtn')
@@ -235,19 +236,108 @@ function convertValueForInputAndDatePicker({
   shouldEmit?: boolean
   extraEmitEvents?: string[]
 }) {
+  // console.log('=== convertValueForInputAndDatePicker (RangePicker) ===', {
+  //   value,
+  //   shouldEmit,
+  //   extraEmitEvents,
+  //   currentDatePickerValue: datePickerValue.value,
+  //   currentInputValue: inputValue.value
+  // })
+
   //case: no init value
   if (!value || value.length === 0) {
     inputValue.value = ['', '']
     datePickerValue.value = ['', '']
   } else {
     if (Array.isArray(value)) {
-      inputValue.value = formatStr
-        ? value.map((item) => (item ? dayjs(item).format(formatStr) : ''))
-        : value
-      datePickerValue.value = value.map((item) => (item ? dayjs(item).valueOf() : item))
+      inputValue.value = value.map((item) => {
+        if (!item) return ''
+
+        try {
+          // First try relative date parsing
+          let parsedDate = EnhancedDateParser.parseRelativeDate(String(item))
+
+          // If relative date parsing fails, use the enhanced date parser
+          if (!parsedDate) {
+            parsedDate = EnhancedDateParser.parseDate(item)
+          }
+
+          if (parsedDate && parsedDate.isValid()) {
+            return parsedDate.format(formatStr.value)
+          } else {
+            console.warn('Failed to parse date with enhanced parser:', item)
+            // If enhanced parsing fails, try original dayjs parsing as fallback
+            const fallbackDate = dayjs(item)
+            if (fallbackDate.isValid()) {
+              return fallbackDate.format(formatStr.value)
+            } else {
+              return String(item)
+            }
+          }
+        } catch (error) {
+          console.error('Date conversion error:', error)
+          return String(item)
+        }
+      })
+
+      datePickerValue.value = value.map((item) => {
+        if (!item) return item
+
+        try {
+          // First try relative date parsing
+          let parsedDate = EnhancedDateParser.parseRelativeDate(String(item))
+
+          // If relative date parsing fails, use the enhanced date parser
+          if (!parsedDate) {
+            parsedDate = EnhancedDateParser.parseDate(item)
+          }
+
+          if (parsedDate && parsedDate.isValid()) {
+            return parsedDate.valueOf()
+          } else {
+            // If enhanced parsing fails, try original dayjs parsing as fallback
+            const fallbackDate = dayjs(item)
+            if (fallbackDate.isValid()) {
+              return fallbackDate.valueOf()
+            } else {
+              return ''
+            }
+          }
+        } catch (error) {
+          console.error('Date conversion error:', error)
+          return ''
+        }
+      })
     } else {
-      inputValue.value = formatStr ? [dayjs(value).format(formatStr)] : ['']
-      datePickerValue.value = [value ? dayjs(value).valueOf() : value]
+      try {
+        // First try relative date parsing
+        let parsedDate = EnhancedDateParser.parseRelativeDate(String(value))
+
+        // If relative date parsing fails, use the enhanced date parser
+        if (!parsedDate) {
+          parsedDate = EnhancedDateParser.parseDate(value)
+        }
+
+        if (parsedDate && parsedDate.isValid()) {
+          inputValue.value = [parsedDate.format(formatStr.value)]
+          datePickerValue.value = [parsedDate.valueOf()]
+        } else {
+          console.warn('Failed to parse single date with enhanced parser:', value)
+          // If enhanced parsing fails, try original dayjs parsing as fallback
+          const fallbackDate = dayjs(value)
+          if (fallbackDate.isValid()) {
+            inputValue.value = [fallbackDate.format(formatStr.value)]
+            datePickerValue.value = [fallbackDate.valueOf()]
+          } else {
+            inputValue.value = [String(value)]
+            datePickerValue.value = ['']
+          }
+        }
+      } catch (error) {
+        console.error('Date conversion error:', error)
+        inputValue.value = [String(value)]
+        datePickerValue.value = ['']
+      }
     }
   }
 
@@ -267,23 +357,53 @@ function onInputBlur(obj: FocusEvent | string | number, position: 0 | 1) {
     value = obj
   }
 
+  // the first time select date will trigger blur event
+  if (!value) return
+
+  // If the user entered something, try to use the enhanced date parser
+  if (value) {
+    try {
+      // First try relative date parsing
+      let parsedDate = EnhancedDateParser.parseRelativeDate(String(value))
+
+      // If relative date parsing fails, use the enhanced date parser
+      if (!parsedDate) {
+        parsedDate = EnhancedDateParser.parseDate(value)
+      }
+
+      if (parsedDate && parsedDate.isValid()) {
+        value = parsedDate.valueOf()
+      } else {
+        console.warn('Failed to parse date with enhanced parser:', value)
+        // If enhanced parsing fails, try original dayjs parsing as fallback
+        const fallbackDate = dayjs(value)
+        if (fallbackDate.isValid()) {
+          value = fallbackDate.valueOf()
+        } else {
+          console.error('Failed to parse date:', value)
+          return
+        }
+      }
+    } catch (error) {
+      console.error('Date conversion error:', error)
+      return
+    }
+  }
+
   if (props.datePickerProps[position]) {
     const currentConfig = props.datePickerProps[position]
-    value = dayjs(value).valueOf()
+    const numericValue = Number(value)
 
     if (currentConfig.max) {
       const maxTimestamp = currentConfig.max ? dayjs(currentConfig.max).valueOf() : 0
-      value = Math.min(value, maxTimestamp)
+      value = Math.min(numericValue, maxTimestamp)
     }
 
     if (currentConfig.min) {
       const minTimestamp = currentConfig.min ? dayjs(currentConfig.min).valueOf() : 0
-      value = Math.max(minTimestamp, value)
+      value = Math.max(minTimestamp, numericValue)
     }
   }
-
-  // the first time select date will trigger blur event
-  if (!value) return
 
   convertValueForInputAndDatePicker({
     value: inputValue.value.map((item, i) => (i === position ? value : item)),

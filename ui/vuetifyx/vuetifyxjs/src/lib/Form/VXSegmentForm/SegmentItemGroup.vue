@@ -1,5 +1,5 @@
 <template>
-  <div class="vx-segment-item-wrap" :class="{ 'readonly': readonly }">
+  <div class="vx-segment-item-wrap" :class="{ readonly: readonly }">
     <div class="condition-left">
       <div class="connect-decoration" />
       <VXConditionSwitch

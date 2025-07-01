@@ -31,7 +31,7 @@
       <!-- requiredSymbol -->
       <span v-if="requiredSymbol" class="required-symbol ml-1 text-error">*</span>
 
-      <v-tooltip v-if="tooltip">
+      <v-tooltip v-if="tooltip" :location="tooltipLocation">
         <pre class="tooltip-display">{{ tooltip }}</pre>
         <template v-slot:activator="{ props }">
           <v-icon
@@ -53,11 +53,15 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, useSlots, ref } from 'vue'
+import { defineProps, useSlots, ref, PropType } from 'vue'
 
 const slots = useSlots()
 const props = defineProps({
   tooltip: String,
+  tooltipLocation: {
+    type: String as PropType<'top' | 'bottom' | 'left' | 'right' | 'start' | 'end'>,
+    default: 'end'
+  },
   toggleLabel: Boolean,
   toggleIconSize: {
     type: String,

@@ -7,6 +7,15 @@ import (
 	h "github.com/theplant/htmlgo"
 )
 
+type TooltipLocation string
+
+const (
+	TooltipLocationTop    TooltipLocation = "top"
+	TooltipLocationBottom TooltipLocation = "bottom"
+	TooltipLocationLeft   TooltipLocation = "left"
+	TooltipLocationRight  TooltipLocation = "right"
+)
+
 type VXLabelBuilder struct {
 	tag *h.HTMLTagBuilder
 }
@@ -38,13 +47,18 @@ func (b *VXLabelBuilder) Tooltip(v interface{}) (r *VXLabelBuilder) {
 	return b
 }
 
+func (b *VXLabelBuilder) TooltipLocation(v TooltipLocation) (r *VXLabelBuilder) {
+	b.tag.Attr("tooltip-location", v)
+	return b
+}
+
 func (b *VXLabelBuilder) RequiredSymbol(v bool) (r *VXLabelBuilder) {
 	b.tag.Attr(":required-symbol", fmt.Sprint(v))
 	return b
 }
 
 func (b *VXLabelBuilder) TooltipIconColor(v string) (r *VXLabelBuilder) {
-	b.tag.Attr("type", v)
+	b.tag.Attr("tooltip-icon-color", v)
 	return b
 }
 

@@ -11,6 +11,7 @@ const showValueComputed = computed(() => {
   if (props.op.selected) {
     switch (props.op.itemType) {
       case 'DatetimeRangeItem':
+      case 'DatetimeRangePickerItem':
       case 'DateRangeItem': {
         const mod = props.op.modifier || constants.ModifierBetween
 
@@ -29,7 +30,29 @@ const showValueComputed = computed(() => {
         }
         break
       }
+      case 'DateRangePickerItem': {
+        const mod = props.op.modifier || constants.ModifierBetween
+
+        if (mod === constants.ModifierBetween) {
+          if (props.op.valueFrom) {
+            if (props.op.valueTo) {
+              showValue = `${props.op.valueFrom} - ${props.op.valueTo}`
+            } else {
+              showValue = ` >= ${props.op.valueFrom}`
+            }
+          } else {
+            if (props.op.valueTo) {
+              showValue = ` < ${props.op.valueTo}`
+            }
+          }
+        }
+        break
+      }
       case 'DateItem': {
+        showValue = props.op.valueIs
+        break
+      }
+      case 'DatePickerItem': {
         showValue = props.op.valueIs
         break
       }

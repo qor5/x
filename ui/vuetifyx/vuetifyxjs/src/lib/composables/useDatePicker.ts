@@ -1,6 +1,8 @@
 import dayjs from 'dayjs'
 import _ from 'lodash'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { EnhancedDateParser } from '@/lib/utils/dateParser'
+
 export type datePickerType = 'datepicker' | 'datetimepicker'
 
 // the duplicate logic on vx-date-picker and vx-range-picker
@@ -12,21 +14,27 @@ export function useDatePicker<EmitFnType>(props: any, emit: EmitFnType) {
     datetimepicker: 'YYYY-MM-DD HH:mm:ss'
   }
 
-  const formatStr = props.format || formatMapDefault[props.type as datePickerType]
+  const formatStr = computed(() => props.format || formatMapDefault[props.type as datePickerType])
 
   function emitModelValueFormat(value: number | string | (number | string)[]) {
-    if (_.isEqual(value, dayjs(props.modelValue).format(formatStr))) return value
-
     const formatedValue = Array.isArray(value)
-      ? value.map((item) =>
-          item
-            ? dayjs(item).format(formatStr || formatMapDefault[props.type as datePickerType])
+      ? value.map((item) => {
+          if (!item) return ''
+
+          // 使用增强的日期解析器进行解析
+          const parsed = EnhancedDateParser.parseDate(item)
+          return parsed
+            ? parsed.format(formatStr.value || formatMapDefault[props.type as datePickerType])
             : ''
-        )
+        })
       : value
-        ? dayjs(value).format(formatStr || formatMapDefault[props.type as datePickerType])
+        ? (() => {
+            const parsed = EnhancedDateParser.parseDate(value)
+            return parsed
+              ? parsed.format(formatStr.value || formatMapDefault[props.type as datePickerType])
+              : ''
+          })()
         : ''
-    // console.log(formatedValue, formatStr)
     return formatedValue
   }
 

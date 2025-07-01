@@ -4,8 +4,11 @@ import { encodeFilterData, filterData } from '@/lib/Filter/FilterData'
 import { FilterItem } from '@/lib/Filter/Model'
 import ItemFilter from '@/lib/Filter/components/ItemFilter.vue'
 import DatetimeRangeItem from '@/lib/Filter/components/DatetimeRangeItem.vue'
+import DatetimeRangePickerItem from '@/lib/Filter/components/DatetimeRangePickerItem.vue'
 import DateRangeItem from '@/lib/Filter/components/DateRangeItem.vue'
+import DateRangePickerItem from '@/lib/Filter/components/DateRangePickerItem.vue'
 import DateItem from '@/lib/Filter/components/DateItem.vue'
+import DatePickerItem from '@/lib/Filter/components/DatePickerItem.vue'
 import NumberItem from '@/lib/Filter/components/NumberItem.vue'
 import StringItem from '@/lib/Filter/components/StringItem.vue'
 import LinkageSelectItem from '@/lib/Filter/components/LinkageSelectItem.vue'
@@ -60,13 +63,19 @@ const itemTypes: any = {
   LinkageSelectItemRemote,
   MultipleSelectItem,
   SelectItem,
-  AutoCompleteItem
+  AutoCompleteItem,
+  DatePickerItem,
+  DateRangePickerItem,
+  DatetimeRangePickerItem
 }
 
 const trans: any = {
   DatetimeRangeItem: t.date,
+  DatetimeRangePickerItem: t.date,
   DateRangeItem: t.date,
+  DateRangePickerItem: t.date,
   DateItem: t.date,
+  DatePickerItem: t.date,
   NumberItem: t.number,
   StringItem: t.string,
   SelectItem: {},
