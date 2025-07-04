@@ -21,7 +21,7 @@
               class="funnel-card-text cardText mr-2"
               :tooltip="item.tooltip"
               tooltipLocation="top"
-              tooltip-icon-color="primary"
+              tooltip-icon-color="#757575"
               >{{ item.name }}</vx-label
             >
             <div class="funnel-card-icon" :style="iconStyles">
