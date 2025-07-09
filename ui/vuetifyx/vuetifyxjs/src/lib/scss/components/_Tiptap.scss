@@ -22,20 +22,20 @@
     line-height: 38px;
   }
 
-  h1 + p {
-    margin-top: 40px;
-  }
+  // h1 + p {
+  //   margin-top: 40px;
+  // }
 
-  h2 + p {
-    margin-top: 24px;
-  }
+  // h2 + p {
+  //   margin-top: 24px;
+  // }
 
-  h3 + p,
-  h4 + p,
-  h5 + p,
-  h6 + p {
-    margin-top: 16px;
-  }
+  // h3 + p,
+  // h4 + p,
+  // h5 + p,
+  // h6 + p {
+  //   margin-top: 16px;
+  // }
 
   h3 {
     font-size: 24px;
@@ -64,5 +64,10 @@
   p {
     line-height: 19px;
     font-size: 16px;
+  }
+
+  ul,
+  ol {
+    padding-left: 1em;
   }
 }
