@@ -21,7 +21,7 @@
               class="funnel-card-text cardText mr-2"
               :tooltip="item.tooltip"
               tooltipLocation="top"
-              tooltip-icon-color="primary"
+              tooltip-icon-color="#757575"
               >{{ item.name }}</vx-label
             >
             <div class="funnel-card-icon" :style="iconStyles">
@@ -44,7 +44,10 @@
             >
             <!-- 主数值 -->
             <div style="line-height: 1">
-              <div class="funnel-stat-value" :style="statValueStyles">
+              <div
+                class="funnel-stat-value"
+                :style="[statValueStyles, getStatObject(item, index, 0)?.textStyle]"
+              >
                 {{ getStatObject(item, index, 0)?.text }}
               </div>
               <!-- 趋势 -->
@@ -76,7 +79,10 @@
             >
             <!-- 主数值 -->
             <div style="line-height: 1">
-              <div class="funnel-stat-value lighter" :style="statValueStyles">
+              <div
+                class="funnel-stat-value"
+                :style="[statValueStyles, getStatObject(item, index, 1)?.textStyle]"
+              >
                 {{ getStatObject(item, index, 1)?.text }}
               </div>
               <!-- 趋势 -->
@@ -104,12 +110,13 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, PropType, onBeforeUnmount, watch } from 'vue'
 import * as echarts from 'echarts'
-import { funnelChartPreset } from './presets.config'
+import { funnelChartPreset, presetsLineInFunnel } from './presets.config'
 
 interface LabelItem {
   labelName?: string
   type: string
   text: string
+  textStyle?: string
   icon?: string
 }
 
@@ -129,9 +136,11 @@ interface FunnelItem {
 
 interface SeriesData {
   name: string
-  type?: 'funnel' | 'line'
+  type?: 'line' | 'funnel'
   data: FunnelItem[] | number[]
+  isDisabled?: boolean
   smooth?: boolean
+  lineColor?: string
 }
 
 interface ChartData {
@@ -141,9 +150,9 @@ interface ChartData {
   series: SeriesData[]
 }
 
-// 缩放配置常量
+// Scaling configuration constants
 const SCALE_CONFIG = {
-  // 基础尺寸配置
+  // Basic size configuration
   BASE_CONTAINER_HEIGHT: 541,
   BASE_CARD_HEIGHT: 68,
   BASE_CARD_PADDING: { vertical: 16, horizontal: 14 },
@@ -153,7 +162,7 @@ const SCALE_CONFIG = {
   STAT_CARD_MARGIN_BOTTOM: 14,
   BASE_STAT_PADDING: 12,
 
-  // 字体大小配置
+  // Font size configuration
   BASE_FONT_SIZES: {
     thisWeekText: 14,
     cardText: 18,
@@ -162,32 +171,32 @@ const SCALE_CONFIG = {
     icon: 20
   },
 
-  // 行高配置
+  // Line height configuration
   BASE_LINE_HEIGHTS: {
     cardText: 20,
     statValue: 32,
     statTrend: 18
   },
 
-  // 间距配置
+  // Spacing configuration
   BASE_SPACINGS: {
     trendTextMargin: 6,
     trendMargin: 8
   },
 
-  // 断点配置
+  // Breakpoint configuration
   BREAKPOINTS: {
-    // 最小宽度，低于此宽度使用最小缩放
+    // Minimum width, use minimum scaling below this width
     MIN_WIDTH: 400,
-    // 舒适宽度，高于此宽度使用标准缩放
+    // Comfortable width, use standard scaling above this width
     COMFORTABLE_WIDTH: 800,
-    // 每列的理想最小宽度
+    // Ideal minimum width per column
     MIN_COL_WIDTH: 120,
-    // 每列的理想最大宽度
+    // Ideal maximum width per column
     MAX_COL_WIDTH: 200
   },
 
-  // 缩放范围
+  // Scaling range
   SCALE_RANGE: {
     MIN: 0.6,
     MAX: 1.2
@@ -224,7 +233,7 @@ watch(
   }
 )
 
-// 生成唯一的图表ID
+// Generate unique chart ID
 const chartId = `funnel-chart-${Math.random().toString(36).substring(2, 10)}`
 
 const chartInstance = ref<echarts.EChartsType | null>(null)
@@ -235,14 +244,14 @@ const lineSeriesData = ref<SeriesData[]>([])
 const lineChartOverlays = ref<echarts.EChartsType[]>([])
 const observer = ref<ResizeObserver | null>(null)
 
-// 处理数据格式，支持新旧两种格式
+// Process data format, support both old and new formats
 const processData = (data: FunnelItem[] | ChartData) => {
   if (Array.isArray(data)) {
-    // 旧格式：直接是 FunnelItem 数组
+    // Old format: directly FunnelItem array
     internalData.value = [...data]
     lineSeriesData.value = []
   } else {
-    // 新格式：ChartData 对象
+    // New format: ChartData object
     const funnelSeries = data.series.find((s) => !s.type || s.type === 'funnel')
     const lineSeries = data.series.filter((s) => s.type === 'line')
 
@@ -256,6 +265,17 @@ const processData = (data: FunnelItem[] | ChartData) => {
   }
 }
 
+// Check if funnel chart visualization is disabled
+const isFunnelChartDisabled = computed(() => {
+  if (Array.isArray(props.data)) {
+    return false // Old format doesn't support disable
+  } else {
+    // New format: check if funnel chart series is disabled
+    const funnelSeries = props.data.series?.find((s) => !s.type || s.type === 'funnel')
+    return funnelSeries?.isDisabled === true
+  }
+})
+
 watch(
   () => props.data,
   (newData) => {
@@ -264,19 +284,11 @@ watch(
   { immediate: true }
 )
 
-// 获取图表标题
-const chartTitle = computed(() => {
-  if (!Array.isArray(props.data) && props.data.title) {
-    return props.data.title.text
-  }
-  return ''
-})
-
-// 根据item和索引位置获取统计值
+// Get statistical value based on item and index position
 const getStatObject = (item: FunnelItem, index: number, statIndex: number) => {
-  // statIndex 0: 1: 主数值 本周, 2: 主数值 上周
+  // statIndex 0: 1: main value this week, 2: main value last week
   if (item.extraData?.labelList && item.extraData.labelList.length >= statIndex * 2) {
-    // 找到对应的主要标签（type为primary）
+    // Find corresponding primary labels (type is primary)
     const primaryLabels = item.extraData.labelList.filter((l) => l.type === 'primary')
     if (primaryLabels.length > statIndex) {
       return primaryLabels[statIndex]
@@ -286,13 +298,14 @@ const getStatObject = (item: FunnelItem, index: number, statIndex: number) => {
   return {
     labelName: '',
     type: '',
-    text: ''
+    text: '',
+    textStyle: ''
   }
 }
 
-// 根据item和索引位置获取趋势信息
+// Get trend information based on item and index position
 const getStatTrend = (item: FunnelItem, index: number, statIndex: number) => {
-  // 查找对应的次要标签（type为secondary）
+  // Find corresponding secondary labels (type is secondary)
   if (item.extraData?.labelList) {
     const secondaryLabels = item.extraData.labelList.filter((l) => l.type === 'secondary')
     if (secondaryLabels.length > statIndex) {
@@ -308,7 +321,7 @@ const getStatTrend = (item: FunnelItem, index: number, statIndex: number) => {
   return { icon: '', text: '', color: '' }
 }
 
-// 智能缩放算法
+// Smart scaling algorithm
 const scalingMetrics = computed(() => {
   const colCount = internalData.value.length
   const width = containerWidth.value
@@ -318,38 +331,45 @@ const scalingMetrics = computed(() => {
       scaleFactor: 1,
       colWidth: SCALE_CONFIG.BREAKPOINTS.MIN_COL_WIDTH,
       isCompact: false,
-      adaptiveSpacing: 1
+      adaptiveSpacing: 1,
+      useFixedSize: false
     }
   }
 
-  // 计算每列的理想宽度
+  // If 5+ columns, use fixed size mode
+  const useFixedSize = colCount >= 6
+
+  if (useFixedSize) {
+    return {
+      scaleFactor: 1, // Not used in fixed size mode
+      colWidth: SCALE_CONFIG.BREAKPOINTS.MIN_COL_WIDTH,
+      isCompact: false,
+      adaptiveSpacing: 1,
+      useFixedSize: true
+    }
+  }
+
+  // For 4 columns and below, use original scaling logic
   const idealColWidth = Math.max(
     SCALE_CONFIG.BREAKPOINTS.MIN_COL_WIDTH,
     Math.min(SCALE_CONFIG.BREAKPOINTS.MAX_COL_WIDTH, width / colCount)
   )
 
-  // 计算基于列数的缩放因子
   let scaleFactor = 1
 
   if (colCount <= 3) {
-    // 3列及以下，使用标准缩放
+    // 3 columns and below, use standard scaling
     scaleFactor = Math.max(
       SCALE_CONFIG.SCALE_RANGE.MIN,
       Math.min(SCALE_CONFIG.SCALE_RANGE.MAX, width / SCALE_CONFIG.BREAKPOINTS.COMFORTABLE_WIDTH)
     )
-  } else if (colCount <= 6) {
-    // 4-6列，适度缩放
+  } else if (colCount === 4) {
+    // 4 columns, standard scaling (default style)
     const baseScale = width / SCALE_CONFIG.BREAKPOINTS.COMFORTABLE_WIDTH
-    const colPenalty = (colCount - 3) * 0.1 // 每增加一列减少10%
-    scaleFactor = Math.max(SCALE_CONFIG.SCALE_RANGE.MIN, Math.min(1, baseScale - colPenalty))
-  } else {
-    // 7列及以上，更激进的缩放
-    const baseScale = width / SCALE_CONFIG.BREAKPOINTS.COMFORTABLE_WIDTH
-    const colPenalty = (colCount - 6) * 0.15 + 0.3 // 基础减少30%，每增加一列再减少15%
-    scaleFactor = Math.max(SCALE_CONFIG.SCALE_RANGE.MIN, Math.min(0.8, baseScale - colPenalty))
+    scaleFactor = Math.max(SCALE_CONFIG.SCALE_RANGE.MIN, Math.min(1, baseScale))
   }
 
-  // 宽度约束调整
+  // Width constraint adjustment for 4 columns and below
   if (width < SCALE_CONFIG.BREAKPOINTS.MIN_WIDTH) {
     scaleFactor *= 0.8
   } else if (width < SCALE_CONFIG.BREAKPOINTS.COMFORTABLE_WIDTH) {
@@ -359,20 +379,20 @@ const scalingMetrics = computed(() => {
     scaleFactor *= 0.8 + widthRatio * 0.2
   }
 
-  // 确保缩放因子在合理范围内
+  // Ensure scaling factor is within reasonable range
   scaleFactor = Math.max(
     SCALE_CONFIG.SCALE_RANGE.MIN,
     Math.min(SCALE_CONFIG.SCALE_RANGE.MAX, scaleFactor)
   )
 
-  // 计算自适应间距因子
-  const adaptiveSpacing = colCount > 4 ? Math.max(0.5, 1 - (colCount - 4) * 0.1) : 1
+  const adaptiveSpacing = 1
 
   return {
     scaleFactor,
     colWidth: idealColWidth,
     isCompact: width < 800,
-    adaptiveSpacing
+    adaptiveSpacing,
+    useFixedSize: false
   }
 })
 
@@ -402,14 +422,17 @@ const colsStyles = computed(() => {
 
 // 单列样式
 const colStyles = (item: FunnelItem) => {
-  const { scaleFactor, adaptiveSpacing, isCompact } = scalingMetrics.value
+  const { scaleFactor, adaptiveSpacing, isCompact, useFixedSize } = scalingMetrics.value
   const colCount = internalData.value.length
 
   // 计算每列应该占用的宽度百分比
   const colWidthPercent = colCount > 0 ? 100 / colCount : 100
 
+  // Set padding based on useFixedSize: default 16px, fixed size mode 8px
+  const basePadding = useFixedSize ? 8 : 16
+
   const baseStyles = {
-    padding: `${16 * scaleFactor * adaptiveSpacing}px ${isCompact ? 4 : 16 * scaleFactor * adaptiveSpacing}px`,
+    padding: `${basePadding * scaleFactor * adaptiveSpacing}px ${isCompact ? 4 : basePadding * scaleFactor * adaptiveSpacing}px`,
     minWidth: `${SCALE_CONFIG.BREAKPOINTS.MIN_COL_WIDTH * scaleFactor}px`
   }
 
@@ -435,9 +458,20 @@ const colStyles = (item: FunnelItem) => {
   }
 }
 
-// 卡片样式
+// Card styles
 const cardStyles = computed(() => {
-  const { scaleFactor, adaptiveSpacing, isCompact } = scalingMetrics.value
+  const { scaleFactor, adaptiveSpacing, isCompact, useFixedSize } = scalingMetrics.value
+
+  if (useFixedSize) {
+    // Fixed size for 5+ columns
+    return {
+      padding: '8px',
+      // No height restriction
+      marginBottom: `${SCALE_CONFIG.BASE_MARGIN_BOTTOM}px`
+    }
+  }
+
+  // Original logic for 4 columns and below
   const verticalPadding = SCALE_CONFIG.BASE_CARD_PADDING.vertical * scaleFactor * adaptiveSpacing
   const horizontalPadding =
     SCALE_CONFIG.BASE_CARD_PADDING.horizontal * scaleFactor * adaptiveSpacing
@@ -451,9 +485,13 @@ const cardStyles = computed(() => {
   }
 })
 
-// 卡片文字样式
+// Card text styles
 const cardTextClassFontSize = computed(() => {
-  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+  const { scaleFactor, adaptiveSpacing, useFixedSize } = scalingMetrics.value
+
+  if (useFixedSize) {
+    return '14px'
+  }
 
   return `${SCALE_CONFIG.BASE_FONT_SIZES.cardText * scaleFactor * adaptiveSpacing}px`
 })
@@ -475,9 +513,18 @@ const cardTextStylesForPlainStyle = (item: FunnelItem) => {
   }
 }
 
-// 图标样式
+// Icon styles
 const iconStyles = computed(() => {
-  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+  const { scaleFactor, adaptiveSpacing, useFixedSize } = scalingMetrics.value
+
+  if (useFixedSize) {
+    return {
+      width: '32px',
+      height: '32px',
+      borderRadius: '8.7px'
+    }
+  }
+
   const size = SCALE_CONFIG.BASE_ICON_SIZE * scaleFactor * adaptiveSpacing
 
   return {
@@ -502,9 +549,17 @@ const statCardStyles = (item: FunnelItem) => {
   }
 }
 
-// 统计数值样式
+// Statistical value styles
 const statValueStyles = computed(() => {
-  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+  const { scaleFactor, adaptiveSpacing, useFixedSize } = scalingMetrics.value
+
+  if (useFixedSize) {
+    return {
+      fontSize: '16px',
+      lineHeight: '24px'
+    }
+  }
+
   return {
     fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.statValue * scaleFactor * adaptiveSpacing}px`,
     // marginBottom: `${SCALE_CONFIG.BASE_STAT_PADDING * scaleFactor * adaptiveSpacing}px`,
@@ -512,7 +567,7 @@ const statValueStyles = computed(() => {
   }
 })
 
-// 统计趋势样式
+// Statistical trend styles
 const statTrendStyles = computed(() => {
   const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
   return {
@@ -522,15 +577,33 @@ const statTrendStyles = computed(() => {
 })
 
 const ThisWeekTextStyles = computed(() => {
-  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+  const { scaleFactor, adaptiveSpacing, useFixedSize } = scalingMetrics.value
+
+  if (useFixedSize) {
+    return {
+      fontSize: '12px',
+      fontWeight: '590'
+    }
+  }
+
   return {
-    fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.thisWeekText * scaleFactor * adaptiveSpacing}px`
+    fontSize: `${SCALE_CONFIG.BASE_FONT_SIZES.thisWeekText * scaleFactor * adaptiveSpacing}px`,
+    fontWeight: '590'
   }
 })
 
-// 趋势文字样式
+// Trend text styles
 const trendTextStyles = computed(() => {
-  const { scaleFactor, adaptiveSpacing } = scalingMetrics.value
+  const { scaleFactor, adaptiveSpacing, useFixedSize } = scalingMetrics.value
+
+  if (useFixedSize) {
+    return {
+      fontSize: '12px',
+      marginLeft: `${SCALE_CONFIG.BASE_SPACINGS.trendTextMargin}px`,
+      lineHeight: '18px'
+    }
+  }
+
   return {
     marginLeft: `${SCALE_CONFIG.BASE_SPACINGS.trendTextMargin * scaleFactor * adaptiveSpacing}px`,
     lineHeight: `${SCALE_CONFIG.BASE_LINE_HEIGHTS.statTrend * scaleFactor * adaptiveSpacing}px`
@@ -610,36 +683,30 @@ const updateEChartsOptions = () => {
 
   const options = JSON.parse(JSON.stringify(funnelChartPreset))
 
-  // 设置漏斗图数据
-  options.series[0].data = ensuredData
+  // Filter out tooltip property from data to prevent ECharts from using it
+  // Keep only properties that ECharts funnel chart needs: value, name, and other non-tooltip properties
+  const chartData = ensuredData.map((item) => {
+    const { tooltip, ...chartItem } = item
+    return chartItem
+  })
 
-  // 如果有折线图数据，我们将创建一个独立的图表实例来避免坐标系冲突
-  if (lineSeriesData.value.length > 0) {
-    // 先渲染漏斗图
-    if (props.mergeOptionsCallback) {
-      props.mergeOptionsCallback(options, { seriesData: options.series })
-    }
+  // Set funnel chart data (without tooltip property)
+  options.series[0].data = chartData
 
-    chartInstance.value.clear()
-    chartInstance.value.setOption(options)
-
-    // 然后在漏斗图上叠加折线图
-    setTimeout(() => {
-      addLineChartOverlay()
-    }, 100)
-
-    return
-  }
-
-  // 如果没有折线图，清理叠加层并正常渲染漏斗图
-  cleanupLineChartOverlays()
-
+  // Handle merge options callback first
   if (props.mergeOptionsCallback) {
     props.mergeOptionsCallback(options, { seriesData: options.series })
   }
 
+  // Then render funnel chart and add line chart overlay
+  lineSeriesData.value.length > 0
+    ? setTimeout(() => {
+        addLineChartOverlay()
+      }, 100)
+    : cleanupLineChartOverlays()
+
   chartInstance.value.clear()
-  chartInstance.value.setOption(options)
+  !isFunnelChartDisabled.value && chartInstance.value.setOption(options)
 }
 
 // 清理折线图叠加层
@@ -679,7 +746,7 @@ const addLineChartOverlay = () => {
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
+    pointer-events: auto;
     z-index: 10;
   `
 
@@ -698,78 +765,76 @@ const addLineChartOverlay = () => {
     height: chartDom.clientHeight
   })
 
-  // 处理折线图数据
-  const ensuredData = [...(internalData.value || [])]
-  const lineSeriesOptions = lineSeriesData.value
-    .map((lineSeries) => {
-      let lineData = lineSeries.data
-
-      if (!Array.isArray(lineData)) {
-        console.warn('Line chart data must be an array')
-        return null
-      }
-
-      // 格式化数据
-      const formattedData = lineData.map((item) => {
-        if (typeof item === 'number') {
-          return item
-        } else if (typeof item === 'object' && item !== null && 'value' in item) {
-          return item.value
-        } else if (typeof item === 'string') {
-          const num = parseFloat(item)
-          return isNaN(num) ? 0 : num
-        }
-        return 0
-      })
-
-      // 调整数据长度
-      while (formattedData.length < ensuredData.length) {
-        formattedData.push(0)
-      }
-      if (formattedData.length > ensuredData.length) {
-        formattedData.splice(ensuredData.length)
-      }
-
-      return {
-        name: lineSeries.name,
-        type: 'line',
-        data: formattedData,
-        smooth: lineSeries.smooth || false,
-        lineStyle: {
-          width: 2,
-          color: '#3e63dd'
-        },
-        itemStyle: {
-          color: '#3e63dd'
-        },
-        symbol: 'none',
-        symbolSize: 0
-      }
-    })
-    .filter(Boolean)
-
   // 配置独立的折线图
+  const ensuredData = [...(internalData.value || [])]
+  const baseSeriesConfig = presetsLineInFunnel.series?.[0] || {
+    type: 'line',
+    smooth: false,
+    symbol: 'none',
+    symbolSize: 0,
+    showSymbol: false,
+    connectNulls: false,
+    lineStyle: { width: 2, color: '#3e63dd' }
+  }
+
   const lineChartOption = {
-    backgroundColor: 'transparent',
-    grid: {
-      left: '0%',
-      right: '0%',
-      top: '0%',
-      bottom: '0%',
-      containLabel: false
-    },
+    backgroundColor: presetsLineInFunnel.backgroundColor,
+    tooltip: presetsLineInFunnel.tooltip,
+    grid: presetsLineInFunnel.grid,
     xAxis: {
-      type: 'category',
-      data: ensuredData.map((item) => item.name),
-      show: false,
-      boundaryGap: false
+      ...presetsLineInFunnel.xAxis,
+      min: 0,
+      max: ensuredData.length
     },
-    yAxis: {
-      type: 'value',
-      show: false,
-      min: 0
-    },
-    series: lineSeriesOptions
+    yAxis: presetsLineInFunnel.yAxis,
+    series: lineSeriesData.value
+      .map((lineSeries) => {
+        // 处理折线图数据
+        let lineData = lineSeries.data
+
+        if (!Array.isArray(lineData)) {
+          console.warn('Line chart data must be an array')
+          return null
+        }
+
+        // 格式化数据为中心坐标
+        const formattedData = lineData.map((item, index) => {
+          let value = 0
+          if (typeof item === 'number') {
+            value = item
+          } else if (typeof item === 'object' && item !== null && 'value' in item) {
+            value = item.value
+          } else if (typeof item === 'string') {
+            const num = parseFloat(item)
+            value = isNaN(num) ? 0 : num
+          }
+
+          // 返回 [x, y] 坐标格式，x为列的真正中心位置
+          return [index + 0.5, value]
+        })
+
+        // 调整数据长度
+        while (formattedData.length < ensuredData.length) {
+          const nextIndex = formattedData.length
+          formattedData.push([nextIndex + 0.5, 0])
+        }
+        if (formattedData.length > ensuredData.length) {
+          formattedData.splice(ensuredData.length)
+        }
+
+        // 以预设配置为基准，只覆盖数据相关属性
+        return {
+          ...baseSeriesConfig,
+          name: lineSeries.name,
+          data: formattedData,
+          smooth: lineSeries.smooth || baseSeriesConfig.smooth,
+          lineStyle: {
+            ...baseSeriesConfig.lineStyle,
+            color: lineSeries.lineColor || baseSeriesConfig.lineStyle?.color || '#3e63dd'
+          }
+        }
+      })
+      .filter(Boolean)
   }
 
   lineChart.setOption(lineChartOption)
@@ -791,6 +856,16 @@ const handleResize = () => {
       width: chartWidth,
       height: getChartHeight()
     })
+
+    // 同时调整折线图叠加层的尺寸
+    lineChartOverlays.value.forEach((lineChart) => {
+      if (lineChart) {
+        lineChart.resize({
+          width: chartWidth,
+          height: getChartHeight()
+        })
+      }
+    })
   }
 }
 
@@ -800,6 +875,13 @@ const updateContainerWidth = () => {
 
     if (chartInstance.value) {
       handleResize()
+
+      // 如果有折线图数据，重新创建叠加层以确保正确的位置和尺寸
+      if (lineSeriesData.value.length > 0) {
+        setTimeout(() => {
+          addLineChartOverlay()
+        }, 100)
+      }
     }
   }
 }
@@ -841,6 +923,11 @@ onMounted(() => {
   observer.value = new ResizeObserver((entries) => {
     for (const entry of entries) {
       containerWidth.value = entry.contentRect.width
+
+      // 立即触发resize处理
+      if (chartInstance.value) {
+        handleResize()
+      }
     }
   })
 
@@ -1116,10 +1203,11 @@ onBeforeUnmount(() => {
   min-width: 0;
   word-break: break-word;
   transition: font-size 0.3s ease;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* 当列数很多时，允许文字换行 */
-  white-space: nowrap;
 
   &.cardText * {
     font-size: v-bind(cardTextClassFontSize) !important;
@@ -1127,9 +1215,11 @@ onBeforeUnmount(() => {
   }
 
   &.cardText:deep(.text-subtitle-2) {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   /* 高列数时允许换行 */
@@ -1192,6 +1282,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: #616161;
 
   /* 高列数时允许换行 */
   .funnel-col:nth-child(n + 7) & {

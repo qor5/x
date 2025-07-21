@@ -39,6 +39,7 @@
         :close-delay="0"
         min-width="292"
         location-strategy="connected"
+        scroll-strategy="close"
       >
         <date-picker-base
           class="elevation-5 d-inline-block bg-background rounded-lg overflow-hidden"
@@ -296,10 +297,7 @@ function onDatePickerUpdate(value: number) {
 </style>
 
 <style lang="scss">
-.v-picker-wrap[data-v-e7884ff8]
-  .v-date-picker-month__days
-  .v-date-picker-month__day--selected
-  .v-btn[disabled] {
+.v-picker-wrap .v-date-picker-month__days .v-date-picker-month__day--selected .v-btn[disabled] {
   color: #fff;
 }
 </style>
