@@ -1,10 +1,11 @@
 package parser
 
 import (
+	"fmt"
 	"go/ast"
 	go_parser "go/parser"
 	"go/token"
-	go_path "path"
+	"path/filepath"
 	"strings"
 )
 
@@ -92,7 +93,11 @@ func (v *Visitor) translationExport(translationMap map[string]string, pkgName st
 
 		value, ok := keyValueExpr.Value.(*ast.BasicLit)
 		if ok {
-			translationMap[go_path.Join(pkgName, key.Name)] = strings.Trim(value.Value, "\"")
+			joined := filepath.Join(pkgName, key.Name)
+			if !strings.HasPrefix(joined, filepath.Clean(pkgName)+string(filepath.Separator)) {
+				return false
+			}
+			translationMap[joined] = strings.Trim(value.Value, "\"")
 		} else {
 			// embed struct
 			if embed, ok := keyValueExpr.Value.(*ast.Ident); ok {
