@@ -297,10 +297,7 @@ function onDatePickerUpdate(value: number) {
 </style>
 
 <style lang="scss">
-.v-picker-wrap[data-v-e7884ff8]
-  .v-date-picker-month__days
-  .v-date-picker-month__day--selected
-  .v-btn[disabled] {
+.v-picker-wrap .v-date-picker-month__days .v-date-picker-month__day--selected .v-btn[disabled] {
   color: #fff;
 }
 </style>

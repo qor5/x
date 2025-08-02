@@ -21,7 +21,7 @@
               class="funnel-card-text cardText mr-2"
               :tooltip="item.tooltip"
               tooltipLocation="top"
-              tooltip-icon-color="primary"
+              tooltip-icon-color="#757575"
               >{{ item.name }}</vx-label
             >
             <div class="funnel-card-icon" :style="iconStyles">
@@ -44,7 +44,10 @@
             >
             <!-- 主数值 -->
             <div style="line-height: 1">
-              <div class="funnel-stat-value" :style="statValueStyles">
+              <div
+                class="funnel-stat-value"
+                :style="[statValueStyles, getStatObject(item, index, 0)?.textStyle]"
+              >
                 {{ getStatObject(item, index, 0)?.text }}
               </div>
               <!-- 趋势 -->
@@ -76,7 +79,10 @@
             >
             <!-- 主数值 -->
             <div style="line-height: 1">
-              <div class="funnel-stat-value lighter" :style="statValueStyles">
+              <div
+                class="funnel-stat-value"
+                :style="[statValueStyles, getStatObject(item, index, 1)?.textStyle]"
+              >
                 {{ getStatObject(item, index, 1)?.text }}
               </div>
               <!-- 趋势 -->
@@ -110,6 +116,7 @@ interface LabelItem {
   labelName?: string
   type: string
   text: string
+  textStyle?: string
   icon?: string
 }
 
@@ -291,7 +298,8 @@ const getStatObject = (item: FunnelItem, index: number, statIndex: number) => {
   return {
     labelName: '',
     type: '',
-    text: ''
+    text: '',
+    textStyle: ''
   }
 }
 
@@ -1274,6 +1282,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: #616161;
 
   /* 高列数时允许换行 */
   .funnel-col:nth-child(n + 7) & {

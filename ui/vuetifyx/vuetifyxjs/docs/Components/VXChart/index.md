@@ -447,7 +447,8 @@ const funnelChartData = ref([
                 {
                   labelName: 'Last Week',
                   type: 'primary',
-                  text: '4000'
+                  text: '4000',
+                  textStyle: 'color: #9e9e9e;'
                 }
               ]
             }
