@@ -8,7 +8,8 @@ import (
 )
 
 type VXDialogBuilder struct {
-	tag *h.HTMLTagBuilder
+	tag     *h.HTMLTagBuilder
+	rounded bool
 }
 
 type (
@@ -34,7 +35,8 @@ const (
 */
 func VXDialog(children ...h.HTMLComponent) (r *VXDialogBuilder) {
 	r = &VXDialogBuilder{
-		tag: h.Tag("vx-dialog").Children(children...),
+		tag:     h.Tag("vx-dialog").Children(children...),
+		rounded: true, // default to rounded
 	}
 	return
 }
@@ -156,6 +158,14 @@ func (b *VXDialogBuilder) Class(names ...string) (r *VXDialogBuilder) {
 	return b
 }
 
+func (b *VXDialogBuilder) NoRounded() (r *VXDialogBuilder) {
+	b.rounded = false
+	return b
+}
+
 func (b *VXDialogBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	if b.rounded {
+		b.tag.Class("rounded")
+	}
 	return b.tag.MarshalHTML(ctx)
 }
