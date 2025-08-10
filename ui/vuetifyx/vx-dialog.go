@@ -8,8 +8,9 @@ import (
 )
 
 type VXDialogBuilder struct {
-	tag     *h.HTMLTagBuilder
-	rounded bool
+	tag          *h.HTMLTagBuilder
+	rounded      bool
+	roundedClass string
 }
 
 type (
@@ -35,8 +36,9 @@ const (
 */
 func VXDialog(children ...h.HTMLComponent) (r *VXDialogBuilder) {
 	r = &VXDialogBuilder{
-		tag:     h.Tag("vx-dialog").Children(children...),
-		rounded: true, // default to rounded
+		tag:          h.Tag("vx-dialog").Children(children...),
+		rounded:      true,      // default to rounded
+		roundedClass: "rounded", // default rounded class
 	}
 	return
 }
@@ -159,7 +161,28 @@ func (b *VXDialogBuilder) Class(names ...string) (r *VXDialogBuilder) {
 }
 
 func (b *VXDialogBuilder) Rounded(v interface{}) (r *VXDialogBuilder) {
-	b.tag.Attr(":rounded", h.JSONString(v))
+	// Accept bool or size string (e.g., "lg", "xl") and store to be applied on content container
+	switch vv := v.(type) {
+	case bool:
+		b.rounded = vv
+		if vv {
+			b.roundedClass = "rounded"
+		}
+	case string:
+		switch vv { // prefer tagged switch for clarity and linter friendliness
+		case "true":
+			b.rounded = true
+			b.roundedClass = "rounded"
+		case "false":
+			b.rounded = false
+		default:
+			b.rounded = true
+			b.roundedClass = fmt.Sprintf("rounded-%s", vv)
+		}
+	default:
+		b.rounded = true
+		b.roundedClass = "rounded"
+	}
 	return b
 }
 
@@ -169,10 +192,11 @@ func (b *VXDialogBuilder) NoRounded() (r *VXDialogBuilder) {
 }
 
 func (b *VXDialogBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	// Apply rounded style on overlay content via content-class for v-dialog inside VXDialog
 	if b.rounded {
-		b.tag.Attr(":rounded", "true")
+		b.tag.Attr(":content-class", fmt.Sprintf("'%s'", b.roundedClass))
 	} else {
-		b.tag.Attr(":rounded", "false")
+		b.tag.Attr(":content-class", "'rounded-0'")
 	}
 	return b.tag.MarshalHTML(ctx)
 }
