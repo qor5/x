@@ -158,6 +158,11 @@ func (b *VXDialogBuilder) Class(names ...string) (r *VXDialogBuilder) {
 	return b
 }
 
+func (b *VXDialogBuilder) Rounded(v interface{}) (r *VXDialogBuilder) {
+	b.tag.Attr(":rounded", h.JSONString(v))
+	return b
+}
+
 func (b *VXDialogBuilder) NoRounded() (r *VXDialogBuilder) {
 	b.rounded = false
 	return b
@@ -165,7 +170,9 @@ func (b *VXDialogBuilder) NoRounded() (r *VXDialogBuilder) {
 
 func (b *VXDialogBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	if b.rounded {
-		b.tag.Class("rounded")
+		b.tag.Attr(":rounded", "true")
+	} else {
+		b.tag.Attr(":rounded", "false")
 	}
 	return b.tag.MarshalHTML(ctx)
 }
