@@ -165,7 +165,7 @@ func (b *VXDialogBuilder) NoRounded() (r *VXDialogBuilder) {
 
 func (b *VXDialogBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	if b.rounded {
-		b.tag.Attr(":content-class", "rounded overflow-hidden")
+		b.tag.Attr(":content-class", `'rounded overflow-hidden'`)
 	}
 	return b.tag.MarshalHTML(ctx)
 }

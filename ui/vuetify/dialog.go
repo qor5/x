@@ -267,7 +267,7 @@ func (b *VDialogBuilder) Bind(name string, value string) (r *VDialogBuilder) {
 func (b *VDialogBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
 	// Apply rounded style on overlay content instead of root tag for better visual correctness
 	if b.rounded {
-		b.tag.Attr(":content-class", "rounded overflow-hidden")
+		b.tag.Attr(":content-class", `'rounded overflow-hidden'`)
 	}
 	return b.tag.MarshalHTML(ctx)
 }
