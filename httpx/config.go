@@ -14,7 +14,7 @@ type CORSConfig struct {
 
 type SecurityConfig struct {
 	CORS                 CORSConfig `confx:"cors"`
-	DenyMIMETypeSniffing bool       `confx:"denyMIMETypeSniffing" usage:"Deny MIME type sniffing"`
+	DenyMIMETypeSniffing bool       `confx:"denyMimeTypeSniffing" usage:"Deny MIME type sniffing"`
 	DenyClickjacking     bool       `confx:"denyClickjacking" usage:"Deny clickjacking"`
 	EnableHSTS           bool       `confx:"enableHSTS" usage:"Enable HSTS"`
 }
