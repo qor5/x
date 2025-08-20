@@ -3,3 +3,4 @@
 __*
 !__tests__
 vite.config.ts.timestamp-*.mjs
+.vscode
