@@ -3,13 +3,13 @@ package filesystem
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/qor5/x/v3/filepathx"
 	"github.com/qor5/x/v3/oss"
 )
 
@@ -27,30 +27,9 @@ func New(base string) *FileSystem {
 	return &FileSystem{Base: absbase}
 }
 
-// GetFullPath get full path from absolute/relative path and validate it's within base directory
-func (fileSystem FileSystem) GetFullPath(path string) (string, error) {
-	// Normalize path: remove all leading "/" for OSS compatibility
-	normalizedPath := strings.TrimLeft(path, "/")
-
-	// Always join with base directory
-	fullpath, err := filepath.Abs(filepath.Join(fileSystem.Base, normalizedPath))
-	if err != nil {
-		return "", fmt.Errorf("failed to get absolute path: %w", err)
-	}
-
-	// Validate that the resolved path is within base directory
-	baseAbs := filepath.Clean(fileSystem.Base)
-	fullpath = filepath.Clean(fullpath)
-	if !strings.HasPrefix(fullpath+string(filepath.Separator), baseAbs+string(filepath.Separator)) && fullpath != baseAbs {
-		return "", errors.New("access denied: path is outside of base directory")
-	}
-
-	return fullpath, nil
-}
-
 // Get receive file with given path
 func (fileSystem FileSystem) Get(ctx context.Context, path string) (*os.File, error) {
-	fullPath, err := fileSystem.GetFullPath(path)
+	fullPath, err := filepathx.Join(fileSystem.Base, path)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +38,7 @@ func (fileSystem FileSystem) Get(ctx context.Context, path string) (*os.File, er
 
 // GetStream get file as stream
 func (fileSystem FileSystem) GetStream(ctx context.Context, path string) (io.ReadCloser, error) {
-	fullPath, err := fileSystem.GetFullPath(path)
+	fullPath, err := filepathx.Join(fileSystem.Base, path)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +47,7 @@ func (fileSystem FileSystem) GetStream(ctx context.Context, path string) (io.Rea
 
 // Put store a reader into given path
 func (fileSystem FileSystem) Put(ctx context.Context, path string, reader io.Reader) (*oss.Object, error) {
-	fullpath, err := fileSystem.GetFullPath(path)
+	fullpath, err := filepathx.Join(fileSystem.Base, path)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +74,7 @@ func (fileSystem FileSystem) Put(ctx context.Context, path string, reader io.Rea
 
 // Delete delete file
 func (fileSystem FileSystem) Delete(ctx context.Context, path string) error {
-	fullPath, err := fileSystem.GetFullPath(path)
+	fullPath, err := filepathx.Join(fileSystem.Base, path)
 	if err != nil {
 		return err
 	}
@@ -105,7 +84,7 @@ func (fileSystem FileSystem) Delete(ctx context.Context, path string) error {
 // List list all objects under current path
 func (fileSystem FileSystem) List(ctx context.Context, path string) ([]*oss.Object, error) {
 	var objects []*oss.Object
-	fullpath, err := fileSystem.GetFullPath(path)
+	fullpath, err := filepathx.Join(fileSystem.Base, path)
 	if err != nil {
 		return nil, err
 	}
