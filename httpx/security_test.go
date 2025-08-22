@@ -27,6 +27,7 @@ func TestSecurity(t *testing.T) {
 				DenyMIMETypeSniffing: true,
 				DenyClickjacking:     true,
 				EnableHSTS:           true,
+				CORS:                 &CORSConfig{},
 			},
 			request:        httptest.NewRequest(http.MethodGet, "/test", nil),
 			expectedStatus: http.StatusOK,
@@ -43,6 +44,7 @@ func TestSecurity(t *testing.T) {
 				DenyMIMETypeSniffing: false,
 				DenyClickjacking:     false,
 				EnableHSTS:           false,
+				CORS:                 &CORSConfig{},
 			},
 			request:        httptest.NewRequest(http.MethodGet, "/test", nil),
 			expectedStatus: http.StatusOK,
@@ -56,7 +58,7 @@ func TestSecurity(t *testing.T) {
 		{
 			name: "with_allowed_origins",
 			config: SecurityConfig{
-				CORS: CORSConfig{
+				CORS: &CORSConfig{
 					AllowedOrigins: []string{"https://example.com", "https://test.com"},
 				},
 				DenyClickjacking: true,
@@ -71,7 +73,7 @@ func TestSecurity(t *testing.T) {
 		{
 			name: "deny_simple_requests_with_invalid_content_type",
 			config: SecurityConfig{
-				CORS: CORSConfig{
+				CORS: &CORSConfig{
 					DenySimpleRequests: true,
 				},
 			},
@@ -85,7 +87,7 @@ func TestSecurity(t *testing.T) {
 		{
 			name: "deny_simple_requests_with_missing_content_type",
 			config: SecurityConfig{
-				CORS: CORSConfig{
+				CORS: &CORSConfig{
 					DenySimpleRequests: true,
 				},
 			},
@@ -95,7 +97,7 @@ func TestSecurity(t *testing.T) {
 		{
 			name: "deny_simple_requests_with_valid_json_content_type",
 			config: SecurityConfig{
-				CORS: CORSConfig{
+				CORS: &CORSConfig{
 					DenySimpleRequests: true,
 				},
 			},
@@ -109,7 +111,7 @@ func TestSecurity(t *testing.T) {
 		{
 			name: "deny_simple_requests_with_valid_proto_content_type",
 			config: SecurityConfig{
-				CORS: CORSConfig{
+				CORS: &CORSConfig{
 					DenySimpleRequests: true,
 				},
 			},
@@ -123,7 +125,7 @@ func TestSecurity(t *testing.T) {
 		{
 			name: "multiple_content_type_headers",
 			config: SecurityConfig{
-				CORS: CORSConfig{
+				CORS: &CORSConfig{
 					DenySimpleRequests: true,
 				},
 			},
@@ -138,7 +140,7 @@ func TestSecurity(t *testing.T) {
 		{
 			name: "invalid_content_type_format",
 			config: SecurityConfig{
-				CORS: CORSConfig{
+				CORS: &CORSConfig{
 					DenySimpleRequests: true,
 				},
 			},
@@ -152,7 +154,7 @@ func TestSecurity(t *testing.T) {
 		{
 			name: "deny_simple_requests_with_head_method",
 			config: SecurityConfig{
-				CORS: CORSConfig{
+				CORS: &CORSConfig{
 					DenySimpleRequests: true,
 				},
 			},
@@ -166,7 +168,7 @@ func TestSecurity(t *testing.T) {
 		{
 			name: "deny_simple_requests_with_valid_head_content_type",
 			config: SecurityConfig{
-				CORS: CORSConfig{
+				CORS: &CORSConfig{
 					DenySimpleRequests: true,
 				},
 			},
