@@ -3,11 +3,11 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: github.com/qor5/x/v3/jsonx/testdata/gen
+      value: github.com/qor5/x/v3/statusx/gen
 plugins:
   - remote: buf.build/protocolbuffers/go:v1.35.2
     out: gen
     opt:
       - paths=source_relative
 inputs:
-  - directory: proto 
+  - directory: proto

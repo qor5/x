@@ -6,10 +6,12 @@ modules:
 lint:
   use:
     - STANDARD
-  except:
-    - PACKAGE_DIRECTORY_MATCH
-    - PACKAGE_VERSION_SUFFIX
+  ignore_only:
+    ENUM_VALUE_PREFIX:
+      - proto/status/v1/error.proto
+    ENUM_ZERO_VALUE_SUFFIX:
+      - proto/status/v1/error.proto
 
 breaking:
   use:
-    - FILE 
+    - FILE
