@@ -55,8 +55,8 @@ import { onMounted, Ref, ref } from 'vue'
 function sanitizeHtml(html: string) {
   return html
     ? DOMPurify.sanitize(html, {
-        ALLOWED_TAGS: ['span', 'p'],
-        ALLOWED_ATTR: ['class']
+        ALLOWED_TAGS: ['span', 'p', 'br', 'strong', 'b', 'em', 'i', 'a'],
+        ALLOWED_ATTR: ['class', 'href', 'target', 'rel']
       })
     : ''
 }
