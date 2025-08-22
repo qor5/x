@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/qor5/x/v3/filepathx"
 	"github.com/qor5/x/v3/oss"
 )
 
@@ -21,38 +22,36 @@ type FileSystem struct {
 func New(base string) *FileSystem {
 	absbase, err := filepath.Abs(base)
 	if err != nil {
-		fmt.Println("FileSystem storage's directory haven't been initialized")
+		panic(fmt.Sprintf("failed to initialize FileSystem storage: cannot get absolute path for base directory %q: %v", base, err))
 	}
 	return &FileSystem{Base: absbase}
 }
 
-// GetFullPath get full path from absolute/relative path
-func (fileSystem FileSystem) GetFullPath(path string) string {
-	fullpath := path
-	if !strings.HasPrefix(path, fileSystem.Base) {
-		fullpath, _ = filepath.Abs(filepath.Join(fileSystem.Base, path))
-	}
-	return fullpath
-}
-
 // Get receive file with given path
 func (fileSystem FileSystem) Get(ctx context.Context, path string) (*os.File, error) {
-	return os.Open(fileSystem.GetFullPath(path))
+	fullPath, err := filepathx.Join(fileSystem.Base, path)
+	if err != nil {
+		return nil, err
+	}
+	return os.Open(fullPath)
 }
 
 // GetStream get file as stream
 func (fileSystem FileSystem) GetStream(ctx context.Context, path string) (io.ReadCloser, error) {
-	return os.Open(fileSystem.GetFullPath(path))
+	fullPath, err := filepathx.Join(fileSystem.Base, path)
+	if err != nil {
+		return nil, err
+	}
+	return os.Open(fullPath)
 }
 
 // Put store a reader into given path
 func (fileSystem FileSystem) Put(ctx context.Context, path string, reader io.Reader) (*oss.Object, error) {
-	var (
-		fullpath = fileSystem.GetFullPath(path)
-		err      = os.MkdirAll(filepath.Dir(fullpath), os.ModePerm)
-	)
-
+	fullpath, err := filepathx.Join(fileSystem.Base, path)
 	if err != nil {
+		return nil, err
+	}
+	if err = os.MkdirAll(filepath.Dir(fullpath), os.ModePerm); err != nil {
 		return nil, err
 	}
 
@@ -75,15 +74,20 @@ func (fileSystem FileSystem) Put(ctx context.Context, path string, reader io.Rea
 
 // Delete delete file
 func (fileSystem FileSystem) Delete(ctx context.Context, path string) error {
-	return os.Remove(fileSystem.GetFullPath(path))
+	fullPath, err := filepathx.Join(fileSystem.Base, path)
+	if err != nil {
+		return err
+	}
+	return os.Remove(fullPath)
 }
 
 // List list all objects under current path
 func (fileSystem FileSystem) List(ctx context.Context, path string) ([]*oss.Object, error) {
-	var (
-		objects  []*oss.Object
-		fullpath = fileSystem.GetFullPath(path)
-	)
+	var objects []*oss.Object
+	fullpath, err := filepathx.Join(fileSystem.Base, path)
+	if err != nil {
+		return nil, err
+	}
 
 	filepath.Walk(fullpath, func(path string, info os.FileInfo, err error) error {
 		if path == fullpath {
