@@ -4,17 +4,20 @@ go 1.23.0
 
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
-	github.com/aws/aws-sdk-go-v2 v1.36.5
+	github.com/aws/aws-sdk-go-v2 v1.38.1
 	github.com/aws/aws-sdk-go-v2/config v1.29.6
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.59
+	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.6.4
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.68.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.14
+	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/huandu/go-clone v1.7.3
 	github.com/iancoleman/strcase v0.3.0
+	github.com/jackc/pgx/v5 v5.7.1
 	github.com/jinzhu/configor v1.2.2
 	github.com/jinzhu/inflection v1.0.0
 	github.com/lib/pq v1.10.9
@@ -34,6 +37,7 @@ require (
 	github.com/sunfmin/reflectutils v1.0.6
 	github.com/theplant/appkit v0.0.0-20250528023215-3d0d299dc4c6
 	github.com/theplant/htmlgo v1.0.3
+	github.com/theplant/inject v1.0.0
 	github.com/theplant/osenv v0.0.2
 	github.com/theplant/testenv v0.1.0
 	github.com/theplant/testingutils v0.0.2
@@ -65,9 +69,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.24.15 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.28.14 // indirect
-	github.com/aws/smithy-go v1.22.4 // indirect
+	github.com/aws/smithy-go v1.22.5 // indirect
 	github.com/boombuler/barcode v1.0.2 // indirect
-	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/containerd/log v0.1.0 // indirect
@@ -107,7 +110,6 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/pgx/v5 v5.7.1 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jjeffery/errors v1.0.3 // indirect
@@ -172,3 +174,4 @@ require (
 
 //replace	github.com/qor5/web => ../web
 //replace github.com/theplant/docgo => ../../docgo/
+// replace github.com/theplant/inject => ../../theplant/inject

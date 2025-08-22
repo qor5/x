@@ -23,15 +23,15 @@ func WithSpanName(spanName string) func(db *gorm.DB) *gorm.DB {
 }
 
 type TracingConfig struct {
-	LogSQL           bool                      `confx:"logSQL" usage:"Log SQL queries"`
+	ExcludeQuery     bool                      `confx:"excludeQuery" usage:"Exclude query"`
 	ExcludeQueryVars bool                      `confx:"excludeQueryVars" usage:"Exclude query vars"`
 	QueryFormatter   func(query string) string `confx:"-"`
 	Logger           kitlog.Logger             `confx:"-" inject:""`
 }
 
-func NewTracingPlugin(cfg *TracingConfig) gorm.Plugin {
+func NewTracingPlugin(conf *TracingConfig) gorm.Plugin {
 	return &logtracingPlugin{
-		TracingConfig: cfg,
+		TracingConfig: conf,
 	}
 }
 
@@ -216,7 +216,7 @@ func (p *logtracingPlugin) after() gormHookFunc {
 			span.AppendKVs("sql.rows_affected", tx.Statement.RowsAffected)
 		}
 
-		if p.LogSQL {
+		if !p.ExcludeQuery {
 			vars := tx.Statement.Vars
 			var query string
 			if p.ExcludeQueryVars {

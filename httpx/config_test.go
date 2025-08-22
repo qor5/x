@@ -52,7 +52,7 @@ func TestSecurityConfig_Validation(t *testing.T) {
 		{
 			Name: "valid config with all security features enabled",
 			Config: &SecurityConfig{
-				CORS: &CORSConfig{
+				CORS: CORSConfig{
 					AllowedOrigins: []string{"http://localhost:3000"},
 					AllowedMethods: []string{"GET", "POST"},
 				},
@@ -64,7 +64,7 @@ func TestSecurityConfig_Validation(t *testing.T) {
 		{
 			Name: "valid config with all security features disabled",
 			Config: &SecurityConfig{
-				CORS: &CORSConfig{
+				CORS: CORSConfig{
 					AllowedOrigins: []string{"http://localhost:3000"},
 					AllowedMethods: []string{"GET", "POST"},
 				},
@@ -76,7 +76,7 @@ func TestSecurityConfig_Validation(t *testing.T) {
 		{
 			Name: "invalid CORS config",
 			Config: &SecurityConfig{
-				CORS: &CORSConfig{
+				CORS: CORSConfig{
 					AllowedOrigins: []string{"invalid-url"},
 					AllowedMethods: []string{"INVALID"},
 				},
