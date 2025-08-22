@@ -12,9 +12,21 @@ import "reflect"
 // - T is a function type (not supported)
 func Make[T any]() T {
 	var zero T
+	// Optimize for simple kinds: return zero directly without MakeValue
 	t := reflect.TypeOf(zero)
-	v := MakeValue(t)
-	return v.Interface().(T)
+	if t == nil {
+		panic("Make: cannot determine type from nil interface")
+	}
+	if t.Kind() == reflect.Func {
+		panic("Make: function type is not supported")
+	}
+	switch t.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Chan:
+		v := MakeValue(t)
+		return v.Interface().(T)
+	default:
+		return zero
+	}
 }
 
 // MakeValue recursively creates a new instance based on the given reflect.Type.

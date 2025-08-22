@@ -25,8 +25,8 @@ func WithSpanName(spanName string) func(db *gorm.DB) *gorm.DB {
 type TracingConfig struct {
 	ExcludeQuery     bool                      `confx:"excludeQuery" usage:"Exclude query"`
 	ExcludeQueryVars bool                      `confx:"excludeQueryVars" usage:"Exclude query vars"`
-	QueryFormatter   func(query string) string `confx:"-"`
-	Logger           kitlog.Logger             `confx:"-" inject:""`
+	QueryFormatter   func(query string) string `confx:"-" json:"-"`
+	Logger           kitlog.Logger             `confx:"-" inject:"" json:"-"`
 }
 
 func NewTracingPlugin(conf *TracingConfig) gorm.Plugin {
