@@ -17,8 +17,8 @@ type Response struct {
 	Status string `json:"status"`
 }
 
-// NewHandler creates a new health check handler
-func NewHandler(opts ...Option) http.HandlerFunc {
+// newHandler creates a new health check handler
+func newHandler(opts ...Option) http.HandlerFunc {
 	o := new(options)
 	for _, opt := range opts {
 		opt(o)
@@ -47,7 +47,7 @@ func NewHandler(opts ...Option) http.HandlerFunc {
 
 // HTTPMiddleware creates a middleware that intercepts health check requests at the top level
 func HTTPMiddleware(opts ...Option) func(next http.Handler) http.Handler {
-	handler := NewHandler(opts...)
+	handler := newHandler(opts...)
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if strings.TrimSpace(r.URL.Path) == Path {

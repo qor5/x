@@ -1,4 +1,4 @@
-package healthz_test
+package healthz
 
 import (
 	"context"
@@ -17,19 +17,16 @@ import (
 	"google.golang.org/grpc/test/bufconn"
 
 	"google.golang.org/grpc/health/grpc_health_v1"
-	healthpb "google.golang.org/grpc/health/grpc_health_v1"
-
-	"github.com/qor5/x/v3/healthz"
 )
 
 func TestHandler(t *testing.T) {
 	t.Run("additional grpc health checker", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, healthz.Path, nil)
+		req := httptest.NewRequest(http.MethodGet, Path, nil)
 		w := httptest.NewRecorder()
 
 		server := grpc.NewServer()
 		healthServer := health.NewServer()
-		healthpb.RegisterHealthServer(server, healthServer)
+		grpc_health_v1.RegisterHealthServer(server, healthServer)
 		listener := bufconn.Listen(1024 * 1024)
 		serverErr := make(chan error)
 		go func() {
@@ -44,7 +41,7 @@ func TestHandler(t *testing.T) {
 		require.NoError(t, err)
 
 		// execute the handler
-		healthz.NewHandler(healthz.WithGRPCHealthChecker(conn))(w, req)
+		newHandler(WithGRPCHealthChecker(conn))(w, req)
 
 		res := w.Result()
 		t.Cleanup(func() {
@@ -54,7 +51,7 @@ func TestHandler(t *testing.T) {
 		assert.Equal(t, http.StatusOK, res.StatusCode)
 		assert.Equal(t, "application/json", res.Header.Get("Content-Type"))
 
-		var response healthz.Response
+		var response Response
 		err = json.NewDecoder(res.Body).Decode(&response)
 		require.NoError(t, err)
 		assert.Equal(t, grpc_health_v1.HealthCheckResponse_SERVING.String(), response.Status)
@@ -65,12 +62,12 @@ func TestHandler(t *testing.T) {
 	})
 
 	t.Run("additional checker returns error", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, healthz.Path, nil)
+		req := httptest.NewRequest(http.MethodGet, Path, nil)
 		w := httptest.NewRecorder()
 
 		// execute the handler
-		healthz.NewHandler(
-			healthz.WithChecker(func(_ http.ResponseWriter, _ *http.Request) error {
+		newHandler(
+			WithChecker(func(_ http.ResponseWriter, _ *http.Request) error {
 				return errors.New("some error")
 			}),
 		)(w, req)
@@ -83,7 +80,7 @@ func TestHandler(t *testing.T) {
 		assert.Equal(t, http.StatusServiceUnavailable, res.StatusCode)
 		assert.Equal(t, "application/json", res.Header.Get("Content-Type"))
 
-		var response healthz.Response
+		var response Response
 		err := json.NewDecoder(res.Body).Decode(&response)
 		require.NoError(t, err)
 		assert.Equal(t, grpc_health_v1.HealthCheckResponse_NOT_SERVING.String(), response.Status)
@@ -99,11 +96,11 @@ func TestHTTPMiddleware(t *testing.T) {
 		})
 
 		// Create middleware
-		middleware := healthz.HTTPMiddleware()
+		middleware := HTTPMiddleware()
 		handler := middleware(nextHandler)
 
 		// Test health check path
-		req := httptest.NewRequest(http.MethodGet, healthz.Path, nil)
+		req := httptest.NewRequest(http.MethodGet, Path, nil)
 		w := httptest.NewRecorder()
 		handler.ServeHTTP(w, req)
 
@@ -115,7 +112,7 @@ func TestHTTPMiddleware(t *testing.T) {
 		assert.Equal(t, http.StatusOK, res.StatusCode)
 		assert.Equal(t, "application/json", res.Header.Get("Content-Type"))
 
-		var response healthz.Response
+		var response Response
 		err := json.NewDecoder(res.Body).Decode(&response)
 		require.NoError(t, err)
 		assert.Equal(t, grpc_health_v1.HealthCheckResponse_SERVING.String(), response.Status)
@@ -129,7 +126,7 @@ func TestHTTPMiddleware(t *testing.T) {
 		})
 
 		// Create middleware
-		middleware := healthz.HTTPMiddleware()
+		middleware := HTTPMiddleware()
 		handler := middleware(nextHandler)
 
 		// Test non-health check path
