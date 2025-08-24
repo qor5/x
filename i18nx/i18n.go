@@ -47,15 +47,16 @@ type tmplKey struct {
 	key message.Reference
 }
 
+//go:embed embed/default.csv
+var defaultCatalogCSV string
+
 // New creates a new I18N instance with the default catalog. If the override
 // io.Reader is not nil, it is used to override the default catalog.
-func New(override io.Reader) (*I18N, error) {
-	cl := catalog.NewBuilder(catalog.Fallback(FallbackTag))
-	if err := setDefault(cl); err != nil {
-		return nil, err
-	}
+func New(overrides ...io.Reader) (*I18N, error) {
+	overrides = append([]io.Reader{strings.NewReader(defaultCatalogCSV)}, overrides...)
 
-	if override != nil {
+	cl := catalog.NewBuilder(catalog.Fallback(FallbackTag))
+	for _, override := range overrides {
 		msgs, err := parseCSV(override)
 		if err != nil {
 			return nil, err
@@ -162,22 +163,6 @@ func (b *I18N) LanguageFromContext(ctx context.Context) language.Tag {
 		accept = strings.Join(md.Get(HeaderAcceptLanguage), ",")
 	}
 	return b.MatchStrings(selected, accept)
-}
-
-//go:embed embed/default.csv
-var defaultCatalogCSV string
-
-func setDefault(cl *catalog.Builder) error {
-	msgs, err := parseCSV(strings.NewReader(defaultCatalogCSV))
-	if err != nil {
-		return err
-	}
-	for _, msg := range msgs {
-		if err := cl.SetString(msg.tag, msg.key, msg.value); err != nil {
-			return errors.Wrapf(err, "failed to set default message %q for language %q", msg.key, msg.tag)
-		}
-	}
-	return nil
 }
 
 type csvMessage struct {
