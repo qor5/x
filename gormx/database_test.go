@@ -130,7 +130,7 @@ func TestNewIAMDialector(t *testing.T) {
 		{
 			name: "empty region",
 			args: args{
-				dsn:    "postgres://postgres@localhost:5432/ciam?sslmode=disable",
+				dsn:    "postgres://postgres@localhost:5432/dbname?sslmode=disable",
 				region: "",
 			},
 			errContains: "region is required",
