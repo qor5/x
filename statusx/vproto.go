@@ -14,6 +14,7 @@ import (
 	kitlog "github.com/theplant/appkit/log"
 	vproto "github.com/theplant/validator/proto"
 
+	"github.com/qor5/x/v3/httpx"
 	"github.com/qor5/x/v3/i18nx"
 	"github.com/qor5/x/v3/jsonx"
 )
@@ -109,8 +110,8 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 		}
 	}
 
-	isJSON := isMimeTypeJSON(w.Header().Get("Content-Type"))
-	if w.Header().Get("Content-Type") == "" {
+	isJSON := isMimeTypeJSON(w.Header().Get(httpx.HeaderContentType))
+	if w.Header().Get(httpx.HeaderContentType) == "" {
 		isJSON = shouldReturnJSON(r)
 		contentType := xprottpContentType
 		if isJSON {
@@ -118,7 +119,7 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 		} else if strings.Contains(strings.ToLower(r.Header.Get("Accept")), protoContentType) {
 			contentType = protoContentType
 		}
-		w.Header().Set("Content-Type", contentType)
+		w.Header().Set(httpx.HeaderContentType, contentType)
 	}
 
 	w.WriteHeader(statusCode)
@@ -195,7 +196,7 @@ func isMimeTypeJSON(contentType string) bool {
 }
 
 func isContentTypeJSON(r *http.Request) bool {
-	return isMimeTypeJSON(r.Header.Get("Content-Type"))
+	return isMimeTypeJSON(r.Header.Get(httpx.HeaderContentType))
 }
 
 // shouldReturnJSON returns true if the response to the given request

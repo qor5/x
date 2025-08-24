@@ -269,7 +269,7 @@ func TestErrorFormat(t *testing.T) {
 		formatted := fmt.Sprintf("%+v", s.Err())
 		assert.Contains(t, formatted, "original error")
 		assert.Contains(t, formatted, "rpc error: code = InvalidArgument reason = INVALID_INPUT message = invalid input provided")
-		assert.Contains(t, formatted, "pkg/statusx.TestErrorFormat")
+		assert.Contains(t, formatted, "statusx.TestErrorFormat")
 	}
 	{
 		formatted := fmt.Sprintf("%v", s.Err())

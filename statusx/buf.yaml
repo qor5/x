@@ -3,6 +3,9 @@ version: v2
 modules:
   - path: proto
 
+deps:
+  - buf.build/envoyproxy/protoc-gen-validate
+
 lint:
   use:
     - STANDARD

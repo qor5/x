@@ -14,8 +14,6 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/protoadapt"
-
-	"github.com/qor5/x/v3/i18nx"
 )
 
 type Status struct {
@@ -178,7 +176,7 @@ func (s *Status) WithMetadata(md map[string]string) *Status {
 	return err
 }
 
-func (s *Status) WithLocalized(key i18nx.Key, args ...string) *Status {
+func (s *Status) WithLocalized(key string, args ...string) *Status {
 	err := Clone(s)
 	err.localized = &statusv1.Localized{
 		Key:  string(key),

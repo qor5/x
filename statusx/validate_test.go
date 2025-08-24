@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/qor5/x/v3/statusx/testdata"
+	"github.com/qor5/x/v3/statusx/gen/testdata"
 )
 
 type mockPgvErr struct {

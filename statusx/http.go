@@ -67,8 +67,7 @@ func HTTPErrorWriter(conf *HTTPErrorWriterConfig) func(http.Handler) http.Handle
 							W:    w, R: r, Err: err,
 						})
 						if werr != nil {
-							kitlog.ForceContext(r.Context()).
-								WithError(err).Log("msg", "failed to write error") // This should not happen generally
+							kitlog.ForceContext(r.Context()).WithError(err).Log("msg", "failed to write error") // This should not happen generally
 							return
 						}
 						written = output.Written

@@ -5,7 +5,12 @@ managed:
     - file_option: go_package_prefix
       value: github.com/qor5/x/v3/statusx/gen
 plugins:
-  - remote: buf.build/protocolbuffers/go:v1.35.2
+  - remote: buf.build/protocolbuffers/go:v1.36.8
+    out: gen
+    opt:
+      - paths=source_relative
+      - Mvalidate/validate.proto=github.com/envoyproxy/protoc-gen-validate/validate
+  - remote: buf.build/bufbuild/validate-go:v1.2.1
     out: gen
     opt:
       - paths=source_relative

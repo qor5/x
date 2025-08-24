@@ -6,12 +6,13 @@ import (
 	"slices"
 	"strings"
 
+	connectcors "connectrpc.com/cors"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/samber/lo"
 )
 
-var contentTypeHeader = http.CanonicalHeaderKey("Content-Type")
+var HeaderContentType = http.CanonicalHeaderKey("Content-Type")
 
 var DenySimpleRequests = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -41,9 +42,9 @@ var Security = func(conf SecurityConfig) func(next http.Handler) http.Handler {
 	corsOpts := cors.Options{
 		AllowedOrigins:   conf.CORS.AllowedOrigins,
 		AllowCredentials: true,
-		AllowedMethods:   lo.Uniq(slices.Concat([]string{http.MethodPost}, conf.CORS.AllowedMethods)),
-		AllowedHeaders:   lo.Uniq(slices.Concat([]string{contentTypeHeader}, conf.CORS.AllowedHeaders)),
-		ExposedHeaders:   lo.Uniq(conf.CORS.ExposedHeaders),
+		AllowedMethods:   lo.Uniq(slices.Concat([]string{http.MethodPost}, conf.CORS.AllowedMethods /*, connectcors.AllowedMethods()*/)),
+		AllowedHeaders:   lo.Uniq(slices.Concat([]string{HeaderContentType}, conf.CORS.AllowedHeaders, connectcors.AllowedHeaders())),
+		ExposedHeaders:   lo.Uniq(slices.Concat(conf.CORS.ExposedHeaders, connectcors.ExposedHeaders())),
 		MaxAge:           int(conf.CORS.MaxAge.Seconds()),
 		Debug:            conf.CORS.Debug,
 	}
@@ -90,16 +91,16 @@ func buildFrameAncestors(origins []string) string {
 }
 
 func ParseContentType(r *http.Request) (mediaType string, params map[string]string, err error) {
-	contentTypeVals := r.Header.Values(contentTypeHeader)
+	contentTypeVals := r.Header.Values(HeaderContentType)
 	if len(contentTypeVals) == 0 {
-		return "", nil, errors.Errorf("%s header not found", contentTypeHeader)
+		return "", nil, errors.Errorf("%s header not found", HeaderContentType)
 	}
 	if len(contentTypeVals) > 1 {
-		return "", nil, errors.Errorf("multiple %s headers found", contentTypeHeader)
+		return "", nil, errors.Errorf("multiple %s headers found", HeaderContentType)
 	}
 	mediaType, params, err = mime.ParseMediaType(contentTypeVals[0])
 	if err != nil {
-		return "", nil, errors.Wrapf(err, "failed to parse %s %s", contentTypeHeader, contentTypeVals[0])
+		return "", nil, errors.Wrapf(err, "failed to parse %s %s", HeaderContentType, contentTypeVals[0])
 	}
 	return mediaType, params, nil
 }

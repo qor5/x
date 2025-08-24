@@ -13,6 +13,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/qor5/x/v3/i18nx"
+	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
 )
 
 func TestTranslateError(t *testing.T) {
@@ -66,7 +67,7 @@ pre_localized,Pre-localized error,预置本地化错误 %s
 
 	t.Run("with localized", func(t *testing.T) {
 		err := New(codes.InvalidArgument, "pre_localized", "original message").
-			WithLocalized(i18nx.Key("pre_localized"), "10").Err()
+			WithLocalized("pre_localized", "10").Err()
 		err = TranslateError(ctx, ib, err)
 
 		var localizedMsg *errdetails.LocalizedMessage
@@ -84,7 +85,7 @@ pre_localized,Pre-localized error,预置本地化错误 %s
 	t.Run("with localized message", func(t *testing.T) {
 		// Create error with pre-localized message
 		preLocalizedErr := New(codes.InvalidArgument, "pre_localized", "original message").
-			WithLocalized(i18nx.Key("pre_localized")).
+			WithLocalized("pre_localized").
 			WithExtraDetail(&errdetails.LocalizedMessage{
 				Locale:  "zh-CN",
 				Message: "指定本地化错误",
@@ -112,6 +113,46 @@ pre_localized,Pre-localized error,预置本地化错误 %s
 		}
 		if assert.NotNil(t, localizedMsg, "should have localized message") {
 			assert.Equal(t, "指定本地化错误", localizedMsg.GetMessage(), "should preserve pre-localized message")
+		}
+	})
+
+	t.Run("translate by statusv1.ErrorReason", func(t *testing.T) {
+		ib2, _ := i18nx.New(strings.NewReader(`
+key,en,zh-CN
+INVALID_ARGUMENT,Invalid argument,参数无效
+`))
+
+		ctx2 := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			"x-selected-language", "zh-CN",
+			"accept-language", "zh-CN;q=0.9",
+		))
+
+		err := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "original").Err()
+		err = TranslateError(ctx2, ib2, err)
+
+		var localizedMsg *errdetails.LocalizedMessage
+		for _, detail := range status.Convert(err).Details() {
+			if v, ok := detail.(*errdetails.LocalizedMessage); ok {
+				localizedMsg = v
+				break
+			}
+		}
+		if assert.NotNil(t, localizedMsg, "should have localized message from enum reason") {
+			assert.Equal(t, "参数无效", localizedMsg.GetMessage())
+		}
+
+		// Also verify embedded default.csv works without overrides
+		errDef := New(codes.PermissionDenied, statusv1.ErrorReason_PERMISSION_DENIED.String(), "orig").Err()
+		errDef = TranslateError(ctx2, ib2, errDef)
+		var lmDef *errdetails.LocalizedMessage
+		for _, d := range status.Convert(errDef).Details() {
+			if v, ok := d.(*errdetails.LocalizedMessage); ok {
+				lmDef = v
+				break
+			}
+		}
+		if assert.NotNil(t, lmDef, "should localize from embedded default.csv") {
+			assert.Equal(t, "无权限", lmDef.GetMessage())
 		}
 	})
 }

@@ -4,6 +4,7 @@ go 1.23.0
 
 require (
 	connectrpc.com/connect v1.18.1
+	connectrpc.com/cors v0.1.0
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
 	github.com/aws/aws-sdk-go-v2 v1.38.1
 	github.com/aws/aws-sdk-go-v2/config v1.29.6
@@ -45,18 +46,18 @@ require (
 	github.com/theplant/testenv v0.2.1
 	github.com/theplant/testingutils v0.0.2
 	github.com/theplant/validator v0.0.0-20210202101755-357a9daa8f5f
-	golang.org/x/crypto v0.40.0
-	golang.org/x/text v0.27.0
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f
-	google.golang.org/grpc v1.70.0
-	google.golang.org/protobuf v1.36.6
+	golang.org/x/crypto v0.41.0
+	golang.org/x/text v0.28.0
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250818200422-3122310a409c
+	google.golang.org/grpc v1.75.0
+	google.golang.org/protobuf v1.36.8
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/driver/sqlite v1.5.6
 	gorm.io/gorm v1.30.1
 )
 
 require (
-	cloud.google.com/go/compute/metadata v0.6.0 // indirect
+	cloud.google.com/go/compute/metadata v0.7.0 // indirect
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
@@ -169,12 +170,12 @@ require (
 	go.opentelemetry.io/proto/otlp v1.5.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20241204233417-43b7b7cde48d // indirect
-	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/oauth2 v0.28.0 // indirect
+	golang.org/x/net v0.43.0 // indirect
+	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.34.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250115164207-1a7da9e5054f // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250811230008-5f3141c8851a // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
