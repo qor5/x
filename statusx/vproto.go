@@ -69,7 +69,7 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 		cerr := r.Body.Close()
 		if cerr != nil {
 			if xerr == nil {
-				xerr = WrapInternal(cerr, "failed to close request body").Err()
+				xerr = WrapCode(cerr, codes.Internal, "failed to close request body").Err()
 			}
 		}
 	}()
@@ -132,12 +132,12 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 		data, werr = proto.Marshal(verr)
 	}
 	if werr != nil {
-		return WrapInternalf(werr, "failed to marshal error (isJSON:%t)", isJSON).Err()
+		return WrapCodef(werr, codes.Internal, "failed to marshal error (isJSON:%t)", isJSON).Err()
 	}
 
 	_, werr = w.Write(data)
 	if werr != nil {
-		return WrapInternalf(werr, "failed to write error (isJSON:%t)", isJSON).Err()
+		return WrapCodef(werr, codes.Internal, "failed to write error (isJSON:%t)", isJSON).Err()
 	}
 	return nil
 }

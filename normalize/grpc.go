@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 
 	kitlog "github.com/theplant/appkit/log"
+	"google.golang.org/grpc/codes"
 	stdmetadata "google.golang.org/grpc/metadata"
 
 	"github.com/qor5/x/v3/statusx"
@@ -21,7 +22,7 @@ func UnaryServerInterceptor(defClientKind ClientKind) grpc.UnaryServerIntercepto
 		headerClientKind := metadata.ExtractIncoming(ctx).Get(HeaderEnsureClientKind)
 		if headerClientKind != "" {
 			if headerClientKind != string(ClientKindPublic) {
-				return nil, statusx.Internalf("only %q is supported for %q", ClientKindPublic, HeaderEnsureClientKind).Err()
+				return nil, statusx.NewCodef(codes.Internal, "only %q is supported for %q", ClientKindPublic, HeaderEnsureClientKind).Err()
 			}
 			clientKind = ClientKind(headerClientKind)
 		}
@@ -54,7 +55,7 @@ func UnaryServerInterceptor(defClientKind ClientKind) grpc.UnaryServerIntercepto
 		defer func() {
 			if len(resMD) > 0 {
 				if serr := grpc.SetHeader(ctx, resMD); serr != nil {
-					serr = statusx.WrapInternal(serr, "failed to set header").Err()
+					serr = statusx.WrapCode(serr, codes.Internal, "failed to set header").Err()
 					kitlog.ForceContext(ctx).WithError(serr).Log("msg", "failed to set header")
 					if xerr == nil {
 						xerr = serr

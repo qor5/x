@@ -164,6 +164,12 @@ func (s *Status) WithCode(c codes.Code) *Status {
 	return err
 }
 
+func (s *Status) WithReason(reason string) *Status {
+	err := Clone(s)
+	err.errorInfo.Reason = reason
+	return err
+}
+
 func (s *Status) WithCause(cause error) *Status {
 	err := Clone(s)
 	err.cause = errors.WithStack(cause)
