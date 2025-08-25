@@ -20,6 +20,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2
 	github.com/huandu/go-clone v1.7.3
+	github.com/huandu/go-clone/generic v1.7.3
 	github.com/iancoleman/strcase v0.3.0
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/jinzhu/configor v1.2.2
