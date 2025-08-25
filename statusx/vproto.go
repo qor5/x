@@ -65,11 +65,13 @@ func VProtoHTTPWriteErrorHook(next HTTPWriteErrorFunc) HTTPWriteErrorFunc {
 }
 
 func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xerr error) {
+	// Explicitly close the request body following the pattern from connectUnaryHandlerConn.Close().
+	// This ensures consistent resource management and proper cleanup, even though the HTTP server
+	// would normally handle this automatically.
 	defer func() {
-		cerr := r.Body.Close()
-		if cerr != nil {
+		if err := r.Body.Close(); err != nil {
 			if xerr == nil {
-				xerr = WrapCode(cerr, codes.Internal, "failed to close request body").Err()
+				xerr = WrapCode(err, codes.Internal, "failed to close request body").Err()
 			}
 		}
 	}()
@@ -77,7 +79,7 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 	st := Convert(err)
 
 	code := st.Code()
-	statusCode := CodeToHTTP(code)
+	statusCode := HTTPStatusFromCode(code)
 
 	var errInfo *errdetails.ErrorInfo
 	var localizedMessage *errdetails.LocalizedMessage
@@ -143,7 +145,7 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 }
 
 // from connectCodeToHTTP of connect library
-func CodeToHTTP(code codes.Code) int {
+func HTTPStatusFromCode(code codes.Code) int {
 	// Return literals rather than named constants from the HTTP package to make
 	// it easier to compare this function to the Connect specification.
 	switch code {
