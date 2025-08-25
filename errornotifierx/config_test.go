@@ -28,7 +28,7 @@ func TestConfig_Validation(t *testing.T) {
 				Airbrake: AirbrakeConfig{
 					ProjectID:   123,
 					Token:       strings.Repeat("1", 32), // 32 chars
-					Environment: "test",
+					Environment: "development",
 				},
 			},
 		},
@@ -71,7 +71,7 @@ func TestConfig_Validation(t *testing.T) {
 				Airbrake: AirbrakeConfig{
 					ProjectID:   123,
 					Token:       "short-token",
-					Environment: "test",
+					Environment: "development",
 				},
 			},
 			ExpectedErrors: []confx.ExpectedValidationError{

@@ -296,7 +296,7 @@ func TestUnaryServerInterceptor_ErrorMetadata(t *testing.T) {
 
 		// This is true rate limiting (reservation.OK = false), so codes.ResourceExhausted
 		assert.Equal(t, codes.ResourceExhausted, st.Code())
-		assert.Equal(t, "rate limit exceeded", st.Message())
+		assert.Equal(t, "ratelimit exceeded", st.Message())
 
 		// Verify error details contain rate limiting metadata
 		details := st.Details()
