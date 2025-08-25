@@ -44,6 +44,7 @@ require (
 	github.com/theplant/htmlgo v1.0.3
 	github.com/theplant/inject v1.0.0
 	github.com/theplant/osenv v0.0.2
+	github.com/theplant/ratelimiter v1.0.1
 	github.com/theplant/testenv v0.2.1
 	github.com/theplant/testingutils v0.0.2
 	github.com/theplant/validator v0.0.0-20210202101755-357a9daa8f5f
@@ -61,6 +62,7 @@ require (
 	cel.dev/expr v0.24.0 // indirect
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
 	dario.cat/mergo v1.0.2 // indirect
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
@@ -110,6 +112,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.25.0 // indirect
+	github.com/go-sql-driver/mysql v1.8.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/gookit/color v1.3.6 // indirect
