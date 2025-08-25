@@ -16,23 +16,23 @@ type Email struct {
 }
 
 var User_CN = &UserMessage{
-	name:   "New User CN",
+	name:   "User CN",
 	Email:  Email_CN,
 	Detail: out_messages.Detail_CN,
 }
 
 var Email_CN = Email{
-	Email: "New CNEmail",
+	Email: "terry@theplant.cn",
 	Phone: Phone_CN,
 }
 
 var User_JP = &UserMessage{
-	name:   "New User JP",
+	name:   "User JP",
 	Email:  Email_JP,
 	Detail: out_messages.Detail_JP,
 }
 
 var Email_JP = Email{
-	Email: "New JPEmail",
+	Email: "terry@theplant.jp",
 	Phone: Phone_JP,
 }

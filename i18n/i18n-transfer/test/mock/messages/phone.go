@@ -5,9 +5,9 @@ type Phone struct {
 }
 
 var Phone_CN = Phone{
-	PhoneNumber: "+8666",
+	PhoneNumber: "+86",
 }
 
 var Phone_JP = Phone{
-	PhoneNumber: "+100000",
+	PhoneNumber: "+100",
 }
