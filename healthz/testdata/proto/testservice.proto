@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package healthz.testdata;
+
+// TestService is a simple business service for testing grpc interceptors
+service TestService {
+  // Echo returns the same message that was sent
+  rpc Echo(EchoRequest) returns (EchoResponse);
+}
+
+message EchoRequest {
+  // Message to echo back
+  string message = 1;
+}
+
+message EchoResponse {
+  // The echoed message
+  string message = 1;
+}
