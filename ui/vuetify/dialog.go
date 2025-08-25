@@ -8,12 +8,14 @@ import (
 )
 
 type VDialogBuilder struct {
-	tag *h.HTMLTagBuilder
+	tag     *h.HTMLTagBuilder
+	rounded bool
 }
 
 func VDialog(children ...h.HTMLComponent) (r *VDialogBuilder) {
 	r = &VDialogBuilder{
-		tag: h.Tag("v-dialog").Children(children...),
+		tag:     h.Tag("v-dialog").Children(children...),
+		rounded: true, // default to rounded
 	}
 	return
 }
@@ -213,6 +215,11 @@ func (b *VDialogBuilder) Attach(v interface{}) (r *VDialogBuilder) {
 	return b
 }
 
+func (b *VDialogBuilder) NoRounded() (r *VDialogBuilder) {
+	b.rounded = false
+	return b
+}
+
 func (b *VDialogBuilder) SetAttr(k string, v interface{}) {
 	b.tag.SetAttr(k, v)
 }
@@ -258,5 +265,9 @@ func (b *VDialogBuilder) Bind(name string, value string) (r *VDialogBuilder) {
 }
 
 func (b *VDialogBuilder) MarshalHTML(ctx context.Context) (r []byte, err error) {
+	// Apply rounded style on overlay content instead of root tag for better visual correctness
+	if b.rounded {
+		b.tag.Attr(":content-class", `'rounded overflow-hidden'`)
+	}
 	return b.tag.MarshalHTML(ctx)
 }
