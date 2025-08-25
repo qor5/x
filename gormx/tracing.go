@@ -26,7 +26,7 @@ type TracingConfig struct {
 	ExcludeQuery     bool                      `confx:"excludeQuery" usage:"Exclude query"`
 	ExcludeQueryVars bool                      `confx:"excludeQueryVars" usage:"Exclude query vars"`
 	QueryFormatter   func(query string) string `confx:"-" json:"-"`
-	Logger           kitlog.Logger             `confx:"-" inject:"" json:"-"`
+	Logger           *kitlog.Logger            `confx:"-" json:"-" inject:""`
 }
 
 func NewTracingPlugin(conf *TracingConfig) gorm.Plugin {
@@ -197,8 +197,10 @@ func (p *logtracingPlugin) after() gormHookFunc {
 		var xerr error
 		defer func() {
 			ctx := tx.Statement.Context
-			if _, ok := kitlog.FromContext(ctx); !ok {
-				ctx = kitlog.Context(ctx, p.Logger)
+			if p.Logger != nil {
+				if _, ok := kitlog.FromContext(ctx); !ok {
+					ctx = kitlog.Context(ctx, *p.Logger)
+				}
 			}
 			logtracing.EndSpan(ctx, xerr)
 		}()

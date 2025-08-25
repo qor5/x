@@ -107,7 +107,7 @@ func Open(ctx context.Context, conf *DatabaseConfig) (*gorm.DB, io.Closer, error
 		return nil, nil, errors.Wrap(err, "failed to setup omit associations plugin for gorm.DB")
 	}
 
-	conf.Tracing.Logger = logger
+	conf.Tracing.Logger = &logger
 	if err := db.Use(NewTracingPlugin(&conf.Tracing)); err != nil {
 		return nil, nil, errors.Wrap(err, "failed to setup tracing for gorm.DB")
 	}

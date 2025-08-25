@@ -11,7 +11,10 @@ import (
 )
 
 // LoggingUnaryServerInterceptor returns a new unary server interceptor that logs gRPC calls at various levels.
-func LoggingUnaryServerInterceptor(l kitlog.Logger, opts ...logging.Option) grpc.UnaryServerInterceptor {
+func LoggingUnaryServerInterceptor(l *kitlog.Logger, opts ...logging.Option) grpc.UnaryServerInterceptor {
+	if l == nil {
+		panic("logger is required")
+	}
 	interceptor := logging.UnaryServerInterceptor(logging.LoggerFunc(func(_ context.Context, lvl logging.Level, msg string, fields ...any) {
 		largs := append([]any{"msg", msg}, fields...)
 		switch lvl {
@@ -29,7 +32,7 @@ func LoggingUnaryServerInterceptor(l kitlog.Logger, opts ...logging.Option) grpc
 	}), opts...)
 
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
-		ctx = kitlog.Context(ctx, l)
+		ctx = kitlog.Context(ctx, *l)
 		ctx = logging.InjectLogField(ctx, "req_id", uuid.New())
 		return interceptor(ctx, req, info, handler)
 	}
