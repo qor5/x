@@ -22,8 +22,8 @@ import (
 type AuthMethod string
 
 const (
-	AuthMethodPassword AuthMethod = "PASSWORD"
-	AuthMethodIAM      AuthMethod = "IAM"
+	AuthMethodPassword AuthMethod = "password"
+	AuthMethodIAM      AuthMethod = "iam"
 )
 
 type DatabaseConfig struct {
@@ -34,7 +34,7 @@ type DatabaseConfig struct {
 	MaxOpenConns    int           `confx:"maxOpenConns" usage:"Maximum number of open connections"`
 	ConnMaxLifetime time.Duration `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`
 	ConnMaxIdleTime time.Duration `confx:"connMaxIdleTime" usage:"Maximum idle time for connections" validate:"ltefield=ConnMaxLifetime"`
-	AuthMethod      AuthMethod    `confx:"authMethod" usage:"Authentication method: 'PASSWORD' or 'IAM'" validate:"required,oneof=PASSWORD IAM"`
+	AuthMethod      AuthMethod    `confx:"authMethod" usage:"Authentication method: 'password' or 'iam'" validate:"required,oneof=password iam"`
 }
 
 func SetupDatabase(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {

@@ -12,13 +12,13 @@ import (
 type Kind string
 
 const (
-	KindLog      Kind = "LOG"
-	KindAirbrake Kind = "AIRBRAKE"
+	KindLog      Kind = "log"
+	KindAirbrake Kind = "airbrake"
 )
 
 type Config struct {
-	Kind     Kind           `confx:"kind" validate:"required,oneof=LOG AIRBRAKE" usage:"Error notifier type, can be 'LOG' or 'AIRBRAKE'"`
-	Airbrake AirbrakeConfig `confx:"airbrake" validate:"skip_nested_unless=Kind AIRBRAKE" usage:"Airbrake configuration, required when kind is 'AIRBRAKE'"`
+	Kind     Kind           `confx:"kind" validate:"required,oneof=log airbrake" usage:"Error notifier type, can be 'log' or 'airbrake'"`
+	Airbrake AirbrakeConfig `confx:"airbrake" validate:"skip_nested_unless=Kind airbrake" usage:"Airbrake configuration, required when kind is 'airbrake'"`
 	Logger   *kitlog.Logger `confx:"-" json:"-" inject:""`
 }
 
@@ -26,7 +26,7 @@ func Setup(lc *lifecycle.Lifecycle, conf *Config) (errornotifier.Notifier, error
 	switch conf.Kind {
 	case KindLog:
 		if conf.Logger == nil {
-			return nil, errors.New("logger is required when kind is LOG")
+			return nil, errors.New("logger is required when kind is log")
 		}
 		return errornotifier.NewLogNotifier(*conf.Logger), nil
 	case KindAirbrake:
@@ -47,7 +47,7 @@ func New(c *Config) (errornotifier.Notifier, io.Closer, error) {
 	switch c.Kind {
 	case KindLog:
 		if c.Logger == nil {
-			return nil, nil, errors.New("logger is required when kind is LOG")
+			return nil, nil, errors.New("logger is required when kind is log")
 		}
 		return errornotifier.NewLogNotifier(*c.Logger), &nopCloser{}, nil
 	case KindAirbrake:

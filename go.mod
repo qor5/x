@@ -34,6 +34,8 @@ require (
 	github.com/pquerna/otp v1.4.0
 	github.com/qiniu/api.v7/v7 v7.8.2
 	github.com/qor5/confx v0.0.0-20250426065316-0d28db5b4d54
+	github.com/qor5/go-bus v0.0.0-20250731113321-2c127f29aaaa
+	github.com/qor5/go-que v1.1.0
 	github.com/qor5/web/v3 v3.0.12-0.20250610095130-935d3f95f63a
 	github.com/rs/cors v1.11.1
 	github.com/samber/lo v1.50.0
@@ -83,6 +85,7 @@ require (
 	github.com/aws/smithy-go v1.22.5 // indirect
 	github.com/boombuler/barcode v1.0.2 // indirect
 	github.com/caio/go-tdigest/v4 v4.0.1 // indirect
+	github.com/cenkalti/backoff/v5 v5.0.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cncf/xds/go v0.0.0-20250501225837-2ac532fd4443 // indirect
@@ -192,7 +195,7 @@ require (
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
-	golang.org/x/time v0.9.0 // indirect
+	golang.org/x/time v0.12.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250811230008-5f3141c8851a // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
