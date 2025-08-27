@@ -234,7 +234,7 @@ func (p *logtracingPlugin) after() gormHookFunc {
 			!(errors.Is(tx.Error, driver.ErrSkip)) &&
 			!(errors.Is(tx.Error, io.EOF)) &&
 			!(errors.Is(tx.Error, sql.ErrNoRows)) {
-			xerr = tx.Error
+			xerr = errors.WithStack(tx.Error)
 		}
 	}
 }
