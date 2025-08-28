@@ -41,7 +41,7 @@ func SetupServer(handler http.Handler) func(lc *lifecycle.Lifecycle, conf *Confi
 			return nil, err
 		}
 		lc.Add(lifecycle.NewFuncService(func(ctx context.Context) error {
-			if conf.TLS.Enabled {
+			if srv.TLSConfig != nil {
 				logger.Info().Log("msg", "HTTPS server listening", "address", listener.Addr())
 				if err := srv.ServeTLS(listener, "", ""); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					return errors.Wrap(err, "failed to start HTTPS server")
@@ -54,11 +54,18 @@ func SetupServer(handler http.Handler) func(lc *lifecycle.Lifecycle, conf *Confi
 			}
 			return nil
 		}).WithStop(func(ctx context.Context) error {
+			// Attempt graceful shutdown first - waits for active connections to finish
 			err := srv.Shutdown(ctx)
 			if err != nil {
-				return errors.Wrap(err, "failed to shutdown HTTP server")
+				// If graceful shutdown fails (timeout, context cancelled, etc.),
+				// force immediate shutdown to ensure resources are released
+				if closeErr := srv.Close(); closeErr != nil {
+					return errors.Wrap(closeErr, "failed to force close HTTP server after shutdown failure")
+				}
+				return errors.Wrap(err, "graceful shutdown failed, forced close completed")
 			}
-			return errors.Wrap(srv.Close(), "failed to close HTTP server")
+			// Graceful shutdown succeeded - no need to call Close()
+			return nil
 		}).WithName("http-server"))
 		return srv, nil
 	}

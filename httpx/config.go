@@ -7,7 +7,7 @@ import (
 type Config struct {
 	Address           string         `confx:"address" usage:"HTTP server address" validate:"required"`
 	ReadTimeout       time.Duration  `confx:"readTimeout" usage:"maximum duration before timing out read of the request"`
-	ReadHeaderTimeout time.Duration  `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers"  validate:"ltefield=ReadTimeout"`
+	ReadHeaderTimeout time.Duration  `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers" validate:"ltefield=ReadTimeout"`
 	WriteTimeout      time.Duration  `confx:"writeTimeout" usage:"maximum duration before timing out write of the response"`
 	IdleTimeout       time.Duration  `confx:"idleTimeout" usage:"maximum amount of time to wait for the next request when keep-alives are enabled"`
 	TLS               TLSConfig      `confx:"tls"`
