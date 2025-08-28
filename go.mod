@@ -51,6 +51,7 @@ require (
 	github.com/theplant/testingutils v0.0.2
 	github.com/theplant/validator v0.0.0-20210202101755-357a9daa8f5f
 	golang.org/x/crypto v0.41.0
+	golang.org/x/net v0.43.0
 	golang.org/x/text v0.28.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250818200422-3122310a409c
 	google.golang.org/grpc v1.75.0
@@ -191,7 +192,6 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20241204233417-43b7b7cde48d // indirect
-	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
