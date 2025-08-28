@@ -1,4 +1,4 @@
-package goqx
+package goquex
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package hookx
+package hook
 
 type Hook[T any] func(next T) T
 

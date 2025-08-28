@@ -1,4 +1,4 @@
-package hookx
+package hook
 
 import (
 	"fmt"

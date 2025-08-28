@@ -8,7 +8,7 @@ import (
 
 	kitlog "github.com/theplant/appkit/log"
 
-	"github.com/qor5/x/v3/hookx"
+	"github.com/qor5/x/v3/hook"
 	"github.com/qor5/x/v3/i18nx"
 )
 
@@ -33,8 +33,8 @@ type HTTPErrorWriterConfig struct {
 	writeErrorHook func(next HTTPWriteErrorFunc) HTTPWriteErrorFunc
 }
 
-func (c *HTTPErrorWriterConfig) WithHTTPWriteErrorHook(hooks ...hookx.Hook[HTTPWriteErrorFunc]) *HTTPErrorWriterConfig {
-	c.writeErrorHook = hookx.Prepend(c.writeErrorHook, hooks...)
+func (c *HTTPErrorWriterConfig) WithHTTPWriteErrorHook(hooks ...hook.Hook[HTTPWriteErrorFunc]) *HTTPErrorWriterConfig {
+	c.writeErrorHook = hook.Prepend(c.writeErrorHook, hooks...)
 	return c
 }
 
