@@ -1,6 +1,24 @@
 package httpx
 
-import "time"
+import (
+	"time"
+)
+
+type Config struct {
+	Address           string         `confx:"address" usage:"HTTP server address" validate:"required"`
+	ReadTimeout       time.Duration  `confx:"readTimeout" usage:"maximum duration before timing out read of the request"`
+	ReadHeaderTimeout time.Duration  `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers"  validate:"ltefield=ReadTimeout"`
+	WriteTimeout      time.Duration  `confx:"writeTimeout" usage:"maximum duration before timing out write of the response"`
+	IdleTimeout       time.Duration  `confx:"idleTimeout" usage:"maximum amount of time to wait for the next request when keep-alives are enabled"`
+	TLS               TLSConfig      `confx:"tls"`
+	Security          SecurityConfig `confx:",squash"`
+}
+
+type TLSConfig struct {
+	Enabled    bool   `confx:"enabled" usage:"Enable TLS"`
+	CertBase64 string `confx:"certBase64" usage:"TLS certificate base64 encoded" validate:"required_if=Enabled true"`
+	KeyBase64  string `confx:"keyBase64" usage:"TLS key base64 encoded" validate:"required_if=Enabled true"`
+}
 
 type CORSConfig struct {
 	Debug              bool          `confx:"debug" usage:"CORS debug"`
@@ -14,7 +32,7 @@ type CORSConfig struct {
 
 type SecurityConfig struct {
 	CORS                 CORSConfig `confx:"cors" inject:""`
-	DenyMIMETypeSniffing bool       `confx:"denyMimeTypeSniffing" usage:"Deny MIME type sniffing"`
+	DenyMIMETypeSniffing bool       `confx:"denyMIMETypeSniffing" usage:"Deny MIME type sniffing"`
 	DenyClickjacking     bool       `confx:"denyClickjacking" usage:"Deny clickjacking"`
 	EnableHSTS           bool       `confx:"enableHSTS" usage:"Enable HSTS"`
 }
