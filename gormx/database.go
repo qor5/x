@@ -37,20 +37,24 @@ type DatabaseConfig struct {
 	AuthMethod      AuthMethod    `confx:"authMethod" usage:"Authentication method: 'password' or 'iam'" validate:"required,oneof=password iam"`
 }
 
-func SetupDatabase(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
-	db, closer, err := Open(ctx, conf)
-	if err != nil {
-		return nil, err
-	}
+var SetupDatabase = SetupDatabaseFactory("database")
 
-	lc.Add(lifecycle.NewFuncActor(nil, func(_ context.Context) error {
-		if err := closer.Close(); err != nil {
-			return errors.Wrap(err, "failed to close database")
+func SetupDatabaseFactory(name string) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
+	return func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
+		db, closer, err := Open(ctx, conf)
+		if err != nil {
+			return nil, err
 		}
-		return nil
-	}).WithName("database"))
 
-	return db, nil
+		lc.Add(lifecycle.NewFuncActor(nil, func(_ context.Context) error {
+			if err := closer.Close(); err != nil {
+				return errors.Wrap(err, "failed to close database")
+			}
+			return nil
+		}).WithName(name))
+
+		return db, nil
+	}
 }
 
 func Open(ctx context.Context, conf *DatabaseConfig) (*gorm.DB, io.Closer, error) {
