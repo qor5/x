@@ -13,7 +13,7 @@ import (
 type AirbrakeConfig struct {
 	ProjectID   int64  `confx:"projectID" validate:"required" usage:"Airbrake project ID"`
 	Token       string `confx:"token" validate:"required,len=32" usage:"Airbrake project token, must be exactly 32 characters"`
-	Environment string `confx:"environment" validate:"required,oneof=development staging production" usage:"Environment name for error reporting (e.g., development, staging, production)"`
+	Environment string `confx:"environment" validate:"required,oneof=development test staging production" usage:"Environment name for error reporting (e.g., development, test, staging, production)"`
 }
 
 func SetupAirbrakeNotifier(lc *lifecycle.Lifecycle, conf *AirbrakeConfig) (errornotifier.Notifier, error) {
