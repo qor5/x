@@ -14,13 +14,6 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-func SetupFactory(handler http.Handler) []any {
-	return []any{
-		SetupListener,
-		SetupServer(handler),
-	}
-}
-
 type Listener net.Listener
 
 func SetupListener(lc *lifecycle.Lifecycle, conf *Config) (Listener, error) {
@@ -29,12 +22,15 @@ func SetupListener(lc *lifecycle.Lifecycle, conf *Config) (Listener, error) {
 		return nil, errors.Wrapf(err, "failed to listen on %s", conf.Address)
 	}
 	lc.Add(lifecycle.NewFuncActor(nil, func(ctx context.Context) error {
-		return errors.Wrap(listener.Close(), "failed to close HTTP listener")
+		if err := listener.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
+			return errors.Wrap(err, "failed to close HTTP listener")
+		}
+		return nil
 	}).WithName("http-listener"))
 	return Listener(listener), nil
 }
 
-func SetupServer(handler http.Handler) func(lc *lifecycle.Lifecycle, conf *Config, listener Listener, logger *kitlog.Logger) (*http.Server, error) {
+func SetupServerFactory(handler http.Handler) func(lc *lifecycle.Lifecycle, conf *Config, listener Listener, logger *kitlog.Logger) (*http.Server, error) {
 	return func(lc *lifecycle.Lifecycle, conf *Config, listener Listener, logger *kitlog.Logger) (*http.Server, error) {
 		srv, err := NewServer(conf, handler)
 		if err != nil {

@@ -3,6 +3,7 @@ package goquex
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/qor5/go-que"
@@ -19,7 +20,11 @@ type withTracing struct {
 }
 
 func (g *withTracing) Enqueue(ctx context.Context, tx *sql.Tx, plans ...que.Plan) (_ []int64, xerr error) {
-	ctx, span := logtracing.StartSpan(ctx, "goque.enqueue")
+	spanName := "goque.enqueue"
+	if len(plans) == 1 {
+		spanName = fmt.Sprintf("goque.enqueue:%s", plans[0].Queue)
+	}
+	ctx, span := logtracing.StartSpan(ctx, spanName)
 	defer func() { logtracing.EndSpan(ctx, xerr) }()
 
 	span.AppendKVs("goque.plans.count", len(plans))
@@ -64,7 +69,8 @@ func WithTracing(goq que.Queue) que.Queue {
 func PerformWithTracing(notifier errornotifier.Notifier) func(next func(ctx context.Context, j que.Job) error) func(ctx context.Context, j que.Job) error {
 	return func(next func(ctx context.Context, j que.Job) error) func(ctx context.Context, j que.Job) error {
 		return func(ctx context.Context, j que.Job) (xerr error) {
-			ctx, span := logtracing.StartSpan(ctx, "goque.perform")
+			spanName := fmt.Sprintf("goque.perform:%s", j.Plan().Queue)
+			ctx, span := logtracing.StartSpan(ctx, spanName)
 			defer func() { logtracing.EndSpan(ctx, xerr) }()
 			defer logtracing.RecordPanic(ctx)
 
@@ -99,7 +105,7 @@ func PerformWithTracing(notifier errornotifier.Notifier) func(next func(ctx cont
 					for k, v := range spanKVs {
 						errorContext[k] = v
 					}
-					errorContext["goque.span.name"] = "goque.perform"
+					errorContext["goque.span.name"] = spanName
 					errorContext["goque.error.source"] = "job_execution"
 					notifier.Notify(perr, nil, errorContext)
 				})
