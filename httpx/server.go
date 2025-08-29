@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"net"
 	"net/http"
-	"strings"
 
 	"github.com/pkg/errors"
 	kitlog "github.com/theplant/appkit/log"
@@ -23,7 +22,7 @@ func SetupListener(lc *lifecycle.Lifecycle, conf *Config) (Listener, error) {
 		return nil, errors.Wrapf(err, "failed to listen on %s", conf.Address)
 	}
 	lc.Add(lifecycle.NewFuncActor(nil, func(ctx context.Context) error {
-		if err := listener.Close(); err != nil && !strings.Contains(err.Error(), "use of closed network connection") {
+		if err := listener.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
 			return errors.Wrap(err, "failed to close HTTP listener")
 		}
 		return nil
