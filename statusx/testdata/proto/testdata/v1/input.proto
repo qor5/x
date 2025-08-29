@@ -1,8 +1,6 @@
 syntax = "proto3";
 
-package testdata;
-
-option go_package = "github.com/qor5/x/v3/statusx/gen/testdata";
+package testdata.v1;
 
 import "google/protobuf/struct.proto";
 import "validate/validate.proto";

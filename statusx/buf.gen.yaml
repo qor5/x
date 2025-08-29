@@ -16,3 +16,4 @@ plugins:
       - paths=source_relative
 inputs:
   - directory: proto
+  - directory: testdata/proto

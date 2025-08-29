@@ -2,6 +2,7 @@
 version: v2
 modules:
   - path: proto
+  - path: testdata/proto
 
 deps:
   - buf.build/envoyproxy/protoc-gen-validate
