@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.8
 // 	protoc        (unknown)
-// source: testdata/input.proto
+// source: testdata/v1/input.proto
 
-package testdata
+package testdatav1
 
 import (
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
@@ -37,7 +37,7 @@ type TestValidateError struct {
 
 func (x *TestValidateError) Reset() {
 	*x = TestValidateError{}
-	mi := &file_testdata_input_proto_msgTypes[0]
+	mi := &file_testdata_v1_input_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +49,7 @@ func (x *TestValidateError) String() string {
 func (*TestValidateError) ProtoMessage() {}
 
 func (x *TestValidateError) ProtoReflect() protoreflect.Message {
-	mi := &file_testdata_input_proto_msgTypes[0]
+	mi := &file_testdata_v1_input_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +62,7 @@ func (x *TestValidateError) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestValidateError.ProtoReflect.Descriptor instead.
 func (*TestValidateError) Descriptor() ([]byte, []int) {
-	return file_testdata_input_proto_rawDescGZIP(), []int{0}
+	return file_testdata_v1_input_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *TestValidateError) GetMetadataPublic() map[string]*structpb.Value {
@@ -86,13 +86,13 @@ func (x *TestValidateError) GetFamilyName() string {
 	return ""
 }
 
-var File_testdata_input_proto protoreflect.FileDescriptor
+var File_testdata_v1_input_proto protoreflect.FileDescriptor
 
-const file_testdata_input_proto_rawDesc = "" +
+const file_testdata_v1_input_proto_rawDesc = "" +
 	"\n" +
-	"\x14testdata/input.proto\x12\btestdata\x1a\x1cgoogle/protobuf/struct.proto\x1a\x17validate/validate.proto\"\xc7\x02\n" +
-	"\x11TestValidateError\x12X\n" +
-	"\x0fmetadata_public\x18\x01 \x03(\v2/.testdata.TestValidateError.MetadataPublicEntryR\x0emetadataPublic\x12-\n" +
+	"\x17testdata/v1/input.proto\x12\vtestdata.v1\x1a\x1cgoogle/protobuf/struct.proto\x1a\x17validate/validate.proto\"\xca\x02\n" +
+	"\x11TestValidateError\x12[\n" +
+	"\x0fmetadata_public\x18\x01 \x03(\v22.testdata.v1.TestValidateError.MetadataPublicEntryR\x0emetadataPublic\x12-\n" +
 	"\n" +
 	"given_name\x18\x03 \x01(\tB\t\xfaB\x06r\x04\x10\x02\x18\x05H\x00R\tgivenName\x88\x01\x01\x12/\n" +
 	"\vfamily_name\x18\x04 \x01(\tB\t\xfaB\x06r\x04\x10\x02\x18\x05H\x01R\n" +
@@ -101,31 +101,31 @@ const file_testdata_input_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
 	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01B\r\n" +
 	"\v_given_nameB\x0e\n" +
-	"\f_family_nameB\x85\x01\n" +
-	"\fcom.testdataB\n" +
-	"InputProtoP\x01Z)github.com/qor5/x/v3/statusx/gen/testdata\xa2\x02\x03TXX\xaa\x02\bTestdata\xca\x02\bTestdata\xe2\x02\x14Testdata\\GPBMetadata\xea\x02\bTestdatab\x06proto3"
+	"\f_family_nameB\xa3\x01\n" +
+	"\x0fcom.testdata.v1B\n" +
+	"InputProtoP\x01Z7github.com/qor5/x/v3/statusx/gen/testdata/v1;testdatav1\xa2\x02\x03TXX\xaa\x02\vTestdata.V1\xca\x02\vTestdata\\V1\xe2\x02\x17Testdata\\V1\\GPBMetadata\xea\x02\fTestdata::V1b\x06proto3"
 
 var (
-	file_testdata_input_proto_rawDescOnce sync.Once
-	file_testdata_input_proto_rawDescData []byte
+	file_testdata_v1_input_proto_rawDescOnce sync.Once
+	file_testdata_v1_input_proto_rawDescData []byte
 )
 
-func file_testdata_input_proto_rawDescGZIP() []byte {
-	file_testdata_input_proto_rawDescOnce.Do(func() {
-		file_testdata_input_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_testdata_input_proto_rawDesc), len(file_testdata_input_proto_rawDesc)))
+func file_testdata_v1_input_proto_rawDescGZIP() []byte {
+	file_testdata_v1_input_proto_rawDescOnce.Do(func() {
+		file_testdata_v1_input_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_testdata_v1_input_proto_rawDesc), len(file_testdata_v1_input_proto_rawDesc)))
 	})
-	return file_testdata_input_proto_rawDescData
+	return file_testdata_v1_input_proto_rawDescData
 }
 
-var file_testdata_input_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_testdata_input_proto_goTypes = []any{
-	(*TestValidateError)(nil), // 0: testdata.TestValidateError
-	nil,                       // 1: testdata.TestValidateError.MetadataPublicEntry
+var file_testdata_v1_input_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_testdata_v1_input_proto_goTypes = []any{
+	(*TestValidateError)(nil), // 0: testdata.v1.TestValidateError
+	nil,                       // 1: testdata.v1.TestValidateError.MetadataPublicEntry
 	(*structpb.Value)(nil),    // 2: google.protobuf.Value
 }
-var file_testdata_input_proto_depIdxs = []int32{
-	1, // 0: testdata.TestValidateError.metadata_public:type_name -> testdata.TestValidateError.MetadataPublicEntry
-	2, // 1: testdata.TestValidateError.MetadataPublicEntry.value:type_name -> google.protobuf.Value
+var file_testdata_v1_input_proto_depIdxs = []int32{
+	1, // 0: testdata.v1.TestValidateError.metadata_public:type_name -> testdata.v1.TestValidateError.MetadataPublicEntry
+	2, // 1: testdata.v1.TestValidateError.MetadataPublicEntry.value:type_name -> google.protobuf.Value
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -133,27 +133,27 @@ var file_testdata_input_proto_depIdxs = []int32{
 	0, // [0:2] is the sub-list for field type_name
 }
 
-func init() { file_testdata_input_proto_init() }
-func file_testdata_input_proto_init() {
-	if File_testdata_input_proto != nil {
+func init() { file_testdata_v1_input_proto_init() }
+func file_testdata_v1_input_proto_init() {
+	if File_testdata_v1_input_proto != nil {
 		return
 	}
-	file_testdata_input_proto_msgTypes[0].OneofWrappers = []any{}
+	file_testdata_v1_input_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_testdata_input_proto_rawDesc), len(file_testdata_input_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_testdata_v1_input_proto_rawDesc), len(file_testdata_v1_input_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_testdata_input_proto_goTypes,
-		DependencyIndexes: file_testdata_input_proto_depIdxs,
-		MessageInfos:      file_testdata_input_proto_msgTypes,
+		GoTypes:           file_testdata_v1_input_proto_goTypes,
+		DependencyIndexes: file_testdata_v1_input_proto_depIdxs,
+		MessageInfos:      file_testdata_v1_input_proto_msgTypes,
 	}.Build()
-	File_testdata_input_proto = out.File
-	file_testdata_input_proto_goTypes = nil
-	file_testdata_input_proto_depIdxs = nil
+	File_testdata_v1_input_proto = out.File
+	file_testdata_v1_input_proto_goTypes = nil
+	file_testdata_v1_input_proto_depIdxs = nil
 }
