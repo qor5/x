@@ -37,9 +37,9 @@ type DatabaseConfig struct {
 	AuthMethod      AuthMethod    `confx:"authMethod" usage:"Authentication method: 'password' or 'iam'" validate:"required,oneof=password iam"`
 }
 
-var Setup = SetupFactory("database")
+var SetupDatabase = SetupDatabaseFactory("database")
 
-func SetupFactory(name string) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
+func SetupDatabaseFactory(name string) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
 	return func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
 		db, closer, err := Open(ctx, conf)
 		if err != nil {
