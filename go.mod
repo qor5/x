@@ -44,12 +44,13 @@ require (
 	github.com/sunfmin/reflectutils v1.0.6
 	github.com/theplant/appkit v0.0.0-20250528023215-3d0d299dc4c6
 	github.com/theplant/htmlgo v1.0.3
-	github.com/theplant/inject v1.0.0
+	github.com/theplant/inject v1.0.1
 	github.com/theplant/osenv v0.0.2
 	github.com/theplant/ratelimiter v1.0.1
 	github.com/theplant/testenv v0.2.1
 	github.com/theplant/testingutils v0.0.2
 	github.com/theplant/validator v0.0.0-20210202101755-357a9daa8f5f
+	go.opentelemetry.io/otel/trace v1.37.0
 	golang.org/x/crypto v0.41.0
 	golang.org/x/net v0.43.0
 	golang.org/x/text v0.28.0
@@ -187,7 +188,6 @@ require (
 	go.opentelemetry.io/otel v1.37.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.28.0 // indirect
 	go.opentelemetry.io/otel/metric v1.37.0 // indirect
-	go.opentelemetry.io/otel/trace v1.37.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.5.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect

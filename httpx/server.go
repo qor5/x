@@ -4,12 +4,12 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/base64"
+	"log/slog"
 	"net"
 	"net/http"
 
 	"github.com/pkg/errors"
 	"github.com/qor5/x/v3/netx"
-	kitlog "github.com/theplant/appkit/log"
 	"github.com/theplant/inject/lifecycle"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -21,20 +21,20 @@ func SetupListener(lc *lifecycle.Lifecycle, conf *Config) (Listener, error) {
 	return netx.SetupListenerFactory("http-listener", conf.Address)(lc)
 }
 
-func SetupServerFactory(name string, handler http.Handler) func(lc *lifecycle.Lifecycle, conf *Config, listener Listener, logger *kitlog.Logger) (*http.Server, error) {
-	return func(lc *lifecycle.Lifecycle, conf *Config, listener Listener, logger *kitlog.Logger) (*http.Server, error) {
+func SetupServerFactory(name string, handler http.Handler) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *Config, listener Listener) (*http.Server, error) {
+	return func(ctx context.Context, lc *lifecycle.Lifecycle, conf *Config, listener Listener) (*http.Server, error) {
 		srv, err := NewServer(conf, handler)
 		if err != nil {
 			return nil, err
 		}
 		lc.Add(lifecycle.NewFuncService(func(ctx context.Context) error {
 			if srv.TLSConfig != nil {
-				logger.Info().Log("msg", "HTTPS server listening", "address", listener.Addr())
+				slog.InfoContext(ctx, "HTTPS server listening", "address", listener.Addr().String())
 				if err := srv.ServeTLS(listener, "", ""); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					return errors.Wrap(err, "failed to start HTTPS server")
 				}
 			} else {
-				logger.Info().Log("msg", "HTTP server listening", "address", listener.Addr())
+				slog.InfoContext(ctx, "HTTP server listening", "address", listener.Addr().String())
 				if err := srv.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					return errors.Wrap(err, "failed to start HTTP server")
 				}

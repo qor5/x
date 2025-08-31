@@ -2,11 +2,11 @@ package normalize
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/metadata"
 	"google.golang.org/grpc"
 
-	kitlog "github.com/theplant/appkit/log"
 	"google.golang.org/grpc/codes"
 	stdmetadata "google.golang.org/grpc/metadata"
 
@@ -56,7 +56,7 @@ func UnaryServerInterceptor(defClientKind ClientKind) grpc.UnaryServerIntercepto
 			if len(resMD) > 0 {
 				if serr := grpc.SetHeader(ctx, resMD); serr != nil {
 					serr = statusx.WrapCode(serr, codes.Internal, "failed to set header").Err()
-					kitlog.ForceContext(ctx).WithError(serr).Log("msg", "failed to set header")
+					slog.ErrorContext(ctx, "failed to set header", "error", serr)
 					if xerr == nil {
 						xerr = serr
 					}

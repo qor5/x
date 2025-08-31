@@ -5,26 +5,21 @@ import (
 	"testing"
 
 	"github.com/qor5/confx"
-
-	kitlog "github.com/theplant/appkit/log"
 )
 
 func TestConfig_Validation(t *testing.T) {
 	suite := confx.NewValidationSuite(t)
-	logger := kitlog.Default()
 	suite.RunTests([]confx.ExpectedValidation{
 		{
 			Name: "valid log config",
 			Config: &Config{
-				Kind:   KindLog,
-				Logger: &logger,
+				Kind: KindLog,
 			},
 		},
 		{
 			Name: "valid airbrake config",
 			Config: &Config{
-				Kind:   KindAirbrake,
-				Logger: &logger,
+				Kind: KindAirbrake,
 				Airbrake: AirbrakeConfig{
 					ProjectID:   123,
 					Token:       strings.Repeat("1", 32), // 32 chars
@@ -33,10 +28,8 @@ func TestConfig_Validation(t *testing.T) {
 			},
 		},
 		{
-			Name: "missing kind",
-			Config: &Config{
-				Logger: &logger,
-			},
+			Name:   "missing kind",
+			Config: &Config{},
 			ExpectedErrors: []confx.ExpectedValidationError{
 				{Path: "Kind", Tag: "required"},
 			},
@@ -44,8 +37,7 @@ func TestConfig_Validation(t *testing.T) {
 		{
 			Name: "invalid kind",
 			Config: &Config{
-				Kind:   "invalid",
-				Logger: &logger,
+				Kind: "invalid",
 			},
 			ExpectedErrors: []confx.ExpectedValidationError{
 				{Path: "Kind", Tag: "oneof"},
@@ -54,8 +46,7 @@ func TestConfig_Validation(t *testing.T) {
 		{
 			Name: "missing airbrake config when kind is airbrake",
 			Config: &Config{
-				Kind:   KindAirbrake,
-				Logger: &logger,
+				Kind: KindAirbrake,
 			},
 			ExpectedErrors: []confx.ExpectedValidationError{
 				{Path: "Airbrake.ProjectID", Tag: "required"},
@@ -66,8 +57,7 @@ func TestConfig_Validation(t *testing.T) {
 		{
 			Name: "invalid token length",
 			Config: &Config{
-				Kind:   KindAirbrake,
-				Logger: &logger,
+				Kind: KindAirbrake,
 				Airbrake: AirbrakeConfig{
 					ProjectID:   123,
 					Token:       "short-token",
@@ -82,7 +72,6 @@ func TestConfig_Validation(t *testing.T) {
 			Name: "airbrake config not validated when kind is log",
 			Config: &Config{
 				Kind:     KindLog,
-				Logger:   &logger,
 				Airbrake: AirbrakeConfig{
 					// missing required fields but should be skipped
 				},

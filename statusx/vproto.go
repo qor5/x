@@ -3,6 +3,7 @@ package statusx
 import (
 	"cmp"
 	"context"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -11,7 +12,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
 
-	kitlog "github.com/theplant/appkit/log"
 	vproto "github.com/theplant/validator/proto"
 
 	"github.com/qor5/x/v3/httpx"
@@ -55,7 +55,7 @@ func VProtoHTTPWriteErrorHook(next HTTPWriteErrorFunc) HTTPWriteErrorFunc {
 
 		werr := WriteVProtoHTTPError(err, w, r)
 		if werr != nil {
-			kitlog.ForceContext(ctx).WithError(werr).Log("msg", "failed to write vproto http error")
+			slog.ErrorContext(ctx, "failed to write vproto http error", "error", werr)
 		}
 
 		return &HTTPWriteErrorOutput{

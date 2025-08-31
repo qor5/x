@@ -34,7 +34,7 @@ func TestUnaryServerInterceptor(t *testing.T) {
 	middlewareCalls := make([]string, 0)
 
 	// Business middleware that should be bypassed for health checks
-	businessMiddleware := func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	businessMiddleware := func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		mu.Lock()
 		middlewareCalls = append(middlewareCalls, info.FullMethod)
 		mu.Unlock()

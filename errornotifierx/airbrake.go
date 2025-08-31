@@ -17,7 +17,7 @@ type AirbrakeConfig struct {
 }
 
 func SetupAirbrakeNotifier(lc *lifecycle.Lifecycle, conf *AirbrakeConfig) (errornotifier.Notifier, error) {
-	notifier, closer, err := NewAirbrakeNotifier(errornotifier.AirbrakeConfig{
+	notifier, err := NewAirbrakeNotifier(errornotifier.AirbrakeConfig{
 		ProjectID:   conf.ProjectID,
 		Token:       conf.Token,
 		Environment: conf.Environment,
@@ -27,7 +27,7 @@ func SetupAirbrakeNotifier(lc *lifecycle.Lifecycle, conf *AirbrakeConfig) (error
 	}
 
 	lc.Add(lifecycle.NewFuncActor(nil, func(_ context.Context) error {
-		if err := closer.Close(); err != nil {
+		if err := notifier.Close(); err != nil {
 			return errors.Wrap(err, "failed to close airbrake notifier")
 		}
 		return nil
@@ -36,16 +36,17 @@ func SetupAirbrakeNotifier(lc *lifecycle.Lifecycle, conf *AirbrakeConfig) (error
 	return notifier, nil
 }
 
-func NewAirbrakeNotifier(conf errornotifier.AirbrakeConfig) (errornotifier.Notifier, io.Closer, error) {
+func NewAirbrakeNotifier(conf errornotifier.AirbrakeConfig) (Notifier, error) {
 	notifier, closer, err := errornotifier.NewAirbrakeNotifier(conf)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "failed to create airbrake notifier")
+		return nil, errors.Wrap(err, "failed to create airbrake notifier")
 	}
-	return &notifierWrapper{Notifier: notifier}, closer, nil
+	return &notifierWrapper{Notifier: notifier, closer: closer}, nil
 }
 
 type notifierWrapper struct {
 	errornotifier.Notifier
+	closer io.Closer
 }
 
 func (n *notifierWrapper) Notify(aErr any, r *http.Request, context map[string]any) {
@@ -54,4 +55,8 @@ func (n *notifierWrapper) Notify(aErr any, r *http.Request, context map[string]a
 	} else {
 		n.Notifier.Notify(aErr, r, context)
 	}
+}
+
+func (n *notifierWrapper) Close() error {
+	return n.closer.Close()
 }
