@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
+	"github.com/qor5/x/v3/netx"
 	kitlog "github.com/theplant/appkit/log"
 	"github.com/theplant/inject/lifecycle"
 	"golang.org/x/net/http2"
@@ -17,20 +18,10 @@ import (
 type Listener net.Listener
 
 func SetupListener(lc *lifecycle.Lifecycle, conf *Config) (Listener, error) {
-	listener, err := net.Listen("tcp", conf.Address)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to listen on %s", conf.Address)
-	}
-	lc.Add(lifecycle.NewFuncActor(nil, func(ctx context.Context) error {
-		if err := listener.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
-			return errors.Wrap(err, "failed to close HTTP listener")
-		}
-		return nil
-	}).WithName("http-listener"))
-	return Listener(listener), nil
+	return netx.SetupListenerFactory("http-listener", conf.Address)(lc)
 }
 
-func SetupServerFactory(handler http.Handler) func(lc *lifecycle.Lifecycle, conf *Config, listener Listener, logger *kitlog.Logger) (*http.Server, error) {
+func SetupServerFactory(name string, handler http.Handler) func(lc *lifecycle.Lifecycle, conf *Config, listener Listener, logger *kitlog.Logger) (*http.Server, error) {
 	return func(lc *lifecycle.Lifecycle, conf *Config, listener Listener, logger *kitlog.Logger) (*http.Server, error) {
 		srv, err := NewServer(conf, handler)
 		if err != nil {
@@ -62,7 +53,7 @@ func SetupServerFactory(handler http.Handler) func(lc *lifecycle.Lifecycle, conf
 			}
 			// Graceful shutdown succeeded - no need to call Close()
 			return nil
-		}).WithName("http-server"))
+		}).WithName(name))
 		return srv, nil
 	}
 }
