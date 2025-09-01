@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"connectrpc.com/connect"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/metadata"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
@@ -30,17 +31,19 @@ func EnsureConnectError(ctx context.Context) bool {
 }
 
 func NewVProtoHTTPErrorWriter(ib *i18nx.I18N) func(http.Handler) http.Handler {
-	conf := &HTTPErrorWriterConfig{
-		I18N: ib,
-	}
+	conf := &HTTPErrorWriterConfig{I18N: ib}
 	conf = conf.WithHTTPWriteErrorHook(VProtoHTTPWriteErrorHook) // Compatible with vproto
 	return HTTPErrorWriter(conf)
 }
 
 func VProtoHTTPWriteErrorHook(next HTTPWriteErrorFunc) HTTPWriteErrorFunc {
+	errWriter := connect.NewErrorWriter()
 	return func(ctx context.Context, input *HTTPWriteErrorInput) (*HTTPWriteErrorOutput, error) {
 		if EnsureConnectError(ctx) {
-			return next(ctx, input)
+			// Why not use statusx.TranslateError? Just to avoid affecting the original prottp releated logic.
+			err, _ := TranslateStatusErrorOnly(ctx, input.Conf.I18N, input.Err)
+			written := WriteConnectErrorOnly(errWriter, input.W, input.R, err)
+			return &HTTPWriteErrorOutput{Written: written}, nil
 		}
 
 		err, w, r := input.Err, input.W, input.R
@@ -48,9 +51,7 @@ func VProtoHTTPWriteErrorHook(next HTTPWriteErrorFunc) HTTPWriteErrorFunc {
 		// Why not use statusx.TranslateError? Just to avoid affecting the original prottp releated logic.
 		err, translated := TranslateStatusErrorOnly(ctx, input.Conf.I18N, err)
 		if !translated {
-			return &HTTPWriteErrorOutput{
-				Written: false, // ignore errors that are not statusx.StatusError
-			}, nil
+			return &HTTPWriteErrorOutput{Written: false}, nil // ignore errors that are not statusx.StatusError
 		}
 
 		werr := WriteVProtoHTTPError(err, w, r)
@@ -58,9 +59,7 @@ func VProtoHTTPWriteErrorHook(next HTTPWriteErrorFunc) HTTPWriteErrorFunc {
 			slog.ErrorContext(ctx, "Failed to write vproto http error", "error", werr)
 		}
 
-		return &HTTPWriteErrorOutput{
-			Written: true,
-		}, nil
+		return &HTTPWriteErrorOutput{Written: true}, nil
 	}
 }
 
