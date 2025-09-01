@@ -17,12 +17,12 @@ import (
 
 type Listener net.Listener
 
-func SetupListener(lc *lifecycle.Lifecycle, conf *Config) (Listener, error) {
+func SetupListener(lc *lifecycle.Lifecycle, conf *ServerConfig) (Listener, error) {
 	return netx.SetupListenerFactory("http-listener", conf.Address)(lc)
 }
 
-func SetupServerFactory(name string, handler http.Handler) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *Config, listener Listener) (*http.Server, error) {
-	return func(ctx context.Context, lc *lifecycle.Lifecycle, conf *Config, listener Listener) (*http.Server, error) {
+func SetupServerFactory(name string, handler http.Handler) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *ServerConfig, listener Listener) (*http.Server, error) {
+	return func(ctx context.Context, lc *lifecycle.Lifecycle, conf *ServerConfig, listener Listener) (*http.Server, error) {
 		srv, err := NewServer(conf, handler)
 		if err != nil {
 			return nil, err
@@ -58,7 +58,7 @@ func SetupServerFactory(name string, handler http.Handler) func(ctx context.Cont
 	}
 }
 
-func NewServer(conf *Config, handler http.Handler) (*http.Server, error) {
+func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
 	srv := &http.Server{
 		ReadTimeout:       conf.ReadTimeout,
 		ReadHeaderTimeout: conf.ReadHeaderTimeout,
