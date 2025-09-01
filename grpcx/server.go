@@ -14,12 +14,12 @@ import (
 
 type Listener net.Listener
 
-func SetupListener(lc *lifecycle.Lifecycle, conf *Config) (Listener, error) {
+func SetupListener(lc *lifecycle.Lifecycle, conf *ServerConfig) (Listener, error) {
 	return netx.SetupListenerFactory("grpc-listener", conf.Address)(lc)
 }
 
-func SetupServerFactory(name string, opts ...grpc.ServerOption) func(ctx context.Context, lc *lifecycle.Lifecycle, listener Listener, conf *Config) (*grpc.Server, error) {
-	return func(ctx context.Context, lc *lifecycle.Lifecycle, listener Listener, conf *Config) (*grpc.Server, error) {
+func SetupServerFactory(name string, opts ...grpc.ServerOption) func(ctx context.Context, lc *lifecycle.Lifecycle, listener Listener, conf *ServerConfig) (*grpc.Server, error) {
+	return func(ctx context.Context, lc *lifecycle.Lifecycle, listener Listener, conf *ServerConfig) (*grpc.Server, error) {
 		grpcServer := grpc.NewServer(opts...)
 
 		if conf.RegisterReflection {

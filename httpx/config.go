@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type Config struct {
+type ServerConfig struct {
 	Address           string         `confx:"address" usage:"HTTP server address" validate:"required"`
 	ReadTimeout       time.Duration  `confx:"readTimeout" usage:"maximum duration before timing out read of the request"`
 	ReadHeaderTimeout time.Duration  `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers" validate:"ltefield=ReadTimeout"`
