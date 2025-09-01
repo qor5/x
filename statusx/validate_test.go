@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/qor5/x/v3/statusx/gen/testdata"
+	testdatav1 "github.com/qor5/x/v3/statusx/gen/testdata/v1"
 )
 
 type mockPgvErr struct {
@@ -89,7 +89,7 @@ func TestProtoGenValidate(t *testing.T) {
 	cases := []testCase{
 		{
 			name: "one error validate all",
-			input: &testdata.TestValidateError{
+			input: &testdatav1.TestValidateError{
 				GivenName:  lo.ToPtr("Terry"),
 				FamilyName: lo.ToPtr("X"),
 			},
@@ -99,7 +99,7 @@ func TestProtoGenValidate(t *testing.T) {
 		},
 		{
 			name: "one more error validate all",
-			input: &testdata.TestValidateError{
+			input: &testdatav1.TestValidateError{
 				GivenName:  lo.ToPtr("T"),
 				FamilyName: lo.ToPtr("X"),
 			},
@@ -109,7 +109,7 @@ func TestProtoGenValidate(t *testing.T) {
 		},
 		{
 			name: "error validate with field prefix",
-			input: &testdata.TestValidateError{
+			input: &testdatav1.TestValidateError{
 				GivenName:  lo.ToPtr("Terry"),
 				FamilyName: lo.ToPtr("X"),
 			},

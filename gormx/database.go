@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -13,7 +14,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pkg/errors"
-	kitlog "github.com/theplant/appkit/log"
 	"github.com/theplant/inject/lifecycle"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -37,31 +37,34 @@ type DatabaseConfig struct {
 	AuthMethod      AuthMethod    `confx:"authMethod" usage:"Authentication method: 'password' or 'iam'" validate:"required,oneof=password iam"`
 }
 
-func SetupDatabase(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
-	db, closer, err := Open(ctx, conf)
-	if err != nil {
-		return nil, err
-	}
+var SetupDatabase = SetupDatabaseFactory("database")
 
-	lc.Add(lifecycle.NewFuncActor(nil, func(_ context.Context) error {
-		if err := closer.Close(); err != nil {
-			return errors.Wrap(err, "failed to close database")
+func SetupDatabaseFactory(name string) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
+	return func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
+		db, closer, err := Open(ctx, conf)
+		if err != nil {
+			return nil, err
 		}
-		return nil
-	}).WithName("database"))
 
-	return db, nil
+		lc.Add(lifecycle.NewFuncActor(nil, func(_ context.Context) error {
+			if err := closer.Close(); err != nil {
+				return errors.Wrap(err, "failed to close database")
+			}
+			return nil
+		}).WithName(name))
+
+		return db, nil
+	}
 }
 
 func Open(ctx context.Context, conf *DatabaseConfig) (*gorm.DB, io.Closer, error) {
 	var (
 		dialector gorm.Dialector
 		err       error
-		logger    = kitlog.ForceContext(ctx)
 	)
 	switch conf.AuthMethod {
 	case AuthMethodIAM:
-		logger.Info().Log("msg", "Using IAM authentication to connect to database")
+		slog.InfoContext(ctx, "Using IAM authentication to connect to database")
 		awsConfig, err := config.LoadDefaultConfig(ctx)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "failed to load AWS config")
@@ -71,7 +74,7 @@ func Open(ctx context.Context, conf *DatabaseConfig) (*gorm.DB, io.Closer, error
 			return nil, nil, err
 		}
 	case AuthMethodPassword:
-		logger.Info().Log("msg", "Using password authentication to connect to database")
+		slog.InfoContext(ctx, "Using password authentication to connect to database")
 		dialector, err = NewDefaultDialector(conf.DSN)
 		if err != nil {
 			return nil, nil, err
@@ -107,7 +110,6 @@ func Open(ctx context.Context, conf *DatabaseConfig) (*gorm.DB, io.Closer, error
 		return nil, nil, errors.Wrap(err, "failed to setup omit associations plugin for gorm.DB")
 	}
 
-	conf.Tracing.Logger = &logger
 	if err := db.Use(NewTracingPlugin(&conf.Tracing)); err != nil {
 		return nil, nil, errors.Wrap(err, "failed to setup tracing for gorm.DB")
 	}
@@ -137,8 +139,6 @@ func Open(ctx context.Context, conf *DatabaseConfig) (*gorm.DB, io.Closer, error
 }
 
 func buildIAMAuthToken(ctx context.Context, endpoint, region, dbUser string, credProvider aws.CredentialsProvider) (string, error) {
-	logger := kitlog.ForceContext(ctx)
-
 	var token string
 	if err := backoff.RetryNotify(
 		func() error {
@@ -159,13 +159,13 @@ func buildIAMAuthToken(ctx context.Context, endpoint, region, dbUser string, cre
 			Clock:               backoff.SystemClock,
 		}, ctx),
 		func(err error, next time.Duration) {
-			logger.WithError(err).Log("msg", "failed to get IAM Token, will retry", "retryIn", next.String())
+			slog.ErrorContext(ctx, "Failed to get IAM Token, will retry", "retryIn", next.String(), "error", err)
 		},
 	); err != nil {
 		return "", errors.Wrap(err, "failed to get IAM auth token after retries")
 	}
 
-	logger.Info().Log("msg", "Successfully got IAM Token.")
+	slog.InfoContext(ctx, "Successfully got IAM Token")
 	return token, nil
 }
 

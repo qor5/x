@@ -411,8 +411,8 @@ github.com/theplant/htmlgo v1.0.3 h1:G7/YSf8OrOIRHVQ13avd78T/GV1kDl/jMwpQURrXB0o
 github.com/theplant/htmlgo v1.0.3/go.mod h1:pCKSFJsoVNkyW+yN2i1Mst+8130NSQzIU7L2IbnuyKg=
 github.com/theplant/htmltestingutils v0.0.0-20190423050759-0e06de7b6967 h1:yPrgtU8bj7Q/XbXgjjmngZtOhsUufBAraruNwxv/eXM=
 github.com/theplant/htmltestingutils v0.0.0-20190423050759-0e06de7b6967/go.mod h1:86iN4EAYaQbx1VTW5uPslTIviRkYH8CzslMC//g+BgY=
-github.com/theplant/inject v1.0.0 h1:w4JpRKiotNjiqhlO6v4y5U+O4UoqbP/NQ3APY6KFiTA=
-github.com/theplant/inject v1.0.0/go.mod h1:vuuYp7lKifex8HfI4izobKSqulfhpWIvGvW2/pP4Rqo=
+github.com/theplant/inject v1.0.2 h1:JXN2C/bAWJ9COG53WGoM9npJyYpwufYTHop+x2abDaQ=
+github.com/theplant/inject v1.0.2/go.mod h1:vuuYp7lKifex8HfI4izobKSqulfhpWIvGvW2/pP4Rqo=
 github.com/theplant/osenv v0.0.2 h1:SI2I/gLQQj5pQgpBQ8YKx/u4i7KE7yG2Gmr/ZORuxn8=
 github.com/theplant/osenv v0.0.2/go.mod h1:gUdlLzvmJb/dyBmXk+qEWiIhAN1tmVhYktzK1HHEz3c=
 github.com/theplant/ratelimiter v1.0.1 h1:JEtCbhdU8DHLb9gVLOosZwc/HIAsXqAt1mnq0hMUbt0=

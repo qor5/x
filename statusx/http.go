@@ -2,11 +2,10 @@ package statusx
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 
 	"connectrpc.com/connect"
-
-	kitlog "github.com/theplant/appkit/log"
 
 	"github.com/qor5/x/v3/hook"
 	"github.com/qor5/x/v3/i18nx"
@@ -67,7 +66,7 @@ func HTTPErrorWriter(conf *HTTPErrorWriterConfig) func(http.Handler) http.Handle
 							W:    w, R: r, Err: err,
 						})
 						if werr != nil {
-							kitlog.ForceContext(r.Context()).WithError(err).Log("msg", "failed to write error") // This should not happen generally
+							slog.ErrorContext(r.Context(), "failed to write http response error", "error", err) // This should not happen generally
 							return
 						}
 						written = output.Written

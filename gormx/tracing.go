@@ -26,7 +26,7 @@ type TracingConfig struct {
 	ExcludeQuery     bool                      `confx:"excludeQuery" usage:"Exclude query"`
 	ExcludeQueryVars bool                      `confx:"excludeQueryVars" usage:"Exclude query vars"`
 	QueryFormatter   func(query string) string `confx:"-" json:"-"`
-	Logger           *kitlog.Logger            `confx:"-" json:"-" inject:""`
+	Logger           *kitlog.Logger            `confx:"-" json:"-" inject:"optional"`
 }
 
 func NewTracingPlugin(conf *TracingConfig) gorm.Plugin {
