@@ -55,7 +55,7 @@ func VProtoHTTPWriteErrorHook(next HTTPWriteErrorFunc) HTTPWriteErrorFunc {
 
 		werr := WriteVProtoHTTPError(err, w, r)
 		if werr != nil {
-			slog.ErrorContext(ctx, "failed to write vproto http error", "error", werr)
+			slog.ErrorContext(ctx, "Failed to write vproto http error", "error", werr)
 		}
 
 		return &HTTPWriteErrorOutput{

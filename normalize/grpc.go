@@ -56,7 +56,7 @@ func UnaryServerInterceptor(defClientKind ClientKind) grpc.UnaryServerIntercepto
 			if len(resMD) > 0 {
 				if serr := grpc.SetHeader(ctx, resMD); serr != nil {
 					serr = statusx.WrapCode(serr, codes.Internal, "failed to set header").Err()
-					slog.ErrorContext(ctx, "failed to set header", "error", serr)
+					slog.ErrorContext(ctx, "Failed to set header", "error", serr)
 					if xerr == nil {
 						xerr = serr
 					}
