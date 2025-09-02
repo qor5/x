@@ -21,9 +21,6 @@ type (
 	HTTPWriteErrorOutput struct {
 		Written bool
 	}
-)
-
-type (
 	HTTPWriteErrorFunc func(ctx context.Context, input *HTTPWriteErrorInput) (*HTTPWriteErrorOutput, error)
 )
 
@@ -44,12 +41,13 @@ func HTTPErrorWriter(conf *HTTPErrorWriterConfig) func(http.Handler) http.Handle
 	return func(next http.Handler) http.Handler {
 		errWriter := connect.NewErrorWriter()
 		defWriteError := func(ctx context.Context, input *HTTPWriteErrorInput) (*HTTPWriteErrorOutput, error) {
-			// Why not use statusx.TranslateError? Just to avoid affecting the original prottp releated logic.
-			err, _ := TranslateStatusErrorOnly(ctx, input.Conf.I18N, input.Err)
+			err := TranslateError(ctx, input.Conf.I18N, input.Err)
 			written := WriteConnectErrorOnly(errWriter, input.W, input.R, err)
-			return &HTTPWriteErrorOutput{
-				Written: written,
-			}, nil
+			return &HTTPWriteErrorOutput{Written: written}, nil
+		}
+		writeError := defWriteError
+		if conf.writeErrorHook != nil {
+			writeError = conf.writeErrorHook(writeError)
 		}
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			newCtx := i18nx.NewContext(r.Context(), conf.I18N)
@@ -57,16 +55,12 @@ func HTTPErrorWriter(conf *HTTPErrorWriterConfig) func(http.Handler) http.Handle
 				if v := recover(); v != nil {
 					var written bool
 					if err, ok := v.(error); ok && err != nil {
-						writeError := defWriteError
-						if conf.writeErrorHook != nil {
-							writeError = conf.writeErrorHook(writeError)
-						}
 						output, werr := writeError(newCtx, &HTTPWriteErrorInput{
 							Conf: conf,
 							W:    w, R: r, Err: err,
 						})
 						if werr != nil {
-							slog.ErrorContext(r.Context(), "failed to write http response error", "error", err) // This should not happen generally
+							slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err) // This should not happen generally
 							return
 						}
 						written = output.Written

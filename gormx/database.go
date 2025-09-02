@@ -29,7 +29,7 @@ const (
 type DatabaseConfig struct {
 	DSN             string        `confx:"dsn" usage:"Database connection string" validate:"required"`
 	Debug           bool          `confx:"debug" usage:"Enable debug mode"`
-	Tracing         TracingConfig `confx:"tracing" usage:"Tracing configuration" inject:""`
+	Tracing         TracingConfig `confx:"tracing" usage:"Tracing configuration"`
 	MaxIdleConns    int           `confx:"maxIdleConns" usage:"Maximum number of idle connections" validate:"ltefield=MaxOpenConns"`
 	MaxOpenConns    int           `confx:"maxOpenConns" usage:"Maximum number of open connections"`
 	ConnMaxLifetime time.Duration `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`

@@ -5,12 +5,10 @@ import (
 	"log/slog"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/metadata"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 
-	"google.golang.org/grpc/codes"
 	stdmetadata "google.golang.org/grpc/metadata"
-
-	"github.com/qor5/x/v3/statusx"
 )
 
 // HeaderEnsureClientKind is just used for reverse proxy such as grpc-gateway
@@ -22,7 +20,7 @@ func UnaryServerInterceptor(defClientKind ClientKind) grpc.UnaryServerIntercepto
 		headerClientKind := metadata.ExtractIncoming(ctx).Get(HeaderEnsureClientKind)
 		if headerClientKind != "" {
 			if headerClientKind != string(ClientKindPublic) {
-				return nil, statusx.NewCodef(codes.Internal, "only %q is supported for %q", ClientKindPublic, HeaderEnsureClientKind).Err()
+				return nil, errors.Errorf("only %q is supported for %q", ClientKindPublic, HeaderEnsureClientKind)
 			}
 			clientKind = ClientKind(headerClientKind)
 		}
@@ -55,8 +53,8 @@ func UnaryServerInterceptor(defClientKind ClientKind) grpc.UnaryServerIntercepto
 		defer func() {
 			if len(resMD) > 0 {
 				if serr := grpc.SetHeader(ctx, resMD); serr != nil {
-					serr = statusx.WrapCode(serr, codes.Internal, "failed to set header").Err()
-					slog.ErrorContext(ctx, "failed to set header", "error", serr)
+					serr = errors.Wrap(serr, "failed to set grpc header")
+					slog.ErrorContext(ctx, "Failed to set grpc header", "error", serr)
 					if xerr == nil {
 						xerr = serr
 					}
