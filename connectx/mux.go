@@ -71,7 +71,10 @@ func NewVProtoMux(ib *i18nx.I18N, opts ...connect.HandlerOption) *Mux {
 					res, err := next(ctx, request)
 					if err != nil {
 						if !statusx.EnsureConnectError(ctx) {
-							// Panic to allow top-level VProto translation
+							// Panic here to propagate the error to a top-level handler that will translate it into a VProto error response.
+							// This approach ensures that errors not already marked for Connect error handling are consistently converted at a single point,
+							// rather than being handled piecemeal throughout the codebase. While using panic for control flow is unusual in Go,
+							// it is intentional here to centralize error translation and maintain consistent error responses for clients.
 							panic(err)
 						}
 					}
