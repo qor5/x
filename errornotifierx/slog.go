@@ -39,12 +39,18 @@ func (n *LogNotifier) WithLogger(logger *slog.Logger) *LogNotifier {
 	return n
 }
 
-func (n *LogNotifier) Notify(val any, req *http.Request, context map[string]any) {
+func (n *LogNotifier) Notify(val any, req *http.Request, logCtx map[string]any) {
+	var ctx context.Context
+	if req != nil {
+		ctx = req.Context()
+	} else {
+		ctx = context.Background()
+	}
 	n.logger.ErrorContext(
-		req.Context(),
+		ctx,
 		fmt.Sprintf("Error notification: %v", val),
 		"err", val,
-		"context", fmt.Sprint(context),
+		"context", fmt.Sprint(logCtx),
 		"stacktrace", string(debug.Stack()),
 	)
 }
