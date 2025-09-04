@@ -54,6 +54,10 @@ func (vh *ViewHelper) PasswordLoginURL() string {
 	return vh.b.passwordLoginURL
 }
 
+func (vh *ViewHelper) SendLoginCodeURL() string {
+	return vh.b.sendLoginCodeURL
+}
+
 func (vh *ViewHelper) LoginCodePageURL() string {
 	return vh.b.loginCodePageURL
 }

@@ -14,6 +14,7 @@ type Messages struct {
 	PasswordLabel       string
 	PasswordPlaceholder string
 	SignInBtn           string
+	SendCodeBtn         string
 	ForgetPasswordLink  string
 
 	ForgetPasswordPageTitle        string
@@ -94,6 +95,7 @@ var Messages_en_US = &Messages{
 	PasswordLabel:                       "Password",
 	PasswordPlaceholder:                 "Password",
 	SignInBtn:                           "Sign In",
+	SendCodeBtn:                         "Send Code",
 	ForgetPasswordLink:                  "Forget your password?",
 	ForgetPasswordPageTitle:             "Forget Your Password?",
 	ForgotMyPasswordTitle:               "I forgot my password",
@@ -166,6 +168,7 @@ var Messages_zh_CN = &Messages{
 	PasswordLabel:                       "密码",
 	PasswordPlaceholder:                 "密码",
 	SignInBtn:                           "登录",
+	SendCodeBtn:                         "发送验证码",
 	ForgetPasswordLink:                  "忘记密码？",
 	ForgetPasswordPageTitle:             "忘记密码？",
 	ForgotMyPasswordTitle:               "我忘记密码了",
@@ -238,6 +241,7 @@ var Messages_ja_JP = &Messages{
 	PasswordLabel:                       "パスワード",
 	PasswordPlaceholder:                 "パスワード",
 	SignInBtn:                           "ログイン",
+	SendCodeBtn:                         "認証コードを送信",
 	ForgetPasswordLink:                  "パスワードをお忘れですか？",
 	ForgetPasswordPageTitle:             "パスワードをお忘れですか？",
 	ForgotMyPasswordTitle:               "パスワードを忘れました",
