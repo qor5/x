@@ -2,7 +2,6 @@ package grpcx
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -35,7 +34,7 @@ func SetupConnFactory(name string, dialOpts ...grpc.DialOption) func(lc *lifecyc
 			if !strings.HasPrefix(conf.Address, "dns:///") {
 				return nil, errors.Errorf("load balancing policy %q requires dns:///address, got %q", conf.LoadBalancingPolicy, conf.Address)
 			}
-			opts = append(opts, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingConfig": [{%q:{}}]}`, conf.LoadBalancingPolicy)))
+			opts = append(opts, grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`))
 		}
 
 		conn, err := grpc.NewClient(conf.Address, append(opts, dialOpts...)...)
