@@ -36,6 +36,17 @@ func TestImport(t *testing.T) {
 	projectPath, err := os.Getwd()
 	projectPath = filepath.Join(projectPath, "mock")
 	assert.NoError(t, err)
+
+	// Store original data for restoration
+	originalTranslations, err := parser.ExportToTranslationsMap(projectPath)
+	assert.NoError(t, err)
+
+	// Cleanup function to restore original data
+	t.Cleanup(func() {
+		err := parser.ImportFromTranslationsMap(projectPath, originalTranslations)
+		assert.NoError(t, err)
+	})
+
 	translationMap, err := csv.CsvToTranslationsMap(projectPath + "/test_import.csv")
 	assert.NoError(t, err)
 	err = parser.ImportFromTranslationsMap(projectPath, translationMap)
@@ -54,6 +65,5 @@ func TestImport(t *testing.T) {
 			"mock/messages/name":        "New User CN",
 		},
 	}
-	err = parser.ImportFromTranslationsMap(projectPath, translationsMap)
 	assert.Equal(t, want, translationsMap)
 }

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package testdata.v1;
+
+import "google/protobuf/struct.proto";
+import "validate/validate.proto";
+
+// TestValidateError is used in tests to verify PGV error conversion behavior.
+message TestValidateError {
+  map<string, google.protobuf.Value> metadata_public = 1;
+
+  // Given name with length constraints.
+  optional string given_name = 3 [(validate.rules).string = { min_len: 2, max_len: 5 }];
+
+  // Family name with length constraints.
+  optional string family_name = 4 [(validate.rules).string = { min_len: 2, max_len: 5 }];
+}
+
+

@@ -1,5 +1,7 @@
 .idea
 *.DS_Store
+.vscode
 __*
 !__tests__
 vite.config.ts.timestamp-*.mjs
+.cursor

@@ -1,5 +1,5 @@
 <template>
-  <label class="v-label theme--light" v-html="label"></label>
+  <label class="v-label theme--light" v-html="sanitizeHtml(label)"></label>
   <v-card v-if="internalSelectedItems.length > 0" variant="flat" class="mb-2">
     <v-list>
       <draggable
@@ -49,8 +49,17 @@
 </template>
 <script setup lang="ts">
 import draggable from 'vuedraggable'
-
+import DOMPurify from 'dompurify'
 import { onMounted, Ref, ref } from 'vue'
+
+function sanitizeHtml(html: string) {
+  return html
+    ? DOMPurify.sanitize(html, {
+        ALLOWED_TAGS: ['span', 'p', 'br', 'strong', 'b', 'em', 'i', 'a'],
+        ALLOWED_ATTR: ['class', 'href', 'target', 'rel']
+      })
+    : ''
+}
 
 const props = defineProps({
   items: {
