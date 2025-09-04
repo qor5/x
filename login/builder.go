@@ -119,6 +119,7 @@ type Builder struct {
 	// LoginCode URLs
 	loginCodePageURL     string
 	validateLoginCodeURL string
+	sendLoginCodeURL     string
 
 	// Page functions
 	loginPageFunc                 web.PageFunc
@@ -190,6 +191,7 @@ func New() *Builder {
 
 		validateLoginCodeURL: "/auth/logincode/validate",
 		loginCodePageURL:     "/auth/logincode",
+		sendLoginCodeURL:     "/auth/logincode/send",
 
 		sessionMaxAge: 60 * 60,
 		cookieConfig: CookieConfig{
@@ -311,6 +313,7 @@ func (b *Builder) URIPrefix(v string) (r *Builder) {
 	b.resetPasswordLinkSentPageURL = prefix + b.resetPasswordLinkSentPageURL
 	b.validateLoginCodeURL = prefix + b.validateLoginCodeURL
 	b.loginCodePageURL = prefix + b.loginCodePageURL
+	b.sendLoginCodeURL = prefix + b.sendLoginCodeURL
 
 	return b
 }
@@ -965,7 +968,7 @@ func (b *Builder) authUserPass(account string, password string) (user interface{
 	return user, nil
 }
 
-func (b *Builder) userWhatsAppLogin(w http.ResponseWriter, r *http.Request) {
+func (b *Builder) userCodeLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -1891,6 +1894,7 @@ func (b *Builder) MountAPI(mux *http.ServeMux) {
 	}
 	if b.loginCodeEnabled {
 		mux.HandleFunc(b.validateLoginCodeURL, b.loginCodeDo)
+		mux.HandleFunc(b.sendLoginCodeURL, b.userCodeLogin)
 	}
 	if b.oauthEnabled {
 		mux.HandleFunc(b.oauthBeginURL, b.beginAuth)
