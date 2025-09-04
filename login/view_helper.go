@@ -30,6 +30,10 @@ func (vh *ViewHelper) UserPassEnabled() bool {
 	return vh.b.userPassEnabled
 }
 
+func (vh *ViewHelper) UserWhatsAppEnabled() bool {
+	return vh.b.loginCodeEnabled
+}
+
 func (vh *ViewHelper) TOTPEnabled() bool {
 	return vh.b.totpEnabled
 }
@@ -50,6 +54,10 @@ func (vh *ViewHelper) PasswordLoginURL() string {
 	return vh.b.passwordLoginURL
 }
 
+func (vh *ViewHelper) LoginCodePageURL() string {
+	return vh.b.loginCodePageURL
+}
+
 func (vh *ViewHelper) ForgetPasswordPageURL() string {
 	return vh.b.forgetPasswordPageURL
 }
@@ -68,6 +76,10 @@ func (vh *ViewHelper) ChangePasswordURL() string {
 
 func (vh *ViewHelper) ValidateTOTPURL() string {
 	return vh.b.validateTOTPURL
+}
+
+func (vh *ViewHelper) ValidateLoginCodeURL() string {
+	return vh.b.validateLoginCodeURL
 }
 
 func (vh *ViewHelper) RecaptchaSiteKey() string {
@@ -276,6 +288,10 @@ func (vh *ViewHelper) GetFailFlashMessage(msgr *Messages, w http.ResponseWriter,
 		return msgr.ErrorTOTPCodeReused
 	case FailCodeIncorrectRecaptchaToken:
 		return msgr.ErrorIncorrectRecaptchaToken
+	case FailCodeInvalidLoginCode:
+		return msgr.ErrorInvalidLoginCode
+	case FailCodeLoginTokenExpired:
+		return msgr.ErrorLoginTokenExpired
 	}
 
 	return ""

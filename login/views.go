@@ -476,3 +476,33 @@ func defaultTOTPValidatePage(vh *ViewHelper) web.PageFunc {
 		return
 	}
 }
+
+func defaultLoginCodeValidatePageFunc(vh *ViewHelper) web.PageFunc {
+	return func(ctx *web.EventContext) (r web.PageResponse, err error) {
+		msgr := i18n.MustGetModuleMessages(ctx.R, I18nLoginKey, Messages_en_US).(*Messages)
+
+		r.PageTitle = msgr.LoginCodePageTitle
+		r.Body = Div(
+			Link(StyleCSSURL).Type("text/css").Rel("stylesheet"),
+			DefaultViewCommon.Notice(vh, msgr, ctx.W, ctx.R),
+			Div(
+				Div(
+					H1(msgr.LoginCodeTitle).
+						Class(DefaultViewCommon.TitleClass),
+					Label(msgr.LoginCodeEnterPrompt),
+				),
+				Form(
+					Input("logincode").Placeholder(msgr.WhatsAppLoginCodePlaceholder).
+						Class(DefaultViewCommon.InputClass).
+						Class("mt-6").
+						Attr("autofocus", true),
+					Div(
+						Button(msgr.Verify).Class(DefaultViewCommon.ButtonClass),
+					).Class("mt-6"),
+				).Method(http.MethodPost).Action(vh.ValidateLoginCodeURL()),
+			).Class(DefaultViewCommon.WrapperClass).Class("text-center"),
+		)
+
+		return
+	}
+}

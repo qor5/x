@@ -37,12 +37,16 @@ const (
 	FailCodeAccountIsRequired
 	FailCodePasswordCannotBeEmpty
 	FailCodePasswordNotMatch
+	FailCodeTooManyAttempts
+	FailCodeInvalidLoginCode
 	FailCodeIncorrectPassword
 	FailCodeInvalidToken
 	FailCodeTokenExpired
 	FailCodeIncorrectTOTPCode
 	FailCodeTOTPCodeHasBeenUsed
 	FailCodeIncorrectRecaptchaToken
+	FailCodeLoginTokenExpired
+	FailCodeAccountNumberInvalid
 )
 
 type WarnCode int
@@ -134,6 +138,7 @@ const wrongLoginInputFlashCookieName = "qor5_wli_flash"
 type WrongLoginInputFlash struct {
 	Account  string
 	Password string
+	LoginCode string
 }
 
 func (b *Builder) setWrongLoginInputFlash(w http.ResponseWriter, f WrongLoginInputFlash) {
