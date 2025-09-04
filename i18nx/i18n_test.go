@@ -84,11 +84,11 @@ func TestI18N(t *testing.T) {
 	}
 
 	in, err := New(strings.NewReader(`
-key,en,ja,zh
-google,Google,グーグル,谷歌
+key,zh,en,ja
+google,谷歌,Google,グーグル
 sub,%s,%s,%s
 sub2,%m,%m,%m
-visit,"Lookup: %m.","検索: %m.","查找: %m."`))
+visit,"查找: %m.","Lookup: %m.","検索: %m."`))
 	require.NoError(t, err)
 
 	for _, test := range tests {
