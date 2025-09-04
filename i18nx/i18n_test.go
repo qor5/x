@@ -233,8 +233,8 @@ func TestTmplKey_Comparable(t *testing.T) {
 
 func TestI18N_MatchStrings(t *testing.T) {
 	in, err := New(strings.NewReader(`
-key,en,ja,zh,fr
-test,Test,テスト,测试,Test`))
+key,zh,en,ja,fr
+test,测试,Test,テスト,Test`))
 	require.NoError(t, err)
 
 	tests := []struct {
