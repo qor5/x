@@ -117,6 +117,16 @@ func (b *VXDialogBuilder) Persistent(v bool) (r *VXDialogBuilder) {
 	return b
 }
 
+func (b *VXDialogBuilder) ContentPadding(v string) (r *VXDialogBuilder) {
+	b.tag.Attr("content-padding", v)
+	return b
+}
+
+func (b *VXDialogBuilder) ContentOnlyMode(v bool) (r *VXDialogBuilder) {
+	b.tag.Attr(":content-only-mode", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXDialogBuilder) ContentHeight(v int) (r *VXDialogBuilder) {
 	b.tag.Attr("content-height", h.JSONString(v))
 	return b
