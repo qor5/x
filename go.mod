@@ -25,7 +25,6 @@ require (
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/jinzhu/configor v1.2.2
 	github.com/jinzhu/inflection v1.0.0
-	github.com/jjeffery/errors v1.0.3
 	github.com/lib/pq v1.10.9
 	github.com/manifoldco/promptui v0.9.0
 	github.com/markbates/goth v1.80.0
@@ -139,6 +138,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/jjeffery/errors v1.0.3 // indirect
 	github.com/jjeffery/kv v0.8.1 // indirect
 	github.com/jonboulle/clockwork v0.3.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
