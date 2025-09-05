@@ -14,6 +14,7 @@ type Messages struct {
 	PasswordLabel       string
 	PasswordPlaceholder string
 	SignInBtn           string
+	SendCodeBtn         string
 	ForgetPasswordLink  string
 
 	ForgetPasswordPageTitle        string
@@ -57,6 +58,11 @@ type Messages struct {
 	TOTPValidateCodeLabel       string
 	TOTPValidateCodePlaceholder string
 
+	LoginCodePageTitle   string
+	LoginCodeTitle       string
+	LoginCodeEnterPrompt string
+	WhatsAppLoginCodePlaceholder string
+
 	ErrorSystemError                    string
 	ErrorCompleteUserAuthFailed         string
 	ErrorUserNotFound                   string
@@ -71,6 +77,8 @@ type Messages struct {
 	ErrorIncorrectTOTPCode              string
 	ErrorTOTPCodeReused                 string
 	ErrorIncorrectRecaptchaToken        string
+	ErrorInvalidLoginCode               string
+	ErrorLoginTokenExpired              string
 
 	WarnPasswordHasBeenChanged string
 
@@ -87,6 +95,7 @@ var Messages_en_US = &Messages{
 	PasswordLabel:                       "Password",
 	PasswordPlaceholder:                 "Password",
 	SignInBtn:                           "Sign In",
+	SendCodeBtn:                         "Send Code",
 	ForgetPasswordLink:                  "Forget your password?",
 	ForgetPasswordPageTitle:             "Forget Your Password?",
 	ForgotMyPasswordTitle:               "I forgot my password",
@@ -123,6 +132,12 @@ var Messages_en_US = &Messages{
 	TOTPValidateEnterCodePrompt:         "Enter the provided one-time code below",
 	TOTPValidateCodeLabel:               "Authenticator passcode",
 	TOTPValidateCodePlaceholder:         "Passcode",
+
+	LoginCodePageTitle:   "Enter WhatsApp Code",
+	LoginCodeTitle:       "Enter Code",
+	LoginCodeEnterPrompt: "Enter the code sent to your WhatsApp",
+	WhatsAppLoginCodePlaceholder: "Code",
+
 	ErrorSystemError:                    "System Error",
 	ErrorCompleteUserAuthFailed:         "Complete User Auth Failed",
 	ErrorUserNotFound:                   "User Not Found",
@@ -137,6 +152,8 @@ var Messages_en_US = &Messages{
 	ErrorIncorrectTOTPCode:              "Incorrect passcode",
 	ErrorTOTPCodeReused:                 "This passcode has been used",
 	ErrorIncorrectRecaptchaToken:        "Incorrect reCAPTCHA token",
+	ErrorInvalidLoginCode:               "Invalid login code",
+	ErrorLoginTokenExpired:              "Login token expired",
 	WarnPasswordHasBeenChanged:          "Password has been changed, please sign-in again",
 	InfoPasswordSuccessfullyReset:       "Password successfully reset, please sign-in again",
 	InfoPasswordSuccessfullyChanged:     "Password successfully changed, please sign-in again",
@@ -151,6 +168,7 @@ var Messages_zh_CN = &Messages{
 	PasswordLabel:                       "密码",
 	PasswordPlaceholder:                 "密码",
 	SignInBtn:                           "登录",
+	SendCodeBtn:                         "发送验证码",
 	ForgetPasswordLink:                  "忘记密码？",
 	ForgetPasswordPageTitle:             "忘记密码？",
 	ForgotMyPasswordTitle:               "我忘记密码了",
@@ -187,6 +205,12 @@ var Messages_zh_CN = &Messages{
 	TOTPValidateEnterCodePrompt:         "在下面输入提供的一次性代码",
 	TOTPValidateCodeLabel:               "Authenticator验证码",
 	TOTPValidateCodePlaceholder:         "passcode",
+
+	LoginCodePageTitle:   "输入WhatsApp代码",
+	LoginCodeTitle:       "输入代码",
+	LoginCodeEnterPrompt: "输入发送到您WhatsApp的代码",
+	WhatsAppLoginCodePlaceholder: "代码",
+
 	ErrorSystemError:                    "系统错误",
 	ErrorCompleteUserAuthFailed:         "用户认证失败",
 	ErrorUserNotFound:                   "找不到该用户",
@@ -201,6 +225,8 @@ var Messages_zh_CN = &Messages{
 	ErrorIncorrectTOTPCode:              "passcode错误",
 	ErrorTOTPCodeReused:                 "这个passcode已经被使用过了",
 	ErrorIncorrectRecaptchaToken:        "reCAPTCHA token错误",
+	ErrorInvalidLoginCode:               "登录码无效",
+	ErrorLoginTokenExpired:              "登录码已过期",
 	WarnPasswordHasBeenChanged:          "密码被修改了，请重新登录",
 	InfoPasswordSuccessfullyReset:       "密码重置成功，请重新登录",
 	InfoPasswordSuccessfullyChanged:     "密码修改成功，请重新登录",
@@ -215,6 +241,7 @@ var Messages_ja_JP = &Messages{
 	PasswordLabel:                       "パスワード",
 	PasswordPlaceholder:                 "パスワード",
 	SignInBtn:                           "ログイン",
+	SendCodeBtn:                         "認証コードを送信",
 	ForgetPasswordLink:                  "パスワードをお忘れですか？",
 	ForgetPasswordPageTitle:             "パスワードをお忘れですか？",
 	ForgotMyPasswordTitle:               "パスワードを忘れました",
@@ -251,6 +278,12 @@ var Messages_ja_JP = &Messages{
 	TOTPValidateEnterCodePrompt:         "提供されたワンタイムコードを以下に入力してください",
 	TOTPValidateCodeLabel:               "認証パスコード",
 	TOTPValidateCodePlaceholder:         "パスコード",
+
+	LoginCodePageTitle:   "WhatsAppコードを入力",
+	LoginCodeTitle:       "コードを入力",
+	LoginCodeEnterPrompt: "WhatsAppに送信されたコードを入力してください",
+	WhatsAppLoginCodePlaceholder: "コード",
+
 	ErrorSystemError:                    "システムエラー",
 	ErrorCompleteUserAuthFailed:         "ユーザー認証に失敗しました",
 	ErrorUserNotFound:                   "このユーザーは存在しません",
@@ -265,6 +298,8 @@ var Messages_ja_JP = &Messages{
 	ErrorIncorrectTOTPCode:              "パスコードが間違っています",
 	ErrorTOTPCodeReused:                 "このパスコードは既に利用されています",
 	ErrorIncorrectRecaptchaToken:        "reCAPTCHAトークンが間違っています",
+	ErrorInvalidLoginCode:               "無効なログインコード",
+	ErrorLoginTokenExpired:              "ログインコードの有効期限が切れました",
 	WarnPasswordHasBeenChanged:          "パスワードが変更されました。再度ログインしてください",
 	InfoPasswordSuccessfullyReset:       "パスワードのリセットに成功しました。再度ログインしてください",
 	InfoPasswordSuccessfullyChanged:     "パスワードの変更に成功しました。再度ログインしてください",
