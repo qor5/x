@@ -3,7 +3,7 @@ package gobusx
 import (
 	"context"
 
-	"github.com/jjeffery/errors"
+	"github.com/pkg/errors"
 	"github.com/qor5/go-bus/pgbus"
 	"gorm.io/gorm"
 )
