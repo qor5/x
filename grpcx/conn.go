@@ -43,7 +43,10 @@ func SetupConnFactory(name string, dialOpts ...grpc.DialOption) func(lc *lifecyc
 		}
 
 		lc.Add(lifecycle.NewFuncActor(nil, func(_ context.Context) error {
-			return conn.Close()
+			if err := conn.Close(); err != nil {
+				return errors.Wrap(err, "failed to close gRPC connection")
+			}
+			return nil
 		}).WithName(name))
 
 		return conn, nil
