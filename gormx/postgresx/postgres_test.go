@@ -1,4 +1,4 @@
-package gormx
+package postgresx
 
 import (
 	"errors"
@@ -7,13 +7,41 @@ import (
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/stretchr/testify/require"
+	"github.com/theplant/testenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func TestWithCauseVsWithoutCause(t *testing.T) {
-	dsn := db.Config.Dialector.(*postgres.Dialector).Config.DSN
+var dsn string
 
+func TestMain(m *testing.M) {
+	env, err := testenv.New().DBEnable(true).SetUp()
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		if err := env.TearDown(); err != nil {
+			panic(err)
+		}
+	}()
+
+	dsn = env.DB.Config.Dialector.(*postgres.Dialector).Config.DSN
+
+	m.Run()
+}
+
+func TestSavePointerDialectorInterface(t *testing.T) {
+	// Test with PostgreSQL (which supports SavePointerDialectorInterface)
+	d := postgres.Open(dsn)
+	_, ok := d.(gorm.SavePointerDialectorInterface)
+	require.True(t, ok)
+
+	d = Open(dsn)
+	_, ok = d.(gorm.SavePointerDialectorInterface)
+	require.True(t, ok)
+}
+
+func TestWithCauseVsWithoutCause(t *testing.T) {
 	// Three scenarios to compare
 	withoutTranslateDB, err := gorm.Open(
 		postgres.Open(dsn),
@@ -28,7 +56,7 @@ func TestWithCauseVsWithoutCause(t *testing.T) {
 	require.NoError(t, err)
 
 	withCauseDB, err := gorm.Open(
-		WithCause(postgres.Open(dsn)),
+		Open(dsn),
 		&gorm.Config{TranslateError: true},
 	)
 	require.NoError(t, err)
@@ -87,10 +115,8 @@ func TestWithCauseVsWithoutCause(t *testing.T) {
 }
 
 func TestWithCause_NoTranslationNeeded(t *testing.T) {
-	dsn := db.Config.Dialector.(*postgres.Dialector).Config.DSN
-
 	withCauseDB, err := gorm.Open(
-		WithCause(postgres.Open(dsn)),
+		Open(dsn),
 		&gorm.Config{TranslateError: true},
 	)
 	require.NoError(t, err)

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/qor5/confx"
+	"github.com/qor5/x/v3/gormx/postgresx"
 	"github.com/stretchr/testify/require"
-	"gorm.io/driver/postgres"
 )
 
 func TestConfig(t *testing.T) {
@@ -231,9 +231,9 @@ func TestNewDefaultDialector(t *testing.T) {
 				require.NotNil(t, got)
 
 				// Additional checks for the returned dialector.
-				dialector, ok := got.(*withCause)
-				require.True(t, ok, "Expected *withCause")
-				require.Equal(t, tt.args.dsn, dialector.Dialector.(*postgres.Dialector).Config.DSN)
+				dialector, ok := got.(*postgresx.Dialector)
+				require.True(t, ok, "Expected *postgresx.Dialector")
+				require.Equal(t, tt.args.dsn, dialector.Config.DSN)
 			}
 		})
 	}

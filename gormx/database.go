@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pkg/errors"
+	"github.com/qor5/x/v3/gormx/postgresx"
 	"github.com/theplant/inject/lifecycle"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -39,25 +40,33 @@ type DatabaseConfig struct {
 
 var SetupDatabase = SetupDatabaseFactory("database")
 
-func SetupDatabaseFactory(name string) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
+func SetupDatabaseFactory(name string, opts ...gorm.Option) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
 	return func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
-		db, closer, err := Open(ctx, conf)
+		db, closer, err := Open(ctx, conf, opts...)
 		if err != nil {
 			return nil, err
 		}
 
 		lc.Add(lifecycle.NewFuncActor(nil, func(_ context.Context) error {
-			if err := closer.Close(); err != nil {
-				return errors.Wrap(err, "failed to close database")
-			}
-			return nil
+			return closer.Close()
 		}).WithName(name))
 
 		return db, nil
 	}
 }
 
-func Open(ctx context.Context, conf *DatabaseConfig) (*gorm.DB, io.Closer, error) {
+type closerWrapper struct {
+	io.Closer
+}
+
+func (c *closerWrapper) Close() error {
+	if err := c.Closer.Close(); err != nil {
+		return errors.Wrap(err, "failed to close database connection")
+	}
+	return nil
+}
+
+func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm.DB, io.Closer, error) {
 	var (
 		dialector gorm.Dialector
 		err       error
@@ -85,33 +94,35 @@ func Open(ctx context.Context, conf *DatabaseConfig) (*gorm.DB, io.Closer, error
 
 	db, err := gorm.Open(
 		dialector,
-		&gorm.Config{
-			DisableForeignKeyConstraintWhenMigrating: true, // We don't want to use any foreign key constraint.
-			CreateBatchSize:                          100,
-			PrepareStmt:                              true,
-			// Enable GORM error translation to convert database-specific errors into standardized GORM errors.
-			// Benefits:
-			// 1. Cross-database compatibility: Unified error handling across different databases
-			//    - MySQL: "Error 1062: Duplicate entry 'xxx' for key 'xxx'" -> gorm.ErrDuplicatedKey
-			//    - PostgreSQL: "ERROR: duplicate key value violates unique constraint" -> gorm.ErrDuplicatedKey
-			// 2. Better error handling: Enables type-based error handling (errors.Is(err, gorm.ErrDuplicatedKey))
-			//    instead of fragile string matching
-			// 3. Clean abstraction: Business logic remains database-agnostic, making it easier to switch
-			//    database providers or run multiple databases in production
-			TranslateError: true,
-			// QueryFields:                              true,
-		},
+		append([]gorm.Option{
+			&gorm.Config{
+				DisableForeignKeyConstraintWhenMigrating: true, // We don't want to use any foreign key constraint.
+				CreateBatchSize:                          100,
+				PrepareStmt:                              true,
+				// Enable GORM error translation to convert database-specific errors into standardized GORM errors.
+				// Benefits:
+				// 1. Cross-database compatibility: Unified error handling across different databases
+				//    - MySQL: "Error 1062: Duplicate entry 'xxx' for key 'xxx'" -> gorm.ErrDuplicatedKey
+				//    - PostgreSQL: "ERROR: duplicate key value violates unique constraint" -> gorm.ErrDuplicatedKey
+				// 2. Better error handling: Enables type-based error handling (errors.Is(err, gorm.ErrDuplicatedKey))
+				//    instead of fragile string matching
+				// 3. Clean abstraction: Business logic remains database-agnostic, making it easier to switch
+				//    database providers or run multiple databases in production
+				TranslateError: true,
+				// QueryFields:                              true,
+			},
+		}, opts...)...,
 	)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to open database connection")
 	}
 
 	if err := db.Use(OmitAssociationsPlugin); err != nil {
-		return nil, nil, errors.Wrap(err, "failed to setup omit associations plugin for gorm.DB")
+		return nil, nil, errors.Wrap(err, "failed to setup omit associations plugin")
 	}
 
 	if err := db.Use(NewTracingPlugin(&conf.Tracing)); err != nil {
-		return nil, nil, errors.Wrap(err, "failed to setup tracing for gorm.DB")
+		return nil, nil, errors.Wrap(err, "failed to setup database tracing plugin")
 	}
 
 	if conf.Debug {
@@ -135,7 +146,7 @@ func Open(ctx context.Context, conf *DatabaseConfig) (*gorm.DB, io.Closer, error
 		sqlDB.SetConnMaxIdleTime(conf.ConnMaxIdleTime)
 	}
 
-	return db, sqlDB, nil
+	return db, &closerWrapper{sqlDB}, nil
 }
 
 func buildIAMAuthToken(ctx context.Context, endpoint, region, dbUser string, credProvider aws.CredentialsProvider) (string, error) {
@@ -206,20 +217,20 @@ func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProv
 		return nil
 	})
 	conn := stdlib.OpenDB(*conf, optBeforeConnect)
-	return WithCause(postgres.New(postgres.Config{
+	return postgresx.New(postgres.Config{
 		Conn: conn,
 		// We are using pgx as postgresql's database/sql driver, it enables prepared statement cache by default (extended protocol)
 		// PreferSimpleProtocol: true, // disables implicit prepared statement usage.
-	})), nil
+	}), nil
 }
 
 func NewDefaultDialector(dsn string) (gorm.Dialector, error) {
 	if dsn == "" {
 		return nil, errors.New("dsn is required")
 	}
-	return WithCause(postgres.New(postgres.Config{
+	return postgresx.New(postgres.Config{
 		DSN: dsn,
 		// We are using pgx as postgresql's database/sql driver, it enables prepared statement cache by default (extended protocol)
 		// PreferSimpleProtocol: true, // disables implicit prepared statement usage.
-	})), nil
+	}), nil
 }
