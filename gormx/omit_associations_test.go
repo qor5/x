@@ -4,10 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/theplant/testenv"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"gorm.io/gorm/logger"
 )
 
 type User struct {
@@ -22,26 +20,6 @@ type Address struct {
 	AddressLine string
 	UserID      string
 	User        User
-}
-
-var db *gorm.DB
-
-func TestMain(m *testing.M) {
-	env, err := testenv.New().DBEnable(true).SetUp()
-	if err != nil {
-		panic(err)
-	}
-	defer func() {
-		if err := env.TearDown(); err != nil {
-			panic(err)
-		}
-	}()
-
-	db = env.DB
-	db.Logger = db.Logger.LogMode(logger.Info)
-	db.Config.DisableForeignKeyConstraintWhenMigrating = true
-
-	m.Run()
 }
 
 func resetTables(t *testing.T) {

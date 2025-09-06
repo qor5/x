@@ -206,20 +206,20 @@ func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProv
 		return nil
 	})
 	conn := stdlib.OpenDB(*conf, optBeforeConnect)
-	return postgres.New(postgres.Config{
+	return WithCause(postgres.New(postgres.Config{
 		Conn: conn,
 		// We are using pgx as postgresql's database/sql driver, it enables prepared statement cache by default (extended protocol)
 		// PreferSimpleProtocol: true, // disables implicit prepared statement usage.
-	}), nil
+	})), nil
 }
 
 func NewDefaultDialector(dsn string) (gorm.Dialector, error) {
 	if dsn == "" {
 		return nil, errors.New("dsn is required")
 	}
-	return postgres.New(postgres.Config{
+	return WithCause(postgres.New(postgres.Config{
 		DSN: dsn,
 		// We are using pgx as postgresql's database/sql driver, it enables prepared statement cache by default (extended protocol)
 		// PreferSimpleProtocol: true, // disables implicit prepared statement usage.
-	}), nil
+	})), nil
 }

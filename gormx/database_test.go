@@ -231,9 +231,9 @@ func TestNewDefaultDialector(t *testing.T) {
 				require.NotNil(t, got)
 
 				// Additional checks for the returned dialector.
-				dialector, ok := got.(*postgres.Dialector)
-				require.True(t, ok, "Expected *postgres.Dialector")
-				require.Equal(t, tt.args.dsn, dialector.Config.DSN)
+				dialector, ok := got.(*withCause)
+				require.True(t, ok, "Expected *withCause")
+				require.Equal(t, tt.args.dsn, dialector.Dialector.(*postgres.Dialector).Config.DSN)
 			}
 		})
 	}
