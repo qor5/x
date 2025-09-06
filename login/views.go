@@ -492,7 +492,8 @@ func defaultLoginCodeValidatePageFunc(vh *ViewHelper) web.PageFunc {
 					Label(msgr.LoginCodeEnterPrompt),
 				),
 				Form(
-					Input("logincode").Placeholder(msgr.WhatsAppLoginCodePlaceholder).
+					Input("account").Type("hidden").Value(ctx.R.URL.Query().Get("account")),
+					Input("logincode").Placeholder(msgr.LoginCodePlaceholder).
 						Class(DefaultViewCommon.InputClass).
 						Class("mt-6").
 						Attr("autofocus", true),

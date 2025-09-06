@@ -153,7 +153,7 @@ type Builder struct {
 	snakePrimaryField    string
 	tUser                reflect.Type
 	userPassEnabled      bool
-	loginCodeEnabled  bool
+	loginCodeEnabled     bool
 	oauthEnabled         bool
 	sessionSecureEnabled bool
 	// key is provider
@@ -388,7 +388,7 @@ func (b *Builder) TOTPValidatePageFunc(v web.PageFunc) (r *Builder) {
 	return b
 }
 
-func (b *Builder) LoginCode(v web.PageFunc) (r *Builder) {
+func (b *Builder) LoginCodePageFunc(v web.PageFunc) (r *Builder) {
 	b.loginCodePageFunc = v
 	return b
 }
@@ -905,7 +905,8 @@ func (b *Builder) authUserLoginCode(account string, code string) (user interface
 		return user, ErrLoginCodeExpired
 	}
 
-	if ltoken != code {
+	// Empty code means user need a login code, not to verify it.
+	if ltoken != code && ltoken != "" {
 		if b.maxRetryCount > 0 {
 			if err = up.IncreaseRetryCount(b.db, b.newUserObject()); err != nil {
 				return user, err
@@ -926,7 +927,7 @@ func (b *Builder) authUserLoginCode(account string, code string) (user interface
 		}
 	}
 
-	return user, nil
+	return user, u.ConsumeLoginCode(b.db, b.newUserObject())
 }
 
 // return user if account exists even if there is an error returned
@@ -968,7 +969,7 @@ func (b *Builder) authUserPass(account string, password string) (user interface{
 	return user, nil
 }
 
-func (b *Builder) userCodeLogin(w http.ResponseWriter, r *http.Request) {
+func (b *Builder) sendUserCodeLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -1004,13 +1005,16 @@ func (b *Builder) userCodeLogin(w http.ResponseWriter, r *http.Request) {
 	account := r.FormValue("account")
 	user, err = b.userModel.(UserLoginCoder).FindUserByPhoneNumber(b.db, b.newUserObject(), account)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		switch err {
+		case gorm.ErrRecordNotFound:
 			SetFailCodeFlash(w, FailCodeUserNotFound)
-			http.Redirect(w, r, b.loginPageURL, http.StatusFound)
-			return
+		case ErrAccountNumberInvalid:
+			SetFailCodeFlash(w, FailCodeAccountNumberInvalid)
+		default:
+			log.Printf("failed to find user by phone number: %v", err)
+			SetFailCodeFlash(w, FailCodeSystemError)
 		}
-    log.Printf("failed to find user by phone number: %v", err)
-    SetFailCodeFlash(w, FailCodeSystemError)
+		http.Redirect(w, r, b.loginPageURL, http.StatusFound)
 		return
 	}
 
@@ -1022,15 +1026,19 @@ func (b *Builder) userCodeLogin(w http.ResponseWriter, r *http.Request) {
 
 	// send login code to user
 	loginCode, err := user.(UserLoginCoder).GenerateLoginCode(b.db, b.newUserObject())
-	err = user.(UserLoginCodeSender).SendLoginCode(account, loginCode)
+	if err != nil {
+		log.Printf("failed to generate login code: %v", err)
+		SetFailCodeFlash(w, FailCodeSystemError)
+		return
+	}
+	err = user.(UserLoginCodeSender).SendLoginCode(r, account, loginCode)
 	if err != nil {
 		log.Printf("failed to send login code: %v", err)
 		SetFailCodeFlash(w, FailCodeSystemError)
 		return
 	}
 
-	http.Redirect(w, r, b.validateLoginCodeURL, http.StatusFound)
-	return
+	web.Page(b.loginCodePageFunc).ServeHTTP(w, r)
 }
 
 func (b *Builder) loginCodeDo(w http.ResponseWriter, r *http.Request) {
@@ -1056,7 +1064,7 @@ func (b *Builder) loginCodeDo(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	account := r.FormValue("account")
-	loginCode := r.FormValue("code")
+	loginCode := r.FormValue("logincode")
 	user, err = b.authUserLoginCode(account, loginCode)
 	if err != nil {
 		if err == ErrUserGetLocked && b.afterUserLockedHook != nil {
@@ -1067,7 +1075,9 @@ func (b *Builder) loginCodeDo(w http.ResponseWriter, r *http.Request) {
 		}
 		var code FailCode
 		switch err {
-		case ErrInvalidLoginCode, ErrUserNotFound:
+		case ErrInvalidLoginCode:
+			code = FailCodeInvalidLoginCode
+		case ErrUserNotFound:
 			code = FailCodeIncorrectAccountNameOrPassword
 		case ErrUserLocked, ErrUserGetLocked:
 			code = FailCodeUserLocked
@@ -1084,8 +1094,17 @@ func (b *Builder) loginCodeDo(w http.ResponseWriter, r *http.Request) {
 
 	userID := objectID(user)
 	claims := UserClaims{
-		UserID:           userID,
-		RegisteredClaims: b.genBaseSessionClaim(userID),
+		UserID:             userID,
+		LoginCodeValidated: true,
+		RegisteredClaims:   b.genBaseSessionClaim(userID),
+	}
+  
+	if b.afterLoginHook != nil {
+		setCookieForRequest(r, &http.Cookie{Name: b.authCookieName, Value: b.mustGetSessionToken(claims)})
+		if err = b.wrapHook(b.afterLoginHook)(r, user); err != nil {
+			setNoticeOrPanic(w, err)
+			return
+		}
 	}
 
 	if err = b.setSecureCookiesByClaims(w, user, claims); err != nil {
@@ -1894,7 +1913,7 @@ func (b *Builder) MountAPI(mux *http.ServeMux) {
 	}
 	if b.loginCodeEnabled {
 		mux.HandleFunc(b.validateLoginCodeURL, b.loginCodeDo)
-		mux.HandleFunc(b.sendLoginCodeURL, b.userCodeLogin)
+		mux.HandleFunc(b.sendLoginCodeURL, b.sendUserCodeLogin)
 	}
 	if b.oauthEnabled {
 		mux.HandleFunc(b.oauthBeginURL, b.beginAuth)
