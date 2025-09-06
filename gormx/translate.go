@@ -2,6 +2,7 @@ package gormx
 
 import (
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -20,12 +21,13 @@ func WithCause(d gorm.Dialector) gorm.Dialector {
 }
 
 func (d *withCause) Translate(cause error) error {
-	if et, ok := d.Dialector.(gorm.ErrorTranslator); ok {
-		translatedErr := et.Translate(cause)
-		if translatedErr == cause {
-			return translatedErr
-		}
-		return errors.Join(translatedErr, cause)
+	et, ok := d.Dialector.(gorm.ErrorTranslator)
+	if !ok {
+		panic(fmt.Sprintf("dialector %T does not implement gorm.ErrorTranslator", d.Dialector))
 	}
-	return cause
+	translatedErr := et.Translate(cause)
+	if translatedErr == cause {
+		return translatedErr
+	}
+	return errors.Join(translatedErr, cause)
 }
