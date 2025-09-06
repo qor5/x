@@ -1,9 +1,11 @@
 package login
 
 import (
-	"encoding/base64"
 	"fmt"
+	"net/http"
+	"strings"
 	"time"
+	"unicode"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -18,27 +20,52 @@ type UserLoginCoder interface {
 }
 
 type UserLoginCodeSender interface {
-	SendLoginCode(phoneNumber string, code string) error
+	SendLoginCode(r *http.Request, phoneNumber string, code string) error
 }
 
 type UserLoginCode struct {
-	PhoneNumber            string `gorm:"index:,unique,where:phone_number!='' and deleted_at is null"`
-	ConfirmedAt         *time.Time
-	LoginToken          string `gorm:"index:,unique,where:login_token!=''"`
-	LoginCreatedAt      *time.Time
-	LoginTokenExpiredAt *time.Time
+	PhoneNumber        string `gorm:"index:,unique,where:phone_number!='' and deleted_at is null"`
+	ConfirmedAt        *time.Time
+	LoginCode          string `gorm:"index:,unique,where:login_code!=''"`
+	LoginCreatedAt     *time.Time
+	LoginCodeExpiredAt *time.Time
 }
 
-//var _ UserLoginCoder = (*UserLoginCode)(nil)
+var _ UserLoginCoder = (*UserLoginCode)(nil)
+
+const minPhoneNumberLength = 8
+
+func numbersOnly(s string) string {
+	return strings.Map(func(r rune) rune {
+		if unicode.IsNumber(r) {
+			return r
+		}
+		return -1
+	}, s)
+}
 
 func (up *UserLoginCode) FindUserByPhoneNumber(db *gorm.DB, model interface{}, phoneNumber string) (user interface{}, err error) {
-	err = db.Where("phone_number = ?", phoneNumber).
-		First(model).
-		Error
-	if err != nil {
-		return nil, err
+	phoneNumber = numbersOnly(phoneNumber)
+	if len(phoneNumber) < minPhoneNumberLength {
+		return nil, ErrAccountNumberInvalid
 	}
-	return model, nil
+	// Logic here is to try to find the phone number in the database, even
+	// if the user did not enter the international code. So we use a LIKE
+	// to check if there are more than one user with the same ending digits.
+	// If there are, we need more numbers. Otherwise, we can assume it's the correct user.
+	result := db.Model(model).Where("phone_number like ?", fmt.Sprintf("%%%s", phoneNumber)).
+		First(model)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	switch result.RowsAffected {
+	case 0:
+		return nil, gorm.ErrRecordNotFound
+	case 1:
+		return model, nil
+	default:
+		return nil, ErrAccountNumberInvalid
+	}
 }
 
 func (up *UserLoginCode) GetPhoneNumber() string {
@@ -50,8 +77,8 @@ func (up *UserLoginCode) GenerateLoginCodeExpiration(db *gorm.DB) (createdAt tim
 	return createdAt, createdAt.Add(10 * time.Minute)
 }
 
-func (up *UserLoginCode) GenerateLoginCode(db *gorm.DB, model interface{}) (token string, err error) {
-	token = base64.URLEncoding.EncodeToString([]byte(uuid.NewString()))
+func (up *UserLoginCode) GenerateLoginCode(db *gorm.DB, model interface{}) (code string, err error) {
+	code = fmt.Sprintf("%06d", uuid.New().ID()%1000000)
 
 	iface, ok := model.(interface {
 		GenerateLoginCodeExpiration(db *gorm.DB) (createdAt time.Time, expiredAt time.Time)
@@ -62,52 +89,61 @@ func (up *UserLoginCode) GenerateLoginCode(db *gorm.DB, model interface{}) (toke
 
 	createdAt, expiredAt := iface.GenerateLoginCodeExpiration(db)
 
-	err = db.Model(model).
-		Where("login_code = ?", up.PhoneNumber).
+	result := db.Model(model).
+		Where("phone_number = ?", numbersOnly(up.PhoneNumber)).
 		Updates(map[string]interface{}{
-			"login_token":            token,
-			"login_created_at":       createdAt,
-			"login_token_expired_at": expiredAt,
-		}).
-		Error
-	if err != nil {
-		return "", err
+			"login_code":            code,
+			"login_created_at":      createdAt,
+			"login_code_expired_at": expiredAt,
+		})
+	if result.Error != nil {
+		return "", result.Error
 	}
-	up.LoginToken = token
+	if result.RowsAffected != 1 {
+		return "", gorm.ErrRecordNotFound
+	}
+	up.LoginCode = code
 	up.LoginCreatedAt = &createdAt
-	up.LoginTokenExpiredAt = &expiredAt
-	return token, nil
+	up.LoginCodeExpiredAt = &expiredAt
+	return code, nil
 }
 
 func (up *UserLoginCode) ConsumeLoginCode(db *gorm.DB, model interface{}) error {
+	now := time.Now()
 	err := db.Model(model).
-		Where("login_code = ?", up.PhoneNumber).
+		Where("phone_number = ?", numbersOnly(up.PhoneNumber)).
 		Updates(map[string]interface{}{
-			"login_token_expired_at": time.Now(),
+			"login_code_expired_at": now,
+			"login_code":            "",
 		}).
 		Error
 	if err != nil {
 		return err
 	}
+	up.LoginCode = ""
+	up.LoginCodeExpiredAt = &now
 	return nil
 }
 
 func (up *UserLoginCode) GetLoginCode() (token string, createdAt *time.Time, expired bool) {
-	if up.LoginTokenExpiredAt != nil && time.Since(*up.LoginTokenExpiredAt) > 0 {
+	if up.LoginCodeExpiredAt != nil && time.Since(*up.LoginCodeExpiredAt) > 0 {
 		return "", nil, true
 	}
-	return up.LoginToken, up.LoginCreatedAt, false
+	return up.LoginCode, up.LoginCreatedAt, false
 }
 
 func (up *UserLoginCode) SetConfirmTime(db *gorm.DB, model interface{}) error {
 	now := time.Now()
-	err := db.Model(model).
-		Where("login_code = ?", up.PhoneNumber).
-		Update("confirmed_at", now).
-		Error
-	if err != nil {
-		return err
+	result := db.Model(model).
+		Where("phone_number = ?", numbersOnly(up.PhoneNumber)).
+		Update("confirmed_at", now)
+	if result.Error != nil {
+		return result.Error
 	}
+	if result.RowsAffected != 1 {
+		return gorm.ErrRecordNotFound
+	}
+
 	up.ConfirmedAt = &now
 	return nil
 }

@@ -61,7 +61,7 @@ type Messages struct {
 	LoginCodePageTitle   string
 	LoginCodeTitle       string
 	LoginCodeEnterPrompt string
-	WhatsAppLoginCodePlaceholder string
+	LoginCodePlaceholder string
 
 	ErrorSystemError                    string
 	ErrorCompleteUserAuthFailed         string
@@ -133,10 +133,10 @@ var Messages_en_US = &Messages{
 	TOTPValidateCodeLabel:               "Authenticator passcode",
 	TOTPValidateCodePlaceholder:         "Passcode",
 
-	LoginCodePageTitle:   "Enter WhatsApp Code",
-	LoginCodeTitle:       "Enter Code",
-	LoginCodeEnterPrompt: "Enter the code sent to your WhatsApp",
-	WhatsAppLoginCodePlaceholder: "Code",
+	LoginCodePageTitle:   "Login Code",
+	LoginCodeTitle:       "Enter Login Code",
+	LoginCodeEnterPrompt: "Enter the code sent to your mobile phone",
+	LoginCodePlaceholder: "Code",
 
 	ErrorSystemError:                    "System Error",
 	ErrorCompleteUserAuthFailed:         "Complete User Auth Failed",
@@ -209,7 +209,7 @@ var Messages_zh_CN = &Messages{
 	LoginCodePageTitle:   "输入WhatsApp代码",
 	LoginCodeTitle:       "输入代码",
 	LoginCodeEnterPrompt: "输入发送到您WhatsApp的代码",
-	WhatsAppLoginCodePlaceholder: "代码",
+	LoginCodePlaceholder: "代码",
 
 	ErrorSystemError:                    "系统错误",
 	ErrorCompleteUserAuthFailed:         "用户认证失败",
@@ -282,7 +282,7 @@ var Messages_ja_JP = &Messages{
 	LoginCodePageTitle:   "WhatsAppコードを入力",
 	LoginCodeTitle:       "コードを入力",
 	LoginCodeEnterPrompt: "WhatsAppに送信されたコードを入力してください",
-	WhatsAppLoginCodePlaceholder: "コード",
+	LoginCodePlaceholder: "コード",
 
 	ErrorSystemError:                    "システムエラー",
 	ErrorCompleteUserAuthFailed:         "ユーザー認証に失敗しました",
