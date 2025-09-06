@@ -2,6 +2,7 @@ package gormx
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgconn"
@@ -83,4 +84,42 @@ func TestWithCauseVsWithoutCause(t *testing.T) {
 	t.Logf("  WithoutTranslate: Raw PostgreSQL error only")
 	t.Logf("  WithTranslate: GORM error only (loses details)")
 	t.Logf("  WithCause: GORM error + PostgreSQL details (best of both)")
+}
+
+func TestWithCause_NoTranslationNeeded(t *testing.T) {
+	dsn := db.Config.Dialector.(*postgres.Dialector).Config.DSN
+
+	withCauseDB, err := gorm.Open(
+		WithCause(postgres.Open(dsn)),
+		&gorm.Config{TranslateError: true},
+	)
+	require.NoError(t, err)
+
+	// Create a table with a numeric column to cause a data type error
+	type NumericTestEntity struct {
+		ID    string `gorm:"primarykey"`
+		Count int    `gorm:"not null"`
+	}
+
+	require.NoError(t, withCauseDB.AutoMigrate(&NumericTestEntity{}))
+	t.Cleanup(func() {
+		withCauseDB.Migrator().DropTable(&NumericTestEntity{})
+	})
+
+	// Execute raw SQL that causes a data type error (not in PostgreSQL translator's error code list)
+	// This will cause error code 22P02 (invalid_text_representation) which is not translated by PostgreSQL driver
+	rawErr := withCauseDB.Exec("INSERT INTO numeric_test_entities (id, count) VALUES ('test', 'not_a_number')").Error
+	require.Error(t, rawErr)
+
+	t.Logf("Raw SQL error (no translation): %s", rawErr.Error())
+
+	// Verify this is a PostgreSQL error that was NOT translated
+	var pgErr *pgconn.PgError
+	require.True(t, errors.As(rawErr, &pgErr), "should be a PostgreSQL error")
+	require.Equal(t, "22P02", pgErr.Code, "should be invalid_text_representation error")
+
+	// Since this error code (22P02) is not in errCodes map, PostgreSQL driver returns the original error
+	// WithCause should also return the same error without wrapping it
+	require.False(t, strings.Contains(rawErr.Error(), "\n"), "error should not contain newlines indicating joined errors")
+	require.False(t, errors.Is(rawErr, gorm.ErrDuplicatedKey), "should not be translated to any GORM error")
 }

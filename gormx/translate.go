@@ -20,9 +20,12 @@ func WithCause(d gorm.Dialector) gorm.Dialector {
 }
 
 func (d *withCause) Translate(cause error) error {
-	translatedErr := d.Dialector.(gorm.ErrorTranslator).Translate(cause)
-	if translatedErr == cause {
-		return cause
+	if et, ok := d.Dialector.(gorm.ErrorTranslator); ok {
+		translatedErr := et.Translate(cause)
+		if translatedErr == cause {
+			return translatedErr
+		}
+		return errors.Join(translatedErr, cause)
 	}
-	return errors.Join(translatedErr, cause)
+	return cause
 }
