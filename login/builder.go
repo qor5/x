@@ -130,7 +130,6 @@ type Builder struct {
 	totpSetupPageFunc             web.PageFunc
 	totpValidatePageFunc          web.PageFunc
 	loginCodePageFunc             web.PageFunc
-	loginCodeValidateFunc         web.PageFunc
 
 	// Hooks
 	beforeSetPasswordHook HookFunc
@@ -390,11 +389,6 @@ func (b *Builder) TOTPValidatePageFunc(v web.PageFunc) (r *Builder) {
 
 func (b *Builder) LoginCodePageFunc(v web.PageFunc) (r *Builder) {
 	b.loginCodePageFunc = v
-	return b
-}
-
-func (b *Builder) LoginCodeValidatePageFunc(v web.PageFunc) (r *Builder) {
-	b.loginCodeValidateFunc = v
 	return b
 }
 
@@ -1024,8 +1018,15 @@ func (b *Builder) sendUserCodeLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	uc, ok := user.(UserLoginCoder)
+	if !ok {
+		log.Printf("user does not implement UserLoginCoder: %v", user)
+		SetFailCodeFlash(w, FailCodeSystemError)
+		return
+	}
+
 	// send login code to user
-	loginCode, err := user.(UserLoginCoder).GenerateLoginCode(b.db, b.newUserObject())
+	loginCode, err := uc.GenerateLoginCode(b.db, b.newUserObject())
 	if err != nil {
 		log.Printf("failed to generate login code: %v", err)
 		SetFailCodeFlash(w, FailCodeSystemError)
@@ -1098,7 +1099,7 @@ func (b *Builder) loginCodeDo(w http.ResponseWriter, r *http.Request) {
 		LoginCodeValidated: true,
 		RegisteredClaims:   b.genBaseSessionClaim(userID),
 	}
-  
+
 	if b.afterLoginHook != nil {
 		setCookieForRequest(r, &http.Cookie{Name: b.authCookieName, Value: b.mustGetSessionToken(claims)})
 		if err = b.wrapHook(b.afterLoginHook)(r, user); err != nil {

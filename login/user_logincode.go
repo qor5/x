@@ -3,9 +3,8 @@ package login
 import (
 	"fmt"
 	"net/http"
-	"strings"
+	"regexp"
 	"time"
-	"unicode"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -35,17 +34,10 @@ var _ UserLoginCoder = (*UserLoginCode)(nil)
 
 const minPhoneNumberLength = 8
 
-func numbersOnly(s string) string {
-	return strings.Map(func(r rune) rune {
-		if unicode.IsNumber(r) {
-			return r
-		}
-		return -1
-	}, s)
-}
+var removeNonNumeric = regexp.MustCompile(`\D`)
 
 func (up *UserLoginCode) FindUserByPhoneNumber(db *gorm.DB, model interface{}, phoneNumber string) (user interface{}, err error) {
-	phoneNumber = numbersOnly(phoneNumber)
+	phoneNumber = removeNonNumeric.ReplaceAllString(phoneNumber, "")
 	if len(phoneNumber) < minPhoneNumberLength {
 		return nil, ErrAccountNumberInvalid
 	}
@@ -53,19 +45,23 @@ func (up *UserLoginCode) FindUserByPhoneNumber(db *gorm.DB, model interface{}, p
 	// if the user did not enter the international code. So we use a LIKE
 	// to check if there are more than one user with the same ending digits.
 	// If there are, we need more numbers. Otherwise, we can assume it's the correct user.
-	result := db.Model(model).Where("phone_number like ?", fmt.Sprintf("%%%s", phoneNumber)).
-		First(model)
+	likeClause := fmt.Sprintf("%%%s", phoneNumber)
+	var nphones int64
+	result := db.Model(model).Where("phone_number like ?", likeClause).
+		Count(&nphones)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	switch result.RowsAffected {
+	switch nphones {
 	case 0:
 		return nil, gorm.ErrRecordNotFound
 	case 1:
-		return model, nil
+		result = db.Model(model).Where("phone_number like ?", likeClause).
+			First(model)
 	default:
 		return nil, ErrAccountNumberInvalid
 	}
+	return model, result.Error
 }
 
 func (up *UserLoginCode) GetPhoneNumber() string {
@@ -90,7 +86,7 @@ func (up *UserLoginCode) GenerateLoginCode(db *gorm.DB, model interface{}) (code
 	createdAt, expiredAt := iface.GenerateLoginCodeExpiration(db)
 
 	result := db.Model(model).
-		Where("phone_number = ?", numbersOnly(up.PhoneNumber)).
+		Where("phone_number = ?", removeNonNumeric.ReplaceAllString(up.PhoneNumber, "")).
 		Updates(map[string]interface{}{
 			"login_code":            code,
 			"login_created_at":      createdAt,
@@ -111,7 +107,7 @@ func (up *UserLoginCode) GenerateLoginCode(db *gorm.DB, model interface{}) (code
 func (up *UserLoginCode) ConsumeLoginCode(db *gorm.DB, model interface{}) error {
 	now := time.Now()
 	err := db.Model(model).
-		Where("phone_number = ?", numbersOnly(up.PhoneNumber)).
+		Where("phone_number = ?", removeNonNumeric.ReplaceAllString(up.PhoneNumber, "")).
 		Updates(map[string]interface{}{
 			"login_code_expired_at": now,
 			"login_code":            "",
@@ -135,7 +131,7 @@ func (up *UserLoginCode) GetLoginCode() (token string, createdAt *time.Time, exp
 func (up *UserLoginCode) SetConfirmTime(db *gorm.DB, model interface{}) error {
 	now := time.Now()
 	result := db.Model(model).
-		Where("phone_number = ?", numbersOnly(up.PhoneNumber)).
+		Where("phone_number = ?", removeNonNumeric.ReplaceAllString(up.PhoneNumber, "")).
 		Update("confirmed_at", now)
 	if result.Error != nil {
 		return result.Error
