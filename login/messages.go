@@ -69,6 +69,7 @@ type Messages struct {
 	ErrorIncorrectAccountNameOrPassword string
 	ErrorUserLocked                     string
 	ErrorAccountIsRequired              string
+	ErrorAccountNumberInvalid           string
 	ErrorPasswordCannotBeEmpty          string
 	ErrorPasswordNotMatch               string
 	ErrorIncorrectPassword              string
@@ -144,6 +145,7 @@ var Messages_en_US = &Messages{
 	ErrorIncorrectAccountNameOrPassword: "Incorrect email or password",
 	ErrorUserLocked:                     "User Locked",
 	ErrorAccountIsRequired:              "Email is required",
+	ErrorAccountNumberInvalid:           "Account number is invalid",
 	ErrorPasswordCannotBeEmpty:          "Password cannot be empty",
 	ErrorPasswordNotMatch:               "The new passwords do not match. Please try again.",
 	ErrorIncorrectPassword:              "Unable to change password. Please check your inputs and try again.",
