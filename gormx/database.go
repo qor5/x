@@ -2,6 +2,7 @@ package gormx
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"io"
 	"log/slog"
@@ -55,12 +56,12 @@ func SetupDatabaseFactory(name string, opts ...gorm.Option) func(ctx context.Con
 	}
 }
 
-type closerWrapper struct {
-	io.Closer
+type dbCloserWrapper struct {
+	*sql.DB
 }
 
-func (c *closerWrapper) Close() error {
-	if err := c.Closer.Close(); err != nil {
+func (c *dbCloserWrapper) Close() error {
+	if err := c.DB.Close(); err != nil {
 		return errors.Wrap(err, "failed to close database connection")
 	}
 	return nil
@@ -146,7 +147,7 @@ func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm
 		sqlDB.SetConnMaxIdleTime(conf.ConnMaxIdleTime)
 	}
 
-	return db, &closerWrapper{sqlDB}, nil
+	return db, &dbCloserWrapper{sqlDB}, nil
 }
 
 func buildIAMAuthToken(ctx context.Context, endpoint, region, dbUser string, credProvider aws.CredentialsProvider) (string, error) {
