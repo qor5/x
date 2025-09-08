@@ -1,19 +1,20 @@
-address: ":8787"
-readTimeout: "10s"
-readHeaderTimeout: "4s"
-writeTimeout: "20s"
-idleTimeout: "120s"
-tls:
-  enabled: false
-  certBase64: ""
-  keyBase64: ""
-cors:
-  debug: false
-  allowedOrigins: []
-  allowedMethods: []
-  exposedHeaders: []
-  maxAge: 600s
-  denySimpleRequests: true
-denyMIMETypeSniffing: true
-denyClickjacking: true
-enableHSTS: true
+http:
+  address: ":8787"
+  readTimeout: "10s"
+  readHeaderTimeout: "4s"
+  writeTimeout: "20s"
+  idleTimeout: "120s"
+  tls:
+    enabled: false
+    certBase64: ""
+    keyBase64: ""
+  cors:
+    debug: false
+    allowedOrigins: []
+    allowedMethods: []
+    exposedHeaders: []
+    maxAge: 600s
+    denySimpleRequests: true
+  denyMIMETypeSniffing: true
+  denyClickjacking: true
+  enableHSTS: true
