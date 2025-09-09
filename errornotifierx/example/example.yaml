@@ -1,0 +1,6 @@
+errorNotifier:
+  kind: log # oneof log, airbrake
+  airbrake:
+    projectID: "" # required if kind is airbrake
+    token: "" # required if kind is airbrake
+    environment: "" # required if kind is airbrake
