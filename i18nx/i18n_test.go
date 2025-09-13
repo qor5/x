@@ -84,11 +84,11 @@ func TestI18N(t *testing.T) {
 	}
 
 	in, err := New(strings.NewReader(`
-key,en,ja,zh
-google,Google,グーグル,谷歌
+key,zh,en,ja
+google,谷歌,Google,グーグル
 sub,%s,%s,%s
 sub2,%m,%m,%m
-visit,"Lookup: %m.","検索: %m.","查找: %m."`))
+visit,"查找: %m.","Lookup: %m.","検索: %m."`))
 	require.NoError(t, err)
 
 	for _, test := range tests {
@@ -233,8 +233,8 @@ func TestTmplKey_Comparable(t *testing.T) {
 
 func TestI18N_MatchStrings(t *testing.T) {
 	in, err := New(strings.NewReader(`
-key,en,ja,zh,fr
-test,Test,テスト,测试,Test`))
+key,zh,en,ja,fr
+test,测试,Test,テスト,Test`))
 	require.NoError(t, err)
 
 	tests := []struct {

@@ -15,27 +15,31 @@
 
       <template v-slot:default="{ isActive }">
         <v-card ref="dialogMain">
-          <template #title>
+          <template #title v-if="!resolvedHideHeader">
             <span>{{ title }}</span>
           </template>
 
-          <template v-slot:prepend v-if="prependIcon.icon">
+          <template v-slot:prepend v-if="prependIcon.icon && !resolvedHideHeader">
             <v-icon :color="prependIcon.color" size="small" :icon="prependIcon.icon" />
           </template>
 
-          <template v-slot:append v-if="!hideClose">
+          <template v-slot:append v-if="!resolvedHideClose">
             <v-icon color="#757575" size="small" icon="mdi-close" @click="onClose(isActive)" />
           </template>
-
           <v-card-text
-            :class="{ 'mb-6': !hideFooter, 'pb-0': !hideFooter }"
-            :style="[contentWidth, contentMaxWidth, contentHeightStyle]"
+            :class="{ 'mb-6': !resolvedHideFooter, 'pb-0': !resolvedHideFooter }"
+            :style="[
+              contentWidth,
+              contentMaxWidth,
+              contentHeightStyle,
+              { padding: props.contentPadding }
+            ]"
           >
             <slot :isActive="isActive"
               ><span class="dialog-content-text">{{ text }}</span></slot
             >
           </v-card-text>
-          <v-card-actions :class="props.size" v-if="!hideFooter">
+          <v-card-actions :class="props.size" v-if="!resolvedHideFooter">
             <slot :isActive="isActive" name="action-btn">
               <v-btn
                 v-if="!hideCancel"
@@ -77,7 +81,10 @@ const emit = defineEmits([
   'click:ok',
   'click:cancel',
   'click:close',
-  'click:outside'
+  'click:outside',
+  'update:hideFooter',
+  'update:hideHeader',
+  'update:hideClose'
 ])
 const props = defineProps({
   modelValue: Boolean,
@@ -130,6 +137,14 @@ const props = defineProps({
   },
   persistent: Boolean,
   noClickAnimation: Boolean,
+  contentPadding: {
+    type: String,
+    default: ''
+  },
+  contentOnlyMode: {
+    type: Boolean,
+    default: false
+  },
   contentHeight: {
     type: [Number, String],
     default: 'auto'
@@ -150,6 +165,21 @@ watch(
     dialogVisible.value = newValue
   }
 )
+
+watch(
+  () => props.contentOnlyMode,
+  (newValue) => {
+    if (newValue) {
+      emit('update:hideFooter', true)
+      emit('update:hideHeader', true)
+      emit('update:hideClose', true)
+    }
+  },
+  {
+    immediate: true
+  }
+)
+
 const dialogMain = ref(null)
 const isOkBtnLoading = ref(false)
 const dialogVisible = ref(props.modelValue)
@@ -194,6 +224,10 @@ const prependIcon = computed(() => {
 
   return vCardTitleIconMap[props.type]
 })
+
+const resolvedHideFooter = computed(() => props.hideFooter || props.contentOnlyMode)
+const resolvedHideHeader = computed(() => props.hideHeader || props.contentOnlyMode)
+const resolvedHideClose = computed(() => props.hideClose || props.contentOnlyMode)
 
 scope.run(() => {
   onClickOutside(dialogMain, (event) => {

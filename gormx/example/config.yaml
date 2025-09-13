@@ -1,0 +1,11 @@
+database:
+  dsn: ""
+  debug: false
+  tracing:
+    excludeQuery: true
+    excludeQueryVars: false
+  maxIdleConns: 20
+  maxOpenConns: 200
+  connMaxLifetime: "30m"
+  connMaxIdleTime: "10m"
+  authMethod: "password" # password, iam
