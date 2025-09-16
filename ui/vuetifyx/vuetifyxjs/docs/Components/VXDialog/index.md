@@ -16,6 +16,8 @@
 | cancelText       | 取消按钮文案                                                | `String`                                                        | `Cancel`      |
 | width            | 弹窗宽度                                                    | `Number`                                                        | -             |
 | maxWidth         | 弹窗最大宽度                                                | `Number`                                                        | -             |
+| contentPadding   | 弹窗内的间隙padding（请使用css的样式修改）                  | `String`                                                        | -             |
+| contentOnlyMode  | 该模式可以自定义弹窗内所有的内容                            | `Boolean`                                                       | false         |
 | contentHeight    | 弹窗内容高度                                                | `Number`                                                        | -             |
 | disableOk        | 禁用确认按钮                                                | `Boolean`                                                       | `false`       |
 | loadingOk        | 确认按钮loading                                             | `Boolean`                                                       | `false`       |
@@ -284,6 +286,39 @@ const dialogVisible = ref(false)
         <div class="mt-2 text-caption">
           内容区域超出高度会出现滚动条,如果不指定contentHeight则是以屏幕高度为准
         </div>
+      </v-col>
+    </v-row>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+const dialogVisible = ref(false)
+</script>
+```
+
+:::
+
+## 只有内容区域的模式（contentOnlyMode）
+
+- 当希望完全使用内部组件时，contentOnlyMode: true 配合使用 contentPadding 控制间距大小
+
+:::demo
+
+```vue
+<template>
+  <div>
+    <v-row>
+      <v-col cols="3" class="text-center">
+        <div class="mb-2">contentOnlyMode</div>
+        <vx-dialog contentOnlyMode contentPadding="0">
+          This is an info description line This is an info description lineThis is an info
+          description lineThis is an info description lineThis is an info description line
+
+          <template v-slot:activator="{ props: { activatorProps } }">
+            <v-btn v-bind="activatorProps" color="secondary">Dialog</v-btn>
+          </template>
+        </vx-dialog>
       </v-col>
     </v-row>
   </div>

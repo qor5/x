@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package status.v1;
+
+message Localized {
+  string key = 1;
+  repeated string args = 2;
+}
