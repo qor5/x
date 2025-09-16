@@ -17,7 +17,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",
     "nodemon": "^3.1.9",
-    "vite": "^5.4.19",
+    "vite": "^5.4.20",
     "vite-plugin-vue-devtools": "^7.7.2"
   },
   "pnpm": {
