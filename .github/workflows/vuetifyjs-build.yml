@@ -21,10 +21,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '22.x'
 
       - name: Install pnpm
-        run: npm install -g pnpm@9.15.5
+        run: npm install -g pnpm@10.16.1
 
       - name: Build project
         run: |
