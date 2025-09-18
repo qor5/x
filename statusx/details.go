@@ -10,8 +10,8 @@ func ExtractDetail[T any](details []any) T {
 		return ok
 	})
 	if !ok {
-		var nop T
-		return nop
+		var zero T
+		return zero
 	}
 	return pb.(T)
 }

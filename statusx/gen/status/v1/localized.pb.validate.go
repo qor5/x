@@ -35,6 +35,196 @@ var (
 	_ = sort.Sort
 )
 
+// Validate checks the field values on Status with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Status) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Status with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in StatusMultiError, or nil if none found.
+func (m *Status) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Status) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetErrorInfo()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, StatusValidationError{
+					field:  "ErrorInfo",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, StatusValidationError{
+					field:  "ErrorInfo",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetErrorInfo()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return StatusValidationError{
+				field:  "ErrorInfo",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetLocalized()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, StatusValidationError{
+					field:  "Localized",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, StatusValidationError{
+					field:  "Localized",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetLocalized()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return StatusValidationError{
+				field:  "Localized",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	for idx, item := range m.GetFieldViolations() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, StatusValidationError{
+						field:  fmt.Sprintf("FieldViolations[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, StatusValidationError{
+						field:  fmt.Sprintf("FieldViolations[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return StatusValidationError{
+					field:  fmt.Sprintf("FieldViolations[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return StatusMultiError(errors)
+	}
+
+	return nil
+}
+
+// StatusMultiError is an error wrapping multiple validation errors returned by
+// Status.ValidateAll() if the designated constraints aren't met.
+type StatusMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m StatusMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m StatusMultiError) AllErrors() []error { return m }
+
+// StatusValidationError is the validation error returned by Status.Validate if
+// the designated constraints aren't met.
+type StatusValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StatusValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StatusValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StatusValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StatusValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StatusValidationError) ErrorName() string { return "StatusValidationError" }
+
+// Error satisfies the builtin error interface
+func (e StatusValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStatus.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StatusValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StatusValidationError{}
+
 // Validate checks the field values on Localized with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -58,6 +248,40 @@ func (m *Localized) validate(all bool) error {
 	var errors []error
 
 	// no validation rules for Key
+
+	for idx, item := range m.GetArgs() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, LocalizedValidationError{
+						field:  fmt.Sprintf("Args[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, LocalizedValidationError{
+						field:  fmt.Sprintf("Args[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return LocalizedValidationError{
+					field:  fmt.Sprintf("Args[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
 
 	if len(errors) > 0 {
 		return LocalizedMultiError(errors)
@@ -135,3 +359,138 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = LocalizedValidationError{}
+
+// Validate checks the field values on FieldViolation with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *FieldViolation) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on FieldViolation with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in FieldViolationMultiError,
+// or nil if none found.
+func (m *FieldViolation) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *FieldViolation) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Field
+
+	// no validation rules for Description
+
+	// no validation rules for Reason
+
+	if all {
+		switch v := interface{}(m.GetLocalized()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, FieldViolationValidationError{
+					field:  "Localized",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, FieldViolationValidationError{
+					field:  "Localized",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetLocalized()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return FieldViolationValidationError{
+				field:  "Localized",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return FieldViolationMultiError(errors)
+	}
+
+	return nil
+}
+
+// FieldViolationMultiError is an error wrapping multiple validation errors
+// returned by FieldViolation.ValidateAll() if the designated constraints
+// aren't met.
+type FieldViolationMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m FieldViolationMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m FieldViolationMultiError) AllErrors() []error { return m }
+
+// FieldViolationValidationError is the validation error returned by
+// FieldViolation.Validate if the designated constraints aren't met.
+type FieldViolationValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e FieldViolationValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e FieldViolationValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e FieldViolationValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e FieldViolationValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e FieldViolationValidationError) ErrorName() string { return "FieldViolationValidationError" }
+
+// Error satisfies the builtin error interface
+func (e FieldViolationValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sFieldViolation.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = FieldViolationValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = FieldViolationValidationError{}

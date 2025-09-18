@@ -4,6 +4,9 @@ managed:
   override:
     - file_option: go_package_prefix
       value: github.com/qor5/x/v3/statusx/gen
+    - file_option: go_package
+      module: buf.build/googleapis/googleapis
+      value: google.golang.org/genproto/googleapis/rpc/errdetails
 plugins:
   - remote: buf.build/protocolbuffers/go:v1.36.8
     out: gen

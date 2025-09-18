@@ -7,8 +7,10 @@
 package statusv1
 
 import (
+	errdetails "google.golang.org/genproto/googleapis/rpc/errdetails"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	anypb "google.golang.org/protobuf/types/known/anypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -21,17 +23,79 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Status represents a complete error status with localization and field violations
+type Status struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	ErrorInfo       *errdetails.ErrorInfo  `protobuf:"bytes,1,opt,name=error_info,json=errorInfo,proto3" json:"error_info,omitempty"`                   // Business error information (official gRPC standard)
+	Localized       *Localized             `protobuf:"bytes,2,opt,name=localized,proto3" json:"localized,omitempty"`                                    // Top-level localization
+	FieldViolations []*FieldViolation      `protobuf:"bytes,3,rep,name=field_violations,json=fieldViolations,proto3" json:"field_violations,omitempty"` // Field-level violations
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *Status) Reset() {
+	*x = Status{}
+	mi := &file_status_v1_localized_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Status) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Status) ProtoMessage() {}
+
+func (x *Status) ProtoReflect() protoreflect.Message {
+	mi := &file_status_v1_localized_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Status.ProtoReflect.Descriptor instead.
+func (*Status) Descriptor() ([]byte, []int) {
+	return file_status_v1_localized_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Status) GetErrorInfo() *errdetails.ErrorInfo {
+	if x != nil {
+		return x.ErrorInfo
+	}
+	return nil
+}
+
+func (x *Status) GetLocalized() *Localized {
+	if x != nil {
+		return x.Localized
+	}
+	return nil
+}
+
+func (x *Status) GetFieldViolations() []*FieldViolation {
+	if x != nil {
+		return x.FieldViolations
+	}
+	return nil
+}
+
+// Localized contains internationalization information
 type Localized struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
-	Args          []string               `protobuf:"bytes,2,rep,name=args,proto3" json:"args,omitempty"`
+	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`   // Localization key
+	Args          []*anypb.Any           `protobuf:"bytes,2,rep,name=args,proto3" json:"args,omitempty"` // Template arguments for gotpl
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Localized) Reset() {
 	*x = Localized{}
-	mi := &file_status_v1_localized_proto_msgTypes[0]
+	mi := &file_status_v1_localized_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -43,7 +107,7 @@ func (x *Localized) String() string {
 func (*Localized) ProtoMessage() {}
 
 func (x *Localized) ProtoReflect() protoreflect.Message {
-	mi := &file_status_v1_localized_proto_msgTypes[0]
+	mi := &file_status_v1_localized_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -56,7 +120,7 @@ func (x *Localized) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Localized.ProtoReflect.Descriptor instead.
 func (*Localized) Descriptor() ([]byte, []int) {
-	return file_status_v1_localized_proto_rawDescGZIP(), []int{0}
+	return file_status_v1_localized_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Localized) GetKey() string {
@@ -66,9 +130,78 @@ func (x *Localized) GetKey() string {
 	return ""
 }
 
-func (x *Localized) GetArgs() []string {
+func (x *Localized) GetArgs() []*anypb.Any {
 	if x != nil {
 		return x.Args
+	}
+	return nil
+}
+
+// FieldViolation represents a field-level validation violation with localization
+type FieldViolation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Field         string                 `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`             // Field name (e.g., "email", "user.email", "profile.age")
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"` // Error description for BadRequest_FieldViolation
+	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`           // Error reason code (UPPER_SNAKE_CASE format)
+	Localized     *Localized             `protobuf:"bytes,4,opt,name=localized,proto3" json:"localized,omitempty"`     // Field-specific localization information
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FieldViolation) Reset() {
+	*x = FieldViolation{}
+	mi := &file_status_v1_localized_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FieldViolation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FieldViolation) ProtoMessage() {}
+
+func (x *FieldViolation) ProtoReflect() protoreflect.Message {
+	mi := &file_status_v1_localized_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FieldViolation.ProtoReflect.Descriptor instead.
+func (*FieldViolation) Descriptor() ([]byte, []int) {
+	return file_status_v1_localized_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *FieldViolation) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+func (x *FieldViolation) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *FieldViolation) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *FieldViolation) GetLocalized() *Localized {
+	if x != nil {
+		return x.Localized
 	}
 	return nil
 }
@@ -77,10 +210,20 @@ var File_status_v1_localized_proto protoreflect.FileDescriptor
 
 const file_status_v1_localized_proto_rawDesc = "" +
 	"\n" +
-	"\x19status/v1/localized.proto\x12\tstatus.v1\"1\n" +
+	"\x19status/v1/localized.proto\x12\tstatus.v1\x1a\x19google/protobuf/any.proto\x1a\x1egoogle/rpc/error_details.proto\"\xb8\x01\n" +
+	"\x06Status\x124\n" +
+	"\n" +
+	"error_info\x18\x01 \x01(\v2\x15.google.rpc.ErrorInfoR\terrorInfo\x122\n" +
+	"\tlocalized\x18\x02 \x01(\v2\x14.status.v1.LocalizedR\tlocalized\x12D\n" +
+	"\x10field_violations\x18\x03 \x03(\v2\x19.status.v1.FieldViolationR\x0ffieldViolations\"G\n" +
 	"\tLocalized\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x12\n" +
-	"\x04args\x18\x02 \x03(\tR\x04argsB\x99\x01\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12(\n" +
+	"\x04args\x18\x02 \x03(\v2\x14.google.protobuf.AnyR\x04args\"\x94\x01\n" +
+	"\x0eFieldViolation\x12\x14\n" +
+	"\x05field\x18\x01 \x01(\tR\x05field\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\x122\n" +
+	"\tlocalized\x18\x04 \x01(\v2\x14.status.v1.LocalizedR\tlocalizedB\x99\x01\n" +
 	"\rcom.status.v1B\x0eLocalizedProtoP\x01Z3github.com/qor5/x/v3/statusx/gen/status/v1;statusv1\xa2\x02\x03SXX\xaa\x02\tStatus.V1\xca\x02\tStatus\\V1\xe2\x02\x15Status\\V1\\GPBMetadata\xea\x02\n" +
 	"Status::V1b\x06proto3"
 
@@ -96,16 +239,25 @@ func file_status_v1_localized_proto_rawDescGZIP() []byte {
 	return file_status_v1_localized_proto_rawDescData
 }
 
-var file_status_v1_localized_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_status_v1_localized_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_status_v1_localized_proto_goTypes = []any{
-	(*Localized)(nil), // 0: status.v1.Localized
+	(*Status)(nil),               // 0: status.v1.Status
+	(*Localized)(nil),            // 1: status.v1.Localized
+	(*FieldViolation)(nil),       // 2: status.v1.FieldViolation
+	(*errdetails.ErrorInfo)(nil), // 3: google.rpc.ErrorInfo
+	(*anypb.Any)(nil),            // 4: google.protobuf.Any
 }
 var file_status_v1_localized_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	3, // 0: status.v1.Status.error_info:type_name -> google.rpc.ErrorInfo
+	1, // 1: status.v1.Status.localized:type_name -> status.v1.Localized
+	2, // 2: status.v1.Status.field_violations:type_name -> status.v1.FieldViolation
+	4, // 3: status.v1.Localized.args:type_name -> google.protobuf.Any
+	1, // 4: status.v1.FieldViolation.localized:type_name -> status.v1.Localized
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_status_v1_localized_proto_init() }
@@ -119,7 +271,7 @@ func file_status_v1_localized_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_status_v1_localized_proto_rawDesc), len(file_status_v1_localized_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

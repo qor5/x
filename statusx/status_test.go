@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/pkg/errors"
 	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
@@ -13,6 +14,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func TestNew(t *testing.T) {
@@ -95,7 +98,11 @@ func TestWithLocalized(t *testing.T) {
 	localized := s.Localized()
 	assert.NotNil(t, localized)
 	assert.Equal(t, "error.invalid_input", localized.Key)
-	assert.Equal(t, []string{"username", "required"}, localized.Args)
+
+	// Extract values from Any for comparison
+	require.Len(t, localized.Args, 2)
+	assert.Equal(t, "username", extractStringFromAny(t, localized.Args[0]))
+	assert.Equal(t, "required", extractStringFromAny(t, localized.Args[1]))
 }
 
 func TestWrap(t *testing.T) {
@@ -170,7 +177,9 @@ func TestGRPCStatus(t *testing.T) {
 
 	localizedMessage := details[1].(*statusv1.Localized)
 	require.Equal(t, "error.permission_denied", localizedMessage.Key)
-	require.Equal(t, []string{"access", "user"}, localizedMessage.Args)
+	require.Len(t, localizedMessage.Args, 2)
+	assert.Equal(t, "access", extractStringFromAny(t, localizedMessage.Args[0]))
+	assert.Equal(t, "user", extractStringFromAny(t, localizedMessage.Args[1]))
 
 	{
 		s := New(codes.OK, "XXXX", "yyyy")
@@ -209,8 +218,8 @@ func TestFromError(t *testing.T) {
 		assert.Equal(t, codes.Unauthenticated, s.Code())
 		assert.Equal(t, "UNAUTHENTICATED", s.Reason())
 		assert.Equal(t, "authentication required", s.Message())
-		assert.Len(t, s.extraDetails, 1)
-		assert.True(t, proto.Equal(s.extraDetails[0], &errdetails.LocalizedMessage{
+		assert.Len(t, s.details, 1)
+		assert.True(t, proto.Equal(s.details[0], &errdetails.LocalizedMessage{
 			Locale:  "en-US",
 			Message: "authentication required",
 		}))
@@ -329,4 +338,414 @@ func TestConvert(t *testing.T) {
 		assert.Equal(t, statusv1.ErrorReason_DEADLINE_EXCEEDED.String(), s.Reason())
 		assert.Equal(t, err.Error(), s.Message())
 	}
+}
+
+// extractStringFromAny is a test helper to extract string values from protobuf Any
+func extractStringFromAny(t *testing.T, anyVal *anypb.Any) string {
+	t.Helper()
+	if anyVal == nil {
+		return ""
+	}
+
+	if anyVal.MessageIs(&wrapperspb.StringValue{}) {
+		var val wrapperspb.StringValue
+		err := anyVal.UnmarshalTo(&val)
+		require.NoError(t, err)
+		return val.GetValue()
+	}
+
+	t.Fatalf("Expected StringValue in Any, got %s", anyVal.GetTypeUrl())
+	return ""
+}
+
+func TestWithLocalizedWellKnownTypes(t *testing.T) {
+	now := time.Now()
+	duration := 5 * time.Minute
+	structData := map[string]any{
+		"user": "john",
+		"age":  30,
+	}
+
+	s := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+		WithLocalized("validation.essential",
+			"string_arg",    // 1. string
+			int64(123),      // 2. int64
+			int32(456),      // 3. int32
+			uint64(789),     // 4. uint64
+			uint32(101),     // 5. uint32
+			float32(3.14),   // 6. float32
+			float64(2.718),  // 7. float64
+			true,            // 8. bool
+			[]byte("bytes"), // 9. bytes
+			now,             // 10. time.Time -> Timestamp
+			duration,        // 11. time.Duration -> Duration
+			structData,      // 12. map[string]any -> Struct
+			nil,             // 13. nil -> Empty
+		)
+
+	require.NotNil(t, s)
+	localized := s.Localized()
+	assert.NotNil(t, localized)
+	assert.Equal(t, "validation.essential", localized.Key)
+	require.Len(t, localized.Args, 13)
+
+	// Test that all types are properly stored and can be extracted
+	args := localized.Args
+	assert.Equal(t, "string_arg", extractStringFromAny(t, args[0]))
+	// Note: We could add more specific extraction helpers for other types,
+	// but the main point is that they're stored without errors
+}
+
+func TestWithLocalizedUnsupportedType(t *testing.T) {
+	// Test that unsupported types cause panic
+	assert.Panics(t, func() {
+		New(codes.InvalidArgument, "TEST", "test").
+			WithLocalized("test.key", make(chan int)) // channels are not supported
+	})
+
+	assert.Panics(t, func() {
+		New(codes.InvalidArgument, "TEST", "test").
+			WithLocalized("test.key", func() {}) // functions are not supported
+	})
+
+	assert.Panics(t, func() {
+		New(codes.InvalidArgument, "TEST", "test").
+			WithLocalized("test.key", []string{"a", "b"}) // arrays are not supported
+	})
+
+	assert.Panics(t, func() {
+		New(codes.InvalidArgument, "TEST", "test").
+			WithLocalized("test.key", []any{"a", "b"}) // slices are not supported
+	})
+}
+
+func TestWithDetailsTypeValidation(t *testing.T) {
+	// Valid usage should work
+	t.Run("valid details", func(t *testing.T) {
+		err := New(codes.InvalidArgument, "TEST", "test").
+			WithDetails(&errdetails.BadRequest{
+				FieldViolations: []*errdetails.BadRequest_FieldViolation{
+					{Field: "email", Description: "invalid"},
+				},
+			}).Err()
+
+		assert.NotNil(t, err)
+
+		// Should have the BadRequest detail
+		details := status.Convert(err).Details()
+		badRequestFound := false
+		for _, detail := range details {
+			if _, ok := detail.(*errdetails.BadRequest); ok {
+				badRequestFound = true
+				break
+			}
+		}
+		assert.True(t, badRequestFound, "should contain BadRequest detail")
+	})
+
+	// Should panic when trying to add reserved types
+	t.Run("panic on statusv1.Localized", func(t *testing.T) {
+		assert.Panics(t, func() {
+			New(codes.InvalidArgument, "TEST", "test").
+				WithDetails(&statusv1.Localized{
+					Key: "test.key",
+				})
+		}, "should panic when adding *statusv1.Localized")
+	})
+
+	t.Run("panic on errdetails.ErrorInfo", func(t *testing.T) {
+		assert.Panics(t, func() {
+			New(codes.InvalidArgument, "TEST", "test").
+				WithDetails(&errdetails.ErrorInfo{
+					Reason: "TEST_REASON",
+				})
+		}, "should panic when adding *errdetails.ErrorInfo")
+	})
+}
+
+func TestWithFieldsLocalizedAPI(t *testing.T) {
+	t.Run("WithFieldLocalized single field", func(t *testing.T) {
+		status := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+			WithFieldLocalized("email", "field.email.required")
+
+		assert.NotNil(t, status.localized)
+		assert.Len(t, status.localized.FieldViolations, 1)
+
+		fieldLoc := status.localized.FieldViolations[0]
+		assert.Equal(t, "email", fieldLoc.Field)
+		assert.Equal(t, "field.email.required", fieldLoc.LocalizedKey)
+		assert.Empty(t, fieldLoc.LocalizedArgs)
+	})
+
+	t.Run("WithFieldLocalized with args", func(t *testing.T) {
+		data := map[string]any{"minLength": 8}
+		status := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+			WithFieldLocalized("password", "field.password.min_length", data)
+
+		fieldLoc := status.localized.FieldViolations[0]
+		assert.Equal(t, "password", fieldLoc.Field)
+		assert.Equal(t, "field.password.min_length", fieldLoc.LocalizedKey)
+		assert.Len(t, fieldLoc.LocalizedArgs, 1)
+	})
+
+	t.Run("WithFieldsLocalized batch operation", func(t *testing.T) {
+		fields := []*FieldLocalized{
+			{
+				Field: "email",
+				Key:   "field.email.required",
+			},
+			{
+				Field: "password",
+				Key:   "field.password.weak",
+				Args:  []any{map[string]any{"strength": "low"}},
+			},
+			{
+				Field: "age",
+				Key:   "field.age.invalid_range",
+				Args:  []any{18, 65},
+			},
+		}
+
+		status := New(codes.InvalidArgument, "VALIDATION_ERROR", "multiple field errors").
+			WithFieldsLocalized(fields...)
+
+		assert.NotNil(t, status.localized)
+		assert.Len(t, status.localized.FieldViolations, 3)
+
+		// Check first field
+		field1 := status.localized.FieldViolations[0]
+		assert.Equal(t, "email", field1.Field)
+		assert.Equal(t, "field.email.required", field1.LocalizedKey)
+		assert.Empty(t, field1.LocalizedArgs)
+
+		// Check second field
+		field2 := status.localized.FieldViolations[1]
+		assert.Equal(t, "password", field2.Field)
+		assert.Equal(t, "field.password.weak", field2.LocalizedKey)
+		assert.Len(t, field2.LocalizedArgs, 1)
+
+		// Check third field
+		field3 := status.localized.FieldViolations[2]
+		assert.Equal(t, "age", field3.Field)
+		assert.Equal(t, "field.age.invalid_range", field3.LocalizedKey)
+		assert.Len(t, field3.LocalizedArgs, 2)
+	})
+
+	t.Run("combine WithLocalized and WithFieldsLocalized", func(t *testing.T) {
+		fields := []*FieldLocalized{
+			{Field: "email", Key: "field.email.invalid"},
+			{Field: "phone", Key: "field.phone.invalid"},
+		}
+
+		status := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+			WithLocalized("global.validation_failed").
+			WithFieldsLocalized(fields...)
+
+		assert.NotNil(t, status.localized)
+		assert.Equal(t, "global.validation_failed", status.localized.Key)
+		assert.Len(t, status.localized.FieldViolations, 2)
+	})
+
+	t.Run("multiple calls to WithFieldLocalized", func(t *testing.T) {
+		status := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+			WithFieldLocalized("email", "field.email.invalid").
+			WithFieldLocalized("password", "field.password.weak")
+
+		assert.NotNil(t, status.localized)
+		assert.Len(t, status.localized.FieldViolations, 2)
+
+		assert.Equal(t, "email", status.localized.FieldViolations[0].Field)
+		assert.Equal(t, "password", status.localized.FieldViolations[1].Field)
+	})
+
+	t.Run("FieldLocalized Proto method", func(t *testing.T) {
+		fieldLocalized := &FieldLocalized{
+			Field: "email",
+			Key:   "field.email.invalid",
+			Args:  []any{"test@example.com", 25},
+		}
+
+		proto := fieldLocalized.Proto()
+
+		assert.Equal(t, "email", proto.Field)
+		assert.Equal(t, "field.email.invalid", proto.Key)
+		assert.Len(t, proto.Args, 2)
+	})
+
+	t.Run("WithFieldsLocalized duplicate field validation", func(t *testing.T) {
+		t.Run("duplicate within new fields", func(t *testing.T) {
+			fields := []*FieldLocalized{
+				{Field: "email", Key: "field.email.required"},
+				{Field: "password", Key: "field.password.weak"},
+				{Field: "email", Key: "field.email.invalid"}, // Duplicate field!
+			}
+
+			assert.Panics(t, func() {
+				New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+					WithFieldsLocalized(fields...)
+			}, "should panic when duplicate field names are provided")
+		})
+
+		t.Run("replacement preserves original position", func(t *testing.T) {
+			// First add some fields
+			status := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+				WithFieldLocalized("email", "field.email.required").
+				WithFieldLocalized("password", "field.password.weak").
+				WithFieldLocalized("age", "field.age.required")
+
+			// Verify initial order
+			assert.Len(t, status.localized.FieldViolations, 3)
+			assert.Equal(t, "email", status.localized.FieldViolations[0].Field)
+			assert.Equal(t, "password", status.localized.FieldViolations[1].Field)
+			assert.Equal(t, "age", status.localized.FieldViolations[2].Field)
+
+			// Replace middle field and add new field
+			newFields := []*FieldLocalized{
+				{Field: "phone", Key: "field.phone.invalid"},      // New field (should be appended)
+				{Field: "password", Key: "field.password.strong"}, // Replace existing (should stay in position 1)
+			}
+
+			updatedStatus := status.WithFieldsLocalized(newFields...)
+
+			// Should have 4 fields total
+			assert.Len(t, updatedStatus.localized.FieldViolations, 4)
+
+			// Verify order is preserved for existing fields, new fields appended
+			fields := updatedStatus.localized.FieldViolations
+			assert.Equal(t, "email", fields[0].Field)
+			assert.Equal(t, "field.email.required", fields[0].Key)
+
+			assert.Equal(t, "password", fields[1].Field)
+			assert.Equal(t, "field.password.strong", fields[1].Key) // Replaced in place
+
+			assert.Equal(t, "age", fields[2].Field)
+			assert.Equal(t, "field.age.required", fields[2].Key)
+
+			assert.Equal(t, "phone", fields[3].Field) // New field appended
+			assert.Equal(t, "field.phone.invalid", fields[3].Key)
+		})
+
+		t.Run("WithFieldLocalized should replace existing field", func(t *testing.T) {
+			status := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+				WithFieldLocalized("email", "field.email.required")
+
+			// Replace the existing field
+			updatedStatus := status.WithFieldLocalized("email", "field.email.format_error")
+
+			assert.Len(t, updatedStatus.localized.FieldViolations, 1)
+			assert.Equal(t, "email", updatedStatus.localized.FieldViolations[0].Field)
+			assert.Equal(t, "field.email.format_error", updatedStatus.localized.FieldViolations[0].Key)
+		})
+
+		t.Run("duplicate within new fields should still panic", func(t *testing.T) {
+			status := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+				WithFieldLocalized("email", "field.email.required")
+
+			newFields := []*FieldLocalized{
+				{Field: "password", Key: "field.password.weak"},
+				{Field: "phone", Key: "field.phone.invalid"},
+				{Field: "password", Key: "field.password.short"}, // Duplicate in new fields
+			}
+
+			assert.Panics(t, func() {
+				status.WithFieldsLocalized(newFields...)
+			}, "should panic when duplicate field names exist within new fields")
+		})
+
+		t.Run("new fields maintain input order", func(t *testing.T) {
+			status := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+				WithFieldLocalized("email", "field.email.required")
+
+			// Add multiple new fields in specific order
+			newFields := []*FieldLocalized{
+				{Field: "phone", Key: "field.phone.invalid"},
+				{Field: "address", Key: "field.address.required"},
+				{Field: "age", Key: "field.age.invalid"},
+				{Field: "country", Key: "field.country.required"},
+			}
+
+			updatedStatus := status.WithFieldsLocalized(newFields...)
+
+			// Should have 5 fields: email (existing) + 4 new fields
+			assert.Len(t, updatedStatus.localized.FieldViolations, 5)
+
+			fields := updatedStatus.localized.FieldViolations
+			assert.Equal(t, "email", fields[0].Field) // Existing field preserved in position
+
+			// New fields should be appended in the exact order they were provided
+			assert.Equal(t, "phone", fields[1].Field)
+			assert.Equal(t, "address", fields[2].Field)
+			assert.Equal(t, "age", fields[3].Field)
+			assert.Equal(t, "country", fields[4].Field)
+		})
+
+		t.Run("FieldViolation with Description and Reason", func(t *testing.T) {
+			fieldViolation := &FieldViolation{
+				Field:       "email",
+				Key:         "field.email.invalid_format",
+				Args:        []any{"user@example", "email format"},
+				Description: "Email address format is invalid",
+				Reason:      "INVALID_EMAIL_FORMAT",
+			}
+
+			proto := fieldViolation.Proto()
+			assert.Equal(t, "email", proto.Field)
+			assert.Equal(t, "field.email.invalid_format", proto.Key)
+			assert.Len(t, proto.Args, 2)
+			assert.Equal(t, "Email address format is invalid", proto.Description)
+			assert.Equal(t, "INVALID_EMAIL_FORMAT", proto.Reason)
+		})
+
+		t.Run("New WithFieldViolation API", func(t *testing.T) {
+			status := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+				WithFieldViolation("email", "INVALID_EMAIL_FORMAT", "Email address format is invalid", "field.email.invalid_format", "user@example")
+
+			assert.NotNil(t, status.localized)
+			assert.Len(t, status.localized.FieldViolations, 1)
+
+			fieldViol := status.localized.FieldViolations[0]
+			assert.Equal(t, "email", fieldViol.Field)
+			assert.Equal(t, "INVALID_EMAIL_FORMAT", fieldViol.Reason)
+			assert.Equal(t, "Email address format is invalid", fieldViol.Description)
+			assert.Equal(t, "field.email.invalid_format", fieldViol.Key)
+			assert.Len(t, fieldViol.Args, 1)
+		})
+
+		t.Run("New WithFieldsViolations API", func(t *testing.T) {
+			violations := []*FieldViolation{
+				{
+					Field:       "email",
+					Reason:      "REQUIRED",
+					Description: "Email is required",
+					Key:         "field.email.required",
+				},
+				{
+					Field:       "password",
+					Reason:      "TOO_WEAK",
+					Description: "Password is too weak",
+					Key:         "field.password.weak",
+					Args:        []any{"minLength", 8},
+				},
+			}
+
+			status := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+				WithFieldsViolations(violations...)
+
+			assert.NotNil(t, status.localized)
+			assert.Len(t, status.localized.FieldViolations, 2)
+
+			// Check first violation
+			emailViol := status.localized.FieldViolations[0]
+			assert.Equal(t, "email", emailViol.Field)
+			assert.Equal(t, "REQUIRED", emailViol.Reason)
+			assert.Equal(t, "Email is required", emailViol.Description)
+
+			// Check second violation
+			passwordViol := status.localized.FieldViolations[1]
+			assert.Equal(t, "password", passwordViol.Field)
+			assert.Equal(t, "TOO_WEAK", passwordViol.Reason)
+			assert.Equal(t, "Password is too weak", passwordViol.Description)
+			assert.Len(t, passwordViol.Args, 2)
+		})
+	})
 }
