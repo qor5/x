@@ -41,6 +41,8 @@ declare module 'vue' {
     Overlay: typeof import('./src/lib/Overlay.vue')['default']
     RangePicker: typeof import('./src/lib/Form/VXDatePicker/RangePicker.vue')['default']
     RestoreScrollListener: typeof import('./src/lib/RestoreScrollListener.vue')['default']
+    RouterLink: typeof import('vue-router')['RouterLink']
+    RouterView: typeof import('vue-router')['RouterView']
     ScrollIframe: typeof import('./src/lib/ScrollIframe.vue')['default']
     SegmentItem: typeof import('./src/lib/Form/VXSegmentForm/SegmentItem.vue')['default']
     SegmentItemGroup: typeof import('./src/lib/Form/VXSegmentForm/SegmentItemGroup.vue')['default']
