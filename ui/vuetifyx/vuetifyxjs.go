@@ -32,7 +32,7 @@ func cssComponentsPack() web.ComponentsPack {
 	if customizeVuetifyCSS {
 		v, err = vuetifyx.ReadFile("vuetifyxjs/dist/assets/vuetifyx.min.css")
 	} else {
-		v, err = assetsbox.ReadFile("buildinAsserts/vuetify.min.3.6.14.css")
+		v, err = assetsbox.ReadFile("buildinAsserts/vuetify.min.3.7.18.css")
 	}
 	if err != nil {
 		panic(err)
