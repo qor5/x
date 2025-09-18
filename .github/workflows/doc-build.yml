@@ -19,10 +19,10 @@ jobs:
       - name: set Node.js environment
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: '22.x'
 
       - name: Install pnpm
-        run: npm install -g pnpm@9.15.5
+        run: npm install -g pnpm@10.16.1
 
       - name: Install dep
         working-directory: ui/vuetifyx/vuetifyxjs
