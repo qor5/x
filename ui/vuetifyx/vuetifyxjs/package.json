@@ -47,7 +47,7 @@
     "@vue/test-utils": "^2.4.6",
     "body-scroll-lock": "4.0.0-beta.0",
     "cross-env": "^7.0.3",
-    "inquirer": "^10.2.2",
+    "inquirer": "^12.9.6",
     "jsdom": "^27.0.0",
     "msw": "^2.7.3",
     "nodemon": "^3.1.9",
