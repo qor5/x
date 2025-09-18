@@ -191,9 +191,9 @@ func (s *Status) WithLocalized(key string, args ...string) *Status {
 	return err
 }
 
-func (s *Status) WithExtraDetail(message ...proto.Message) *Status {
+func (s *Status) WithExtraDetails(details ...proto.Message) *Status {
 	err := Clone(s)
-	err.extraDetails = append(err.extraDetails, message...)
+	err.extraDetails = append(err.extraDetails, details...)
 	return err
 }
 

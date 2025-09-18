@@ -32,7 +32,7 @@ pre_localized,Pre-localized error,预置本地化错误 %s
 
 	// Create untranslated original error
 	originalErr := New(codes.InvalidArgument, "invalid_request", "original error").
-		WithExtraDetail(&errdetails.BadRequest{
+		WithExtraDetails(&errdetails.BadRequest{
 			FieldViolations: []*errdetails.BadRequest_FieldViolation{
 				{
 					Field:       "email",
@@ -86,7 +86,7 @@ pre_localized,Pre-localized error,预置本地化错误 %s
 		// Create error with pre-localized message
 		preLocalizedErr := New(codes.InvalidArgument, "pre_localized", "original message").
 			WithLocalized("pre_localized").
-			WithExtraDetail(&errdetails.LocalizedMessage{
+			WithExtraDetails(&errdetails.LocalizedMessage{
 				Locale:  "zh-CN",
 				Message: "指定本地化错误",
 			}).Err()
