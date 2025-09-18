@@ -30,7 +30,7 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: szenius/set-timezone@v1.0
+      - uses: szenius/set-timezone@dd47655c84241eec2ffa0a855959c16c0920c3c4 # v1.0
         with:
           timezoneLinux: 'Asia/Shanghai'
 
