@@ -172,11 +172,16 @@ func LocalizedFromProto(pb *statusv1.Localized) *Localized {
 }
 
 // FieldViolation represents a field-level validation violation with localization capability
+//
+// Priority order for localized messages:
+//  1. LocalizedMessage (highest priority - pre-translated, ready to use)
+//  2. Localized (lower priority - template that needs translation)
 type FieldViolation struct {
-	Field       string
-	Reason      string
-	Description string
-	Localized   *Localized
+	Field            string
+	Reason           string
+	Description      string
+	Localized        *Localized                   // Localization template (requires translation)
+	LocalizedMessage *errdetails.LocalizedMessage // Pre-translated message (ready to use)
 }
 
 // Proto converts FieldViolation to protobuf message
@@ -184,11 +189,13 @@ func (f *FieldViolation) Proto() *statusv1.BadRequest_FieldViolation {
 	if f == nil {
 		return nil
 	}
+
 	return &statusv1.BadRequest_FieldViolation{
-		Field:       f.Field,
-		Reason:      f.Reason,
-		Description: f.Description,
-		Localized:   f.Localized.Proto(),
+		Field:            f.Field,
+		Reason:           f.Reason,
+		Description:      f.Description,
+		Localized:        f.Localized.Proto(),
+		LocalizedMessage: f.LocalizedMessage,
 	}
 }
 
@@ -202,33 +209,56 @@ func ToFieldViolations(err error, field string) []*FieldViolation {
 
 	s, _ := FromError(err)
 
-	// Extract localization information if available
-	var localized *Localized
-	if s.localized != nil {
-		localized = LocalizedFromProto(s.localized)
+	// Check for existing translated content in details
+	var localizedMessage *errdetails.LocalizedMessage
+	var badRequest *errdetails.BadRequest
+	for _, d := range s.details {
+		switch v := d.(type) {
+		case *errdetails.LocalizedMessage:
+			localizedMessage = v
+		case *errdetails.BadRequest:
+			badRequest = v
+		}
 	}
 
 	// Main field error (always first)
+	var mainLocalized *Localized
+	if localizedMessage == nil {
+		// Only use s.localized if no existing translated message
+		mainLocalized = LocalizedFromProto(s.localized)
+	}
+
 	mainViolation := &FieldViolation{
-		Field:       field,
-		Reason:      s.Reason(),
-		Description: s.Message(),
-		Localized:   localized,
+		Field:            field,
+		Reason:           s.Reason(),
+		Description:      s.Message(),
+		Localized:        mainLocalized,
+		LocalizedMessage: localizedMessage,
 	}
 
 	result := []*FieldViolation{mainViolation}
 
-	// If the original error has field violations, append them with proper field path
-	if s.badRequest != nil && len(s.badRequest.FieldViolations) > 0 {
-		for _, fv := range s.badRequest.FieldViolations {
-			nestedField := field + "." + fv.Field
-			nestedLocalized := LocalizedFromProto(fv.Localized)
-
+	// Process field violations - use existingBadRequest if present, otherwise s.badRequest
+	if badRequest != nil {
+		// Use Google standard BadRequest from details
+		for _, fv := range badRequest.FieldViolations {
 			result = append(result, &FieldViolation{
-				Field:       nestedField,
-				Reason:      fv.Reason,
-				Description: fv.Description,
-				Localized:   nestedLocalized,
+				Field:            field + "." + fv.Field,
+				Reason:           fv.Reason,
+				Description:      fv.Description,
+				Localized:        nil,
+				LocalizedMessage: fv.LocalizedMessage,
+			})
+		}
+	} else if s.badRequest != nil {
+		// Use our custom badRequest
+		for _, fv := range s.badRequest.FieldViolations {
+			result = append(result, &FieldViolation{
+				Field:            field + "." + fv.Field,
+				Reason:           fv.Reason,
+				Description:      fv.Description,
+				Localized:        LocalizedFromProto(fv.Localized),
+				LocalizedMessage: nil,
 			})
 		}
 	}
@@ -238,6 +268,11 @@ func ToFieldViolations(err error, field string) []*FieldViolation {
 
 // TranslateError translates error messages and field violations using the provided i18n instance and language.
 // Returns the original error if translation is not possible or if localized details already exist.
+//
+// Translation priority:
+//  1. If LocalizedMessage already exists -> skip translation (highest priority)
+//  2. If Localized template exists -> translate template (medium priority)
+//  3. Use error reason for translation -> fallback (lowest priority)
 func TranslateError(ib *i18nx.I18N, lang language.Tag, err error) error {
 	if err == nil {
 		return nil
@@ -292,22 +327,29 @@ func TranslateError(ib *i18nx.I18N, lang language.Tag, err error) error {
 				Reason:      fieldViolation.Reason,
 			}
 
-			var text string
+			// Check if LocalizedMessage already exists (highest priority)
+			if fieldViolation.LocalizedMessage != nil {
+				// Use existing pre-translated message directly
+				fv.LocalizedMessage = proto.Clone(fieldViolation.LocalizedMessage).(*errdetails.LocalizedMessage)
+			} else {
+				// Need to translate from template or reason
+				var text string
 
-			if fieldViolation.Localized != nil && fieldViolation.Localized.GetKey() != "" {
-				localized := LocalizedFromProto(fieldViolation.Localized)
-				text = ib.Sprintf(lang, localized.Key, localized.Args...)
-			}
+				if fieldViolation.Localized != nil && fieldViolation.Localized.GetKey() != "" {
+					localized := LocalizedFromProto(fieldViolation.Localized)
+					text = ib.Sprintf(lang, localized.Key, localized.Args...)
+				}
 
-			reason := fieldViolation.GetReason()
-			if text == "" && reason != "" {
-				text = ib.Sprintf(lang, reason)
-			}
+				reason := fieldViolation.GetReason()
+				if text == "" && reason != "" {
+					text = ib.Sprintf(lang, reason)
+				}
 
-			if text != "" {
-				fv.LocalizedMessage = &errdetails.LocalizedMessage{
-					Locale:  lang.String(),
-					Message: text,
+				if text != "" {
+					fv.LocalizedMessage = &errdetails.LocalizedMessage{
+						Locale:  lang.String(),
+						Message: text,
+					}
 				}
 			}
 

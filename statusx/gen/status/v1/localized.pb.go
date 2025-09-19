@@ -7,6 +7,7 @@
 package statusv1
 
 import (
+	errdetails "google.golang.org/genproto/googleapis/rpc/errdetails"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	anypb "google.golang.org/protobuf/types/known/anypb"
@@ -121,13 +122,14 @@ func (x *BadRequest) GetFieldViolations() []*BadRequest_FieldViolation {
 }
 
 type BadRequest_FieldViolation struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Field         string                 `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`             // Field name (e.g., "email", "user.email", "profile.age")
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"` // Error description for BadRequest_FieldViolation
-	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`           // Error reason code (UPPER_SNAKE_CASE format)
-	Localized     *Localized             `protobuf:"bytes,4,opt,name=localized,proto3" json:"localized,omitempty"`     // Field-specific localization information
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState       `protogen:"open.v1"`
+	Field            string                       `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`                                               // Field name (e.g., "email", "user.email", "profile.age")
+	Description      string                       `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`                                   // Error description for BadRequest_FieldViolation
+	Reason           string                       `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`                                             // Error reason code (UPPER_SNAKE_CASE format)
+	Localized        *Localized                   `protobuf:"bytes,4,opt,name=localized,proto3" json:"localized,omitempty"`                                       // Field-specific localization template (lower priority)
+	LocalizedMessage *errdetails.LocalizedMessage `protobuf:"bytes,5,opt,name=localized_message,json=localizedMessage,proto3" json:"localized_message,omitempty"` // Pre-translated message (higher priority)
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *BadRequest_FieldViolation) Reset() {
@@ -188,22 +190,30 @@ func (x *BadRequest_FieldViolation) GetLocalized() *Localized {
 	return nil
 }
 
+func (x *BadRequest_FieldViolation) GetLocalizedMessage() *errdetails.LocalizedMessage {
+	if x != nil {
+		return x.LocalizedMessage
+	}
+	return nil
+}
+
 var File_status_v1_localized_proto protoreflect.FileDescriptor
 
 const file_status_v1_localized_proto_rawDesc = "" +
 	"\n" +
-	"\x19status/v1/localized.proto\x12\tstatus.v1\x1a\x19google/protobuf/any.proto\"G\n" +
+	"\x19status/v1/localized.proto\x12\tstatus.v1\x1a\x19google/protobuf/any.proto\x1a\x1egoogle/rpc/error_details.proto\"G\n" +
 	"\tLocalized\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12(\n" +
-	"\x04args\x18\x02 \x03(\v2\x14.google.protobuf.AnyR\x04args\"\xf4\x01\n" +
+	"\x04args\x18\x02 \x03(\v2\x14.google.protobuf.AnyR\x04args\"\xbf\x02\n" +
 	"\n" +
 	"BadRequest\x12O\n" +
-	"\x10field_violations\x18\x01 \x03(\v2$.status.v1.BadRequest.FieldViolationR\x0ffieldViolations\x1a\x94\x01\n" +
+	"\x10field_violations\x18\x01 \x03(\v2$.status.v1.BadRequest.FieldViolationR\x0ffieldViolations\x1a\xdf\x01\n" +
 	"\x0eFieldViolation\x12\x14\n" +
 	"\x05field\x18\x01 \x01(\tR\x05field\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x16\n" +
 	"\x06reason\x18\x03 \x01(\tR\x06reason\x122\n" +
-	"\tlocalized\x18\x04 \x01(\v2\x14.status.v1.LocalizedR\tlocalizedB\x99\x01\n" +
+	"\tlocalized\x18\x04 \x01(\v2\x14.status.v1.LocalizedR\tlocalized\x12I\n" +
+	"\x11localized_message\x18\x05 \x01(\v2\x1c.google.rpc.LocalizedMessageR\x10localizedMessageB\x99\x01\n" +
 	"\rcom.status.v1B\x0eLocalizedProtoP\x01Z3github.com/qor5/x/v3/statusx/gen/status/v1;statusv1\xa2\x02\x03SXX\xaa\x02\tStatus.V1\xca\x02\tStatus\\V1\xe2\x02\x15Status\\V1\\GPBMetadata\xea\x02\n" +
 	"Status::V1b\x06proto3"
 
@@ -221,20 +231,22 @@ func file_status_v1_localized_proto_rawDescGZIP() []byte {
 
 var file_status_v1_localized_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_status_v1_localized_proto_goTypes = []any{
-	(*Localized)(nil),                 // 0: status.v1.Localized
-	(*BadRequest)(nil),                // 1: status.v1.BadRequest
-	(*BadRequest_FieldViolation)(nil), // 2: status.v1.BadRequest.FieldViolation
-	(*anypb.Any)(nil),                 // 3: google.protobuf.Any
+	(*Localized)(nil),                   // 0: status.v1.Localized
+	(*BadRequest)(nil),                  // 1: status.v1.BadRequest
+	(*BadRequest_FieldViolation)(nil),   // 2: status.v1.BadRequest.FieldViolation
+	(*anypb.Any)(nil),                   // 3: google.protobuf.Any
+	(*errdetails.LocalizedMessage)(nil), // 4: google.rpc.LocalizedMessage
 }
 var file_status_v1_localized_proto_depIdxs = []int32{
 	3, // 0: status.v1.Localized.args:type_name -> google.protobuf.Any
 	2, // 1: status.v1.BadRequest.field_violations:type_name -> status.v1.BadRequest.FieldViolation
 	0, // 2: status.v1.BadRequest.FieldViolation.localized:type_name -> status.v1.Localized
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	4, // 3: status.v1.BadRequest.FieldViolation.localized_message:type_name -> google.rpc.LocalizedMessage
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_status_v1_localized_proto_init() }

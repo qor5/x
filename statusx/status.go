@@ -164,6 +164,14 @@ func (s *Status) BadRequest() *statusv1.BadRequest {
 	return proto.Clone(s.badRequest).(*statusv1.BadRequest)
 }
 
+// ToFieldViolations converts this Status to field violations for the specified field
+func (s *Status) ToFieldViolations(field string) []*FieldViolation {
+	if s == nil {
+		return nil
+	}
+	return ToFieldViolations(s.Err(), field)
+}
+
 // Err converts the Status to an error interface.
 //
 // The returned error type is either:
@@ -398,12 +406,4 @@ func Wrap(err error, c codes.Code, reason, message string) *Status {
 
 func Wrapf(err error, c codes.Code, reason, format string, a ...any) *Status {
 	return Wrap(err, c, reason, fmt.Sprintf(format, a...))
-}
-
-// ToFieldViolations converts this Status to field violations for the specified field
-func (s *Status) ToFieldViolations(field string) []*FieldViolation {
-	if s == nil {
-		return nil
-	}
-	return ToFieldViolations(s.Err(), field)
 }

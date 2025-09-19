@@ -82,13 +82,15 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 	code := st.Code()
 	statusCode := HTTPStatusFromCode(code)
 
-	var errInfo *errdetails.ErrorInfo
+	var errorInfo *errdetails.ErrorInfo
 	var localizedMessage *errdetails.LocalizedMessage
 	var badRequest *errdetails.BadRequest
+	// Intentionally use st.Details() instead of st.details to get the fully processed data
+	// that has gone through the complete transformation pipeline (GRPCStatus -> Details)
 	for _, d := range st.Details() {
 		switch v := d.(type) {
 		case *errdetails.ErrorInfo:
-			errInfo = v
+			errorInfo = v
 		case *errdetails.LocalizedMessage:
 			localizedMessage = v
 		case *errdetails.BadRequest:
@@ -97,7 +99,7 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 	}
 
 	verr := &vproto.ValidationError{
-		Code:           cmp.Or(errInfo.GetReason(), code.String()),
+		Code:           cmp.Or(errorInfo.GetReason(), code.String()),
 		DefaultViewMsg: cmp.Or(localizedMessage.GetMessage(), st.Message()),
 	}
 
