@@ -1,11 +1,13 @@
 package statusx
 
 import (
-	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/pkg/errors"
 	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
+	"golang.org/x/text/language"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -14,7 +16,19 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
+
+	"github.com/qor5/x/v3/i18nx"
 )
+
+// NewLocalized creates a new Status with the given code, key, and args
+func NewLocalized(code codes.Code, key string, args ...any) *Status {
+	return New(code, ReasonFromCode(code).String(), key).WithLocalized(key, args...)
+}
+
+// WrapLocalized wraps an error with the given code, key, and args
+func WrapLocalized(err error, code codes.Code, key string, args ...any) *Status {
+	return Wrap(err, code, ReasonFromCode(code).String(), key).WithLocalized(key, args...)
+}
 
 // toProtoMessage converts Go values to proto messages for use with Any.
 func toProtoMessage(v any) (proto.Message, error) {
@@ -137,17 +151,22 @@ func (l *Localized) Proto() *statusv1.Localized {
 }
 
 func LocalizedFromProto(pb *statusv1.Localized) *Localized {
+	if pb == nil {
+		return nil
+	}
 	args := pb.GetArgs()
 	goArgs := make([]any, len(args))
 	for i, anyArg := range args {
 		val, err := extractValueFromAny(anyArg)
 		if err != nil {
-			val = fmt.Sprintf("<%s>", anyArg.GetTypeUrl())
+			// Use nil instead of placeholder strings to avoid breaking template rendering
+			val = nil
+			slog.Warn("failed to extract value from Any", "error", err)
 		}
 		goArgs[i] = val
 	}
 	return &Localized{
-		Key:  pb.Key,
+		Key:  pb.GetKey(),
 		Args: goArgs,
 	}
 }
@@ -173,12 +192,142 @@ func (f *FieldViolation) Proto() *statusv1.BadRequest_FieldViolation {
 	}
 }
 
-// NewLocalized creates a new Status with the given code, key, and args
-func NewLocalized(code codes.Code, key string, args ...any) *Status {
-	return New(code, ReasonFromCode(code).String(), key).WithLocalized(key, args...)
+// ToFieldViolations converts any error to field violations for the specified field.
+// Returns a slice where the first element is the main field error, followed by
+// nested field violations with the field path properly prefixed.
+func ToFieldViolations(err error, field string) []*FieldViolation {
+	if err == nil {
+		return nil
+	}
+
+	s, _ := FromError(err)
+
+	// Extract localization information if available
+	var localized *Localized
+	if s.localized != nil {
+		localized = LocalizedFromProto(s.localized)
+	}
+
+	// Main field error (always first)
+	mainViolation := &FieldViolation{
+		Field:       field,
+		Reason:      s.Reason(),
+		Description: s.Message(),
+		Localized:   localized,
+	}
+
+	result := []*FieldViolation{mainViolation}
+
+	// If the original error has field violations, append them with proper field path
+	if s.badRequest != nil && len(s.badRequest.FieldViolations) > 0 {
+		for _, fv := range s.badRequest.FieldViolations {
+			nestedField := field + "." + fv.Field
+			nestedLocalized := LocalizedFromProto(fv.Localized)
+
+			result = append(result, &FieldViolation{
+				Field:       nestedField,
+				Reason:      fv.Reason,
+				Description: fv.Description,
+				Localized:   nestedLocalized,
+			})
+		}
+	}
+
+	return result
 }
 
-// WrapLocalized wraps an error with the given code, key, and args
-func WrapLocalized(err error, code codes.Code, key string, args ...any) *Status {
-	return Wrap(err, code, ReasonFromCode(code).String(), key).WithLocalized(key, args...)
+// TranslateError translates error messages and field violations using the provided i18n instance and language.
+// Returns the original error if translation is not possible or if localized details already exist.
+func TranslateError(ib *i18nx.I18N, lang language.Tag, err error) error {
+	if err == nil {
+		return nil
+	}
+
+	s, ok := FromError(err)
+	if !ok {
+		s.message = "unknown error"
+	}
+
+	var localizedMessage *errdetails.LocalizedMessage
+	var badRequest *errdetails.BadRequest
+	for _, d := range s.details {
+		switch v := d.(type) {
+		case *errdetails.LocalizedMessage:
+			localizedMessage = v
+		case *errdetails.BadRequest:
+			badRequest = v
+		}
+	}
+
+	if localizedMessage == nil {
+		var text string
+
+		if s.localized != nil && s.localized.GetKey() != "" {
+			localized := LocalizedFromProto(s.localized)
+			text = ib.Sprintf(lang, localized.Key, localized.Args...)
+		}
+
+		reason := s.Reason()
+		if text == "" && reason != "" {
+			text = ib.Sprintf(lang, reason)
+		}
+
+		if text != "" {
+			s.details = append(s.details, &errdetails.LocalizedMessage{
+				Locale:  lang.String(),
+				Message: text,
+			})
+		}
+
+		// Clear original localized information after translation to avoid duplication
+		s.localized = nil
+	}
+
+	if badRequest == nil && s.badRequest != nil {
+		br := &errdetails.BadRequest{}
+		for _, fieldViolation := range s.badRequest.FieldViolations {
+			fv := &errdetails.BadRequest_FieldViolation{
+				Field:       fieldViolation.Field,
+				Description: fieldViolation.Description,
+				Reason:      fieldViolation.Reason,
+			}
+
+			var text string
+
+			if fieldViolation.Localized != nil && fieldViolation.Localized.GetKey() != "" {
+				localized := LocalizedFromProto(fieldViolation.Localized)
+				text = ib.Sprintf(lang, localized.Key, localized.Args...)
+			}
+
+			reason := fieldViolation.GetReason()
+			if text == "" && reason != "" {
+				text = ib.Sprintf(lang, reason)
+			}
+
+			if text != "" {
+				fv.LocalizedMessage = &errdetails.LocalizedMessage{
+					Locale:  lang.String(),
+					Message: text,
+				}
+			}
+
+			br.FieldViolations = append(br.FieldViolations, fv)
+		}
+		s.details = append(s.details, br)
+
+		// Clear original localized information after translation to avoid duplication
+		s.badRequest = nil
+	}
+
+	return s.Err()
+}
+
+// TranslateStatusErrorOnly translates only StatusError types, returning the error and a boolean indicating success
+func TranslateStatusErrorOnly(ib *i18nx.I18N, lang language.Tag, err error) (error, bool) {
+	if err != nil {
+		if se := new(StatusError); !errors.As(err, &se) {
+			return err, false //nolint:errhandle
+		}
+	}
+	return TranslateError(ib, lang, err), true
 }
