@@ -1,41 +1,25 @@
 package statusx
 
 import (
-	"context"
-
 	"github.com/pkg/errors"
-	"github.com/samber/lo"
+	"golang.org/x/text/language"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 
 	"github.com/qor5/x/v3/i18nx"
 )
 
-func TranslateStatusErrorOnly(ctx context.Context, ib *i18nx.I18N, err error) (error, bool) {
+func TranslateStatusErrorOnly(ib *i18nx.I18N, lang language.Tag, err error) (error, bool) {
 	if err != nil {
 		if se := new(StatusError); !errors.As(err, &se) {
 			return err, false //nolint:errhandle
 		}
 	}
-	return TranslateError(ctx, ib, err), true
+	return TranslateError(ib, lang, err), true
 }
 
-// TranslateError translates error details according to the locale in the context.
-//
-// Given an error, it translates the error message and field violations into the
-// locale specified in the context. If the error doesn't contain any localized
-// message or field violations, it falls back to the error reason. If the error
-// doesn't contain any localized message but has a localized key, it uses the key
-// to translate the message. If the error doesn't contain any localized message or
-// key, it leaves the error as is.
-//
-// The function returns the translated error. If the error is nil, it returns nil.
-//
-// For example, if a request is invalid, the error will contain a
-// *errdetails.BadRequest error detail. The field violations in the bad request
-// will be translated according to the locale specified in the context. The
-// translated field violations will be returned as a new *errdetails.LocalizedMessage
-// error detail.
-func TranslateError(ctx context.Context, ib *i18nx.I18N, err error) error {
+// TranslateError translates error messages and field violations using the provided i18n instance and language.
+// Returns the original error if translation is not possible or if localized details already exist.
+func TranslateError(ib *i18nx.I18N, lang language.Tag, err error) error {
 	if err == nil {
 		return nil
 	}
@@ -45,12 +29,9 @@ func TranslateError(ctx context.Context, ib *i18nx.I18N, err error) error {
 		s.message = "unknown error"
 	}
 
-	tag := ib.LanguageFromContext(ctx)
-	locale := tag.String()
-
-	var badRequest *errdetails.BadRequest
 	var localizedMessage *errdetails.LocalizedMessage
-	for _, d := range s.extraDetails {
+	var badRequest *errdetails.BadRequest
+	for _, d := range s.details {
 		switch v := d.(type) {
 		case *errdetails.LocalizedMessage:
 			localizedMessage = v
@@ -62,42 +43,55 @@ func TranslateError(ctx context.Context, ib *i18nx.I18N, err error) error {
 	if localizedMessage == nil {
 		var text string
 
-		localized := s.localized
-		if localized.GetKey() != "" {
-			args := localized.GetArgs()
-			text = ib.Sprintf(tag, localized.GetKey(), lo.Map(args, func(v string, _ int) any {
-				return v
-			})...)
+		if s.localized.GetKey() != "" {
+			localized := LocalizedFromProto(s.localized)
+			text = ib.Sprintf(lang, localized.Key, localized.Args...)
 		}
-		s.localized = nil
 
-		if text == "" {
-			text = ib.Sprintf(tag, s.Reason())
+		reason := s.Reason()
+		if text == "" && reason != "" {
+			text = ib.Sprintf(lang, reason)
 		}
 
 		if text != "" {
-			s.extraDetails = append(s.extraDetails, &errdetails.LocalizedMessage{
-				Locale:  locale,
+			s.details = append(s.details, &errdetails.LocalizedMessage{
+				Locale:  lang.String(),
 				Message: text,
 			})
 		}
 	}
 
-	if badRequest == nil {
-		return s.Err()
-	}
-
-	for _, fv := range badRequest.GetFieldViolations() {
-		if fv.GetLocalizedMessage() != nil {
-			continue
-		}
-		text := ib.Sprintf(tag, fv.GetReason())
-		if text != "" {
-			fv.LocalizedMessage = &errdetails.LocalizedMessage{
-				Locale:  locale,
-				Message: text,
+	if badRequest == nil && s.badRequest != nil {
+		br := &errdetails.BadRequest{}
+		for _, fieldViolation := range s.badRequest.FieldViolations {
+			fv := &errdetails.BadRequest_FieldViolation{
+				Field:       fieldViolation.Field,
+				Description: fieldViolation.Description,
+				Reason:      fieldViolation.Reason,
 			}
+
+			var text string
+
+			if fieldViolation.Localized.GetKey() != "" {
+				localized := LocalizedFromProto(fieldViolation.Localized)
+				text = ib.Sprintf(lang, localized.Key, localized.Args...)
+			}
+
+			reason := fieldViolation.GetReason()
+			if text == "" && reason != "" {
+				text = ib.Sprintf(lang, reason)
+			}
+
+			if text != "" {
+				fv.LocalizedMessage = &errdetails.LocalizedMessage{
+					Locale:  lang.String(),
+					Message: text,
+				}
+			}
+
+			br.FieldViolations = append(br.FieldViolations, fv)
 		}
+		s.details = append(s.details, br)
 	}
 
 	return s.Err()

@@ -6,6 +6,7 @@ modules:
 
 deps:
   - buf.build/envoyproxy/protoc-gen-validate
+  - buf.build/googleapis/googleapis
 
 lint:
   use:

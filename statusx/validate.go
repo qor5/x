@@ -17,7 +17,7 @@ import (
 
 func BadRequest(fvs ...*errdetails.BadRequest_FieldViolation) *Status {
 	return New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "invalid argument").
-		WithExtraDetails(&errdetails.BadRequest{FieldViolations: fvs})
+		WithDetails(&errdetails.BadRequest{FieldViolations: fvs})
 }
 
 func PrependFieldPrefix(prefix string, fvs ...*errdetails.BadRequest_FieldViolation) []*errdetails.BadRequest_FieldViolation {

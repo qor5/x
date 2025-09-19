@@ -20,9 +20,10 @@ type Status struct {
 	code    codes.Code
 	message string
 
-	errorInfo    *errdetails.ErrorInfo
-	localized    *statusv1.Localized
-	extraDetails []proto.Message
+	errorInfo  *errdetails.ErrorInfo
+	localized  *statusv1.Localized
+	badRequest *statusv1.BadRequest
+	details    []proto.Message
 
 	cause error
 }
@@ -68,21 +69,31 @@ func (s *Status) GRPCStatus() *status.Status {
 	if s == nil {
 		return nil
 	}
+
 	if s.Code() == codes.OK {
 		return status.New(codes.OK, "")
 	}
+
 	var details []protoadapt.MessageV1
+
 	errorInfo := proto.Clone(s.errorInfo).(*errdetails.ErrorInfo)
 	errorInfo.Reason = s.Reason()
 	details = append(details, errorInfo)
+
 	if s.localized != nil {
 		details = append(details, proto.Clone(s.localized).(*statusv1.Localized))
 	}
-	if len(s.extraDetails) > 0 {
-		for _, d := range s.extraDetails {
+
+	if s.badRequest != nil {
+		details = append(details, proto.Clone(s.badRequest).(*statusv1.BadRequest))
+	}
+
+	if len(s.details) > 0 {
+		for _, d := range s.details {
 			details = append(details, protoadapt.MessageV1Of(proto.Clone(d)))
 		}
 	}
+
 	st, err := status.New(s.Code(), s.message).WithDetails(details...)
 	if err != nil {
 		panic(err)
@@ -140,10 +151,17 @@ func (s *Status) Metadata() map[string]string {
 }
 
 func (s *Status) Localized() *statusv1.Localized {
-	if s == nil {
+	if s == nil || s.localized == nil {
 		return nil
 	}
 	return proto.Clone(s.localized).(*statusv1.Localized)
+}
+
+func (s *Status) BadRequest() *statusv1.BadRequest {
+	if s == nil || s.badRequest == nil {
+		return nil
+	}
+	return proto.Clone(s.badRequest).(*statusv1.BadRequest)
 }
 
 // Err converts the Status to an error interface.
@@ -159,42 +177,93 @@ func (s *Status) Err() error {
 }
 
 func (s *Status) WithCode(c codes.Code) *Status {
-	err := Clone(s)
-	err.code = c
-	return err
+	st := Clone(s)
+	st.code = c
+	return st
 }
 
 func (s *Status) WithReason(reason string) *Status {
-	err := Clone(s)
-	err.errorInfo.Reason = reason
-	return err
+	st := Clone(s)
+	st.errorInfo.Reason = reason
+	return st
 }
 
 func (s *Status) WithCause(cause error) *Status {
-	err := Clone(s)
-	err.cause = errors.WithStack(cause)
-	return err
+	st := Clone(s)
+	st.cause = errors.WithStack(cause)
+	return st
 }
 
 func (s *Status) WithMetadata(md map[string]string) *Status {
-	err := Clone(s)
-	err.errorInfo.Metadata = md
-	return err
+	st := Clone(s)
+	st.errorInfo.Metadata = md
+	return st
 }
 
-func (s *Status) WithLocalized(key string, args ...string) *Status {
-	err := Clone(s)
-	err.localized = &statusv1.Localized{
-		Key:  string(key),
-		Args: args,
+func (s *Status) WithLocalized(key string, args ...any) *Status {
+	st := Clone(s)
+	st.localized = (&Localized{Key: key, Args: args}).Proto()
+	return st
+}
+
+// WithFieldViolations adds multiple field-level validation violations in batch.
+// Duplicate field names within new fields will panic. Existing fields are replaced in place.
+func (s *Status) WithFieldViolations(fields ...*FieldViolation) *Status {
+	st := Clone(s)
+
+	if st.badRequest == nil {
+		st.badRequest = &statusv1.BadRequest{}
 	}
-	return err
+
+	newFieldMap := make(map[string]*FieldViolation)
+	for _, field := range fields {
+		if field.Field == "" {
+			panic(errors.Errorf("field name is required"))
+		}
+		if field.Reason == "" {
+			panic(errors.Errorf("reason is required"))
+		}
+		if _, exists := newFieldMap[field.Field]; exists {
+			panic(errors.Errorf("duplicate field name in localization: %s", field.Field))
+		}
+		newFieldMap[field.Field] = field
+	}
+
+	// Replace existing fields in place, keep others unchanged
+	for i, existing := range st.badRequest.FieldViolations {
+		if newField, shouldReplace := newFieldMap[existing.Field]; shouldReplace {
+			st.badRequest.FieldViolations[i] = newField.Proto()
+			delete(newFieldMap, existing.Field) // Mark as processed
+		}
+	}
+
+	// Append remaining new fields in original order
+	for _, field := range fields {
+		if _, wasNotReplaced := newFieldMap[field.Field]; wasNotReplaced {
+			st.badRequest.FieldViolations = append(st.badRequest.FieldViolations, field.Proto())
+		}
+	}
+
+	return st
 }
 
-func (s *Status) WithExtraDetails(details ...proto.Message) *Status {
-	err := Clone(s)
-	err.extraDetails = append(err.extraDetails, details...)
-	return err
+func (s *Status) WithDetails(details ...proto.Message) *Status {
+	st := Clone(s)
+
+	// Validate that details don't contain reserved types
+	for _, detail := range details {
+		switch detail.(type) {
+		case *errdetails.ErrorInfo:
+			panic("cannot add *errdetails.ErrorInfo via WithDetails, it's managed internally")
+		case *statusv1.Localized:
+			panic("cannot add *statusv1.Localized via WithDetails, use WithLocalized instead")
+		case *statusv1.BadRequest:
+			panic("cannot add *statusv1.BadRequest via WithDetails, use WithFieldViolations instead")
+		}
+	}
+
+	st.details = append(st.details, details...)
+	return st
 }
 
 func (s *Status) String() string {
@@ -206,12 +275,13 @@ func Clone(s *Status) *Status {
 		return nil
 	}
 	return &Status{
-		code:         s.code,
-		message:      s.message,
-		errorInfo:    proto.Clone(s.errorInfo).(*errdetails.ErrorInfo),
-		localized:    proto.Clone(s.localized).(*statusv1.Localized),
-		extraDetails: lo.Map(s.extraDetails, func(d proto.Message, _ int) proto.Message { return proto.Clone(d) }),
-		cause:        s.cause,
+		code:       s.code,
+		message:    s.message,
+		errorInfo:  proto.Clone(s.errorInfo).(*errdetails.ErrorInfo),
+		localized:  proto.Clone(s.localized).(*statusv1.Localized),
+		badRequest: proto.Clone(s.badRequest).(*statusv1.BadRequest),
+		details:    lo.Map(s.details, func(d proto.Message, _ int) proto.Message { return proto.Clone(d) }),
+		cause:      s.cause,
 	}
 }
 
@@ -292,8 +362,10 @@ func FromError(err error) (s *Status, ok bool) {
 			s.errorInfo = proto.Clone(d).(*errdetails.ErrorInfo)
 		case *statusv1.Localized:
 			s.localized = proto.Clone(d).(*statusv1.Localized)
+		case *statusv1.BadRequest:
+			s.badRequest = proto.Clone(d).(*statusv1.BadRequest)
 		default:
-			s.extraDetails = append(s.extraDetails, proto.Clone(d.(proto.Message)))
+			s.details = append(s.details, proto.Clone(d.(proto.Message)))
 		}
 	}
 	return s, true

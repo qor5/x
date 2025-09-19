@@ -2,7 +2,21 @@ syntax = "proto3";
 
 package status.v1;
 
+import "google/protobuf/any.proto";
+
+// Localized contains internationalization information
 message Localized {
-  string key = 1;
-  repeated string args = 2;
+  string key = 1;                               // Localization key
+  repeated google.protobuf.Any args = 2;       // Template arguments for gotpl
+}
+
+// BadRequest contains field-level validation violations
+message BadRequest {
+  message FieldViolation {
+    string field = 1;        // Field name (e.g., "email", "user.email", "profile.age")
+    string description = 2;  // Error description for BadRequest_FieldViolation
+    string reason = 3;       // Error reason code (UPPER_SNAKE_CASE format)
+    Localized localized = 4; // Field-specific localization information
+  }
+  repeated FieldViolation field_violations = 1; // Field-level violations
 }
