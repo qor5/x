@@ -702,3 +702,106 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 		})
 	})
 }
+
+func TestStatusMethods(t *testing.T) {
+	t.Run("Details method", func(t *testing.T) {
+		status := New(codes.InvalidArgument, "TEST", "test")
+
+		// Status automatically adds ErrorInfo, so details are not nil
+		details := status.Details()
+		assert.NotEmpty(t, details, "should have ErrorInfo automatically")
+
+		// Verify ErrorInfo is present
+		errorInfo := ExtractDetail[*errdetails.ErrorInfo](details)
+		assert.NotNil(t, errorInfo, "should contain ErrorInfo")
+
+		// Add additional details
+		status = status.WithDetails(&errdetails.LocalizedMessage{
+			Locale:  "en",
+			Message: "test message",
+		})
+		details = status.Details()
+		assert.Greater(t, len(details), 1, "should have more details after adding LocalizedMessage")
+
+		// Check that our LocalizedMessage is present
+		localizedMessage := ExtractDetail[*errdetails.LocalizedMessage](details)
+		assert.NotNil(t, localizedMessage, "should contain the LocalizedMessage we added")
+		assert.Equal(t, "en", localizedMessage.GetLocale())
+		assert.Equal(t, "test message", localizedMessage.GetMessage())
+	})
+
+	t.Run("BadRequest method", func(t *testing.T) {
+		// Nil status
+		var nilStatus *Status
+		assert.Nil(t, nilStatus.BadRequest())
+
+		// Status without BadRequest
+		status := New(codes.InvalidArgument, "TEST", "test")
+		assert.Nil(t, status.BadRequest())
+
+		// Status with BadRequest
+		status = status.WithFieldViolations(
+			&FieldViolation{
+				Field:       "email",
+				Reason:      "REQUIRED",
+				Description: "Email is required",
+			},
+		)
+		badRequest := status.BadRequest()
+		assert.NotNil(t, badRequest)
+		assert.Len(t, badRequest.FieldViolations, 1)
+		assert.Equal(t, "email", badRequest.FieldViolations[0].Field)
+	})
+
+	t.Run("ToFieldViolations method delegation", func(t *testing.T) {
+		// Nil status
+		var nilStatus *Status
+		assert.Nil(t, nilStatus.ToFieldViolations("test"))
+
+		// Valid status
+		status := New(codes.InvalidArgument, "VALIDATION_ERROR", "Validation failed").
+			WithFieldViolations(
+				&FieldViolation{Field: "name", Reason: "REQUIRED", Description: "Name required"},
+			)
+		violations := status.ToFieldViolations("user")
+
+		assert.Len(t, violations, 2) // Main + nested
+		assert.Equal(t, "user", violations[0].Field)
+		assert.Equal(t, "user.name", violations[1].Field)
+	})
+
+	t.Run("WithCode method", func(t *testing.T) {
+		originalStatus := New(codes.InvalidArgument, "TEST", "test message")
+		newStatus := originalStatus.WithCode(codes.NotFound)
+
+		// Original unchanged
+		assert.Equal(t, codes.InvalidArgument, originalStatus.Code())
+
+		// New status has updated code
+		assert.Equal(t, codes.NotFound, newStatus.Code())
+		assert.Equal(t, "TEST", newStatus.Reason())          // Reason unchanged
+		assert.Equal(t, "test message", newStatus.Message()) // Message unchanged
+	})
+
+	t.Run("WithReason method", func(t *testing.T) {
+		originalStatus := New(codes.InvalidArgument, "OLD_REASON", "test message")
+		newStatus := originalStatus.WithReason("NEW_REASON")
+
+		// Original unchanged
+		assert.Equal(t, "OLD_REASON", originalStatus.Reason())
+
+		// New status has updated reason
+		assert.Equal(t, "NEW_REASON", newStatus.Reason())
+		assert.Equal(t, codes.InvalidArgument, newStatus.Code()) // Code unchanged
+		assert.Equal(t, "test message", newStatus.Message())     // Message unchanged
+	})
+
+	t.Run("Status method for StatusError", func(t *testing.T) {
+		status := New(codes.NotFound, "NOT_FOUND", "Resource not found")
+		err := status.Err().(*StatusError)
+
+		grpcStatus := err.Status()
+		assert.Equal(t, codes.NotFound, grpcStatus.Code())
+		assert.Equal(t, "Resource not found", grpcStatus.Message())
+	})
+}

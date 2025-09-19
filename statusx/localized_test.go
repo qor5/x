@@ -2,10 +2,12 @@ package statusx
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/text/language"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -367,5 +369,124 @@ field.email.detailed,"Current email: {{.currentEmail}}. Valid domains: {{range .
 			assert.Equal(t, "PASSWORD_WEAK", passwordViolation.Reason)
 			assert.NotNil(t, passwordViolation.LocalizedMessage, "should have localized message")
 		})
+	})
+}
+
+func TestToFieldViolations(t *testing.T) {
+	t.Run("basic cases", func(t *testing.T) {
+		// Nil input
+		violations := ToFieldViolations(nil, "user")
+		assert.Nil(t, violations)
+
+		// Simple error
+		err := New(codes.InvalidArgument, "INVALID_EMAIL", "Email format is invalid").Err()
+		violations = ToFieldViolations(err, "email")
+		assert.Len(t, violations, 1)
+		assert.Equal(t, "email", violations[0].Field)
+		assert.Equal(t, "INVALID_EMAIL", violations[0].Reason)
+	})
+
+	t.Run("localization priority", func(t *testing.T) {
+		// LocalizedMessage takes priority over Localized
+		localizedMsg := &errdetails.LocalizedMessage{Locale: "zh-CN", Message: "预置本地化消息"}
+		err := New(codes.InvalidArgument, "MIXED", "test").
+			WithLocalized("template.key", "arg1").
+			WithDetails(localizedMsg).Err()
+		violations := ToFieldViolations(err, "test")
+
+		assert.Len(t, violations, 1)
+		assert.Nil(t, violations[0].Localized)
+		assert.Equal(t, localizedMsg, violations[0].LocalizedMessage)
+	})
+
+	t.Run("nested violations", func(t *testing.T) {
+		// Custom BadRequest
+		err := New(codes.InvalidArgument, "VALIDATION_ERROR", "Form validation failed").
+			WithFieldViolations(
+				&FieldViolation{Field: "email", Reason: "REQUIRED", Description: "Email is required"},
+			).Err()
+		violations := ToFieldViolations(err, "form")
+
+		assert.Len(t, violations, 2)
+		assert.Equal(t, "form", violations[0].Field)
+		assert.Equal(t, "form.email", violations[1].Field)
+
+		// Standard BadRequest
+		standardBadRequest := &errdetails.BadRequest{
+			FieldViolations: []*errdetails.BadRequest_FieldViolation{
+				{Field: "username", Reason: "EXISTS", Description: "Username exists"},
+			},
+		}
+		err = New(codes.InvalidArgument, "USER_ERROR", "User validation failed").
+			WithDetails(standardBadRequest).Err()
+		violations = ToFieldViolations(err, "user")
+
+		assert.Len(t, violations, 2)
+		assert.Equal(t, "user", violations[0].Field)
+		assert.Equal(t, "user.username", violations[1].Field)
+	})
+}
+
+func TestLocalizedConstructors(t *testing.T) {
+	t.Run("NewLocalized creates localized error", func(t *testing.T) {
+		status := NewLocalized(codes.InvalidArgument, "error.validation", "field", "email")
+
+		assert.Equal(t, codes.InvalidArgument, status.Code())
+		assert.Equal(t, statusv1.ErrorReason_INVALID_ARGUMENT.String(), status.Reason())
+		assert.Equal(t, "error.validation", status.Message())
+
+		localized := status.Localized()
+		assert.NotNil(t, localized)
+		assert.Equal(t, "error.validation", localized.Key)
+		assert.Len(t, localized.Args, 2)
+	})
+
+	t.Run("WrapLocalized wraps existing error with localization", func(t *testing.T) {
+		originalErr := errors.New("original error")
+		status := WrapLocalized(originalErr, codes.Internal, "error.internal", "service", "user-service")
+
+		assert.Equal(t, codes.Internal, status.Code())
+		assert.Equal(t, statusv1.ErrorReason_INTERNAL.String(), status.Reason())
+		assert.Equal(t, "error.internal", status.Message())
+		assert.True(t, errors.Is(status.Err(), originalErr))
+
+		localized := status.Localized()
+		assert.NotNil(t, localized)
+		assert.Equal(t, "error.internal", localized.Key)
+		assert.Len(t, localized.Args, 2)
+	})
+}
+
+func TestTranslateStatusErrorOnly(t *testing.T) {
+	t.Run("handles StatusError correctly", func(t *testing.T) {
+		ib, _ := i18nx.New(strings.NewReader(`
+key,en,zh
+test.message,Test message,测试消息
+`))
+
+		originalErr := New(codes.InvalidArgument, "test.message", "original message").
+			WithLocalized("test.message").Err()
+
+		translatedErr, ok := TranslateStatusErrorOnly(ib, language.Chinese, originalErr)
+		assert.True(t, ok, "should successfully handle StatusError")
+		assert.NotNil(t, translatedErr, "translated error should not be nil")
+
+		// The function returns the result of TranslateError, which may be the same
+		// object if no translation is needed, but it's still processed
+		st := Convert(translatedErr)
+		assert.Equal(t, codes.InvalidArgument, st.Code())
+
+		localizedMsg := ExtractDetail[*errdetails.LocalizedMessage](st.Details())
+		assert.Equal(t, "zh", localizedMsg.GetLocale())
+		assert.Equal(t, "测试消息", localizedMsg.GetMessage())
+	})
+
+	t.Run("handles non-StatusError", func(t *testing.T) {
+		ib, _ := i18nx.New(strings.NewReader(""))
+		originalErr := errors.New("not a status error")
+
+		translatedErr, ok := TranslateStatusErrorOnly(ib, language.Chinese, originalErr)
+		assert.False(t, ok, "should not translate non-StatusError")
+		assert.Equal(t, originalErr, translatedErr, "should return original error unchanged")
 	})
 }

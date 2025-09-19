@@ -175,12 +175,12 @@ func LocalizedFromProto(pb *statusv1.Localized) *Localized {
 //
 // Priority order for localized messages:
 //  1. LocalizedMessage (highest priority - pre-translated, ready to use)
-//  2. Localized (lower priority - template that needs translation)
+//  2. Localized (lower priority - template that needs translation via interceptor)
 type FieldViolation struct {
 	Field            string
 	Reason           string
 	Description      string
-	Localized        *Localized                   // Localization template (requires translation)
+	Localized        *Localized                   // Localization template (requires translation via interceptor)
 	LocalizedMessage *errdetails.LocalizedMessage // Pre-translated message (ready to use)
 }
 
