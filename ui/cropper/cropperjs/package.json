@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build ",
-    "watch-build": "nodemon --watch src --exec 'npm run build'",
     "preview": "vite preview",
     "format": "prettier --write src/"
   },
@@ -19,17 +18,17 @@
     "@types/node": "^20.17.24",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/tsconfig": "^0.5.1",
-    "nodemon": "^3.1.9",
     "npm-run-all2": "^6.2.6",
     "prettier": "^3.5.3",
     "typescript": "~5.4.5",
-    "vite": "^5.4.19",
+    "vite": "5.4.20",
     "vite-plugin-vue-devtools": "^7.7.2",
     "vue-tsc": "^2.2.8"
   },
   "pnpm": {
     "overrides": {
-      "esbuild": "0.25.0"
+      "esbuild": "0.25.0",
+      "brace-expansion": "2.0.2"
     }
   }
 }

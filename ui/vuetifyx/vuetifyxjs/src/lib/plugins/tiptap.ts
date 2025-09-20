@@ -4,7 +4,7 @@ import {
   createVuetifyProTipTap
   // @ts-ignore
 } from 'vuetify-pro-tiptap'
-import 'vuetify-pro-tiptap/style.css'
+import 'vuetify-pro-tiptap/vuetify-pro-tiptap.css'
 
 export const vuetifyProTipTap = createVuetifyProTipTap({
   lang: 'en',
