@@ -28,23 +28,24 @@ type Status struct {
 	cause error
 }
 
-// New creates a Status with the specified code, reason, and message.
+// New creates a Status with the specified code and message.
+// The reason is automatically derived from the code using ReasonFromCode.
 //
 // For non-OK status codes, it automatically captures a stacktrace at creation time,
 // which provides valuable debugging context without manual instrumentation.
 //
 // Parameters:
 //   - c: The status code indicating the type of status
-//   - reason: A string identifier describing the reason for this status
 //   - message: A human-readable message describing the status
 //
+// For custom reasons, use the WithReason() method after creation.
 // Returns a Status object that can be further enriched with metadata or localization.
-func New(c codes.Code, reason, message string) *Status {
+func New(c codes.Code, message string) *Status {
 	s := &Status{
 		code:    c,
 		message: message,
 		errorInfo: &errdetails.ErrorInfo{
-			Reason: reason,
+			Reason: ReasonFromCode(c).String(),
 		},
 	}
 	if c != codes.OK {
@@ -53,16 +54,16 @@ func New(c codes.Code, reason, message string) *Status {
 	return s
 }
 
-func Newf(c codes.Code, reason, format string, a ...any) *Status {
-	return New(c, reason, fmt.Sprintf(format, a...))
+func Newf(c codes.Code, format string, a ...any) *Status {
+	return New(c, fmt.Sprintf(format, a...))
 }
 
-func Error(c codes.Code, reason, message string) error {
-	return New(c, reason, message).Err()
+func Error(c codes.Code, message string) error {
+	return New(c, message).Err()
 }
 
-func Errorf(c codes.Code, reason, format string, a ...any) error {
-	return Error(c, reason, fmt.Sprintf(format, a...))
+func Errorf(c codes.Code, format string, a ...any) error {
+	return Error(c, fmt.Sprintf(format, a...))
 }
 
 func (s *Status) GRPCStatus() *status.Status {
@@ -210,8 +211,12 @@ func (s *Status) WithMetadata(md map[string]string) *Status {
 
 func (s *Status) WithLocalized(key string, args ...any) *Status {
 	st := Clone(s)
-	st.localized = (&Localized{Key: key, Args: args}).Proto()
-	return st
+	return st.withLocalized(key, args...)
+}
+
+func (s *Status) withLocalized(key string, args ...any) *Status {
+	s.localized = (&Localized{Key: key, Args: args}).Proto()
+	return s
 }
 
 // WithFieldViolations adds multiple field-level validation violations in batch.
@@ -358,7 +363,7 @@ func (e *StatusError) GRPCStatus() *status.Status {
 func FromError(err error) (s *Status, ok bool) {
 	if err == nil {
 		// This is intentionally different from status.FromError(nil) behavior for convenience.
-		return New(codes.OK, statusv1.ErrorReason_OK.String(), ""), true
+		return New(codes.OK, ""), true
 	}
 	if se := new(StatusError); errors.As(err, &se) {
 		// if err is already a *StatusError, we don't want to lose the original status.
@@ -367,14 +372,14 @@ func FromError(err error) (s *Status, ok bool) {
 	ss, ok := status.FromError(err)
 	if !ok {
 		if errors.Is(err, context.DeadlineExceeded) {
-			return New(codes.DeadlineExceeded, statusv1.ErrorReason_DEADLINE_EXCEEDED.String(), err.Error()), true
+			return New(codes.DeadlineExceeded, err.Error()), true
 		}
 		if errors.Is(err, context.Canceled) {
-			return New(codes.Canceled, statusv1.ErrorReason_CANCELED.String(), err.Error()), true
+			return New(codes.Canceled, err.Error()), true
 		}
-		return New(codes.Unknown, statusv1.ErrorReason_UNKNOWN.String(), err.Error()), false
+		return New(codes.Unknown, err.Error()), false
 	}
-	s = New(ss.Code(), statusv1.ErrorReason_UNKNOWN.String(), ss.Message())
+	s = New(ss.Code(), ss.Message())
 	for _, detail := range ss.Details() {
 		switch d := detail.(type) {
 		case *errdetails.ErrorInfo:
@@ -403,7 +408,7 @@ func Convert(err error) *Status {
 	return s
 }
 
-func Wrap(err error, c codes.Code, reason, message string) *Status {
+func Wrap(err error, c codes.Code, message string) *Status {
 	s, ok := FromError(err)
 	if ok {
 		return s
@@ -411,10 +416,10 @@ func Wrap(err error, c codes.Code, reason, message string) *Status {
 	s.cause = errors.WithStack(err)
 	s.code = c
 	s.message = message
-	s.errorInfo.Reason = reason
+	s.errorInfo.Reason = ReasonFromCode(c).String()
 	return s
 }
 
-func Wrapf(err error, c codes.Code, reason, format string, a ...any) *Status {
-	return Wrap(err, c, reason, fmt.Sprintf(format, a...))
+func Wrapf(err error, c codes.Code, format string, a ...any) *Status {
+	return Wrap(err, c, fmt.Sprintf(format, a...))
 }

@@ -42,7 +42,7 @@ func VProtoHTTPWriteErrorHook(next HTTPWriteErrorFunc) HTTPWriteErrorFunc {
 		lang := input.Conf.I18N.LanguageFromContext(ctx)
 
 		// Why not use statusx.TranslateError? Just to avoid affecting the original prottp related logic.
-		err, translated := TranslateStatusErrorOnly(input.Conf.I18N, lang, input.Err)
+		err, translated := TranslateStatusErrorOnly(input.Err, input.Conf.I18N, lang)
 
 		if EnsureConnectError(ctx) {
 			written := WriteConnectErrorOnly(errWriter, input.W, input.R, err)
@@ -72,7 +72,7 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 	defer func() {
 		if err := r.Body.Close(); err != nil {
 			if xerr == nil {
-				xerr = WrapCode(err, codes.Internal, "failed to close request body").Err()
+				xerr = Wrap(err, codes.Internal, "failed to close request body").Err()
 			}
 		}
 	}()
@@ -137,12 +137,12 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 		data, werr = proto.Marshal(verr)
 	}
 	if werr != nil {
-		return WrapCodef(werr, codes.Internal, "failed to marshal error (isJSON:%t)", isJSON).Err()
+		return Wrapf(werr, codes.Internal, "failed to marshal error (isJSON:%t)", isJSON).Err()
 	}
 
 	_, werr = w.Write(data)
 	if werr != nil {
-		return WrapCodef(werr, codes.Internal, "failed to write error (isJSON:%t)", isJSON).Err()
+		return Wrapf(werr, codes.Internal, "failed to write error (isJSON:%t)", isJSON).Err()
 	}
 	return nil
 }

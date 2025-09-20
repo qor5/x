@@ -1,8 +1,6 @@
 package statusx
 
 import (
-	"fmt"
-
 	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
 	"google.golang.org/grpc/codes"
 )
@@ -47,28 +45,4 @@ func ReasonFromCode(code codes.Code) statusv1.ErrorReason {
 	default:
 		return statusv1.ErrorReason_UNKNOWN
 	}
-}
-
-// NewCode creates a Status with the specified code and message.
-// The reason is automatically derived from the code.
-func NewCode(code codes.Code, message string) *Status {
-	return New(code, ReasonFromCode(code).String(), message)
-}
-
-// NewCodef creates a Status with the specified code and formatted message.
-// The reason is automatically derived from the code.
-func NewCodef(code codes.Code, format string, a ...any) *Status {
-	return NewCode(code, fmt.Sprintf(format, a...))
-}
-
-// WrapCode wraps an existing error with the specified code and message.
-// The reason is automatically derived from the code.
-func WrapCode(err error, code codes.Code, message string) *Status {
-	return Wrap(err, code, ReasonFromCode(code).String(), message)
-}
-
-// WrapCodef wraps an existing error with the specified code and formatted message.
-// The reason is automatically derived from the code.
-func WrapCodef(err error, code codes.Code, format string, a ...any) *Status {
-	return WrapCode(err, code, fmt.Sprintf(format, a...))
 }

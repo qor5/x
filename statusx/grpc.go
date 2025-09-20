@@ -16,7 +16,7 @@ func UnaryServerInterceptor(ib *i18nx.I18N) grpc.UnaryServerInterceptor {
 		ctx = i18nx.NewContext(ctx, ib)
 		lang := ib.LanguageFromContext(ctx)
 		resp, err := handler(ctx, req)
-		err = TranslateError(ib, lang, err)
+		err = TranslateError(err, ib, lang)
 		return resp, err
 	}
 }

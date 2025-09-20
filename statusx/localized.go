@@ -20,14 +20,16 @@ import (
 	"github.com/qor5/x/v3/i18nx"
 )
 
-// NewLocalized creates a new Status with the given code, key, and args
-func NewLocalized(code codes.Code, key string, args ...any) *Status {
-	return New(code, ReasonFromCode(code).String(), key).WithLocalized(key, args...)
+// WithLocalized creates a new Status with the given code, key, and localized template.
+// This is a convenience function that calls New() followed by WithLocalized().
+func WithLocalized(code codes.Code, key string, args ...any) *Status {
+	return New(code, key).withLocalized(key, args...)
 }
 
-// WrapLocalized wraps an error with the given code, key, and args
+// WrapLocalized wraps an error into a Status with the given code, key, and localized template.
+// This is a convenience function that calls Wrap() followed by WithLocalized().
 func WrapLocalized(err error, code codes.Code, key string, args ...any) *Status {
-	return Wrap(err, code, ReasonFromCode(code).String(), key).WithLocalized(key, args...)
+	return Wrap(err, code, key).withLocalized(key, args...)
 }
 
 // toProtoMessage converts Go values to proto messages for use with Any.
@@ -207,7 +209,10 @@ func ToFieldViolations(err error, field string) []*FieldViolation {
 		return nil
 	}
 
-	s, _ := FromError(err)
+	s, ok := FromError(err)
+	if !ok {
+		s.message = "unknown error"
+	}
 
 	// Check for existing translated content in details
 	var localizedMessage *errdetails.LocalizedMessage
@@ -316,7 +321,7 @@ func FlattenFieldViolations(inputs ...any) []*FieldViolation {
 //  1. If LocalizedMessage already exists -> skip translation (highest priority)
 //  2. If Localized template exists -> translate template (medium priority)
 //  3. Use error reason for translation -> fallback (lowest priority)
-func TranslateError(ib *i18nx.I18N, lang language.Tag, err error) error {
+func TranslateError(err error, ib *i18nx.I18N, lang language.Tag) error {
 	if err == nil {
 		return nil
 	}
@@ -326,93 +331,142 @@ func TranslateError(ib *i18nx.I18N, lang language.Tag, err error) error {
 		s.message = "unknown error"
 	}
 
-	var localizedMessage *errdetails.LocalizedMessage
-	var badRequest *errdetails.BadRequest
-	for _, d := range s.details {
-		switch v := d.(type) {
-		case *errdetails.LocalizedMessage:
-			localizedMessage = v
-		case *errdetails.BadRequest:
-			badRequest = v
-		}
-	}
-
-	if localizedMessage == nil {
-		var text string
-
-		if s.localized != nil && s.localized.GetKey() != "" {
-			localized := LocalizedFromProto(s.localized)
-			text = ib.Sprintf(lang, localized.Key, localized.Args...)
-		}
-
-		reason := s.Reason()
-		if text == "" && reason != "" {
-			text = ib.Sprintf(lang, reason)
-		}
-
-		if text != "" {
-			s.details = append(s.details, &errdetails.LocalizedMessage{
-				Locale:  lang.String(),
-				Message: text,
-			})
-		}
-
-		// Clear original localized information after translation to avoid duplication
-		s.localized = nil
-	}
-
-	if badRequest == nil && s.badRequest != nil {
-		br := &errdetails.BadRequest{}
-		for _, fieldViolation := range s.badRequest.FieldViolations {
-			fv := &errdetails.BadRequest_FieldViolation{
-				Field:       fieldViolation.Field,
-				Description: fieldViolation.Description,
-				Reason:      fieldViolation.Reason,
-			}
-
-			// Check if LocalizedMessage already exists (highest priority)
-			if fieldViolation.LocalizedMessage != nil {
-				// Use existing pre-translated message directly
-				fv.LocalizedMessage = proto.Clone(fieldViolation.LocalizedMessage).(*errdetails.LocalizedMessage)
-			} else {
-				// Need to translate from template or reason
-				var text string
-
-				if fieldViolation.Localized != nil && fieldViolation.Localized.GetKey() != "" {
-					localized := LocalizedFromProto(fieldViolation.Localized)
-					text = ib.Sprintf(lang, localized.Key, localized.Args...)
-				}
-
-				reason := fieldViolation.GetReason()
-				if text == "" && reason != "" {
-					text = ib.Sprintf(lang, reason)
-				}
-
-				if text != "" {
-					fv.LocalizedMessage = &errdetails.LocalizedMessage{
-						Locale:  lang.String(),
-						Message: text,
-					}
-				}
-			}
-
-			br.FieldViolations = append(br.FieldViolations, fv)
-		}
-		s.details = append(s.details, br)
-
-		// Clear original localized information after translation to avoid duplication
-		s.badRequest = nil
-	}
-
-	return s.Err()
+	// Use the new Status method for translation
+	translatedStatus := s.Translated(ib, lang)
+	return translatedStatus.Err()
 }
 
 // TranslateStatusErrorOnly translates only StatusError types, returning the error and a boolean indicating success
-func TranslateStatusErrorOnly(ib *i18nx.I18N, lang language.Tag, err error) (error, bool) {
+func TranslateStatusErrorOnly(err error, ib *i18nx.I18N, lang language.Tag) (error, bool) {
 	if err != nil {
 		if se := new(StatusError); !errors.As(err, &se) {
 			return err, false //nolint:errhandle
 		}
 	}
-	return TranslateError(ib, lang, err), true
+	return TranslateError(err, ib, lang), true
+}
+
+// Translated returns a new Status with translated messages and field violations.
+//
+// Translation priority:
+//  1. If LocalizedMessage already exists -> skip translation (highest priority)
+//  2. If Localized template exists -> translate template (medium priority)
+//  3. Use error reason for translation -> fallback (lowest priority)
+func (s *Status) Translated(ib *i18nx.I18N, lang language.Tag) *Status {
+	if s == nil {
+		return nil
+	}
+
+	st := Clone(s)
+
+	// Translate main status message
+	st = st.translateMainMessage(ib, lang)
+
+	// Translate field violations
+	st = st.translateFieldViolations(ib, lang)
+
+	return st
+}
+
+// translateMainMessage handles the translation of the main status message
+func (s *Status) translateMainMessage(ib *i18nx.I18N, lang language.Tag) *Status {
+	// Check if LocalizedMessage already exists
+	var hasLocalizedMessage bool
+	for _, d := range s.details {
+		if _, ok := d.(*errdetails.LocalizedMessage); ok {
+			hasLocalizedMessage = true
+			break
+		}
+	}
+
+	if hasLocalizedMessage {
+		return s // Already translated
+	}
+
+	var text string
+
+	// Try to translate from Localized template
+	if s.localized != nil && s.localized.GetKey() != "" {
+		localized := LocalizedFromProto(s.localized)
+		text = ib.Sprintf(lang, localized.Key, localized.Args...)
+	}
+
+	// Fallback to reason translation
+	if text == "" {
+		reason := s.Reason()
+		if reason != "" {
+			text = ib.Sprintf(lang, reason)
+		}
+	}
+
+	if text != "" {
+		// Add translated message and clear original localized info
+		st := Clone(s)
+		st.details = append(st.details, &errdetails.LocalizedMessage{
+			Locale:  lang.String(),
+			Message: text,
+		})
+		st.localized = nil // Clear to avoid duplication
+		return st
+	}
+
+	return s
+}
+
+// translateFieldViolations handles the translation of field violations
+func (s *Status) translateFieldViolations(ib *i18nx.I18N, lang language.Tag) *Status {
+	if s.badRequest == nil || len(s.badRequest.FieldViolations) == 0 {
+		return s
+	}
+
+	// Check if BadRequest already exists in details
+	for _, d := range s.details {
+		if _, ok := d.(*errdetails.BadRequest); ok {
+			return s // Already translated
+		}
+	}
+
+	st := Clone(s)
+	br := &errdetails.BadRequest{}
+
+	for _, fieldViolation := range s.badRequest.FieldViolations {
+		fv := &errdetails.BadRequest_FieldViolation{
+			Field:       fieldViolation.Field,
+			Description: fieldViolation.Description,
+			Reason:      fieldViolation.Reason,
+		}
+
+		// Check if LocalizedMessage already exists (highest priority)
+		if fieldViolation.LocalizedMessage != nil {
+			fv.LocalizedMessage = proto.Clone(fieldViolation.LocalizedMessage).(*errdetails.LocalizedMessage)
+		} else {
+			// Translate from template or reason
+			var text string
+
+			if fieldViolation.Localized != nil && fieldViolation.Localized.GetKey() != "" {
+				localized := LocalizedFromProto(fieldViolation.Localized)
+				text = ib.Sprintf(lang, localized.Key, localized.Args...)
+			}
+
+			if text == "" {
+				reason := fieldViolation.GetReason()
+				if reason != "" {
+					text = ib.Sprintf(lang, reason)
+				}
+			}
+
+			if text != "" {
+				fv.LocalizedMessage = &errdetails.LocalizedMessage{
+					Locale:  lang.String(),
+					Message: text,
+				}
+			}
+		}
+
+		br.FieldViolations = append(br.FieldViolations, fv)
+	}
+
+	st.details = append(st.details, br)
+	st.badRequest = nil // Clear to avoid duplication
+	return st
 }

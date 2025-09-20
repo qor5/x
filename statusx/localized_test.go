@@ -53,7 +53,7 @@ func TestFlattenFieldViolations(t *testing.T) {
 
 	t.Run("flatten with ToFieldViolations from error", func(t *testing.T) {
 		// Create a status error with field violations
-		statusErr := New(codes.InvalidArgument, "VALIDATION_FAILED", "validation failed").
+		statusErr := New(codes.InvalidArgument, "validation failed").
 			WithFieldViolations(
 				&FieldViolation{Field: "nested.field1", Reason: "INVALID", Description: "Field1 is invalid"},
 				&FieldViolation{Field: "nested.field2", Reason: "REQUIRED", Description: "Field2 is required"},
@@ -79,7 +79,7 @@ func TestFlattenFieldViolations(t *testing.T) {
 
 	t.Run("flatten with Status.ToFieldViolations method", func(t *testing.T) {
 		// Create a status with field violations
-		status := New(codes.InvalidArgument, "USER_INVALID", "user data invalid").
+		status := New(codes.InvalidArgument, "user data invalid").WithReason("USER_INVALID").
 			WithFieldViolations(
 				&FieldViolation{Field: "profile.bio", Reason: "TOO_LONG", Description: "Bio is too long"},
 				&FieldViolation{Field: "profile.avatar", Reason: "INVALID_FORMAT", Description: "Avatar format is invalid"},
@@ -159,7 +159,7 @@ pre_localized,Pre-localized error,预置本地化错误 %s
 	))
 
 	// Create untranslated original error
-	originalErr := New(codes.InvalidArgument, "invalid_request", "original error").
+	originalErr := New(codes.InvalidArgument, "original error").WithReason("invalid_request").
 		WithDetails(&errdetails.BadRequest{
 			FieldViolations: []*errdetails.BadRequest_FieldViolation{
 				{
@@ -171,7 +171,7 @@ pre_localized,Pre-localized error,预置本地化错误 %s
 		}).Err()
 
 	t.Run("translate result and idempotence", func(t *testing.T) {
-		err := TranslateError(ib, ib.LanguageFromContext(ctx), originalErr)
+		err := TranslateError(originalErr, ib, ib.LanguageFromContext(ctx))
 		originalStatus := status.Convert(err)
 
 		localizedMsg := ExtractDetail[*errdetails.LocalizedMessage](originalStatus.Details())
@@ -181,16 +181,16 @@ pre_localized,Pre-localized error,预置本地化错误 %s
 
 		// Test multiple translations
 		for i := 0; i < 5; i++ {
-			err = TranslateError(ib, ib.LanguageFromContext(ctx), err)
+			err = TranslateError(err, ib, ib.LanguageFromContext(ctx))
 			assert.True(t, proto.Equal(originalStatus.Proto(), status.Convert(err).Proto()),
 				"Protobuf mismatch after %d translations", i+1)
 		}
 	})
 
 	t.Run("with localized", func(t *testing.T) {
-		err := New(codes.InvalidArgument, "pre_localized", "original message").
+		err := New(codes.InvalidArgument, "original message").
 			WithLocalized("pre_localized", "10").Err()
-		err = TranslateError(ib, ib.LanguageFromContext(ctx), err)
+		err = TranslateError(err, ib, ib.LanguageFromContext(ctx))
 
 		localizedMsg := ExtractDetail[*errdetails.LocalizedMessage](status.Convert(err).Details())
 		if assert.NotNil(t, localizedMsg, "should have localized message") {
@@ -200,7 +200,7 @@ pre_localized,Pre-localized error,预置本地化错误 %s
 
 	t.Run("with localized message", func(t *testing.T) {
 		// Create error with pre-localized message
-		preLocalizedErr := New(codes.InvalidArgument, "pre_localized", "original message").
+		preLocalizedErr := New(codes.InvalidArgument, "original message").
 			WithLocalized("pre_localized").
 			WithDetails(&errdetails.LocalizedMessage{
 				Locale:  "zh-CN",
@@ -208,11 +208,11 @@ pre_localized,Pre-localized error,预置本地化错误 %s
 			}).Err()
 
 		// First translation
-		err1 := TranslateError(ib, ib.LanguageFromContext(ctx), preLocalizedErr)
+		err1 := TranslateError(preLocalizedErr, ib, ib.LanguageFromContext(ctx))
 		firstDetails := status.Convert(err1).Details()
 
 		// Second translation
-		err2 := TranslateError(ib, ib.LanguageFromContext(ctx), err1)
+		err2 := TranslateError(err1, ib, ib.LanguageFromContext(ctx))
 		secondDetails := status.Convert(err2).Details()
 
 		// Verify idempotence
@@ -237,8 +237,8 @@ INVALID_ARGUMENT,Invalid argument,参数无效
 			"accept-language", "zh-CN;q=0.9",
 		))
 
-		err := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "original").Err()
-		err = TranslateError(ib2, ib2.LanguageFromContext(ctx2), err)
+		err := New(codes.InvalidArgument, "original").Err()
+		err = TranslateError(err, ib2, ib2.LanguageFromContext(ctx2))
 
 		localizedMsg := ExtractDetail[*errdetails.LocalizedMessage](status.Convert(err).Details())
 		if assert.NotNil(t, localizedMsg, "should have localized message from enum reason") {
@@ -246,8 +246,8 @@ INVALID_ARGUMENT,Invalid argument,参数无效
 		}
 
 		// Also verify embedded default.csv works without overrides
-		errDef := New(codes.PermissionDenied, statusv1.ErrorReason_PERMISSION_DENIED.String(), "orig").Err()
-		errDef = TranslateError(ib2, ib2.LanguageFromContext(ctx2), errDef)
+		errDef := New(codes.PermissionDenied, "orig").Err()
+		errDef = TranslateError(errDef, ib2, ib2.LanguageFromContext(ctx2))
 		lmDef := ExtractDetail[*errdetails.LocalizedMessage](status.Convert(errDef).Details())
 		if assert.NotNil(t, lmDef, "should localize from embedded default.csv") {
 			assert.Equal(t, "无权限", lmDef.GetMessage())
@@ -273,8 +273,8 @@ complex.nested.data,"Welcome {{.User.Name}}! You have {{.Stats.UnreadCount}} unr
 				"Field": "邮箱",
 				"Error": "格式无效",
 			}
-			err := New(codes.InvalidArgument, "user.validation.failed", "validation error").WithLocalized("user.validation.failed", data).Err()
-			err = TranslateError(ib3, ib3.LanguageFromContext(ctx3), err)
+			err := New(codes.InvalidArgument, "validation error").WithLocalized("user.validation.failed", data).Err()
+			err = TranslateError(err, ib3, ib3.LanguageFromContext(ctx3))
 
 			localizedMsg := ExtractDetail[*errdetails.LocalizedMessage](status.Convert(err).Details())
 			if assert.NotNil(t, localizedMsg, "should have localized message from gotpl") {
@@ -292,8 +292,8 @@ complex.nested.data,"Welcome {{.User.Name}}! You have {{.Stats.UnreadCount}} unr
 					"PendingTasks": 3,
 				},
 			}
-			err := New(codes.Internal, "complex.nested.data", "complex error").WithLocalized("complex.nested.data", data).Err()
-			err = TranslateError(ib3, ib3.LanguageFromContext(ctx3), err)
+			err := New(codes.Internal, "complex error").WithLocalized("complex.nested.data", data).Err()
+			err = TranslateError(err, ib3, ib3.LanguageFromContext(ctx3))
 
 			localizedMsg := ExtractDetail[*errdetails.LocalizedMessage](status.Convert(err).Details())
 			if assert.NotNil(t, localizedMsg, "should have localized message from nested map") {
@@ -307,8 +307,8 @@ complex.nested.data,"Welcome {{.User.Name}}! You have {{.Stats.UnreadCount}} unr
 				"ItemList": "苹果(2) 香蕉(3)",
 				"Status":   "已取消",
 			}
-			err := New(codes.Internal, "order.processing.error", "order error").WithLocalized("order.processing.error", data).Err()
-			err = TranslateError(ib3, ib3.LanguageFromContext(ctx3), err)
+			err := New(codes.Internal, "order error").WithLocalized("order.processing.error", data).Err()
+			err = TranslateError(err, ib3, ib3.LanguageFromContext(ctx3))
 
 			localizedMsg := ExtractDetail[*errdetails.LocalizedMessage](status.Convert(err).Details())
 			if assert.NotNil(t, localizedMsg, "should have localized message with string template") {
@@ -341,8 +341,8 @@ product.created,"Product {{.name}} created successfully. Price: {{.price}}, Cate
 			// Convert struct to map using jsonx.MustToMap - this is the key improvement!
 			data := jsonx.MustToMap(productData)
 
-			err := New(codes.Internal, "product.created", "product created").WithLocalized("product.created", data).Err()
-			err = TranslateError(ib5, ib5.LanguageFromContext(ctx3), err)
+			err := New(codes.Internal, "product created").WithLocalized("product.created", data).Err()
+			err = TranslateError(err, ib5, ib5.LanguageFromContext(ctx3))
 
 			localizedMsg := ExtractDetail[*errdetails.LocalizedMessage](status.Convert(err).Details())
 			if assert.NotNil(t, localizedMsg, "should have localized message from struct via jsonx.MustToMap") {
@@ -377,7 +377,7 @@ field.email.detailed,"Current email: {{.currentEmail}}. Valid domains: {{range .
 		))
 
 		data := jsonx.MustToMap(validationInfo)
-		err := New(codes.InvalidArgument, "validation_failed", "Email validation failed").
+		err := New(codes.InvalidArgument, "Email validation failed").
 			WithFieldViolations(&FieldViolation{
 				Field:  "email",
 				Reason: "INVALID_DOMAIN",
@@ -387,7 +387,7 @@ field.email.detailed,"Current email: {{.currentEmail}}. Valid domains: {{range .
 				},
 			}).Err()
 
-		err = TranslateError(ib7, ib7.LanguageFromContext(ctx7), err)
+		err = TranslateError(err, ib7, ib7.LanguageFromContext(ctx7))
 
 		badRequest := ExtractDetail[*errdetails.BadRequest](status.Convert(err).Details())
 		if assert.NotNil(t, badRequest, "should have BadRequest detail") {
@@ -414,11 +414,11 @@ field.email.detailed,"Current email: {{.currentEmail}}. Valid domains: {{range .
 				Message: "现有的本地化消息",
 			}
 
-			err := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+			err := New(codes.InvalidArgument, "validation failed").
 				WithDetails(existingLocalized).
 				Err()
 
-			translated := TranslateError(ib, ib.LanguageFromContext(ctx), err)
+			translated := TranslateError(err, ib, ib.LanguageFromContext(ctx))
 			st := status.Convert(translated)
 
 			localizedMessages := ExtractDetail[*errdetails.LocalizedMessage](st.Details())
@@ -436,7 +436,7 @@ field.email.detailed,"Current email: {{.currentEmail}}. Valid domains: {{range .
 				},
 			}
 
-			err := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+			err := New(codes.InvalidArgument, "validation failed").
 				WithDetails(existingBadRequest).
 				WithFieldViolations(&FieldViolation{
 					Field:       "password",
@@ -446,7 +446,7 @@ field.email.detailed,"Current email: {{.currentEmail}}. Valid domains: {{range .
 				}).
 				Err()
 
-			translated := TranslateError(ib, ib.LanguageFromContext(ctx), err)
+			translated := TranslateError(err, ib, ib.LanguageFromContext(ctx))
 			st := status.Convert(translated)
 
 			badRequests := ExtractDetail[*errdetails.BadRequest](st.Details())
@@ -456,7 +456,7 @@ field.email.detailed,"Current email: {{.currentEmail}}. Valid domains: {{range .
 		})
 
 		t.Run("construct BadRequest when none exists", func(t *testing.T) {
-			err := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+			err := New(codes.InvalidArgument, "validation failed").
 				WithFieldViolations(
 					&FieldViolation{
 						Field:       "email",
@@ -473,7 +473,7 @@ field.email.detailed,"Current email: {{.currentEmail}}. Valid domains: {{range .
 				).
 				Err()
 
-			translated := TranslateError(ib, ib.LanguageFromContext(ctx), err)
+			translated := TranslateError(err, ib, ib.LanguageFromContext(ctx))
 			st := status.Convert(translated)
 
 			badRequests := ExtractDetail[*errdetails.BadRequest](st.Details())
@@ -504,7 +504,7 @@ func TestToFieldViolations(t *testing.T) {
 		assert.Nil(t, violations)
 
 		// Simple error
-		err := New(codes.InvalidArgument, "INVALID_EMAIL", "Email format is invalid").Err()
+		err := New(codes.InvalidArgument, "Email format is invalid").WithReason("INVALID_EMAIL").Err()
 		violations = ToFieldViolations(err, "email")
 		assert.Len(t, violations, 1)
 		assert.Equal(t, "email", violations[0].Field)
@@ -514,7 +514,7 @@ func TestToFieldViolations(t *testing.T) {
 	t.Run("localization priority", func(t *testing.T) {
 		// LocalizedMessage takes priority over Localized
 		localizedMsg := &errdetails.LocalizedMessage{Locale: "zh-CN", Message: "预置本地化消息"}
-		err := New(codes.InvalidArgument, "MIXED", "test").
+		err := New(codes.InvalidArgument, "test").
 			WithLocalized("template.key", "arg1").
 			WithDetails(localizedMsg).Err()
 		violations := ToFieldViolations(err, "test")
@@ -526,7 +526,7 @@ func TestToFieldViolations(t *testing.T) {
 
 	t.Run("nested violations", func(t *testing.T) {
 		// Custom BadRequest
-		err := New(codes.InvalidArgument, "VALIDATION_ERROR", "Form validation failed").
+		err := New(codes.InvalidArgument, "Form validation failed").
 			WithFieldViolations(
 				&FieldViolation{Field: "email", Reason: "REQUIRED", Description: "Email is required"},
 			).Err()
@@ -542,7 +542,7 @@ func TestToFieldViolations(t *testing.T) {
 				{Field: "username", Reason: "EXISTS", Description: "Username exists"},
 			},
 		}
-		err = New(codes.InvalidArgument, "USER_ERROR", "User validation failed").
+		err = New(codes.InvalidArgument, "User validation failed").
 			WithDetails(standardBadRequest).Err()
 		violations = ToFieldViolations(err, "user")
 
@@ -553,8 +553,8 @@ func TestToFieldViolations(t *testing.T) {
 }
 
 func TestLocalizedConstructors(t *testing.T) {
-	t.Run("NewLocalized creates localized error", func(t *testing.T) {
-		status := NewLocalized(codes.InvalidArgument, "error.validation", "field", "email")
+	t.Run("WithLocalized creates localized error", func(t *testing.T) {
+		status := WithLocalized(codes.InvalidArgument, "error.validation", "field", "email")
 
 		assert.Equal(t, codes.InvalidArgument, status.Code())
 		assert.Equal(t, statusv1.ErrorReason_INVALID_ARGUMENT.String(), status.Reason())
@@ -589,10 +589,9 @@ key,en,zh
 test.message,Test message,测试消息
 `))
 
-		originalErr := New(codes.InvalidArgument, "test.message", "original message").
-			WithLocalized("test.message").Err()
+		originalErr := New(codes.InvalidArgument, "original message").WithLocalized("test.message").Err()
 
-		translatedErr, ok := TranslateStatusErrorOnly(ib, language.Chinese, originalErr)
+		translatedErr, ok := TranslateStatusErrorOnly(originalErr, ib, language.Chinese)
 		assert.True(t, ok, "should successfully handle StatusError")
 		assert.NotNil(t, translatedErr, "translated error should not be nil")
 
@@ -610,7 +609,7 @@ test.message,Test message,测试消息
 		ib, _ := i18nx.New(strings.NewReader(""))
 		originalErr := errors.New("not a status error")
 
-		translatedErr, ok := TranslateStatusErrorOnly(ib, language.Chinese, originalErr)
+		translatedErr, ok := TranslateStatusErrorOnly(originalErr, ib, language.Chinese)
 		assert.False(t, ok, "should not translate non-StatusError")
 		assert.Equal(t, originalErr, translatedErr, "should return original error unchanged")
 	})

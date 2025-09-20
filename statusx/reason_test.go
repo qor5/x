@@ -43,9 +43,9 @@ func TestReasonFromCode(t *testing.T) {
 	}
 }
 
-func TestNewCode(t *testing.T) {
+func TestNewAutoReason(t *testing.T) {
 	t.Run("creates status with derived reason", func(t *testing.T) {
-		status := NewCode(codes.NotFound, "Resource not found")
+		status := New(codes.NotFound, "Resource not found")
 
 		assert.Equal(t, codes.NotFound, status.Code())
 		assert.Equal(t, statusv1.ErrorReason_NOT_FOUND.String(), status.Reason())
@@ -53,7 +53,7 @@ func TestNewCode(t *testing.T) {
 	})
 
 	t.Run("handles OK code", func(t *testing.T) {
-		status := NewCode(codes.OK, "Success")
+		status := New(codes.OK, "Success")
 
 		assert.Equal(t, codes.OK, status.Code())
 		assert.Equal(t, statusv1.ErrorReason_OK.String(), status.Reason())
@@ -61,9 +61,9 @@ func TestNewCode(t *testing.T) {
 	})
 }
 
-func TestNewCodef(t *testing.T) {
+func TestNewfAutoReason(t *testing.T) {
 	t.Run("creates status with formatted message", func(t *testing.T) {
-		status := NewCodef(codes.InvalidArgument, "Invalid %s: %d", "user ID", 123)
+		status := Newf(codes.InvalidArgument, "Invalid %s: %d", "user ID", 123)
 
 		assert.Equal(t, codes.InvalidArgument, status.Code())
 		assert.Equal(t, statusv1.ErrorReason_INVALID_ARGUMENT.String(), status.Reason())
@@ -71,17 +71,17 @@ func TestNewCodef(t *testing.T) {
 	})
 
 	t.Run("handles empty format arguments", func(t *testing.T) {
-		status := NewCodef(codes.Internal, "Internal error")
+		status := Newf(codes.Internal, "Internal error")
 
 		assert.Equal(t, codes.Internal, status.Code())
 		assert.Equal(t, "Internal error", status.Message())
 	})
 }
 
-func TestWrapCode(t *testing.T) {
+func TestWrapAutoReason(t *testing.T) {
 	t.Run("wraps error with derived reason", func(t *testing.T) {
 		originalErr := errors.New("original error")
-		status := WrapCode(originalErr, codes.PermissionDenied, "Access denied")
+		status := Wrap(originalErr, codes.PermissionDenied, "Access denied")
 
 		assert.Equal(t, codes.PermissionDenied, status.Code())
 		assert.Equal(t, statusv1.ErrorReason_PERMISSION_DENIED.String(), status.Reason())
@@ -90,7 +90,7 @@ func TestWrapCode(t *testing.T) {
 	})
 
 	t.Run("handles nil error", func(t *testing.T) {
-		status := WrapCode(nil, codes.Internal, "Internal error")
+		status := Wrap(nil, codes.Internal, "Internal error")
 
 		assert.Equal(t, codes.OK, status.Code())
 		assert.Equal(t, statusv1.ErrorReason_OK.String(), status.Reason())
@@ -98,10 +98,10 @@ func TestWrapCode(t *testing.T) {
 	})
 }
 
-func TestWrapCodef(t *testing.T) {
+func TestWrapf(t *testing.T) {
 	t.Run("wraps error with formatted message", func(t *testing.T) {
 		originalErr := errors.New("database connection failed")
-		status := WrapCodef(originalErr, codes.Unavailable, "Service unavailable: %s", "database down")
+		status := Wrapf(originalErr, codes.Unavailable, "Service unavailable: %s", "database down")
 
 		assert.Equal(t, codes.Unavailable, status.Code())
 		assert.Equal(t, statusv1.ErrorReason_UNAVAILABLE.String(), status.Reason())

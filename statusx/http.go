@@ -42,7 +42,7 @@ func HTTPErrorWriter(conf *HTTPErrorWriterConfig) func(http.Handler) http.Handle
 		errWriter := connect.NewErrorWriter()
 		defWriteError := func(ctx context.Context, input *HTTPWriteErrorInput) (*HTTPWriteErrorOutput, error) {
 			lang := input.Conf.I18N.LanguageFromContext(ctx)
-			err := TranslateError(input.Conf.I18N, lang, input.Err)
+			err := TranslateError(input.Err, input.Conf.I18N, lang)
 			written := WriteConnectErrorOnly(errWriter, input.W, input.R, err)
 			return &HTTPWriteErrorOutput{Written: written}, nil
 		}
