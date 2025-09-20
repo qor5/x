@@ -1,42 +1,34 @@
-package postgresx
+package postgresx_test
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/qor5/x/v3/gormx"
+	"github.com/qor5/x/v3/gormx/postgresx"
 	"github.com/stretchr/testify/require"
-	"github.com/theplant/testenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-var dsn string
+var suite *gormx.TestSuite
 
 func TestMain(m *testing.M) {
-	env, err := testenv.New().DBEnable(true).SetUp()
-	if err != nil {
-		panic(err)
-	}
-	defer func() {
-		if err := env.TearDown(); err != nil {
-			panic(err)
-		}
-	}()
-
-	dsn = env.DB.Config.Dialector.(*postgres.Dialector).Config.DSN
-
+	suite = gormx.MustStartTestSuite(context.Background())
+	defer suite.Stop(context.Background())
 	m.Run()
 }
 
 func TestSavePointerDialectorInterface(t *testing.T) {
 	// Test with PostgreSQL (which supports SavePointerDialectorInterface)
-	d := postgres.Open(dsn)
+	d := postgres.Open(suite.DSN())
 	_, ok := d.(gorm.SavePointerDialectorInterface)
 	require.True(t, ok)
 
-	d = Open(dsn)
+	d = postgresx.Open(suite.DSN())
 	_, ok = d.(gorm.SavePointerDialectorInterface)
 	require.True(t, ok)
 }
@@ -44,19 +36,19 @@ func TestSavePointerDialectorInterface(t *testing.T) {
 func TestWithCauseVsWithoutCause(t *testing.T) {
 	// Three scenarios to compare
 	withoutTranslateDB, err := gorm.Open(
-		postgres.Open(dsn),
+		postgres.Open(suite.DSN()),
 		&gorm.Config{TranslateError: false},
 	)
 	require.NoError(t, err)
 
 	withTranslateDB, err := gorm.Open(
-		postgres.Open(dsn),
+		postgres.Open(suite.DSN()),
 		&gorm.Config{TranslateError: true},
 	)
 	require.NoError(t, err)
 
 	withCauseDB, err := gorm.Open(
-		Open(dsn),
+		postgresx.Open(suite.DSN()),
 		&gorm.Config{TranslateError: true},
 	)
 	require.NoError(t, err)
@@ -116,7 +108,7 @@ func TestWithCauseVsWithoutCause(t *testing.T) {
 
 func TestWithCause_NoTranslationNeeded(t *testing.T) {
 	withCauseDB, err := gorm.Open(
-		Open(dsn),
+		postgresx.Open(suite.DSN()),
 		&gorm.Config{TranslateError: true},
 	)
 	require.NoError(t, err)
