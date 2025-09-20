@@ -703,6 +703,139 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 	})
 }
 
+func TestWithFlattenFieldViolations(t *testing.T) {
+	t.Run("mixed types in single call", func(t *testing.T) {
+		// Create various inputs
+		single := &FieldViolation{Field: "email", Reason: "INVALID_FORMAT"}
+		slice := []*FieldViolation{
+			{Field: "name", Reason: "REQUIRED"},
+			{Field: "age", Reason: "TOO_YOUNG"},
+		}
+
+		// Create another status with violations
+		otherStatus := New(codes.InvalidArgument, "NESTED_ERROR", "nested validation").
+			WithFieldViolations(&FieldViolation{Field: "nested.field", Reason: "INVALID"})
+
+		// Use WithFlattenFieldViolations
+		status := New(codes.InvalidArgument, "VALIDATION_ERROR", "validation failed").
+			WithFlattenFieldViolations(single, slice, otherStatus.ToFieldViolations("parent"))
+
+		// Verify results
+		assert.NotNil(t, status.badRequest)
+		// Should have: single + 2 from slice + 1 main + 1 nested from other status = 5 total
+		assert.Len(t, status.badRequest.FieldViolations, 5)
+
+		// Verify all fields are present
+		fieldNames := make([]string, 0, 5)
+		for _, fv := range status.badRequest.FieldViolations {
+			fieldNames = append(fieldNames, fv.Field)
+		}
+		assert.Contains(t, fieldNames, "email")
+		assert.Contains(t, fieldNames, "name")
+		assert.Contains(t, fieldNames, "age")
+		assert.Contains(t, fieldNames, "parent")
+		assert.Contains(t, fieldNames, "parent.nested.field")
+	})
+
+	t.Run("error input conversion", func(t *testing.T) {
+		// Create a status error
+		statusErr := New(codes.InvalidArgument, "VALIDATION_FAILED", "validation failed").
+			WithFieldViolations(
+				&FieldViolation{Field: "field1", Reason: "INVALID"},
+				&FieldViolation{Field: "field2", Reason: "REQUIRED"},
+			).Err()
+
+		// Use error via ToFieldViolations in WithFlattenFieldViolations
+		status := New(codes.InvalidArgument, "MAIN_ERROR", "main validation error").
+			WithFlattenFieldViolations(ToFieldViolations(statusErr, "nested"), &FieldViolation{Field: "direct", Reason: "INVALID"})
+
+		// Verify results
+		assert.NotNil(t, status.badRequest)
+		// Should have: 1 main error + 2 nested errors + 1 direct = 4 total
+		assert.Len(t, status.badRequest.FieldViolations, 4)
+	})
+
+	t.Run("delegation to existing method", func(t *testing.T) {
+		// Test that the new method delegates properly to WithFieldViolations
+		// and maintains the same behavior for duplicate field handling
+
+		existing := New(codes.InvalidArgument, "BASE", "base").
+			WithFieldViolations(&FieldViolation{Field: "email", Reason: "ORIGINAL"})
+
+		// Add same field via WithFlattenFieldViolations - should replace
+		updated := existing.WithFlattenFieldViolations(&FieldViolation{Field: "email", Reason: "UPDATED"})
+
+		// Verify delegation behavior
+		assert.Len(t, updated.badRequest.FieldViolations, 1)
+		assert.Equal(t, "email", updated.badRequest.FieldViolations[0].Field)
+		assert.Equal(t, "UPDATED", updated.badRequest.FieldViolations[0].Reason)
+	})
+
+	t.Run("nil input handling", func(t *testing.T) {
+		status := New(codes.InvalidArgument, "TEST", "test").
+			WithFlattenFieldViolations(nil, (*FieldViolation)(nil), []*FieldViolation(nil))
+
+		// Should handle nil inputs gracefully
+		if status.badRequest != nil {
+			assert.Len(t, status.badRequest.FieldViolations, 0)
+		}
+	})
+}
+
+func TestWithFieldViolationsDuplicateStrategy(t *testing.T) {
+	t.Run("design rationale - same call vs cross call duplicates", func(t *testing.T) {
+		// ✅ Scenario 1: Same-call duplicates should panic (programming error)
+		assert.Panics(t, func() {
+			New(codes.InvalidArgument, "TEST", "test").WithFieldViolations(
+				&FieldViolation{Field: "email", Reason: "REQUIRED"},
+				&FieldViolation{Field: "email", Reason: "INVALID"}, // Same field in same call - clear mistake
+			)
+		}, "Same-call duplicates should panic as this is clearly a programming error")
+
+		// ✅ Scenario 2: Cross-call duplicates should overwrite (update semantics)
+		base := New(codes.InvalidArgument, "TEST", "test").WithFieldViolations(
+			&FieldViolation{Field: "email", Reason: "REQUIRED"},
+			&FieldViolation{Field: "name", Reason: "TOO_SHORT"},
+		)
+
+		updated := base.WithFieldViolations(
+			&FieldViolation{Field: "email", Reason: "INVALID_FORMAT"}, // Different call - update existing
+		)
+
+		// Should have 2 fields total, email should be updated, name should remain
+		assert.Len(t, updated.badRequest.FieldViolations, 2)
+
+		// Email should be updated but maintain its original position (index 0)
+		assert.Equal(t, "email", updated.badRequest.FieldViolations[0].Field)
+		assert.Equal(t, "INVALID_FORMAT", updated.badRequest.FieldViolations[0].Reason)
+
+		// Name should remain unchanged
+		assert.Equal(t, "name", updated.badRequest.FieldViolations[1].Field)
+		assert.Equal(t, "TOO_SHORT", updated.badRequest.FieldViolations[1].Reason)
+	})
+
+	t.Run("position preservation demonstrates intent", func(t *testing.T) {
+		// Position preservation shows this is intentional "update" not "replace"
+		status := New(codes.InvalidArgument, "TEST", "test").WithFieldViolations(
+			&FieldViolation{Field: "field1", Reason: "ERROR1"},
+			&FieldViolation{Field: "field2", Reason: "ERROR2"},
+			&FieldViolation{Field: "field3", Reason: "ERROR3"},
+		)
+
+		// Update the middle field
+		updated := status.WithFieldViolations(
+			&FieldViolation{Field: "field2", Reason: "UPDATED_ERROR"},
+		)
+
+		// Verify order is preserved: field2 stays in position 1
+		assert.Len(t, updated.badRequest.FieldViolations, 3)
+		assert.Equal(t, "field1", updated.badRequest.FieldViolations[0].Field)
+		assert.Equal(t, "field2", updated.badRequest.FieldViolations[1].Field)
+		assert.Equal(t, "UPDATED_ERROR", updated.badRequest.FieldViolations[1].Reason)
+		assert.Equal(t, "field3", updated.badRequest.FieldViolations[2].Field)
+	})
+}
+
 func TestStatusMethods(t *testing.T) {
 	t.Run("Details method", func(t *testing.T) {
 		status := New(codes.InvalidArgument, "TEST", "test")

@@ -53,17 +53,41 @@ func (s *TestSuite) ResetDB(ctx context.Context, models ...any) error {
 	return db.AutoMigrate(models...)
 }
 
-// StartTestSuiteWithConfig creates a test suite with custom container configuration.
-// If containerConfig is nil, default configuration will be used.
-func StartTestSuiteWithConfig(ctx context.Context, containerConfig *ContainerConfig, ctors ...any) (*TestSuite, error) {
-	configProvider := DefaultContainerConfig
-	if containerConfig != nil {
-		configProvider = func() *ContainerConfig { return containerConfig }
+// TestSuiteOption configures TestSuite creation
+type TestSuiteOption func(*testSuiteOptions)
+
+type testSuiteOptions struct {
+	containerConfig *ContainerConfig
+	providers       []any
+}
+
+// WithContainerConfig sets a custom container configuration
+func WithContainerConfig(config *ContainerConfig) TestSuiteOption {
+	return func(opts *testSuiteOptions) {
+		opts.containerConfig = config
+	}
+}
+
+// WithProviders adds additional dependency injection providers
+func WithProviders(providers ...any) TestSuiteOption {
+	return func(opts *testSuiteOptions) {
+		opts.providers = append(opts.providers, providers...)
+	}
+}
+
+// StartTestSuite creates and starts a new test suite with PostgreSQL container.
+// Configuration can be customized using TestSuiteOption functions.
+func StartTestSuite(ctx context.Context, opts ...TestSuiteOption) (*TestSuite, error) {
+	options := &testSuiteOptions{
+		containerConfig: DefaultContainerConfig(),
+	}
+	for _, opt := range opts {
+		opt(options)
 	}
 
 	lc, err := lifecycle.Start(ctx,
 		lifecycle.SetupSignal,
-		configProvider,
+		func() *ContainerConfig { return options.containerConfig },
 		SetupContainer,
 		func(c *Container) *DatabaseConfig {
 			conf := DefaultDatabaseConfig()
@@ -71,7 +95,7 @@ func StartTestSuiteWithConfig(ctx context.Context, containerConfig *ContainerCon
 			return conf
 		},
 		SetupDatabase,
-		ctors,
+		options.providers,
 	)
 	if err != nil {
 		return nil, err
@@ -82,16 +106,10 @@ func StartTestSuiteWithConfig(ctx context.Context, containerConfig *ContainerCon
 	return &TestSuite{Lifecycle: lc, Container: container, db: db}, nil
 }
 
-// StartTestSuite creates and starts a new test suite with PostgreSQL container.
-// Additional constructors can be provided to extend the dependency injection setup.
-func StartTestSuite(ctx context.Context, ctors ...any) (*TestSuite, error) {
-	return StartTestSuiteWithConfig(ctx, nil, ctors...)
-}
-
 // MustStartTestSuite creates and starts a new test suite, panicking on error.
 // This is a convenience wrapper around StartTestSuite for test code that prefers panics.
-func MustStartTestSuite(ctx context.Context, ctors ...any) *TestSuite {
-	suite, err := StartTestSuite(ctx, ctors...)
+func MustStartTestSuite(ctx context.Context, opts ...TestSuiteOption) *TestSuite {
+	suite, err := StartTestSuite(ctx, opts...)
 	if err != nil {
 		panic(err)
 	}
@@ -99,9 +117,9 @@ func MustStartTestSuite(ctx context.Context, ctors ...any) *TestSuite {
 }
 
 // SetupTestSuiteFactory creates a factory function for creating test suites.
-func SetupTestSuiteFactory(ctors ...any) func(ctx context.Context, lc *lifecycle.Lifecycle) (*TestSuite, error) {
+func SetupTestSuiteFactory(opts ...TestSuiteOption) func(ctx context.Context, lc *lifecycle.Lifecycle) (*TestSuite, error) {
 	return func(ctx context.Context, lc *lifecycle.Lifecycle) (*TestSuite, error) {
-		suite, err := StartTestSuite(ctx, ctors...)
+		suite, err := StartTestSuite(ctx, opts...)
 		if err != nil {
 			return nil, err
 		}

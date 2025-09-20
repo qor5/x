@@ -255,6 +255,17 @@ func (s *Status) WithFieldViolations(fields ...*FieldViolation) *Status {
 	return st
 }
 
+// WithFlattenFieldViolations accepts various types of field violation inputs and flattens them.
+// Supports *FieldViolation, []*FieldViolation, and their protobuf equivalents.
+// Mixed types are allowed in a single call for maximum flexibility.
+//
+// Note: For error and *Status inputs, use ToFieldViolations(err, field) or status.ToFieldViolations(field)
+// first to specify the field name, then pass the result to this function.
+func (s *Status) WithFlattenFieldViolations(inputs ...any) *Status {
+	violations := FlattenFieldViolations(inputs...)
+	return s.WithFieldViolations(violations...)
+}
+
 func (s *Status) WithDetails(details ...proto.Message) *Status {
 	st := Clone(s)
 

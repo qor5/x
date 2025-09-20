@@ -266,6 +266,49 @@ func ToFieldViolations(err error, field string) []*FieldViolation {
 	return result
 }
 
+// FlattenFieldViolations flattens various field violation types into a unified []*FieldViolation slice.
+// Supports *FieldViolation, []*FieldViolation, and their protobuf equivalents.
+// Mixed types are allowed in a single call.
+//
+// Note: For error and *Status inputs, use ToFieldViolations(err, field) or status.ToFieldViolations(field)
+// first to specify the field name, then pass the result to this function.
+func FlattenFieldViolations(inputs ...any) []*FieldViolation {
+	var result []*FieldViolation
+
+	for _, input := range inputs {
+		switch v := input.(type) {
+		case *FieldViolation:
+			if v != nil {
+				result = append(result, v)
+			}
+		case []*FieldViolation:
+			result = append(result, v...)
+		case *errdetails.BadRequest_FieldViolation:
+			if v != nil {
+				result = append(result, &FieldViolation{
+					Field:            v.Field,
+					Reason:           v.Reason,
+					Description:      v.Description,
+					LocalizedMessage: v.LocalizedMessage,
+				})
+			}
+		case []*errdetails.BadRequest_FieldViolation:
+			for _, pbFv := range v {
+				if pbFv != nil {
+					result = append(result, &FieldViolation{
+						Field:            pbFv.Field,
+						Reason:           pbFv.Reason,
+						Description:      pbFv.Description,
+						LocalizedMessage: pbFv.LocalizedMessage,
+					})
+				}
+			}
+		}
+	}
+
+	return result
+}
+
 // TranslateError translates error messages and field violations using the provided i18n instance and language.
 // Returns the original error if translation is not possible or if localized details already exist.
 //

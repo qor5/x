@@ -19,6 +19,131 @@ import (
 	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
 )
 
+func TestFlattenFieldViolations(t *testing.T) {
+	t.Run("flatten mixed single and slice", func(t *testing.T) {
+		// ✅ mixed types in a single call
+		single1 := &FieldViolation{Field: "email", Reason: "INVALID"}
+		slice1 := []*FieldViolation{
+			{Field: "name", Reason: "REQUIRED"},
+			{Field: "age", Reason: "TOO_YOUNG"},
+		}
+		single2 := &FieldViolation{Field: "phone", Reason: "INVALID_FORMAT"}
+
+		// Mixed usage: single, slice, single
+		result := FlattenFieldViolations(single1, slice1, single2)
+
+		// Verify results
+		assert.Len(t, result, 4)
+		assert.Equal(t, "email", result[0].Field)
+		assert.Equal(t, "name", result[1].Field)
+		assert.Equal(t, "age", result[2].Field)
+		assert.Equal(t, "phone", result[3].Field)
+	})
+
+	t.Run("flatten handles nil", func(t *testing.T) {
+		var nilSingle *FieldViolation
+		slice := []*FieldViolation{
+			{Field: "valid", Reason: "OK"},
+		}
+
+		result := FlattenFieldViolations(nilSingle, slice, nilSingle)
+		assert.Len(t, result, 1)
+		assert.Equal(t, "valid", result[0].Field)
+	})
+
+	t.Run("flatten with ToFieldViolations from error", func(t *testing.T) {
+		// Create a status error with field violations
+		statusErr := New(codes.InvalidArgument, "VALIDATION_FAILED", "validation failed").
+			WithFieldViolations(
+				&FieldViolation{Field: "nested.field1", Reason: "INVALID", Description: "Field1 is invalid"},
+				&FieldViolation{Field: "nested.field2", Reason: "REQUIRED", Description: "Field2 is required"},
+			).Err()
+
+		// Convert error to field violations using ToFieldViolations
+		errorViolations := ToFieldViolations(statusErr, "user")
+
+		// Mix with other violations
+		directViolations := []*FieldViolation{
+			{Field: "email", Reason: "INVALID_FORMAT"},
+		}
+
+		result := FlattenFieldViolations(errorViolations, directViolations)
+
+		// Verify results: main error + 2 nested violations + 1 direct violation = 4 total
+		assert.Len(t, result, 4)
+		assert.Equal(t, "user", result[0].Field)               // main error field
+		assert.Equal(t, "user.nested.field1", result[1].Field) // prefixed nested field
+		assert.Equal(t, "user.nested.field2", result[2].Field) // prefixed nested field
+		assert.Equal(t, "email", result[3].Field)              // direct violation
+	})
+
+	t.Run("flatten with Status.ToFieldViolations method", func(t *testing.T) {
+		// Create a status with field violations
+		status := New(codes.InvalidArgument, "USER_INVALID", "user data invalid").
+			WithFieldViolations(
+				&FieldViolation{Field: "profile.bio", Reason: "TOO_LONG", Description: "Bio is too long"},
+				&FieldViolation{Field: "profile.avatar", Reason: "INVALID_FORMAT", Description: "Avatar format is invalid"},
+			)
+
+		// Use Status.ToFieldViolations method
+		statusViolations := status.ToFieldViolations("request")
+
+		// Mix with single violations
+		singleViolation := &FieldViolation{Field: "timestamp", Reason: "EXPIRED"}
+
+		result := FlattenFieldViolations(statusViolations, singleViolation)
+
+		// Verify results: main status error + 2 nested violations + 1 single violation = 4 total
+		assert.Len(t, result, 4)
+		assert.Equal(t, "request", result[0].Field)                // main status field
+		assert.Equal(t, "request.profile.bio", result[1].Field)    // prefixed nested field
+		assert.Equal(t, "request.profile.avatar", result[2].Field) // prefixed nested field
+		assert.Equal(t, "timestamp", result[3].Field)              // single violation
+		assert.Equal(t, "USER_INVALID", result[0].Reason)          // main status reason
+	})
+
+	t.Run("flatten protobuf field violations", func(t *testing.T) {
+		// Test direct *errdetails.BadRequest_FieldViolation support
+		pbSingle := &errdetails.BadRequest_FieldViolation{
+			Field:       "pb_email",
+			Reason:      "INVALID_FORMAT",
+			Description: "Protobuf email invalid",
+		}
+
+		pbSlice := []*errdetails.BadRequest_FieldViolation{
+			{Field: "pb_name", Reason: "REQUIRED", Description: "Protobuf name required"},
+			{Field: "pb_age", Reason: "TOO_YOUNG", Description: "Protobuf age too young"},
+		}
+
+		// Mix protobuf types with internal types
+		internal := &FieldViolation{Field: "internal", Reason: "CUSTOM"}
+
+		result := FlattenFieldViolations(pbSingle, pbSlice, internal)
+
+		// Verify results: 1 single pb + 2 slice pb + 1 internal = 4 total
+		assert.Len(t, result, 4)
+		assert.Equal(t, "pb_email", result[0].Field)
+		assert.Equal(t, "INVALID_FORMAT", result[0].Reason)
+		assert.Equal(t, "Protobuf email invalid", result[0].Description)
+		assert.Equal(t, "pb_name", result[1].Field)
+		assert.Equal(t, "pb_age", result[2].Field)
+		assert.Equal(t, "internal", result[3].Field)
+		assert.Equal(t, "CUSTOM", result[3].Reason)
+	})
+
+	t.Run("flatten nil protobuf violations", func(t *testing.T) {
+		var nilPbSingle *errdetails.BadRequest_FieldViolation
+		var nilPbSlice []*errdetails.BadRequest_FieldViolation
+		validInternal := &FieldViolation{Field: "valid", Reason: "OK"}
+
+		result := FlattenFieldViolations(nilPbSingle, nilPbSlice, validInternal)
+
+		// Should handle nil protobuf inputs gracefully
+		assert.Len(t, result, 1)
+		assert.Equal(t, "valid", result[0].Field)
+	})
+}
+
 func TestTranslateError(t *testing.T) {
 	ib, _ := i18nx.New(strings.NewReader(`
 key,en,zh-CN
