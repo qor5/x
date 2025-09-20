@@ -1,30 +1,16 @@
-package gormx
+package gormx_test
 
 import (
+	"context"
 	"testing"
 
-	"github.com/theplant/testenv"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"github.com/qor5/x/v3/gormx"
 )
 
-var db *gorm.DB
+var suite *gormx.TestSuite
 
 func TestMain(m *testing.M) {
-	env, err := testenv.New().DBEnable(true).SetUp()
-	if err != nil {
-		panic(err)
-	}
-	defer func() {
-		if err := env.TearDown(); err != nil {
-			panic(err)
-		}
-	}()
-
-	db = env.DB
-	db.Logger = db.Logger.LogMode(logger.Info)
-	db.Config.DisableForeignKeyConstraintWhenMigrating = true
-	db.Config.TranslateError = true
-
+	suite = gormx.MustStartTestSuite(context.Background())
+	defer suite.Stop(context.Background())
 	m.Run()
 }

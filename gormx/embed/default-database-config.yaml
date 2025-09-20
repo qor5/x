@@ -2,7 +2,7 @@ database:
   dsn: ""
   debug: false
   tracing:
-    excludeQuery: true
+    excludeQuery: false
     excludeQueryVars: false
   maxIdleConns: 20
   maxOpenConns: 200

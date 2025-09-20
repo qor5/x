@@ -46,10 +46,6 @@ func UnaryServerInterceptor(defClientKind ClientKind) grpc.UnaryServerIntercepto
 		}
 		ctx = context.WithValue(ctx, ctxKeyNormalization{}, nlz)
 
-		if decorator, ok := nlz.callMeta.Service.(ContextDecorator); ok {
-			ctx = decorator.DecorateContext(ctx)
-		}
-
 		defer func() {
 			if len(resMD) > 0 {
 				if serr := grpc.SetHeader(ctx, resMD); serr != nil {

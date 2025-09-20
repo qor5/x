@@ -1,0 +1,3 @@
+pim:
+  address: "localhost:50051"
+  loadBalancingPolicy: "pick-first" # "pick-first" or "round-robin"

@@ -111,7 +111,12 @@ func (b *I18N) getPrinter(tag language.Tag) *message.Printer {
 // Sprintf prints a localized message.
 // - Positional args: behaves like fmt.Sprintf through x/text/message.
 // - Named arg (single map or struct): render with text/template using the localized message as template.
-func (b *I18N) Sprintf(tag language.Tag, key message.Reference, args ...any) string {
+func (b *I18N) Sprintf(tag language.Tag, key message.Reference, args ...any) (xres string) {
+	defer func() {
+		if xres == "" && b.logger != nil {
+			b.logger.Warn("i18n message is empty", "tag", tag.String(), "key", key, "args", args)
+		}
+	}()
 	// Named-arg via map or struct: try gotpl rendering; fallback to positional on error.
 	if len(args) == 1 && (isMap(args[0]) || isStruct(args[0])) {
 		if out, err := b.renderTemplate(tag, key, args[0]); err == nil {

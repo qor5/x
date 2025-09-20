@@ -39,22 +39,24 @@ func NewVProtoHTTPErrorWriter(ib *i18nx.I18N) func(http.Handler) http.Handler {
 func VProtoHTTPWriteErrorHook(next HTTPWriteErrorFunc) HTTPWriteErrorFunc {
 	errWriter := connect.NewErrorWriter()
 	return func(ctx context.Context, input *HTTPWriteErrorInput) (*HTTPWriteErrorOutput, error) {
+		lang := input.Conf.I18N.LanguageFromContext(ctx)
+
+		// Why not use statusx.TranslateError? Just to avoid affecting the original prottp related logic.
+		err, translated := TranslateStatusErrorOnly(input.Conf.I18N, lang, input.Err)
+
 		if EnsureConnectError(ctx) {
-			// Why not use statusx.TranslateError? Just to avoid affecting the original prottp releated logic.
-			err, _ := TranslateStatusErrorOnly(ctx, input.Conf.I18N, input.Err)
 			written := WriteConnectErrorOnly(errWriter, input.W, input.R, err)
 			return &HTTPWriteErrorOutput{Written: written}, nil
 		}
 
-		err, w, r := input.Err, input.W, input.R
-
-		// Why not use statusx.TranslateError? Just to avoid affecting the original prottp releated logic.
-		err, translated := TranslateStatusErrorOnly(ctx, input.Conf.I18N, err)
 		if !translated {
-			return &HTTPWriteErrorOutput{Written: false}, nil // ignore errors that are not statusx.StatusError
+			// For non-StatusError types, we delegate to other handlers in the chain.
+			// This maintains separation of concerns: VProto hook focuses on structured
+			// validation errors, while other handlers can process different error types.
+			return &HTTPWriteErrorOutput{Written: false}, nil
 		}
 
-		werr := WriteVProtoHTTPError(err, w, r)
+		werr := WriteVProtoHTTPError(err, input.W, input.R)
 		if werr != nil {
 			slog.ErrorContext(ctx, "Failed to write vproto http error", "error", werr)
 		}
@@ -80,13 +82,15 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 	code := st.Code()
 	statusCode := HTTPStatusFromCode(code)
 
-	var errInfo *errdetails.ErrorInfo
+	var errorInfo *errdetails.ErrorInfo
 	var localizedMessage *errdetails.LocalizedMessage
 	var badRequest *errdetails.BadRequest
+	// Intentionally use st.Details() instead of st.details to get the fully processed data
+	// that has gone through the complete transformation pipeline (GRPCStatus -> Details)
 	for _, d := range st.Details() {
 		switch v := d.(type) {
 		case *errdetails.ErrorInfo:
-			errInfo = v
+			errorInfo = v
 		case *errdetails.LocalizedMessage:
 			localizedMessage = v
 		case *errdetails.BadRequest:
@@ -95,7 +99,7 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 	}
 
 	verr := &vproto.ValidationError{
-		Code:           cmp.Or(errInfo.GetReason(), code.String()),
+		Code:           cmp.Or(errorInfo.GetReason(), code.String()),
 		DefaultViewMsg: cmp.Or(localizedMessage.GetMessage(), st.Message()),
 	}
 
