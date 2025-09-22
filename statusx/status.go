@@ -29,7 +29,7 @@ type Status struct {
 }
 
 // New creates a Status with the specified code and message.
-// The reason is automatically derived from the code using ReasonFromCode.
+// The reason is automatically derived from the status code.
 //
 // For non-OK status codes, it automatically captures a stacktrace at creation time,
 // which provides valuable debugging context without manual instrumentation.
