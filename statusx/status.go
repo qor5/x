@@ -467,6 +467,8 @@ func Wrap(err error, c codes.Code, reason, message string) *Status {
 	s.code = c
 	s.message = message
 	s.errorInfo.Reason = reason
+	// Immediately fix key to creation-time reason
+	s.localized = &statusv1.Localized{Key: s.Reason()}
 	return s
 }
 

@@ -8,7 +8,7 @@ import "google/rpc/error_details.proto";
 // Localized contains i18n information
 message Localized {
   string key = 1; // Localization key
-  repeated google.protobuf.Any args = 2; // Template arguments for gotpl
+  repeated google.protobuf.Any args = 2; // Template arguments
 }
 
 // BadRequest contains field-level validation violations

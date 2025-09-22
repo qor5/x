@@ -270,6 +270,21 @@ func TestWrap(t *testing.T) {
 		assert.Equal(t, "NOT_FOUND", wrapped.Reason())
 		assert.Equal(t, "resource not found", wrapped.Message())
 	}
+
+	// Test localized key consistency - this test would fail without the s.localized assignment
+	t.Run("localized key should match reason after wrap", func(t *testing.T) {
+		originalErr := errors.New("database connection failed")
+		wrapped := Wrap(originalErr, codes.Internal, "DATABASE_CONNECTION_ERROR", "failed to connect to database")
+
+		require.NotNil(t, wrapped)
+		assert.Equal(t, "DATABASE_CONNECTION_ERROR", wrapped.Reason())
+
+		// This is the critical test - localized key should match the reason
+		localized := wrapped.Localized()
+		require.NotNil(t, localized, "localized should not be nil")
+		assert.Equal(t, "DATABASE_CONNECTION_ERROR", localized.Key,
+			"localized key should match the reason for consistent i18n translation")
+	})
 }
 
 func TestGRPCStatus(t *testing.T) {
