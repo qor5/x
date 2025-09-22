@@ -1,14 +1,16 @@
 package statusx
 
 import (
+	"cmp"
+	"fmt"
 	"log/slog"
+	"slices"
 	"time"
 
 	"github.com/pkg/errors"
 	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
 	"golang.org/x/text/language"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -19,18 +21,6 @@ import (
 
 	"github.com/qor5/x/v3/i18nx"
 )
-
-// WithLocalized creates a new Status with the given code, key, and localized template.
-// This is a convenience function that calls New() followed by WithLocalized().
-func WithLocalized(code codes.Code, key string, args ...any) *Status {
-	return New(code, key).withLocalized(key, args...)
-}
-
-// WrapLocalized wraps an error into a Status with the given code, key, and localized template.
-// This is a convenience function that calls Wrap() followed by WithLocalized().
-func WrapLocalized(err error, code codes.Code, key string, args ...any) *Status {
-	return Wrap(err, code, key).withLocalized(key, args...)
-}
 
 // toProtoMessage converts Go values to proto messages for use with Any.
 func toProtoMessage(v any) (proto.Message, error) {
@@ -138,8 +128,22 @@ func convertArgsToAny(args []any) []*anypb.Any {
 
 // Localized represents a localized message
 type Localized struct {
-	Key  string
-	Args []any
+	key  string
+	args []any
+}
+
+func (l *Localized) Key() string {
+	if l == nil {
+		return ""
+	}
+	return l.key
+}
+
+func (l *Localized) Args() []any {
+	if l == nil {
+		return nil
+	}
+	return slices.Clone(l.args)
 }
 
 func (l *Localized) Proto() *statusv1.Localized {
@@ -147,8 +151,8 @@ func (l *Localized) Proto() *statusv1.Localized {
 		return nil
 	}
 	return &statusv1.Localized{
-		Key:  l.Key,
-		Args: convertArgsToAny(l.Args),
+		Key:  l.key,
+		Args: convertArgsToAny(l.args),
 	}
 }
 
@@ -163,13 +167,13 @@ func LocalizedFromProto(pb *statusv1.Localized) *Localized {
 		if err != nil {
 			// Use nil instead of placeholder strings to avoid breaking template rendering
 			val = nil
-			slog.Warn("failed to extract value from Any", "error", err)
+			slog.Warn("failed to extract value from Any", "error", err, "typeURL", anyArg.TypeUrl)
 		}
 		goArgs[i] = val
 	}
 	return &Localized{
-		Key:  pb.GetKey(),
-		Args: goArgs,
+		key:  pb.GetKey(),
+		args: goArgs,
 	}
 }
 
@@ -179,11 +183,101 @@ func LocalizedFromProto(pb *statusv1.Localized) *Localized {
 //  1. LocalizedMessage (highest priority - pre-translated, ready to use)
 //  2. Localized (lower priority - template that needs translation via interceptor)
 type FieldViolation struct {
-	Field            string
-	Reason           string
-	Description      string
-	Localized        *Localized                   // Localization template (requires translation via interceptor)
-	LocalizedMessage *errdetails.LocalizedMessage // Pre-translated message (ready to use)
+	field            string
+	reason           string
+	description      string
+	localized        *Localized                   // Localization template (requires translation via interceptor)
+	localizedMessage *errdetails.LocalizedMessage // Pre-translated message (ready to use)
+}
+
+// Field returns the field name that caused the violation.
+func (f *FieldViolation) Field() string {
+	if f == nil {
+		return ""
+	}
+	return f.field
+}
+
+// Reason returns the error reason code.
+func (f *FieldViolation) Reason() string {
+	if f == nil {
+		return ""
+	}
+	return f.reason
+}
+
+// Description returns the human-readable description of the violation.
+func (f *FieldViolation) Description() string {
+	if f == nil {
+		return ""
+	}
+	return f.description
+}
+
+// Localized returns the localization template if set.
+// Returns nil if no localization template is available.
+func (f *FieldViolation) Localized() *Localized {
+	if f.localized == nil {
+		return nil
+	}
+	// Return a copy to prevent external modification
+	return &Localized{
+		key:  f.localized.Key(),
+		args: f.localized.Args(),
+	}
+}
+
+// LocalizedMessage returns the pre-translated message if available.
+// Returns nil if no pre-translated message is set.
+func (f *FieldViolation) LocalizedMessage() *errdetails.LocalizedMessage {
+	if f.localizedMessage == nil {
+		return nil
+	}
+	return proto.Clone(f.localizedMessage).(*errdetails.LocalizedMessage)
+}
+
+// NewFieldViolation creates a new field validation violation.
+// The reason serves as the error identifier and will be used as the i18n key fallback during translation.
+func NewFieldViolation(field, reason, description string) *FieldViolation {
+	if field == "" {
+		panic("field is required")
+	}
+	if reason == "" {
+		panic("reason is required")
+	}
+	return &FieldViolation{
+		field:       field,
+		reason:      reason,
+		description: description,
+		localized:   &Localized{key: reason},
+	}
+}
+
+// NewFieldViolationf creates a new field validation violation with a formatted description.
+func NewFieldViolationf(field, reason, format string, args ...any) *FieldViolation {
+	return NewFieldViolation(field, reason, fmt.Sprintf(format, args...))
+}
+
+// WithLocalized sets a custom i18n key and template arguments.
+// This sets a specific i18n key instead of relying on the reason as fallback during translation.
+func (f *FieldViolation) WithLocalized(key string, args ...any) *FieldViolation {
+	if key == "" {
+		panic("key is required")
+	}
+	return &FieldViolation{
+		field:            f.Field(),
+		reason:           f.Reason(),
+		description:      f.Description(),
+		localized:        &Localized{key: key, args: args},
+		localizedMessage: f.LocalizedMessage(),
+	}
+}
+
+// WithLocalizedArgs sets template arguments for i18n.
+// Preserves the existing localized key if present, or leaves it empty for the translator to use reason as fallback.
+// This is useful when you want to add template arguments without setting a specific i18n key.
+func (f *FieldViolation) WithLocalizedArgs(args ...any) *FieldViolation {
+	return f.WithLocalized(f.localized.Key(), args...)
 }
 
 // Proto converts FieldViolation to protobuf message
@@ -193,11 +287,11 @@ func (f *FieldViolation) Proto() *statusv1.BadRequest_FieldViolation {
 	}
 
 	return &statusv1.BadRequest_FieldViolation{
-		Field:            f.Field,
-		Reason:           f.Reason,
-		Description:      f.Description,
-		Localized:        f.Localized.Proto(),
-		LocalizedMessage: f.LocalizedMessage,
+		Field:            f.Field(),
+		Reason:           f.Reason(),
+		Description:      f.Description(),
+		Localized:        f.Localized().Proto(),
+		LocalizedMessage: f.LocalizedMessage(),
 	}
 }
 
@@ -220,9 +314,9 @@ func ToFieldViolations(err error, field string) []*FieldViolation {
 	for _, d := range s.details {
 		switch v := d.(type) {
 		case *errdetails.LocalizedMessage:
-			localizedMessage = v
+			localizedMessage = proto.Clone(v).(*errdetails.LocalizedMessage)
 		case *errdetails.BadRequest:
-			badRequest = v
+			badRequest = proto.Clone(v).(*errdetails.BadRequest)
 		}
 	}
 
@@ -234,11 +328,11 @@ func ToFieldViolations(err error, field string) []*FieldViolation {
 	}
 
 	mainViolation := &FieldViolation{
-		Field:            field,
-		Reason:           s.Reason(),
-		Description:      s.Message(),
-		Localized:        mainLocalized,
-		LocalizedMessage: localizedMessage,
+		field:            field,
+		reason:           s.Reason(),
+		description:      s.Message(),
+		localized:        mainLocalized,
+		localizedMessage: localizedMessage,
 	}
 
 	result := []*FieldViolation{mainViolation}
@@ -248,22 +342,22 @@ func ToFieldViolations(err error, field string) []*FieldViolation {
 		// Use Google standard BadRequest from details
 		for _, fv := range badRequest.FieldViolations {
 			result = append(result, &FieldViolation{
-				Field:            field + "." + fv.Field,
-				Reason:           fv.Reason,
-				Description:      fv.Description,
-				Localized:        nil,
-				LocalizedMessage: fv.LocalizedMessage,
+				field:            field + "." + fv.Field,
+				reason:           fv.Reason,
+				description:      fv.Description,
+				localized:        nil,
+				localizedMessage: fv.LocalizedMessage,
 			})
 		}
 	} else if s.badRequest != nil {
 		// Use our custom badRequest
 		for _, fv := range s.badRequest.FieldViolations {
 			result = append(result, &FieldViolation{
-				Field:            field + "." + fv.Field,
-				Reason:           fv.Reason,
-				Description:      fv.Description,
-				Localized:        LocalizedFromProto(fv.Localized),
-				LocalizedMessage: nil,
+				field:            field + "." + fv.Field,
+				reason:           fv.Reason,
+				description:      fv.Description,
+				localized:        LocalizedFromProto(fv.Localized),
+				localizedMessage: nil,
 			})
 		}
 	}
@@ -277,10 +371,13 @@ func ToFieldViolations(err error, field string) []*FieldViolation {
 //
 // Note: For error and *Status inputs, use ToFieldViolations(err, field) or status.ToFieldViolations(field)
 // first to specify the field name, then pass the result to this function.
-func FlattenFieldViolations(inputs ...any) []*FieldViolation {
+func FlattenFieldViolations(inputs ...any) ([]*FieldViolation, error) {
 	var result []*FieldViolation
 
 	for _, input := range inputs {
+		if input == nil {
+			continue // Skip nil inputs
+		}
 		switch v := input.(type) {
 		case *FieldViolation:
 			if v != nil {
@@ -291,27 +388,29 @@ func FlattenFieldViolations(inputs ...any) []*FieldViolation {
 		case *errdetails.BadRequest_FieldViolation:
 			if v != nil {
 				result = append(result, &FieldViolation{
-					Field:            v.Field,
-					Reason:           v.Reason,
-					Description:      v.Description,
-					LocalizedMessage: v.LocalizedMessage,
+					field:            v.Field,
+					reason:           v.Reason,
+					description:      v.Description,
+					localizedMessage: v.LocalizedMessage,
 				})
 			}
 		case []*errdetails.BadRequest_FieldViolation:
 			for _, pbFv := range v {
 				if pbFv != nil {
 					result = append(result, &FieldViolation{
-						Field:            pbFv.Field,
-						Reason:           pbFv.Reason,
-						Description:      pbFv.Description,
-						LocalizedMessage: pbFv.LocalizedMessage,
+						field:            pbFv.Field,
+						reason:           pbFv.Reason,
+						description:      pbFv.Description,
+						localizedMessage: pbFv.LocalizedMessage,
 					})
 				}
 			}
+		default:
+			return nil, errors.Errorf("unsupported type for flatten field violations: %T", v)
 		}
 	}
 
-	return result
+	return result, nil
 }
 
 // TranslateError translates error messages and field violations using the provided i18n instance and language.
@@ -358,75 +457,59 @@ func (s *Status) Translated(ib *i18nx.I18N, lang language.Tag) *Status {
 	}
 
 	st := Clone(s)
-
-	// Translate main status message
-	st = st.translateMainMessage(ib, lang)
-
-	// Translate field violations
-	st = st.translateFieldViolations(ib, lang)
-
+	st.translateMainMessage(ib, lang)
+	st.translateFieldViolations(ib, lang)
 	return st
 }
 
 // translateMainMessage handles the translation of the main status message
-func (s *Status) translateMainMessage(ib *i18nx.I18N, lang language.Tag) *Status {
+func (s *Status) translateMainMessage(ib *i18nx.I18N, lang language.Tag) {
 	// Check if LocalizedMessage already exists
-	var hasLocalizedMessage bool
 	for _, d := range s.details {
 		if _, ok := d.(*errdetails.LocalizedMessage); ok {
-			hasLocalizedMessage = true
-			break
+			return // Already translated
 		}
 	}
 
-	if hasLocalizedMessage {
-		return s // Already translated
-	}
+	defer func() {
+		s.localized = nil // Clear to avoid duplication
+	}()
 
 	var text string
 
-	// Try to translate from Localized template
-	if s.localized != nil && s.localized.GetKey() != "" {
-		localized := LocalizedFromProto(s.localized)
-		text = ib.Sprintf(lang, localized.Key, localized.Args...)
+	localized := cmp.Or(LocalizedFromProto(s.localized), &Localized{})
+	if localized.key == "" {
+		localized.key = s.Reason()
 	}
-
-	// Fallback to reason translation
-	if text == "" {
-		reason := s.Reason()
-		if reason != "" {
-			text = ib.Sprintf(lang, reason)
-		}
+	if localized.key != "" {
+		text = ib.Sprintf(lang, localized.key, localized.args...)
 	}
 
 	if text != "" {
-		// Add translated message and clear original localized info
-		st := Clone(s)
-		st.details = append(st.details, &errdetails.LocalizedMessage{
+		s.details = append(s.details, &errdetails.LocalizedMessage{
 			Locale:  lang.String(),
 			Message: text,
 		})
-		st.localized = nil // Clear to avoid duplication
-		return st
 	}
-
-	return s
 }
 
 // translateFieldViolations handles the translation of field violations
-func (s *Status) translateFieldViolations(ib *i18nx.I18N, lang language.Tag) *Status {
+func (s *Status) translateFieldViolations(ib *i18nx.I18N, lang language.Tag) {
 	if s.badRequest == nil || len(s.badRequest.FieldViolations) == 0 {
-		return s
+		return
 	}
 
 	// Check if BadRequest already exists in details
 	for _, d := range s.details {
 		if _, ok := d.(*errdetails.BadRequest); ok {
-			return s // Already translated
+			return // Already translated
 		}
 	}
 
-	st := Clone(s)
+	defer func() {
+		s.badRequest = nil // Clear to avoid duplication
+	}()
+
 	br := &errdetails.BadRequest{}
 
 	for _, fieldViolation := range s.badRequest.FieldViolations {
@@ -440,19 +523,14 @@ func (s *Status) translateFieldViolations(ib *i18nx.I18N, lang language.Tag) *St
 		if fieldViolation.LocalizedMessage != nil {
 			fv.LocalizedMessage = proto.Clone(fieldViolation.LocalizedMessage).(*errdetails.LocalizedMessage)
 		} else {
-			// Translate from template or reason
 			var text string
 
-			if fieldViolation.Localized != nil && fieldViolation.Localized.GetKey() != "" {
-				localized := LocalizedFromProto(fieldViolation.Localized)
-				text = ib.Sprintf(lang, localized.Key, localized.Args...)
+			localized := cmp.Or(LocalizedFromProto(fieldViolation.Localized), &Localized{})
+			if localized.key == "" {
+				localized.key = fieldViolation.GetReason()
 			}
-
-			if text == "" {
-				reason := fieldViolation.GetReason()
-				if reason != "" {
-					text = ib.Sprintf(lang, reason)
-				}
+			if localized.key != "" {
+				text = ib.Sprintf(lang, localized.key, localized.args...)
 			}
 
 			if text != "" {
@@ -466,7 +544,5 @@ func (s *Status) translateFieldViolations(ib *i18nx.I18N, lang language.Tag) *St
 		br.FieldViolations = append(br.FieldViolations, fv)
 	}
 
-	st.details = append(st.details, br)
-	st.badRequest = nil // Clear to avoid duplication
-	return st
+	s.details = append(s.details, br)
 }

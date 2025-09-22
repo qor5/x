@@ -46,3 +46,27 @@ func ReasonFromCode(code codes.Code) statusv1.ErrorReason {
 		return statusv1.ErrorReason_UNKNOWN
 	}
 }
+
+// NewCode creates a Status with automatically derived reason from the gRPC code.
+// This is a convenience function that uses ReasonFromCode to generate the reason.
+func NewCode(code codes.Code, message string) *Status {
+	return New(code, ReasonFromCode(code).String(), message)
+}
+
+// NewCodef creates a Status with automatically derived reason and formatted message.
+// This is a convenience function that uses ReasonFromCode to generate the reason.
+func NewCodef(code codes.Code, format string, a ...any) *Status {
+	return Newf(code, ReasonFromCode(code).String(), format, a...)
+}
+
+// WrapCode wraps an error with automatically derived reason from the gRPC code.
+// This is a convenience function that uses ReasonFromCode to generate the reason.
+func WrapCode(err error, code codes.Code, message string) *Status {
+	return Wrap(err, code, ReasonFromCode(code).String(), message)
+}
+
+// WrapCodef wraps an error with automatically derived reason and formatted message.
+// This is a convenience function that uses ReasonFromCode to generate the reason.
+func WrapCodef(err error, code codes.Code, format string, a ...any) *Status {
+	return Wrapf(err, code, ReasonFromCode(code).String(), format, a...)
+}

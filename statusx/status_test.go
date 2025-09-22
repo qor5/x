@@ -9,6 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/qor5/x/v3/i18nx"
+	"github.com/qor5/x/v3/lox"
 	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,22 +24,28 @@ import (
 
 func TestNew(t *testing.T) {
 	t.Run("basic properties", func(t *testing.T) {
-		s := New(codes.InvalidArgument, "invalid input provided").WithReason("INVALID_INPUT")
+		s := New(codes.InvalidArgument, "INVALID_INPUT", "invalid input provided")
 		require.NotNil(t, s)
 
 		assert.Equal(t, codes.InvalidArgument, s.Code())
 		assert.Equal(t, "INVALID_INPUT", s.Reason())
 		assert.Equal(t, "invalid input provided", s.Message())
+
+		// Verify that localized key is immediately fixed to reason
+		localized := s.Localized()
+		assert.NotNil(t, localized)
+		assert.Equal(t, "INVALID_INPUT", localized.Key)
+		assert.Empty(t, localized.Args)
 	})
 
 	t.Run("stacktrace behavior", func(t *testing.T) {
 		// Test OK status has no stacktrace
-		s := New(codes.OK, "success")
+		s := New(codes.OK, statusv1.ErrorReason_OK.String(), "success")
 		require.NotNil(t, s)
 		assert.Nil(t, s.cause)
 
 		// Test non-OK status has stacktrace
-		s = New(codes.Internal, "error")
+		s = New(codes.Internal, statusv1.ErrorReason_INTERNAL.String(), "error")
 		require.NotNil(t, s)
 		require.NotNil(t, s.cause)
 
@@ -49,7 +56,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestNewf(t *testing.T) {
-	s := Newf(codes.NotFound, "resource %s not found", "user")
+	s := Newf(codes.NotFound, statusv1.ErrorReason_NOT_FOUND.String(), "resource %s not found", "user")
 	require.NotNil(t, s)
 
 	assert.Equal(t, codes.NotFound, s.Code())
@@ -58,7 +65,7 @@ func TestNewf(t *testing.T) {
 }
 
 func TestErr(t *testing.T) {
-	err := Error(codes.PermissionDenied, "permission denied")
+	err := Error(codes.PermissionDenied, statusv1.ErrorReason_PERMISSION_DENIED.String(), "permission denied")
 	require.NotNil(t, err)
 
 	s, ok := FromError(err)
@@ -74,7 +81,7 @@ func TestErr(t *testing.T) {
 }
 
 func TestErrorf(t *testing.T) {
-	err := Errorf(codes.InvalidArgument, "invalid input provided for %s", "username")
+	err := Errorf(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "invalid input provided for %s", "username")
 	require.NotNil(t, err)
 
 	s, ok := FromError(err)
@@ -88,29 +95,131 @@ func TestErrorf(t *testing.T) {
 
 func TestWithMetadata(t *testing.T) {
 	md := map[string]string{"field": "username", "error": "missing"}
-	s := New(codes.InvalidArgument, "required field is missing").WithReason("MISSING_FIELD").WithMetadata(md)
+	s := New(codes.InvalidArgument, "MISSING_FIELD", "required field is missing").WithMetadata(md)
 
 	require.NotNil(t, s)
 	assert.Equal(t, md, s.Metadata())
 }
 
 func TestWithLocalized(t *testing.T) {
-	s := New(codes.InvalidArgument, "invalid input").WithLocalized("error.invalid_input", "username", "required")
+	s := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "invalid input").
+		WithLocalized("error.invalid_input", "username", "required")
 
 	require.NotNil(t, s)
 	localized := s.Localized()
 	assert.NotNil(t, localized)
 	assert.Equal(t, "error.invalid_input", localized.Key)
 
-	// Extract values from Any for comparison
+	// Verify args using proto.Equal
 	require.Len(t, localized.Args, 2)
-	assert.Equal(t, "username", extractStringFromAny(t, localized.Args[0]))
-	assert.Equal(t, "required", extractStringFromAny(t, localized.Args[1]))
+	assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.String("username"))), localized.Args[0]))
+	assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.String("required"))), localized.Args[1]))
+}
+
+func TestWithLocalizedArgs(t *testing.T) {
+	t.Run("uses reason as key when no existing key", func(t *testing.T) {
+		s := New(codes.InvalidArgument, "INVALID_EMAIL_FORMAT", "Email validation failed").
+			WithLocalizedArgs("user@invalid.com")
+
+		require.NotNil(t, s)
+		localized := s.Localized()
+		assert.NotNil(t, localized)
+		assert.Equal(t, "INVALID_EMAIL_FORMAT", localized.Key) // Uses reason as key immediately
+		require.Len(t, localized.Args, 1)
+		assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.String("user@invalid.com"))), localized.Args[0]))
+	})
+
+	t.Run("preserves existing localized key", func(t *testing.T) {
+		s := New(codes.PermissionDenied, "ACCESS_DENIED", "Permission check failed").
+			WithLocalized("INSUFFICIENT_CREDITS", "placeholder"). // Set custom key first
+			WithLocalizedArgs(100, 200)                           // Then add args
+
+		require.NotNil(t, s)
+		localized := s.Localized()
+		assert.NotNil(t, localized)
+		assert.Equal(t, "INSUFFICIENT_CREDITS", localized.Key) // Preserves existing key
+		require.Len(t, localized.Args, 2)
+		assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.Int64(100))), localized.Args[0]))
+		assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.Int64(200))), localized.Args[1]))
+	})
+
+	t.Run("overwrites existing args", func(t *testing.T) {
+		s := New(codes.NotFound, "USER_NOT_FOUND", "User lookup failed").
+			WithLocalizedArgs("john", "initial"). // First set of args
+			WithLocalizedArgs("jane", "updated")  // Second set overwrites
+
+		require.NotNil(t, s)
+		localized := s.Localized()
+		assert.NotNil(t, localized)
+		assert.Equal(t, "USER_NOT_FOUND", localized.Key) // Uses reason as key immediately
+		require.Len(t, localized.Args, 2)
+		assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.String("jane"))), localized.Args[0])) // Updated args
+		assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.String("updated"))), localized.Args[1]))
+	})
+
+	t.Run("handles empty args", func(t *testing.T) {
+		s := New(codes.Internal, "DATABASE_ERROR", "Connection failed").
+			WithLocalizedArgs() // No args
+
+		require.NotNil(t, s)
+		localized := s.Localized()
+		assert.NotNil(t, localized)
+		assert.Equal(t, "DATABASE_ERROR", localized.Key) // Uses reason as key immediately
+		assert.Empty(t, localized.Args)
+	})
+
+	t.Run("handles mixed types", func(t *testing.T) {
+		s := New(codes.InvalidArgument, "VALIDATION_FAILED", "Field validation failed").
+			WithLocalizedArgs("email", int64(5), true)
+
+		require.NotNil(t, s)
+		localized := s.Localized()
+		assert.NotNil(t, localized)
+		assert.Equal(t, "VALIDATION_FAILED", localized.Key) // Uses reason as key immediately
+		require.Len(t, localized.Args, 3)
+		assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.String("email"))), localized.Args[0]))
+		assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.Int64(5))), localized.Args[1]))
+		assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.Bool(true))), localized.Args[2]))
+	})
+
+	t.Run("preserves other status properties", func(t *testing.T) {
+		metadata := map[string]string{"field": "email", "validator": "regex"}
+		s := New(codes.InvalidArgument, "INVALID_EMAIL", "Email format check failed").
+			WithMetadata(metadata).
+			WithLocalizedArgs("test@invalid")
+
+		require.NotNil(t, s)
+		assert.Equal(t, codes.InvalidArgument, s.Code())
+		assert.Equal(t, "INVALID_EMAIL", s.Reason())
+		assert.Equal(t, "Email format check failed", s.Message())
+		assert.Equal(t, metadata, s.Metadata())
+
+		// Localized should be set correctly
+		localized := s.Localized()
+		assert.NotNil(t, localized)
+		assert.Equal(t, "INVALID_EMAIL", localized.Key) // Uses reason as key immediately
+		require.Len(t, localized.Args, 1)
+		assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.String("test@invalid"))), localized.Args[0]))
+	})
+
+	t.Run("key is fixed at creation time", func(t *testing.T) {
+		// Test that WithReason after New doesn't affect the already fixed key
+		s := New(codes.InvalidArgument, "CREATION_REASON", "Initial message").
+			WithReason("CHANGED_REASON") // Changes reason but key should remain fixed
+
+		require.NotNil(t, s)
+		assert.Equal(t, "CHANGED_REASON", s.Reason()) // Reason changed
+
+		localized := s.Localized()
+		assert.NotNil(t, localized)
+		assert.Equal(t, "CREATION_REASON", localized.Key) // Key remains fixed to creation-time reason
+		assert.Empty(t, localized.Args)
+	})
 }
 
 func TestWrap(t *testing.T) {
 	originalErr := errors.New("original error")
-	wrapped := Wrap(originalErr, codes.Internal, "internal server error").WithReason("INTERNAL_ERROR")
+	wrapped := Wrap(originalErr, codes.Internal, "INTERNAL_ERROR", "internal server error")
 	require.NotNil(t, wrapped)
 
 	assert.Equal(t, codes.Internal, wrapped.Code())
@@ -119,7 +228,7 @@ func TestWrap(t *testing.T) {
 	assert.True(t, errors.Is(wrapped.Err(), originalErr))
 
 	{
-		wrapped := Wrap(nil, codes.Internal, "internal server error")
+		wrapped := Wrap(nil, codes.Internal, statusv1.ErrorReason_INTERNAL.String(), "internal server error")
 		assert.NotNil(t, wrapped)
 		assert.Equal(t, codes.OK, wrapped.Code())
 		assert.Equal(t, statusv1.ErrorReason_OK.String(), wrapped.Reason())
@@ -127,7 +236,7 @@ func TestWrap(t *testing.T) {
 	}
 
 	{
-		wrapped := Wrap(originalErr, codes.OK, "success")
+		wrapped := Wrap(originalErr, codes.OK, statusv1.ErrorReason_OK.String(), "success")
 		assert.NotNil(t, wrapped)
 		// Because the cause is not nil, the code will be Unknown finally.
 		assert.Equal(t, codes.Unknown, wrapped.Code())
@@ -136,7 +245,7 @@ func TestWrap(t *testing.T) {
 	}
 
 	{
-		wrapped := Wrapf(originalErr, codes.Internal, "internal server error for %s", "user").WithReason("INTERNAL_ERROR")
+		wrapped := Wrapf(originalErr, codes.Internal, "INTERNAL_ERROR", "internal server error for %s", "user")
 		assert.NotNil(t, wrapped)
 		assert.Equal(t, codes.Internal, wrapped.Code())
 		assert.Equal(t, "INTERNAL_ERROR", wrapped.Reason())
@@ -144,8 +253,8 @@ func TestWrap(t *testing.T) {
 	}
 
 	{
-		status := New(codes.NotFound, "resource not found")
-		wrapped := Wrap(status.Err(), codes.Internal, "internal server error")
+		status := New(codes.NotFound, statusv1.ErrorReason_NOT_FOUND.String(), "resource not found")
+		wrapped := Wrap(status.Err(), codes.Internal, statusv1.ErrorReason_INTERNAL.String(), "internal server error")
 		assert.Equal(t, wrapped, status)
 		assert.Equal(t, codes.NotFound, wrapped.Code())
 		assert.Equal(t, "NOT_FOUND", wrapped.Reason())
@@ -156,7 +265,7 @@ func TestWrap(t *testing.T) {
 		status, _ := status.New(codes.NotFound, "resource not found").WithDetails(&errdetails.ErrorInfo{
 			Reason: "NOT_FOUND",
 		})
-		wrapped := Wrap(status.Err(), codes.Internal, "internal server error")
+		wrapped := Wrap(status.Err(), codes.Internal, statusv1.ErrorReason_INTERNAL.String(), "internal server error")
 		assert.Equal(t, codes.NotFound, wrapped.Code())
 		assert.Equal(t, "NOT_FOUND", wrapped.Reason())
 		assert.Equal(t, "resource not found", wrapped.Message())
@@ -164,7 +273,7 @@ func TestWrap(t *testing.T) {
 }
 
 func TestGRPCStatus(t *testing.T) {
-	s := New(codes.PermissionDenied, "permission denied").
+	s := New(codes.PermissionDenied, statusv1.ErrorReason_PERMISSION_DENIED.String(), "permission denied").
 		WithLocalized("error.permission_denied", "access", "user").
 		WithMetadata(map[string]string{"reason": "policy_violation"})
 
@@ -181,11 +290,11 @@ func TestGRPCStatus(t *testing.T) {
 	localized := details[1].(*statusv1.Localized)
 	require.Equal(t, "error.permission_denied", localized.Key)
 	require.Len(t, localized.Args, 2)
-	assert.Equal(t, "access", extractStringFromAny(t, localized.Args[0]))
-	assert.Equal(t, "user", extractStringFromAny(t, localized.Args[1]))
+	assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.String("access"))), localized.Args[0]))
+	assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.String("user"))), localized.Args[1]))
 
 	{
-		s := New(codes.OK, "ok")
+		s := New(codes.OK, statusv1.ErrorReason_OK.String(), "ok")
 		st := s.GRPCStatus()
 		require.NotNil(t, st)
 		assert.Empty(t, st.Details())
@@ -195,7 +304,7 @@ func TestGRPCStatus(t *testing.T) {
 }
 
 func TestFromError(t *testing.T) {
-	s := New(codes.Unauthenticated, "authentication required").
+	s := New(codes.Unauthenticated, statusv1.ErrorReason_UNAUTHENTICATED.String(), "authentication required").
 		WithLocalized("error.unauthenticated", "access", "user")
 	ss := s.GRPCStatus()
 	grpcErr := ss.Err()
@@ -238,7 +347,7 @@ func TestFromError(t *testing.T) {
 }
 
 func TestClone(t *testing.T) {
-	s := New(codes.InvalidArgument, "invalid input provided").WithReason("INVALID_INPUT").
+	s := New(codes.InvalidArgument, "INVALID_INPUT", "invalid input provided").
 		WithMetadata(map[string]string{"field": "username"}).
 		WithLocalized("error.invalid_input", "username", "required").
 		WithCause(errors.New("original error"))
@@ -272,7 +381,7 @@ func TestNil(t *testing.T) {
 }
 
 func TestErrorFormat(t *testing.T) {
-	s := New(codes.InvalidArgument, "invalid input provided").WithReason("INVALID_INPUT").
+	s := New(codes.InvalidArgument, "INVALID_INPUT", "invalid input provided").
 		WithMetadata(map[string]string{"field": "username"}).
 		WithLocalized("error.invalid_input", "username", "required").
 		WithCause(errors.New("original error"))
@@ -301,10 +410,10 @@ func TestCode(t *testing.T) {
 	assert.Equal(t, codes.OK, Code(nil))
 	assert.Equal(t, codes.Unknown, Code(errors.New("original error")))
 
-	err := New(codes.InvalidArgument, "invalid input provided")
+	err := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "invalid input provided")
 	assert.Equal(t, codes.InvalidArgument, Code(err.Err()))
 
-	err = New(codes.OK, "success").WithCause(errors.New("original error"))
+	err = New(codes.OK, statusv1.ErrorReason_OK.String(), "success").WithCause(errors.New("original error"))
 	assert.Equal(t, codes.Unknown, Code(err.Err()))
 }
 
@@ -312,7 +421,7 @@ func TestReason(t *testing.T) {
 	assert.Equal(t, statusv1.ErrorReason_OK.String(), Reason(nil))
 	assert.Equal(t, statusv1.ErrorReason_UNKNOWN.String(), Reason(errors.New("original error")))
 
-	err := New(codes.InvalidArgument, "invalid input provided").WithReason("INVALID_INPUT")
+	err := New(codes.InvalidArgument, "INVALID_INPUT", "invalid input provided")
 	assert.Equal(t, "INVALID_INPUT", Reason(err.Err()))
 }
 
@@ -343,24 +452,6 @@ func TestConvert(t *testing.T) {
 	}
 }
 
-// extractStringFromAny is a test helper to extract string values from protobuf Any
-func extractStringFromAny(t *testing.T, anyVal *anypb.Any) string {
-	t.Helper()
-	if anyVal == nil {
-		return ""
-	}
-
-	if anyVal.MessageIs(&wrapperspb.StringValue{}) {
-		var val wrapperspb.StringValue
-		err := anyVal.UnmarshalTo(&val)
-		require.NoError(t, err)
-		return val.GetValue()
-	}
-
-	t.Fatalf("Expected StringValue in Any, got %s", anyVal.GetTypeUrl())
-	return ""
-}
-
 func TestWithLocalizedWellKnownTypes(t *testing.T) {
 	now := time.Now()
 	duration := 5 * time.Minute
@@ -369,7 +460,7 @@ func TestWithLocalizedWellKnownTypes(t *testing.T) {
 		"age":  30,
 	}
 
-	s := New(codes.InvalidArgument, "validation failed").
+	s := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
 		WithLocalized("validation.essential",
 			"string_arg",    // 1. string
 			int64(123),      // 2. int64
@@ -394,7 +485,7 @@ func TestWithLocalizedWellKnownTypes(t *testing.T) {
 
 	// Test that all types are properly stored and can be extracted
 	args := localized.Args
-	assert.Equal(t, "string_arg", extractStringFromAny(t, args[0]))
+	assert.True(t, proto.Equal(lox.Must1(anypb.New(wrapperspb.String("string_arg"))), args[0]))
 	// Note: We could add more specific extraction helpers for other types,
 	// but the main point is that they're stored without errors
 }
@@ -402,26 +493,26 @@ func TestWithLocalizedWellKnownTypes(t *testing.T) {
 func TestWithLocalizedUnsupportedType(t *testing.T) {
 	// Test that unsupported types cause panic
 	assert.Panics(t, func() {
-		New(codes.InvalidArgument, "test").WithLocalized("test.key", make(chan int)) // channels are not supported
+		New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").WithLocalized("test.key", make(chan int)) // channels are not supported
 	})
 
 	assert.Panics(t, func() {
-		New(codes.InvalidArgument, "test").WithLocalized("test.key", func() {}) // functions are not supported
+		New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").WithLocalized("test.key", func() {}) // functions are not supported
 	})
 
 	assert.Panics(t, func() {
-		New(codes.InvalidArgument, "test").WithLocalized("test.key", []string{"a", "b"}) // arrays are not supported
+		New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").WithLocalized("test.key", []string{"a", "b"}) // arrays are not supported
 	})
 
 	assert.Panics(t, func() {
-		New(codes.InvalidArgument, "test").WithLocalized("test.key", []any{"a", "b"}) // slices are not supported
+		New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").WithLocalized("test.key", []any{"a", "b"}) // slices are not supported
 	})
 }
 
 func TestWithDetailsTypeValidation(t *testing.T) {
 	// Valid usage should work
 	t.Run("valid details", func(t *testing.T) {
-		err := New(codes.InvalidArgument, "test").
+		err := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").
 			WithDetails(&errdetails.BadRequest{
 				FieldViolations: []*errdetails.BadRequest_FieldViolation{
 					{Field: "email", Description: "invalid"},
@@ -445,7 +536,7 @@ func TestWithDetailsTypeValidation(t *testing.T) {
 	// Should panic when trying to add reserved types
 	t.Run("panic on statusv1.Localized", func(t *testing.T) {
 		assert.Panics(t, func() {
-			New(codes.InvalidArgument, "test").
+			New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").
 				WithDetails(&statusv1.Localized{
 					Key: "test.key",
 				})
@@ -454,7 +545,7 @@ func TestWithDetailsTypeValidation(t *testing.T) {
 
 	t.Run("panic on errdetails.ErrorInfo", func(t *testing.T) {
 		assert.Panics(t, func() {
-			New(codes.InvalidArgument, "test").
+			New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").
 				WithDetails(&errdetails.ErrorInfo{
 					Reason: "TEST_REASON",
 				})
@@ -464,33 +555,33 @@ func TestWithDetailsTypeValidation(t *testing.T) {
 
 func TestWithFieldViolationsAPI(t *testing.T) {
 	t.Run("single field via WithFieldViolations", func(t *testing.T) {
-		status := New(codes.InvalidArgument, "validation failed").
-			WithFieldViolations(&FieldViolation{Field: "email", Reason: "REQUIRED", Localized: &Localized{Key: "field.email.required"}})
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
+			WithFieldViolations(NewFieldViolation("email", "field.email.required", "Email is required"))
 
 		assert.NotNil(t, status.badRequest)
 		assert.Len(t, status.badRequest.FieldViolations, 1)
 
 		field := status.badRequest.FieldViolations[0]
 		assert.Equal(t, "email", field.Field)
-		assert.Equal(t, "REQUIRED", field.Reason)
+		assert.Equal(t, "field.email.required", field.Reason)
 	})
 
 	t.Run("WithFieldViolations with args data", func(t *testing.T) {
 		data := map[string]any{"minLength": 8}
-		status := New(codes.InvalidArgument, "validation failed").
-			WithFieldViolations(&FieldViolation{Field: "password", Reason: "TOO_WEAK", Localized: &Localized{Key: "field.password.min_length", Args: []any{data}}})
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
+			WithFieldViolations(NewFieldViolation("password", "field.password.min_length", "Password is too weak").WithLocalizedArgs(data))
 
 		field := status.badRequest.FieldViolations[0]
 		assert.Equal(t, "password", field.Field)
-		assert.Equal(t, "TOO_WEAK", field.Reason)
+		assert.Equal(t, "field.password.min_length", field.Reason)
 	})
 
 	t.Run("batch WithFieldViolations", func(t *testing.T) {
-		status := New(codes.InvalidArgument, "multiple field errors").
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "multiple field errors").
 			WithFieldViolations(
-				&FieldViolation{Field: "email", Reason: "REQUIRED", Localized: &Localized{Key: "field.email.required"}},
-				&FieldViolation{Field: "password", Reason: "WEAK", Localized: &Localized{Key: "field.password.weak", Args: []any{map[string]any{"strength": "low"}}}},
-				&FieldViolation{Field: "age", Reason: "INVALID_RANGE", Localized: &Localized{Key: "field.age.invalid_range", Args: []any{18, 65}}},
+				NewFieldViolation("email", "field.email.required", "Email is required"),
+				NewFieldViolation("password", "field.password.weak", "Password is weak").WithLocalizedArgs(map[string]any{"strength": "low"}),
+				NewFieldViolation("age", "field.age.invalid_range", "Age is in invalid range").WithLocalizedArgs(18, 65),
 			)
 
 		assert.NotNil(t, status.badRequest)
@@ -501,22 +592,22 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 	})
 
 	t.Run("combine WithLocalized and WithFieldViolations", func(t *testing.T) {
-		status := New(codes.InvalidArgument, "validation failed").
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
 			WithLocalized("global.validation_failed").
 			WithFieldViolations(
-				&FieldViolation{Field: "email", Reason: "INVALID", Localized: &Localized{Key: "field.email.invalid"}},
-				&FieldViolation{Field: "phone", Reason: "INVALID", Localized: &Localized{Key: "field.phone.invalid"}},
+				NewFieldViolation("email", "field.email.invalid", "Email is invalid"),
+				NewFieldViolation("phone", "field.phone.invalid", "Phone is invalid"),
 			)
 
 		assert.NotNil(t, status.Localized())
-		assert.Equal(t, "global.validation_failed", status.Localized().Key)
+		assert.Equal(t, "global.validation_failed", status.Localized().GetKey())
 		assert.Len(t, status.badRequest.FieldViolations, 2)
 	})
 
 	t.Run("multiple WithFieldViolations calls", func(t *testing.T) {
-		status := New(codes.InvalidArgument, "validation failed").
-			WithFieldViolations(&FieldViolation{Field: "email", Reason: "INVALID", Localized: &Localized{Key: "field.email.invalid"}}).
-			WithFieldViolations(&FieldViolation{Field: "password", Reason: "WEAK", Localized: &Localized{Key: "field.password.weak"}})
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
+			WithFieldViolations(NewFieldViolation("email", "field.email.invalid", "Email is invalid")).
+			WithFieldViolations(NewFieldViolation("password", "field.password.weak", "Password is weak"))
 
 		assert.NotNil(t, status.badRequest)
 		assert.Len(t, status.badRequest.FieldViolations, 2)
@@ -526,7 +617,7 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 	})
 
 	t.Run("FieldViolation Proto mapping", func(t *testing.T) {
-		fv := &FieldViolation{Field: "email", Reason: "INVALID", Localized: &Localized{Key: "field.email.invalid", Args: []any{"test@example.com", 25}}}
+		fv := NewFieldViolation("email", "field.email.invalid", "Email is invalid").WithLocalizedArgs("test@example.com", 25)
 		proto := fv.Proto()
 		assert.Equal(t, "email", proto.Field)
 		assert.Equal(t, "field.email.invalid", proto.Localized.Key)
@@ -536,22 +627,22 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 	t.Run("WithFieldsLocalized duplicate field validation", func(t *testing.T) {
 		t.Run("duplicate within new fields", func(t *testing.T) {
 			assert.Panics(t, func() {
-				New(codes.InvalidArgument, "validation failed").
+				New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
 					WithFieldViolations(
-						&FieldViolation{Field: "email", Reason: "REQUIRED"},
-						&FieldViolation{Field: "password", Reason: "WEAK"},
-						&FieldViolation{Field: "email", Reason: "INVALID"},
+						NewFieldViolation("email", "REQUIRED", "Email is required"),
+						NewFieldViolation("password", "WEAK", "Password is weak"),
+						NewFieldViolation("email", "INVALID", "Email is invalid"),
 					)
 			}, "should panic when duplicate field names are provided")
 		})
 
 		t.Run("replacement preserves original position with WithFieldViolations", func(t *testing.T) {
 			// First add some fields
-			status := New(codes.InvalidArgument, "validation failed").
+			status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
 				WithFieldViolations(
-					&FieldViolation{Field: "email", Reason: "REQUIRED", Localized: &Localized{Key: "field.email.required"}},
-					&FieldViolation{Field: "password", Reason: "WEAK", Localized: &Localized{Key: "field.password.weak"}},
-					&FieldViolation{Field: "age", Reason: "REQUIRED", Localized: &Localized{Key: "field.age.required"}},
+					NewFieldViolation("email", "field.email.required", "Email is required"),
+					NewFieldViolation("password", "field.password.weak", "Password is weak"),
+					NewFieldViolation("age", "field.age.required", "Age is required"),
 				)
 
 				// Verify initial order
@@ -562,8 +653,8 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 
 			// Replace middle field and add new field
 			updatedStatus := status.WithFieldViolations(
-				&FieldViolation{Field: "phone", Reason: "INVALID", Localized: &Localized{Key: "field.phone.invalid"}},
-				&FieldViolation{Field: "password", Reason: "STRONG", Localized: &Localized{Key: "field.password.strong"}},
+				NewFieldViolation("phone", "field.phone.invalid", "Phone is invalid"),
+				NewFieldViolation("password", "field.password.strong", "Password is strong"),
 			)
 
 			// Should have 4 fields total
@@ -585,11 +676,11 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 		})
 
 		t.Run("WithFieldViolations should replace existing field", func(t *testing.T) {
-			status := New(codes.InvalidArgument, "validation failed").
-				WithFieldViolations(&FieldViolation{Field: "email", Reason: "REQUIRED", Localized: &Localized{Key: "field.email.required"}})
+			status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
+				WithFieldViolations(NewFieldViolation("email", "field.email.required", "Email is required"))
 
 			// Replace the existing field
-			updatedStatus := status.WithFieldViolations(&FieldViolation{Field: "email", Reason: "FORMAT_ERROR", Localized: &Localized{Key: "field.email.format_error"}})
+			updatedStatus := status.WithFieldViolations(NewFieldViolation("email", "field.email.format_error", "Email format error"))
 
 			assert.Len(t, updatedStatus.badRequest.FieldViolations, 1)
 			assert.Equal(t, "email", updatedStatus.badRequest.FieldViolations[0].Field)
@@ -597,28 +688,28 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 		})
 
 		t.Run("duplicate within new fields should still panic", func(t *testing.T) {
-			status := New(codes.InvalidArgument, "validation failed").
-				WithFieldViolations(&FieldViolation{Field: "email", Reason: "REQUIRED", Localized: &Localized{Key: "field.email.required"}})
+			status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
+				WithFieldViolations(NewFieldViolation("email", "field.email.required", "Email is required"))
 
 			assert.Panics(t, func() {
 				status.WithFieldViolations(
-					&FieldViolation{Field: "password", Reason: "WEAK"},
-					&FieldViolation{Field: "phone", Reason: "INVALID"},
-					&FieldViolation{Field: "password", Reason: "SHORT"},
+					NewFieldViolation("password", "WEAK", "Password is weak"),
+					NewFieldViolation("phone", "INVALID", "Phone is invalid"),
+					NewFieldViolation("password", "SHORT", "Password is short"),
 				)
 			}, "should panic when duplicate field names exist within new fields")
 		})
 
 		t.Run("new fields maintain input order", func(t *testing.T) {
-			status := New(codes.InvalidArgument, "validation failed").
-				WithFieldViolations(&FieldViolation{Field: "email", Reason: "REQUIRED", Localized: &Localized{Key: "field.email.required"}})
+			status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
+				WithFieldViolations(NewFieldViolation("email", "field.email.required", "Email is required"))
 
 			// Add multiple new fields in specific order
 			updatedStatus := status.WithFieldViolations(
-				&FieldViolation{Field: "phone", Reason: "INVALID", Localized: &Localized{Key: "field.phone.invalid"}},
-				&FieldViolation{Field: "address", Reason: "REQUIRED", Localized: &Localized{Key: "field.address.required"}},
-				&FieldViolation{Field: "age", Reason: "INVALID", Localized: &Localized{Key: "field.age.invalid"}},
-				&FieldViolation{Field: "country", Reason: "REQUIRED", Localized: &Localized{Key: "field.country.required"}},
+				NewFieldViolation("phone", "field.phone.invalid", "Phone is invalid"),
+				NewFieldViolation("address", "field.address.required", "Address is required"),
+				NewFieldViolation("age", "field.age.invalid", "Age is invalid"),
+				NewFieldViolation("country", "field.country.required", "Country is required"),
 			)
 
 			// Should have 5 fields: email (existing) + 4 new fields
@@ -634,31 +725,27 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 		})
 
 		t.Run("FieldViolation with Description and Reason", func(t *testing.T) {
-			fieldViolation := &FieldViolation{
-				Field:       "email",
-				Localized:   &Localized{Key: "field.email.invalid_format", Args: []any{"user@example", "email format"}},
-				Description: "Email address format is invalid",
-				Reason:      "INVALID_EMAIL_FORMAT",
-			}
+			fieldViolation := NewFieldViolation("email", "field.email.invalid_format", "Email address format is invalid").
+				WithLocalizedArgs("user@example", "email format")
 
 			proto := fieldViolation.Proto()
 			assert.Equal(t, "email", proto.Field)
 			assert.Equal(t, "field.email.invalid_format", proto.Localized.Key)
 			assert.Len(t, proto.Localized.Args, 2)
 			assert.Equal(t, "Email address format is invalid", proto.Description)
-			assert.Equal(t, "INVALID_EMAIL_FORMAT", proto.Reason)
+			assert.Equal(t, "field.email.invalid_format", proto.Reason)
 		})
 
 		t.Run("New WithFieldViolation API", func(t *testing.T) {
-			status := New(codes.InvalidArgument, "validation failed").
-				WithFieldViolations(&FieldViolation{Field: "email", Reason: "INVALID_EMAIL_FORMAT", Description: "Email address format is invalid", Localized: &Localized{Key: "field.email.invalid_format", Args: []any{"user@example"}}})
+			status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
+				WithFieldViolations(NewFieldViolation("email", "field.email.invalid_format", "Email address format is invalid").WithLocalizedArgs("user@example"))
 
 			assert.NotNil(t, status.badRequest)
 			assert.Len(t, status.badRequest.FieldViolations, 1)
 
 			fieldViol := status.badRequest.FieldViolations[0]
 			assert.Equal(t, "email", fieldViol.Field)
-			assert.Equal(t, "INVALID_EMAIL_FORMAT", fieldViol.Reason)
+			assert.Equal(t, "field.email.invalid_format", fieldViol.Reason)
 			assert.Equal(t, "Email address format is invalid", fieldViol.Description)
 			assert.Equal(t, "field.email.invalid_format", fieldViol.Localized.Key)
 			assert.Len(t, fieldViol.Localized.Args, 1)
@@ -666,21 +753,12 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 
 		t.Run("New WithFieldViolations API", func(t *testing.T) {
 			violations := []*FieldViolation{
-				{
-					Field:       "email",
-					Reason:      "REQUIRED",
-					Description: "Email is required",
-					Localized:   &Localized{Key: "field.email.required"},
-				},
-				{
-					Field:       "password",
-					Reason:      "TOO_WEAK",
-					Description: "Password is too weak",
-					Localized:   &Localized{Key: "field.password.weak", Args: []any{"minLength", 8}},
-				},
+				NewFieldViolation("email", "field.email.required", "Email is required"),
+				NewFieldViolation("password", "field.password.weak", "Password is too weak").
+					WithLocalizedArgs("minLength", 8),
 			}
 
-			status := New(codes.InvalidArgument, "validation failed").
+			status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
 				WithFieldViolations(violations...)
 
 			assert.NotNil(t, status.badRequest)
@@ -689,13 +767,13 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 			// Check first violation
 			emailViol := status.badRequest.FieldViolations[0]
 			assert.Equal(t, "email", emailViol.Field)
-			assert.Equal(t, "REQUIRED", emailViol.Reason)
+			assert.Equal(t, "field.email.required", emailViol.Reason)
 			assert.Equal(t, "Email is required", emailViol.Description)
 
 			// Check second violation
 			passwordViol := status.badRequest.FieldViolations[1]
 			assert.Equal(t, "password", passwordViol.Field)
-			assert.Equal(t, "TOO_WEAK", passwordViol.Reason)
+			assert.Equal(t, "field.password.weak", passwordViol.Reason)
 			assert.Equal(t, "Password is too weak", passwordViol.Description)
 			assert.Len(t, passwordViol.Localized.Args, 2)
 		})
@@ -705,18 +783,18 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 func TestWithFlattenFieldViolations(t *testing.T) {
 	t.Run("mixed types in single call", func(t *testing.T) {
 		// Create various inputs
-		single := &FieldViolation{Field: "email", Reason: "INVALID_FORMAT"}
+		single := NewFieldViolation("email", "INVALID_FORMAT", "Email format is invalid")
 		slice := []*FieldViolation{
-			{Field: "name", Reason: "REQUIRED"},
-			{Field: "age", Reason: "TOO_YOUNG"},
+			NewFieldViolation("name", "REQUIRED", "Name is required"),
+			NewFieldViolation("age", "TOO_YOUNG", "Age is too young"),
 		}
 
 		// Create another status with violations
-		otherStatus := New(codes.InvalidArgument, "nested validation").
-			WithFieldViolations(&FieldViolation{Field: "nested.field", Reason: "INVALID"})
+		otherStatus := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "nested validation").
+			WithFieldViolations(NewFieldViolation("nested.field", "INVALID", "Nested field is invalid"))
 
 		// Use WithFlattenFieldViolations
-		status := New(codes.InvalidArgument, "validation failed").
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
 			WithFlattenFieldViolations(single, slice, otherStatus.ToFieldViolations("parent"))
 
 		// Verify results
@@ -738,15 +816,15 @@ func TestWithFlattenFieldViolations(t *testing.T) {
 
 	t.Run("error input conversion", func(t *testing.T) {
 		// Create a status error
-		statusErr := New(codes.InvalidArgument, "validation failed").
+		statusErr := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
 			WithFieldViolations(
-				&FieldViolation{Field: "field1", Reason: "INVALID"},
-				&FieldViolation{Field: "field2", Reason: "REQUIRED"},
+				NewFieldViolation("field1", "INVALID", "Field1 is invalid"),
+				NewFieldViolation("field2", "REQUIRED", "Field2 is required"),
 			).Err()
 
 		// Use error via ToFieldViolations in WithFlattenFieldViolations
-		status := New(codes.InvalidArgument, "main validation error").
-			WithFlattenFieldViolations(ToFieldViolations(statusErr, "nested"), &FieldViolation{Field: "direct", Reason: "INVALID"})
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "main validation error").
+			WithFlattenFieldViolations(ToFieldViolations(statusErr, "nested"), NewFieldViolation("direct", "INVALID", "Direct field is invalid"))
 
 		// Verify results
 		assert.NotNil(t, status.badRequest)
@@ -758,11 +836,11 @@ func TestWithFlattenFieldViolations(t *testing.T) {
 		// Test that the new method delegates properly to WithFieldViolations
 		// and maintains the same behavior for duplicate field handling
 
-		existing := New(codes.InvalidArgument, "base").
-			WithFieldViolations(&FieldViolation{Field: "email", Reason: "ORIGINAL"})
+		existing := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "base").
+			WithFieldViolations(NewFieldViolation("email", "ORIGINAL", "Original email error"))
 
 		// Add same field via WithFlattenFieldViolations - should replace
-		updated := existing.WithFlattenFieldViolations(&FieldViolation{Field: "email", Reason: "UPDATED"})
+		updated := existing.WithFlattenFieldViolations(NewFieldViolation("email", "UPDATED", "Updated email error"))
 
 		// Verify delegation behavior
 		assert.Len(t, updated.badRequest.FieldViolations, 1)
@@ -771,7 +849,7 @@ func TestWithFlattenFieldViolations(t *testing.T) {
 	})
 
 	t.Run("nil input handling", func(t *testing.T) {
-		status := New(codes.InvalidArgument, "test").
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").
 			WithFlattenFieldViolations(nil, (*FieldViolation)(nil), []*FieldViolation(nil))
 
 		// Should handle nil inputs gracefully
@@ -785,20 +863,20 @@ func TestWithFieldViolationsDuplicateStrategy(t *testing.T) {
 	t.Run("design rationale - same call vs cross call duplicates", func(t *testing.T) {
 		// ✅ Scenario 1: Same-call duplicates should panic (programming error)
 		assert.Panics(t, func() {
-			New(codes.InvalidArgument, "test").WithFieldViolations(
-				&FieldViolation{Field: "email", Reason: "REQUIRED"},
-				&FieldViolation{Field: "email", Reason: "INVALID"}, // Same field in same call - clear mistake
+			New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").WithFieldViolations(
+				NewFieldViolation("email", "REQUIRED", "Email is required"),
+				NewFieldViolation("email", "INVALID", "Email is invalid"), // Same field in same call - clear mistake
 			)
 		}, "Same-call duplicates should panic as this is clearly a programming error")
 
 		// ✅ Scenario 2: Cross-call duplicates should overwrite (update semantics)
-		base := New(codes.InvalidArgument, "test").WithFieldViolations(
-			&FieldViolation{Field: "email", Reason: "REQUIRED"},
-			&FieldViolation{Field: "name", Reason: "TOO_SHORT"},
+		base := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").WithFieldViolations(
+			NewFieldViolation("email", "REQUIRED", "Email is required"),
+			NewFieldViolation("name", "TOO_SHORT", "Name is too short"),
 		)
 
 		updated := base.WithFieldViolations(
-			&FieldViolation{Field: "email", Reason: "INVALID_FORMAT"}, // Different call - update existing
+			NewFieldViolation("email", "INVALID_FORMAT", "Email format is invalid"), // Different call - update existing
 		)
 
 		// Should have 2 fields total, email should be updated, name should remain
@@ -815,15 +893,15 @@ func TestWithFieldViolationsDuplicateStrategy(t *testing.T) {
 
 	t.Run("position preservation demonstrates intent", func(t *testing.T) {
 		// Position preservation shows this is intentional "update" not "replace"
-		status := New(codes.InvalidArgument, "test").WithFieldViolations(
-			&FieldViolation{Field: "field1", Reason: "ERROR1"},
-			&FieldViolation{Field: "field2", Reason: "ERROR2"},
-			&FieldViolation{Field: "field3", Reason: "ERROR3"},
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").WithFieldViolations(
+			NewFieldViolation("field1", "ERROR1", "Field1 error"),
+			NewFieldViolation("field2", "ERROR2", "Field2 error"),
+			NewFieldViolation("field3", "ERROR3", "Field3 error"),
 		)
 
 		// Update the middle field
 		updated := status.WithFieldViolations(
-			&FieldViolation{Field: "field2", Reason: "UPDATED_ERROR"},
+			NewFieldViolation("field2", "UPDATED_ERROR", "Updated field2 error"),
 		)
 
 		// Verify order is preserved: field2 stays in position 1
@@ -846,7 +924,7 @@ REQUIRED,Required field,必填字段
 `))
 
 	t.Run("translate main message with localized template", func(t *testing.T) {
-		status := New(codes.InvalidArgument, "original message").
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "original message").
 			WithLocalized("invalid_request")
 
 		translated := status.Translated(ib, language.MustParse("zh-CN"))
@@ -863,7 +941,7 @@ REQUIRED,Required field,必填字段
 	})
 
 	t.Run("translate main message with reason fallback", func(t *testing.T) {
-		status := New(codes.InvalidArgument, "original message").WithReason("VALIDATION_FAILED")
+		status := New(codes.InvalidArgument, "VALIDATION_FAILED", "original message")
 
 		translated := status.Translated(ib, language.MustParse("zh-CN"))
 
@@ -875,18 +953,12 @@ REQUIRED,Required field,必填字段
 	})
 
 	t.Run("translate field violations with localized templates", func(t *testing.T) {
-		status := New(codes.InvalidArgument, "validation failed").
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
 			WithFieldViolations(
-				&FieldViolation{
-					Field:     "email",
-					Reason:    "INVALID_FORMAT",
-					Localized: &Localized{Key: "email.invalid_format"},
-				},
-				&FieldViolation{
-					Field:     "password",
-					Reason:    "TOO_SHORT",
-					Localized: &Localized{Key: "field.password.min_length", Args: []any{8}},
-				},
+				NewFieldViolation("email", "INVALID_FORMAT", "Email format is invalid").
+					WithLocalized("email.invalid_format"),
+				NewFieldViolation("password", "TOO_SHORT", "Password is too short").
+					WithLocalized("field.password.min_length", 8),
 			)
 
 		translated := status.Translated(ib, language.MustParse("zh-CN"))
@@ -914,7 +986,7 @@ REQUIRED,Required field,必填字段
 	})
 
 	t.Run("skip translation when LocalizedMessage already exists", func(t *testing.T) {
-		status := New(codes.InvalidArgument, "original")
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "original")
 
 		// Add existing LocalizedMessage
 		preTranslated := status.WithDetails(&errdetails.LocalizedMessage{
@@ -941,13 +1013,12 @@ REQUIRED,Required field,必填字段
 	})
 
 	t.Run("translateMainMessage and translateFieldViolations are idempotent", func(t *testing.T) {
-		status := New(codes.InvalidArgument, "validation failed").
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
 			WithLocalized("invalid_request").
-			WithFieldViolations(&FieldViolation{
-				Field:     "email",
-				Reason:    "REQUIRED",
-				Localized: &Localized{Key: "email.invalid_format"},
-			})
+			WithFieldViolations(
+				NewFieldViolation("email", "REQUIRED", "Email is required").
+					WithLocalized("email.invalid_format"),
+			)
 
 		// First translation
 		translated1 := status.Translated(ib, language.MustParse("zh-CN"))
@@ -966,9 +1037,86 @@ REQUIRED,Required field,必填字段
 	})
 }
 
+func TestWithMessage(t *testing.T) {
+	t.Run("basic message replacement", func(t *testing.T) {
+		originalStatus := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "original message")
+		newStatus := originalStatus.WithMessage("new message")
+
+		// Original status should remain unchanged
+		assert.Equal(t, "original message", originalStatus.Message())
+
+		// New status should have updated message
+		assert.Equal(t, "new message", newStatus.Message())
+
+		// Other fields should remain the same
+		assert.Equal(t, codes.InvalidArgument, newStatus.Code())
+		assert.Equal(t, "INVALID_ARGUMENT", newStatus.Reason())
+	})
+
+	t.Run("empty message", func(t *testing.T) {
+		originalStatus := New(codes.NotFound, statusv1.ErrorReason_NOT_FOUND.String(), "resource not found")
+		newStatus := originalStatus.WithMessage("")
+
+		assert.Equal(t, "", newStatus.Message())
+		assert.Equal(t, codes.NotFound, newStatus.Code())
+	})
+
+	t.Run("preserve other properties", func(t *testing.T) {
+		originalStatus := New(codes.PermissionDenied, "CUSTOM_REASON", "permission denied").
+			WithMetadata(map[string]string{"key": "value"})
+
+		newStatus := originalStatus.WithMessage("access denied")
+
+		assert.Equal(t, "access denied", newStatus.Message())
+		assert.Equal(t, codes.PermissionDenied, newStatus.Code())
+		assert.Equal(t, "CUSTOM_REASON", newStatus.Reason())
+		assert.Equal(t, map[string]string{"key": "value"}, newStatus.Metadata())
+	})
+}
+
+func TestWithMessagef(t *testing.T) {
+	t.Run("basic formatted message", func(t *testing.T) {
+		originalStatus := New(codes.NotFound, statusv1.ErrorReason_NOT_FOUND.String(), "original message")
+		newStatus := originalStatus.WithMessagef("user %s not found", "john")
+
+		// Original status should remain unchanged
+		assert.Equal(t, "original message", originalStatus.Message())
+
+		// New status should have formatted message
+		assert.Equal(t, "user john not found", newStatus.Message())
+		assert.Equal(t, codes.NotFound, newStatus.Code())
+	})
+
+	t.Run("multiple format arguments", func(t *testing.T) {
+		originalStatus := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "original")
+		newStatus := originalStatus.WithMessagef("validation failed: field %s requires %d characters", "email", 5)
+
+		assert.Equal(t, "validation failed: field email requires 5 characters", newStatus.Message())
+	})
+
+	t.Run("no format arguments", func(t *testing.T) {
+		originalStatus := New(codes.Internal, statusv1.ErrorReason_INTERNAL.String(), "original")
+		newStatus := originalStatus.WithMessagef("internal error occurred")
+
+		assert.Equal(t, "internal error occurred", newStatus.Message())
+	})
+
+	t.Run("preserve other properties", func(t *testing.T) {
+		originalStatus := New(codes.Unauthenticated, "TOKEN_EXPIRED", "auth failed").
+			WithMetadata(map[string]string{"token": "expired"})
+
+		newStatus := originalStatus.WithMessagef("authentication failed: %s", "token expired")
+
+		assert.Equal(t, "authentication failed: token expired", newStatus.Message())
+		assert.Equal(t, codes.Unauthenticated, newStatus.Code())
+		assert.Equal(t, "TOKEN_EXPIRED", newStatus.Reason())
+		assert.Equal(t, map[string]string{"token": "expired"}, newStatus.Metadata())
+	})
+}
+
 func TestStatusMethods(t *testing.T) {
 	t.Run("Details method", func(t *testing.T) {
-		status := New(codes.InvalidArgument, "test")
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test")
 
 		// Status automatically adds ErrorInfo, so details are not nil
 		details := status.Details()
@@ -999,16 +1147,12 @@ func TestStatusMethods(t *testing.T) {
 		assert.Nil(t, nilStatus.BadRequest())
 
 		// Status without BadRequest
-		status := New(codes.InvalidArgument, "test")
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test")
 		assert.Nil(t, status.BadRequest())
 
 		// Status with BadRequest
 		status = status.WithFieldViolations(
-			&FieldViolation{
-				Field:       "email",
-				Reason:      "REQUIRED",
-				Description: "Email is required",
-			},
+			NewFieldViolation("email", "REQUIRED", "Email is required"),
 		)
 		badRequest := status.BadRequest()
 		assert.NotNil(t, badRequest)
@@ -1022,19 +1166,19 @@ func TestStatusMethods(t *testing.T) {
 		assert.Nil(t, nilStatus.ToFieldViolations("test"))
 
 		// Valid status
-		status := New(codes.InvalidArgument, "Validation failed").
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "Validation failed").
 			WithFieldViolations(
-				&FieldViolation{Field: "name", Reason: "REQUIRED", Description: "Name required"},
+				NewFieldViolation("name", "REQUIRED", "Name required"),
 			)
 		violations := status.ToFieldViolations("user")
 
 		assert.Len(t, violations, 2) // Main + nested
-		assert.Equal(t, "user", violations[0].Field)
-		assert.Equal(t, "user.name", violations[1].Field)
+		assert.Equal(t, "user", violations[0].Field())
+		assert.Equal(t, "user.name", violations[1].Field())
 	})
 
 	t.Run("WithCode method", func(t *testing.T) {
-		originalStatus := New(codes.InvalidArgument, "test message").WithReason("TEST")
+		originalStatus := New(codes.InvalidArgument, "TEST", "test message")
 		newStatus := originalStatus.WithCode(codes.NotFound)
 
 		// Original unchanged
@@ -1047,7 +1191,7 @@ func TestStatusMethods(t *testing.T) {
 	})
 
 	t.Run("WithReason method", func(t *testing.T) {
-		originalStatus := New(codes.InvalidArgument, "test message").WithReason("OLD_REASON")
+		originalStatus := New(codes.InvalidArgument, "OLD_REASON", "test message")
 		newStatus := originalStatus.WithReason("NEW_REASON")
 
 		// Original unchanged
@@ -1060,7 +1204,7 @@ func TestStatusMethods(t *testing.T) {
 	})
 
 	t.Run("Status method for StatusError", func(t *testing.T) {
-		status := New(codes.NotFound, "Resource not found")
+		status := New(codes.NotFound, statusv1.ErrorReason_NOT_FOUND.String(), "Resource not found")
 		err := status.Err().(*StatusError)
 
 		grpcStatus := err.Status()

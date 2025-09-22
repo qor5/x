@@ -4,9 +4,15 @@ import (
 	"context"
 	"strings"
 
+	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
 	"github.com/samber/lo"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
+	"google.golang.org/grpc/codes"
 )
+
+func BadRequest(inputs ...any) *Status {
+	return New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "invalid argument").WithFlattenFieldViolations(inputs...)
+}
 
 type ValidatorX interface {
 	ValidateX(ctx context.Context) []*errdetails.BadRequest_FieldViolation

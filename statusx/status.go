@@ -28,42 +28,48 @@ type Status struct {
 	cause error
 }
 
-// New creates a Status with the specified code and message.
-// The reason is automatically derived from the code using ReasonFromCode.
+// New creates a Status with the specified code, reason, and message.
 //
 // For non-OK status codes, it automatically captures a stacktrace at creation time,
 // which provides valuable debugging context without manual instrumentation.
 //
 // Parameters:
 //   - c: The status code indicating the type of status
-//   - message: A human-readable message describing the status
+//   - reason: A string identifier used as the error reason and i18n key fallback during translation
+//   - message: A human-readable message for debugging purposes
 //
-// For custom reasons, use the WithReason() method after creation.
+// The reason serves as both the error identifier and the i18n key.
+// The reason is immediately fixed as the i18n key at creation time.
+// Use WithLocalized() to override with a specific i18n key and args if needed.
+// Use WithLocalizedArgs() to add template arguments while preserving the current key.
 // Returns a Status object that can be further enriched with metadata or localization.
-func New(c codes.Code, message string) *Status {
+func New(c codes.Code, reason, message string) *Status {
+	if reason == "" {
+		panic("reason is required")
+	}
 	s := &Status{
-		code:    c,
-		message: message,
-		errorInfo: &errdetails.ErrorInfo{
-			Reason: ReasonFromCode(c).String(),
-		},
+		code:      c,
+		message:   message,
+		errorInfo: &errdetails.ErrorInfo{Reason: reason},
 	}
 	if c != codes.OK {
 		s.cause = errors.New(message)
 	}
+	// Immediately fix key to creation-time reason
+	s.localized = &statusv1.Localized{Key: s.Reason()}
 	return s
 }
 
-func Newf(c codes.Code, format string, a ...any) *Status {
-	return New(c, fmt.Sprintf(format, a...))
+func Newf(c codes.Code, reason, format string, a ...any) *Status {
+	return New(c, reason, fmt.Sprintf(format, a...))
 }
 
-func Error(c codes.Code, message string) error {
-	return New(c, message).Err()
+func Error(c codes.Code, reason, message string) error {
+	return New(c, reason, message).Err()
 }
 
-func Errorf(c codes.Code, format string, a ...any) error {
-	return Error(c, fmt.Sprintf(format, a...))
+func Errorf(c codes.Code, reason, format string, a ...any) error {
+	return Error(c, reason, fmt.Sprintf(format, a...))
 }
 
 func (s *Status) GRPCStatus() *status.Status {
@@ -191,6 +197,16 @@ func (s *Status) WithCode(c codes.Code) *Status {
 	return st
 }
 
+func (s *Status) WithMessage(message string) *Status {
+	st := Clone(s)
+	st.message = message
+	return st
+}
+
+func (s *Status) WithMessagef(format string, a ...any) *Status {
+	return s.WithMessage(fmt.Sprintf(format, a...))
+}
+
 func (s *Status) WithReason(reason string) *Status {
 	st := Clone(s)
 	st.errorInfo.Reason = reason
@@ -210,18 +226,32 @@ func (s *Status) WithMetadata(md map[string]string) *Status {
 }
 
 func (s *Status) WithLocalized(key string, args ...any) *Status {
+	if key == "" {
+		panic("key is required")
+	}
 	st := Clone(s)
-	return st.withLocalized(key, args...)
+	st.localized = &statusv1.Localized{
+		Key:  key,
+		Args: convertArgsToAny(args),
+	}
+	return st
 }
 
-func (s *Status) withLocalized(key string, args ...any) *Status {
-	s.localized = (&Localized{Key: key, Args: args}).Proto()
-	return s
+// WithLocalizedArgs sets template arguments for i18n.
+// Preserves the existing localized key and adds/replaces the template arguments.
+// Since the key is always set (either at creation time or by WithLocalized), no fallback logic is needed.
+func (s *Status) WithLocalizedArgs(args ...any) *Status {
+	st := Clone(s)
+	st.localized = &statusv1.Localized{
+		Key:  st.localized.GetKey(), // Always non-empty due to New() or WithLocalized()
+		Args: convertArgsToAny(args),
+	}
+	return st
 }
 
 // WithFieldViolations adds multiple field-level validation violations in batch.
 // Duplicate field names within new fields will panic. Existing fields are replaced in place.
-func (s *Status) WithFieldViolations(fields ...*FieldViolation) *Status {
+func (s *Status) WithFieldViolations(fieldViolations ...*FieldViolation) *Status {
 	st := Clone(s)
 
 	if st.badRequest == nil {
@@ -229,31 +259,32 @@ func (s *Status) WithFieldViolations(fields ...*FieldViolation) *Status {
 	}
 
 	newFieldMap := make(map[string]*FieldViolation)
-	for _, field := range fields {
-		if field.Field == "" {
-			panic(errors.Errorf("field name is required"))
+	for _, fv := range fieldViolations {
+		field := fv.Field()
+		if field == "" {
+			panic(errors.Errorf("field is required"))
 		}
-		if field.Reason == "" {
+		if fv.Reason() == "" {
 			panic(errors.Errorf("reason is required"))
 		}
-		if _, exists := newFieldMap[field.Field]; exists {
-			panic(errors.Errorf("duplicate field name in localization: %s", field.Field))
+		if _, exists := newFieldMap[field]; exists {
+			panic(errors.Errorf("duplicate field name in localization: %s", field))
 		}
-		newFieldMap[field.Field] = field
+		newFieldMap[field] = fv
 	}
 
 	// Replace existing fields in place, keep others unchanged
 	for i, existing := range st.badRequest.FieldViolations {
-		if newField, shouldReplace := newFieldMap[existing.Field]; shouldReplace {
+		if newField, shouldReplace := newFieldMap[existing.GetField()]; shouldReplace {
 			st.badRequest.FieldViolations[i] = newField.Proto()
-			delete(newFieldMap, existing.Field) // Mark as processed
+			delete(newFieldMap, existing.GetField()) // Mark as processed
 		}
 	}
 
 	// Append remaining new fields in original order
-	for _, field := range fields {
-		if _, wasNotReplaced := newFieldMap[field.Field]; wasNotReplaced {
-			st.badRequest.FieldViolations = append(st.badRequest.FieldViolations, field.Proto())
+	for _, fv := range fieldViolations {
+		if _, wasNotReplaced := newFieldMap[fv.Field()]; wasNotReplaced {
+			st.badRequest.FieldViolations = append(st.badRequest.FieldViolations, fv.Proto())
 		}
 	}
 
@@ -267,7 +298,10 @@ func (s *Status) WithFieldViolations(fields ...*FieldViolation) *Status {
 // Note: For error and *Status inputs, use ToFieldViolations(err, field) or status.ToFieldViolations(field)
 // first to specify the field name, then pass the result to this function.
 func (s *Status) WithFlattenFieldViolations(inputs ...any) *Status {
-	violations := FlattenFieldViolations(inputs...)
+	violations, err := FlattenFieldViolations(inputs...)
+	if err != nil {
+		panic(err)
+	}
 	return s.WithFieldViolations(violations...)
 }
 
@@ -298,13 +332,29 @@ func Clone(s *Status) *Status {
 	if s == nil {
 		return nil
 	}
+	var errorInfo *errdetails.ErrorInfo
+	if s.errorInfo != nil {
+		errorInfo = proto.Clone(s.errorInfo).(*errdetails.ErrorInfo)
+	}
+	var localized *statusv1.Localized
+	if s.localized != nil {
+		localized = proto.Clone(s.localized).(*statusv1.Localized)
+	}
+	var badRequest *statusv1.BadRequest
+	if s.badRequest != nil {
+		badRequest = proto.Clone(s.badRequest).(*statusv1.BadRequest)
+	}
+	var details []proto.Message
+	if s.details != nil {
+		details = lo.Map(s.details, func(d proto.Message, _ int) proto.Message { return proto.Clone(d) })
+	}
 	return &Status{
 		code:       s.code,
 		message:    s.message,
-		errorInfo:  proto.Clone(s.errorInfo).(*errdetails.ErrorInfo),
-		localized:  proto.Clone(s.localized).(*statusv1.Localized),
-		badRequest: proto.Clone(s.badRequest).(*statusv1.BadRequest),
-		details:    lo.Map(s.details, func(d proto.Message, _ int) proto.Message { return proto.Clone(d) }),
+		errorInfo:  errorInfo,
+		localized:  localized,
+		badRequest: badRequest,
+		details:    details,
 		cause:      s.cause,
 	}
 }
@@ -363,7 +413,7 @@ func (e *StatusError) GRPCStatus() *status.Status {
 func FromError(err error) (s *Status, ok bool) {
 	if err == nil {
 		// This is intentionally different from status.FromError(nil) behavior for convenience.
-		return New(codes.OK, ""), true
+		return New(codes.OK, statusv1.ErrorReason_OK.String(), ""), true
 	}
 	if se := new(StatusError); errors.As(err, &se) {
 		// if err is already a *StatusError, we don't want to lose the original status.
@@ -372,14 +422,14 @@ func FromError(err error) (s *Status, ok bool) {
 	ss, ok := status.FromError(err)
 	if !ok {
 		if errors.Is(err, context.DeadlineExceeded) {
-			return New(codes.DeadlineExceeded, err.Error()), true
+			return New(codes.DeadlineExceeded, statusv1.ErrorReason_DEADLINE_EXCEEDED.String(), err.Error()), true
 		}
 		if errors.Is(err, context.Canceled) {
-			return New(codes.Canceled, err.Error()), true
+			return New(codes.Canceled, statusv1.ErrorReason_CANCELED.String(), err.Error()), true
 		}
-		return New(codes.Unknown, err.Error()), false
+		return New(codes.Unknown, statusv1.ErrorReason_UNKNOWN.String(), err.Error()), false
 	}
-	s = New(ss.Code(), ss.Message())
+	s = New(ss.Code(), statusv1.ErrorReason_UNKNOWN.String(), ss.Message())
 	for _, detail := range ss.Details() {
 		switch d := detail.(type) {
 		case *errdetails.ErrorInfo:
@@ -408,7 +458,7 @@ func Convert(err error) *Status {
 	return s
 }
 
-func Wrap(err error, c codes.Code, message string) *Status {
+func Wrap(err error, c codes.Code, reason, message string) *Status {
 	s, ok := FromError(err)
 	if ok {
 		return s
@@ -416,10 +466,10 @@ func Wrap(err error, c codes.Code, message string) *Status {
 	s.cause = errors.WithStack(err)
 	s.code = c
 	s.message = message
-	s.errorInfo.Reason = ReasonFromCode(c).String()
+	s.errorInfo.Reason = reason
 	return s
 }
 
-func Wrapf(err error, c codes.Code, format string, a ...any) *Status {
-	return Wrap(err, c, fmt.Sprintf(format, a...))
+func Wrapf(err error, c codes.Code, reason, format string, a ...any) *Status {
+	return Wrap(err, c, reason, fmt.Sprintf(format, a...))
 }
