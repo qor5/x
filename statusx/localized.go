@@ -337,7 +337,7 @@ func ToFieldViolations(err error, field string) FieldViolations {
 	}
 
 	// Main field error (skip if field is empty)
-	var result []*FieldViolation
+	var result FieldViolations
 	if field != "" {
 		// Include main error as first field violation
 		var mainLocalized *Localized
@@ -346,13 +346,13 @@ func ToFieldViolations(err error, field string) FieldViolations {
 			mainLocalized = LocalizedFromProto(s.localized)
 		}
 
-		result = []*FieldViolation{{
+		result = append(result, &FieldViolation{
 			field:            field,
 			reason:           s.Reason(),
 			description:      s.Message(),
 			localized:        mainLocalized,
 			localizedMessage: localizedMessage,
-		}}
+		})
 	}
 
 	// Process field violations - use existingBadRequest if present, otherwise s.badRequest
@@ -387,14 +387,14 @@ func ToFieldViolations(err error, field string) FieldViolations {
 	return result
 }
 
-// FlattenFieldViolations flattens various field violation types into a unified []*FieldViolation slice.
-// Supports *FieldViolation, []*FieldViolation, and their protobuf equivalents.
+// FlattenFieldViolations flattens various field violation types into a unified FieldViolations slice.
+// Supports *FieldViolation, []*FieldViolation, FieldViolations, and their protobuf equivalents.
 // Mixed types are allowed in a single call.
 //
 // Note: For error and *Status inputs, use ToFieldViolations(err, field) or status.ToFieldViolations(field)
 // first to specify the field name, then pass the result to this function.
-func FlattenFieldViolations(inputs ...any) ([]*FieldViolation, error) {
-	var result []*FieldViolation
+func FlattenFieldViolations(inputs ...any) (FieldViolations, error) {
+	var result FieldViolations
 
 	for _, input := range inputs {
 		if input == nil {
@@ -406,6 +406,8 @@ func FlattenFieldViolations(inputs ...any) ([]*FieldViolation, error) {
 				result = append(result, v)
 			}
 		case []*FieldViolation:
+			result = append(result, v...)
+		case FieldViolations:
 			result = append(result, v...)
 		case *errdetails.BadRequest_FieldViolation:
 			if v != nil {

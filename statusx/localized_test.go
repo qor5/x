@@ -29,17 +29,25 @@ func TestFlattenFieldViolations(t *testing.T) {
 			NewFieldViolation("age", "TOO_YOUNG", "Age is too young"),
 		}
 		single2 := NewFieldViolation("phone", "INVALID_FORMAT", "Phone has invalid format")
+		slice2 := FieldViolations{
+			NewFieldViolation("email", "INVALID", "Email is invalid"),
+			NewFieldViolation("name", "REQUIRED", "Name is required"),
+			NewFieldViolation("age", "TOO_YOUNG", "Age is too young"),
+		}
 
 		// Mixed usage: single, slice, single
-		result, err := FlattenFieldViolations(single1, slice1, single2)
+		result, err := FlattenFieldViolations(single1, slice1, single2, slice2)
 		require.NoError(t, err)
 
 		// Verify results
-		assert.Len(t, result, 4)
+		assert.Len(t, result, 7)
 		assert.Equal(t, "email", result[0].Field())
 		assert.Equal(t, "name", result[1].Field())
 		assert.Equal(t, "age", result[2].Field())
 		assert.Equal(t, "phone", result[3].Field())
+		assert.Equal(t, "email", result[4].Field())
+		assert.Equal(t, "name", result[5].Field())
+		assert.Equal(t, "age", result[6].Field())
 	})
 
 	t.Run("flatten handles nil", func(t *testing.T) {
