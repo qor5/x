@@ -7,59 +7,63 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/genproto/googleapis/rpc/errdetails"
 
 	testdatav1 "github.com/qor5/x/v3/statusx/gen/testdata/v1"
 )
 
 // Mock ValidatorX implementation for testing
 type mockValidator struct {
-	violations []*errdetails.BadRequest_FieldViolation
+	violations []*FieldViolation
 }
 
-func (m *mockValidator) ValidateX(ctx context.Context) []*errdetails.BadRequest_FieldViolation {
-	return m.violations
+func (m *mockValidator) ValidateX(ctx context.Context) error {
+	return BadRequest(m.violations).Err()
 }
 
 func TestValidateX(t *testing.T) {
 	t.Run("validates ValidatorX interface", func(t *testing.T) {
 		validator := &mockValidator{
-			violations: []*errdetails.BadRequest_FieldViolation{
-				{Field: "name", Description: "Name is required", Reason: "REQUIRED"},
-				{Field: "email", Description: "Invalid email", Reason: "INVALID"},
+			violations: []*FieldViolation{
+				NewFieldViolation("name", "name.required", "Name is required"),
+				NewFieldViolation("email", "email.invalid", "Invalid email"),
 			},
 		}
 
-		violations := ValidateX(context.Background(), validator)
+		err := ValidateX(context.Background(), validator)
+		violations := ToFieldViolations(err, "")
 
 		assert.Len(t, violations, 2)
-		assert.Equal(t, "name", violations[0].Field)
-		assert.Equal(t, "email", violations[1].Field)
+		assert.Equal(t, "name", violations[0].Field())
+		assert.Equal(t, "email", violations[1].Field())
 	})
 
 	t.Run("applies field prefix to ValidatorX results", func(t *testing.T) {
 		validator := &mockValidator{
-			violations: []*errdetails.BadRequest_FieldViolation{
-				{Field: "name", Description: "Name is required", Reason: "REQUIRED"},
+			violations: []*FieldViolation{
+				NewFieldViolation("name", "name.required", "Name is required"),
 			},
 		}
 
-		violations := ValidateX(context.Background(), validator, WithFieldPrefix("user."))
+		err := ValidateX(context.Background(), validator)
+		violations := ToFieldViolations(err, "user")
 
-		assert.Len(t, violations, 1)
-		assert.Equal(t, "user.name", violations[0].Field)
+		assert.Len(t, violations, 2)
+		assert.Equal(t, "user", violations[0].Field())      // main error
+		assert.Equal(t, "user.name", violations[1].Field()) // nested violation
 	})
 
 	t.Run("returns empty for valid ValidatorX", func(t *testing.T) {
 		validator := &mockValidator{violations: nil}
 
-		violations := ValidateX(context.Background(), validator)
+		err := ValidateX(context.Background(), validator)
+		violations := ToFieldViolations(err, "")
 
 		assert.Empty(t, violations)
 	})
 
 	t.Run("returns empty for non-validator input", func(t *testing.T) {
-		violations := ValidateX(context.Background(), "not a validator")
+		err := ValidateX(context.Background(), "not a validator")
+		violations := ToFieldViolations(err, "")
 
 		assert.Empty(t, violations)
 	})
@@ -131,7 +135,7 @@ func TestProtoGenValidate(t *testing.T) {
 	type testCase struct {
 		name        string
 		input       any
-		fieldPrefix string
+		parentField string
 		wantField   []string
 	}
 	cases := []testCase{
@@ -141,7 +145,7 @@ func TestProtoGenValidate(t *testing.T) {
 				GivenName:  lo.ToPtr("Terry"),
 				FamilyName: lo.ToPtr("X"),
 			},
-			fieldPrefix: "",
+			parentField: "",
 			wantField:   []string{"familyName"},
 		},
 		{
@@ -150,26 +154,32 @@ func TestProtoGenValidate(t *testing.T) {
 				GivenName:  lo.ToPtr("T"),
 				FamilyName: lo.ToPtr("X"),
 			},
-			fieldPrefix: "",
+			parentField: "",
 			wantField:   []string{"givenName", "familyName"},
 		},
 		{
-			name: "error validate with field prefix",
+			name: "error validate with parent field",
 			input: &testdatav1.TestValidateError{
 				GivenName:  lo.ToPtr("Terry"),
 				FamilyName: lo.ToPtr("X"),
 			},
-			fieldPrefix: "UpdateInput[0].",
-			wantField:   []string{"updateInput[0].familyName"},
+			parentField: "UpdateInput[0]",
+			wantField:   []string{"UpdateInput[0]", "UpdateInput[0].familyName"},
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			errs := ValidateX(context.Background(), c.input, WithFieldPrefix(c.fieldPrefix))
-			require.Len(t, errs, len(c.wantField))
-			for i, e := range errs {
-				assert.Equal(t, c.wantField[i], e.GetField())
-				assert.Equal(t, "PROTO_GEN_VALIDATE", e.GetReason())
+			errs := ValidateX(context.Background(), c.input)
+			violations := ToFieldViolations(errs, c.parentField)
+			require.Len(t, violations, len(c.wantField))
+			for i, e := range violations {
+				assert.Equal(t, c.wantField[i], e.Field())
+				// First violation is main error (BadRequest container), rest are proto-gen-validate violations
+				if i == 0 && c.parentField != "" {
+					assert.Equal(t, "INVALID_ARGUMENT", e.Reason()) // Main error from BadRequest
+				} else {
+					assert.Equal(t, "PROTO_GEN_VALIDATE", e.Reason()) // Nested violations
+				}
 			}
 		})
 	}

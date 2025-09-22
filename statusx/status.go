@@ -172,7 +172,7 @@ func (s *Status) BadRequest() *statusv1.BadRequest {
 }
 
 // ToFieldViolations converts this Status to field violations for the specified field
-func (s *Status) ToFieldViolations(field string) []*FieldViolation {
+func (s *Status) ToFieldViolations(field string) FieldViolations {
 	if s == nil {
 		return nil
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/pkg/errors"
 	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
 	"github.com/samber/lo"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -15,50 +16,30 @@ func BadRequest(inputs ...any) *Status {
 }
 
 type ValidatorX interface {
-	ValidateX(ctx context.Context) []*errdetails.BadRequest_FieldViolation
+	ValidateX(ctx context.Context) error
 }
 
-type ValidateXOption func(*validateXOptions)
-
-type validateXOptions struct {
-	fieldPrefix string
-}
-
-func WithFieldPrefix(prefix string) ValidateXOption {
-	return func(o *validateXOptions) {
-		o.fieldPrefix = prefix
-	}
-}
-
-func ValidateX(ctx context.Context, input any, opts ...ValidateXOption) []*errdetails.BadRequest_FieldViolation {
-	options := &validateXOptions{}
-	for _, opt := range opts {
-		opt(options)
-	}
+func ValidateX(ctx context.Context, input any) error {
 	if val, ok := input.(ValidatorX); ok {
-		violations := val.ValidateX(ctx)
-		if options.fieldPrefix != "" {
-			for _, fv := range violations {
-				fv.Field = options.fieldPrefix + fv.Field
-			}
-		}
-		return violations
+		return val.ValidateX(ctx)
 	}
 
 	// Compatible with proto-gen-validate
-	var fvs []*errdetails.BadRequest_FieldViolation
+	var fvs []any
 	if val, ok := input.(interface{ ValidateAll() error }); ok {
 		err := val.ValidateAll()
 		if err == nil {
-			return fvs
+			return nil
 		}
 		inf := err.(interface{ AllErrors() []error })
 		for _, vErr := range inf.AllErrors() {
 			infPgvErr := vErr.(pgvErr)
-			fvs = append(fvs, convertProtoGenErrToFV(infPgvErr, options.fieldPrefix))
+			fvs = append(fvs, convertProtoGenErrToFV(infPgvErr, ""))
 		}
+	} else {
+		return errors.New("input is not a ValidatorX")
 	}
-	return fvs
+	return BadRequest(fvs...).Err()
 }
 
 // proto-gen-validate error

@@ -190,6 +190,12 @@ type FieldViolation struct {
 	localizedMessage *errdetails.LocalizedMessage // Pre-translated message (ready to use)
 }
 
+type FieldViolations []*FieldViolation
+
+func (fvs FieldViolations) PrependField(field string) FieldViolations {
+	return PrependField(field, fvs...)
+}
+
 // Field returns the field name that caused the violation.
 func (f *FieldViolation) Field() string {
 	if f == nil {
@@ -295,10 +301,20 @@ func (f *FieldViolation) Proto() *statusv1.BadRequest_FieldViolation {
 	}
 }
 
+func PrependField(field string, fvs ...*FieldViolation) FieldViolations {
+	for _, fv := range fvs {
+		fv.field = field + "." + fv.field
+	}
+	return fvs
+}
+
 // ToFieldViolations converts any error to field violations for the specified field.
-// Returns a slice where the first element is the main field error, followed by
-// nested field violations with the field path properly prefixed.
-func ToFieldViolations(err error, field string) []*FieldViolation {
+// Simple behavior:
+//   - If field is empty: returns only nested field violations without prefix
+//   - If field is non-empty: returns only nested field violations with the specified field prefix
+//
+// This design extracts meaningful field-level violations from container errors.
+func ToFieldViolations(err error, field string) FieldViolations {
 	if err == nil {
 		return nil
 	}
@@ -320,29 +336,35 @@ func ToFieldViolations(err error, field string) []*FieldViolation {
 		}
 	}
 
-	// Main field error (always first)
-	var mainLocalized *Localized
-	if localizedMessage == nil {
-		// Only use s.localized if no existing translated message
-		mainLocalized = LocalizedFromProto(s.localized)
-	}
+	// Main field error (skip if field is empty)
+	var result []*FieldViolation
+	if field != "" {
+		// Include main error as first field violation
+		var mainLocalized *Localized
+		if localizedMessage == nil {
+			// Only use s.localized if no existing translated message
+			mainLocalized = LocalizedFromProto(s.localized)
+		}
 
-	mainViolation := &FieldViolation{
-		field:            field,
-		reason:           s.Reason(),
-		description:      s.Message(),
-		localized:        mainLocalized,
-		localizedMessage: localizedMessage,
+		result = []*FieldViolation{{
+			field:            field,
+			reason:           s.Reason(),
+			description:      s.Message(),
+			localized:        mainLocalized,
+			localizedMessage: localizedMessage,
+		}}
 	}
-
-	result := []*FieldViolation{mainViolation}
 
 	// Process field violations - use existingBadRequest if present, otherwise s.badRequest
+	var fieldPrefix string
+	if field != "" {
+		fieldPrefix = field + "."
+	}
 	if badRequest != nil {
 		// Use Google standard BadRequest from details
 		for _, fv := range badRequest.FieldViolations {
 			result = append(result, &FieldViolation{
-				field:            field + "." + fv.Field,
+				field:            fieldPrefix + fv.Field,
 				reason:           fv.Reason,
 				description:      fv.Description,
 				localized:        nil,
@@ -353,7 +375,7 @@ func ToFieldViolations(err error, field string) []*FieldViolation {
 		// Use our custom badRequest
 		for _, fv := range s.badRequest.FieldViolations {
 			result = append(result, &FieldViolation{
-				field:            field + "." + fv.Field,
+				field:            fieldPrefix + fv.Field,
 				reason:           fv.Reason,
 				description:      fv.Description,
 				localized:        LocalizedFromProto(fv.Localized),
