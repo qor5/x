@@ -15,31 +15,53 @@ func BadRequest(inputs ...any) *Status {
 	return New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "invalid argument").WithFlattenFieldViolations(inputs...)
 }
 
-type ValidatorX interface {
-	ValidateX(ctx context.Context) error
+type Validator interface {
+	Validate() error
 }
 
-func ValidateX(ctx context.Context, input any) error {
-	if val, ok := input.(ValidatorX); ok {
-		return val.ValidateX(ctx)
+type ContextValidator interface {
+	Validate(ctx context.Context) error
+}
+
+func Validate(ctx context.Context, input any) error {
+	// Try ContextValidator interface first (has context support)
+	if val, ok := input.(ContextValidator); ok {
+		return val.Validate(ctx)
 	}
 
-	// Compatible with proto-gen-validate
+	// Try proto-gen-validate interface next (provides better error details than simple Validator)
 	var fvs []any
 	if val, ok := input.(interface{ ValidateAll() error }); ok {
 		err := val.ValidateAll()
 		if err == nil {
 			return nil
 		}
-		inf := err.(interface{ AllErrors() []error })
-		for _, vErr := range inf.AllErrors() {
-			infPgvErr := vErr.(pgvErr)
-			fvs = append(fvs, convertProtoGenErrToFV(infPgvErr, ""))
+		if inf, ok := err.(interface{ AllErrors() []error }); ok {
+			// Multi-error case
+			for _, vErr := range inf.AllErrors() {
+				if infPgvErr, ok := vErr.(pgvErr); ok {
+					fvs = append(fvs, convertProtoGenErrToFV(infPgvErr))
+				}
+			}
 		}
-	} else {
-		return errors.New("input is not a ValidatorX")
+		// Single error case - try to convert directly
+		if pgvErr, ok := err.(pgvErr); ok {
+			fvs = append(fvs, convertProtoGenErrToFV(pgvErr))
+		}
+
+		if len(fvs) > 0 {
+			return BadRequest(fvs...).Err()
+		}
+		// Fallback - return original error if we can't handle it
+		return err
 	}
-	return BadRequest(fvs...).Err()
+
+	// Fallback to simple Validator interface (for types that only have Validate())
+	if val, ok := input.(Validator); ok {
+		return val.Validate()
+	}
+
+	return errors.New("input does not implement Validator or ContextValidator interface")
 }
 
 // proto-gen-validate error
@@ -58,25 +80,20 @@ const ErrorReasonProtoGenValidate = "PROTO_GEN_VALIDATE"
 //
 // Parameters:
 //   - pgvErr: The protobuf generated validation error
-//   - fieldPrefix: Optional prefix to prepend to the field path (can be empty)
 //
 // The function:
-//  1. Combines the fieldPrefix with the error field if prefix is provided
-//  2. Splits the field path on dots and processes each segment:
+//  1. Splits the field path on dots and processes each segment:
 //     - Preserves array indices (e.g., [0], [1])
 //     - Converts path segments to camelCase
-//  3. Creates a BadRequest_FieldViolation with:
+//  2. Creates a BadRequest_FieldViolation with:
 //     - Formatted field path
 //     - Original error reason
 //     - Standard proto validation error reason
 //
 // Returns:
 //   - *errdetails.BadRequest_FieldViolation with formatted field information
-func convertProtoGenErrToFV(pgvErr pgvErr, fieldPrefix string) *errdetails.BadRequest_FieldViolation {
+func convertProtoGenErrToFV(pgvErr pgvErr) *errdetails.BadRequest_FieldViolation {
 	field := pgvErr.Field()
-	if fieldPrefix != "" {
-		field = fieldPrefix + field
-	}
 	parts := strings.Split(field, ".")
 	for i, part := range parts {
 		// Find the start position of array index notation (e.g., [0], [1])

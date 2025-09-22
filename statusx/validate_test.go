@@ -11,25 +11,38 @@ import (
 	testdatav1 "github.com/qor5/x/v3/statusx/gen/testdata/v1"
 )
 
-// Mock ValidatorX implementation for testing
-type mockValidator struct {
+// Mock Validator interface implementation for testing (no context)
+type mockSimpleValidator struct {
 	violations []*FieldViolation
 }
 
-func (m *mockValidator) ValidateX(ctx context.Context) error {
+var _ Validator = (*mockSimpleValidator)(nil)
+
+func (m *mockSimpleValidator) Validate() error {
 	return BadRequest(m.violations).Err()
 }
 
-func TestValidateX(t *testing.T) {
-	t.Run("validates ValidatorX interface", func(t *testing.T) {
-		validator := &mockValidator{
+// Mock ContextValidator interface implementation for testing (with context)
+type mockContextValidator struct {
+	violations []*FieldViolation
+}
+
+var _ ContextValidator = (*mockContextValidator)(nil)
+
+func (m *mockContextValidator) Validate(_ context.Context) error {
+	return BadRequest(m.violations).Err()
+}
+
+func TestValidate(t *testing.T) {
+	t.Run("validates ContextValidator interface", func(t *testing.T) {
+		validator := &mockContextValidator{
 			violations: []*FieldViolation{
 				NewFieldViolation("name", "name.required", "Name is required"),
 				NewFieldViolation("email", "email.invalid", "Invalid email"),
 			},
 		}
 
-		err := ValidateX(context.Background(), validator)
+		err := Validate(context.Background(), validator)
 		violations := ToFieldViolations(err, "")
 
 		assert.Len(t, violations, 2)
@@ -37,14 +50,28 @@ func TestValidateX(t *testing.T) {
 		assert.Equal(t, "email", violations[1].Field())
 	})
 
-	t.Run("applies field prefix to ValidatorX results", func(t *testing.T) {
-		validator := &mockValidator{
+	t.Run("validates simple Validator interface", func(t *testing.T) {
+		validator := &mockSimpleValidator{
+			violations: []*FieldViolation{
+				NewFieldViolation("username", "username.required", "Username is required"),
+			},
+		}
+
+		err := Validate(context.Background(), validator)
+		violations := ToFieldViolations(err, "")
+
+		assert.Len(t, violations, 1)
+		assert.Equal(t, "username", violations[0].Field())
+	})
+
+	t.Run("applies field prefix to ContextValidator results", func(t *testing.T) {
+		validator := &mockContextValidator{
 			violations: []*FieldViolation{
 				NewFieldViolation("name", "name.required", "Name is required"),
 			},
 		}
 
-		err := ValidateX(context.Background(), validator)
+		err := Validate(context.Background(), validator)
 		violations := ToFieldViolations(err, "user")
 
 		assert.Len(t, violations, 2)
@@ -52,17 +79,26 @@ func TestValidateX(t *testing.T) {
 		assert.Equal(t, "user.name", violations[1].Field()) // nested violation
 	})
 
-	t.Run("returns empty for valid ValidatorX", func(t *testing.T) {
-		validator := &mockValidator{violations: nil}
+	t.Run("returns empty for valid ContextValidator", func(t *testing.T) {
+		validator := &mockContextValidator{violations: nil}
 
-		err := ValidateX(context.Background(), validator)
+		err := Validate(context.Background(), validator)
+		violations := ToFieldViolations(err, "")
+
+		assert.Empty(t, violations)
+	})
+
+	t.Run("returns empty for valid simple Validator", func(t *testing.T) {
+		validator := &mockSimpleValidator{violations: nil}
+
+		err := Validate(context.Background(), validator)
 		violations := ToFieldViolations(err, "")
 
 		assert.Empty(t, violations)
 	})
 
 	t.Run("returns empty for non-validator input", func(t *testing.T) {
-		err := ValidateX(context.Background(), "not a validator")
+		err := Validate(context.Background(), "not a validator")
 		violations := ToFieldViolations(err, "")
 
 		assert.Empty(t, violations)
@@ -118,7 +154,7 @@ func TestConvertProtoGenErrToFV(t *testing.T) {
 				name:   "test_name",
 			}
 
-			result := convertProtoGenErrToFV(mockErr, "")
+			result := convertProtoGenErrToFV(mockErr)
 			assert.Equal(t, tt.expectedField, result.Field)
 			assert.Equal(t, "test reason", result.Description)
 			assert.Equal(t, "PROTO_GEN_VALIDATE", result.Reason)
@@ -169,7 +205,7 @@ func TestProtoGenValidate(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			errs := ValidateX(context.Background(), c.input)
+			errs := Validate(context.Background(), c.input)
 			violations := ToFieldViolations(errs, c.parentField)
 			require.Len(t, violations, len(c.wantField))
 			for i, e := range violations {
