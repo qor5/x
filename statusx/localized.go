@@ -163,7 +163,7 @@ func LocalizedFromProto(pb *statusv1.Localized) *Localized {
 		if err != nil {
 			// Use nil instead of placeholder strings to avoid breaking template rendering
 			val = nil
-			slog.Warn("failed to extract value from Any", "error", err)
+			slog.Warn("failed to extract value from Any", "error", err, "index", i, "typeUrl", anyArg.GetTypeUrl())
 		}
 		goArgs[i] = val
 	}
