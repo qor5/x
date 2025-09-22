@@ -24,18 +24,18 @@ func allow(ctx context.Context, limiter ratelimiter.RateLimiter, evaluator Evalu
 	callMeta := normalize.MustCallMetaFromContext(ctx)
 	reserveRequests, err := evaluator(ctx, callMeta)
 	if err != nil {
-		return statusx.WrapCode(err, codes.Internal, "failed to call policy function").Err()
+		return statusx.Wrap(err, codes.Internal, "failed to call policy function").Err()
 	}
 
 	if len(reserveRequests) > 0 {
 		var meta Metadata
 		for _, r := range reserveRequests {
 			if r.MaxFutureReserve > 0 {
-				return statusx.NewCode(codes.Internal, "expect max future reserve is equal to 0").Err()
+				return statusx.New(codes.Internal, "expect max future reserve is equal to 0").Err()
 			}
 			reservation, err := limiter.Reserve(ctx, r)
 			if err != nil {
-				return statusx.WrapCodef(err, codes.Internal, "failed to reserve for key %s", r.Key).Err()
+				return statusx.Wrapf(err, codes.Internal, "failed to reserve for key %s", r.Key).Err()
 			}
 			if reservation.OK {
 				continue
@@ -48,9 +48,12 @@ func allow(ctx context.Context, limiter ratelimiter.RateLimiter, evaluator Evalu
 		if !meta.TimeToAct.IsZero() {
 			md := make(map[string]string)
 			if err := jsonx.Copy(&md, &meta); err != nil {
-				return statusx.WrapCodef(err, codes.Internal, "failed to copy metadata").Err()
+				return statusx.Wrap(err, codes.Internal, "failed to copy metadata").Err()
 			}
-			return statusx.New(codes.ResourceExhausted, ErrorReasonRateLimited, "ratelimit exceeded").WithMetadata(md).Err()
+			return statusx.New(codes.ResourceExhausted, "ratelimit exceeded").
+				WithReason(ErrorReasonRateLimited).
+				WithMetadata(md).
+				Err()
 		}
 	}
 
