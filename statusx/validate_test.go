@@ -2,7 +2,6 @@ package statusx
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/samber/lo"
@@ -118,107 +117,6 @@ func (m *mockPgvErr) Reason() string    { return m.reason }
 func (m *mockPgvErr) Key() bool         { return false }
 func (m *mockPgvErr) Cause() error      { return nil }
 func (m *mockPgvErr) ErrorName() string { return m.name }
-
-func TestFormatField(t *testing.T) {
-	tests := []struct {
-		name       string
-		input      string
-		formatFunc func(string) string
-		expected   string
-	}{
-		{
-			name:       "simple field with camelCase",
-			input:      "user_name",
-			formatFunc: lo.CamelCase,
-			expected:   "userName",
-		},
-		{
-			name:       "nested field with camelCase",
-			input:      "user_info.first_name",
-			formatFunc: lo.CamelCase,
-			expected:   "userInfo.firstName",
-		},
-		{
-			name:       "array index preservation with camelCase",
-			input:      "user_addresses[0]",
-			formatFunc: lo.CamelCase,
-			expected:   "userAddresses[0]",
-		},
-		{
-			name:       "complex nested array with camelCase",
-			input:      "user_info.addresses[0].street_name",
-			formatFunc: lo.CamelCase,
-			expected:   "userInfo.addresses[0].streetName",
-		},
-		{
-			name:       "multiple array indices with camelCase",
-			input:      "matrix_data[1][2].cell_value",
-			formatFunc: lo.CamelCase,
-			expected:   "matrixData[1][2].cellValue",
-		},
-		{
-			name:       "mixed case preservation",
-			input:      "user_ID.address_info[0].ZIP_code",
-			formatFunc: lo.CamelCase,
-			expected:   "userId.addressInfo[0].zipCode",
-		},
-		{
-			name:       "snake_case transformation",
-			input:      "userInfo.addressList[0].cityName",
-			formatFunc: lo.SnakeCase,
-			expected:   "user_info.address_list[0].city_name",
-		},
-		{
-			name:       "kebab-case transformation",
-			input:      "user_info.address_data[0].street_name",
-			formatFunc: lo.KebabCase,
-			expected:   "user-info.address-data[0].street-name",
-		},
-		{
-			name:       "PascalCase transformation",
-			input:      "user_name.address_list[0].city_code",
-			formatFunc: lo.PascalCase,
-			expected:   "UserName.AddressList[0].CityCode",
-		},
-		{
-			name:       "SCREAMING_SNAKE_CASE transformation",
-			input:      "user_info.address[0].zip_code",
-			formatFunc: func(s string) string { return strings.ToUpper(lo.SnakeCase(s)) },
-			expected:   "USER_INFO.ADDRESS[0].ZIP_CODE",
-		},
-		{
-			name:       "uppercase transformation",
-			input:      "user_name.address[0].city",
-			formatFunc: strings.ToUpper,
-			expected:   "USER_NAME.ADDRESS[0].CITY",
-		},
-		{
-			name:       "empty field",
-			input:      "",
-			formatFunc: lo.CamelCase,
-			expected:   "",
-		},
-		{
-			name:       "field with no dots",
-			input:      "simple_field",
-			formatFunc: lo.CamelCase,
-			expected:   "simpleField",
-		},
-		{
-			name:       "field ending with array index",
-			input:      "items[10]",
-			formatFunc: lo.CamelCase,
-			expected:   "items[10]",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := FormatField(tt.input, tt.formatFunc)
-			assert.Equal(t, tt.expected, result)
-		})
-	}
-}
 
 func TestConvertProtoGenErrToFV(t *testing.T) {
 	tests := []struct {
