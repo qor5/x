@@ -374,8 +374,8 @@ func TestBeautify(t *testing.T) {
 			name:  "beautify simple object",
 			input: `{"name":"John","age":30}`,
 			want: `{
-  "age": 30,
-  "name": "John"
+  "name": "John",
+  "age": 30
 }`,
 		},
 		{
@@ -383,8 +383,8 @@ func TestBeautify(t *testing.T) {
 			input: `{"user":{"name":"John","age":30}}`,
 			want: `{
   "user": {
-    "age": 30,
-    "name": "John"
+    "name": "John",
+    "age": 30
   }
 }`,
 		},
@@ -419,8 +419,8 @@ func TestMustBeautify(t *testing.T) {
 			name:  "beautify simple object",
 			input: `{"name":"John","age":30}`,
 			want: `{
-  "age": 30,
-  "name": "John"
+  "name": "John",
+  "age": 30
 }`,
 		},
 		{

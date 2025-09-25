@@ -154,6 +154,18 @@ func resolveProtoWithSetter(rv reflect.Value) (proto.Message, func()) {
 	return nil, nil
 }
 
+func MarshalIndent(v any, prefix, indent string) ([]byte, error) {
+	raw, err := Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	if err := Indent(&buf, raw, prefix, indent); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 func MustMarshal(v any) []byte {
 	b, err := Marshal(v)
 	if err != nil {
@@ -180,16 +192,12 @@ func MustMarshalX[T ~string | ~[]byte](v any) T {
 }
 
 func Beautify[T ~string | ~[]byte](rawJSON T) (T, error) {
-	var v map[string]any
 	var zero T
-	if err := json.Unmarshal([]byte(rawJSON), &v); err != nil {
-		return zero, errors.Wrap(err, "failed to unmarshal json")
+	var buf bytes.Buffer
+	if err := Indent(&buf, []byte(rawJSON), "", "  "); err != nil {
+		return zero, err
 	}
-	bs, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		return zero, errors.Wrap(err, "failed to marshal to json")
-	}
-	return T(bs), nil
+	return T(buf.Bytes()), nil
 }
 
 func MustBeautify[T ~string | ~[]byte](rawJSON T) T {
