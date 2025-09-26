@@ -1,43 +1,46 @@
-package gormx
+package gormx_test
 
 import (
 	"testing"
 
+	"github.com/qor5/x/v3/gormx"
+	"github.com/qor5/x/v3/gormx/postgresx"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type User struct {
-	Model
+	gormx.Model
 	Name      string
 	Age       int
 	Addresses []*Address
 }
 
 type Address struct {
-	Model
+	gormx.Model
 	AddressLine string
 	UserID      string
 	User        User
 }
 
-func resetTables(t *testing.T) {
+func resetTables(t *testing.T, db *gorm.DB) {
 	require.NoError(t, db.Migrator().DropTable(&User{}, &Address{}))
 	require.NoError(t, db.AutoMigrate(&User{}, &Address{}))
 }
 
 func TestOmitAssociationsPlugin(t *testing.T) {
-	// Register the plugin
-	require.NoError(t, db.Use(OmitAssociationsPlugin))
+	db, err := gorm.Open(postgresx.Open(suite.DSN()))
+	require.NoError(t, err)
+
+	require.NoError(t, db.Use(gormx.OmitAssociationsPlugin))
 
 	t.Cleanup(func() {
 		require.NoError(t, db.Migrator().DropTable(&User{}, &Address{}))
 	})
 
-	// Test Create operation
 	t.Run("create without associations", func(t *testing.T) {
-		resetTables(t)
+		resetTables(t, db)
 
 		user := User{
 			Name: "Alice",
@@ -52,9 +55,8 @@ func TestOmitAssociationsPlugin(t *testing.T) {
 		require.ErrorIs(t, db.Where("address_line = ?", "123 Street").First(&Address{}).Error, gorm.ErrRecordNotFound)
 	})
 
-	// Test Update operation
 	t.Run("update without associations", func(t *testing.T) {
-		resetTables(t)
+		resetTables(t, db)
 
 		user := User{Name: "Bob"}
 		require.NoError(t, db.Create(&user).Error)
@@ -77,9 +79,8 @@ func TestOmitAssociationsPlugin(t *testing.T) {
 		require.Equal(t, "123 Street", address.AddressLine)
 	})
 
-	// Test Delete operation
 	t.Run("delete without associations", func(t *testing.T) {
-		resetTables(t)
+		resetTables(t, db)
 
 		user := User{Name: "Charlie"}
 		require.NoError(t, db.Create(&user).Error)
@@ -118,9 +119,8 @@ func TestOmitAssociationsPlugin(t *testing.T) {
 		require.Equal(t, int64(2), count2)
 	})
 
-	// Test that Preload still works
 	t.Run("preload still works", func(t *testing.T) {
-		resetTables(t)
+		resetTables(t, db)
 
 		user := User{Name: "David"}
 		require.NoError(t, db.Create(&user).Error)

@@ -20,9 +20,10 @@ type Status struct {
 	code    codes.Code
 	message string
 
-	errorInfo    *errdetails.ErrorInfo
-	localized    *statusv1.Localized
-	extraDetails []proto.Message
+	errorInfo  *errdetails.ErrorInfo
+	localized  *statusv1.Localized
+	badRequest *statusv1.BadRequest
+	details    []proto.Message
 
 	cause error
 }
@@ -34,21 +35,28 @@ type Status struct {
 //
 // Parameters:
 //   - c: The status code indicating the type of status
-//   - reason: A string identifier describing the reason for this status
-//   - message: A human-readable message describing the status
+//   - reason: A string identifier used as the error reason and i18n key fallback during translation
+//   - message: A human-readable message for debugging purposes
 //
+// The reason serves as both the error identifier and the i18n key.
+// The reason is immediately fixed as the i18n key at creation time.
+// Use WithLocalized() to override with a specific i18n key and args if needed.
+// Use WithLocalizedArgs() to add template arguments while preserving the current key.
 // Returns a Status object that can be further enriched with metadata or localization.
 func New(c codes.Code, reason, message string) *Status {
+	if reason == "" {
+		panic("reason is required")
+	}
 	s := &Status{
-		code:    c,
-		message: message,
-		errorInfo: &errdetails.ErrorInfo{
-			Reason: reason,
-		},
+		code:      c,
+		message:   message,
+		errorInfo: &errdetails.ErrorInfo{Reason: reason},
 	}
 	if c != codes.OK {
 		s.cause = errors.New(message)
 	}
+	// Immediately fix key to creation-time reason
+	s.localized = &statusv1.Localized{Key: s.Reason()}
 	return s
 }
 
@@ -68,21 +76,31 @@ func (s *Status) GRPCStatus() *status.Status {
 	if s == nil {
 		return nil
 	}
+
 	if s.Code() == codes.OK {
 		return status.New(codes.OK, "")
 	}
+
 	var details []protoadapt.MessageV1
+
 	errorInfo := proto.Clone(s.errorInfo).(*errdetails.ErrorInfo)
 	errorInfo.Reason = s.Reason()
 	details = append(details, errorInfo)
+
 	if s.localized != nil {
 		details = append(details, proto.Clone(s.localized).(*statusv1.Localized))
 	}
-	if len(s.extraDetails) > 0 {
-		for _, d := range s.extraDetails {
+
+	if s.badRequest != nil {
+		details = append(details, proto.Clone(s.badRequest).(*statusv1.BadRequest))
+	}
+
+	if len(s.details) > 0 {
+		for _, d := range s.details {
 			details = append(details, protoadapt.MessageV1Of(proto.Clone(d)))
 		}
 	}
+
 	st, err := status.New(s.Code(), s.message).WithDetails(details...)
 	if err != nil {
 		panic(err)
@@ -140,10 +158,25 @@ func (s *Status) Metadata() map[string]string {
 }
 
 func (s *Status) Localized() *statusv1.Localized {
-	if s == nil {
+	if s == nil || s.localized == nil {
 		return nil
 	}
 	return proto.Clone(s.localized).(*statusv1.Localized)
+}
+
+func (s *Status) BadRequest() *statusv1.BadRequest {
+	if s == nil || s.badRequest == nil {
+		return nil
+	}
+	return proto.Clone(s.badRequest).(*statusv1.BadRequest)
+}
+
+// ToFieldViolations converts this Status to field violations for the specified field
+func (s *Status) ToFieldViolations(field string) FieldViolations {
+	if s == nil {
+		return nil
+	}
+	return ToFieldViolations(s.Err(), field)
 }
 
 // Err converts the Status to an error interface.
@@ -159,42 +192,136 @@ func (s *Status) Err() error {
 }
 
 func (s *Status) WithCode(c codes.Code) *Status {
-	err := Clone(s)
-	err.code = c
-	return err
+	st := Clone(s)
+	st.code = c
+	return st
+}
+
+func (s *Status) WithMessage(message string) *Status {
+	st := Clone(s)
+	st.message = message
+	return st
+}
+
+func (s *Status) WithMessagef(format string, a ...any) *Status {
+	return s.WithMessage(fmt.Sprintf(format, a...))
 }
 
 func (s *Status) WithReason(reason string) *Status {
-	err := Clone(s)
-	err.errorInfo.Reason = reason
-	return err
+	st := Clone(s)
+	st.errorInfo.Reason = reason
+	return st
 }
 
 func (s *Status) WithCause(cause error) *Status {
-	err := Clone(s)
-	err.cause = errors.WithStack(cause)
-	return err
+	st := Clone(s)
+	st.cause = errors.WithStack(cause)
+	return st
 }
 
 func (s *Status) WithMetadata(md map[string]string) *Status {
-	err := Clone(s)
-	err.errorInfo.Metadata = md
-	return err
+	st := Clone(s)
+	st.errorInfo.Metadata = md
+	return st
 }
 
-func (s *Status) WithLocalized(key string, args ...string) *Status {
-	err := Clone(s)
-	err.localized = &statusv1.Localized{
-		Key:  string(key),
-		Args: args,
+func (s *Status) WithLocalized(key string, args ...any) *Status {
+	if key == "" {
+		panic("key is required")
 	}
-	return err
+	st := Clone(s)
+	st.localized = &statusv1.Localized{
+		Key:  key,
+		Args: convertArgsToAny(args),
+	}
+	return st
 }
 
-func (s *Status) WithExtraDetail(message ...proto.Message) *Status {
-	err := Clone(s)
-	err.extraDetails = append(err.extraDetails, message...)
-	return err
+// WithLocalizedArgs sets template arguments for i18n.
+// Preserves the existing localized key and adds/replaces the template arguments.
+// Since the key is always set (either at creation time or by WithLocalized), no fallback logic is needed.
+func (s *Status) WithLocalizedArgs(args ...any) *Status {
+	st := Clone(s)
+	st.localized = &statusv1.Localized{
+		Key:  st.localized.GetKey(), // Always non-empty due to New() or WithLocalized()
+		Args: convertArgsToAny(args),
+	}
+	return st
+}
+
+// WithFieldViolations adds multiple field-level validation violations in batch.
+// Duplicate field names within new fields will panic. Existing fields are replaced in place.
+func (s *Status) WithFieldViolations(fieldViolations ...*FieldViolation) *Status {
+	st := Clone(s)
+
+	if st.badRequest == nil {
+		st.badRequest = &statusv1.BadRequest{}
+	}
+
+	newFieldMap := make(map[string]*FieldViolation)
+	for _, fv := range fieldViolations {
+		field := fv.Field()
+		if field == "" {
+			panic(errors.Errorf("field is required"))
+		}
+		if fv.Reason() == "" {
+			panic(errors.Errorf("reason is required"))
+		}
+		if _, exists := newFieldMap[field]; exists {
+			panic(errors.Errorf("duplicate field name in localization: %s", field))
+		}
+		newFieldMap[field] = fv
+	}
+
+	// Replace existing fields in place, keep others unchanged
+	for i, existing := range st.badRequest.FieldViolations {
+		if newField, shouldReplace := newFieldMap[existing.GetField()]; shouldReplace {
+			st.badRequest.FieldViolations[i] = newField.Proto()
+			delete(newFieldMap, existing.GetField()) // Mark as processed
+		}
+	}
+
+	// Append remaining new fields in original order
+	for _, fv := range fieldViolations {
+		if _, wasNotReplaced := newFieldMap[fv.Field()]; wasNotReplaced {
+			st.badRequest.FieldViolations = append(st.badRequest.FieldViolations, fv.Proto())
+		}
+	}
+
+	return st
+}
+
+// WithFlattenFieldViolations accepts various types of field violation inputs and flattens them.
+// Supports *FieldViolation, []*FieldViolation, FieldViolations, and their protobuf equivalents.
+// Mixed types are allowed in a single call for maximum flexibility.
+//
+// Note: For error and *Status inputs, use ToFieldViolations(err, field) or status.ToFieldViolations(field)
+// first to specify the field name, then pass the result to this function.
+func (s *Status) WithFlattenFieldViolations(inputs ...any) *Status {
+	violations, err := FlattenFieldViolations(inputs...)
+	if err != nil {
+		panic(err)
+	}
+	return s.WithFieldViolations(violations...)
+}
+
+func (s *Status) WithDetails(details ...proto.Message) *Status {
+	st := Clone(s)
+
+	// Validate that details don't contain reserved types
+	for _, detail := range details {
+		switch detail.(type) {
+		case *errdetails.ErrorInfo:
+			panic("cannot add *errdetails.ErrorInfo via WithDetails, it's managed internally")
+		case *statusv1.Localized:
+			panic("cannot add *statusv1.Localized via WithDetails, use WithLocalized instead")
+		case *statusv1.BadRequest:
+			panic("cannot add *statusv1.BadRequest via WithDetails, use WithFieldViolations instead")
+		}
+	}
+
+	st.details = append(st.details, details...)
+	return st
 }
 
 func (s *Status) String() string {
@@ -205,13 +332,30 @@ func Clone(s *Status) *Status {
 	if s == nil {
 		return nil
 	}
+	var errorInfo *errdetails.ErrorInfo
+	if s.errorInfo != nil {
+		errorInfo = proto.Clone(s.errorInfo).(*errdetails.ErrorInfo)
+	}
+	var localized *statusv1.Localized
+	if s.localized != nil {
+		localized = proto.Clone(s.localized).(*statusv1.Localized)
+	}
+	var badRequest *statusv1.BadRequest
+	if s.badRequest != nil {
+		badRequest = proto.Clone(s.badRequest).(*statusv1.BadRequest)
+	}
+	var details []proto.Message
+	if s.details != nil {
+		details = lo.Map(s.details, func(d proto.Message, _ int) proto.Message { return proto.Clone(d) })
+	}
 	return &Status{
-		code:         s.code,
-		message:      s.message,
-		errorInfo:    proto.Clone(s.errorInfo).(*errdetails.ErrorInfo),
-		localized:    proto.Clone(s.localized).(*statusv1.Localized),
-		extraDetails: lo.Map(s.extraDetails, func(d proto.Message, _ int) proto.Message { return proto.Clone(d) }),
-		cause:        s.cause,
+		code:       s.code,
+		message:    s.message,
+		errorInfo:  errorInfo,
+		localized:  localized,
+		badRequest: badRequest,
+		details:    details,
+		cause:      s.cause,
 	}
 }
 
@@ -292,8 +436,10 @@ func FromError(err error) (s *Status, ok bool) {
 			s.errorInfo = proto.Clone(d).(*errdetails.ErrorInfo)
 		case *statusv1.Localized:
 			s.localized = proto.Clone(d).(*statusv1.Localized)
+		case *statusv1.BadRequest:
+			s.badRequest = proto.Clone(d).(*statusv1.BadRequest)
 		default:
-			s.extraDetails = append(s.extraDetails, proto.Clone(d.(proto.Message)))
+			s.details = append(s.details, proto.Clone(d.(proto.Message)))
 		}
 	}
 	return s, true
@@ -321,6 +467,8 @@ func Wrap(err error, c codes.Code, reason, message string) *Status {
 	s.code = c
 	s.message = message
 	s.errorInfo.Reason = reason
+	// Immediately fix key to creation-time reason
+	s.localized = &statusv1.Localized{Key: s.Reason()}
 	return s
 }
 

@@ -11,6 +11,101 @@ import (
 	testdatav1 "github.com/qor5/x/v3/statusx/gen/testdata/v1"
 )
 
+// Mock Validator interface implementation for testing (no context)
+type mockSimpleValidator struct {
+	violations []*FieldViolation
+}
+
+var _ Validator = (*mockSimpleValidator)(nil)
+
+func (m *mockSimpleValidator) Validate() error {
+	return BadRequest(m.violations).Err()
+}
+
+// Mock ContextValidator interface implementation for testing (with context)
+type mockContextValidator struct {
+	violations []*FieldViolation
+}
+
+var _ ContextValidator = (*mockContextValidator)(nil)
+
+func (m *mockContextValidator) Validate(_ context.Context) error {
+	return BadRequest(m.violations).Err()
+}
+
+func TestValidate(t *testing.T) {
+	t.Run("validates ContextValidator interface", func(t *testing.T) {
+		validator := &mockContextValidator{
+			violations: []*FieldViolation{
+				NewFieldViolation("name", "name.required", "Name is required"),
+				NewFieldViolation("email", "email.invalid", "Invalid email"),
+			},
+		}
+
+		err := Validate(context.Background(), validator)
+		violations := ToFieldViolations(err, "")
+
+		assert.Len(t, violations, 2)
+		assert.Equal(t, "name", violations[0].Field())
+		assert.Equal(t, "email", violations[1].Field())
+	})
+
+	t.Run("validates simple Validator interface", func(t *testing.T) {
+		validator := &mockSimpleValidator{
+			violations: []*FieldViolation{
+				NewFieldViolation("username", "username.required", "Username is required"),
+			},
+		}
+
+		err := Validate(context.Background(), validator)
+		violations := ToFieldViolations(err, "")
+
+		assert.Len(t, violations, 1)
+		assert.Equal(t, "username", violations[0].Field())
+	})
+
+	t.Run("applies field prefix to ContextValidator results", func(t *testing.T) {
+		validator := &mockContextValidator{
+			violations: []*FieldViolation{
+				NewFieldViolation("name", "name.required", "Name is required"),
+			},
+		}
+
+		err := Validate(context.Background(), validator)
+		violations := ToFieldViolations(err, "user")
+
+		assert.Len(t, violations, 2)
+		assert.Equal(t, "user", violations[0].Field())      // main error
+		assert.Equal(t, "user.name", violations[1].Field()) // nested violation
+	})
+
+	t.Run("returns empty for valid ContextValidator", func(t *testing.T) {
+		validator := &mockContextValidator{violations: nil}
+
+		err := Validate(context.Background(), validator)
+		violations := ToFieldViolations(err, "")
+
+		assert.Empty(t, violations)
+	})
+
+	t.Run("returns empty for valid simple Validator", func(t *testing.T) {
+		validator := &mockSimpleValidator{violations: nil}
+
+		err := Validate(context.Background(), validator)
+		violations := ToFieldViolations(err, "")
+
+		assert.Empty(t, violations)
+	})
+
+	t.Run("returns empty for non-validator input", func(t *testing.T) {
+		err := Validate(context.Background(), "not a validator")
+		violations := ToFieldViolations(err, "")
+
+		assert.Empty(t, violations)
+	})
+}
+
+// Mock implementation of proto-gen-validate error interface
 type mockPgvErr struct {
 	field  string
 	reason string
@@ -28,31 +123,26 @@ func TestConvertProtoGenErrToFV(t *testing.T) {
 		name          string
 		inputField    string
 		expectedField string
-		// expectedReason string
 	}{
 		{
 			name:          "simple field",
 			inputField:    "AAA",
 			expectedField: "aaa",
-			// expectedReason: "test_name:aaa",
 		},
 		{
 			name:          "nested field",
 			inputField:    "Aaa.BBB",
 			expectedField: "aaa.bbb",
-			// expectedReason: "test_name:aaa.bbb",
 		},
 		{
 			name:          "array index",
 			inputField:    "Aaa[0].ID",
 			expectedField: "aaa[0].id",
-			// expectedReason: "test_name:aaa[0].id",
 		},
 		{
 			name:          "mixed case",
 			inputField:    "ParentField.childField[1].GrandChild",
 			expectedField: "parentField.childField[1].grandChild",
-			// expectedReason: "test_name:parentField.childField[1].grandChild",
 		},
 	}
 
@@ -64,10 +154,9 @@ func TestConvertProtoGenErrToFV(t *testing.T) {
 				name:   "test_name",
 			}
 
-			result := convertProtoGenErrToFV(mockErr, "")
+			result := convertProtoGenErrToFV(mockErr)
 			assert.Equal(t, tt.expectedField, result.Field)
 			assert.Equal(t, "test reason", result.Description)
-			// assert.Equal(t, tt.expectedReason, result.Reason)
 			assert.Equal(t, "PROTO_GEN_VALIDATE", result.Reason)
 		})
 	}
@@ -82,9 +171,8 @@ func TestProtoGenValidate(t *testing.T) {
 	type testCase struct {
 		name        string
 		input       any
-		fieldPrefix string
+		parentField string
 		wantField   []string
-		// wantReason  []string
 	}
 	cases := []testCase{
 		{
@@ -93,9 +181,8 @@ func TestProtoGenValidate(t *testing.T) {
 				GivenName:  lo.ToPtr("Terry"),
 				FamilyName: lo.ToPtr("X"),
 			},
-			fieldPrefix: "",
+			parentField: "",
 			wantField:   []string{"familyName"},
-			// wantReason:  []string{"TestValidateErrorValidationError:familyName"},
 		},
 		{
 			name: "one more error validate all",
@@ -103,29 +190,32 @@ func TestProtoGenValidate(t *testing.T) {
 				GivenName:  lo.ToPtr("T"),
 				FamilyName: lo.ToPtr("X"),
 			},
-			fieldPrefix: "",
+			parentField: "",
 			wantField:   []string{"givenName", "familyName"},
-			// wantReason:  []string{"TestValidateErrorValidationError:givenName", "TestValidateErrorValidationError:familyName"},
 		},
 		{
-			name: "error validate with field prefix",
+			name: "error validate with parent field",
 			input: &testdatav1.TestValidateError{
 				GivenName:  lo.ToPtr("Terry"),
 				FamilyName: lo.ToPtr("X"),
 			},
-			fieldPrefix: "UpdateInput[0].",
-			wantField:   []string{"updateInput[0].familyName"},
-			// wantReason:  []string{"TestValidateErrorValidationError:updateInput[0].familyName"},
+			parentField: "UpdateInput[0]",
+			wantField:   []string{"UpdateInput[0]", "UpdateInput[0].familyName"},
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			errs := ValidateX(context.Background(), c.input, WithFieldPrefix(c.fieldPrefix))
-			require.Len(t, errs, len(c.wantField))
-			for i, e := range errs {
-				assert.Equal(t, c.wantField[i], e.GetField())
-				// assert.Equal(t, c.wantReason[i], e.GetReason())
-				assert.Equal(t, "PROTO_GEN_VALIDATE", e.GetReason())
+			errs := Validate(context.Background(), c.input)
+			violations := ToFieldViolations(errs, c.parentField)
+			require.Len(t, violations, len(c.wantField))
+			for i, e := range violations {
+				assert.Equal(t, c.wantField[i], e.Field())
+				// First violation is main error (BadRequest container), rest are proto-gen-validate violations
+				if i == 0 && c.parentField != "" {
+					assert.Equal(t, "INVALID_ARGUMENT", e.Reason()) // Main error from BadRequest
+				} else {
+					assert.Equal(t, "PROTO_GEN_VALIDATE", e.Reason()) // Nested violations
+				}
 			}
 		})
 	}

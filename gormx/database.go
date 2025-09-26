@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -15,10 +16,13 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pkg/errors"
+	"github.com/qor5/confx"
 	"github.com/qor5/x/v3/gormx/postgresx"
 	"github.com/theplant/inject/lifecycle"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	_ "embed"
 )
 
 type AuthMethod string
@@ -37,6 +41,19 @@ type DatabaseConfig struct {
 	ConnMaxLifetime time.Duration `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`
 	ConnMaxIdleTime time.Duration `confx:"connMaxIdleTime" usage:"Maximum idle time for connections" validate:"ltefield=ConnMaxLifetime"`
 	AuthMethod      AuthMethod    `confx:"authMethod" usage:"Authentication method: 'password' or 'iam'" validate:"required,oneof=password iam"`
+}
+
+//go:embed embed/default-database-config.yaml
+var defaultDatabaseConfigYAML string
+
+var DefaultDatabaseConfig = func() *DatabaseConfig {
+	def, err := confx.Read[*struct {
+		Database DatabaseConfig `confx:"database"`
+	}]("yaml", strings.NewReader(defaultDatabaseConfigYAML))
+	if err != nil {
+		panic(err)
+	}
+	return &def.Database
 }
 
 var SetupDatabase = SetupDatabaseFactory("database")
@@ -97,7 +114,8 @@ func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm
 		dialector,
 		append([]gorm.Option{
 			&gorm.Config{
-				DisableForeignKeyConstraintWhenMigrating: true, // We don't want to use any foreign key constraint.
+				// We don't want to use any foreign key constraint.
+				DisableForeignKeyConstraintWhenMigrating: true,
 				CreateBatchSize:                          100,
 				PrepareStmt:                              true,
 				// Enable GORM error translation to convert database-specific errors into standardized GORM errors.

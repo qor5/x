@@ -1,8 +1,6 @@
 package statusx
 
 import (
-	"fmt"
-
 	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
 	"google.golang.org/grpc/codes"
 )
@@ -49,26 +47,26 @@ func ReasonFromCode(code codes.Code) statusv1.ErrorReason {
 	}
 }
 
-// NewCode creates a Status with the specified code and message.
-// The reason is automatically derived from the code.
+// NewCode creates a Status with automatically derived reason from the gRPC code.
+// This is a convenience function that uses ReasonFromCode to generate the reason.
 func NewCode(code codes.Code, message string) *Status {
 	return New(code, ReasonFromCode(code).String(), message)
 }
 
-// NewCodef creates a Status with the specified code and formatted message.
-// The reason is automatically derived from the code.
+// NewCodef creates a Status with automatically derived reason and formatted message.
+// This is a convenience function that uses ReasonFromCode to generate the reason.
 func NewCodef(code codes.Code, format string, a ...any) *Status {
-	return NewCode(code, fmt.Sprintf(format, a...))
+	return Newf(code, ReasonFromCode(code).String(), format, a...)
 }
 
-// WrapCode wraps an existing error with the specified code and message.
-// The reason is automatically derived from the code.
+// WrapCode wraps an error with automatically derived reason from the gRPC code.
+// This is a convenience function that uses ReasonFromCode to generate the reason.
 func WrapCode(err error, code codes.Code, message string) *Status {
 	return Wrap(err, code, ReasonFromCode(code).String(), message)
 }
 
-// WrapCodef wraps an existing error with the specified code and formatted message.
-// The reason is automatically derived from the code.
+// WrapCodef wraps an error with automatically derived reason and formatted message.
+// This is a convenience function that uses ReasonFromCode to generate the reason.
 func WrapCodef(err error, code codes.Code, format string, a ...any) *Status {
-	return WrapCode(err, code, fmt.Sprintf(format, a...))
+	return Wrapf(err, code, ReasonFromCode(code).String(), format, a...)
 }

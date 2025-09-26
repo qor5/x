@@ -12,6 +12,11 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+type ServerConfig struct {
+	Address            string `confx:"address" usage:"gRPC server address" validate:"required"`
+	RegisterReflection bool   `confx:"registerReflection" usage:"register the server reflection service"`
+}
+
 type Listener net.Listener
 
 func SetupListener(lc *lifecycle.Lifecycle, conf *ServerConfig) (Listener, error) {

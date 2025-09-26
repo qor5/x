@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/theplant/ratelimiter"
 	"github.com/theplant/ratelimiter/sqlrl"
-	"github.com/theplant/testenv"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -21,11 +20,10 @@ import (
 	"google.golang.org/grpc/test/bufconn"
 	"gorm.io/gorm"
 
+	"github.com/qor5/x/v3/gormx"
 	"github.com/qor5/x/v3/healthz/testdata/gen"
 	"github.com/qor5/x/v3/normalize"
 )
-
-var db *gorm.DB
 
 // Test gRPC service implementation using healthz testdata
 type testGRPCService struct {
@@ -36,14 +34,13 @@ func (s *testGRPCService) Echo(ctx context.Context, req *gen.EchoRequest) (*gen.
 	return &gen.EchoResponse{Message: req.GetMessage()}, nil
 }
 
-func TestMain(m *testing.M) {
-	env, err := testenv.New().DBEnable(true).SetUp()
-	if err != nil {
-		panic(err)
-	}
-	defer env.TearDown()
+var db *gorm.DB
 
-	db = env.DB
+func TestMain(m *testing.M) {
+	suite := gormx.MustStartTestSuite(context.Background())
+	defer suite.Stop(context.Background())
+
+	db = suite.DB()
 
 	// Setup rate limiter tables
 	if err := sqlrl.Migrate(context.Background(), db, "rate_limits"); err != nil {

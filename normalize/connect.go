@@ -38,10 +38,6 @@ func UnaryConnectInterceptor[T any](svc T) connect.UnaryInterceptorFunc {
 			}
 			ctx = context.WithValue(ctx, ctxKeyNormalization{}, nlz)
 
-			if decorator, ok := nlz.callMeta.Service.(ContextDecorator); ok {
-				ctx = decorator.DecorateContext(ctx)
-			}
-
 			res, err := next(ctx, req)
 			if err != nil {
 				if len(resMD) > 0 {

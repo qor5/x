@@ -17,8 +17,9 @@ func UnaryConnectInterceptor(ib *i18nx.I18N, shouldConvert func(ctx context.Cont
 	return func(next connect.UnaryFunc) connect.UnaryFunc {
 		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 			ctx = i18nx.NewContext(ctx, ib)
+			lang := ib.LanguageFromContext(ctx)
 			res, err := next(ctx, req)
-			err = TranslateError(ctx, ib, err)
+			err = TranslateError(err, ib, lang)
 			if err != nil {
 				convert := true
 				if shouldConvert != nil && !shouldConvert(ctx, req) {

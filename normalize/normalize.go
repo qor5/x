@@ -95,7 +95,3 @@ func ClientIPFromContext(ctx context.Context) string {
 	}
 	return ""
 }
-
-type ContextDecorator interface {
-	DecorateContext(ctx context.Context) context.Context
-}
