@@ -92,9 +92,9 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 					next.ServeHTTP(w, r)
 					return
 				}
-				if r.Method == http.MethodGet {
+				// if r.Method == http.MethodGet {
 					b.setContinueURL(w, r)
-				}
+				// }
 				if path == b.loginPageURL {
 					next.ServeHTTP(w, r)
 				} else {
