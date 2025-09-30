@@ -13,7 +13,14 @@ import (
 
 // BadRequest creates a new Status with the InvalidArgument code and a flattened list of field violations.
 func BadRequest(inputs ...any) *Status {
-	return New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "invalid argument").WithFlattenFieldViolations(inputs...)
+	violations, err := FlattenFieldViolations(inputs...)
+	if err != nil {
+		panic(err)
+	}
+	if len(violations) == 0 {
+		return New(codes.OK, statusv1.ErrorReason_OK.String(), "ok")
+	}
+	return New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "invalid argument").WithFieldViolations(violations...)
 }
 
 // FormatField formats a dotted field path by applying a formatting function to each segment

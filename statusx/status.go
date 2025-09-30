@@ -250,7 +250,7 @@ func (s *Status) WithLocalizedArgs(args ...any) *Status {
 }
 
 // WithFieldViolations adds multiple field-level validation violations in batch.
-// Duplicate field names within new fields will panic. Existing fields are replaced in place.
+// Multiple violations for the same field are allowed and will be appended.
 func (s *Status) WithFieldViolations(fieldViolations ...*FieldViolation) *Status {
 	st := Clone(s)
 
@@ -258,7 +258,7 @@ func (s *Status) WithFieldViolations(fieldViolations ...*FieldViolation) *Status
 		st.badRequest = &statusv1.BadRequest{}
 	}
 
-	newFieldMap := make(map[string]*FieldViolation)
+	// Simply append all field violations without deduplication
 	for _, fv := range fieldViolations {
 		field := fv.Field()
 		if field == "" {
@@ -267,25 +267,7 @@ func (s *Status) WithFieldViolations(fieldViolations ...*FieldViolation) *Status
 		if fv.Reason() == "" {
 			panic(errors.Errorf("reason is required"))
 		}
-		if _, exists := newFieldMap[field]; exists {
-			panic(errors.Errorf("duplicate field name in localization: %s", field))
-		}
-		newFieldMap[field] = fv
-	}
-
-	// Replace existing fields in place, keep others unchanged
-	for i, existing := range st.badRequest.FieldViolations {
-		if newField, shouldReplace := newFieldMap[existing.GetField()]; shouldReplace {
-			st.badRequest.FieldViolations[i] = newField.Proto()
-			delete(newFieldMap, existing.GetField()) // Mark as processed
-		}
-	}
-
-	// Append remaining new fields in original order
-	for _, fv := range fieldViolations {
-		if _, wasNotReplaced := newFieldMap[fv.Field()]; wasNotReplaced {
-			st.badRequest.FieldViolations = append(st.badRequest.FieldViolations, fv.Proto())
-		}
+		st.badRequest.FieldViolations = append(st.badRequest.FieldViolations, fv.Proto())
 	}
 
 	return st

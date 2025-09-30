@@ -639,19 +639,27 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 		assert.Len(t, proto.Localized.Args, 2)
 	})
 
-	t.Run("WithFieldsLocalized duplicate field validation", func(t *testing.T) {
-		t.Run("duplicate within new fields", func(t *testing.T) {
-			assert.Panics(t, func() {
-				New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
-					WithFieldViolations(
-						NewFieldViolation("email", "REQUIRED", "Email is required"),
-						NewFieldViolation("password", "WEAK", "Password is weak"),
-						NewFieldViolation("email", "INVALID", "Email is invalid"),
-					)
-			}, "should panic when duplicate field names are provided")
+	t.Run("WithFieldsLocalized append behavior", func(t *testing.T) {
+		t.Run("duplicate fields are allowed and appended", func(t *testing.T) {
+			// Multiple violations for the same field are now allowed
+			status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
+				WithFieldViolations(
+					NewFieldViolation("email", "REQUIRED", "Email is required"),
+					NewFieldViolation("password", "WEAK", "Password is weak"),
+					NewFieldViolation("email", "INVALID", "Email is invalid"),
+				)
+
+			// Should have all 3 violations
+			assert.Len(t, status.badRequest.FieldViolations, 3)
+			assert.Equal(t, "email", status.badRequest.FieldViolations[0].Field)
+			assert.Equal(t, "REQUIRED", status.badRequest.FieldViolations[0].Reason)
+			assert.Equal(t, "password", status.badRequest.FieldViolations[1].Field)
+			assert.Equal(t, "WEAK", status.badRequest.FieldViolations[1].Reason)
+			assert.Equal(t, "email", status.badRequest.FieldViolations[2].Field)
+			assert.Equal(t, "INVALID", status.badRequest.FieldViolations[2].Reason)
 		})
 
-		t.Run("replacement preserves original position with WithFieldViolations", func(t *testing.T) {
+		t.Run("cross-call violations are appended in order", func(t *testing.T) {
 			// First add some fields
 			status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
 				WithFieldViolations(
@@ -666,53 +674,67 @@ func TestWithFieldViolationsAPI(t *testing.T) {
 			assert.Equal(t, "password", status.badRequest.FieldViolations[1].Field)
 			assert.Equal(t, "age", status.badRequest.FieldViolations[2].Field)
 
-			// Replace middle field and add new field
+			// Add more fields including duplicate
 			updatedStatus := status.WithFieldViolations(
 				NewFieldViolation("phone", "field.phone.invalid", "Phone is invalid"),
 				NewFieldViolation("password", "field.password.strong", "Password is strong"),
 			)
 
-			// Should have 4 fields total
-			assert.Len(t, updatedStatus.badRequest.FieldViolations, 4)
+			// Should have 5 fields total (original 3 + new 2)
+			assert.Len(t, updatedStatus.badRequest.FieldViolations, 5)
 
-			// Verify order is preserved for existing fields, new fields appended
+			// Verify all violations are present in order
 			fields := updatedStatus.badRequest.FieldViolations
 			assert.Equal(t, "email", fields[0].Field)
 			assert.Equal(t, "field.email.required", fields[0].Localized.Key)
 
 			assert.Equal(t, "password", fields[1].Field)
-			assert.Equal(t, "field.password.strong", fields[1].Localized.Key) // Replaced in place
+			assert.Equal(t, "field.password.weak", fields[1].Localized.Key) // Original remains
 
 			assert.Equal(t, "age", fields[2].Field)
 			assert.Equal(t, "field.age.required", fields[2].Localized.Key)
 
 			assert.Equal(t, "phone", fields[3].Field) // New field appended
 			assert.Equal(t, "field.phone.invalid", fields[3].Localized.Key)
+
+			assert.Equal(t, "password", fields[4].Field) // Duplicate password appended
+			assert.Equal(t, "field.password.strong", fields[4].Localized.Key)
 		})
 
-		t.Run("WithFieldViolations should replace existing field", func(t *testing.T) {
+		t.Run("WithFieldViolations appends rather than replaces", func(t *testing.T) {
 			status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
 				WithFieldViolations(NewFieldViolation("email", "field.email.required", "Email is required"))
 
-			// Replace the existing field
+			// Add another violation for the same field
 			updatedStatus := status.WithFieldViolations(NewFieldViolation("email", "field.email.format_error", "Email format error"))
 
-			assert.Len(t, updatedStatus.badRequest.FieldViolations, 1)
+			// Should have 2 violations total
+			assert.Len(t, updatedStatus.badRequest.FieldViolations, 2)
 			assert.Equal(t, "email", updatedStatus.badRequest.FieldViolations[0].Field)
-			assert.Equal(t, "field.email.format_error", updatedStatus.badRequest.FieldViolations[0].Localized.Key)
+			assert.Equal(t, "field.email.required", updatedStatus.badRequest.FieldViolations[0].Localized.Key)
+			assert.Equal(t, "email", updatedStatus.badRequest.FieldViolations[1].Field)
+			assert.Equal(t, "field.email.format_error", updatedStatus.badRequest.FieldViolations[1].Localized.Key)
 		})
 
-		t.Run("duplicate within new fields should still panic", func(t *testing.T) {
+		t.Run("multiple same-field violations in single call", func(t *testing.T) {
 			status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "validation failed").
 				WithFieldViolations(NewFieldViolation("email", "field.email.required", "Email is required"))
 
-			assert.Panics(t, func() {
-				status.WithFieldViolations(
-					NewFieldViolation("password", "WEAK", "Password is weak"),
-					NewFieldViolation("phone", "INVALID", "Phone is invalid"),
-					NewFieldViolation("password", "SHORT", "Password is short"),
-				)
-			}, "should panic when duplicate field names exist within new fields")
+			// Add multiple violations for same field in single call
+			updatedStatus := status.WithFieldViolations(
+				NewFieldViolation("password", "WEAK", "Password is weak"),
+				NewFieldViolation("phone", "INVALID", "Phone is invalid"),
+				NewFieldViolation("password", "SHORT", "Password is short"),
+			)
+
+			// Should have 4 violations total (1 existing + 3 new)
+			assert.Len(t, updatedStatus.badRequest.FieldViolations, 4)
+			assert.Equal(t, "email", updatedStatus.badRequest.FieldViolations[0].Field)
+			assert.Equal(t, "password", updatedStatus.badRequest.FieldViolations[1].Field)
+			assert.Equal(t, "WEAK", updatedStatus.badRequest.FieldViolations[1].Reason)
+			assert.Equal(t, "phone", updatedStatus.badRequest.FieldViolations[2].Field)
+			assert.Equal(t, "password", updatedStatus.badRequest.FieldViolations[3].Field)
+			assert.Equal(t, "SHORT", updatedStatus.badRequest.FieldViolations[3].Reason)
 		})
 
 		t.Run("new fields maintain input order", func(t *testing.T) {
@@ -849,18 +871,20 @@ func TestWithFlattenFieldViolations(t *testing.T) {
 
 	t.Run("delegation to existing method", func(t *testing.T) {
 		// Test that the new method delegates properly to WithFieldViolations
-		// and maintains the same behavior for duplicate field handling
+		// and maintains the same append behavior for duplicate field handling
 
 		existing := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "base").
 			WithFieldViolations(NewFieldViolation("email", "ORIGINAL", "Original email error"))
 
-		// Add same field via WithFlattenFieldViolations - should replace
+		// Add same field via WithFlattenFieldViolations - should append
 		updated := existing.WithFlattenFieldViolations(NewFieldViolation("email", "UPDATED", "Updated email error"))
 
-		// Verify delegation behavior
-		assert.Len(t, updated.badRequest.FieldViolations, 1)
+		// Verify delegation behavior - should have both violations
+		assert.Len(t, updated.badRequest.FieldViolations, 2)
 		assert.Equal(t, "email", updated.badRequest.FieldViolations[0].Field)
-		assert.Equal(t, "UPDATED", updated.badRequest.FieldViolations[0].Reason)
+		assert.Equal(t, "ORIGINAL", updated.badRequest.FieldViolations[0].Reason)
+		assert.Equal(t, "email", updated.badRequest.FieldViolations[1].Field)
+		assert.Equal(t, "UPDATED", updated.badRequest.FieldViolations[1].Reason)
 	})
 
 	t.Run("nil input handling", func(t *testing.T) {
@@ -874,57 +898,59 @@ func TestWithFlattenFieldViolations(t *testing.T) {
 	})
 }
 
-func TestWithFieldViolationsDuplicateStrategy(t *testing.T) {
-	t.Run("design rationale - same call vs cross call duplicates", func(t *testing.T) {
-		// ✅ Scenario 1: Same-call duplicates should panic (programming error)
-		assert.Panics(t, func() {
-			New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").WithFieldViolations(
-				NewFieldViolation("email", "REQUIRED", "Email is required"),
-				NewFieldViolation("email", "INVALID", "Email is invalid"), // Same field in same call - clear mistake
-			)
-		}, "Same-call duplicates should panic as this is clearly a programming error")
-
-		// ✅ Scenario 2: Cross-call duplicates should overwrite (update semantics)
-		base := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").WithFieldViolations(
+func TestWithFieldViolationsAppendStrategy(t *testing.T) {
+	t.Run("allows multiple violations for same field", func(t *testing.T) {
+		// Multiple violations for same field within same call are now allowed
+		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").WithFieldViolations(
 			NewFieldViolation("email", "REQUIRED", "Email is required"),
-			NewFieldViolation("name", "TOO_SHORT", "Name is too short"),
+			NewFieldViolation("email", "INVALID", "Email format is invalid"),
 		)
 
-		updated := base.WithFieldViolations(
-			NewFieldViolation("email", "INVALID_FORMAT", "Email format is invalid"), // Different call - update existing
+		// Should have both violations for the same field
+		assert.Len(t, status.badRequest.FieldViolations, 2)
+		assert.Equal(t, "email", status.badRequest.FieldViolations[0].Field)
+		assert.Equal(t, "REQUIRED", status.badRequest.FieldViolations[0].Reason)
+		assert.Equal(t, "email", status.badRequest.FieldViolations[1].Field)
+		assert.Equal(t, "INVALID", status.badRequest.FieldViolations[1].Reason)
+
+		// Cross-call duplicates are also appended
+		updated := status.WithFieldViolations(
+			NewFieldViolation("email", "TOO_LONG", "Email is too long"),
 		)
 
-		// Should have 2 fields total, email should be updated, name should remain
-		assert.Len(t, updated.badRequest.FieldViolations, 2)
-
-		// Email should be updated but maintain its original position (index 0)
+		// Should have 3 violations total, all for email field
+		assert.Len(t, updated.badRequest.FieldViolations, 3)
 		assert.Equal(t, "email", updated.badRequest.FieldViolations[0].Field)
-		assert.Equal(t, "INVALID_FORMAT", updated.badRequest.FieldViolations[0].Reason)
-
-		// Name should remain unchanged
-		assert.Equal(t, "name", updated.badRequest.FieldViolations[1].Field)
-		assert.Equal(t, "TOO_SHORT", updated.badRequest.FieldViolations[1].Reason)
+		assert.Equal(t, "REQUIRED", updated.badRequest.FieldViolations[0].Reason)
+		assert.Equal(t, "email", updated.badRequest.FieldViolations[1].Field)
+		assert.Equal(t, "INVALID", updated.badRequest.FieldViolations[1].Reason)
+		assert.Equal(t, "email", updated.badRequest.FieldViolations[2].Field)
+		assert.Equal(t, "TOO_LONG", updated.badRequest.FieldViolations[2].Reason)
 	})
 
-	t.Run("position preservation demonstrates intent", func(t *testing.T) {
-		// Position preservation shows this is intentional "update" not "replace"
+	t.Run("append strategy preserves order and allows duplicates", func(t *testing.T) {
+		// All violations are appended in order without deduplication
 		status := New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "test").WithFieldViolations(
 			NewFieldViolation("field1", "ERROR1", "Field1 error"),
 			NewFieldViolation("field2", "ERROR2", "Field2 error"),
 			NewFieldViolation("field3", "ERROR3", "Field3 error"),
 		)
 
-		// Update the middle field
+		// Add another violation for field2
 		updated := status.WithFieldViolations(
-			NewFieldViolation("field2", "UPDATED_ERROR", "Updated field2 error"),
+			NewFieldViolation("field2", "ADDITIONAL_ERROR", "Additional field2 error"),
 		)
 
-		// Verify order is preserved: field2 stays in position 1
-		assert.Len(t, updated.badRequest.FieldViolations, 3)
+		// Verify all violations are present, with the new one appended at the end
+		assert.Len(t, updated.badRequest.FieldViolations, 4)
 		assert.Equal(t, "field1", updated.badRequest.FieldViolations[0].Field)
+		assert.Equal(t, "ERROR1", updated.badRequest.FieldViolations[0].Reason)
 		assert.Equal(t, "field2", updated.badRequest.FieldViolations[1].Field)
-		assert.Equal(t, "UPDATED_ERROR", updated.badRequest.FieldViolations[1].Reason)
+		assert.Equal(t, "ERROR2", updated.badRequest.FieldViolations[1].Reason)
 		assert.Equal(t, "field3", updated.badRequest.FieldViolations[2].Field)
+		assert.Equal(t, "ERROR3", updated.badRequest.FieldViolations[2].Reason)
+		assert.Equal(t, "field2", updated.badRequest.FieldViolations[3].Field)
+		assert.Equal(t, "ADDITIONAL_ERROR", updated.badRequest.FieldViolations[3].Reason)
 	})
 }
 

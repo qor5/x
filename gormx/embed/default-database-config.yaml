@@ -4,6 +4,7 @@ database:
   tracing:
     excludeQuery: false
     excludeQueryVars: false
+    maxQueryLength: 0 # Maximum query length for tracing, 0 uses default (4096)
   maxIdleConns: 20
   maxOpenConns: 200
   connMaxLifetime: "30m"

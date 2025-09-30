@@ -14,7 +14,12 @@ import (
 	kitlog "github.com/theplant/appkit/log"
 )
 
-const keyTracingSpanName = "keyTracingSpanName"
+const (
+	keyTracingSpanName       = "keyTracingSpanName"
+	keyTracingMaxQueryLength = "keyTracingMaxQueryLength"
+)
+
+const defaultMaxQueryLength = 4096
 
 func WithSpanName(spanName string) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
@@ -22,9 +27,16 @@ func WithSpanName(spanName string) func(db *gorm.DB) *gorm.DB {
 	}
 }
 
+func WithMaxQueryLength(maxLength int) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Set(keyTracingMaxQueryLength, maxLength)
+	}
+}
+
 type TracingConfig struct {
 	ExcludeQuery     bool                      `confx:"excludeQuery" usage:"Exclude query"`
 	ExcludeQueryVars bool                      `confx:"excludeQueryVars" usage:"Exclude query vars"`
+	MaxQueryLength   int                       `confx:"maxQueryLength" usage:"Maximum query length for tracing, 0 uses default (4096)"`
 	QueryFormatter   func(query string) string `confx:"-" json:"-"`
 	Logger           *kitlog.Logger            `confx:"-" json:"-" inject:"optional"`
 }
@@ -226,7 +238,7 @@ func (p *logtracingPlugin) after() gormHookFunc {
 			} else {
 				query = tx.Dialector.Explain(tx.Statement.SQL.String(), vars...)
 			}
-			span.AppendKVs("sql.query", p.formatQuery(query))
+			span.AppendKVs("sql.query", p.formatQuery(tx, query))
 		}
 
 		if tx.Error != nil &&
@@ -239,9 +251,26 @@ func (p *logtracingPlugin) after() gormHookFunc {
 	}
 }
 
-func (p *logtracingPlugin) formatQuery(query string) string {
+func (p *logtracingPlugin) formatQuery(tx *gorm.DB, query string) string {
 	if p.QueryFormatter != nil {
-		return p.QueryFormatter(query)
+		query = p.QueryFormatter(query)
 	}
+
+	// Priority: request-level > config-level > default
+	maxLen := p.MaxQueryLength
+	if val, ok := tx.Get(keyTracingMaxQueryLength); ok {
+		if reqMaxLen, ok := val.(int); ok && reqMaxLen > 0 {
+			maxLen = reqMaxLen
+		}
+	}
+
+	if maxLen <= 0 {
+		maxLen = defaultMaxQueryLength
+	}
+
+	if len(query) > maxLen {
+		return query[:maxLen] + "... (truncated)"
+	}
+
 	return query
 }

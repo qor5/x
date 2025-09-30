@@ -25,6 +25,8 @@ import (
 	_ "embed"
 )
 
+var DefaultCreateBatchSize = 100
+
 type AuthMethod string
 
 const (
@@ -116,17 +118,18 @@ func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm
 			&gorm.Config{
 				// We don't want to use any foreign key constraint.
 				DisableForeignKeyConstraintWhenMigrating: true,
-				CreateBatchSize:                          100,
-				PrepareStmt:                              true,
+				// CreateBatchSize is set to DefaultCreateBatchSize to improve performance by reducing the number of round trips to the database.
+				CreateBatchSize: DefaultCreateBatchSize,
+				// PrepareStmt is disabled because pgx driver already enables prepared statement cache
+				// by default (extended protocol). Enabling this would create redundant statement caching
+				// at both GORM and driver levels, potentially causing memory overhead without performance gain.
+				PrepareStmt: false,
 				// Enable GORM error translation to convert database-specific errors into standardized GORM errors.
 				// Benefits:
-				// 1. Cross-database compatibility: Unified error handling across different databases
-				//    - MySQL: "Error 1062: Duplicate entry 'xxx' for key 'xxx'" -> gorm.ErrDuplicatedKey
-				//    - PostgreSQL: "ERROR: duplicate key value violates unique constraint" -> gorm.ErrDuplicatedKey
-				// 2. Better error handling: Enables type-based error handling (errors.Is(err, gorm.ErrDuplicatedKey))
-				//    instead of fragile string matching
-				// 3. Clean abstraction: Business logic remains database-agnostic, making it easier to switch
-				//    database providers or run multiple databases in production
+				// 1. Better error handling: Enables type-based error handling (errors.Is(err, gorm.ErrDuplicatedKey))
+				//    instead of fragile string matching against raw database error messages.
+				//    Example: PostgreSQL "ERROR: duplicate key value violates unique constraint" -> gorm.ErrDuplicatedKey
+				// 2. Clean abstraction: Business logic remains database-agnostic
 				TranslateError: true,
 				// QueryFields:                              true,
 			},
