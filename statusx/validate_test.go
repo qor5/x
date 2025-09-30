@@ -85,6 +85,7 @@ func TestValidate(t *testing.T) {
 		err := Validate(context.Background(), validator)
 		violations := ToFieldViolations(err, "")
 
+		assert.NoError(t, err)
 		assert.Empty(t, violations)
 	})
 
@@ -94,7 +95,24 @@ func TestValidate(t *testing.T) {
 		err := Validate(context.Background(), validator)
 		violations := ToFieldViolations(err, "")
 
+		assert.NoError(t, err)
 		assert.Empty(t, violations)
+	})
+
+	t.Run("mockContextValidator with empty violations returns nil error", func(t *testing.T) {
+		validator := &mockContextValidator{violations: []*FieldViolation{}}
+
+		err := Validate(context.Background(), validator)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("mockSimpleValidator with empty violations returns nil error", func(t *testing.T) {
+		validator := &mockSimpleValidator{violations: []*FieldViolation{}}
+
+		err := Validate(context.Background(), validator)
+
+		assert.NoError(t, err)
 	})
 
 	t.Run("returns empty for non-validator input", func(t *testing.T) {
