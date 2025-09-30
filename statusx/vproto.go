@@ -100,6 +100,7 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 
 	verr := &vproto.ValidationError{
 		Code:           cmp.Or(errorInfo.GetReason(), code.String()),
+		Msg:            st.Message(),
 		DefaultViewMsg: cmp.Or(localizedMessage.GetMessage(), st.Message()),
 	}
 
@@ -110,6 +111,7 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 			verr.FieldViolations = append(verr.FieldViolations, &vproto.ValidationError_FieldViolation{
 				Field:          fv.GetField(),
 				Code:           fv.GetReason(),
+				Msg:            fv.GetDescription(),
 				DefaultViewMsg: cmp.Or(fv.GetLocalizedMessage().GetMessage(), fv.GetDescription()),
 			})
 		}

@@ -4,8 +4,17 @@ import (
 	"log/slog"
 )
 
+type Level string
+
+const (
+	LevelDebug Level = "debug"
+	LevelInfo  Level = "info"
+	LevelWarn  Level = "warn"
+	LevelError Level = "error"
+)
+
 type Config struct {
-	Level string `confx:"level" usage:"Logging level" validate:"required,oneof=debug info warn error"`
+	Level Level `confx:"level" usage:"Logging level" validate:"required,oneof=debug info warn error"`
 }
 
 func SetupDefaultLogger(conf *Config) (*slog.Logger, error) {
