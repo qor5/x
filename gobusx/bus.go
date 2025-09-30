@@ -12,7 +12,7 @@ import (
 )
 
 type Config struct {
-	Database gormx.DatabaseConfig `confx:",squash"`
+	Database gormx.DatabaseConfig `confx:"database"`
 }
 
 var SetupBus = []any{

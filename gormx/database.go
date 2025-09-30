@@ -117,7 +117,10 @@ func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm
 				// We don't want to use any foreign key constraint.
 				DisableForeignKeyConstraintWhenMigrating: true,
 				CreateBatchSize:                          100,
-				PrepareStmt:                              true,
+				// PrepareStmt is disabled because pgx driver already enables prepared statement cache
+				// by default (extended protocol). Enabling this would create redundant statement caching
+				// at both GORM and driver levels, potentially causing memory overhead without performance gain.
+				PrepareStmt: false,
 				// Enable GORM error translation to convert database-specific errors into standardized GORM errors.
 				// Benefits:
 				// 1. Cross-database compatibility: Unified error handling across different databases
