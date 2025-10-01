@@ -131,7 +131,12 @@ func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm
 				//    Example: PostgreSQL "ERROR: duplicate key value violates unique constraint" -> gorm.ErrDuplicatedKey
 				// 2. Clean abstraction: Business logic remains database-agnostic
 				TranslateError: true,
-				// QueryFields:                              true,
+				// QueryFields explicitly lists columns in SELECT queries instead of using SELECT *.
+				// Required to prevent "cached plan must not change result type" errors when pgx's
+				// prepared statement cache encounters schema changes during rolling deployments.
+				// Trade-off: Field removal will fail-fast (error immediately) rather than silently
+				// returning zero values, requiring proper multi-phase deployment for breaking changes.
+				QueryFields: true,
 			},
 		}, opts...)...,
 	)
