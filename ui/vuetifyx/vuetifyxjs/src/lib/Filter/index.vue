@@ -234,5 +234,8 @@ const foldedFilters = computed(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 0;
+  &:deep(.v-chip .v-chip__content i.v-icon) {
+    vertical-align: text-top;
+  }
 }
 </style>
