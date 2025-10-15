@@ -47,7 +47,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.38.0
 	github.com/theplant/appkit v0.0.0-20250528023215-3d0d299dc4c6
 	github.com/theplant/htmlgo v1.0.3
-	github.com/theplant/inject v1.0.2
+	github.com/theplant/inject v1.1.0
 	github.com/theplant/osenv v0.0.2
 	github.com/theplant/ratelimiter v1.0.1
 	github.com/theplant/testenv v0.2.1
