@@ -25,14 +25,8 @@ type Config struct {
 	SessionToken string `confx:"sessionToken" usage:"AWS session token for temporary credentials"`
 }
 
-// SetupAWSConfig creates an AWS configuration from the provided Config
-var SetupAWSConfig = SetupAWSConfigFactory("aws")
-
-// SetupAWSConfigFactory creates a factory function for setting up AWS configuration
-func SetupAWSConfigFactory(name string) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *Config) (*aws.Config, error) {
-	return func(ctx context.Context, lc *lifecycle.Lifecycle, conf *Config) (*aws.Config, error) {
-		return LoadConfig(ctx, conf)
-	}
+func SetupAWSConfig(ctx context.Context, lc *lifecycle.Lifecycle, conf *Config) (*aws.Config, error) {
+	return LoadConfig(ctx, conf)
 }
 
 // LoadConfig loads AWS configuration based on the provided Config
