@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/rs/xid"
 )
 
 type Executor interface {
@@ -77,7 +77,7 @@ func Transaction(ctx context.Context, exec Executor, fn func(ctx context.Context
 }
 
 func transactionWithSavepoint(ctx context.Context, tx *sql.Tx, fn func(ctx context.Context, tx *sql.Tx) error) (xerr error) {
-	spID := uuid.New().String()
+	spID := xid.New().String()
 	spName := fmt.Sprintf("sp_%s", spID)
 
 	if _, err := tx.ExecContext(ctx, fmt.Sprintf("SAVEPOINT %s", spName)); err != nil {
