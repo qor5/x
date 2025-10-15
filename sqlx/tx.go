@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"hash/maphash"
 	"log/slog"
 
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -77,8 +77,8 @@ func Transaction(ctx context.Context, exec Executor, fn func(ctx context.Context
 }
 
 func transactionWithSavepoint(ctx context.Context, tx *sql.Tx, fn func(ctx context.Context, tx *sql.Tx) error) (xerr error) {
-	spID := new(maphash.Hash).Sum64()
-	spName := fmt.Sprintf("sp%d", spID)
+	spID := uuid.New().String()
+	spName := fmt.Sprintf("sp_%s", spID)
 
 	if _, err := tx.ExecContext(ctx, fmt.Sprintf("SAVEPOINT %s", spName)); err != nil {
 		return errors.Wrap(err, "failed to create savepoint")
