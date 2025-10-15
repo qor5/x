@@ -25,13 +25,6 @@ type Config struct {
 }
 
 func SetupAWSConfig(ctx context.Context, conf *Config) (*aws.Config, error) {
-	return LoadConfig(ctx, conf)
-}
-
-// LoadConfig loads AWS configuration based on the provided Config
-// It supports both confx configuration and AWS SDK native environment variables
-// If confx config is provided, it sets the corresponding environment variables
-func LoadConfig(ctx context.Context, conf *Config) (*aws.Config, error) {
 	// Set environment variables from confx config if provided
 	if conf.Region != "" {
 		os.Setenv("AWS_REGION", conf.Region)

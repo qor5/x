@@ -26,7 +26,7 @@ func TestLoadConfig(t *testing.T) {
 			SessionToken:    "test-session-token",
 		}
 
-		awsConfig, err := LoadConfig(ctx, conf)
+		awsConfig, err := SetupAWSConfig(ctx, conf)
 		require.NoError(t, err)
 		assert.Equal(t, "ap-northeast-1", awsConfig.Region)
 
@@ -61,7 +61,7 @@ func TestLoadConfig(t *testing.T) {
 
 		conf := &Config{}
 
-		awsConfig, err := LoadConfig(ctx, conf)
+		awsConfig, err := SetupAWSConfig(ctx, conf)
 		require.NoError(t, err)
 
 		// The region should be loaded from environment
@@ -86,7 +86,7 @@ func TestLoadConfig(t *testing.T) {
 			SecretAccessKey: "config-secret-key",
 		}
 
-		awsConfig, err := LoadConfig(ctx, conf)
+		awsConfig, err := SetupAWSConfig(ctx, conf)
 		require.NoError(t, err)
 
 		// confx config should have set new environment variable values
@@ -117,7 +117,7 @@ func TestLoadConfig(t *testing.T) {
 		// Empty confx config should allow AWS native env vars to work
 		conf := &Config{}
 
-		awsConfig, err := LoadConfig(ctx, conf)
+		awsConfig, err := SetupAWSConfig(ctx, conf)
 		require.NoError(t, err)
 
 		// Should use AWS native environment variables
