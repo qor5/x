@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/pkg/errors"
-	"github.com/theplant/inject/lifecycle"
 )
 
 // Config defines AWS configuration that supports both confx and environment variables
@@ -25,7 +24,7 @@ type Config struct {
 	SessionToken string `confx:"sessionToken" usage:"AWS session token for temporary credentials"`
 }
 
-func SetupAWSConfig(ctx context.Context, lc *lifecycle.Lifecycle, conf *Config) (*aws.Config, error) {
+func SetupAWSConfig(ctx context.Context, conf *Config) (*aws.Config, error) {
 	return LoadConfig(ctx, conf)
 }
 
