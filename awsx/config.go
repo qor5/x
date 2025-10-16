@@ -15,7 +15,7 @@ type Config struct {
 	Region string `confx:"region" usage:"AWS region (e.g., ap-northeast-1)"`
 
 	// AccessKeyID specifies the AWS access key ID
-	AccessKeyID string `confx:"accessKeyId" usage:"AWS access key ID"`
+	AccessKeyID string `confx:"accessKeyID" usage:"AWS access key ID"`
 
 	// SecretAccessKey specifies the AWS secret access key
 	SecretAccessKey string `confx:"secretAccessKey" usage:"AWS secret access key"`
