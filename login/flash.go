@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/pkg/errors"
 )
 
 type NoticeLevel int
@@ -119,7 +121,8 @@ func setNoticeOrPanic(w http.ResponseWriter, err error) {
 	if err == nil {
 		return
 	}
-	ne, ok := err.(*NoticeError)
+	var ne *NoticeError
+	ok := errors.As(err, &ne)
 	if !ok {
 		panic(err)
 	}
