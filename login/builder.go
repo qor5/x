@@ -1484,7 +1484,8 @@ func (b *Builder) doFormChangePassword(w http.ResponseWriter, r *http.Request) {
 
 	err := b.ChangePassword(r, oldPassword, password, confirmPassword, otp)
 	if err != nil {
-		if ne, ok := err.(*NoticeError); ok {
+		var ne *NoticeError
+		if errors.As(err, &ne) {
 			setNoticeFlash(w, ne)
 		} else {
 			var fc FailCode
