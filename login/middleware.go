@@ -124,9 +124,9 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 					}
 					switch err {
 					case ErrUserNotFound:
-						setFailCodeFlash(w, FailCodeUserNotFound)
+						SetFailCodeFlash(w, FailCodeUserNotFound)
 					case ErrUserLocked:
-						setFailCodeFlash(w, FailCodeUserLocked)
+						SetFailCodeFlash(w, FailCodeUserLocked)
 					case ErrPasswordChanged:
 						isSelfChange := false
 						if c, err := r.Cookie(infoCodeFlashCookieName); err == nil {
