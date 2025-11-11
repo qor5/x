@@ -16,7 +16,7 @@ var vuetifyx embed.FS
 var assetsbox embed.FS
 
 func JSComponentsPack() web.ComponentsPack {
-	v, err := vuetifyx.ReadFile("vuetifyxjs/dist/vuetifyx.min.js")
+	v, err := vuetifyx.ReadFile("vuetifyxjs/dist/vuetifyx.js")
 	if err != nil {
 		panic(err)
 	}

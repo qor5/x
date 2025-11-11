@@ -72,9 +72,15 @@
     },
     "overrides": {
       "esbuild": "0.25.0"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "esbuild",
+      "msw",
+      "vue-demi"
+    ]
   },
   "engines": {
-    "pnpm": "10.16.1"
+    "pnpm": "10.20.0"
   }
 }
