@@ -25,6 +25,7 @@ export default defineConfig({
     //   formats: ['umd'],
     //   name: 'vuetifyx'
     // },
+    minify: false,
     copyPublicDir: false,
     rollupOptions: {
       input: resolve(__dirname, 'src/lib/main.ts'),
@@ -38,7 +39,7 @@ export default defineConfig({
           vuetify: 'Vuetify'
         },
         chunkFileNames: `[name].js`,
-        entryFileNames: 'vuetifyx.min.js',
+        entryFileNames: 'vuetifyx.js',
         assetFileNames: assetInfo => {
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
             return 'assets/vuetifyx.min.css';
