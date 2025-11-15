@@ -879,8 +879,12 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 }
 
 // return user if account exists even if there is an error returned
-func (b *Builder) authUserLoginCode(account string, code string) (user interface{}, err error) {
-	user, err = b.userModel.(UserLoginCoder).FindUserByPhoneNumber(b.db, b.newUserObject(), account)
+func (b *Builder) AuthUserLoginCode(account string, code string) (user interface{}, err error) {
+	user, err = b.userModel.(UserLoginCoder).FindUser(b.db, b.newUserObject(), account)
+	// Falls back to find by email
+	if err == ErrAccountNumberInvalid {
+		user, err = b.userModel.(UserPasser).FindUser(b.db, b.newUserObject(), account)
+	}
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, ErrUserNotFound
@@ -893,8 +897,8 @@ func (b *Builder) authUserLoginCode(account string, code string) (user interface
 		return user, ErrUserLocked
 	}
 
-	u := user.(UserLoginCoder)
-	ltoken, _, expired := u.GetLoginCode()
+	ul := user.(UserLoginCoder)
+	ltoken, _, expired := ul.GetLoginCode()
 	if expired {
 		return user, ErrLoginCodeExpired
 	}
@@ -921,7 +925,7 @@ func (b *Builder) authUserLoginCode(account string, code string) (user interface
 		}
 	}
 
-	return user, u.ConsumeLoginCode(b.db, b.newUserObject())
+	return user, ul.ConsumeLoginCode(b.db, b.newUserObject(), account)
 }
 
 // return user if account exists even if there is an error returned
@@ -997,7 +1001,7 @@ func (b *Builder) sendUserCodeLogin(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	account := r.FormValue("account")
-	user, err = b.userModel.(UserLoginCoder).FindUserByPhoneNumber(b.db, b.newUserObject(), account)
+	user, err = b.userModel.(UserLoginCoder).FindUser(b.db, b.newUserObject(), account)
 	if err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
@@ -1026,7 +1030,7 @@ func (b *Builder) sendUserCodeLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// send login code to user
-	loginCode, err := uc.GenerateLoginCode(b.db, b.newUserObject())
+	loginCode, err := uc.GenerateLoginCode(b.db, b.newUserObject(), account)
 	if err != nil {
 		log.Printf("failed to generate login code: %v", err)
 		SetFailCodeFlash(w, FailCodeSystemError)
@@ -1066,7 +1070,7 @@ func (b *Builder) loginCodeDo(w http.ResponseWriter, r *http.Request) {
 
 	account := r.FormValue("account")
 	loginCode := r.FormValue("logincode")
-	user, err = b.authUserLoginCode(account, loginCode)
+	user, err = b.AuthUserLoginCode(account, loginCode)
 	if err != nil {
 		if err == ErrUserGetLocked && b.afterUserLockedHook != nil {
 			if herr := b.wrapHook(b.afterUserLockedHook)(r, user); herr != nil {
