@@ -3,7 +3,7 @@ package login
 import (
 	"fmt"
 	"net/http"
-	"regexp"
+	"reflect"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,19 +11,18 @@ import (
 )
 
 type UserLoginCoder interface {
-	FindUserByPhoneNumber(db *gorm.DB, model interface{}, phoneNumber string) (user interface{}, err error)
-	GenerateLoginCode(db *gorm.DB, model interface{}) (token string, err error)
-	ConsumeLoginCode(db *gorm.DB, model interface{}) error
+	FindUser(db *gorm.DB, model interface{}, identifier string) (user interface{}, err error)
+	GenerateLoginCode(db *gorm.DB, model interface{}, identifier string) (token string, err error)
+	ConsumeLoginCode(db *gorm.DB, model interface{}, identifier string) error
 	GetLoginCode() (token string, createdAt *time.Time, expired bool)
-	SetConfirmTime(db *gorm.DB, model interface{}) error
+	SetConfirmTime(db *gorm.DB, model interface{}, identifier string) error
 }
 
 type UserLoginCodeSender interface {
-	SendLoginCode(r *http.Request, phoneNumber string, code string) error
+	SendLoginCode(r *http.Request, identifier string, code string) error
 }
 
 type UserLoginCode struct {
-	PhoneNumber        string `gorm:"index:,unique,where:phone_number!='' and deleted_at is null"`
 	ConfirmedAt        *time.Time
 	LoginCode          string `gorm:"index:,unique,where:login_code!=''"`
 	LoginCreatedAt     *time.Time
@@ -32,40 +31,13 @@ type UserLoginCode struct {
 
 var _ UserLoginCoder = (*UserLoginCode)(nil)
 
-const minPhoneNumberLength = 8
-
-var removeNonNumeric = regexp.MustCompile(`\D`)
-
-func (up *UserLoginCode) FindUserByPhoneNumber(db *gorm.DB, model interface{}, phoneNumber string) (user interface{}, err error) {
-	phoneNumber = removeNonNumeric.ReplaceAllString(phoneNumber, "")
-	if len(phoneNumber) < minPhoneNumberLength {
-		return nil, ErrAccountNumberInvalid
+func (up *UserLoginCode) FindUser(db *gorm.DB, model interface{}, identifier string) (user interface{}, err error) {
+	// This is a generic finder, the actual implementation is on the user model.
+	iface, ok := model.(UserLoginCoder)
+	if !ok {
+		return nil, fmt.Errorf("model does not implement UserLoginCoder")
 	}
-	// Logic here is to try to find the phone number in the database, even
-	// if the user did not enter the international code. So we use a LIKE
-	// to check if there are more than one user with the same ending digits.
-	// If there are, we need more numbers. Otherwise, we can assume it's the correct user.
-	likeClause := fmt.Sprintf("%%%s", phoneNumber)
-	var nphones int64
-	result := db.Model(model).Where("phone_number like ?", likeClause).
-		Count(&nphones)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-	switch nphones {
-	case 0:
-		return nil, gorm.ErrRecordNotFound
-	case 1:
-		result = db.Model(model).Where("phone_number like ?", likeClause).
-			First(model)
-	default:
-		return nil, ErrAccountNumberInvalid
-	}
-	return model, result.Error
-}
-
-func (up *UserLoginCode) GetPhoneNumber() string {
-	return up.PhoneNumber
+	return iface.FindUser(db, model, identifier)
 }
 
 func (up *UserLoginCode) GenerateLoginCodeExpiration(db *gorm.DB) (createdAt time.Time, expiredAt time.Time) {
@@ -73,20 +45,26 @@ func (up *UserLoginCode) GenerateLoginCodeExpiration(db *gorm.DB) (createdAt tim
 	return createdAt, createdAt.Add(10 * time.Minute)
 }
 
-func (up *UserLoginCode) GenerateLoginCode(db *gorm.DB, model interface{}) (code string, err error) {
+func (up *UserLoginCode) GenerateLoginCode(db *gorm.DB, model interface{}, identifier string) (code string, err error) {
 	code = fmt.Sprintf("%06d", uuid.New().ID()%1000000)
 
 	iface, ok := model.(interface {
 		GenerateLoginCodeExpiration(db *gorm.DB) (createdAt time.Time, expiredAt time.Time)
 	})
 	if !ok {
-		return "", fmt.Errorf("model does not have GenerateLoginCodeExpiration method, maybe it does not embed UserWhatsApp")
+		return "", fmt.Errorf("model does not have GenerateLoginCodeExpiration method, maybe it does not embed LoginCoder")
 	}
 
 	createdAt, expiredAt := iface.GenerateLoginCodeExpiration(db)
 
+	// get the primary key of the model
+	stmt := &gorm.Statement{DB: db}
+	stmt.Parse(model)
+	primaryField := stmt.Schema.PrioritizedPrimaryField
+	primaryValue := primaryField.ReflectValueOf(stmt.Context, reflect.ValueOf(model)).Interface()
+
 	result := db.Model(model).
-		Where("phone_number = ?", removeNonNumeric.ReplaceAllString(up.PhoneNumber, "")).
+		Where(fmt.Sprintf("%s = ?", primaryField.DBName), primaryValue).
 		Updates(map[string]interface{}{
 			"login_code":            code,
 			"login_created_at":      createdAt,
@@ -104,10 +82,15 @@ func (up *UserLoginCode) GenerateLoginCode(db *gorm.DB, model interface{}) (code
 	return code, nil
 }
 
-func (up *UserLoginCode) ConsumeLoginCode(db *gorm.DB, model interface{}) error {
+func (up *UserLoginCode) ConsumeLoginCode(db *gorm.DB, model interface{}, identifier string) error {
 	now := time.Now()
+	stmt := &gorm.Statement{DB: db}
+	stmt.Parse(model)
+	primaryField := stmt.Schema.PrioritizedPrimaryField
+	primaryValue := primaryField.ReflectValueOf(stmt.Context, reflect.ValueOf(model)).Interface()
+
 	err := db.Model(model).
-		Where("phone_number = ?", removeNonNumeric.ReplaceAllString(up.PhoneNumber, "")).
+		Where(fmt.Sprintf("%s = ?", primaryField.DBName), primaryValue).
 		Updates(map[string]interface{}{
 			"login_code_expired_at": now,
 			"login_code":            "",
@@ -128,10 +111,14 @@ func (up *UserLoginCode) GetLoginCode() (token string, createdAt *time.Time, exp
 	return up.LoginCode, up.LoginCreatedAt, false
 }
 
-func (up *UserLoginCode) SetConfirmTime(db *gorm.DB, model interface{}) error {
+func (up *UserLoginCode) SetConfirmTime(db *gorm.DB, model interface{}, identifier string) error {
 	now := time.Now()
+	stmt := &gorm.Statement{DB: db}
+	stmt.Parse(model)
+	primaryField := stmt.Schema.PrioritizedPrimaryField
+	primaryValue := primaryField.ReflectValueOf(stmt.Context, reflect.ValueOf(model)).Interface()
 	result := db.Model(model).
-		Where("phone_number = ?", removeNonNumeric.ReplaceAllString(up.PhoneNumber, "")).
+		Where(fmt.Sprintf("%s = ?", primaryField.DBName), primaryValue).
 		Update("confirmed_at", now)
 	if result.Error != nil {
 		return result.Error
