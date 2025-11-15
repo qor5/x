@@ -337,8 +337,99 @@ const updateBody = (
     },
     '*'
   )
-  const bodyEle = iframeDoc().querySelector('body')
-  bodyEle.innerHTML = data.body
+  // const bodyEle = iframeDoc().querySelector('body')
+  // var bodyEle = temp as Element
+  // bodyEle.innerHTML = data.body
+  iframe.value.srcdoc = data.body
+  setTimeout(() => {
+    setIframeDisplay()
+    scrollToCurrentContainer(data.containerDataID, data.isUpdate)
+  }, 200)
+}
+
+/**
+ * Helper function to decode an HTML-escaped string.
+ * (e.g., "alert(&#39;hi&#39;)" becomes "alert('hi')")
+ */
+function htmlDecode(input: string): string {
+  const doc = new DOMParser().parseFromString(input, 'text/html')
+  return doc.documentElement.textContent
+}
+
+/**
+ * Creates the full HTML skeleton needed for the Vue app to run.
+ * The bodyContent is the snippet starting with <div id='app'>.
+ */
+function buildFullHtml(bodyContent: string): string {
+  // This skeleton MUST include the <script> tags that initialize Vue.
+  // Adjust these paths if they are incorrect.
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset='utf-8'>
+      <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
+      
+      <style>
+        [v-cloak] { display: none; }
+        /* Add any other critical styles your layout needs */
+      </style>
+
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+      <link rel="stylesheet" href="/assets/pb.css" async>
+      <link rel="stylesheet" href="/vuetify/assets/index.css" async>
+    </head>
+    <body class='front'>
+      
+      ${bodyContent}
+      
+      <script src='/assets/vue.js'><\/script>
+      <script src='/assets/main.js'><\/script>
+    </body>
+    </html>
+  `
+}
+
+const updateBodyNew = (
+  data: { body: string; containerDataID: string; isUpdate: boolean; eventName: string },
+  temp: Node // This parameter is no longer used but kept for compatibility with updateIframeBody
+) => {
+  if (!iframe.value) {
+    return
+  }
+
+  // 1. Post the event
+  iframe.value.contentWindow.postMessage(
+    {
+      eventName: data.eventName
+    },
+    '*'
+  )
+
+  // 2. Decode the HTML string (to fix &#39; errors)
+  const rawHtml = htmlDecode(data.body)
+  const trimmedHtml = rawHtml.trim()
+
+  // 3. Check if it's a full document or just a snippet
+  const isFullDocument =
+    trimmedHtml.toLowerCase().startsWith('<!doctype html') ||
+    trimmedHtml.toLowerCase().startsWith('<html')
+
+  let finalHtml = ''
+  if (isFullDocument) {
+    // The server gave us a full document, use it directly.
+    finalHtml = rawHtml
+  } else {
+    // The server gave us just a snippet, wrap it in the skeleton
+    // so that Vue can actually be loaded and mounted.
+    finalHtml = buildFullHtml(rawHtml)
+  }
+
+  // 4. Set the *entire* iframe document using srcdoc.
+  // This forces the browser to load the new document and run the scripts.
+  iframe.value.srcdoc = finalHtml
+
+  // 5. Wait for the iframe to load, parse, and render the new srcdoc.
   setTimeout(() => {
     setIframeDisplay()
     scrollToCurrentContainer(data.containerDataID, data.isUpdate)

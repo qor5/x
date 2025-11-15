@@ -53,6 +53,7 @@
         :on-update:model-value="onUpdateModelValue"
         inset
         v-bind="combinedProps"
+        :decimal-separator="localDecimalSeparator"
       >
         <template
           v-if="hasPrependInnerSlot"
@@ -129,6 +130,12 @@ function modelValueFormatter(value: any) {
   }
   return value
 }
+
+const localDecimalSeparator = computed(() => {
+  // Determine the local decimal separator using the browser's locale
+  // This creates a number (0.1), formats it, and extracts the non-digit character
+  return (0.1).toLocaleString().replace(/\d/g, '').charAt(0)
+})
 
 const passwordFieldType = computed(() => {
   if (props.passwordVisibleToggle === undefined) return 'password'

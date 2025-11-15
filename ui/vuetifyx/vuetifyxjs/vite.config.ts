@@ -3,9 +3,10 @@ import Components from 'unplugin-vue-components/vite'
 import { Vuetify3Resolver } from 'unplugin-vue-components/resolvers'
 import Vue from '@vitejs/plugin-vue'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
-// import ViteFonts from 'unplugin-fonts/vite'
+import ViteFonts from 'unplugin-fonts/vite'
 import { resolve } from 'path'
 import vueJsx from '@vitejs/plugin-vue-jsx'
+import commonjs from 'vite-plugin-commonjs' 
 
 // Utilities
 import { defineConfig } from 'vite'
@@ -25,6 +26,7 @@ export default defineConfig({
     //   formats: ['umd'],
     //   name: 'vuetifyx'
     // },
+    minify: false,
     copyPublicDir: false,
     rollupOptions: {
       input: resolve(__dirname, 'src/lib/main.ts'),
@@ -38,7 +40,7 @@ export default defineConfig({
           vuetify: 'Vuetify'
         },
         chunkFileNames: `[name].js`,
-        entryFileNames: 'vuetifyx.min.js',
+        entryFileNames: 'vuetifyx.js',
         assetFileNames: assetInfo => {
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
             return 'assets/vuetifyx.min.css';
@@ -61,22 +63,25 @@ export default defineConfig({
         configFile: 'src/lib/scss/_vuetify.scss'
       }
     }),
+    commonjs(),
     Components({
       dts: true,
       dirs: ['src/demo/components', 'src/lib'],
       resolvers: [Vuetify3Resolver()],
       include: [/\.vue$/]
     }),
-    // ViteFonts({
-    //   google: {
-    //     families: [{
-    //       name: 'Roboto',
-    //       styles: 'wght@100;300;400;500;700;900'
-    //     }]
-    //   }
-    // })
+    ViteFonts({
+      google: {
+        families: [{
+          name: 'Roboto',
+          styles: 'wght@100;300;400;500;700;900'
+        }]
+      }
+    })
   ],
-
+  optimizeDeps: {
+    include: ['@vue/shared'], // Add the suspected package here
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

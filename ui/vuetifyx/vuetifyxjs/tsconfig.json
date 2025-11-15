@@ -7,7 +7,10 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "moduleResolution": "Node",
+    // "moduleResolution": "Node",
+    "moduleResolution": "bundler",
+    /* Bundler mode */
+    "allowImportingTsExtensions": true,
     "strict": true,
     "jsx": "preserve",
     "resolveJsonModule": true,

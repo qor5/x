@@ -37,12 +37,16 @@ const (
 	FailCodeAccountIsRequired
 	FailCodePasswordCannotBeEmpty
 	FailCodePasswordNotMatch
+	FailCodeTooManyAttempts
+	FailCodeInvalidLoginCode
 	FailCodeIncorrectPassword
 	FailCodeInvalidToken
 	FailCodeTokenExpired
 	FailCodeIncorrectTOTPCode
 	FailCodeTOTPCodeHasBeenUsed
 	FailCodeIncorrectRecaptchaToken
+	FailCodeLoginTokenExpired
+	FailCodeAccountNumberInvalid
 )
 
 type WarnCode int
@@ -64,7 +68,7 @@ const (
 	infoCodeFlashCookieName = "qor5_ic_flash"
 )
 
-func setFailCodeFlash(w http.ResponseWriter, c FailCode) {
+func SetFailCodeFlash(w http.ResponseWriter, c FailCode) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     failCodeFlashCookieName,
 		Value:    fmt.Sprint(c),
@@ -93,7 +97,7 @@ func setInfoCodeFlash(w http.ResponseWriter, c InfoCode) {
 
 const noticeFlashCookieName = "qor5_notice_flash"
 
-func setNoticeFlash(w http.ResponseWriter, ne *NoticeError) {
+func SetNoticeFlash(w http.ResponseWriter, ne *NoticeError) {
 	if ne == nil {
 		return
 	}
@@ -111,10 +115,10 @@ func setNoticeOrFailCodeFlash(w http.ResponseWriter, err error, c FailCode) {
 	}
 	ne, ok := err.(*NoticeError)
 	if ok {
-		setNoticeFlash(w, ne)
+		SetNoticeFlash(w, ne)
 		return
 	}
-	setFailCodeFlash(w, c)
+	SetFailCodeFlash(w, c)
 }
 
 func setNoticeOrPanic(w http.ResponseWriter, err error) {
@@ -126,7 +130,7 @@ func setNoticeOrPanic(w http.ResponseWriter, err error) {
 	if !ok {
 		panic(err)
 	}
-	setNoticeFlash(w, ne)
+	SetNoticeFlash(w, ne)
 }
 
 const wrongLoginInputFlashCookieName = "qor5_wli_flash"
@@ -134,6 +138,7 @@ const wrongLoginInputFlashCookieName = "qor5_wli_flash"
 type WrongLoginInputFlash struct {
 	Account  string
 	Password string
+	LoginCode string
 }
 
 func (b *Builder) setWrongLoginInputFlash(w http.ResponseWriter, f WrongLoginInputFlash) {
