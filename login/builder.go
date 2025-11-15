@@ -925,7 +925,7 @@ func (b *Builder) AuthUserLoginCode(account string, code string) (user interface
 		}
 	}
 
-	return user, ul.ConsumeLoginCode(b.db, b.newUserObject(), account)
+	return user, ul.ConsumeLoginCode(b.db, user)
 }
 
 // return user if account exists even if there is an error returned
@@ -1030,7 +1030,7 @@ func (b *Builder) sendUserCodeLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// send login code to user
-	loginCode, err := uc.GenerateLoginCode(b.db, b.newUserObject(), account)
+	loginCode, err := uc.GenerateLoginCode(b.db, user)
 	if err != nil {
 		log.Printf("failed to generate login code: %v", err)
 		SetFailCodeFlash(w, FailCodeSystemError)

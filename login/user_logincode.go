@@ -12,10 +12,10 @@ import (
 
 type UserLoginCoder interface {
 	FindUser(db *gorm.DB, model interface{}, identifier string) (user interface{}, err error)
-	GenerateLoginCode(db *gorm.DB, model interface{}, identifier string) (token string, err error)
-	ConsumeLoginCode(db *gorm.DB, model interface{}, identifier string) error
+	GenerateLoginCode(db *gorm.DB, model interface{}) (token string, err error)
+	ConsumeLoginCode(db *gorm.DB, model interface{}) error
 	GetLoginCode() (token string, createdAt *time.Time, expired bool)
-	SetConfirmTime(db *gorm.DB, model interface{}, identifier string) error
+	SetConfirmTime(db *gorm.DB, model interface{}) error
 }
 
 type UserLoginCodeSender interface {
@@ -45,7 +45,16 @@ func (up *UserLoginCode) GenerateLoginCodeExpiration(db *gorm.DB) (createdAt tim
 	return createdAt, createdAt.Add(10 * time.Minute)
 }
 
-func (up *UserLoginCode) GenerateLoginCode(db *gorm.DB, model interface{}, identifier string) (code string, err error) {
+func getModelPrimaryKey(db *gorm.DB, model interface{}) (pk string, pv any) {
+	// get the primary key of the model
+	stmt := &gorm.Statement{DB: db}
+	stmt.Parse(model)
+	primaryField := stmt.Schema.PrioritizedPrimaryField
+	primaryValue := primaryField.ReflectValueOf(stmt.Context, reflect.ValueOf(model)).Interface()
+	return primaryField.DBName, primaryValue
+}
+
+func (up *UserLoginCode) GenerateLoginCode(db *gorm.DB, model interface{}) (code string, err error) {
 	code = fmt.Sprintf("%06d", uuid.New().ID()%1000000)
 
 	iface, ok := model.(interface {
@@ -57,14 +66,11 @@ func (up *UserLoginCode) GenerateLoginCode(db *gorm.DB, model interface{}, ident
 
 	createdAt, expiredAt := iface.GenerateLoginCodeExpiration(db)
 
-	// get the primary key of the model
-	stmt := &gorm.Statement{DB: db}
-	stmt.Parse(model)
-	primaryField := stmt.Schema.PrioritizedPrimaryField
-	primaryValue := primaryField.ReflectValueOf(stmt.Context, reflect.ValueOf(model)).Interface()
+
+	pk, pv := getModelPrimaryKey(db, model)
 
 	result := db.Model(model).
-		Where(fmt.Sprintf("%s = ?", primaryField.DBName), primaryValue).
+		Where(fmt.Sprintf("%s = ?", pk), pv).
 		Updates(map[string]interface{}{
 			"login_code":            code,
 			"login_created_at":      createdAt,
@@ -82,15 +88,12 @@ func (up *UserLoginCode) GenerateLoginCode(db *gorm.DB, model interface{}, ident
 	return code, nil
 }
 
-func (up *UserLoginCode) ConsumeLoginCode(db *gorm.DB, model interface{}, identifier string) error {
+func (up *UserLoginCode) ConsumeLoginCode(db *gorm.DB, model interface{}) error {
 	now := time.Now()
-	stmt := &gorm.Statement{DB: db}
-	stmt.Parse(model)
-	primaryField := stmt.Schema.PrioritizedPrimaryField
-	primaryValue := primaryField.ReflectValueOf(stmt.Context, reflect.ValueOf(model)).Interface()
+	pk, pv := getModelPrimaryKey(db, model)
 
 	err := db.Model(model).
-		Where(fmt.Sprintf("%s = ?", primaryField.DBName), primaryValue).
+		Where(fmt.Sprintf("%s = ?", pk), pv).
 		Updates(map[string]interface{}{
 			"login_code_expired_at": now,
 			"login_code":            "",
@@ -111,7 +114,7 @@ func (up *UserLoginCode) GetLoginCode() (token string, createdAt *time.Time, exp
 	return up.LoginCode, up.LoginCreatedAt, false
 }
 
-func (up *UserLoginCode) SetConfirmTime(db *gorm.DB, model interface{}, identifier string) error {
+func (up *UserLoginCode) SetConfirmTime(db *gorm.DB, model interface{}) error {
 	now := time.Now()
 	stmt := &gorm.Statement{DB: db}
 	stmt.Parse(model)
