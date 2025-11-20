@@ -1864,6 +1864,34 @@ func (b *Builder) totpDo(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, redirectURL, http.StatusFound)
 }
 
+func (b *Builder) LoginCodeLogin(account string, code string) (token string, err error) {
+	user, err := b.AuthUserLoginCode(account, code)
+	if err != nil {
+		return "", err
+	}
+
+	userID := objectID(user)
+	claims := UserClaims{
+		UserID:             userID,
+		LoginCodeValidated: true,
+		RegisteredClaims:   b.genBaseSessionClaim(userID),
+	}
+
+	return b.mustGetSessionToken(claims), nil
+}
+
+func (b *Builder) ValidateSessionToken(token string) (claims *UserClaims, err error) {
+	c, err := parseClaims(&UserClaims{}, token, b.secret)
+	if err != nil {
+		return nil, err
+	}
+	rc, ok := c.(*UserClaims)
+	if !ok {
+		return nil, errInvalidToken
+	}
+	return rc, nil
+}
+
 func (b *Builder) Mount(mux *http.ServeMux) {
 	b.MountAPI(mux)
 
