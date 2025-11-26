@@ -22,3 +22,16 @@ func (m *Model) BeforeCreate(_ *gorm.DB) error {
 	}
 	return nil
 }
+
+type HardDeleteModel struct {
+	ID        string    `gorm:"size:36;primaryKey" json:"id"`
+	CreatedAt time.Time `gorm:"not null" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"not null" json:"updatedAt"`
+}
+
+func (m *HardDeleteModel) BeforeCreate(_ *gorm.DB) error {
+	if m.ID == "" {
+		m.ID = uuid.NewString()
+	}
+	return nil
+}
