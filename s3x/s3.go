@@ -12,7 +12,7 @@ import (
 type Config struct {
 	Region   string `confx:"region" usage:"AWS region" validate:"required"`
 	Bucket   string `confx:"bucket" usage:"AWS bucket" validate:"required"`
-	Endpoint string `confx:"endpoint" usage:"AWS endpoint" validate:"required"`
+	Endpoint string `confx:"endpoint" usage:"AWS endpoint"`
 	ACL      string `confx:"-"`
 }
 
