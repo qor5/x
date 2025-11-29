@@ -47,6 +47,7 @@ const handleParallax = () => {
   if (!root.value) return
 
   const opposites = root.value.querySelectorAll('.v-timeline-item__opposite')
+  const bodies = root.value.querySelectorAll('.v-timeline-item__body')
   const windowHeight = window.innerHeight
   const center = windowHeight / 2
 
@@ -54,30 +55,16 @@ const handleParallax = () => {
     const rect = el.getBoundingClientRect()
     const elCenter = rect.top + rect.height / 2
     const dist = elCenter - center
-    // Move slower than scroll: translate in direction of scroll (up when scrolling down means negative dist)
-    // If dist is positive (element below center), we want it to be pushed down further?
-    // Parallax "far away" moves slower.
-    // If I scroll down, everything moves up.
-    // If I want it to move slower, I need to push it down (positive Y).
-    // So if rect.top is decreasing (moving up), I add positive Y.
-    // dist is (rect.top - center).
-    // When element is at center, dist is 0.
-    // When element is below center, dist is positive.
-    // When element is above center, dist is negative.
-    // transform = dist * factor.
-    // If factor is 0.2:
-    // Below center (100px): transform = 20px. It is pushed down.
-    // Above center (-100px): transform = -20px. It is pushed up.
-    // This effectively expands the space, making it move faster?
-    // Wait.
-    // If I scroll down 10px. Element moves up 10px.
-    // I want it to move up only 8px.
-    // So I need to add +2px (down).
-    // dist changes by -10.
-    // transform should change by +2.
-    // So transform = dist * -0.2 ?
-    // Let's try factor = 0.1
     const factor = 0.1
+    const offset = dist * factor
+    ;(el as HTMLElement).style.transform = `translateY(${offset}px)`
+  })
+
+  bodies.forEach((el) => {
+    const rect = el.getBoundingClientRect()
+    const elCenter = rect.top + rect.height / 2
+    const dist = elCenter - center
+    const factor = -0.02
     const offset = dist * factor
     ;(el as HTMLElement).style.transform = `translateY(${offset}px)`
   })
@@ -185,6 +172,11 @@ const combinedProps = computed(() => ({
       transition: opacity 0.6s ease-out !important;
       // transform is controlled by JS
       align-self: center;
+    }
+
+    :deep(.v-timeline-item__body) {
+      transition: opacity 0.6s ease-out !important;
+      // transform is controlled by JS
     }
   }
 
