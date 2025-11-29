@@ -48,8 +48,9 @@ const combinedProps = computed(() => ({
     :deep(.v-timeline-divider__after) {
       background-color: transparent !important;
       width: 20px;
-      background-image: url("data:image/svg+xml,%3Csvg width='16' height='130' viewBox='0 0 12 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 0 Q 12 25 6 50 T 6 100' fill='none' stroke='%23ccc' stroke-width='2'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='100' viewBox='0 0 12 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 0 Q 12 25 6 50 T 6 100' fill='none' stroke='%23ccc' stroke-width='2'/%3E%3C/svg%3E");
       background-repeat: repeat-y;
+      background-size: 12px 100px;
     }
 
     :deep(.v-timeline-divider__before) {
