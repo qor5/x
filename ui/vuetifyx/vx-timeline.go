@@ -48,6 +48,16 @@ func (b *VXTimelineBuilder) HideOpposite(v bool) (r *VXTimelineBuilder) {
 	return b
 }
 
+func (b *VXTimelineBuilder) AnimateOnScroll(v bool) (r *VXTimelineBuilder) {
+	b.tag.Attr(":animate-on-scroll", fmt.Sprint(v))
+	return b
+}
+
+func (b *VXTimelineBuilder) Parallax(v bool) (r *VXTimelineBuilder) {
+	b.tag.Attr(":parallax", fmt.Sprint(v))
+	return b
+}
+
 func (b *VXTimelineBuilder) IconColor(v string) (r *VXTimelineBuilder) {
 	b.tag.Attr("icon-color", v)
 	return b
