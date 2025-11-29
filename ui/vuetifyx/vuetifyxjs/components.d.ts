@@ -69,6 +69,7 @@ declare module 'vue' {
     VXSegmentForm: typeof import('./src/lib/Form/VXSegmentForm/index.vue')['default']
     VXSelect: typeof import('./src/lib/Form/VXSelect.vue')['default']
     VXTabs: typeof import('./src/lib/Tabs/VXTabs.vue')['default']
+    VXTimeline: typeof import('./src/lib/Timeline/VXTimeline.vue')['default']
     VXToolBar: typeof import('./src/lib/Common/VXToolBar.vue')['default']
     VXTreeview: typeof import('./src/lib/Treeview/VXTreeview.vue')['default']
   }
