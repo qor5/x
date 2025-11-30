@@ -18,19 +18,19 @@ import { ref, computed } from 'vue'
 const props = defineProps({
   initialRotateX: {
     type: Number,
-    default: -19.84
+    default: 0
   },
   initialRotateY: {
     type: Number,
-    default: -7.09
+    default: 0
   },
   initialTranslateX: {
     type: Number,
-    default: -8.86
+    default: 0
   },
   initialTranslateY: {
     type: Number,
-    default: 24.8
+    default: 0
   }
 })
 
@@ -43,16 +43,19 @@ const translateY = ref(props.initialTranslateY)
 const containerStyle = {
   perspective: '1000px',
   overflow: 'visible',
-  padding: '50px'
+  padding: '50px',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center'
 }
 
 const contentStyle = computed(() => {
   return {
     position: 'relative' as const,
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'center',
+    display: 'grid',
+    justifyItems: 'center',
     alignItems: 'center',
+    transformOrigin: 'center center',
     transformStyle: 'preserve-3d' as const,
     transform: `translateX(${translateX.value}px) translateY(${translateY.value}px) rotateX(${rotateX.value}deg) rotateY(${rotateY.value}deg)`,
     transition: 'transform 0.1s ease-out'
@@ -87,8 +90,47 @@ const handleMouseLeave = () => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .vx-tilted-images {
   width: 100%;
+}
+
+.vx-tilted-images__content {
+  :deep(*) {
+    grid-area: 1 / 1;
+  }
+
+  @for $i from 1 through 10 {
+    :deep(*:nth-child(#{$i})) {
+      transform: translateZ(#{$i * 20}px);
+    }
+  }
+}
+</style>
+
+<style lang="scss">
+.timeline-with-images .v-timeline-item:nth-child(odd) .v-timeline-item__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+.timeline-with-images .v-timeline-item:nth-child(odd) .v-timeline-item__opposite {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+.timeline-with-images .v-timeline-item:nth-child(even) .v-timeline-item__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+.timeline-with-images .v-timeline-item:nth-child(even) .v-timeline-item__opposite {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
 }
 </style>
