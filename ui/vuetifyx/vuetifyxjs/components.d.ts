@@ -63,6 +63,7 @@ declare module 'vue' {
     VXChip: typeof import('./src/lib/Common/VXChip.vue')['default']
     VXDialog: typeof import('./src/lib/Common/VXDialog.vue')['default']
     VXField: typeof import('./src/lib/Form/VXField.vue')['default']
+    VXImageGallery: typeof import('./src/lib/VXImageGallery.vue')['default']
     VXLabel: typeof import('./src/lib/Common/VXLabel.vue')['default']
     VXModelProxy: typeof import('./src/lib/VXModelProxy.vue')['default']
     VXPagination: typeof import('./src/lib/Common/VXPagination.vue')['default']

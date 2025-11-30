@@ -46,6 +46,7 @@ import VXSegmentForm from '@/lib/Form/VXSegmentForm/index.vue'
 import VXModelProxy from '@/lib/VXModelProxy.vue'
 import VXChart from '@/lib/Chart/VXChart.vue'
 import VXTiltedImages from '@/lib/TiltedImages/VXTiltedImages.vue'
+import VXImageGallery from '@/lib/VXImageGallery.vue'
 
 declare const window: any
 
@@ -89,6 +90,7 @@ const vuetifyx = {
     app.component('vx-iframe-emitter', VXIframeEmitter)
     app.component('vx-model-proxy', VXModelProxy)
     app.component('vx-tilted-images', VXTiltedImages)
+    app.component('vx-image-gallery', VXImageGallery)
   }
 }
 
