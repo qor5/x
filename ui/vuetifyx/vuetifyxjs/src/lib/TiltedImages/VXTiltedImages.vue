@@ -108,29 +108,3 @@ const handleMouseLeave = () => {
 }
 </style>
 
-<style lang="scss">
-.timeline-with-images .v-timeline-item:nth-child(odd) .v-timeline-item__body {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-}
-.timeline-with-images .v-timeline-item:nth-child(odd) .v-timeline-item__opposite {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-}
-.timeline-with-images .v-timeline-item:nth-child(even) .v-timeline-item__body {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-}
-.timeline-with-images .v-timeline-item:nth-child(even) .v-timeline-item__opposite {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-}
-</style>

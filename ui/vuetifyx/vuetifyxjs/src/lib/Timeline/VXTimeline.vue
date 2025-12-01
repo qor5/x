@@ -73,19 +73,10 @@ const handleParallax = () => {
 }
 
 onMounted(() => {
-  console.log('VXTimeline mounted, animateOnScroll:', props.animateOnScroll)
   if (props.animateOnScroll && root.value) {
     observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          // console.log(
-          //   'Intersection entry:',
-          //   entry.isIntersecting,
-          //   'Rect:',
-          //   entry.boundingClientRect,
-          //   'Ratio:',
-          //   entry.intersectionRatio
-          // )
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible')
           } else {
@@ -101,13 +92,11 @@ onMounted(() => {
     // Wait for layout to settle
     setTimeout(() => {
       if (root.value) {
-        console.log('Root rect:', root.value.getBoundingClientRect())
         // Observe the body and opposite elements instead of the item itself,
         // because v-timeline-item might be display: contents
         const items = root.value.querySelectorAll(
           '.v-timeline-item__body, .v-timeline-item__opposite'
         )
-        console.log('Timeline content items found:', items.length)
         items.forEach((item) => {
           observer?.observe(item)
         })
@@ -199,4 +188,5 @@ const combinedProps = computed(() => ({
     }
   }
 }
+
 </style>
