@@ -47,6 +47,7 @@ import VXModelProxy from '@/lib/VXModelProxy.vue'
 import VXChart from '@/lib/Chart/VXChart.vue'
 import VXTiltedImages from '@/lib/TiltedImages/VXTiltedImages.vue'
 import VXImageGallery from '@/lib/VXImageGallery.vue'
+import VXVideo from '@/lib/VXVideo.vue'
 
 declare const window: any
 
@@ -91,6 +92,7 @@ const vuetifyx = {
     app.component('vx-model-proxy', VXModelProxy)
     app.component('vx-tilted-images', VXTiltedImages)
     app.component('vx-image-gallery', VXImageGallery)
+    app.component('vx-video', VXVideo)
   }
 }
 
