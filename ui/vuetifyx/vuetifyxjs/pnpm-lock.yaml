@@ -25,9 +25,6 @@ importers:
       '@tiptap/vue-3':
         specifier: ^2.24.0
         version: 2.26.1(@tiptap/core@2.26.1(@tiptap/pm@2.26.1))(@tiptap/pm@2.26.1)(vue@3.5.21(typescript@5.9.2))
-      '@vitejs/plugin-vue-jsx':
-        specifier: ^5.1.1
-        version: 5.1.1(vite@7.1.5(@types/node@20.19.16)(sass@1.92.1))(vue@3.5.21(typescript@5.9.2))
       '@vueuse/core':
         specifier: ^11.3.0
         version: 11.3.0(vue@3.5.21(typescript@5.9.2))
@@ -43,6 +40,9 @@ importers:
       echarts:
         specifier: ^5.6.0
         version: 5.6.0
+      hls.js:
+        specifier: ^1.6.15
+        version: 1.6.15
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -92,6 +92,9 @@ importers:
       '@vitejs/plugin-vue':
         specifier: ^6.0.1
         version: 6.0.1(vite@7.1.5(@types/node@20.19.16)(sass@1.92.1))(vue@3.5.21(typescript@5.9.2))
+      '@vitejs/plugin-vue-jsx':
+        specifier: ^5.1.1
+        version: 5.1.1(vite@7.1.5(@types/node@20.19.16)(sass@1.92.1))(vue@3.5.21(typescript@5.9.2))
       '@vitepress-code-preview/container':
         specifier: 1.0.8
         version: 1.0.8(patch_hash=405db9b01bef68eb6e69fa24ea7acce9e49941c2fab7291c8ca77efa57eedb2b)(vue@3.5.21(typescript@5.9.2))
@@ -146,6 +149,9 @@ importers:
       vite:
         specifier: 7.1.5
         version: 7.1.5(@types/node@20.19.16)(sass@1.92.1)
+      vite-plugin-commonjs:
+        specifier: ^0.10.4
+        version: 0.10.4
       vite-plugin-vuetify:
         specifier: ^2.1.0
         version: 2.1.2(vite@7.1.5(@types/node@20.19.16)(sass@1.92.1))(vue@3.5.21(typescript@5.9.2))(vuetify@3.10.1)
@@ -2015,6 +2021,9 @@ packages:
   headers-polyfill@4.0.3:
     resolution: {integrity: sha512-IScLbePpkvO846sIwOtOTDjutRMWdXdJmXdMvk6gCBHxFO8d+QKOQedyZSxFTTFYRSmlgSTDtXqqq4pcenBXLQ==}
 
+  hls.js@1.6.15:
+    resolution: {integrity: sha512-E3a5VwgXimGHwpRGV+WxRTKeSp2DW5DI5MWv34ulL3t5UNmyJWCQ1KmLEHbYzcfThfXG8amBL+fCYPneGHC4VA==}
+
   hookable@5.5.3:
     resolution: {integrity: sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ==}
 
@@ -2878,6 +2887,12 @@ packages:
     resolution: {integrity: sha512-EbKSKh+bh1E1IFxeO0pg1n4dvoOTt0UDiXMd/qn++r98+jPO1xtJilvXldeuQ8giIB5IkpjCgMleHMNEsGH6pg==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
+
+  vite-plugin-commonjs@0.10.4:
+    resolution: {integrity: sha512-eWQuvQKCcx0QYB5e5xfxBNjQKyrjEWZIR9UOkOV6JAgxVhtbZvCOF+FNC2ZijBJ3U3Px04ZMMyyMyFBVWIJ5+g==}
+
+  vite-plugin-dynamic-import@1.6.0:
+    resolution: {integrity: sha512-TM0sz70wfzTIo9YCxVFwS8OA9lNREsh+0vMHGSkWDTZ7bgd1Yjs5RV8EgB634l/91IsXJReg0xtmuQqP0mf+rg==}
 
   vite-plugin-vuetify@2.1.2:
     resolution: {integrity: sha512-I/wd6QS+DO6lHmuGoi1UTyvvBTQ2KDzQZ9oowJQEJ6OcjWfJnscYXx2ptm6S7fJSASuZT8jGRBL3LV4oS3LpaA==}
@@ -5038,6 +5053,8 @@ snapshots:
 
   headers-polyfill@4.0.3: {}
 
+  hls.js@1.6.15: {}
+
   hookable@5.5.3: {}
 
   html-encoding-sniffer@4.0.0:
@@ -6074,6 +6091,19 @@ snapshots:
       - terser
       - tsx
       - yaml
+
+  vite-plugin-commonjs@0.10.4:
+    dependencies:
+      acorn: 8.15.0
+      magic-string: 0.30.19
+      vite-plugin-dynamic-import: 1.6.0
+
+  vite-plugin-dynamic-import@1.6.0:
+    dependencies:
+      acorn: 8.15.0
+      es-module-lexer: 1.7.0
+      fast-glob: 3.3.3
+      magic-string: 0.30.19
 
   vite-plugin-vuetify@2.1.2(vite@7.1.5(@types/node@20.19.16)(sass@1.92.1))(vue@3.5.21(typescript@5.9.2))(vuetify@3.10.1):
     dependencies:

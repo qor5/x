@@ -15,7 +15,7 @@ type ModuleKey string
 type Builder struct {
 	supportLanguages                   []language.Tag
 	getSupportLanguagesFromRequestFunc func(R *http.Request) []language.Tag
-	moduleMessages                     map[language.Tag]context.Context
+	moduleMessages                     map[language.Tag]map[ModuleKey]Messages
 	matcher                            language.Matcher
 	cookieName                         string
 	queryName                          string
@@ -28,7 +28,7 @@ func New() *Builder {
 		supportLanguages: []language.Tag{
 			language.English,
 		},
-		moduleMessages: map[language.Tag]context.Context{language.English: context.TODO()},
+		moduleMessages: make(map[language.Tag]map[ModuleKey]Messages),
 		cookieName:     "lang",
 		queryName:      "lang",
 	}
@@ -55,7 +55,7 @@ func (b *Builder) SupportLanguages(vs ...language.Tag) (r *Builder) {
 	b.supportLanguages = vs
 	for _, l := range b.supportLanguages {
 		if b.moduleMessages[l] == nil {
-			b.moduleMessages[l] = context.TODO()
+			b.moduleMessages[l] = make(map[ModuleKey]Messages)
 		}
 	}
 	b.matcher = language.NewMatcher(b.supportLanguages)
@@ -81,11 +81,9 @@ func (b *Builder) GetSupportLanguagesFromRequestFunc(v func(R *http.Request) []l
 func (b *Builder) RegisterForModule(lang language.Tag, module ModuleKey, msg Messages) (r *Builder) {
 	c := b.moduleMessages[lang]
 	if c == nil {
-		c = context.TODO()
+		b.moduleMessages[lang] = make(map[ModuleKey]Messages)
 	}
-
-	c = context.WithValue(c, module, msg)
-	b.moduleMessages[lang] = c
+	b.moduleMessages[lang][module] = msg
 	return b
 }
 
@@ -95,7 +93,12 @@ func MustGetModuleMessages(r *http.Request, module ModuleKey, defaultMessages Me
 		return defaultMessages
 	}
 
-	msg := v.(context.Context).Value(module)
+	mmap, ok := v.(map[ModuleKey]Messages)
+	if !ok {
+		return defaultMessages
+	}
+
+	msg := mmap[module]
 	if msg == nil {
 		msg = defaultMessages
 	}

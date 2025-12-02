@@ -66,6 +66,9 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 		b.resetPasswordURL:             {},
 		b.resetPasswordPageURL:         {},
 		b.validateTOTPURL:              {},
+		b.loginCodePageURL:             {},
+		b.sendLoginCodeURL:             {},
+		b.validateLoginCodeURL:         {},	
 	}
 
 	staticFileRe := regexp.MustCompile(`\.(css|js|gif|jpg|jpeg|png|ico|svg|ttf|eot|woff|woff2|js\.map)$`)
@@ -89,9 +92,9 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 					next.ServeHTTP(w, r)
 					return
 				}
-				if r.Method == http.MethodGet {
+				// if r.Method == http.MethodGet {
 					b.setContinueURL(w, r)
-				}
+				// }
 				if path == b.loginPageURL {
 					next.ServeHTTP(w, r)
 				} else {
@@ -106,7 +109,11 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 				var err error
 				user, err = b.findUserByID(claims.UserID)
 				if err == nil {
-					if claims.Provider == "" {
+					if claims.LoginCodeValidated {
+						if user.(UserPasser).GetLocked() {
+							err = ErrUserLocked
+						}
+					} else if claims.Provider == "" {
 						if user.(UserPasser).GetPasswordUpdatedAt() != claims.PassUpdatedAt {
 							err = ErrPasswordChanged
 						}
@@ -124,9 +131,9 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 					}
 					switch err {
 					case ErrUserNotFound:
-						setFailCodeFlash(w, FailCodeUserNotFound)
+						SetFailCodeFlash(w, FailCodeUserNotFound)
 					case ErrUserLocked:
-						setFailCodeFlash(w, FailCodeUserLocked)
+						SetFailCodeFlash(w, FailCodeUserLocked)
 					case ErrPasswordChanged:
 						isSelfChange := false
 						if c, err := r.Cookie(infoCodeFlashCookieName); err == nil {

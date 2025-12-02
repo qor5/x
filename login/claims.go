@@ -16,15 +16,16 @@ var (
 )
 
 type UserClaims struct {
-	Provider      string
-	Email         string
-	Name          string
-	UserID        string
-	AvatarURL     string
-	Location      string
-	IDToken       string
-	PassUpdatedAt string
-	TOTPValidated bool
+	Provider                string
+	Email                   string
+	Name                    string
+	UserID                  string
+	AvatarURL               string
+	Location                string
+	IDToken                 string
+	PassUpdatedAt           string
+	TOTPValidated           bool
+	LoginCodeValidated      bool
 	jwt.RegisteredClaims
 }
 

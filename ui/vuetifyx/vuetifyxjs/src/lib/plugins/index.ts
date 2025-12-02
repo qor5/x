@@ -38,12 +38,16 @@ import VXAvatar from '@/lib/VXAvatar.vue'
 import VXTabs from '@/lib/Tabs/VXTabs.vue'
 import VXIframeEmitter from '@/lib/IframeEmitter.vue'
 import VXBreadcrumbs from '@/lib/Breadcrumbs/VXBreadcrumbs.vue'
+import VXTimeline from '@/lib/Timeline/VXTimeline.vue'
 import VXTreeview from '@/lib/Treeview/VXTreeview.vue'
 import TiptapEditor from '@/lib/TiptapEditor/TiptapEditor.vue'
 import LinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
 import VXSegmentForm from '@/lib/Form/VXSegmentForm/index.vue'
 import VXModelProxy from '@/lib/VXModelProxy.vue'
 import VXChart from '@/lib/Chart/VXChart.vue'
+import VXTiltedImages from '@/lib/TiltedImages/VXTiltedImages.vue'
+import VXImageGallery from '@/lib/VXImageGallery.vue'
+import VXVideo from '@/lib/VXVideo.vue'
 
 declare const window: any
 
@@ -80,11 +84,15 @@ const vuetifyx = {
     app.component('vx-scroll-iframe', ScrollIframe)
     app.component('vx-send-variables', SendVariables)
     app.component('vx-breadcrumbs', VXBreadcrumbs)
+    app.component('vx-timeline', VXTimeline)
     app.component('vx-treeview', VXTreeview)
     app.component('vx-messagelistener', MessageListener)
     app.component('vx-segment-form', VXSegmentForm)
     app.component('vx-iframe-emitter', VXIframeEmitter)
     app.component('vx-model-proxy', VXModelProxy)
+    app.component('vx-tilted-images', VXTiltedImages)
+    app.component('vx-image-gallery', VXImageGallery)
+    app.component('vx-video', VXVideo)
   }
 }
 

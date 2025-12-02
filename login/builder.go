@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
+	"log"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -26,15 +27,18 @@ import (
 )
 
 var (
-	ErrUserNotFound        = errors.New("user not found")
-	ErrPasswordChanged     = errors.New("password changed")
-	ErrWrongPassword       = errors.New("wrong password")
-	ErrUserLocked          = errors.New("user locked")
-	ErrUserGetLocked       = errors.New("user get locked")
-	ErrWrongTOTPCode       = errors.New("wrong totp code")
-	ErrTOTPCodeHasBeenUsed = errors.New("totp code has been used")
-	ErrEmptyPassword       = errors.New("empty password")
-	ErrPasswordNotMatch    = errors.New("password not match")
+	ErrUserNotFound         = errors.New("user not found")
+	ErrPasswordChanged      = errors.New("password changed")
+	ErrWrongPassword        = errors.New("wrong password")
+	ErrUserLocked           = errors.New("user locked")
+	ErrUserGetLocked        = errors.New("user get locked")
+	ErrWrongTOTPCode        = errors.New("wrong totp code")
+	ErrTOTPCodeHasBeenUsed  = errors.New("totp code has been used")
+	ErrEmptyPassword        = errors.New("empty password")
+	ErrPasswordNotMatch     = errors.New("password not match")
+	ErrInvalidLoginCode     = errors.New("invalid login code")
+	ErrLoginCodeExpired     = errors.New("login code has expired")
+	ErrAccountNumberInvalid = errors.New("account number is invalid")
 )
 
 type (
@@ -112,6 +116,12 @@ type Builder struct {
 	sendResetPasswordLinkURL     string
 	resetPasswordLinkSentPageURL string
 
+	// LoginCode URLs
+	loginCodePageURL     string
+	validateLoginCodeURL string
+	sendLoginCodeURL     string
+
+	// Page functions
 	loginPageFunc                 web.PageFunc
 	forgetPasswordPageFunc        web.PageFunc
 	resetPasswordLinkSentPageFunc web.PageFunc
@@ -119,7 +129,9 @@ type Builder struct {
 	changePasswordPageFunc        web.PageFunc
 	totpSetupPageFunc             web.PageFunc
 	totpValidatePageFunc          web.PageFunc
+	loginCodePageFunc             web.PageFunc
 
+	// Hooks
 	beforeSetPasswordHook HookFunc
 	beforeTOTPFlowHook    HookFunc
 
@@ -128,6 +140,7 @@ type Builder struct {
 	afterUserLockedHook                   HookFunc
 	afterLogoutHook                       HookFunc
 	afterConfirmSendResetPasswordLinkHook HookFunc
+	afterSendWhatsAppLoginCodeHook        HookFunc
 	afterResetPasswordHook                HookFunc
 	afterChangePasswordHook               HookFunc
 	afterExtendSessionHook                HookFunc
@@ -139,6 +152,7 @@ type Builder struct {
 	snakePrimaryField    string
 	tUser                reflect.Type
 	userPassEnabled      bool
+	loginCodeEnabled     bool
 	oauthEnabled         bool
 	sessionSecureEnabled bool
 	// key is provider
@@ -174,6 +188,10 @@ func New() *Builder {
 		sendResetPasswordLinkURL:     "/auth/send-reset-password-link",
 		resetPasswordLinkSentPageURL: "/auth/reset-password-link-sent",
 
+		validateLoginCodeURL: "/auth/logincode/validate",
+		loginCodePageURL:     "/auth/logincode",
+		sendLoginCodeURL:     "/auth/logincode/send",
+
 		sessionMaxAge: 60 * 60,
 		cookieConfig: CookieConfig{
 			Path:     "/",
@@ -202,6 +220,7 @@ func New() *Builder {
 	r.changePasswordPageFunc = defaultChangePasswordPage(vh)
 	r.totpSetupPageFunc = defaultTOTPSetupPage(vh)
 	r.totpValidatePageFunc = defaultTOTPValidatePage(vh)
+	r.loginCodePageFunc = defaultLoginCodeValidatePageFunc(vh)
 
 	return r
 }
@@ -291,6 +310,9 @@ func (b *Builder) URIPrefix(v string) (r *Builder) {
 	b.forgetPasswordPageURL = prefix + b.forgetPasswordPageURL
 	b.sendResetPasswordLinkURL = prefix + b.sendResetPasswordLinkURL
 	b.resetPasswordLinkSentPageURL = prefix + b.resetPasswordLinkSentPageURL
+	b.validateLoginCodeURL = prefix + b.validateLoginCodeURL
+	b.loginCodePageURL = prefix + b.loginCodePageURL
+	b.sendLoginCodeURL = prefix + b.sendLoginCodeURL
 
 	return b
 }
@@ -362,6 +384,11 @@ func (b *Builder) TOTPSetupPageFunc(v web.PageFunc) (r *Builder) {
 
 func (b *Builder) TOTPValidatePageFunc(v web.PageFunc) (r *Builder) {
 	b.totpValidatePageFunc = v
+	return b
+}
+
+func (b *Builder) LoginCodePageFunc(v web.PageFunc) (r *Builder) {
+	b.loginCodePageFunc = v
 	return b
 }
 
@@ -478,6 +505,20 @@ func (b *Builder) WrapAfterConfirmSendResetPasswordLink(w func(in HookFunc) Hook
 		b.afterConfirmSendResetPasswordLinkHook = w(NopHookFunc)
 	} else {
 		b.afterConfirmSendResetPasswordLinkHook = w(b.afterConfirmSendResetPasswordLinkHook)
+	}
+	return b
+}
+
+func (b *Builder) AfterSendWhatsAppLoginCode(v HookFunc) (r *Builder) {
+	b.afterSendWhatsAppLoginCodeHook = v
+	return b
+}
+
+func (b *Builder) WrapAfterSendWhatsAppLoginCode(w func(in HookFunc) HookFunc) (r *Builder) {
+	if b.afterSendWhatsAppLoginCodeHook == nil {
+		b.afterSendWhatsAppLoginCodeHook = w(NopHookFunc)
+	} else {
+		b.afterSendWhatsAppLoginCodeHook = w(b.afterSendWhatsAppLoginCodeHook)
 	}
 	return b
 }
@@ -661,6 +702,9 @@ func (b *Builder) UserModel(m interface{}) (r *Builder) {
 	if _, ok := m.(UserPasser); ok {
 		b.userPassEnabled = true
 	}
+	if _, ok := m.(UserLoginCoder); ok {
+		b.loginCodeEnabled = true
+	}
 	if _, ok := m.(OAuthUser); ok {
 		b.oauthEnabled = true
 	}
@@ -752,7 +796,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 	var ouser goth.User
 	ouser, err = gothic.CompleteUserAuth(w, r)
 	if err != nil {
-		setFailCodeFlash(w, FailCodeCompleteUserAuthFailed)
+		SetFailCodeFlash(w, FailCodeCompleteUserAuthFailed)
 		return
 	}
 
@@ -765,7 +809,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 
 	userID := ouser.UserID
 	if userID == "" {
-		setFailCodeFlash(w, FailCodeCompleteUserAuthFailed)
+		SetFailCodeFlash(w, FailCodeCompleteUserAuthFailed)
 		return
 	}
 
@@ -781,7 +825,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 				if err != gorm.ErrRecordNotFound {
 					panic(err)
 				}
-				setFailCodeFlash(w, FailCodeUserNotFound)
+				SetFailCodeFlash(w, FailCodeUserNotFound)
 				return
 			}
 			err = user.(OAuthUser).InitOAuthUserID(b.db, b.newUserObject(), ouser.Provider, identifier, ouser.UserID)
@@ -794,7 +838,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 				if err != gorm.ErrRecordNotFound {
 					panic(err)
 				}
-				setFailCodeFlash(w, FailCodeUserNotFound)
+				SetFailCodeFlash(w, FailCodeUserNotFound)
 				return
 			}
 		}
@@ -832,6 +876,56 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 
 	http.Redirect(w, r, redirectURL, http.StatusFound)
 	return
+}
+
+// return user if account exists even if there is an error returned
+func (b *Builder) AuthUserLoginCode(account string, code string) (user interface{}, err error) {
+	user, err = b.userModel.(UserLoginCoder).FindUser(b.db, b.newUserObject(), account)
+	// Falls back to find by email
+	if err == ErrAccountNumberInvalid {
+		user, err = b.userModel.(UserPasser).FindUser(b.db, b.newUserObject(), account)
+	}
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	up := user.(UserPasser)
+	if up.GetLocked() {
+		return user, ErrUserLocked
+	}
+
+	ul := user.(UserLoginCoder)
+	ltoken, _, expired := ul.GetLoginCode()
+	if expired {
+		return user, ErrLoginCodeExpired
+	}
+
+	// Empty code means user need a login code, not to verify it.
+	if ltoken != code && ltoken != "" {
+		if b.maxRetryCount > 0 {
+			if err = up.IncreaseRetryCount(b.db, b.newUserObject()); err != nil {
+				return user, err
+			}
+			if up.GetLoginRetryCount() >= b.maxRetryCount {
+				if err = up.LockUser(b.db, b.newUserObject()); err != nil {
+					return user, err
+				}
+				return user, ErrUserGetLocked
+			}
+		}
+		return user, ErrInvalidLoginCode
+	}
+
+	if up.GetLoginRetryCount() != 0 {
+		if err = up.UnlockUser(b.db, b.newUserObject()); err != nil {
+			return user, err
+		}
+	}
+
+	return user, ul.ConsumeLoginCode(b.db, user)
 }
 
 // return user if account exists even if there is an error returned
@@ -873,6 +967,163 @@ func (b *Builder) authUserPass(account string, password string) (user interface{
 	return user, nil
 }
 
+func (b *Builder) sendUserCodeLogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// check reCAPTCHA token
+	if b.recaptchaEnabled {
+		token := r.FormValue("token")
+		if !recaptchaTokenCheck(b, token) {
+			SetFailCodeFlash(w, FailCodeIncorrectRecaptchaToken)
+			http.Redirect(w, r, b.loginPageURL, http.StatusFound)
+			return
+		}
+	}
+
+	var err error
+	var user interface{}
+	failRedirectURL := b.LogoutURL
+	defer func() {
+		if perr := recover(); perr != nil {
+			panic(perr)
+		}
+		if err != nil {
+			if b.afterFailedToLoginHook != nil {
+				if herr := b.wrapHook(b.afterFailedToLoginHook)(r, user, err); herr != nil {
+					setNoticeOrPanic(w, herr)
+				}
+			}
+			http.Redirect(w, r, failRedirectURL, http.StatusFound)
+		}
+	}()
+
+	account := r.FormValue("account")
+	user, err = b.userModel.(UserLoginCoder).FindUser(b.db, b.newUserObject(), account)
+	if err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			SetFailCodeFlash(w, FailCodeUserNotFound)
+		case ErrAccountNumberInvalid:
+			SetFailCodeFlash(w, FailCodeAccountNumberInvalid)
+		default:
+			log.Printf("failed to find user by phone number: %v", err)
+			SetFailCodeFlash(w, FailCodeSystemError)
+		}
+		http.Redirect(w, r, b.loginPageURL, http.StatusFound)
+		return
+	}
+
+	up := user.(UserPasser)
+	if up.GetLocked() {
+		SetFailCodeFlash(w, FailCodeUserLocked)
+		return
+	}
+
+	uc, ok := user.(UserLoginCoder)
+	if !ok {
+		log.Printf("user does not implement UserLoginCoder: %v", user)
+		SetFailCodeFlash(w, FailCodeSystemError)
+		return
+	}
+
+	// send login code to user
+	loginCode, err := uc.GenerateLoginCode(b.db, user)
+	if err != nil {
+		log.Printf("failed to generate login code: %v", err)
+		SetFailCodeFlash(w, FailCodeSystemError)
+		return
+	}
+	err = user.(UserLoginCodeSender).SendLoginCode(r, account, loginCode)
+	if err != nil {
+		log.Printf("failed to send login code: %v", err)
+		SetFailCodeFlash(w, FailCodeSystemError)
+		return
+	}
+
+	web.Page(b.loginCodePageFunc).ServeHTTP(w, r)
+}
+
+func (b *Builder) loginCodeDo(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	var err error
+	var user interface{}
+	failRedirectURL := b.LogoutURL
+	defer func() {
+		if perr := recover(); perr != nil {
+			panic(perr)
+		}
+		if err != nil {
+			if b.afterFailedToLoginHook != nil {
+				if herr := b.wrapHook(b.afterFailedToLoginHook)(r, user, err); herr != nil {
+					setNoticeOrPanic(w, herr)
+				}
+			}
+			http.Redirect(w, r, failRedirectURL, http.StatusFound)
+		}
+	}()
+
+	account := r.FormValue("account")
+	loginCode := r.FormValue("logincode")
+	user, err = b.AuthUserLoginCode(account, loginCode)
+	if err != nil {
+		if err == ErrUserGetLocked && b.afterUserLockedHook != nil {
+			if herr := b.wrapHook(b.afterUserLockedHook)(r, user); herr != nil {
+				setNoticeOrPanic(w, herr)
+				return
+			}
+		}
+		var code FailCode
+		switch err {
+		case ErrInvalidLoginCode:
+			code = FailCodeInvalidLoginCode
+		case ErrUserNotFound:
+			code = FailCodeIncorrectAccountNameOrPassword
+		case ErrUserLocked, ErrUserGetLocked:
+			code = FailCodeUserLocked
+		default:
+			panic(err)
+		}
+		SetFailCodeFlash(w, code)
+		b.setWrongLoginInputFlash(w, WrongLoginInputFlash{
+			Account:   account,
+			LoginCode: loginCode,
+		})
+		return
+	}
+
+	userID := objectID(user)
+	claims := UserClaims{
+		UserID:             userID,
+		LoginCodeValidated: true,
+		RegisteredClaims:   b.genBaseSessionClaim(userID),
+	}
+
+	if b.afterLoginHook != nil {
+		setCookieForRequest(r, &http.Cookie{Name: b.authCookieName, Value: b.mustGetSessionToken(claims)})
+		if err = b.wrapHook(b.afterLoginHook)(r, user); err != nil {
+			setNoticeOrPanic(w, err)
+			return
+		}
+	}
+
+	if err = b.setSecureCookiesByClaims(w, user, claims); err != nil {
+		panic(err)
+	}
+	redirectURL := b.homePageURLFunc(r, user)
+	if v := b.getContinueURL(w, r); v != "" {
+		redirectURL = v
+	}
+	http.Redirect(w, r, redirectURL, http.StatusFound)
+
+	return
+}
+
 func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusNotFound)
@@ -883,7 +1134,7 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 	if b.recaptchaEnabled {
 		token := r.FormValue("token")
 		if !recaptchaTokenCheck(b, token) {
-			setFailCodeFlash(w, FailCodeIncorrectRecaptchaToken)
+			SetFailCodeFlash(w, FailCodeIncorrectRecaptchaToken)
 			http.Redirect(w, r, b.loginPageURL, http.StatusFound)
 			return
 		}
@@ -926,7 +1177,7 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 		default:
 			panic(err)
 		}
-		setFailCodeFlash(w, code)
+		SetFailCodeFlash(w, code)
 		b.setWrongLoginInputFlash(w, WrongLoginInputFlash{
 			Account:  account,
 			Password: password,
@@ -962,6 +1213,11 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 				setNoticeOrPanic(w, err)
 				return
 			}
+		}
+
+		u, ok := user.(UserPasser)
+		if !ok {
+			panic("totp enabled but user model does not implement UserPasser")
 		}
 
 		if u.GetIsTOTPSetup() {
@@ -1188,7 +1444,7 @@ func (b *Builder) sendResetPasswordLink(w http.ResponseWriter, r *http.Request) 
 	if b.recaptchaEnabled {
 		token := r.FormValue("token")
 		if !recaptchaTokenCheck(b, token) {
-			setFailCodeFlash(w, FailCodeIncorrectRecaptchaToken)
+			SetFailCodeFlash(w, FailCodeIncorrectRecaptchaToken)
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
 		}
@@ -1203,7 +1459,7 @@ func (b *Builder) sendResetPasswordLink(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if account == "" {
-		setFailCodeFlash(w, FailCodeAccountIsRequired)
+		SetFailCodeFlash(w, FailCodeAccountIsRequired)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
@@ -1301,12 +1557,12 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 		failRedirectURL = MustSetQuery(failRedirectURL, "totp", "1")
 	}
 	if userID == "" {
-		setFailCodeFlash(w, FailCodeUserNotFound)
+		SetFailCodeFlash(w, FailCodeUserNotFound)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
 	if token == "" {
-		setFailCodeFlash(w, FailCodeInvalidToken)
+		SetFailCodeFlash(w, FailCodeInvalidToken)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
@@ -1314,12 +1570,12 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	confirmPassword := r.FormValue("confirm_password")
 	if password == "" {
-		setFailCodeFlash(w, FailCodePasswordCannotBeEmpty)
+		SetFailCodeFlash(w, FailCodePasswordCannotBeEmpty)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
 	if confirmPassword != password {
-		setFailCodeFlash(w, FailCodePasswordNotMatch)
+		SetFailCodeFlash(w, FailCodePasswordNotMatch)
 		b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
 			Password:        password,
 			ConfirmPassword: confirmPassword,
@@ -1331,7 +1587,7 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 	u, err := b.findUserByID(userID)
 	if err != nil {
 		if err == ErrUserNotFound {
-			setFailCodeFlash(w, FailCodeUserNotFound)
+			SetFailCodeFlash(w, FailCodeUserNotFound)
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
 		}
@@ -1340,12 +1596,12 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	storedToken, _, expired := u.(UserPasser).GetResetPasswordToken()
 	if expired {
-		setFailCodeFlash(w, FailCodeTokenExpired)
+		SetFailCodeFlash(w, FailCodeTokenExpired)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
 	if token != storedToken {
-		setFailCodeFlash(w, FailCodeInvalidToken)
+		SetFailCodeFlash(w, FailCodeInvalidToken)
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
@@ -1383,7 +1639,7 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 			default:
 				panic(err)
 			}
-			setFailCodeFlash(w, fc)
+			SetFailCodeFlash(w, fc)
 			b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
 				Password:        password,
 				ConfirmPassword: confirmPassword,
@@ -1486,7 +1742,7 @@ func (b *Builder) doFormChangePassword(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var ne *NoticeError
 		if errors.As(err, &ne) {
-			setNoticeFlash(w, ne)
+			SetNoticeFlash(w, ne)
 		} else {
 			var fc FailCode
 			switch err {
@@ -1503,7 +1759,7 @@ func (b *Builder) doFormChangePassword(w http.ResponseWriter, r *http.Request) {
 			default:
 				panic(err)
 			}
-			setFailCodeFlash(w, fc)
+			SetFailCodeFlash(w, fc)
 		}
 
 		b.setWrongChangePasswordInputFlash(w, WrongChangePasswordInputFlash{
@@ -1536,7 +1792,7 @@ func (b *Builder) totpDo(w http.ResponseWriter, r *http.Request) {
 	user, err := b.findUserByID(claims.UserID)
 	if err != nil {
 		if err == ErrUserNotFound {
-			setFailCodeFlash(w, FailCodeUserNotFound)
+			SetFailCodeFlash(w, FailCodeUserNotFound)
 			http.Redirect(w, r, b.LogoutURL, http.StatusFound)
 			return
 		}
@@ -1573,7 +1829,7 @@ func (b *Builder) totpDo(w http.ResponseWriter, r *http.Request) {
 		default:
 			panic(err)
 		}
-		setFailCodeFlash(w, fc)
+		SetFailCodeFlash(w, fc)
 		failRedirectURL = b.totpValidatePageURL
 		if !isTOTPSetup {
 			failRedirectURL = b.totpSetupPageURL
@@ -1608,6 +1864,34 @@ func (b *Builder) totpDo(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, redirectURL, http.StatusFound)
 }
 
+func (b *Builder) LoginCodeLogin(account string, code string) (token string, err error) {
+	user, err := b.AuthUserLoginCode(account, code)
+	if err != nil {
+		return "", err
+	}
+
+	userID := objectID(user)
+	claims := UserClaims{
+		UserID:             userID,
+		LoginCodeValidated: true,
+		RegisteredClaims:   b.genBaseSessionClaim(userID),
+	}
+
+	return b.mustGetSessionToken(claims), nil
+}
+
+func (b *Builder) ValidateSessionToken(token string) (claims *UserClaims, err error) {
+	c, err := parseClaims(&UserClaims{}, token, b.secret)
+	if err != nil {
+		return nil, err
+	}
+	rc, ok := c.(*UserClaims)
+	if !ok {
+		return nil, errInvalidToken
+	}
+	return rc, nil
+}
+
 func (b *Builder) Mount(mux *http.ServeMux) {
 	b.MountAPI(mux)
 
@@ -1625,6 +1909,9 @@ func (b *Builder) Mount(mux *http.ServeMux) {
 			mux.Handle(b.totpSetupPageURL, b.i18nBuilder.EnsureLanguage(wb.Page(b.totpSetupPageFunc)))
 			mux.Handle(b.totpValidatePageURL, b.i18nBuilder.EnsureLanguage(wb.Page(b.totpValidatePageFunc)))
 		}
+	}
+	if b.loginCodeEnabled {
+		mux.Handle(b.loginCodePageURL, b.i18nBuilder.EnsureLanguage(wb.Page(b.loginCodePageFunc)))
 	}
 
 	// assets
@@ -1656,6 +1943,10 @@ func (b *Builder) MountAPI(mux *http.ServeMux) {
 		if b.totpEnabled {
 			mux.HandleFunc(b.validateTOTPURL, b.totpDo)
 		}
+	}
+	if b.loginCodeEnabled {
+		mux.HandleFunc(b.validateLoginCodeURL, b.loginCodeDo)
+		mux.HandleFunc(b.sendLoginCodeURL, b.sendUserCodeLogin)
 	}
 	if b.oauthEnabled {
 		mux.HandleFunc(b.oauthBeginURL, b.beginAuth)
