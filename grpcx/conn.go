@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/theplant/appkit/logtracing"
 	"github.com/theplant/inject/lifecycle"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -28,6 +29,9 @@ func SetupConnFactory(name string, dialOpts ...grpc.DialOption) func(lc *lifecyc
 	return func(lc *lifecycle.Lifecycle, conf *ConnConfig) (*grpc.ClientConn, error) {
 		opts := []grpc.DialOption{
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithChainUnaryInterceptor(
+				logtracing.UnaryClientInterceptor(),
+			),
 		}
 
 		if conf.LoadBalancingPolicy == LoadBalancingPolicyRoundRobin {
