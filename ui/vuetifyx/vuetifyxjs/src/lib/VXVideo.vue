@@ -2,6 +2,10 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import Hls from 'hls.js'
 
+defineOptions({
+  inheritAttrs: false
+})
+
 const props = defineProps({
   src: {
     type: String,
@@ -60,12 +64,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <v-card class="rounded-xl" elevation="4">
     <video
       ref="videoRef"
-      controls
-      :style="{ width: width, height: height, borderRadius: 'inherit' }"
+      v-bind="$attrs"
+      :style="{ width: width, height: height }"
       :poster="poster"
     ></video>
-  </v-card>
 </template>
