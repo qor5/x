@@ -54,9 +54,12 @@ onMounted(() => {
   initVideo()
 })
 
-watch(() => props.src, () => {
-  initVideo()
-})
+watch(
+  () => props.src,
+  () => {
+    initVideo()
+  }
+)
 
 onBeforeUnmount(() => {
   if (hls) hls.destroy()
@@ -64,10 +67,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <video
-      ref="videoRef"
-      v-bind="$attrs"
-      :style="{ width: width, height: height }"
-      :poster="poster"
-    ></video>
+  <video
+    ref="videoRef"
+    v-bind="$attrs"
+    :style="{ width: width, height: height }"
+    :poster="poster"
+  ></video>
 </template>

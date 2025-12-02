@@ -42,6 +42,7 @@ const props = defineProps({
 const root = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 let parallaxRafId: number | null = null
+const animationTimeouts = new Map<Element, number>()
 
 const handleParallax = () => {
   if (!root.value) return
@@ -51,23 +52,21 @@ const handleParallax = () => {
   const windowHeight = window.innerHeight
   const center = windowHeight / 2
 
-  opposites.forEach((el) => {
-    const rect = el.getBoundingClientRect()
-    const elCenter = rect.top + rect.height / 2
-    const dist = elCenter - center
-    const factor = 0.1
-    const offset = dist * factor
-    ;(el as HTMLElement).style.transform = `translateY(${offset}px)`
-  })
+  const applyParallax = (el: Element, factor: number) => {
+    // If animateOnScroll is enabled, only apply parallax if the element is visible
+    if (props.animateOnScroll && !el.classList.contains('is-visible')) {
+      return
+    }
 
-  bodies.forEach((el) => {
     const rect = el.getBoundingClientRect()
     const elCenter = rect.top + rect.height / 2
     const dist = elCenter - center
-    const factor = -0.02
     const offset = dist * factor
     ;(el as HTMLElement).style.transform = `translateY(${offset}px)`
-  })
+  }
+
+  opposites.forEach((el) => applyParallax(el, 0.1))
+  bodies.forEach((el) => applyParallax(el, -0.02))
 
   parallaxRafId = requestAnimationFrame(handleParallax)
 }
@@ -79,7 +78,28 @@ onMounted(() => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible')
-            observer?.unobserve(entry.target)
+            
+            const existingId = animationTimeouts.get(entry.target)
+            if (existingId) {
+              clearTimeout(existingId)
+              animationTimeouts.delete(entry.target)
+            }
+
+            // Disable transform transition after animation completes to allow crisp parallax
+            const id = window.setTimeout(() => {
+              entry.target.classList.add('animation-done')
+              animationTimeouts.delete(entry.target)
+            }, 600)
+            animationTimeouts.set(entry.target, id)
+          } else {
+            entry.target.classList.remove('is-visible')
+            entry.target.classList.remove('animation-done')
+
+            const existingId = animationTimeouts.get(entry.target)
+            if (existingId) {
+              clearTimeout(existingId)
+              animationTimeouts.delete(entry.target)
+            }
           }
         })
       },
@@ -113,6 +133,8 @@ onUnmounted(() => {
   if (parallaxRafId) {
     cancelAnimationFrame(parallaxRafId)
   }
+  animationTimeouts.forEach((id) => clearTimeout(id))
+  animationTimeouts.clear()
 })
 
 const defaultOptions = computed(() => {
@@ -152,19 +174,16 @@ const combinedProps = computed(() => ({
         opacity: 1;
         transform: translateY(0);
       }
+
+      &.animation-done {
+        transition: opacity 0.6s ease-out !important;
+      }
     }
   }
 
   &.vx-timeline-parallax {
     :deep(.v-timeline-item__opposite) {
-      transition: opacity 0.6s ease-out !important;
-      // transform is controlled by JS
       align-self: center;
-    }
-
-    :deep(.v-timeline-item__body) {
-      transition: opacity 0.6s ease-out !important;
-      // transform is controlled by JS
     }
   }
 

@@ -56646,36 +56646,36 @@ a {
 }
 .vx-breadcrumbs-wrap[data-v-82c61612] .v-breadcrumbs-item--link {
   color: rgb(var(--v-theme-primary));
-}.vx-timeline-wrap.vx-timeline-animate[data-v-193e120d] .v-timeline-item__body,
-.vx-timeline-wrap.vx-timeline-animate[data-v-193e120d] .v-timeline-item__opposite {
+}.vx-timeline-wrap.vx-timeline-animate[data-v-1852371d] .v-timeline-item__body,
+.vx-timeline-wrap.vx-timeline-animate[data-v-1852371d] .v-timeline-item__opposite {
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
-.vx-timeline-wrap.vx-timeline-animate[data-v-193e120d] .v-timeline-item__body.is-visible,
-.vx-timeline-wrap.vx-timeline-animate[data-v-193e120d] .v-timeline-item__opposite.is-visible {
+.vx-timeline-wrap.vx-timeline-animate[data-v-1852371d] .v-timeline-item__body.is-visible,
+.vx-timeline-wrap.vx-timeline-animate[data-v-1852371d] .v-timeline-item__opposite.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
-.vx-timeline-wrap.vx-timeline-parallax[data-v-193e120d] .v-timeline-item__opposite {
+.vx-timeline-wrap.vx-timeline-animate[data-v-1852371d] .v-timeline-item__body.animation-done,
+.vx-timeline-wrap.vx-timeline-animate[data-v-1852371d] .v-timeline-item__opposite.animation-done {
   transition: opacity 0.6s ease-out !important;
+}
+.vx-timeline-wrap.vx-timeline-parallax[data-v-1852371d] .v-timeline-item__opposite {
   align-self: center;
 }
-.vx-timeline-wrap.vx-timeline-parallax[data-v-193e120d] .v-timeline-item__body {
-  transition: opacity 0.6s ease-out !important;
-}
-.vx-timeline-wrap.vx-timeline-sinuous[data-v-193e120d] .v-timeline-divider__before,
-.vx-timeline-wrap.vx-timeline-sinuous[data-v-193e120d] .v-timeline-divider__after {
+.vx-timeline-wrap.vx-timeline-sinuous[data-v-1852371d] .v-timeline-divider__before,
+.vx-timeline-wrap.vx-timeline-sinuous[data-v-1852371d] .v-timeline-divider__after {
   background-color: transparent !important;
   width: 20px;
   background-image: url("data:image/svg+xml,%3Csvg width='12' height='100' viewBox='0 0 12 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 0 Q 12 25 6 50 T 6 100' fill='none' stroke='%23ccc' stroke-width='2'/%3E%3C/svg%3E");
   background-repeat: repeat-y;
   background-size: 12px 100px;
 }
-.vx-timeline-wrap.vx-timeline-sinuous[data-v-193e120d] .v-timeline-divider__before {
+.vx-timeline-wrap.vx-timeline-sinuous[data-v-1852371d] .v-timeline-divider__before {
   background-position: bottom center;
 }
-.vx-timeline-wrap.vx-timeline-sinuous[data-v-193e120d] .v-timeline-divider__after {
+.vx-timeline-wrap.vx-timeline-sinuous[data-v-1852371d] .v-timeline-divider__after {
   background-position: top center;
 }.vx-treeview-wrap.presets-compact[data-v-57be4cea] .v-list-item {
   min-height: 32px;
