@@ -171,6 +171,17 @@ const dataWithBinding = ref('hello world')
         clearable
       />
     </v-col>
+
+    <v-col cols="6">
+      <vx-field
+        type="textarea"
+        error-messages="This is an error message explanation and rows = 10"
+        :rows="10"
+        placeholder="enter any value"
+        label="textarea disabled"
+        clearable
+      />
+    </v-col>
   </v-row>
 </template>
 
