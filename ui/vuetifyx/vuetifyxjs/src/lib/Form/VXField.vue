@@ -14,9 +14,9 @@
       <v-textarea
         ref="vInputRef"
         v-model:focused="vInputFocus"
-        v-bind="combinedProps"
         :rows="2"
         :max-rows="20"
+        v-bind="combinedProps"
         auto-grow
       />
     </template>
@@ -26,9 +26,9 @@
       <v-text-field
         ref="vInputRef"
         v-model:focused="vInputFocus"
-        v-bind="combinedProps"
         class="password-field"
         :type="passwordFieldType"
+        v-bind="combinedProps"
       >
         <template #append-inner>
           <slot v-if="hasAppendInnerSlot" name="append-inner" />
