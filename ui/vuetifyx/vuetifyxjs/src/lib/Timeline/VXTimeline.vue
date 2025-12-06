@@ -78,7 +78,7 @@ onMounted(() => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible')
-            
+
             const existingId = animationTimeouts.get(entry.target)
             if (existingId) {
               clearTimeout(existingId)

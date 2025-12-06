@@ -44,7 +44,11 @@ const initVideo = () => {
   }
   // 2. If not, use Hls.js library (Chrome, Firefox, etc.)
   else if (Hls.isSupported()) {
-    hls = new Hls()
+    hls = new Hls({
+      xhrSetup: function (xhr, url) {
+        xhr.withCredentials = true // Crucial: Sends cookies with the request
+      }
+    })
     hls.loadSource(props.src)
     hls.attachMedia(video)
   }
