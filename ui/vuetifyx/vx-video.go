@@ -37,6 +37,11 @@ func (b *VXVideoBuilder) Height(v string) (r *VXVideoBuilder) {
 	return b
 }
 
+func (b *VXVideoBuilder) Rounded(v string) (r *VXVideoBuilder) {
+	b.tag.Attr("rounded", v)
+	return b
+}
+
 func (b *VXVideoBuilder) Class(names ...string) (r *VXVideoBuilder) {
 	b.tag.Class(names...)
 	return b

@@ -22,6 +22,10 @@ const props = defineProps({
   height: {
     type: [String, Number],
     default: 'auto'
+  },
+  rounded: {
+    type: [String, Boolean],
+    default: false
   }
 })
 
@@ -74,6 +78,12 @@ onBeforeUnmount(() => {
   <video
     ref="videoRef"
     v-bind="$attrs"
+    :class="[
+      {
+        'rounded': rounded === true || rounded === '',
+        [`rounded-${rounded}`]: typeof rounded === 'string' && rounded !== ''
+      }
+    ]"
     :style="{ width: width, height: height }"
     :poster="poster"
   ></video>
