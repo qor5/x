@@ -10,7 +10,7 @@ import (
 var TimePrecision = time.Microsecond
 
 type Model struct {
-	ID        string         `gorm:"size:36;primaryKey" json:"id"`
+	ID        string         `gorm:"primaryKey" json:"id"`
 	CreatedAt time.Time      `gorm:"not null" json:"createdAt"`
 	UpdatedAt time.Time      `gorm:"not null" json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"deletedAt"`
@@ -24,7 +24,7 @@ func (m *Model) BeforeCreate(_ *gorm.DB) error {
 }
 
 type HardDeleteModel struct {
-	ID        string    `gorm:"size:36;primaryKey" json:"id"`
+	ID        string    `gorm:"primaryKey" json:"id"`
 	CreatedAt time.Time `gorm:"not null" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"not null" json:"updatedAt"`
 }

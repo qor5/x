@@ -17,6 +17,7 @@ import (
 const (
 	keyTracingSpanName       = "keyTracingSpanName"
 	keyTracingMaxQueryLength = "keyTracingMaxQueryLength"
+	keyTracingDisabled       = "keyTracingDisabled"
 )
 
 const defaultMaxQueryLength = 4096
@@ -30,6 +31,14 @@ func WithSpanName(spanName string) func(db *gorm.DB) *gorm.DB {
 func WithMaxQueryLength(maxLength int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Set(keyTracingMaxQueryLength, maxLength)
+	}
+}
+
+// WithoutTracing returns a scope function that disables tracing for the current query.
+// This is useful when you want to temporarily disable tracing for specific queries.
+func WithoutTracing() func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Set(keyTracingDisabled, true)
 	}
 }
 
@@ -168,8 +177,21 @@ func parseTable(tx *gorm.DB) string {
 	return table
 }
 
+func isTracingDisabled(tx *gorm.DB) bool {
+	if val, ok := tx.Get(keyTracingDisabled); ok {
+		if disabled, ok := val.(bool); ok && disabled {
+			return true
+		}
+	}
+	return false
+}
+
 func (p *logtracingPlugin) before(spanPrefix string) gormHookFunc {
 	return func(tx *gorm.DB) {
+		if isTracingDisabled(tx) {
+			return
+		}
+
 		var spanName string
 		val, ok := tx.Get(keyTracingSpanName)
 		if ok {
@@ -193,6 +215,10 @@ func (p *logtracingPlugin) before(spanPrefix string) gormHookFunc {
 
 func (p *logtracingPlugin) after() gormHookFunc {
 	return func(tx *gorm.DB) {
+		if isTracingDisabled(tx) {
+			return
+		}
+
 		cw, _ := tx.Statement.Context.(*contextWrapper)
 		defer func() {
 			if cw != nil {
