@@ -18,6 +18,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/qor5/confx"
 	"github.com/qor5/x/v3/gormx/postgresx"
+	"github.com/theplant/cachex"
 	"github.com/theplant/inject/lifecycle"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -176,35 +177,56 @@ func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm
 	return db, &dbCloserWrapper{sqlDB}, nil
 }
 
-func buildIAMAuthToken(ctx context.Context, endpoint, region, dbUser string, credProvider aws.CredentialsProvider) (string, error) {
-	var token string
-	if err := backoff.RetryNotify(
-		func() error {
-			t, err := auth.BuildAuthToken(ctx, endpoint, region, dbUser, credProvider)
-			if err != nil {
-				return errors.Wrap(err, "failed to build IAM auth token")
-			}
-			token = t
-			return nil
-		},
-		backoff.WithContext(&backoff.ExponentialBackOff{
-			InitialInterval:     100 * time.Millisecond,
-			RandomizationFactor: 0.5,
-			Multiplier:          2,
-			MaxInterval:         time.Second,
-			MaxElapsedTime:      0,
-			Stop:                backoff.Stop,
-			Clock:               backoff.SystemClock,
-		}, ctx),
-		func(err error, next time.Duration) {
-			slog.ErrorContext(ctx, "Failed to get IAM Token, will retry", "retryIn", next.String(), "error", err)
-		},
-	); err != nil {
-		return "", errors.Wrap(err, "failed to get IAM auth token after retries")
-	}
+var (
+	IAMTokenFreshTTL         = 5 * time.Minute
+	IAMTokenStaleTTL         = time.Duration(0)
+	IAMTokenFetchConcurrency = 2
+)
 
-	slog.InfoContext(ctx, "Successfully got IAM Token")
-	return token, nil
+func newIAMTokenClient(region string, dbUser string, credProvider aws.CredentialsProvider) *cachex.Client[*cachex.Entry[string]] {
+	upstream := cachex.UpstreamFunc[*cachex.Entry[string]](
+		func(ctx context.Context, endpoint string) (*cachex.Entry[string], error) {
+			var token string
+			if err := backoff.RetryNotify(
+				func() error {
+					t, err := auth.BuildAuthToken(ctx, endpoint, region, dbUser, credProvider)
+					if err != nil {
+						return errors.Wrap(err, "failed to build IAM auth token")
+					}
+					token = t
+					return nil
+				},
+				backoff.WithContext(&backoff.ExponentialBackOff{
+					InitialInterval:     100 * time.Millisecond,
+					RandomizationFactor: 0.5,
+					Multiplier:          2,
+					MaxInterval:         time.Second,
+					MaxElapsedTime:      0,
+					Stop:                backoff.Stop,
+					Clock:               backoff.SystemClock,
+				}, ctx),
+				func(err error, next time.Duration) {
+					slog.ErrorContext(ctx, "Failed to get IAM Token, will retry", "retryIn", next.String(), "error", err)
+				},
+			); err != nil {
+				return nil, errors.Wrap(err, "failed to get IAM auth token after retries")
+			}
+
+			slog.InfoContext(ctx, "Successfully got IAM Token")
+			return &cachex.Entry[string]{
+				Data:     token,
+				CachedAt: time.Now(),
+			}, nil
+		},
+	)
+
+	return cachex.NewClient(
+		cachex.NewSyncMap[*cachex.Entry[string]](),
+		upstream,
+		cachex.EntryWithTTL[string](IAMTokenFreshTTL, IAMTokenStaleTTL),
+		cachex.WithFetchConcurrency[*cachex.Entry[string]](IAMTokenFetchConcurrency),
+		cachex.WithDoubleCheck[*cachex.Entry[string]](cachex.DoubleCheckEnabled),
+	)
 }
 
 func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProvider) (gorm.Dialector, error) {
@@ -234,13 +256,14 @@ func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProv
 		return nil, errors.New("credentials provider is required")
 	}
 
+	tokenClient := newIAMTokenClient(region, conf.User, credProvider)
+	endpoint := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	optBeforeConnect := stdlib.OptionBeforeConnect(func(ctx context.Context, conf *pgx.ConnConfig) error {
-		endpoint := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
-		token, err := buildIAMAuthToken(ctx, endpoint, region, conf.User, credProvider)
+		entry, err := tokenClient.Get(ctx, endpoint)
 		if err != nil {
 			return err
 		}
-		conf.Password = token
+		conf.Password = entry.Data
 		return nil
 	})
 	conn := stdlib.OpenDB(*conf, optBeforeConnect)
