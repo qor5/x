@@ -18,6 +18,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/qor5/confx"
 	"github.com/qor5/x/v3/gormx/postgresx"
+	"github.com/theplant/cachex"
+	"github.com/theplant/inject"
 	"github.com/theplant/inject/lifecycle"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -34,15 +36,21 @@ const (
 	AuthMethodIAM      AuthMethod = "iam"
 )
 
+type IAMDialectorConfig struct {
+	TokenEndpoint string      `confx:"tokenEndpoint" usage:"RDS endpoint for IAM token generation (optional, defaults to DSN host:port)"`
+	AWSConfig     *aws.Config `confx:"-" `
+}
+
 type DatabaseConfig struct {
-	DSN             string        `confx:"dsn" usage:"Database connection string" validate:"required"`
-	Debug           bool          `confx:"debug" usage:"Enable debug mode"`
-	Tracing         TracingConfig `confx:"tracing" usage:"Tracing configuration"`
-	MaxIdleConns    int           `confx:"maxIdleConns" usage:"Maximum number of idle connections" validate:"ltefield=MaxOpenConns"`
-	MaxOpenConns    int           `confx:"maxOpenConns" usage:"Maximum number of open connections"`
-	ConnMaxLifetime time.Duration `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`
-	ConnMaxIdleTime time.Duration `confx:"connMaxIdleTime" usage:"Maximum idle time for connections" validate:"ltefield=ConnMaxLifetime"`
-	AuthMethod      AuthMethod    `confx:"authMethod" usage:"Authentication method: 'password' or 'iam'" validate:"required,oneof=password iam"`
+	DSN             string             `confx:"dsn" usage:"Database connection string" validate:"required"`
+	Debug           bool               `confx:"debug" usage:"Enable debug mode"`
+	Tracing         TracingConfig      `confx:"tracing" usage:"Tracing configuration"`
+	MaxIdleConns    int                `confx:"maxIdleConns" usage:"Maximum number of idle connections" validate:"ltefield=MaxOpenConns"`
+	MaxOpenConns    int                `confx:"maxOpenConns" usage:"Maximum number of open connections"`
+	ConnMaxLifetime time.Duration      `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`
+	ConnMaxIdleTime time.Duration      `confx:"connMaxIdleTime" usage:"Maximum idle time for connections" validate:"ltefield=ConnMaxLifetime"`
+	AuthMethod      AuthMethod         `confx:"authMethod" usage:"Authentication method: 'password' or 'iam'" validate:"required,oneof=password iam"`
+	IAM             IAMDialectorConfig `confx:"iam" validate:"skip_nested_unless=AuthMethod iam" usage:"IAM configuration"`
 }
 
 //go:embed embed/default-database-config.yaml
@@ -62,6 +70,14 @@ var SetupDatabase = SetupDatabaseFactory("database")
 
 func SetupDatabaseFactory(name string, opts ...gorm.Option) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
 	return func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
+		if conf.AuthMethod == AuthMethodIAM && conf.IAM.AWSConfig == nil {
+			var awsCfg *aws.Config
+			if err := lc.ResolveContext(ctx, &awsCfg); err != nil && !errors.Is(err, inject.ErrTypeNotProvided) {
+				return nil, err
+			}
+			conf.IAM.AWSConfig = awsCfg
+		}
+
 		db, closer, err := Open(ctx, conf, opts...)
 		if err != nil {
 			return nil, err
@@ -94,11 +110,15 @@ func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm
 	switch conf.AuthMethod {
 	case AuthMethodIAM:
 		slog.InfoContext(ctx, "Using IAM authentication to connect to database")
-		awsConfig, err := config.LoadDefaultConfig(ctx)
-		if err != nil {
-			return nil, nil, errors.Wrap(err, "failed to load AWS config")
+		awsConfig := conf.IAM.AWSConfig
+		if awsConfig == nil {
+			awsCfg, err := config.LoadDefaultConfig(ctx)
+			if err != nil {
+				return nil, nil, errors.Wrap(err, "failed to load AWS config")
+			}
+			awsConfig = &awsCfg
 		}
-		dialector, err = NewIAMDialector(conf.DSN, awsConfig.Region, awsConfig.Credentials)
+		dialector, err = NewIAMDialector(conf.DSN, awsConfig.Region, awsConfig.Credentials, WithIAMTokenEndpoint(conf.IAM.TokenEndpoint))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -176,38 +196,98 @@ func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm
 	return db, &dbCloserWrapper{sqlDB}, nil
 }
 
-func buildIAMAuthToken(ctx context.Context, endpoint, region, dbUser string, credProvider aws.CredentialsProvider) (string, error) {
-	var token string
-	if err := backoff.RetryNotify(
-		func() error {
-			t, err := auth.BuildAuthToken(ctx, endpoint, region, dbUser, credProvider)
-			if err != nil {
-				return errors.Wrap(err, "failed to build IAM auth token")
-			}
-			token = t
-			return nil
-		},
-		backoff.WithContext(&backoff.ExponentialBackOff{
-			InitialInterval:     100 * time.Millisecond,
-			RandomizationFactor: 0.5,
-			Multiplier:          2,
-			MaxInterval:         time.Second,
-			MaxElapsedTime:      0,
-			Stop:                backoff.Stop,
-			Clock:               backoff.SystemClock,
-		}, ctx),
-		func(err error, next time.Duration) {
-			slog.ErrorContext(ctx, "Failed to get IAM Token, will retry", "retryIn", next.String(), "error", err)
-		},
-	); err != nil {
-		return "", errors.Wrap(err, "failed to get IAM auth token after retries")
-	}
+var (
+	// IAMTokenFreshTTL is the duration for which the IAM token is considered fresh in the local cache.
+	//
+	// Rationale:
+	//   - AWS RDS IAM authentication tokens are valid for up to 15 minutes, according to the official
+	//     documentation.
+	//   - We choose 10 minutes as the fresh window to ensure that any token served as "fresh" is well
+	//     within the 15-minute validity period.
+	//   - This reduces the frequency of calling auth.BuildAuthToken while still staying safely below
+	//     the server-side expiration time.
+	IAMTokenFreshTTL = 10 * time.Minute
+	// IAMTokenStaleTTL is the additional duration during which a cached token can be served as stale
+	// when the upstream token generation is temporarily failing.
+	//
+	// This is used together with cachex.WithServeStale(true):
+	//   - When a token age is between IAMTokenFreshTTL and IAMTokenFreshTTL+IAMTokenStaleTTL, cachex
+	//     considers it stale and will trigger an asynchronous refresh via auth.BuildAuthToken while
+	//     still returning the stale token to callers during this window.
+	//   - With IAMTokenFreshTTL=10m and IAMTokenStaleTTL=3m, the maximum age of a served token is
+	//     13 minutes, which is still less than the AWS RDS IAM 15-minute validity period, so the
+	//     database continues to accept the stale token.
+	IAMTokenStaleTTL = 3 * time.Minute
+	// IAMTokenFetchConcurrency is the number of concurrent IAM token fetches allowed when refreshing
+	// tokens for the same endpoint, to avoid thundering herd under high concurrency.
+	IAMTokenFetchConcurrency = 2
+)
 
-	slog.InfoContext(ctx, "Successfully got IAM Token")
-	return token, nil
+func newIAMTokenClient(region string, dbUser string, credProvider aws.CredentialsProvider) *cachex.Client[*cachex.Entry[string]] {
+	upstream := cachex.UpstreamFunc[*cachex.Entry[string]](
+		func(ctx context.Context, endpoint string) (*cachex.Entry[string], error) {
+			var token string
+			if err := backoff.RetryNotify(
+				func() error {
+					t, err := auth.BuildAuthToken(ctx, endpoint, region, dbUser, credProvider)
+					if err != nil {
+						return errors.Wrap(err, "failed to build IAM auth token")
+					}
+					token = t
+					return nil
+				},
+				backoff.WithContext(&backoff.ExponentialBackOff{
+					InitialInterval:     100 * time.Millisecond,
+					RandomizationFactor: 0.5,
+					Multiplier:          2,
+					MaxInterval:         time.Second,
+					MaxElapsedTime:      0,
+					Stop:                backoff.Stop,
+					Clock:               backoff.SystemClock,
+				}, ctx),
+				func(err error, next time.Duration) {
+					slog.ErrorContext(ctx, "Failed to get IAM Token, will retry", "retryIn", next.String(), "error", err)
+				},
+			); err != nil {
+				return nil, errors.Wrap(err, "failed to get IAM auth token after retries")
+			}
+
+			slog.InfoContext(ctx, "Successfully got IAM Token")
+			return &cachex.Entry[string]{
+				Data:     token,
+				CachedAt: time.Now(),
+			}, nil
+		},
+	)
+
+	return cachex.NewClient(
+		cachex.NewSyncMap[*cachex.Entry[string]](),
+		upstream,
+		cachex.EntryWithTTL[string](IAMTokenFreshTTL, IAMTokenStaleTTL),
+		cachex.WithServeStale[*cachex.Entry[string]](true),
+		cachex.WithFetchConcurrency[*cachex.Entry[string]](IAMTokenFetchConcurrency),
+		cachex.WithDoubleCheck[*cachex.Entry[string]](cachex.DoubleCheckEnabled),
+	)
 }
 
-func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProvider) (gorm.Dialector, error) {
+type IAMDialectorOption func(*iamDialectorOptions)
+
+type iamDialectorOptions struct {
+	tokenEndpoint string
+}
+
+func WithIAMTokenEndpoint(endpoint string) IAMDialectorOption {
+	return func(o *iamDialectorOptions) {
+		o.tokenEndpoint = endpoint
+	}
+}
+
+func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProvider, opts ...IAMDialectorOption) (gorm.Dialector, error) {
+	var options iamDialectorOptions
+	for _, opt := range opts {
+		opt(&options)
+	}
+
 	if dsn == "" {
 		return nil, errors.New("dsn is required")
 	}
@@ -234,16 +314,22 @@ func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProv
 		return nil, errors.New("credentials provider is required")
 	}
 
+	tokenEndpoint := options.tokenEndpoint
+	if tokenEndpoint == "" {
+		tokenEndpoint = fmt.Sprintf("%s:%d", conf.Host, conf.Port)
+	}
+
+	tokenClient := newIAMTokenClient(region, conf.User, credProvider)
 	optBeforeConnect := stdlib.OptionBeforeConnect(func(ctx context.Context, conf *pgx.ConnConfig) error {
-		endpoint := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
-		token, err := buildIAMAuthToken(ctx, endpoint, region, conf.User, credProvider)
+		entry, err := tokenClient.Get(ctx, tokenEndpoint)
 		if err != nil {
 			return err
 		}
-		conf.Password = token
+		conf.Password = entry.Data
 		return nil
 	})
-	conn := stdlib.OpenDB(*conf, optBeforeConnect)
+	tzOpts := postgresx.ConfigureTimezone(conf)
+	conn := stdlib.OpenDB(*conf, append(tzOpts, optBeforeConnect)...)
 	return postgresx.New(postgres.Config{
 		Conn: conn,
 		// We are using pgx as postgresql's database/sql driver, it enables prepared statement cache by default (extended protocol)
@@ -255,6 +341,7 @@ func NewDefaultDialector(dsn string) (gorm.Dialector, error) {
 	if dsn == "" {
 		return nil, errors.New("dsn is required")
 	}
+
 	return postgresx.New(postgres.Config{
 		DSN: dsn,
 		// We are using pgx as postgresql's database/sql driver, it enables prepared statement cache by default (extended protocol)
