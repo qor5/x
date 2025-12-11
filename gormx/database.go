@@ -197,8 +197,29 @@ func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm
 }
 
 var (
-	IAMTokenFreshTTL         = 5 * time.Minute
-	IAMTokenStaleTTL         = time.Duration(0)
+	// IAMTokenFreshTTL is the duration for which the IAM token is considered fresh in the local cache.
+	//
+	// Rationale:
+	//   - AWS RDS IAM authentication tokens are valid for up to 15 minutes, according to the official
+	//     documentation.
+	//   - We choose 10 minutes as the fresh window to ensure that any token served as "fresh" is well
+	//     within the 15-minute validity period.
+	//   - This reduces the frequency of calling auth.BuildAuthToken while still staying safely below
+	//     the server-side expiration time.
+	IAMTokenFreshTTL = 10 * time.Minute
+	// IAMTokenStaleTTL is the additional duration during which a cached token can be served as stale
+	// when the upstream token generation is temporarily failing.
+	//
+	// This is used together with cachex.WithServeStale(true):
+	//   - When a token age is between IAMTokenFreshTTL and IAMTokenFreshTTL+IAMTokenStaleTTL, cachex
+	//     considers it stale and will trigger an asynchronous refresh via auth.BuildAuthToken while
+	//     still returning the stale token to callers during this window.
+	//   - With IAMTokenFreshTTL=10m and IAMTokenStaleTTL=3m, the maximum age of a served token is
+	//     13 minutes, which is still less than the AWS RDS IAM 15-minute validity period, so the
+	//     database continues to accept the stale token.
+	IAMTokenStaleTTL = 3 * time.Minute
+	// IAMTokenFetchConcurrency is the number of concurrent IAM token fetches allowed when refreshing
+	// tokens for the same endpoint, to avoid thundering herd under high concurrency.
 	IAMTokenFetchConcurrency = 2
 )
 
@@ -243,6 +264,7 @@ func newIAMTokenClient(region string, dbUser string, credProvider aws.Credential
 		cachex.NewSyncMap[*cachex.Entry[string]](),
 		upstream,
 		cachex.EntryWithTTL[string](IAMTokenFreshTTL, IAMTokenStaleTTL),
+		cachex.WithServeStale[*cachex.Entry[string]](true),
 		cachex.WithFetchConcurrency[*cachex.Entry[string]](IAMTokenFetchConcurrency),
 		cachex.WithDoubleCheck[*cachex.Entry[string]](cachex.DoubleCheckEnabled),
 	)
