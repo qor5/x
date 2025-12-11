@@ -4,6 +4,7 @@
 package prottpx
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/pkg/errors"
 	"github.com/qor5/x/v3/grpcx"
+	"github.com/qor5/x/v3/hook"
 	"github.com/qor5/x/v3/normalize"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
@@ -29,17 +31,44 @@ var (
 	JSONMarshalOptions   = protojson.MarshalOptions{EmitUnpopulated: true}
 )
 
+type (
+	// WriteErrorInput contains the input parameters for the error writing hook.
+	WriteErrorInput struct {
+		W                  http.ResponseWriter
+		R                  *http.Request
+		Error              error
+		ContentTypeJSON    bool
+		AcceptJSON         bool
+		ConnectErrorWriter *connect.ErrorWriter
+	}
+	// WriteErrorOutput contains the output of the error writing hook.
+	WriteErrorOutput struct {
+		Written bool
+	}
+
+	// WriteErrorFunc is the function signature for writing errors.
+	WriteErrorFunc func(ctx context.Context, input *WriteErrorInput) (*WriteErrorOutput, error)
+
+	// WriteErrorIface is an interface that errors can implement to customize their own
+	// HTTP response writing behavior. When an error implements this interface, the Handler
+	// will delegate the response writing to the error itself instead of using the default
+	// connect.ErrorWriter. This allows for custom error response formats and status codes.
+	WriteErrorIface interface {
+		WriteError(ctx context.Context, input *WriteErrorInput) (*WriteErrorOutput, error)
+	}
+)
+
 var _ grpc.ServiceRegistrar = (*Handler)(nil)
 
 // Handler is an HTTP handler that wraps gRPC unary services.
 // It implements grpc.ServiceRegistrar for compatibility with generated gRPC code.
 type Handler struct {
-	mux          *http.ServeMux
-	interceptors []grpc.UnaryServerInterceptor
-	errWriter    *connect.ErrorWriter
-	registered   map[string]bool
-
+	mux              *http.ServeMux
 	normalizeHandler http.Handler
+	registered       map[string]bool
+	interceptors     []grpc.UnaryServerInterceptor
+	connectErrWriter *connect.ErrorWriter
+	writeErrorHook   hook.Hook[WriteErrorFunc]
 }
 
 // HandlerOption configures the Handler.
@@ -54,12 +83,20 @@ func ChainUnaryInterceptor(interceptors ...grpc.UnaryServerInterceptor) HandlerO
 	}
 }
 
+// WithWriteErrorHook returns a HandlerOption that adds hooks for customizing error writing.
+// Hooks are chained in the order they are provided.
+func WithWriteErrorHook(hooks ...hook.Hook[WriteErrorFunc]) HandlerOption {
+	return func(m *Handler) {
+		m.writeErrorHook = hook.Prepend(m.writeErrorHook, hooks...)
+	}
+}
+
 // NewHandler creates a new Handler with the given options.
 func NewHandler(opts ...HandlerOption) *Handler {
 	m := &Handler{
-		mux:        http.NewServeMux(),
-		errWriter:  connect.NewErrorWriter(),
-		registered: make(map[string]bool),
+		mux:              http.NewServeMux(),
+		connectErrWriter: connect.NewErrorWriter(),
+		registered:       make(map[string]bool),
 	}
 	m.normalizeHandler = normalize.HTTPMiddleware(m.mux)
 	for _, opt := range opts {
@@ -106,7 +143,8 @@ func (m *Handler) handleMethod(service any, method grpc.MethodDesc) http.Handler
 	interceptor := grpcx.ChainUnaryServerInterceptors(m.interceptors...)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		reqIsJSON := strings.Contains(strings.ToLower(r.Header.Get("Content-Type")), JSONContentType)
+		reqIsJSON := isContentTypeJSON(r)
+		acceptJSON := isAcceptJSON(r, reqIsJSON)
 
 		dec := func(msg any) error {
 			body, err := io.ReadAll(r.Body)
@@ -127,21 +165,46 @@ func (m *Handler) handleMethod(service any, method grpc.MethodDesc) http.Handler
 
 		resp, err := method.Handler(service, r.Context(), dec, interceptor)
 		if err != nil {
-			// Error responses are always returned as JSON regardless of Accept or Content-Type headers.
-			// This is the default behavior of connect.ErrorWriter and we maintain consistency with it.
-			if werr := m.errWriter.Write(w, r, toConnectError(err)); werr != nil {
-				panic(werr)
-			}
+			m.writeError(r.Context(), w, r, err, reqIsJSON, acceptJSON)
 			return
 		}
 
-		writeMessage(resp.(proto.Message), w, r, reqIsJSON)
+		writeMessage(resp.(proto.Message), w, acceptJSON)
 	})
 }
 
+// writeError writes an error response, applying any configured hooks.
+func (m *Handler) writeError(ctx context.Context, w http.ResponseWriter, r *http.Request, err error, reqIsJSON, acceptJSON bool) {
+	defWriteError := func(ctx context.Context, input *WriteErrorInput) (*WriteErrorOutput, error) {
+		if errWriter, ok := input.Error.(WriteErrorIface); ok {
+			return errWriter.WriteError(ctx, input)
+		}
+
+		// Error responses are always returned as JSON regardless of Accept or Content-Type headers.
+		// This is the default behavior of connect.ErrorWriter and we maintain consistency with it.
+		if werr := m.connectErrWriter.Write(input.W, input.R, ToConnectError(input.Error)); werr != nil {
+			return nil, werr
+		}
+		return &WriteErrorOutput{Written: true}, nil
+	}
+
+	writeError := defWriteError
+	if m.writeErrorHook != nil {
+		writeError = m.writeErrorHook(defWriteError)
+	}
+
+	if _, werr := writeError(ctx, &WriteErrorInput{
+		W: w, R: r, Error: err,
+		ContentTypeJSON:    reqIsJSON,
+		AcceptJSON:         acceptJSON,
+		ConnectErrorWriter: m.connectErrWriter,
+	}); werr != nil {
+		panic(werr)
+	}
+}
+
 // writeMessage writes a protobuf message to the HTTP response.
-func writeMessage(msg proto.Message, w http.ResponseWriter, r *http.Request, reqIsJSON bool) {
-	acceptJSON := isAcceptJSON(r, reqIsJSON)
+func writeMessage(msg proto.Message, w http.ResponseWriter, acceptJSON bool) {
 	if acceptJSON {
 		w.Header().Set(HeaderContentType, JSONContentType)
 	} else {
@@ -166,6 +229,11 @@ func writeMessage(msg proto.Message, w http.ResponseWriter, r *http.Request, req
 	}
 }
 
+// isContentTypeJSON determines if the request body should be parsed as JSON.
+func isContentTypeJSON(r *http.Request) bool {
+	return strings.Contains(strings.ToLower(r.Header.Get("Content-Type")), JSONContentType)
+}
+
 // isAcceptJSON determines if the response should be JSON.
 // Priority: Accept header > Content-Type header > default (proto).
 func isAcceptJSON(r *http.Request, reqIsJSON bool) bool {
@@ -176,8 +244,8 @@ func isAcceptJSON(r *http.Request, reqIsJSON bool) bool {
 	return strings.Contains(accept, JSONContentType)
 }
 
-// toConnectError converts any error to a connect.Error.
-func toConnectError(err error) *connect.Error {
+// ToConnectError converts any error to a connect.Error.
+func ToConnectError(err error) *connect.Error {
 	if ce := new(connect.Error); errors.As(err, &ce) {
 		return ce
 	}
