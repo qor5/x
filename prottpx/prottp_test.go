@@ -712,3 +712,188 @@ func TestServeMux_WithNormalizeInterceptor(t *testing.T) {
 		assert.Equal(t, "request-meta-value", rec.Header().Get("X-Request-Header-FromMetadata"))
 	})
 }
+
+func TestHandler_WithWriteErrorHook(t *testing.T) {
+	var hookCalled bool
+	var capturedErr error
+
+	hdr := NewHandler(
+		WithWriteErrorHook(func(next WriteErrorFunc) WriteErrorFunc {
+			return func(ctx context.Context, input *WriteErrorInput) (*WriteErrorOutput, error) {
+				hookCalled = true
+				capturedErr = input.Error
+
+				// Add custom header before calling next
+				input.W.Header().Set("X-Error-Hook", "called")
+
+				return next(ctx, input)
+			}
+		}),
+	)
+	testdatav1.RegisterEchoServiceServer(hdr, &echoServer{})
+
+	t.Run("hook is called on error", func(t *testing.T) {
+		hookCalled = false
+		capturedErr = nil
+
+		req := &testdatav1.EchoWithErrorRequest{
+			Message:   "test",
+			ErrorType: testdatav1.ErrorType_ERROR_TYPE_GRPC_STATUS,
+		}
+		body, err := JSONMarshalOptions.Marshal(req)
+		require.NoError(t, err)
+
+		httpReq := httptest.NewRequest(http.MethodPost, "/testdata.v1.EchoService/EchoWithError", bytes.NewReader(body))
+		httpReq.Header.Set(HeaderContentType, JSONContentType)
+
+		rec := httptest.NewRecorder()
+		hdr.ServeHTTP(rec, httpReq)
+
+		assert.True(t, hookCalled, "hook should be called")
+		assert.NotNil(t, capturedErr, "error should be captured")
+		assert.Equal(t, "called", rec.Header().Get("X-Error-Hook"))
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("hook can modify error response", func(t *testing.T) {
+		customHdr := NewHandler(
+			WithWriteErrorHook(func(next WriteErrorFunc) WriteErrorFunc {
+				return func(ctx context.Context, input *WriteErrorInput) (*WriteErrorOutput, error) {
+					// Custom error response instead of default
+					input.W.Header().Set("Content-Type", "text/plain")
+					input.W.WriteHeader(http.StatusTeapot)
+					input.W.Write([]byte("custom error: " + input.Error.Error()))
+					return &WriteErrorOutput{Written: true}, nil
+				}
+			}),
+		)
+		testdatav1.RegisterEchoServiceServer(customHdr, &echoServer{})
+
+		req := &testdatav1.EchoWithErrorRequest{
+			Message:   "test",
+			ErrorType: testdatav1.ErrorType_ERROR_TYPE_GRPC_STATUS,
+		}
+		body, err := JSONMarshalOptions.Marshal(req)
+		require.NoError(t, err)
+
+		httpReq := httptest.NewRequest(http.MethodPost, "/testdata.v1.EchoService/EchoWithError", bytes.NewReader(body))
+		httpReq.Header.Set(HeaderContentType, JSONContentType)
+
+		rec := httptest.NewRecorder()
+		customHdr.ServeHTTP(rec, httpReq)
+
+		assert.Equal(t, http.StatusTeapot, rec.Code)
+		assert.Equal(t, "text/plain", rec.Header().Get("Content-Type"))
+		assert.Contains(t, rec.Body.String(), "custom error:")
+	})
+
+	t.Run("hook receives ContentTypeJSON and AcceptJSON", func(t *testing.T) {
+		var receivedContentTypeJSON, receivedAcceptJSON bool
+
+		jsonCheckHdr := NewHandler(
+			WithWriteErrorHook(func(next WriteErrorFunc) WriteErrorFunc {
+				return func(ctx context.Context, input *WriteErrorInput) (*WriteErrorOutput, error) {
+					receivedContentTypeJSON = input.ContentTypeJSON
+					receivedAcceptJSON = input.AcceptJSON
+					return next(ctx, input)
+				}
+			}),
+		)
+		testdatav1.RegisterEchoServiceServer(jsonCheckHdr, &echoServer{})
+
+		req := &testdatav1.EchoWithErrorRequest{
+			Message:   "test",
+			ErrorType: testdatav1.ErrorType_ERROR_TYPE_GRPC_STATUS,
+		}
+		body, err := JSONMarshalOptions.Marshal(req)
+		require.NoError(t, err)
+
+		httpReq := httptest.NewRequest(http.MethodPost, "/testdata.v1.EchoService/EchoWithError", bytes.NewReader(body))
+		httpReq.Header.Set(HeaderContentType, JSONContentType)
+		httpReq.Header.Set(HeaderAccept, ProtoContentType)
+
+		rec := httptest.NewRecorder()
+		jsonCheckHdr.ServeHTTP(rec, httpReq)
+
+		assert.True(t, receivedContentTypeJSON, "ContentTypeJSON should be true for JSON request")
+		assert.False(t, receivedAcceptJSON, "AcceptJSON should be false when Accept is proto")
+	})
+}
+
+// customError implements WriteErrorIface for testing.
+type customError struct {
+	message string
+}
+
+func (e *customError) Error() string {
+	return e.message
+}
+
+func (e *customError) WriteError(ctx context.Context, input *WriteErrorInput) (*WriteErrorOutput, error) {
+	input.W.Header().Set("Content-Type", "application/x-custom-error")
+	input.W.Header().Set("X-Custom-Error", "true")
+	input.W.WriteHeader(http.StatusUnprocessableEntity)
+	input.W.Write([]byte(`{"custom_error":"` + e.message + `"}`))
+	return &WriteErrorOutput{Written: true}, nil
+}
+
+// customErrorServer returns customError for testing WriteErrorIface.
+type customErrorServer struct {
+	testdatav1.UnimplementedEchoServiceServer
+}
+
+func (s *customErrorServer) Echo(ctx context.Context, req *testdatav1.EchoRequest) (*testdatav1.EchoResponse, error) {
+	return nil, &customError{message: "custom error message"}
+}
+
+func TestHandler_WriteErrorIface(t *testing.T) {
+	hdr := NewHandler()
+	testdatav1.RegisterEchoServiceServer(hdr, &customErrorServer{})
+
+	t.Run("error implementing WriteErrorIface handles its own response", func(t *testing.T) {
+		req := &testdatav1.EchoRequest{Message: "test"}
+		body, err := JSONMarshalOptions.Marshal(req)
+		require.NoError(t, err)
+
+		httpReq := httptest.NewRequest(http.MethodPost, "/testdata.v1.EchoService/Echo", bytes.NewReader(body))
+		httpReq.Header.Set(HeaderContentType, JSONContentType)
+
+		rec := httptest.NewRecorder()
+		hdr.ServeHTTP(rec, httpReq)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+		assert.Equal(t, "application/x-custom-error", rec.Header().Get("Content-Type"))
+		assert.Equal(t, "true", rec.Header().Get("X-Custom-Error"))
+		assert.Contains(t, rec.Body.String(), "custom error message")
+	})
+
+	t.Run("hook wraps default handler which delegates to WriteErrorIface", func(t *testing.T) {
+		var hookCalled bool
+
+		hdrWithHook := NewHandler(
+			WithWriteErrorHook(func(next WriteErrorFunc) WriteErrorFunc {
+				return func(ctx context.Context, input *WriteErrorInput) (*WriteErrorOutput, error) {
+					hookCalled = true
+					return next(ctx, input)
+				}
+			}),
+		)
+		testdatav1.RegisterEchoServiceServer(hdrWithHook, &customErrorServer{})
+
+		req := &testdatav1.EchoRequest{Message: "test"}
+		body, err := JSONMarshalOptions.Marshal(req)
+		require.NoError(t, err)
+
+		httpReq := httptest.NewRequest(http.MethodPost, "/testdata.v1.EchoService/Echo", bytes.NewReader(body))
+		httpReq.Header.Set(HeaderContentType, JSONContentType)
+
+		rec := httptest.NewRecorder()
+		hdrWithHook.ServeHTTP(rec, httpReq)
+
+		// Hook should still be called (it wraps the default handler)
+		assert.True(t, hookCalled, "hook should be called")
+		// But WriteErrorIface should handle the response
+		assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+		assert.Equal(t, "application/x-custom-error", rec.Header().Get("Content-Type"))
+	})
+}
