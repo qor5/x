@@ -35,6 +35,10 @@ func UnaryConnectInterceptor(ib *i18nx.I18N, shouldConvert func(ctx context.Cont
 }
 
 func ConvertToConnectError(err error) *connect.Error {
+	if ce := new(connect.Error); errors.As(err, &ce) {
+		return ce
+	}
+
 	st := status.Convert(err).Proto()
 	cerr := connect.NewError(connect.Code(st.Code), errors.New(st.Message))
 	for _, v := range st.Details {
