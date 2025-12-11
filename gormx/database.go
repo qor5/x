@@ -19,6 +19,7 @@ import (
 	"github.com/qor5/confx"
 	"github.com/qor5/x/v3/gormx/postgresx"
 	"github.com/theplant/cachex"
+	"github.com/theplant/inject"
 	"github.com/theplant/inject/lifecycle"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -35,15 +36,21 @@ const (
 	AuthMethodIAM      AuthMethod = "iam"
 )
 
+type IAMDialectorConfig struct {
+	TokenEndpoint string      `confx:"tokenEndpoint" usage:"RDS endpoint for IAM token generation (optional, defaults to DSN host:port)"`
+	AWSConfig     *aws.Config `confx:"-" `
+}
+
 type DatabaseConfig struct {
-	DSN             string        `confx:"dsn" usage:"Database connection string" validate:"required"`
-	Debug           bool          `confx:"debug" usage:"Enable debug mode"`
-	Tracing         TracingConfig `confx:"tracing" usage:"Tracing configuration"`
-	MaxIdleConns    int           `confx:"maxIdleConns" usage:"Maximum number of idle connections" validate:"ltefield=MaxOpenConns"`
-	MaxOpenConns    int           `confx:"maxOpenConns" usage:"Maximum number of open connections"`
-	ConnMaxLifetime time.Duration `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`
-	ConnMaxIdleTime time.Duration `confx:"connMaxIdleTime" usage:"Maximum idle time for connections" validate:"ltefield=ConnMaxLifetime"`
-	AuthMethod      AuthMethod    `confx:"authMethod" usage:"Authentication method: 'password' or 'iam'" validate:"required,oneof=password iam"`
+	DSN             string             `confx:"dsn" usage:"Database connection string" validate:"required"`
+	Debug           bool               `confx:"debug" usage:"Enable debug mode"`
+	Tracing         TracingConfig      `confx:"tracing" usage:"Tracing configuration"`
+	MaxIdleConns    int                `confx:"maxIdleConns" usage:"Maximum number of idle connections" validate:"ltefield=MaxOpenConns"`
+	MaxOpenConns    int                `confx:"maxOpenConns" usage:"Maximum number of open connections"`
+	ConnMaxLifetime time.Duration      `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`
+	ConnMaxIdleTime time.Duration      `confx:"connMaxIdleTime" usage:"Maximum idle time for connections" validate:"ltefield=ConnMaxLifetime"`
+	AuthMethod      AuthMethod         `confx:"authMethod" usage:"Authentication method: 'password' or 'iam'" validate:"required,oneof=password iam"`
+	IAM             IAMDialectorConfig `confx:"iam" validate:"skip_nested_unless=AuthMethod iam" usage:"IAM configuration"`
 }
 
 //go:embed embed/default-database-config.yaml
@@ -63,6 +70,14 @@ var SetupDatabase = SetupDatabaseFactory("database")
 
 func SetupDatabaseFactory(name string, opts ...gorm.Option) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
 	return func(ctx context.Context, lc *lifecycle.Lifecycle, conf *DatabaseConfig) (*gorm.DB, error) {
+		if conf.AuthMethod == AuthMethodIAM && conf.IAM.AWSConfig == nil {
+			var awsCfg *aws.Config
+			if err := lc.ResolveContext(ctx, &awsCfg); err != nil && !errors.Is(err, inject.ErrTypeNotProvided) {
+				return nil, err
+			}
+			conf.IAM.AWSConfig = awsCfg
+		}
+
 		db, closer, err := Open(ctx, conf, opts...)
 		if err != nil {
 			return nil, err
@@ -95,11 +110,15 @@ func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm
 	switch conf.AuthMethod {
 	case AuthMethodIAM:
 		slog.InfoContext(ctx, "Using IAM authentication to connect to database")
-		awsConfig, err := config.LoadDefaultConfig(ctx)
-		if err != nil {
-			return nil, nil, errors.Wrap(err, "failed to load AWS config")
+		awsConfig := conf.IAM.AWSConfig
+		if awsConfig == nil {
+			awsCfg, err := config.LoadDefaultConfig(ctx)
+			if err != nil {
+				return nil, nil, errors.Wrap(err, "failed to load AWS config")
+			}
+			awsConfig = &awsCfg
 		}
-		dialector, err = NewIAMDialector(conf.DSN, awsConfig.Region, awsConfig.Credentials)
+		dialector, err = NewIAMDialector(conf.DSN, awsConfig.Region, awsConfig.Credentials, WithIAMTokenEndpoint(conf.IAM.TokenEndpoint))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -229,7 +248,24 @@ func newIAMTokenClient(region string, dbUser string, credProvider aws.Credential
 	)
 }
 
-func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProvider) (gorm.Dialector, error) {
+type IAMDialectorOption func(*iamDialectorOptions)
+
+type iamDialectorOptions struct {
+	tokenEndpoint string
+}
+
+func WithIAMTokenEndpoint(endpoint string) IAMDialectorOption {
+	return func(o *iamDialectorOptions) {
+		o.tokenEndpoint = endpoint
+	}
+}
+
+func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProvider, opts ...IAMDialectorOption) (gorm.Dialector, error) {
+	var options iamDialectorOptions
+	for _, opt := range opts {
+		opt(&options)
+	}
+
 	if dsn == "" {
 		return nil, errors.New("dsn is required")
 	}
@@ -256,17 +292,22 @@ func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProv
 		return nil, errors.New("credentials provider is required")
 	}
 
+	tokenEndpoint := options.tokenEndpoint
+	if tokenEndpoint == "" {
+		tokenEndpoint = fmt.Sprintf("%s:%d", conf.Host, conf.Port)
+	}
+
 	tokenClient := newIAMTokenClient(region, conf.User, credProvider)
-	endpoint := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	optBeforeConnect := stdlib.OptionBeforeConnect(func(ctx context.Context, conf *pgx.ConnConfig) error {
-		entry, err := tokenClient.Get(ctx, endpoint)
+		entry, err := tokenClient.Get(ctx, tokenEndpoint)
 		if err != nil {
 			return err
 		}
 		conf.Password = entry.Data
 		return nil
 	})
-	conn := stdlib.OpenDB(*conf, optBeforeConnect)
+	tzOpts := postgresx.ConfigureTimezone(conf)
+	conn := stdlib.OpenDB(*conf, append(tzOpts, optBeforeConnect)...)
 	return postgresx.New(postgres.Config{
 		Conn: conn,
 		// We are using pgx as postgresql's database/sql driver, it enables prepared statement cache by default (extended protocol)
@@ -278,6 +319,7 @@ func NewDefaultDialector(dsn string) (gorm.Dialector, error) {
 	if dsn == "" {
 		return nil, errors.New("dsn is required")
 	}
+
 	return postgresx.New(postgres.Config{
 		DSN: dsn,
 		// We are using pgx as postgresql's database/sql driver, it enables prepared statement cache by default (extended protocol)
