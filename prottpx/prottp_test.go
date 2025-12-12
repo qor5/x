@@ -547,6 +547,100 @@ func TestServeMux_DuplicateRegistration(t *testing.T) {
 	})
 }
 
+func TestHandler_WithWriteResponseHook(t *testing.T) {
+	var hookCalled bool
+	var capturedResp proto.Message
+
+	hdr := NewHandler(
+		WithWriteResponseHook(func(next WriteResponseFunc) WriteResponseFunc {
+			return func(ctx context.Context, input *WriteResponseInput) (*WriteResponseOutput, error) {
+				hookCalled = true
+				capturedResp = input.Response
+				input.W.Header().Set("X-Response-Hook", "called")
+				return next(ctx, input)
+			}
+		}),
+	)
+	testdatav1.RegisterEchoServiceServer(hdr, &echoServer{})
+
+	t.Run("hook is called on success", func(t *testing.T) {
+		hookCalled = false
+		capturedResp = nil
+
+		req := &testdatav1.EchoRequest{Message: "hello"}
+		body, err := JSONMarshalOptions.Marshal(req)
+		require.NoError(t, err)
+
+		httpReq := httptest.NewRequest(http.MethodPost, "/testdata.v1.EchoService/Echo", bytes.NewReader(body))
+		httpReq.Header.Set(HeaderContentType, JSONContentType)
+
+		rec := httptest.NewRecorder()
+		hdr.ServeHTTP(rec, httpReq)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.True(t, hookCalled, "hook should be called")
+		assert.NotNil(t, capturedResp, "response message should be captured")
+		assert.Equal(t, "called", rec.Header().Get("X-Response-Hook"))
+	})
+
+	t.Run("hook can override response", func(t *testing.T) {
+		customHdr := NewHandler(
+			WithWriteResponseHook(func(next WriteResponseFunc) WriteResponseFunc {
+				return func(ctx context.Context, input *WriteResponseInput) (*WriteResponseOutput, error) {
+					input.W.Header().Set("Content-Type", "text/plain")
+					input.W.WriteHeader(http.StatusCreated)
+					input.W.Write([]byte("custom response"))
+					return &WriteResponseOutput{Written: true}, nil
+				}
+			}),
+		)
+		testdatav1.RegisterEchoServiceServer(customHdr, &echoServer{})
+
+		req := &testdatav1.EchoRequest{Message: "hello"}
+		body, err := JSONMarshalOptions.Marshal(req)
+		require.NoError(t, err)
+
+		httpReq := httptest.NewRequest(http.MethodPost, "/testdata.v1.EchoService/Echo", bytes.NewReader(body))
+		httpReq.Header.Set(HeaderContentType, JSONContentType)
+
+		rec := httptest.NewRecorder()
+		customHdr.ServeHTTP(rec, httpReq)
+
+		assert.Equal(t, http.StatusCreated, rec.Code)
+		assert.Equal(t, "text/plain", rec.Header().Get("Content-Type"))
+		assert.Equal(t, "custom response", rec.Body.String())
+	})
+
+	t.Run("hook receives ContentTypeJSON and AcceptJSON", func(t *testing.T) {
+		var receivedContentTypeJSON, receivedAcceptJSON bool
+
+		jsonCheckHdr := NewHandler(
+			WithWriteResponseHook(func(next WriteResponseFunc) WriteResponseFunc {
+				return func(ctx context.Context, input *WriteResponseInput) (*WriteResponseOutput, error) {
+					receivedContentTypeJSON = input.ContentTypeJSON
+					receivedAcceptJSON = input.AcceptJSON
+					return next(ctx, input)
+				}
+			}),
+		)
+		testdatav1.RegisterEchoServiceServer(jsonCheckHdr, &echoServer{})
+
+		req := &testdatav1.EchoRequest{Message: "hello"}
+		body, err := JSONMarshalOptions.Marshal(req)
+		require.NoError(t, err)
+
+		httpReq := httptest.NewRequest(http.MethodPost, "/testdata.v1.EchoService/Echo", bytes.NewReader(body))
+		httpReq.Header.Set(HeaderContentType, JSONContentType)
+		httpReq.Header.Set(HeaderAccept, ProtoContentType)
+
+		rec := httptest.NewRecorder()
+		jsonCheckHdr.ServeHTTP(rec, httpReq)
+
+		assert.True(t, receivedContentTypeJSON, "ContentTypeJSON should be true for JSON request")
+		assert.False(t, receivedAcceptJSON, "AcceptJSON should be false when Accept is proto")
+	})
+}
+
 // greetServer implements testdatav1.GreetServiceServer for testing.
 type greetServer struct {
 	testdatav1.UnimplementedGreetServiceServer
