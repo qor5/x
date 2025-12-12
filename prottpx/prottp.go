@@ -15,8 +15,8 @@ import (
 	"github.com/qor5/x/v3/grpcx"
 	"github.com/qor5/x/v3/hook"
 	"github.com/qor5/x/v3/normalize"
+	"github.com/qor5/x/v3/statusx"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
@@ -76,6 +76,7 @@ type (
 
 var _ grpc.ServiceRegistrar = (*Handler)(nil)
 
+// TODO: 需要支持默认序列化方式的自定义
 // Handler is an HTTP handler that wraps gRPC unary services.
 // It implements grpc.ServiceRegistrar for compatibility with generated gRPC code.
 type Handler struct {
@@ -209,7 +210,7 @@ func defaultWriteError(ctx context.Context, input *WriteErrorInput) (*WriteError
 
 	// Error responses are always returned as JSON regardless of Accept or Content-Type headers.
 	// This is the default behavior of connect.ErrorWriter and we maintain consistency with it.
-	if werr := input.ConnectErrorWriter.Write(input.W, input.R, ToConnectError(input.Error)); werr != nil {
+	if werr := input.ConnectErrorWriter.Write(input.W, input.R, statusx.ConvertToConnectError(input.Error)); werr != nil {
 		return nil, werr
 	}
 	return &WriteErrorOutput{Written: true}, nil
@@ -290,20 +291,4 @@ func isAcceptJSON(r *http.Request, contentTypeJSON bool) bool {
 		return contentTypeJSON
 	}
 	return strings.Contains(accept, JSONContentType)
-}
-
-// ToConnectError converts any error to a connect.Error.
-func ToConnectError(err error) *connect.Error {
-	if ce := new(connect.Error); errors.As(err, &ce) {
-		return ce
-	}
-
-	st := status.Convert(err).Proto()
-	cerr := connect.NewError(connect.Code(st.Code), errors.New(st.Message))
-	for _, d := range st.Details {
-		if ed, e := connect.NewErrorDetail(d); e == nil {
-			cerr.AddDetail(ed)
-		}
-	}
-	return cerr //nolint:errhandle
 }
