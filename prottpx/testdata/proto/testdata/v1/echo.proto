@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package testdata.v1;
+
+// ErrorType specifies the type of error to return in EchoWithError.
+enum ErrorType {
+  ERROR_TYPE_UNSPECIFIED = 0;
+  // ERROR_TYPE_NONE indicates no error should be returned.
+  ERROR_TYPE_NONE = 1;
+  // ERROR_TYPE_GRPC_STATUS returns a standard grpc/status error.
+  ERROR_TYPE_GRPC_STATUS = 2;
+  // ERROR_TYPE_STATUSX returns a statusx error with details.
+  ERROR_TYPE_STATUSX = 3;
+  // ERROR_TYPE_CONNECT returns a connect.Error directly.
+  ERROR_TYPE_CONNECT = 4;
+}
+
+// EchoRequest is the request message for Echo method.
+message EchoRequest {
+  string message = 1;
+}
+
+// EchoResponse is the response message for Echo method.
+message EchoResponse {
+  string message = 1;
+}
+
+// EchoWithErrorRequest is the request message for EchoWithError method.
+message EchoWithErrorRequest {
+  string message = 1;
+  ErrorType error_type = 2;
+}
+
+// EchoWithErrorResponse is the response message for EchoWithError method.
+message EchoWithErrorResponse {
+  string message = 1;
+}
+
+// EchoService is a simple service for testing prottpx.
+service EchoService {
+  // Echo returns the message from the request.
+  rpc Echo(EchoRequest) returns (EchoResponse);
+  // EchoWithError returns an error based on error_type.
+  rpc EchoWithError(EchoWithErrorRequest) returns (EchoWithErrorResponse);
+}
+
+// GreetRequest is the request message for Greet method.
+message GreetRequest {
+  string name = 1;
+}
+
+// GreetResponse is the response message for Greet method.
+message GreetResponse {
+  string greeting = 1;
+}
+
+// GreetService is another service for testing multiple service registration.
+service GreetService {
+  // Greet returns a greeting message.
+  rpc Greet(GreetRequest) returns (GreetResponse);
+}

@@ -397,7 +397,8 @@ func FromError(err error) (s *Status, ok bool) {
 		// This is intentionally different from status.FromError(nil) behavior for convenience.
 		return New(codes.OK, statusv1.ErrorReason_OK.String(), ""), true
 	}
-	if se := new(StatusError); errors.As(err, &se) {
+	var se *StatusError
+	if errors.As(err, &se) {
 		// if err is already a *StatusError, we don't want to lose the original status.
 		return se.s, true
 	}

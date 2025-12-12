@@ -201,7 +201,8 @@ func TranslateError(err error, ib *i18nx.I18N, lang language.Tag) error {
 // TranslateStatusErrorOnly translates only StatusError types, returning the error and a boolean indicating success
 func TranslateStatusErrorOnly(err error, ib *i18nx.I18N, lang language.Tag) (error, bool) {
 	if err != nil {
-		if se := new(StatusError); !errors.As(err, &se) {
+		var se *StatusError
+		if !errors.As(err, &se) {
 			return err, false //nolint:errhandle
 		}
 	}

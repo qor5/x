@@ -53,6 +53,14 @@ func mustFromContext(ctx context.Context) *normalization {
 	return n
 }
 
+func CallMetaFromContext(ctx context.Context) (*CallMeta, error) {
+	nlz, err := fromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return nlz.callMeta, nil
+}
+
 func MustCallMetaFromContext(ctx context.Context) *CallMeta {
 	return mustFromContext(ctx).callMeta
 }
