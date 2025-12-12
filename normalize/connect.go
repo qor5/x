@@ -41,7 +41,8 @@ func UnaryConnectInterceptor[T any](svc T) connect.UnaryInterceptorFunc {
 			res, err := next(ctx, req)
 			if err != nil {
 				if len(resMD) > 0 {
-					if ce := new(connect.Error); errors.As(err, &ce) {
+					var ce *connect.Error
+					if errors.As(err, &ce) {
 						for key, vv := range resMD {
 							for _, v := range vv {
 								ce.Meta().Add(key, v)
