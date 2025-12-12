@@ -190,84 +190,91 @@ func (m *Handler) handleMethod(service any, method grpc.MethodDesc) http.Handler
 
 		resp, err := method.Handler(service, r.Context(), dec, interceptor)
 		if err != nil {
-			m.writeError(r.Context(), w, r, err, contentTypeJSON, acceptJSON)
+			if writeErr := m.writeError(r.Context(), w, r, err, contentTypeJSON, acceptJSON); writeErr != nil {
+				panic(writeErr)
+			}
 			return
 		}
 
-		m.writeResponse(r.Context(), w, r, resp.(proto.Message), contentTypeJSON, acceptJSON)
+		if writeErr := m.writeResponse(r.Context(), w, r, resp.(proto.Message), contentTypeJSON, acceptJSON); writeErr != nil {
+			panic(writeErr)
+		}
 	})
 }
 
+func defaultWriteError(ctx context.Context, input *WriteErrorInput) (*WriteErrorOutput, error) {
+	if errWriter, ok := input.Error.(WriteErrorIface); ok {
+		return errWriter.WriteError(ctx, input)
+	}
+
+	// Error responses are always returned as JSON regardless of Accept or Content-Type headers.
+	// This is the default behavior of connect.ErrorWriter and we maintain consistency with it.
+	if werr := input.ConnectErrorWriter.Write(input.W, input.R, ToConnectError(input.Error)); werr != nil {
+		return nil, werr
+	}
+	return &WriteErrorOutput{Written: true}, nil
+}
+
 // writeError writes an error response, applying any configured hooks.
-func (m *Handler) writeError(ctx context.Context, w http.ResponseWriter, r *http.Request, err error, contentTypeJSON, acceptJSON bool) {
-	defWriteError := func(ctx context.Context, input *WriteErrorInput) (*WriteErrorOutput, error) {
-		if errWriter, ok := input.Error.(WriteErrorIface); ok {
-			return errWriter.WriteError(ctx, input)
-		}
-
-		// Error responses are always returned as JSON regardless of Accept or Content-Type headers.
-		// This is the default behavior of connect.ErrorWriter and we maintain consistency with it.
-		if werr := m.connectErrWriter.Write(input.W, input.R, ToConnectError(input.Error)); werr != nil {
-			return nil, werr
-		}
-		return &WriteErrorOutput{Written: true}, nil
-	}
-
-	writeError := defWriteError
+func (m *Handler) writeError(ctx context.Context, w http.ResponseWriter, r *http.Request, err error, contentTypeJSON, acceptJSON bool) error {
+	writeError := defaultWriteError
 	if m.writeErrorHook != nil {
-		writeError = m.writeErrorHook(defWriteError)
+		writeError = m.writeErrorHook(writeError)
 	}
 
-	if _, werr := writeError(ctx, &WriteErrorInput{
+	if _, err := writeError(ctx, &WriteErrorInput{
 		W: w, R: r, Error: err,
 		ContentTypeJSON:    contentTypeJSON,
 		AcceptJSON:         acceptJSON,
 		ConnectErrorWriter: m.connectErrWriter,
-	}); werr != nil {
-		panic(werr)
+	}); err != nil {
+		return err
 	}
+	return nil
+}
+
+func defaultWriteResponse(ctx context.Context, input *WriteResponseInput) (*WriteResponseOutput, error) {
+	var data []byte
+	var err error
+
+	if input.AcceptJSON {
+		input.W.Header().Set(HeaderContentType, JSONContentType)
+		data, err = JSONMarshalOptions.Marshal(input.Response)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to marshal response to json")
+		}
+	} else {
+		input.W.Header().Set(HeaderContentType, ProtoContentType)
+		data, err = proto.Marshal(input.Response)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to marshal response to proto")
+		}
+	}
+
+	input.W.Header().Set(HeaderContentLength, strconv.Itoa(len(data)))
+	input.W.WriteHeader(http.StatusOK)
+	if _, err := input.W.Write(data); err != nil {
+		return nil, errors.Wrap(err, "failed to write response")
+	}
+	return &WriteResponseOutput{Written: true}, nil
 }
 
 // writeResponse writes a success response, applying any configured hooks.
-func (m *Handler) writeResponse(ctx context.Context, w http.ResponseWriter, r *http.Request, resp proto.Message, contentTypeJSON, acceptJSON bool) {
-	defWriteResponse := func(ctx context.Context, input *WriteResponseInput) (*WriteResponseOutput, error) {
-		var data []byte
-		var err error
-		if input.AcceptJSON {
-			w.Header().Set(HeaderContentType, JSONContentType)
-			data, err = JSONMarshalOptions.Marshal(input.Response)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to marshal response to json")
-			}
-		} else {
-			w.Header().Set(HeaderContentType, ProtoContentType)
-			data, err = proto.Marshal(input.Response)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to marshal response to proto")
-			}
-		}
-
-		w.Header().Set(HeaderContentLength, strconv.Itoa(len(data)))
-		w.WriteHeader(http.StatusOK)
-		if _, err := w.Write(data); err != nil {
-			return nil, errors.Wrap(err, "failed to write response")
-		}
-		return &WriteResponseOutput{Written: true}, nil
-	}
-
-	writeResp := defWriteResponse
+func (m *Handler) writeResponse(ctx context.Context, w http.ResponseWriter, r *http.Request, resp proto.Message, contentTypeJSON, acceptJSON bool) error {
+	writeResponse := defaultWriteResponse
 	if m.writeResponseHook != nil {
-		writeResp = m.writeResponseHook(defWriteResponse)
+		writeResponse = m.writeResponseHook(writeResponse)
 	}
 
-	if _, werr := writeResp(ctx, &WriteResponseInput{
+	if _, err := writeResponse(ctx, &WriteResponseInput{
 		W: w, R: r,
 		Response:        resp,
 		ContentTypeJSON: contentTypeJSON,
 		AcceptJSON:      acceptJSON,
-	}); werr != nil {
-		panic(werr)
+	}); err != nil {
+		return err
 	}
+	return nil
 }
 
 // isContentTypeJSON determines if the request body should be parsed as JSON.
