@@ -10,14 +10,14 @@ import (
 	"github.com/qor5/x/v3/grpcx"
 )
 
-func UnaryConnectInterceptor[T any](svc T) connect.UnaryInterceptorFunc {
+func UnaryConnectInterceptor[T any](svc T, defClientKind ClientKind) connect.UnaryInterceptorFunc {
 	return func(next connect.UnaryFunc) connect.UnaryFunc {
 		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 			reqMD := grpcx.MetadataFromHeader(req.Header(), req.Peer().Addr)
 			ctx = metadata.NewIncomingContext(ctx, reqMD)
 
 			callMeta := &CallMeta{
-				ClientKind: ClientKindPublic,
+				ClientKind: defClientKind,
 				Service:    svc,
 				FullMethod: req.Spec().Procedure,
 				Req:        req.Any(),

@@ -11,12 +11,12 @@ import (
 
 func NewHandler[T any](
 	fn func(svc T, opts ...connect.HandlerOption) (string, http.Handler),
-	svc T, opts ...connect.HandlerOption,
+	svc T, clientKind normalize.ClientKind, opts ...connect.HandlerOption,
 ) (string, http.Handler) {
 	opts = slices.Concat(
 		[]connect.HandlerOption{
 			connect.WithInterceptors(
-				normalize.UnaryConnectInterceptor(svc),
+				normalize.UnaryConnectInterceptor(svc, clientKind),
 			),
 		},
 		opts,
