@@ -205,7 +205,7 @@ func setupGRPCServer(t *testing.T, limiter ratelimiter.RateLimiter, evaluator Ev
 	// Create gRPC server with interceptors
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			normalize.UnaryServerInterceptor(normalize.ClientKindPrivate),
+			normalize.UnaryServerInterceptor(),
 			UnaryServerInterceptor(limiter, evaluator),
 		),
 	)
@@ -253,7 +253,6 @@ func TestUnaryServerInterceptor_CallMeta(t *testing.T) {
 
 	// Verify CallMeta was populated correctly
 	require.NotNil(t, capturedCallMeta)
-	assert.Equal(t, normalize.ClientKindPrivate, capturedCallMeta.ClientKind)
 	assert.Equal(t, "/healthz.testdata.TestService/Echo", capturedCallMeta.FullMethod)
 	assert.NotNil(t, capturedCallMeta.Service)
 	assert.Equal(t, testReq.GetMessage(), capturedCallMeta.Req.(*gen.EchoRequest).GetMessage())

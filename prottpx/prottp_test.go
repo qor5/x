@@ -731,7 +731,7 @@ func (s *normalizeEchoServer) Echo(ctx context.Context, req *testdatav1.EchoRequ
 func TestServeMux_WithNormalizeInterceptor(t *testing.T) {
 	// Use normalize.UnaryServerInterceptor for gRPC-style interceptor
 	// and wrap with normalize.HTTPMiddleware for HTTP header support
-	hdr := NewHandler(ChainUnaryInterceptor(normalize.UnaryServerInterceptor(normalize.ClientKindPrivate)))
+	hdr := NewHandler(ChainUnaryInterceptor(normalize.UnaryServerInterceptor()))
 	testdatav1.RegisterEchoServiceServer(hdr, &normalizeEchoServer{})
 
 	t.Run("MustCallMetaFromContext works", func(t *testing.T) {
