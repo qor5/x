@@ -74,6 +74,10 @@ func (vh *ViewHelper) ResetPasswordURL() string {
 	return vh.b.resetPasswordURL
 }
 
+func (vh *ViewHelper) ResetPasswordPageURL() string {
+	return vh.b.resetPasswordPageURL
+}
+
 func (vh *ViewHelper) ChangePasswordURL() string {
 	return vh.b.changePasswordURL
 }
