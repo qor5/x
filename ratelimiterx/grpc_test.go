@@ -37,8 +37,9 @@ func (s *testGRPCService) Echo(ctx context.Context, req *gen.EchoRequest) (*gen.
 var db *gorm.DB
 
 func TestMain(m *testing.M) {
-	suite := gormx.MustStartTestSuite(context.Background())
-	defer suite.Stop(context.Background())
+	ctx := context.Background()
+	suite := gormx.MustStartTestSuite(ctx)
+	defer suite.Stop(ctx)
 
 	db = suite.DB()
 
