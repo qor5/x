@@ -166,7 +166,7 @@ func (m *Handler) RegisterService(desc *grpc.ServiceDesc, impl any) {
 
 // handleMethod wraps a gRPC method as an HTTP handler.
 func (m *Handler) handleMethod(service any, method grpc.MethodDesc) http.Handler {
-	interceptor := grpcx.ChainUnaryServerInterceptors(m.interceptors...)
+	interceptor := grpcx.ChainUnaryServerInterceptor(m.interceptors...)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		contentTypeJSON := isContentTypeJSON(r)
