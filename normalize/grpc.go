@@ -4,29 +4,15 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/grpc-ecosystem/go-grpc-middleware/v2/metadata"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 
 	stdmetadata "google.golang.org/grpc/metadata"
 )
 
-// HeaderEnsureClientKind is just used for reverse proxy such as grpc-gateway
-const HeaderEnsureClientKind = "x-ensure-client-kind"
-
-func UnaryServerInterceptor(defClientKind ClientKind) grpc.UnaryServerInterceptor {
+func UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ any, xerr error) {
-		clientKind := defClientKind
-		headerClientKind := metadata.ExtractIncoming(ctx).Get(HeaderEnsureClientKind)
-		if headerClientKind != "" {
-			if headerClientKind != string(ClientKindPublic) {
-				return nil, errors.Errorf("only %q is supported for %q", ClientKindPublic, HeaderEnsureClientKind)
-			}
-			clientKind = ClientKind(headerClientKind)
-		}
-
 		callMeta := &CallMeta{
-			ClientKind: clientKind,
 			Service:    info.Server,
 			FullMethod: info.FullMethod,
 			Req:        req,
