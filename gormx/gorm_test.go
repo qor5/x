@@ -2,6 +2,7 @@ package gormx_test
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/qor5/x/v3/gormx"
@@ -13,5 +14,5 @@ func TestMain(m *testing.M) {
 	ctx := context.Background()
 	suite = gormx.MustStartTestSuite(ctx)
 	defer suite.Stop(ctx)
-	m.Run()
+	os.Exit(m.Run())
 }
