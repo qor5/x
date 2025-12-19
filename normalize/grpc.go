@@ -11,9 +11,15 @@ import (
 	stdmetadata "google.golang.org/grpc/metadata"
 )
 
+// GRPCUnaryServerInterceptor is a unary server interceptor for gRPC
+func GRPCUnaryServerInterceptor() grpc.UnaryServerInterceptor {
+	return UnaryServerInterceptor(ClientKindUndefined)
+}
+
 // HeaderEnsureClientKind is just used for reverse proxy such as grpc-gateway
 const HeaderEnsureClientKind = "x-ensure-client-kind"
 
+// Deprecated: use GRPCUnaryServerInterceptor instead
 func UnaryServerInterceptor(defClientKind ClientKind) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ any, xerr error) {
 		clientKind := defClientKind
