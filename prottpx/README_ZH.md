@@ -35,7 +35,7 @@
 // 创建 Handler 并注册 gRPC 服务
 h := prottpx.NewHandler(
     prottpx.ChainUnaryInterceptor(
-        normalize.UnaryServerInterceptor(normalize.ClientKindPrivate),
+        normalize.GRPCUnaryServerInterceptor(),
     ),
 )
 
