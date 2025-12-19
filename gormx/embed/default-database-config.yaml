@@ -10,3 +10,5 @@ database:
   connMaxLifetime: "30m"
   connMaxIdleTime: "10m"
   authMethod: "password" # password, iam
+  iam:
+    tokenEndpoint: "" # RDS endpoint for IAM token generation (optional, defaults to DSN host:port)
