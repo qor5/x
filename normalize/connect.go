@@ -17,6 +17,7 @@ func UnaryConnectInterceptor[T any](svc T) connect.UnaryInterceptorFunc {
 			ctx = metadata.NewIncomingContext(ctx, reqMD)
 
 			callMeta := &CallMeta{
+				ClientKind: ClientKindPublic,
 				Service:    svc,
 				FullMethod: req.Spec().Procedure,
 				Req:        req.Any(),

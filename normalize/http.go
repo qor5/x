@@ -10,8 +10,9 @@ import (
 )
 
 type HTTPMeta struct {
-	R *http.Request
-	W http.ResponseWriter
+	ClientKind ClientKind
+	R          *http.Request
+	W          http.ResponseWriter
 }
 
 func MustHTTPMetaFromContext(ctx context.Context) *HTTPMeta {
@@ -32,7 +33,7 @@ func HTTPMiddleware(next http.Handler) http.Handler {
 		ctx := metadata.NewIncomingContext(r.Context(), reqMD)
 
 		nlz := &normalization{
-			httpMeta: &HTTPMeta{W: w, R: r},
+			httpMeta: &HTTPMeta{ClientKind: ClientKindPublic, W: w, R: r},
 			setHeader: func(key, value string) {
 				w.Header().Set(key, value)
 			},

@@ -10,7 +10,19 @@ import (
 	"github.com/pkg/errors"
 )
 
+type ClientKind string
+
+const (
+	ClientKindPublic  ClientKind = "PUBLIC"
+	ClientKindPrivate ClientKind = "PRIVATE"
+)
+
+func (k ClientKind) IsPrivate() bool {
+	return k == ClientKindPrivate
+}
+
 type CallMeta struct {
+	ClientKind ClientKind
 	Service    any
 	FullMethod string
 	Req        any
