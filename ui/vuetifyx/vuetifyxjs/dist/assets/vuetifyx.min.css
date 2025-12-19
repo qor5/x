@@ -57259,3 +57259,41 @@ a {
 .vx-tilted-images__content[data-v-5bbaa822] *:nth-child(10) {
   transform: translateZ(200px);
 }
+.vx-video-container[data-v-1573e683] {
+  position: relative;
+  overflow: hidden;
+  background-color: #000;
+}
+.vx-video-element[data-v-1573e683] {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.vx-video-overlay[data-v-1573e683] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+.vx-video-play-button[data-v-1573e683] {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  padding: 16px;
+  transition:
+    transform 0.2s,
+    background-color 0.2s;
+  color: white;
+  display: flex;
+}
+.vx-video-overlay:hover .vx-video-play-button[data-v-1573e683] {
+  transform: scale(1.1);
+  background-color: rgba(0, 0, 0, 0.8);
+}

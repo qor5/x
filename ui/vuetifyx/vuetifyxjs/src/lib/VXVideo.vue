@@ -70,21 +70,115 @@ watch(
 )
 
 onBeforeUnmount(() => {
-  if (hls) hls.destroy()
+  if (hls) {
+    hls.destroy()
+    hls = null
+  }
 })
+
+const showOverlay = ref(true)
+
+const playVideo = () => {
+  const video = videoRef.value
+  if (!video) return
+  video.play()
+  showOverlay.value = false
+}
+
+const onPlay = () => {
+  showOverlay.value = false
+}
+
+const onPause = () => {
+  // Optional: check if we want to show overlay again on pause
+  // showOverlay.value = true
+}
+
+// Watch poster prop to reset overlay if poster changes
+watch(
+  () => props.poster,
+  () => {
+    showOverlay.value = true
+  }
+)
 </script>
 
 <template>
-  <video
-    ref="videoRef"
-    v-bind="$attrs"
+  <div
+    class="vx-video-container"
+    :style="{ width: width, height: height }"
     :class="[
       {
-        'rounded': rounded === true || rounded === '',
+        rounded: rounded === true || rounded === '',
         [`rounded-${rounded}`]: typeof rounded === 'string' && rounded !== ''
       }
     ]"
-    :style="{ width: width, height: height }"
-    :poster="poster"
-  ></video>
+  >
+    <video
+      ref="videoRef"
+      v-bind="$attrs"
+      class="vx-video-element"
+      :poster="poster"
+      @play="onPlay"
+      @pause="onPause"
+    ></video>
+
+    <div
+      v-if="showOverlay"
+      class="vx-video-overlay"
+      :style="{ backgroundImage: `url(${poster})` }"
+      @click="playVideo"
+    >
+      <div class="vx-video-play-button">
+        <svg viewBox="0 0 24 24" width="64" height="64" class="play-icon">
+          <path fill="currentColor" d="M8 5v14l11-7z" />
+        </svg>
+      </div>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.vx-video-container {
+  position: relative;
+  overflow: hidden;
+  background-color: #000;
+}
+
+.vx-video-element {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.vx-video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.vx-video-play-button {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  padding: 16px;
+  transition:
+    transform 0.2s,
+    background-color 0.2s;
+  color: white;
+  display: flex;
+}
+
+.vx-video-overlay:hover .vx-video-play-button {
+  transform: scale(1.1);
+  background-color: rgba(0, 0, 0, 0.8);
+}
+</style>
