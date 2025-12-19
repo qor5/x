@@ -205,7 +205,7 @@ func setupGRPCServer(t *testing.T, limiter ratelimiter.RateLimiter, evaluator Ev
 	// Create gRPC server with interceptors
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			normalize.UnaryServerInterceptor(),
+			normalize.UnaryServerInterceptor(normalize.ClientKindPrivate),
 			UnaryServerInterceptor(limiter, evaluator),
 		),
 	)

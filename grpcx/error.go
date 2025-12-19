@@ -17,9 +17,9 @@ import (
 func ErrorUnaryServerInterceptor(errHandler func(ctx context.Context, req any, info *grpc.UnaryServerInfo, err error) error) grpc.UnaryServerInterceptor {
 	key := new(int) // Each interceptor instance gets its own unique key (use int to avoid zero-size optimization)
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-		handledErrors, ok := ctx.Value(key).(map[error]bool)
+		handledErrors, ok := ctx.Value(key).(map[string]bool)
 		if !ok {
-			handledErrors = map[error]bool{}
+			handledErrors = map[string]bool{}
 			ctx = context.WithValue(ctx, key, handledErrors)
 		}
 
@@ -28,10 +28,11 @@ func ErrorUnaryServerInterceptor(errHandler func(ctx context.Context, req any, i
 			return resp, nil
 		}
 
-		if handledErrors[err] {
+		errPtr := fmt.Sprintf("%p", err)
+		if handledErrors[errPtr] {
 			return resp, err
 		}
-		handledErrors[err] = true
+		handledErrors[errPtr] = true
 
 		err = errHandler(ctx, req, info, err)
 
