@@ -5,8 +5,11 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/qor5/x/v3/gormx"
 	"github.com/qor5/x/v3/gormx/postgresx"
 	"github.com/stretchr/testify/require"
@@ -141,4 +144,79 @@ func TestWithCause_NoTranslationNeeded(t *testing.T) {
 	// WithCause should also return the same error without wrapping it
 	require.False(t, strings.Contains(rawErr.Error(), "\n"), "error should not contain newlines indicating joined errors")
 	require.False(t, errors.Is(rawErr, gorm.ErrDuplicatedKey), "should not be translated to any GORM error")
+}
+
+func TestConfigureTimezone(t *testing.T) {
+	// Test that ConfigureTimezone correctly configures timestamp scanning with timezone
+	// PostgreSQL stores timestamp without timezone as-is, and we want to scan it with a specific location
+
+	t.Run("with timezone configured", func(t *testing.T) {
+		// Parse DSN with timezone parameter
+		dsnWithTZ := suite.DSN() + "&timezone=Asia/Shanghai"
+		conf, err := pgx.ParseConfig(dsnWithTZ)
+		require.NoError(t, err)
+
+		// Apply timezone configuration
+		tzOpts := postgresx.ConfigureTimezone(conf)
+		require.NotNil(t, tzOpts, "should return options when timezone is set")
+
+		// Open connection with timezone options
+		conn := stdlib.OpenDB(*conf, tzOpts...)
+		db, err := gorm.Open(postgresx.New(postgres.Config{Conn: conn}), &gorm.Config{})
+		require.NoError(t, err)
+
+		// Query current timestamp from PostgreSQL
+		var result time.Time
+		err = db.Raw("SELECT '2024-01-15 10:30:00'::timestamp").Scan(&result).Error
+		require.NoError(t, err)
+
+		// The scanned time should be in Asia/Shanghai timezone
+		shanghai, _ := time.LoadLocation("Asia/Shanghai")
+		require.Equal(t, shanghai.String(), result.Location().String())
+		t.Logf("Scanned time with Asia/Shanghai: %v", result)
+	})
+
+	t.Run("without timezone configured", func(t *testing.T) {
+		// Parse DSN without timezone parameter
+		conf, err := pgx.ParseConfig(suite.DSN())
+		require.NoError(t, err)
+
+		// ConfigureTimezone should return nil when no timezone is set
+		tzOpts := postgresx.ConfigureTimezone(conf)
+		require.Nil(t, tzOpts, "should return nil when timezone is not set")
+	})
+
+	t.Run("compare with and without timezone", func(t *testing.T) {
+		dsnWithTZ := suite.DSN() + "&timezone=Asia/Tokyo"
+
+		// Without timezone - tz will be ignored
+		confWithoutTZ, err := pgx.ParseConfig(dsnWithTZ)
+		require.NoError(t, err)
+		connWithoutTZ := stdlib.OpenDB(*confWithoutTZ)
+		dbWithoutTZ, err := gorm.Open(postgresx.New(postgres.Config{Conn: connWithoutTZ}), &gorm.Config{})
+		require.NoError(t, err)
+
+		// With timezone - uses Asia/Tokyo
+		confWithTZ, err := pgx.ParseConfig(dsnWithTZ)
+		require.NoError(t, err)
+		tzOpts := postgresx.ConfigureTimezone(confWithTZ)
+		connWithTZ := stdlib.OpenDB(*confWithTZ, tzOpts...)
+		dbWithTZ, err := gorm.Open(postgresx.New(postgres.Config{Conn: connWithTZ}), &gorm.Config{})
+		require.NoError(t, err)
+
+		// Query the same timestamp
+		var resultWithoutTZ, resultWithTZ time.Time
+		err = dbWithoutTZ.Raw("SELECT '2024-01-15 10:30:00'::timestamp").Scan(&resultWithoutTZ).Error
+		require.NoError(t, err)
+		err = dbWithTZ.Raw("SELECT '2024-01-15 10:30:00'::timestamp").Scan(&resultWithTZ).Error
+		require.NoError(t, err)
+
+		t.Logf("Without timezone: %v (location: %s)", resultWithoutTZ, resultWithoutTZ.Location())
+		t.Logf("With Asia/Tokyo: %v (location: %s)", resultWithTZ, resultWithTZ.Location())
+
+		// Verify different locations
+		tokyo, _ := time.LoadLocation("Asia/Tokyo")
+		require.Equal(t, tokyo.String(), resultWithTZ.Location().String())
+		require.NotEqual(t, resultWithoutTZ.Location().String(), resultWithTZ.Location().String())
+	})
 }

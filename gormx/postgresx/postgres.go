@@ -1,8 +1,13 @@
 package postgresx
 
 import (
+	"context"
 	"errors"
+	"time"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/stdlib"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -34,4 +39,30 @@ func (d *Dialector) Translate(cause error) error {
 		return translatedErr
 	}
 	return errors.Join(translatedErr, cause)
+}
+
+// ConfigureTimezone returns stdlib.OptionOpenDB options that configure the connection
+// to use the timezone specified in conf.RuntimeParams["timezone"]. This ensures that
+// timestamp values are correctly converted to the specified timezone when scanning.
+// The timezone is automatically populated by pgx.ParseConfig when parsing DSN.
+func ConfigureTimezone(conf *pgx.ConnConfig) []stdlib.OptionOpenDB {
+	tz := conf.RuntimeParams["timezone"]
+	if tz == "" {
+		return nil
+	}
+
+	return []stdlib.OptionOpenDB{
+		stdlib.OptionAfterConnect(func(ctx context.Context, conn *pgx.Conn) error {
+			loc, err := time.LoadLocation(tz)
+			if err != nil {
+				return err
+			}
+			conn.TypeMap().RegisterType(&pgtype.Type{
+				Name:  "timestamp",
+				OID:   pgtype.TimestampOID,
+				Codec: &pgtype.TimestampCodec{ScanLocation: loc},
+			})
+			return nil
+		}),
+	}
 }
