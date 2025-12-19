@@ -41,7 +41,7 @@ with additional extensions and conventions to better integrate into the `qor5/x`
 // Create a Handler and register a gRPC service
 h := prottpx.NewHandler(
     prottpx.ChainUnaryInterceptor(
-        normalize.UnaryServerInterceptor(normalize.ClientKindPrivate),
+        normalize.GRPCUnaryServerInterceptor(),
     ),
 )
 
