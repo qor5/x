@@ -3,7 +3,6 @@ package ratelimiterx
 import (
 	"context"
 	"net"
-	"os"
 	"testing"
 	"time"
 
@@ -51,7 +50,7 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	os.Exit(m.Run())
+	m.Run()
 }
 
 func TestUnaryServerInterceptor(t *testing.T) {

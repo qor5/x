@@ -3,7 +3,6 @@ package postgresx_test
 import (
 	"context"
 	"errors"
-	"os"
 	"strings"
 	"testing"
 
@@ -21,7 +20,7 @@ func TestMain(m *testing.M) {
 	ctx := context.Background()
 	suite = gormx.MustStartTestSuite(ctx)
 	defer suite.Stop(ctx)
-	os.Exit(m.Run())
+	m.Run()
 }
 
 func TestSavePointerDialectorInterface(t *testing.T) {
