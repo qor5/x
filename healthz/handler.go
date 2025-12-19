@@ -76,7 +76,7 @@ func WithChecker(checker Checker) Option {
 func WithGRPCHealthChecker(conn grpc.ClientConnInterface) Option {
 	client := grpc_health_v1.NewHealthClient(conn)
 	return WithChecker(func(_ http.ResponseWriter, r *http.Request) error {
-		_, err := client.Check(r.Context(), &grpc_health_v1.HealthCheckRequest{Service: ""})
+		_, err := client.Check(r.Context(), &grpc_health_v1.HealthCheckRequest{Service: ""}, grpc.WaitForReady(true))
 		return errors.Wrap(err, "grpc server is not ready")
 	})
 }
