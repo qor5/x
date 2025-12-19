@@ -49,7 +49,6 @@ func DefaultErrorUnaryServerInterceptor(notifier errornotifier.Notifier) grpc.Un
 		span := logtracing.SpanFromContext(ctx)
 		if span != nil {
 			span.AppendKVs(
-				"err.stacktrace", fmt.Sprintf("%+v", err),
 				"err.reason", st.Reason(),
 			)
 		}
