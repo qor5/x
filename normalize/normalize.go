@@ -10,11 +10,13 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Deprecated: use ClientKindUndefined instead
 type ClientKind string
 
 const (
-	ClientKindPublic  ClientKind = "PUBLIC"
-	ClientKindPrivate ClientKind = "PRIVATE"
+	ClientKindPublic    ClientKind = "PUBLIC"
+	ClientKindPrivate   ClientKind = "PRIVATE"
+	ClientKindUndefined ClientKind = "UNDEFINED"
 )
 
 func (k ClientKind) IsPrivate() bool {
