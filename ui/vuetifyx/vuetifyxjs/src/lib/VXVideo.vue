@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, useAttrs, computed } from 'vue'
 import Hls from 'hls.js'
 
 defineOptions({
@@ -27,6 +27,20 @@ const props = defineProps({
     type: [String, Boolean],
     default: false
   }
+})
+
+const attrs = useAttrs()
+const containerClass = computed(() => {
+  const classes: Record<string, boolean> = {
+    rounded: props.rounded === true || props.rounded === '',
+    [`rounded-${props.rounded}`]: typeof props.rounded === 'string' && props.rounded !== ''
+  }
+
+  const cls = attrs.class
+  if (typeof cls === 'string' && cls.includes('rounded-xl')) {
+    classes['rounded-xl'] = true
+  }
+  return classes
 })
 
 const videoRef = ref<HTMLVideoElement | null>(null)
@@ -104,16 +118,7 @@ watch(
 </script>
 
 <template>
-  <div
-    class="vx-video-container"
-    :style="{ width: width, height: height }"
-    :class="[
-      {
-        rounded: rounded === true || rounded === '',
-        [`rounded-${rounded}`]: typeof rounded === 'string' && rounded !== ''
-      }
-    ]"
-  >
+  <div class="vx-video-container" :style="{ width: width, height: height }" :class="containerClass">
     <video
       ref="videoRef"
       v-bind="$attrs"
