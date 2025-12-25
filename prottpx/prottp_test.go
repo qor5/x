@@ -927,8 +927,8 @@ func (e *customError) WriteError(ctx context.Context, input *WriteErrorInput) (*
 	input.W.Header().Set("Content-Type", "application/x-custom-error")
 	input.W.Header().Set("X-Custom-Error", "true")
 	input.W.WriteHeader(http.StatusUnprocessableEntity)
-	input.W.Write([]byte(`{"custom_error":"` + e.message + `"}`))
-	return &WriteErrorOutput{Written: true}, nil
+	_, err := input.W.Write([]byte(`{"custom_error":"` + e.message + `"}`))
+	return &WriteErrorOutput{Written: true}, err
 }
 
 // customErrorServer returns customError for testing WriteErrorIface.
