@@ -38,7 +38,7 @@ var db *gorm.DB
 func TestMain(m *testing.M) {
 	ctx := context.Background()
 	suite := gormx.MustStartTestSuite(ctx)
-	defer suite.Stop(ctx)
+	defer func() { _ = suite.Stop(ctx) }()
 
 	db = suite.DB()
 

@@ -15,8 +15,12 @@ with additional extensions and conventions to better integrate into the `qor5/x`
 - **Content negotiation**
 
   - Supports both `application/json` and `application/proto` encodings.
-  - The request body is decoded according to `Content-Type`, and the response format (JSON vs proto)
-    is decided by `Accept` / `Content-Type`.
+  - The request body is decoded according to `Content-Type` header. If no Content-Type is specified,
+    it uses the default content type configured via `WithDefaultContentType` (defaults to `application/proto`).
+  - The response format is decided by `Accept` header. If no Accept header is present,
+    it follows the request's Content-Type format.
+  - Use `WithDefaultContentType` to configure the default content type for requests
+    without a Content-Type header.
 
 - **`normalize` integration**
 

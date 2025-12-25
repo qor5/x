@@ -2,6 +2,7 @@ package statusx
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 
 	"connectrpc.com/connect"
@@ -46,6 +47,8 @@ func ConvertToConnectError(err error) *connect.Error {
 	for _, d := range st.Details {
 		if ed, e := connect.NewErrorDetail(d); e == nil {
 			cerr.AddDetail(ed)
+		} else {
+			slog.Error("failed to convert connect error detail", "error", e, "detail", d)
 		}
 	}
 	return cerr //nolint:errhandle
