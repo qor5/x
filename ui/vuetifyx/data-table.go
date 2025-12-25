@@ -400,11 +400,11 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 		VSlot("{ locals:_dataTableLocals_ }").
 		Init(fmt.Sprintf(`{ loadmore : false, selectedIds: %s || [], onSelectionChanged: %s, }`, selectedIdsJSON, onSelectionChanged)).
 		Children(
-			h.Div().Style("display: none;").Attr("v-on-mounted", fmt.Sprintf(`({watch}) => {
+			h.Div().Style("display: none;").Attr("v-on-mounted", `({watch}) => {
 				watch(() => _dataTableLocals_.selectedIds, (val) => {
 					_dataTableLocals_.onSelectionChanged([...val]);
 				})
-			}`)),
+			}`),
 			selectedCountCompo,
 			v.VTable(
 				thead,

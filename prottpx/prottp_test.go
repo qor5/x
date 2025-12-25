@@ -589,7 +589,7 @@ func TestHandler_WithWriteResponseHook(t *testing.T) {
 				return func(ctx context.Context, input *WriteResponseInput) (*WriteResponseOutput, error) {
 					input.W.Header().Set("Content-Type", "text/plain")
 					input.W.WriteHeader(http.StatusCreated)
-					input.W.Write([]byte("custom response"))
+					_, _ = input.W.Write([]byte("custom response"))
 					return &WriteResponseOutput{Written: true}, nil
 				}
 			}),
@@ -856,7 +856,7 @@ func TestHandler_WithWriteErrorHook(t *testing.T) {
 					// Custom error response instead of default
 					input.W.Header().Set("Content-Type", "text/plain")
 					input.W.WriteHeader(http.StatusTeapot)
-					input.W.Write([]byte("custom error: " + input.Error.Error()))
+					_, _ = input.W.Write([]byte("custom error: " + input.Error.Error()))
 					return &WriteErrorOutput{Written: true}, nil
 				}
 			}),

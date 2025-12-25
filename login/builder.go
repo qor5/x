@@ -1131,7 +1131,7 @@ func (b *Builder) consumeTOTPCode(r *http.Request, up UserPasser, passcode strin
 		return ErrWrongTOTPCode
 	}
 	lastCode, usedAt := up.GetLastUsedTOTPCode()
-	if usedAt != nil && time.Now().Sub(*usedAt) > 90*time.Second {
+	if usedAt != nil && time.Since(*usedAt) > 90*time.Second {
 		lastCode = ""
 	}
 	if passcode == lastCode {
@@ -1219,7 +1219,7 @@ func (b *Builder) sendResetPasswordLink(w http.ResponseWriter, r *http.Request) 
 
 	_, createdAt, _ := u.(UserPasser).GetResetPasswordToken()
 	if createdAt != nil {
-		v := 60 - int(time.Now().Sub(*createdAt).Seconds())
+		v := 60 - int(time.Since(*createdAt).Seconds())
 		if v > 0 {
 			setSecondsToRedoFlash(w, v)
 			b.setWrongForgetPasswordInputFlash(w, WrongForgetPasswordInputFlash{

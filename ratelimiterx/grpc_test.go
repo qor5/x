@@ -217,7 +217,7 @@ func setupGRPCServer(t *testing.T, limiter ratelimiter.RateLimiter, evaluator Ev
 	// Setup server with bufconn
 	listener := bufconn.Listen(1024 * 1024)
 	go func() {
-		server.Serve(listener)
+		_ = server.Serve(listener)
 	}()
 
 	// Create client
