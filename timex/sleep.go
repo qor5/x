@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/jjeffery/errors"
+	"github.com/pkg/errors"
 )
 
 func Sleep(ctx context.Context, d time.Duration) error {
