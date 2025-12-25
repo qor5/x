@@ -20,8 +20,9 @@ import (
 var suite *gormx.TestSuite
 
 func TestMain(m *testing.M) {
-	suite = gormx.MustStartTestSuite(context.Background())
-	defer suite.Stop(context.Background())
+	ctx := context.Background()
+	suite = gormx.MustStartTestSuite(ctx)
+	defer func() { _ = suite.Stop(ctx) }()
 	m.Run()
 }
 
@@ -63,7 +64,7 @@ func TestWithCauseVsWithoutCause(t *testing.T) {
 
 	require.NoError(t, withTranslateDB.AutoMigrate(&TestEntity{}))
 	t.Cleanup(func() {
-		withTranslateDB.Migrator().DropTable(&TestEntity{})
+		_ = withTranslateDB.Migrator().DropTable(&TestEntity{})
 	})
 
 	entity1 := &TestEntity{ID: "1", Name: "unique_name"}
@@ -124,7 +125,7 @@ func TestWithCause_NoTranslationNeeded(t *testing.T) {
 
 	require.NoError(t, withCauseDB.AutoMigrate(&NumericTestEntity{}))
 	t.Cleanup(func() {
-		withCauseDB.Migrator().DropTable(&NumericTestEntity{})
+		_ = withCauseDB.Migrator().DropTable(&NumericTestEntity{})
 	})
 
 	// Execute raw SQL that causes a data type error (not in PostgreSQL translator's error code list)

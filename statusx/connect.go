@@ -2,6 +2,7 @@ package statusx
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 
 	"connectrpc.com/connect"
@@ -34,21 +35,32 @@ func UnaryConnectInterceptor(ib *i18nx.I18N, shouldConvert func(ctx context.Cont
 	}
 }
 
+// ConvertToConnectError converts a statusx.StatusError to a connect.Error.
 func ConvertToConnectError(err error) *connect.Error {
+	var ce *connect.Error
+	if errors.As(err, &ce) {
+		return ce
+	}
+
 	st := status.Convert(err).Proto()
 	cerr := connect.NewError(connect.Code(st.Code), errors.New(st.Message))
-	for _, v := range st.Details {
-		ed, _ := connect.NewErrorDetail(v)
-		cerr.AddDetail(ed)
+	for _, d := range st.Details {
+		if ed, e := connect.NewErrorDetail(d); e == nil {
+			cerr.AddDetail(ed)
+		} else {
+			slog.Error("failed to convert connect error detail", "error", e, "detail", d)
+		}
 	}
 	return cerr //nolint:errhandle
 }
 
 func WriteConnectErrorOnly(errWriter *connect.ErrorWriter, w http.ResponseWriter, r *http.Request, err error) (written bool) {
-	if se := new(StatusError); errors.As(err, &se) {
+	var se *StatusError
+	if errors.As(err, &se) {
 		err = ConvertToConnectError(err)
 	}
-	if ce := new(connect.Error); errors.As(err, &ce) {
+	var ce *connect.Error
+	if errors.As(err, &ce) {
 		_ = errWriter.Write(w, r, err)
 		return true
 	}

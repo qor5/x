@@ -19,6 +19,14 @@ func MustHTTPMetaFromContext(ctx context.Context) *HTTPMeta {
 	return mustFromContext(ctx).httpMeta
 }
 
+func HTTPMetaFromContext(ctx context.Context) (*HTTPMeta, error) {
+	nlz, err := fromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return nlz.httpMeta, nil
+}
+
 func HTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqMD := grpcx.MetadataFromHeader(r.Header, r.RemoteAddr)

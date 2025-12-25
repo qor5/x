@@ -10,11 +10,13 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Deprecated: use ClientKindUndefined instead
 type ClientKind string
 
 const (
-	ClientKindPublic  ClientKind = "PUBLIC"
-	ClientKindPrivate ClientKind = "PRIVATE"
+	ClientKindPublic    ClientKind = "PUBLIC"
+	ClientKindPrivate   ClientKind = "PRIVATE"
+	ClientKindUndefined ClientKind = "UNDEFINED"
 )
 
 func (k ClientKind) IsPrivate() bool {
@@ -51,6 +53,14 @@ func mustFromContext(ctx context.Context) *normalization {
 		panic(err)
 	}
 	return n
+}
+
+func CallMetaFromContext(ctx context.Context) (*CallMeta, error) {
+	nlz, err := fromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return nlz.callMeta, nil
 }
 
 func MustCallMetaFromContext(ctx context.Context) *CallMeta {

@@ -10,7 +10,8 @@ import (
 var suite *gormx.TestSuite
 
 func TestMain(m *testing.M) {
-	suite = gormx.MustStartTestSuite(context.Background())
-	defer suite.Stop(context.Background())
+	ctx := context.Background()
+	suite = gormx.MustStartTestSuite(ctx)
+	defer func() { _ = suite.Stop(ctx) }()
 	m.Run()
 }

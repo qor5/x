@@ -3,7 +3,6 @@ package ratelimiterx
 import (
 	"context"
 	"net"
-	"os"
 	"testing"
 	"time"
 
@@ -37,8 +36,9 @@ func (s *testGRPCService) Echo(ctx context.Context, req *gen.EchoRequest) (*gen.
 var db *gorm.DB
 
 func TestMain(m *testing.M) {
-	suite := gormx.MustStartTestSuite(context.Background())
-	defer suite.Stop(context.Background())
+	ctx := context.Background()
+	suite := gormx.MustStartTestSuite(ctx)
+	defer func() { _ = suite.Stop(ctx) }()
 
 	db = suite.DB()
 
@@ -50,7 +50,7 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	os.Exit(m.Run())
+	m.Run()
 }
 
 func TestUnaryServerInterceptor(t *testing.T) {
@@ -205,7 +205,7 @@ func setupGRPCServer(t *testing.T, limiter ratelimiter.RateLimiter, evaluator Ev
 	// Create gRPC server with interceptors
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			normalize.UnaryServerInterceptor(normalize.ClientKindPrivate),
+			normalize.GRPCUnaryServerInterceptor(),
 			UnaryServerInterceptor(limiter, evaluator),
 		),
 	)
@@ -217,7 +217,7 @@ func setupGRPCServer(t *testing.T, limiter ratelimiter.RateLimiter, evaluator Ev
 	// Setup server with bufconn
 	listener := bufconn.Listen(1024 * 1024)
 	go func() {
-		server.Serve(listener)
+		_ = server.Serve(listener)
 	}()
 
 	// Create client
@@ -253,7 +253,6 @@ func TestUnaryServerInterceptor_CallMeta(t *testing.T) {
 
 	// Verify CallMeta was populated correctly
 	require.NotNil(t, capturedCallMeta)
-	assert.Equal(t, normalize.ClientKindPrivate, capturedCallMeta.ClientKind)
 	assert.Equal(t, "/healthz.testdata.TestService/Echo", capturedCallMeta.FullMethod)
 	assert.NotNil(t, capturedCallMeta.Service)
 	assert.Equal(t, testReq.GetMessage(), capturedCallMeta.Req.(*gen.EchoRequest).GetMessage())
