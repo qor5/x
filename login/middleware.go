@@ -176,7 +176,7 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 				user = claims
 			}
 
-			if b.autoExtendSession && time.Now().Sub(claims.IssuedAt.Time).Seconds() > float64(b.sessionMaxAge)/10 {
+			if b.autoExtendSession && time.Since(claims.IssuedAt.Time).Seconds() > float64(b.sessionMaxAge)/10 {
 				if b.afterExtendSessionHook != nil {
 					oldSessionToken := b.mustGetSessionToken(*claims)
 

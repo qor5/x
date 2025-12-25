@@ -62,7 +62,7 @@ func TestUnaryServerInterceptor(t *testing.T) {
 	// Setup server with bufconn
 	listener := bufconn.Listen(1024 * 1024)
 	go func() {
-		server.Serve(listener)
+		_ = server.Serve(listener)
 	}()
 
 	conn, err := grpc.NewClient("passthrough://bufnet",

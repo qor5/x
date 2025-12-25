@@ -82,7 +82,7 @@ func (up *UserPass) GetLocked() bool {
 	if !up.Locked {
 		return false
 	}
-	return up.Locked && up.LockedAt != nil && time.Now().Sub(*up.LockedAt) <= time.Hour
+	return up.Locked && up.LockedAt != nil && time.Since(*up.LockedAt) <= time.Hour
 }
 
 func (up *UserPass) GetTOTPSecret() string {
@@ -202,7 +202,7 @@ func (up *UserPass) ConsumeResetPasswordToken(db *gorm.DB, model interface{}) er
 }
 
 func (up *UserPass) GetResetPasswordToken() (token string, createdAt *time.Time, expired bool) {
-	if up.ResetPasswordTokenExpiredAt != nil && time.Now().Sub(*up.ResetPasswordTokenExpiredAt) > 0 {
+	if up.ResetPasswordTokenExpiredAt != nil && time.Since(*up.ResetPasswordTokenExpiredAt) > 0 {
 		return "", nil, true
 	}
 	return up.ResetPasswordToken, up.ResetPasswordTokenCreatedAt, false

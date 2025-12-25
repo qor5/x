@@ -103,8 +103,7 @@ func defaultLoginPage(vh *ViewHelper) web.PageFunc {
 		}
 
 		r.PageTitle = msgr.LoginPageTitle
-		var bodyForm HTMLComponent
-		bodyForm = Div(
+		var bodyForm HTMLComponent = Div(
 			userPassHTML,
 			oauthHTML,
 			If(len(languagesHTML) > 0,
