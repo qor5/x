@@ -3,6 +3,8 @@ package timex
 import (
 	"context"
 	"time"
+
+	"github.com/jjeffery/errors"
 )
 
 func Sleep(ctx context.Context, d time.Duration) error {
@@ -18,7 +20,7 @@ func Sleep(ctx context.Context, d time.Duration) error {
 	select {
 	case <-ctx.Done():
 		t.Stop()
-		return ctx.Err()
+		return errors.Wrap(ctx.Err(), "timex.Sleep")
 	case <-t.C:
 	}
 	return nil

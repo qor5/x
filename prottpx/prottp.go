@@ -5,6 +5,7 @@ package prottpx
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -76,7 +77,6 @@ type (
 
 var _ grpc.ServiceRegistrar = (*Handler)(nil)
 
-// TODO: 需要支持默认序列化方式的自定义
 // Handler is an HTTP handler that wraps gRPC unary services.
 // It implements grpc.ServiceRegistrar for compatibility with generated gRPC code.
 type Handler struct {
@@ -87,6 +87,7 @@ type Handler struct {
 	connectErrWriter  *connect.ErrorWriter
 	writeErrorHook    hook.Hook[WriteErrorFunc]
 	writeResponseHook hook.Hook[WriteResponseFunc]
+	defaultContentType string // default content type for requests when Content-Type header is not specified
 }
 
 // HandlerOption configures the Handler.
@@ -114,6 +115,20 @@ func WithWriteErrorHook(hooks ...hook.Hook[WriteErrorFunc]) HandlerOption {
 func WithWriteResponseHook(hooks ...hook.Hook[WriteResponseFunc]) HandlerOption {
 	return func(m *Handler) {
 		m.writeResponseHook = hook.Prepend(m.writeResponseHook, hooks...)
+	}
+}
+
+// WithDefaultContentType returns a HandlerOption that sets the default content type for requests
+// when the Content-Type header is not specified.
+// contentType must be either "application/json" or "application/proto".
+// Defaults to "application/proto" if not specified.
+func WithDefaultContentType(contentType string) HandlerOption {
+	contentType = strings.ToLower(strings.TrimSpace(contentType))
+	if contentType != JSONContentType && contentType != ProtoContentType {
+		panic(fmt.Sprintf("invalid content type: %s, must be %s or %s", contentType, JSONContentType, ProtoContentType))
+	}
+	return func(m *Handler) {
+		m.defaultContentType = contentType
 	}
 }
 
@@ -169,7 +184,7 @@ func (m *Handler) handleMethod(service any, method grpc.MethodDesc) http.Handler
 	interceptor := grpcx.ChainUnaryServerInterceptor(m.interceptors...)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		contentTypeJSON := isContentTypeJSON(r)
+		contentTypeJSON := isContentTypeJSON(r, m.defaultContentType)
 		acceptJSON := isAcceptJSON(r, contentTypeJSON)
 
 		dec := func(msg any) error {
@@ -279,12 +294,17 @@ func (m *Handler) writeResponse(ctx context.Context, w http.ResponseWriter, r *h
 }
 
 // isContentTypeJSON determines if the request body should be parsed as JSON.
-func isContentTypeJSON(r *http.Request) bool {
-	return strings.Contains(strings.ToLower(r.Header.Get("Content-Type")), JSONContentType)
+// Uses defaultContentType if the Content-Type header is not specified.
+func isContentTypeJSON(r *http.Request, defaultContentType string) bool {
+	contentType := r.Header.Get("Content-Type")
+	if contentType == "" {
+		return defaultContentType == JSONContentType
+	}
+	return strings.Contains(strings.ToLower(contentType), JSONContentType)
 }
 
 // isAcceptJSON determines if the response should be JSON.
-// Priority: Accept header > Content-Type header > default (proto).
+// Priority: Accept header > Content-Type header.
 func isAcceptJSON(r *http.Request, contentTypeJSON bool) bool {
 	accept := strings.ToLower(r.Header.Get(HeaderAccept))
 	if accept == "" {

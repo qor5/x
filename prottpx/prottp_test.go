@@ -991,3 +991,108 @@ func TestHandler_WriteErrorIface(t *testing.T) {
 		assert.Equal(t, "application/x-custom-error", rec.Header().Get("Content-Type"))
 	})
 }
+
+func TestHandler_WithDefaultContentType(t *testing.T) {
+	t.Run("default JSON content type affects request parsing", func(t *testing.T) {
+		hdr := NewHandler(WithDefaultContentType(JSONContentType))
+		testdatav1.RegisterEchoServiceServer(hdr, &echoServer{})
+
+		req := &testdatav1.EchoRequest{Message: "test"}
+		body, err := JSONMarshalOptions.Marshal(req)
+		require.NoError(t, err)
+
+		// No Content-Type header, should use default JSON for parsing
+		httpReq := httptest.NewRequest(http.MethodPost, "/testdata.v1.EchoService/Echo", bytes.NewReader(body))
+		// No Accept header, response should follow request format (JSON)
+
+		rec := httptest.NewRecorder()
+		hdr.ServeHTTP(rec, httpReq)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, JSONContentType, rec.Header().Get(HeaderContentType))
+
+		resp := &testdatav1.EchoResponse{}
+		err = JSONUnmarshalOptions.Unmarshal(rec.Body.Bytes(), resp)
+		require.NoError(t, err)
+		assert.Equal(t, "Echo: test", resp.Message)
+	})
+
+	t.Run("default proto content type affects request parsing", func(t *testing.T) {
+		hdr := NewHandler(WithDefaultContentType(ProtoContentType))
+		testdatav1.RegisterEchoServiceServer(hdr, &echoServer{})
+
+		req := &testdatav1.EchoRequest{Message: "test"}
+		body, err := proto.Marshal(req)
+		require.NoError(t, err)
+
+		// No Content-Type header, should use default proto for parsing
+		httpReq := httptest.NewRequest(http.MethodPost, "/testdata.v1.EchoService/Echo", bytes.NewReader(body))
+		// No Accept header, response should follow request format (proto)
+
+		rec := httptest.NewRecorder()
+		hdr.ServeHTTP(rec, httpReq)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, ProtoContentType, rec.Header().Get(HeaderContentType))
+
+		resp := &testdatav1.EchoResponse{}
+		err = proto.Unmarshal(rec.Body.Bytes(), resp)
+		require.NoError(t, err)
+		assert.Equal(t, "Echo: test", resp.Message)
+	})
+
+	t.Run("explicit Content-Type overrides default", func(t *testing.T) {
+		hdr := NewHandler(WithDefaultContentType(JSONContentType))
+		testdatav1.RegisterEchoServiceServer(hdr, &echoServer{})
+
+		req := &testdatav1.EchoRequest{Message: "test"}
+		body, err := proto.Marshal(req)
+		require.NoError(t, err)
+
+		// Explicit Content-Type proto overrides default JSON
+		httpReq := httptest.NewRequest(http.MethodPost, "/testdata.v1.EchoService/Echo", bytes.NewReader(body))
+		httpReq.Header.Set(HeaderContentType, ProtoContentType)
+		// No Accept header, response should follow request format (proto)
+
+		rec := httptest.NewRecorder()
+		hdr.ServeHTTP(rec, httpReq)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, ProtoContentType, rec.Header().Get(HeaderContentType))
+
+		resp := &testdatav1.EchoResponse{}
+		err = proto.Unmarshal(rec.Body.Bytes(), resp)
+		require.NoError(t, err)
+		assert.Equal(t, "Echo: test", resp.Message)
+	})
+
+	t.Run("Accept header overrides Content-Type", func(t *testing.T) {
+		hdr := NewHandler(WithDefaultContentType(ProtoContentType))
+		testdatav1.RegisterEchoServiceServer(hdr, &echoServer{})
+
+		req := &testdatav1.EchoRequest{Message: "test"}
+		body, err := proto.Marshal(req)
+		require.NoError(t, err)
+
+		// Default proto, no Content-Type (so uses proto), but Accept JSON
+		httpReq := httptest.NewRequest(http.MethodPost, "/testdata.v1.EchoService/Echo", bytes.NewReader(body))
+		httpReq.Header.Set(HeaderAccept, JSONContentType)
+
+		rec := httptest.NewRecorder()
+		hdr.ServeHTTP(rec, httpReq)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, JSONContentType, rec.Header().Get(HeaderContentType))
+
+		resp := &testdatav1.EchoResponse{}
+		err = JSONUnmarshalOptions.Unmarshal(rec.Body.Bytes(), resp)
+		require.NoError(t, err)
+		assert.Equal(t, "Echo: test", resp.Message)
+	})
+
+	t.Run("invalid content type panics", func(t *testing.T) {
+		assert.Panics(t, func() {
+			NewHandler(WithDefaultContentType("text/plain"))
+		})
+	})
+}

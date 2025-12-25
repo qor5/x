@@ -15,7 +15,12 @@
 - **内容协商**：
 
   - 支持 `application/json` 与 `application/proto` 两种编码。
-  - 请求体根据 `Content-Type` 解码，响应根据 `Accept` / `Content-Type` 决定是否返回 JSON。
+  - 请求体根据 `Content-Type` 头解码。如果未指定 Content-Type，
+    将使用通过 `WithDefaultContentType` 配置的默认内容类型（默认为 `application/proto`）。
+  - 响应格式由 `Accept` 头决定。如果没有 Accept 头，
+    将跟随请求的 Content-Type 格式。
+  - 使用 `WithDefaultContentType` 可以为没有 Content-Type 头的请求
+    配置默认内容类型。
 
 - **normalize 集成**：
 
