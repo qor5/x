@@ -13,19 +13,23 @@ import (
 	"github.com/theplant/inject/lifecycle"
 )
 
-type setupWaitForReady struct{}
+type ReadinessProbe struct{}
 
-func SetupWaitForReady(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *setupWaitForReady {
+var SetupWaitForReady = SetupReadinessProbe
+
+func SetupReadinessProbe(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *ReadinessProbe {
 	endpoint := fmt.Sprintf("http://%s%s", httpListener.Addr().String(), Path)
-	return SetupWaitForReadyFactory(endpoint)(lc)
+	return SetupReadinessProbeFactory(endpoint)(lc)
 }
 
-func SetupWaitForReadyFactory(endpoint string) func(lc *lifecycle.Lifecycle) *setupWaitForReady {
-	return func(lc *lifecycle.Lifecycle) *setupWaitForReady {
+var SetupWaitForReadyFactory = SetupReadinessProbeFactory
+
+func SetupReadinessProbeFactory(endpoint string) func(lc *lifecycle.Lifecycle) *ReadinessProbe {
+	return func(lc *lifecycle.Lifecycle) *ReadinessProbe {
 		lc.Add(lifecycle.NewFuncActor(func(ctx context.Context) error {
 			return WaitForReady(ctx, endpoint)
 		}, nil))
-		return &setupWaitForReady{}
+		return &ReadinessProbe{}
 	}
 }
 
