@@ -63,8 +63,9 @@ func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
 	// Normalize PathPrefix to ensure predictable behavior:
 	// - Always starts with "/" (add if missing)
 	// - Never ends with "/" unless it's the root path "/"
+	// - Root path "/" is treated as no prefix (skips StripPrefix)
 	// This prevents common configuration errors and makes http.StripPrefix behavior consistent
-	if conf.PathPrefix != "" {
+	if conf.PathPrefix != "" && conf.PathPrefix != "/" {
 		// Ensure prefix starts with "/"
 		if !strings.HasPrefix(conf.PathPrefix, "/") {
 			conf.PathPrefix = "/" + conf.PathPrefix

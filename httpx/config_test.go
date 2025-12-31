@@ -99,38 +99,45 @@ func TestServerConfig_PathPrefix(t *testing.T) {
 	})
 
 	tests := []struct {
-		name          string
-		pathPrefix    string
-		requestPath   string
-		expectedPath  string
+		name           string
+		pathPrefix     string
+		requestPath    string
+		expectedPath   string
 		expectedStatus int
 	}{
 		{
-			name:          "no path prefix",
-			pathPrefix:    "",
-			requestPath:   "/api/users",
-			expectedPath:  "/api/users",
+			name:           "no path prefix",
+			pathPrefix:     "",
+			requestPath:    "/api/users",
+			expectedPath:   "/api/users",
 			expectedStatus: 200,
 		},
 		{
-			name:          "with path prefix",
-			pathPrefix:    "/api/v1",
-			requestPath:   "/api/v1/users",
-			expectedPath:  "/users",
+			name:           "with path prefix",
+			pathPrefix:     "/api/v1",
+			requestPath:    "/api/v1/users",
+			expectedPath:   "/users",
 			expectedStatus: 200,
 		},
 		{
-			name:          "path prefix not matched",
-			pathPrefix:    "/api/v1",
-			requestPath:   "/api/users",
-			expectedPath:  "404 page not found\n", // StripPrefix returns 404 when prefix doesn't match
+			name:           "path prefix not matched",
+			pathPrefix:     "/api/v1",
+			requestPath:    "/api/users",
+			expectedPath:   "404 page not found\n", // StripPrefix returns 404 when prefix doesn't match
 			expectedStatus: 404,
 		},
 		{
-			name:          "prefix normalization test",
-			pathPrefix:    "api/v1/", // Will be normalized to "/api/v1"
-			requestPath:   "/api/v1/users",
-			expectedPath:  "/users",
+			name:           "prefix normalization test",
+			pathPrefix:     "api/v1/", // Will be normalized to "/api/v1"
+			requestPath:    "/api/v1/users",
+			expectedPath:   "/users",
+			expectedStatus: 200,
+		},
+		{
+			name:           "root path prefix should not strip",
+			pathPrefix:     "/", // Root path should not strip anything
+			requestPath:    "/users",
+			expectedPath:   "/users",
 			expectedStatus: 200,
 		},
 	}
