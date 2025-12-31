@@ -1,5 +1,6 @@
 http:
   address: ":8787"
+  pathPrefix: ""
   readTimeout: "10s"
   readHeaderTimeout: "4s"
   writeTimeout: "20s"

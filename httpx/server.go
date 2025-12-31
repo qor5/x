@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/qor5/x/v3/netx"
@@ -59,6 +60,26 @@ func SetupServerFactory(name string, handler http.Handler) func(ctx context.Cont
 }
 
 func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
+	// Normalize PathPrefix to ensure predictable behavior:
+	// - Always starts with "/" (add if missing)
+	// - Never ends with "/" unless it's the root path "/"
+	// - Root path "/" is treated as no prefix (skips StripPrefix)
+	// This prevents common configuration errors and makes http.StripPrefix behavior consistent
+	if conf.PathPrefix != "" && conf.PathPrefix != "/" {
+		pathPrefix := conf.PathPrefix
+
+		// Ensure prefix starts with "/"
+		if !strings.HasPrefix(pathPrefix, "/") {
+			pathPrefix = "/" + pathPrefix
+		}
+		// Remove trailing slash unless it's the root path "/"
+		if len(pathPrefix) > 1 && strings.HasSuffix(pathPrefix, "/") {
+			pathPrefix = strings.TrimSuffix(pathPrefix, "/")
+		}
+
+		handler = http.StripPrefix(pathPrefix, handler)
+	}
+
 	srv := &http.Server{
 		ReadTimeout:       conf.ReadTimeout,
 		ReadHeaderTimeout: conf.ReadHeaderTimeout,

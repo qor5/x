@@ -1,6 +1,8 @@
 package httpx
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -87,4 +89,88 @@ func TestSecurityConfig_Validation(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestServerConfig_PathPrefix(t *testing.T) {
+	// Create a test handler that returns the requested path
+	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(r.URL.Path))
+	})
+
+	tests := []struct {
+		name           string
+		pathPrefix     string
+		requestPath    string
+		expectedPath   string
+		expectedStatus int
+	}{
+		{
+			name:           "no path prefix",
+			pathPrefix:     "",
+			requestPath:    "/api/users",
+			expectedPath:   "/api/users",
+			expectedStatus: 200,
+		},
+		{
+			name:           "with path prefix",
+			pathPrefix:     "/api/v1",
+			requestPath:    "/api/v1/users",
+			expectedPath:   "/users",
+			expectedStatus: 200,
+		},
+		{
+			name:           "path prefix not matched",
+			pathPrefix:     "/api/v1",
+			requestPath:    "/api/users",
+			expectedPath:   "404 page not found\n", // StripPrefix returns 404 when prefix doesn't match
+			expectedStatus: 404,
+		},
+		{
+			name:           "prefix normalization test",
+			pathPrefix:     "api/v1/", // Will be normalized to "/api/v1"
+			requestPath:    "/api/v1/users",
+			expectedPath:   "/users",
+			expectedStatus: 200,
+		},
+		{
+			name:           "root path prefix should not strip",
+			pathPrefix:     "/", // Root path should not strip anything
+			requestPath:    "/users",
+			expectedPath:   "/users",
+			expectedStatus: 200,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			conf := &ServerConfig{
+				Address:    ":8080",
+				PathPrefix: tt.pathPrefix,
+			}
+
+			// Create server with the test handler
+			srv, err := NewServer(conf, testHandler)
+			if err != nil {
+				t.Fatalf("Failed to create server: %v", err)
+			}
+
+			// Create a request to test
+			req := httptest.NewRequest("GET", tt.requestPath, nil)
+			w := httptest.NewRecorder()
+
+			// Serve the request
+			srv.Handler.ServeHTTP(w, req)
+
+			// Check the response
+			if w.Code != tt.expectedStatus {
+				t.Errorf("Expected status %d, got %d", tt.expectedStatus, w.Code)
+			}
+
+			responseBody := w.Body.String()
+			if responseBody != tt.expectedPath {
+				t.Errorf("Expected path %q, got %q", tt.expectedPath, responseBody)
+			}
+		})
+	}
 }
