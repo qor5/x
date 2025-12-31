@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/qor5/x/v3/netx"
@@ -37,7 +38,7 @@ func SetupServerFactory(name string, handler http.Handler) func(ctx context.Cont
 				slog.InfoContext(ctx, "HTTP server listening", "address", listener.Addr().String())
 				if err := srv.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					return errors.Wrap(err, "failed to start HTTP server")
-				} 
+				}
 			}
 			return nil
 		}).WithStop(func(ctx context.Context) error {
@@ -59,7 +60,20 @@ func SetupServerFactory(name string, handler http.Handler) func(ctx context.Cont
 }
 
 func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
+	// Normalize PathPrefix to ensure predictable behavior:
+	// - Always starts with "/" (add if missing)
+	// - Never ends with "/" unless it's the root path "/"
+	// This prevents common configuration errors and makes http.StripPrefix behavior consistent
 	if conf.PathPrefix != "" {
+		// Ensure prefix starts with "/"
+		if !strings.HasPrefix(conf.PathPrefix, "/") {
+			conf.PathPrefix = "/" + conf.PathPrefix
+		}
+		// Remove trailing slash unless it's the root path "/"
+		if len(conf.PathPrefix) > 1 && strings.HasSuffix(conf.PathPrefix, "/") {
+			conf.PathPrefix = strings.TrimSuffix(conf.PathPrefix, "/")
+		}
+
 		handler = http.StripPrefix(conf.PathPrefix, handler)
 	}
 
