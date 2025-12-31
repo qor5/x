@@ -126,6 +126,48 @@ func TestServerConfig_PathPrefix(t *testing.T) {
 			expectedPath:  "404 page not found\n", // StripPrefix returns 404 when prefix doesn't match
 			expectedStatus: 404,
 		},
+		{
+			name:          "prefix without trailing slash, request same path",
+			pathPrefix:    "/api",
+			requestPath:   "/api",
+			expectedPath:  "", // StripPrefix strips "/api" and leaves ""
+			expectedStatus: 200,
+		},
+		{
+			name:          "prefix without trailing slash, request with trailing slash",
+			pathPrefix:    "/api",
+			requestPath:   "/api/",
+			expectedPath:  "/", // StripPrefix strips "/api" and leaves "/"
+			expectedStatus: 200,
+		},
+		{
+			name:          "prefix with trailing slash, request without trailing slash",
+			pathPrefix:    "/api/",
+			requestPath:   "/api",
+			expectedPath:  "404 page not found\n", // No match, returns 404
+			expectedStatus: 404,
+		},
+		{
+			name:          "prefix with trailing slash, request with trailing slash",
+			pathPrefix:    "/api/",
+			requestPath:   "/api/",
+			expectedPath:  "", // StripPrefix strips "/api/" and leaves ""
+			expectedStatus: 200,
+		},
+		{
+			name:          "multiple levels with trailing slash",
+			pathPrefix:    "/api/v1/",
+			requestPath:   "/api/v1/users",
+			expectedPath:  "users", // StripPrefix strips "/api/v1/" and leaves "users"
+			expectedStatus: 200,
+		},
+		{
+			name:          "multiple levels correct matching",
+			pathPrefix:    "/api/v1/",
+			requestPath:   "/api/v1/users/",
+			expectedPath:  "users/", // StripPrefix strips "/api/v1/" and leaves "users/"
+			expectedStatus: 200,
+		},
 	}
 
 	for _, tt := range tests {
