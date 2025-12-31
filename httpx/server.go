@@ -37,7 +37,7 @@ func SetupServerFactory(name string, handler http.Handler) func(ctx context.Cont
 				slog.InfoContext(ctx, "HTTP server listening", "address", listener.Addr().String())
 				if err := srv.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					return errors.Wrap(err, "failed to start HTTP server")
-				}
+				} 
 			}
 			return nil
 		}).WithStop(func(ctx context.Context) error {
@@ -59,7 +59,6 @@ func SetupServerFactory(name string, handler http.Handler) func(ctx context.Cont
 }
 
 func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
-	// Apply path prefix if configured
 	if conf.PathPrefix != "" {
 		handler = http.StripPrefix(conf.PathPrefix, handler)
 	}
