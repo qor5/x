@@ -6,6 +6,7 @@ import (
 
 type ServerConfig struct {
 	Address           string         `confx:"address" usage:"HTTP server address" validate:"required"`
+	PathPrefix        string         `confx:"pathPrefix" usage:"Path prefix for all handlers"`
 	ReadTimeout       time.Duration  `confx:"readTimeout" usage:"maximum duration before timing out read of the request"`
 	ReadHeaderTimeout time.Duration  `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers" validate:"ltefield=ReadTimeout"`
 	WriteTimeout      time.Duration  `confx:"writeTimeout" usage:"maximum duration before timing out write of the response"`

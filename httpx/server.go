@@ -59,6 +59,11 @@ func SetupServerFactory(name string, handler http.Handler) func(ctx context.Cont
 }
 
 func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
+	// Apply path prefix if configured
+	if conf.PathPrefix != "" {
+		handler = http.StripPrefix(conf.PathPrefix, handler)
+	}
+
 	srv := &http.Server{
 		ReadTimeout:       conf.ReadTimeout,
 		ReadHeaderTimeout: conf.ReadHeaderTimeout,
