@@ -13,23 +13,43 @@ import (
 	"github.com/theplant/inject/lifecycle"
 )
 
-type ReadinessProbe struct{}
-
+// Deprecated: use SetupReadinessProbe
 var SetupWaitForReady = SetupReadinessProbe
 
-func SetupReadinessProbe(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *ReadinessProbe {
-	endpoint := fmt.Sprintf("http://%s%s", httpListener.Addr().String(), Path)
-	return SetupReadinessProbeFactory(endpoint)(lc)
+var SetupReadinessProbe = SetupReadinessProbeFactory()
+
+func SetupReadinessProbeFactory(readyFuncs ...ReadyFunc) func(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *lifecycle.ReadinessProbe {
+	return func(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *lifecycle.ReadinessProbe {
+		endpoint := fmt.Sprintf("http://%s%s", httpListener.Addr().String(), Path)
+		return SetupReadinessProbeWithEndpointFactory(endpoint, readyFuncs...)(lc)
+	}
 }
 
-var SetupWaitForReadyFactory = SetupReadinessProbeFactory
+var SetupWaitForReadyWithEndpointFactory = SetupReadinessProbeWithEndpointFactory
 
-func SetupReadinessProbeFactory(endpoint string) func(lc *lifecycle.Lifecycle) *ReadinessProbe {
-	return func(lc *lifecycle.Lifecycle) *ReadinessProbe {
-		lc.Add(lifecycle.NewFuncActor(func(ctx context.Context) error {
-			return WaitForReady(ctx, endpoint)
+// ReadyFunc is a function that is called after the server is ready
+// It receives the context and lifecycle for dependency resolution
+type ReadyFunc func(ctx context.Context, lc *lifecycle.Lifecycle) error
+
+func SetupReadinessProbeWithEndpointFactory(endpoint string, readyFuncs ...ReadyFunc) func(lc *lifecycle.Lifecycle) *lifecycle.ReadinessProbe {
+	return func(lc *lifecycle.Lifecycle) *lifecycle.ReadinessProbe {
+		probe := lifecycle.NewReadinessProbe()
+		lc.Add(lifecycle.NewFuncActor(func(ctx context.Context) (xerr error) {
+			defer func() {
+				probe.Signal(xerr)
+			}()
+			if err := WaitForReady(ctx, endpoint); err != nil {
+				return err
+			}
+			// Execute all ready functions after server is ready
+			for _, fn := range readyFuncs {
+				if err := fn(ctx, lc); err != nil {
+					return err
+				}
+			}
+			return nil
 		}, nil))
-		return &ReadinessProbe{}
+		return probe
 	}
 }
 
