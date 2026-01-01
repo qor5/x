@@ -17,19 +17,21 @@ import (
 // Deprecated: use SetupReadinessProbe
 var SetupWaitForReady = SetupReadinessProbe
 
-func SetupReadinessProbe(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *inject.Element[*lifecycle.ReadinessProbe] {
+type ReadinessProbe lifecycle.ReadinessProbe
+
+func SetupReadinessProbe(lc *lifecycle.Lifecycle, httpListener httpx.Listener) (*ReadinessProbe, *inject.Element[*lifecycle.ReadinessProbe]) {
 	endpoint := fmt.Sprintf("http://%s%s", httpListener.Addr().String(), Path)
 	return SetupReadinessProbeFactory(endpoint)(lc)
 }
 
-func SetupReadinessProbeFactory(endpoint string) func(lc *lifecycle.Lifecycle) *inject.Element[*lifecycle.ReadinessProbe] {
-	return func(lc *lifecycle.Lifecycle) *inject.Element[*lifecycle.ReadinessProbe] {
+func SetupReadinessProbeFactory(endpoint string) func(lc *lifecycle.Lifecycle) (*ReadinessProbe, *inject.Element[*lifecycle.ReadinessProbe]) {
+	return func(lc *lifecycle.Lifecycle) (*ReadinessProbe, *inject.Element[*lifecycle.ReadinessProbe]) {
 		probe := lifecycle.NewReadinessProbe()
 		lc.Add(lifecycle.NewFuncActor(func(ctx context.Context) (xerr error) {
 			defer func() { probe.Signal(xerr) }()
 			return WaitForReady(ctx, endpoint)
 		}, nil))
-		return inject.NewElement(probe)
+		return (*ReadinessProbe)(probe), inject.NewElement(probe)
 	}
 }
 
