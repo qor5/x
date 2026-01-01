@@ -13,6 +13,6 @@ func SetupServer(lc *lifecycle.Lifecycle, handler http.Handler) (*httptest.Serve
 	lc.Add(lifecycle.NewFuncActor(nil, func(_ context.Context) error {
 		server.Close()
 		return nil
-	}))
+	}).WithName("httptest-server"))
 	return server, nil
 }
