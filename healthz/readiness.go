@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/qor5/x/v3/httpx"
 	"github.com/qor5/x/v3/timex"
+	"github.com/theplant/inject"
 	"github.com/theplant/inject/lifecycle"
 )
 
@@ -18,8 +19,8 @@ var SetupWaitForReady = SetupReadinessProbe
 
 var SetupReadinessProbe = SetupReadinessProbeFactory()
 
-func SetupReadinessProbeFactory(readyFuncs ...ReadyFunc) func(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *lifecycle.ReadinessProbe {
-	return func(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *lifecycle.ReadinessProbe {
+func SetupReadinessProbeFactory(readyFuncs ...ReadyFunc) func(lc *lifecycle.Lifecycle, httpListener httpx.Listener) inject.Element[*lifecycle.ReadinessProbe] {
+	return func(lc *lifecycle.Lifecycle, httpListener httpx.Listener) inject.Element[*lifecycle.ReadinessProbe] {
 		endpoint := fmt.Sprintf("http://%s%s", httpListener.Addr().String(), Path)
 		return SetupReadinessProbeWithEndpointFactory(endpoint, readyFuncs...)(lc)
 	}
@@ -31,8 +32,8 @@ var SetupWaitForReadyWithEndpointFactory = SetupReadinessProbeWithEndpointFactor
 // It receives the context and lifecycle for dependency resolution
 type ReadyFunc func(ctx context.Context, lc *lifecycle.Lifecycle) error
 
-func SetupReadinessProbeWithEndpointFactory(endpoint string, readyFuncs ...ReadyFunc) func(lc *lifecycle.Lifecycle) *lifecycle.ReadinessProbe {
-	return func(lc *lifecycle.Lifecycle) *lifecycle.ReadinessProbe {
+func SetupReadinessProbeWithEndpointFactory(endpoint string, readyFuncs ...ReadyFunc) func(lc *lifecycle.Lifecycle) inject.Element[*lifecycle.ReadinessProbe] {
+	return func(lc *lifecycle.Lifecycle) inject.Element[*lifecycle.ReadinessProbe] {
 		probe := lifecycle.NewReadinessProbe()
 		lc.Add(lifecycle.NewFuncActor(func(ctx context.Context) (xerr error) {
 			defer func() {
@@ -49,7 +50,7 @@ func SetupReadinessProbeWithEndpointFactory(endpoint string, readyFuncs ...Ready
 			}
 			return nil
 		}, nil))
-		return probe
+		return inject.NewElement(probe)
 	}
 }
 
