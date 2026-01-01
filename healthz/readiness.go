@@ -10,31 +10,33 @@ import (
 	"github.com/pkg/errors"
 	"github.com/qor5/x/v3/httpx"
 	"github.com/qor5/x/v3/timex"
-	"github.com/theplant/inject"
 	"github.com/theplant/inject/lifecycle"
 )
 
 // Deprecated: use SetupReadinessProbe
 var SetupWaitForReady = SetupReadinessProbe
 
-type ReadinessProbe lifecycle.ReadinessProbe
+// ReadinessProbe is a marker type for readiness probe dependency.
+// Other components can depend on this type to ensure they execute after WaitForReady completes.
+type ReadinessProbe struct{}
 
-func SetupReadinessProbe(lc *lifecycle.Lifecycle, httpListener httpx.Listener) (*ReadinessProbe, *inject.Element[*lifecycle.ReadinessProbe]) {
+// SetupReadinessProbe sets up a readiness probe that checks the health endpoint.
+func SetupReadinessProbe(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *ReadinessProbe {
 	endpoint := fmt.Sprintf("http://%s%s", httpListener.Addr().String(), Path)
 	return SetupReadinessProbeFactory(endpoint)(lc)
 }
 
-func SetupReadinessProbeFactory(endpoint string) func(lc *lifecycle.Lifecycle) (*ReadinessProbe, *inject.Element[*lifecycle.ReadinessProbe]) {
-	return func(lc *lifecycle.Lifecycle) (*ReadinessProbe, *inject.Element[*lifecycle.ReadinessProbe]) {
-		probe := lifecycle.NewReadinessProbe()
-		lc.Add(lifecycle.NewFuncActor(func(ctx context.Context) (xerr error) {
-			defer func() { probe.Signal(xerr) }()
+// SetupReadinessProbeFactory creates a factory for setting up a readiness probe with custom endpoint.
+func SetupReadinessProbeFactory(endpoint string) func(lc *lifecycle.Lifecycle) *ReadinessProbe {
+	return func(lc *lifecycle.Lifecycle) *ReadinessProbe {
+		lc.Add(lifecycle.NewFuncActor(func(ctx context.Context) error {
 			return WaitForReady(ctx, endpoint)
-		}, nil))
-		return (*ReadinessProbe)(probe), inject.NewElement(probe)
+		}, nil).WithName("healthz-readiness-probe").WithReadiness())
+		return &ReadinessProbe{}
 	}
 }
 
+// WaitForReady waits until the endpoint responds with HTTP 200 OK.
 func WaitForReady(ctx context.Context, endpoint string) error {
 	if err := timex.Sleep(ctx, 10*time.Millisecond); err != nil {
 		return err
