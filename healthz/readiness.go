@@ -17,38 +17,17 @@ import (
 // Deprecated: use SetupReadinessProbe
 var SetupWaitForReady = SetupReadinessProbe
 
-var SetupReadinessProbe = SetupReadinessProbeFactory()
-
-func SetupReadinessProbeFactory(readyFuncs ...ReadyFunc) func(lc *lifecycle.Lifecycle, httpListener httpx.Listener) inject.Element[*lifecycle.ReadinessProbe] {
-	return func(lc *lifecycle.Lifecycle, httpListener httpx.Listener) inject.Element[*lifecycle.ReadinessProbe] {
-		endpoint := fmt.Sprintf("http://%s%s", httpListener.Addr().String(), Path)
-		return SetupReadinessProbeWithEndpointFactory(endpoint, readyFuncs...)(lc)
-	}
+func SetupReadinessProbe(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *inject.Element[*lifecycle.ReadinessProbe] {
+	endpoint := fmt.Sprintf("http://%s%s", httpListener.Addr().String(), Path)
+	return SetupReadinessProbeFactory(endpoint)(lc)
 }
 
-var SetupWaitForReadyWithEndpointFactory = SetupReadinessProbeWithEndpointFactory
-
-// ReadyFunc is a function that is called after the server is ready
-// It receives the context and lifecycle for dependency resolution
-type ReadyFunc func(ctx context.Context, lc *lifecycle.Lifecycle) error
-
-func SetupReadinessProbeWithEndpointFactory(endpoint string, readyFuncs ...ReadyFunc) func(lc *lifecycle.Lifecycle) inject.Element[*lifecycle.ReadinessProbe] {
-	return func(lc *lifecycle.Lifecycle) inject.Element[*lifecycle.ReadinessProbe] {
+func SetupReadinessProbeFactory(endpoint string) func(lc *lifecycle.Lifecycle) *inject.Element[*lifecycle.ReadinessProbe] {
+	return func(lc *lifecycle.Lifecycle) *inject.Element[*lifecycle.ReadinessProbe] {
 		probe := lifecycle.NewReadinessProbe()
 		lc.Add(lifecycle.NewFuncActor(func(ctx context.Context) (xerr error) {
-			defer func() {
-				probe.Signal(xerr)
-			}()
-			if err := WaitForReady(ctx, endpoint); err != nil {
-				return err
-			}
-			// Execute all ready functions after server is ready
-			for _, fn := range readyFuncs {
-				if err := fn(ctx, lc); err != nil {
-					return err
-				}
-			}
-			return nil
+			defer func() { probe.Signal(xerr) }()
+			return WaitForReady(ctx, endpoint)
 		}, nil))
 		return inject.NewElement(probe)
 	}
@@ -67,10 +46,12 @@ func WaitForReady(ctx context.Context, endpoint string) error {
 			}
 
 			resp, err := client.Do(req)
+			if resp != nil {
+				defer resp.Body.Close()
+			}
 			if err != nil {
 				return errors.Wrapf(err, "failed to access ready check endpoint")
 			}
-			defer resp.Body.Close()
 
 			if resp.StatusCode != http.StatusOK {
 				return errors.Errorf("unexpected status code: %d", resp.StatusCode)
