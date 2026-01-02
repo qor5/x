@@ -51,7 +51,7 @@ require (
 	github.com/theplant/appkit v0.0.0-20250528023215-3d0d299dc4c6
 	github.com/theplant/cachex v0.0.0-20251210183652-8e675368cbc5
 	github.com/theplant/htmlgo v1.0.3
-	github.com/theplant/inject v1.2.0
+	github.com/theplant/inject v1.2.1
 	github.com/theplant/osenv v0.0.2
 	github.com/theplant/ratelimiter v1.0.1
 	github.com/theplant/testenv v0.2.1
