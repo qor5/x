@@ -3,6 +3,7 @@ package grpcx
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/qor5/x/v3/statusx"
 	"github.com/theplant/appkit/errornotifier"
@@ -60,6 +61,7 @@ func DefaultErrorUnaryServerInterceptor(notifier errornotifier.Notifier) grpc.Un
 				"err.stacktrace": fmt.Sprintf("%+v", err),
 				"err.reason":     st.Reason(),
 			})
+			slog.ErrorContext(ctx, fmt.Sprintf("grpc err in %s: %+v", info.FullMethod, err), "full_method", info.FullMethod, "err.reason", st.Reason())
 		}
 
 		return err

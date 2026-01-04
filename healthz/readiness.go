@@ -13,22 +13,30 @@ import (
 	"github.com/theplant/inject/lifecycle"
 )
 
-type setupWaitForReady struct{}
+// Deprecated: use SetupReadinessProbe
+var SetupWaitForReady = SetupReadinessProbe
 
-func SetupWaitForReady(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *setupWaitForReady {
+// ReadinessProbe is a marker type for readiness probe dependency.
+// Other components can depend on this type to ensure they execute after WaitForReady completes.
+type ReadinessProbe struct{}
+
+// SetupReadinessProbe sets up a readiness probe that checks the health endpoint.
+func SetupReadinessProbe(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *ReadinessProbe {
 	endpoint := fmt.Sprintf("http://%s%s", httpListener.Addr().String(), Path)
-	return SetupWaitForReadyFactory(endpoint)(lc)
+	return SetupReadinessProbeFactory(endpoint)(lc)
 }
 
-func SetupWaitForReadyFactory(endpoint string) func(lc *lifecycle.Lifecycle) *setupWaitForReady {
-	return func(lc *lifecycle.Lifecycle) *setupWaitForReady {
+// SetupReadinessProbeFactory creates a factory for setting up a readiness probe with custom endpoint.
+func SetupReadinessProbeFactory(endpoint string) func(lc *lifecycle.Lifecycle) *ReadinessProbe {
+	return func(lc *lifecycle.Lifecycle) *ReadinessProbe {
 		lc.Add(lifecycle.NewFuncActor(func(ctx context.Context) error {
 			return WaitForReady(ctx, endpoint)
-		}, nil))
-		return &setupWaitForReady{}
+		}, nil).WithName("healthz-readiness-probe").WithReadiness())
+		return &ReadinessProbe{}
 	}
 }
 
+// WaitForReady waits until the endpoint responds with HTTP 200 OK.
 func WaitForReady(ctx context.Context, endpoint string) error {
 	if err := timex.Sleep(ctx, 10*time.Millisecond); err != nil {
 		return err
@@ -42,10 +50,12 @@ func WaitForReady(ctx context.Context, endpoint string) error {
 			}
 
 			resp, err := client.Do(req)
+			if resp != nil {
+				defer resp.Body.Close()
+			}
 			if err != nil {
 				return errors.Wrapf(err, "failed to access ready check endpoint")
 			}
-			defer resp.Body.Close()
 
 			if resp.StatusCode != http.StatusOK {
 				return errors.Errorf("unexpected status code: %d", resp.StatusCode)
