@@ -28,8 +28,9 @@ func WrapClient(client *http.Client, baseURL string) *Client {
 
 // WithAuthorization sets the authorization token for subsequent requests
 func (c *Client) WithAuthorization(token string) *Client {
-	c.authorizationToken = token
-	return c
+	newClient := *c
+	newClient.authorizationToken = token
+	return &newClient
 }
 
 // Call makes an HTTP POST request to the prottpx endpoint
