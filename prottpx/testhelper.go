@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// Client is a helper for testing customer-facing HTTP endpoints
+// Client is a helper for testing client-facing HTTP endpoints
 type Client struct {
 	*http.Client
 	baseURL            string
