@@ -263,7 +263,7 @@ func (client Client) ToS3Key(urlPath string) string {
 
 // GetURL get public accessible URL
 func (client Client) GetURL(ctx context.Context, path string) (url string, err error) {
-	if client.getS3Endpoint(ctx) == "" {
+	if client.Config.S3Endpoint == "" {
 		if client.Config.ACL == "private" || client.Config.ACL == "authenticated-read" {
 			presignReq, err := s3.NewPresignClient(client.S3).PresignGetObject(ctx, &s3.GetObjectInput{
 				Bucket: aws.String(client.Config.Bucket),
