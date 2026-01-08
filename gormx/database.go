@@ -291,6 +291,11 @@ func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProv
 	if dsn == "" {
 		return nil, errors.New("dsn is required")
 	}
+	// Parse DSN first to validate format before modifying it.
+	conf, err := pgx.ParseConfig(dsn)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse dsn")
+	}
 	// AWS RDS IAM authentication requires SSL/TLS connection.
 	// Force sslmode to "require" if not explicitly set.
 	// This prevents intermittent "pg_hba.conf rejects connection ... no encryption" errors
@@ -299,11 +304,12 @@ func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProv
 	// We must check the DSN string directly to detect if sslmode was explicitly specified.
 	if !strings.Contains(strings.ToLower(dsn), "sslmode=") {
 		dsn = appendSSLMode(dsn, "require")
+		var err error
+		conf, err = pgx.ParseConfig(dsn)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to parse dsn after appending sslmode")
+		}
 		slog.Info("IAM authentication: sslmode not specified, defaulting to 'require'")
-	}
-	conf, err := pgx.ParseConfig(dsn)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse dsn")
 	}
 	if conf.Host == "" {
 		return nil, errors.New("host is required")
