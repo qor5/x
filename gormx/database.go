@@ -291,6 +291,16 @@ func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProv
 	if dsn == "" {
 		return nil, errors.New("dsn is required")
 	}
+	// AWS RDS IAM authentication requires SSL/TLS connection.
+	// Force sslmode to "require" if not explicitly set.
+	// This prevents intermittent "pg_hba.conf rejects connection ... no encryption" errors
+	// that can occur when sslmode is "prefer" (default) and SSL negotiation occasionally fails.
+	// Note: pgx defaults to sslmode=prefer, so TLSConfig is non-nil even without explicit sslmode.
+	// We must check the DSN string directly to detect if sslmode was explicitly specified.
+	if !strings.Contains(strings.ToLower(dsn), "sslmode=") {
+		dsn = appendSSLMode(dsn, "require")
+		slog.Info("IAM authentication: sslmode not specified, defaulting to 'require'")
+	}
 	conf, err := pgx.ParseConfig(dsn)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse dsn")
@@ -335,6 +345,30 @@ func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProv
 		// We are using pgx as postgresql's database/sql driver, it enables prepared statement cache by default (extended protocol)
 		// PreferSimpleProtocol: true, // disables implicit prepared statement usage.
 	}), nil
+}
+
+// appendSSLMode appends sslmode parameter to a DSN string.
+// Handles both URL format (postgres://...) and keyword format (host=... port=...).
+func appendSSLMode(dsn, mode string) string {
+	dsn = strings.TrimSpace(dsn)
+	param := "sslmode=" + mode
+	if strings.Contains(dsn, "://") {
+		// URL format: postgres://user@host:port/dbname?params
+		idx := strings.Index(dsn, "?")
+		if idx == -1 {
+			// No query params: append ?sslmode=...
+			return dsn + "?" + param
+		}
+		// Has query params: check if it ends with ? or &
+		if idx == len(dsn)-1 || dsn[len(dsn)-1] == '&' {
+			// Ends with ? or &: append directly
+			return dsn + param
+		}
+		// Has existing params: append &sslmode=...
+		return dsn + "&" + param
+	}
+	// Keyword format: host=... port=... - append with space
+	return dsn + " " + param
 }
 
 func NewDefaultDialector(dsn string) (gorm.Dialector, error) {
