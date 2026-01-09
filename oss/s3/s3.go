@@ -266,8 +266,9 @@ func (client Client) GetURL(ctx context.Context, path string) (url string, err e
 	if client.Config.S3Endpoint == "" {
 		if client.Config.ACL == "private" || client.Config.ACL == "authenticated-read" {
 			presignReq, err := s3.NewPresignClient(client.S3).PresignGetObject(ctx, &s3.GetObjectInput{
-				Bucket: aws.String(client.Config.Bucket),
-				Key:    aws.String(client.ToS3Key(path)),
+				Bucket:                     aws.String(client.Config.Bucket),
+				Key:                        aws.String(client.ToS3Key(path)),
+				ResponseContentDisposition: aws.String(fmt.Sprintf(`attachment; filename="%s"`, filepath.Base(path))),
 			}, func(po *s3.PresignOptions) {
 				po.Expires = 1 * time.Hour
 			})
