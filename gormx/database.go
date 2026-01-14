@@ -400,7 +400,7 @@ func (c *iamRetryConnector) Connect(ctx context.Context) (driver.Conn, error) {
 	conn, err := c.connector.Connect(ctx)
 	if err != nil && isPAMAuthError(err) {
 		slog.WarnContext(ctx, "PAM authentication failed, invalidating token cache and retrying",
-			"endpoint", c.tokenEndpoint, "error", err)
+			"error", err)
 
 		// Invalidate the cached token
 		if delErr := c.tokenClient.Del(ctx, c.tokenEndpoint); delErr != nil {
