@@ -3,6 +3,7 @@ package gormx
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"fmt"
 	"io"
 	"log/slog"
@@ -10,13 +11,13 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pkg/errors"
 	"github.com/qor5/confx"
+	"github.com/qor5/x/v3/awsx"
 	"github.com/qor5/x/v3/gormx/postgresx"
 	"github.com/theplant/cachex"
 	"github.com/theplant/inject"
@@ -112,7 +113,7 @@ func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm
 		slog.InfoContext(ctx, "Using IAM authentication to connect to database")
 		awsConfig := conf.IAM.AWSConfig
 		if awsConfig == nil {
-			awsCfg, err := config.LoadDefaultConfig(ctx)
+			awsCfg, err := awsx.LoadDefaultConfig(ctx)
 			if err != nil {
 				return nil, nil, errors.Wrap(err, "failed to load AWS config")
 			}
@@ -229,6 +230,7 @@ func newIAMTokenClient(region string, dbUser string, credProvider aws.Credential
 			var token string
 			if err := backoff.RetryNotify(
 				func() error {
+					slog.InfoContext(ctx, "Generating new IAM token ...")
 					t, err := auth.BuildAuthToken(ctx, endpoint, region, dbUser, credProvider)
 					if err != nil {
 						return errors.Wrap(err, "failed to build IAM auth token")
@@ -273,12 +275,21 @@ func newIAMTokenClient(region string, dbUser string, credProvider aws.Credential
 type IAMDialectorOption func(*iamDialectorOptions)
 
 type iamDialectorOptions struct {
-	tokenEndpoint string
+	tokenEndpoint    string
+	connectorWrapper func(driver.Connector) driver.Connector // for testing
 }
 
 func WithIAMTokenEndpoint(endpoint string) IAMDialectorOption {
 	return func(o *iamDialectorOptions) {
 		o.tokenEndpoint = endpoint
+	}
+}
+
+// withConnectorWrapper is an internal option for testing that wraps the underlying connector.
+// This allows tests to intercept and modify connection behavior.
+func withConnectorWrapper(wrapper func(driver.Connector) driver.Connector) IAMDialectorOption {
+	return func(o *iamDialectorOptions) {
+		o.connectorWrapper = wrapper
 	}
 }
 
@@ -345,12 +356,69 @@ func NewIAMDialector(dsn string, region string, credProvider aws.CredentialsProv
 		return nil
 	})
 	tzOpts := postgresx.ConfigureTimezone(conf)
-	conn := stdlib.OpenDB(*conf, append(tzOpts, optBeforeConnect)...)
+	var baseConnector driver.Connector = stdlib.GetConnector(*conf, append(tzOpts, optBeforeConnect)...)
+
+	// Apply test wrapper if provided
+	if options.connectorWrapper != nil {
+		baseConnector = options.connectorWrapper(baseConnector)
+	}
+
+	// Wrap the connector with retry logic for PAM authentication failures
+	retryConnector := &iamRetryConnector{
+		connector:     baseConnector,
+		tokenClient:   tokenClient,
+		tokenEndpoint: tokenEndpoint,
+	}
+
+	conn := sql.OpenDB(retryConnector)
 	return postgresx.New(postgres.Config{
 		Conn: conn,
 		// We are using pgx as postgresql's database/sql driver, it enables prepared statement cache by default (extended protocol)
 		// PreferSimpleProtocol: true, // disables implicit prepared statement usage.
 	}), nil
+}
+
+// iamRetryConnector wraps a driver.Connector to retry on PAM authentication failures
+// by invalidating the IAM token cache and retrying once.
+type iamRetryConnector struct {
+	connector     driver.Connector
+	tokenClient   *cachex.Client[*cachex.Entry[string]]
+	tokenEndpoint string
+}
+
+// isPAMAuthError checks if the error is a PAM authentication failure
+func isPAMAuthError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := err.Error()
+	return strings.Contains(errStr, "PAM authentication failed") ||
+		strings.Contains(errStr, "SQLSTATE 28000")
+}
+
+func (c *iamRetryConnector) Connect(ctx context.Context) (driver.Conn, error) {
+	conn, err := c.connector.Connect(ctx)
+	if err != nil && isPAMAuthError(err) {
+		slog.WarnContext(ctx, "PAM authentication failed, invalidating token cache and retrying",
+			"error", err)
+
+		// Invalidate the cached token
+		if delErr := c.tokenClient.Del(ctx, c.tokenEndpoint); delErr != nil {
+			slog.WarnContext(ctx, "Failed to invalidate token cache", "error", delErr)
+		}
+
+		// Retry the connection once
+		conn, err = c.connector.Connect(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "retry after token cache invalidation failed")
+		}
+		slog.InfoContext(ctx, "Successfully reconnected after token cache invalidation")
+	}
+	return conn, err
+}
+
+func (c *iamRetryConnector) Driver() driver.Driver {
+	return c.connector.Driver()
 }
 
 // appendSSLMode appends sslmode parameter to a DSN string.

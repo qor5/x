@@ -113,7 +113,8 @@ func OpenContainer(ctx context.Context, conf *ContainerConfig) (_ *Container, xe
 	}
 	defer func() {
 		if xerr != nil {
-			ctx, cancel := context.WithTimeout(context.Background(), DefaultContainerFailCleanupTimeout)
+			ctx, cancel := context.WithTimeout(
+				context.WithoutCancel(ctx), DefaultContainerFailCleanupTimeout)
 			defer cancel()
 			err := container.Terminate(ctx)
 			if err != nil {
