@@ -9,6 +9,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/pkg/errors"
 	"github.com/qor5/x/v3/httpx"
+	"github.com/qor5/x/v3/netx"
 	"github.com/qor5/x/v3/timex"
 	"github.com/theplant/inject/lifecycle"
 )
@@ -16,13 +17,16 @@ import (
 // Deprecated: use SetupReadinessProbe
 var SetupWaitForReady = SetupReadinessProbe
 
+// DefaultReadinessTimeout is the default timeout for the readiness probe.
+var DefaultReadinessTimeout = 30 * time.Second
+
 // ReadinessProbe is a marker type for readiness probe dependency.
 // Other components can depend on this type to ensure they execute after WaitForReady completes.
 type ReadinessProbe struct{}
 
 // SetupReadinessProbe sets up a readiness probe that checks the health endpoint.
 func SetupReadinessProbe(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *ReadinessProbe {
-	endpoint := fmt.Sprintf("http://%s%s", httpListener.Addr().String(), Path)
+	endpoint := fmt.Sprintf("http://%s%s", netx.ConnectableString(httpListener.Addr()), Path)
 	return SetupReadinessProbeFactory(endpoint)(lc)
 }
 
@@ -30,6 +34,8 @@ func SetupReadinessProbe(lc *lifecycle.Lifecycle, httpListener httpx.Listener) *
 func SetupReadinessProbeFactory(endpoint string) func(lc *lifecycle.Lifecycle) *ReadinessProbe {
 	return func(lc *lifecycle.Lifecycle) *ReadinessProbe {
 		lc.Add(lifecycle.NewFuncActor(func(ctx context.Context) error {
+			ctx, cancel := context.WithTimeout(ctx, DefaultReadinessTimeout)
+			defer cancel()
 			return WaitForReady(ctx, endpoint)
 		}, nil).WithName("healthz-readiness-probe").WithReadiness())
 		return &ReadinessProbe{}
@@ -46,7 +52,7 @@ func WaitForReady(ctx context.Context, endpoint string) error {
 		func() error {
 			req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 			if err != nil {
-				return err
+				return errors.Wrap(err, "failed to create request")
 			}
 
 			resp, err := client.Do(req)
@@ -54,7 +60,7 @@ func WaitForReady(ctx context.Context, endpoint string) error {
 				defer resp.Body.Close()
 			}
 			if err != nil {
-				return errors.Wrapf(err, "failed to access ready check endpoint")
+				return errors.Wrap(err, "failed to do request")
 			}
 
 			if resp.StatusCode != http.StatusOK {
