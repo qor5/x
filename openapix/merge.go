@@ -34,18 +34,18 @@ type MergeExtensionsInfo struct {
 
 // MergePathHandler determines how to handle a path during merge.
 // Return nil to merge (overwrite if exists), ErrMergeSkip to skip, or other error to abort.
-type MergePathHandler func(ctx context.Context, info MergePathInfo) error
+type MergePathHandler func(ctx context.Context, info *MergePathInfo) error
 
 // MergeComponentHandler determines how to handle a component during merge.
 // Return nil to merge (overwrite if exists), ErrMergeSkip to skip, or other error to abort.
-type MergeComponentHandler func(ctx context.Context, info MergeComponentInfo) error
+type MergeComponentHandler func(ctx context.Context, info *MergeComponentInfo) error
 
 // MergeExtensionsHandler handles extensions merging.
 // If nil, no extensions merging is performed.
 // If non-nil, the handler is fully responsible for merging info.Source into info.Target.
 // The framework does nothing after the handler returns (no default override).
 // Return nil on success, or error to abort.
-type MergeExtensionsHandler func(ctx context.Context, info MergeExtensionsInfo) error
+type MergeExtensionsHandler func(ctx context.Context, info *MergeExtensionsInfo) error
 
 // MergeSource represents an OpenAPI spec source to be merged.
 type MergeSource struct {
@@ -151,7 +151,7 @@ func ensureComponents(spec *openapi3.T) {
 func handleFirstSource(ctx context.Context, spec *openapi3.T, pathHandler MergePathHandler, componentHandler MergeComponentHandler) error {
 	if pathHandler != nil && spec.Paths != nil {
 		for name, item := range spec.Paths.Map() {
-			err := pathHandler(ctx, MergePathInfo{Name: name, Source: item, Target: nil})
+			err := pathHandler(ctx, &MergePathInfo{Name: name, Source: item, Target: nil})
 			if errors.Is(err, ErrMergeSkip) {
 				spec.Paths.Delete(name)
 			} else if err != nil {
@@ -177,7 +177,7 @@ func mergeIntoSpec(ctx context.Context, target, source *openapi3.T, pathHandler 
 		for name, item := range source.Paths.Map() {
 			existingItem := target.Paths.Find(name)
 			if pathHandler != nil {
-				err := pathHandler(ctx, MergePathInfo{Name: name, Source: item, Target: existingItem})
+				err := pathHandler(ctx, &MergePathInfo{Name: name, Source: item, Target: existingItem})
 				if errors.Is(err, ErrMergeSkip) {
 					continue
 				} else if err != nil {
@@ -198,7 +198,7 @@ func mergeIntoSpec(ctx context.Context, target, source *openapi3.T, pathHandler 
 		if target.Extensions == nil {
 			target.Extensions = make(map[string]any)
 		}
-		if err := extensionsHandler(ctx, MergeExtensionsInfo{Source: source.Extensions, Target: target.Extensions}); err != nil {
+		if err := extensionsHandler(ctx, &MergeExtensionsInfo{Source: source.Extensions, Target: target.Extensions}); err != nil {
 			return errors.Wrap(err, "extensions handler error")
 		}
 	}
@@ -375,7 +375,7 @@ func processComponents(ctx context.Context, target, source *openapi3.Components,
 
 	for _, entry := range entries {
 		if handler != nil {
-			err := handler(ctx, MergeComponentInfo{
+			err := handler(ctx, &MergeComponentInfo{
 				Name:   entry.name,
 				Type:   entry.compType,
 				Source: entry.item,

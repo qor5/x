@@ -212,7 +212,7 @@ func TestMergeOpenAPISpecs_PathHandler(t *testing.T) {
 		{Data: iamServiceSpec},
 		{
 			Data: mediaLibrarySpec,
-			PathHandler: func(ctx context.Context, info MergePathInfo) error {
+			PathHandler: func(ctx context.Context, info *MergePathInfo) error {
 				if info.Name == "/media" {
 					return nil // Include /media
 				}
@@ -244,7 +244,7 @@ func TestMergeOpenAPISpecs_ComponentHandler(t *testing.T) {
 		{Data: iamServiceSpec},
 		{
 			Data: mediaLibrarySpec,
-			ComponentHandler: func(ctx context.Context, info MergeComponentInfo) error {
+			ComponentHandler: func(ctx context.Context, info *MergeComponentInfo) error {
 				if info.Name == "MediaItem" {
 					return nil // Include MediaItem
 				}
@@ -272,13 +272,13 @@ func TestMergeOpenAPISpecs_CombinedHandlers(t *testing.T) {
 		{Data: iamServiceSpec},
 		{
 			Data: mediaLibrarySpec,
-			PathHandler: func(ctx context.Context, info MergePathInfo) error {
+			PathHandler: func(ctx context.Context, info *MergePathInfo) error {
 				if info.Name == "/media" {
 					return nil
 				}
 				return ErrMergeSkip
 			},
-			ComponentHandler: func(ctx context.Context, info MergeComponentInfo) error {
+			ComponentHandler: func(ctx context.Context, info *MergeComponentInfo) error {
 				if info.Name == "MediaItem" {
 					return nil
 				}
@@ -302,13 +302,13 @@ func TestMergeOpenAPISpecs_CombinedHandlers(t *testing.T) {
 // =============================================================================
 
 func TestMergeOpenAPISpecs_CustomPrefixHandler(t *testing.T) {
-	mediaPathHandler := func(ctx context.Context, info MergePathInfo) error {
+	mediaPathHandler := func(ctx context.Context, info *MergePathInfo) error {
 		if strings.HasPrefix(info.Name, "/media") {
 			return nil
 		}
 		return ErrMergeSkip
 	}
-	mediaComponentHandler := func(ctx context.Context, info MergeComponentInfo) error {
+	mediaComponentHandler := func(ctx context.Context, info *MergeComponentInfo) error {
 		if strings.Contains(info.Name, "Media") {
 			return nil
 		}
@@ -425,7 +425,7 @@ components:
 		{Data: specA},
 		{
 			Data: specB,
-			ComponentHandler: func(ctx context.Context, info MergeComponentInfo) error {
+			ComponentHandler: func(ctx context.Context, info *MergeComponentInfo) error {
 				if info.Target != nil {
 					return errors.Errorf("conflict: %s %s already exists", info.Type, info.Name)
 				}
@@ -475,7 +475,7 @@ paths:
 		{Data: specA},
 		{
 			Data: specB,
-			PathHandler: func(ctx context.Context, info MergePathInfo) error {
+			PathHandler: func(ctx context.Context, info *MergePathInfo) error {
 				if info.Target != nil {
 					return errors.Errorf("path conflict: %s already exists", info.Name)
 				}
@@ -496,7 +496,7 @@ func TestMergeOpenAPISpecs_HandlerFirstSource(t *testing.T) {
 	spec, err := Merge(context.Background(), []*MergeSource{
 		{
 			Data: iamServiceSpec,
-			PathHandler: func(ctx context.Context, info MergePathInfo) error {
+			PathHandler: func(ctx context.Context, info *MergePathInfo) error {
 				if info.Name == "/users" {
 					return nil // Only include /users from base
 				}
@@ -807,7 +807,7 @@ components:
 	_, err = Merge(context.Background(), []*MergeSource{
 		{
 			Data: specA,
-			ComponentHandler: func(ctx context.Context, info MergeComponentInfo) error {
+			ComponentHandler: func(ctx context.Context, info *MergeComponentInfo) error {
 				collectedTypes[info.Type] = append(collectedTypes[info.Type], info.Name)
 				return nil
 			},
@@ -841,14 +841,14 @@ func TestMergeOpenAPISpecs_ContextAndFirstSourceHandlers(t *testing.T) {
 	spec, err := Merge(ctx, []*MergeSource{
 		{
 			Data: iamServiceSpec,
-			PathHandler: func(ctx context.Context, info MergePathInfo) error {
+			PathHandler: func(ctx context.Context, info *MergePathInfo) error {
 				pathCtxValue = ctx.Value(testKey)
 				if info.Name == "/users" {
 					return nil
 				}
 				return ErrMergeSkip
 			},
-			ComponentHandler: func(ctx context.Context, info MergeComponentInfo) error {
+			ComponentHandler: func(ctx context.Context, info *MergeComponentInfo) error {
 				componentCtxValue = ctx.Value(testKey)
 				if info.Name == "User" {
 					return nil
@@ -979,7 +979,7 @@ components:
 		{Data: specA},
 		{
 			Data: specB,
-			PathHandler: func(ctx context.Context, info MergePathInfo) error {
+			PathHandler: func(ctx context.Context, info *MergePathInfo) error {
 				if info.Target != nil {
 					pathTargetItems = append(pathTargetItems, info.Name)
 				} else {
@@ -987,7 +987,7 @@ components:
 				}
 				return nil
 			},
-			ComponentHandler: func(ctx context.Context, info MergeComponentInfo) error {
+			ComponentHandler: func(ctx context.Context, info *MergeComponentInfo) error {
 				if info.Target != nil {
 					componentTargetItems = append(componentTargetItems, info.Name)
 				} else {
@@ -1036,7 +1036,7 @@ paths:
 	// Path handler error
 	_, err = Merge(context.Background(), []*MergeSource{{
 		Data: iamServiceSpec,
-		PathHandler: func(ctx context.Context, info MergePathInfo) error {
+		PathHandler: func(ctx context.Context, info *MergePathInfo) error {
 			return errors.New("path handler error")
 		},
 	}})
@@ -1046,7 +1046,7 @@ paths:
 	// Component handler error
 	_, err = Merge(context.Background(), []*MergeSource{{
 		Data: iamServiceSpec,
-		ComponentHandler: func(ctx context.Context, info MergeComponentInfo) error {
+		ComponentHandler: func(ctx context.Context, info *MergeComponentInfo) error {
 			return errors.New("component handler error")
 		},
 	}})
@@ -1064,7 +1064,7 @@ func TestMergeOpenAPISpecs_SkipAll(t *testing.T) {
 		{Data: iamServiceSpec},
 		{
 			Data: mediaLibrarySpec,
-			PathHandler: func(ctx context.Context, info MergePathInfo) error {
+			PathHandler: func(ctx context.Context, info *MergePathInfo) error {
 				return ErrMergeSkip
 			},
 		},
@@ -1079,7 +1079,7 @@ func TestMergeOpenAPISpecs_SkipAll(t *testing.T) {
 		{Data: iamServiceSpec},
 		{
 			Data: mediaLibrarySpec,
-			ComponentHandler: func(ctx context.Context, info MergeComponentInfo) error {
+			ComponentHandler: func(ctx context.Context, info *MergeComponentInfo) error {
 				return ErrMergeSkip
 			},
 		},
@@ -1147,7 +1147,7 @@ components:
 	spec, err := Merge(context.Background(), []*MergeSource{
 		{
 			Data: specWithAllComponents,
-			ComponentHandler: func(ctx context.Context, info MergeComponentInfo) error {
+			ComponentHandler: func(ctx context.Context, info *MergeComponentInfo) error {
 				// Skip all components - they should be deleted
 				return ErrMergeSkip
 			},
@@ -1228,7 +1228,7 @@ paths:
 `)
 
 	// Custom extensions handler that appends x-iam-permissions
-	permissionsHandler := func(ctx context.Context, info MergeExtensionsInfo) error {
+	permissionsHandler := func(ctx context.Context, info *MergeExtensionsInfo) error {
 		sourcePerms, ok := info.Source["x-iam-permissions"]
 		if !ok {
 			return nil
@@ -1358,7 +1358,7 @@ paths:
 
 	// Helper to add prefix to permission codes
 	addPrefix := func(prefix string) MergeExtensionsHandler {
-		return func(ctx context.Context, info MergeExtensionsInfo) error {
+		return func(ctx context.Context, info *MergeExtensionsInfo) error {
 			sourcePerms, ok := info.Source["x-iam-permissions"]
 			if !ok {
 				return nil
@@ -1395,7 +1395,7 @@ paths:
 
 	// PathHandler to transform x-required-permission in paths
 	addPathPrefix := func(prefix string) MergePathHandler {
-		return func(ctx context.Context, info MergePathInfo) error {
+		return func(ctx context.Context, info *MergePathInfo) error {
 			for _, op := range info.Source.Operations() {
 				if op.Extensions != nil {
 					if perm, ok := op.Extensions["x-required-permission"].(string); ok {
@@ -1471,7 +1471,7 @@ x-custom: "another"
 		{Data: specA},
 		{
 			Data: specB,
-			ExtensionsHandler: func(ctx context.Context, info MergeExtensionsInfo) error {
+			ExtensionsHandler: func(ctx context.Context, info *MergeExtensionsInfo) error {
 				return errors.New("extensions handler failed")
 			},
 		},
@@ -1521,7 +1521,7 @@ x-shared: "overwritten"
 		{Data: specA},
 		{
 			Data: specB,
-			ExtensionsHandler: func(ctx context.Context, info MergeExtensionsInfo) error {
+			ExtensionsHandler: func(ctx context.Context, info *MergeExtensionsInfo) error {
 				// Handler is fully responsible for merging
 				for k, v := range info.Source {
 					info.Target[k] = v
