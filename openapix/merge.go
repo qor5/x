@@ -77,7 +77,7 @@ type MergeSource struct {
 //
 // Note: OpenAPI has no namespace - names are globally unique.
 // Use PathHandler and ComponentHandler to control filtering and conflict behavior.
-func Merge(ctx context.Context, sources []MergeSource) (*openapi3.T, error) {
+func Merge(ctx context.Context, sources []*MergeSource) (*openapi3.T, error) {
 	if len(sources) == 0 {
 		return nil, errors.New("at least one source is required")
 	}

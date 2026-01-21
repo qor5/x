@@ -177,7 +177,7 @@ components:
 // =============================================================================
 
 func TestMergeOpenAPISpecs_BasicMergeAll(t *testing.T) {
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: iamServiceSpec},
 		{Data: mediaLibrarySpec},
 		{Data: notificationSpec},
@@ -208,7 +208,7 @@ func TestMergeOpenAPISpecs_BasicMergeAll(t *testing.T) {
 // =============================================================================
 
 func TestMergeOpenAPISpecs_PathHandler(t *testing.T) {
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: iamServiceSpec},
 		{
 			Data: mediaLibrarySpec,
@@ -240,7 +240,7 @@ func TestMergeOpenAPISpecs_PathHandler(t *testing.T) {
 // =============================================================================
 
 func TestMergeOpenAPISpecs_ComponentHandler(t *testing.T) {
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: iamServiceSpec},
 		{
 			Data: mediaLibrarySpec,
@@ -268,7 +268,7 @@ func TestMergeOpenAPISpecs_ComponentHandler(t *testing.T) {
 // =============================================================================
 
 func TestMergeOpenAPISpecs_CombinedHandlers(t *testing.T) {
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: iamServiceSpec},
 		{
 			Data: mediaLibrarySpec,
@@ -315,7 +315,7 @@ func TestMergeOpenAPISpecs_CustomPrefixHandler(t *testing.T) {
 		return ErrMergeSkip
 	}
 
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: iamServiceSpec},
 		{
 			Data:             mediaLibrarySpec,
@@ -382,7 +382,7 @@ components:
           description: "From Service B"
 `)
 
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: specA},
 		{Data: specB},
 	})
@@ -421,7 +421,7 @@ components:
       type: object
 `)
 
-	_, err := Merge(context.Background(), []MergeSource{
+	_, err := Merge(context.Background(), []*MergeSource{
 		{Data: specA},
 		{
 			Data: specB,
@@ -471,7 +471,7 @@ paths:
           description: OK
 `)
 
-	_, err := Merge(context.Background(), []MergeSource{
+	_, err := Merge(context.Background(), []*MergeSource{
 		{Data: specA},
 		{
 			Data: specB,
@@ -493,7 +493,7 @@ paths:
 // =============================================================================
 
 func TestMergeOpenAPISpecs_HandlerFirstSource(t *testing.T) {
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{
 			Data: iamServiceSpec,
 			PathHandler: func(ctx context.Context, info MergePathInfo) error {
@@ -521,7 +521,7 @@ func TestMergeOpenAPISpecs_HandlerFirstSource(t *testing.T) {
 // =============================================================================
 
 func TestMergeOpenAPISpecs_EmptySources(t *testing.T) {
-	_, err := Merge(context.Background(), []MergeSource{})
+	_, err := Merge(context.Background(), []*MergeSource{})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "at least one source is required")
 }
@@ -531,7 +531,7 @@ func TestMergeOpenAPISpecs_EmptySources(t *testing.T) {
 // =============================================================================
 
 func TestMergeOpenAPISpecs_SingleSource(t *testing.T) {
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: iamServiceSpec},
 	})
 	require.NoError(t, err)
@@ -562,7 +562,7 @@ func TestMergeOpenAPISpecs_WithCustomLoader(t *testing.T) {
 	mainData, err := testEmbedFS.ReadFile("testdata/openapi_with_refs.yaml")
 	require.NoError(t, err)
 
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{
 			Data:   mainData,
 			Loader: loader,
@@ -608,7 +608,7 @@ components:
       description: "Placeholder - will be overwritten by media library"
 `)
 
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: mainWithRef},
 		{Data: mediaLibrarySpec}, // MediaItem from here overwrites placeholder
 	})
@@ -633,7 +633,7 @@ components:
 // =============================================================================
 
 func TestMarshal(t *testing.T) {
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: iamServiceSpec},
 		{Data: mediaLibrarySpec},
 	})
@@ -666,7 +666,7 @@ func TestMergeOpenAPISpecs_InvalidYAML(t *testing.T) {
 this is not valid yaml: [
 `)
 
-	_, err := Merge(context.Background(), []MergeSource{
+	_, err := Merge(context.Background(), []*MergeSource{
 		{Data: invalidYAML},
 	})
 	require.Error(t, err)
@@ -776,7 +776,7 @@ components:
 `)
 
 	// Test merge of all component types
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: specA},
 		{Data: specB},
 	})
@@ -804,7 +804,7 @@ components:
 
 	// Test ComponentType enum values via handler
 	collectedTypes := make(map[ComponentType][]string)
-	_, err = Merge(context.Background(), []MergeSource{
+	_, err = Merge(context.Background(), []*MergeSource{
 		{
 			Data: specA,
 			ComponentHandler: func(ctx context.Context, info MergeComponentInfo) error {
@@ -838,7 +838,7 @@ func TestMergeOpenAPISpecs_ContextAndFirstSourceHandlers(t *testing.T) {
 
 	var pathCtxValue, componentCtxValue any
 
-	spec, err := Merge(ctx, []MergeSource{
+	spec, err := Merge(ctx, []*MergeSource{
 		{
 			Data: iamServiceSpec,
 			PathHandler: func(ctx context.Context, info MergePathInfo) error {
@@ -906,7 +906,7 @@ paths:
           description: OK
 `)
 
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: iamServiceSpec},
 		{Data: specNoPaths},
 		{Data: specNoComponents},
@@ -975,7 +975,7 @@ components:
 	var componentTargetItems []string
 	var componentNewItems []string
 
-	_, err := Merge(context.Background(), []MergeSource{
+	_, err := Merge(context.Background(), []*MergeSource{
 		{Data: specA},
 		{
 			Data: specB,
@@ -1029,12 +1029,12 @@ paths:
         "200":
           description: OK
 `)
-	_, err := Merge(context.Background(), []MergeSource{{Data: invalidSpec}})
+	_, err := Merge(context.Background(), []*MergeSource{{Data: invalidSpec}})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "merged spec validation failed")
 
 	// Path handler error
-	_, err = Merge(context.Background(), []MergeSource{{
+	_, err = Merge(context.Background(), []*MergeSource{{
 		Data: iamServiceSpec,
 		PathHandler: func(ctx context.Context, info MergePathInfo) error {
 			return errors.New("path handler error")
@@ -1044,7 +1044,7 @@ paths:
 	require.Contains(t, err.Error(), "path handler error")
 
 	// Component handler error
-	_, err = Merge(context.Background(), []MergeSource{{
+	_, err = Merge(context.Background(), []*MergeSource{{
 		Data: iamServiceSpec,
 		ComponentHandler: func(ctx context.Context, info MergeComponentInfo) error {
 			return errors.New("component handler error")
@@ -1060,7 +1060,7 @@ paths:
 
 func TestMergeOpenAPISpecs_SkipAll(t *testing.T) {
 	// Skip all paths
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: iamServiceSpec},
 		{
 			Data: mediaLibrarySpec,
@@ -1075,7 +1075,7 @@ func TestMergeOpenAPISpecs_SkipAll(t *testing.T) {
 	require.NotNil(t, spec.Components.Schemas["MediaItem"]) // Components still merged
 
 	// Skip all components
-	spec, err = Merge(context.Background(), []MergeSource{
+	spec, err = Merge(context.Background(), []*MergeSource{
 		{Data: iamServiceSpec},
 		{
 			Data: mediaLibrarySpec,
@@ -1144,7 +1144,7 @@ components:
 `)
 
 	// Test that all component types can be deleted via first source handler
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{
 			Data: specWithAllComponents,
 			ComponentHandler: func(ctx context.Context, info MergeComponentInfo) error {
@@ -1254,7 +1254,7 @@ paths:
 		return nil
 	}
 
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: pimSpec},
 		{
 			Data:              mediaLibrarySpec,
@@ -1407,7 +1407,7 @@ paths:
 		}
 	}
 
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: cmsSpec},
 		{
 			Data:              mediaLibraryGeneric,
@@ -1467,7 +1467,7 @@ paths: {}
 x-custom: "another"
 `)
 
-	_, err := Merge(context.Background(), []MergeSource{
+	_, err := Merge(context.Background(), []*MergeSource{
 		{Data: specA},
 		{
 			Data: specB,
@@ -1506,7 +1506,7 @@ x-shared: "overwritten"
 `)
 
 	// Without ExtensionsHandler (nil), no extensions merging is performed
-	spec, err := Merge(context.Background(), []MergeSource{
+	spec, err := Merge(context.Background(), []*MergeSource{
 		{Data: specA},
 		{Data: specB},
 	})
@@ -1517,7 +1517,7 @@ x-shared: "overwritten"
 	require.Equal(t, "original", spec.Extensions["x-shared"])
 
 	// With ExtensionsHandler that performs override, extensions are merged
-	spec, err = Merge(context.Background(), []MergeSource{
+	spec, err = Merge(context.Background(), []*MergeSource{
 		{Data: specA},
 		{
 			Data: specB,
