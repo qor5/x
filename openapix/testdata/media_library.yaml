@@ -1,0 +1,62 @@
+openapi: 3.0.4
+info:
+  title: Media Library API
+  version: 1.0.0
+
+paths:
+  /media:
+    get:
+      operationId: listMedia
+      summary: List media items
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MediaItem"
+
+  /media/{id}:
+    get:
+      operationId: getMedia
+      summary: Get media item by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/MediaItem"
+
+components:
+  schemas:
+    MediaItem:
+      type: object
+      required:
+        - id
+        - url
+      properties:
+        id:
+          type: string
+          example: "media_123"
+        url:
+          type: string
+          format: uri
+          example: "https://example.com/image.jpg"
+        title:
+          type: string
+          example: "My Image"
