@@ -27,7 +27,7 @@ func TestTransaction_ContextCancellation(t *testing.T) {
 
 	cancelCtx, cancel := context.WithCancel(ctx)
 
-	err = gormx.Transaction(cancelCtx, db, func(tx *gorm.DB) error {
+	err = gormx.Transaction(db.WithContext(cancelCtx), func(tx *gorm.DB) error {
 		err := tx.Create(&TxTestUser{ID: "1", Name: "CancelUser", Balance: 100}).Error
 		if err != nil {
 			return err
