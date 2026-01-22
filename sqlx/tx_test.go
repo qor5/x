@@ -3,7 +3,9 @@ package sqlx_test
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"testing"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
@@ -147,4 +149,31 @@ func TestTransaction_NestedSuccess(t *testing.T) {
 	err = db.QueryRowContext(ctx, "SELECT COUNT(*) FROM users").Scan(&count)
 	assert.NoError(t, err)
 	assert.Equal(t, 3, count)
+}
+
+func TestTransaction_ContextCancellation(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	err := sqlx.Transaction(ctx, db, func(ctx context.Context, tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, "INSERT INTO users (name, balance) VALUES (?, ?)", "CancelUser", 100)
+		if err != nil {
+			return err
+		}
+
+		// Cancel context and wait for awaitDone goroutine to rollback the transaction.
+		// This simulates the race condition where context cancellation triggers
+		// internal rollback before Commit() is called.
+		// See: https://github.com/golang/go/issues/43507
+		cancel()
+		time.Sleep(50 * time.Millisecond)
+		return nil
+	})
+
+	// Should return context.Canceled instead of sql.ErrTxDone
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, context.Canceled), "expected context.Canceled, got: %v", err)
+	assert.True(t, strings.Contains(err.Error(), "failed to commit transaction"), "expected 'failed to commit transaction' in error, got: %v", err)
 }
