@@ -57,7 +57,9 @@ func Transaction(ctx context.Context, exec Executor, fn func(ctx context.Context
 	defer func() {
 		if panicked || xerr != nil {
 			if err := tx.Rollback(); err != nil {
-				slog.ErrorContext(ctx, "failed to rollback transaction", "error", err)
+				if !errors.Is(err, sql.ErrTxDone) || ctx.Err() == nil {
+					slog.ErrorContext(ctx, "failed to rollback transaction", "error", err)
+				}
 			}
 		}
 	}()
@@ -69,7 +71,15 @@ func Transaction(ctx context.Context, exec Executor, fn func(ctx context.Context
 		return errors.Wrap(err, "transaction failed")
 	}
 
+	// Handle context cancellation race condition:
+	// When ctx is cancelled, database/sql's internal awaitDone goroutine may rollback
+	// the transaction before Commit() is called, resulting in ErrTxDone.
+	// In this case, return the context error instead of ErrTxDone to reflect the true cause.
+	// See: https://github.com/golang/go/issues/43507
 	if err := tx.Commit(); err != nil {
+		if errors.Is(err, sql.ErrTxDone) && ctx.Err() != nil {
+			return errors.Wrap(ctx.Err(), "failed to commit transaction")
+		}
 		return errors.Wrap(err, "failed to commit transaction")
 	}
 
