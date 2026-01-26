@@ -1,6 +1,7 @@
 package httpx
 
 import (
+	"fmt"
 	"mime"
 	"net/http"
 	"slices"
@@ -12,28 +13,21 @@ import (
 	"github.com/samber/lo"
 )
 
-var HeaderContentType = http.CanonicalHeaderKey("Content-Type")
+var (
+	HeaderContentType = http.CanonicalHeaderKey("Content-Type")
+	HeaderRequestedBy = http.CanonicalHeaderKey("X-Requested-By")
+)
 
+// DenySimpleRequests is a middleware that prevents CORS simple requests by requiring
+// the X-Requested-By header to be present. This provides CSRF protection when used
+// with CORS, as browsers will not automatically include custom headers in simple requests,
+// forcing a preflight OPTIONS request that can be validated by CORS policies.
 var DenySimpleRequests = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Deny CORS simple Request for GET/HEAD/POST
-		switch r.Method {
-		case http.MethodGet, http.MethodHead, http.MethodPost:
-			// Only allow application/json or application/proto content type for simple requests
-			// In this way, all simple requests will be pre-checked by cors before they can be executed.
-			mediaType, _, err := ParseContentType(r)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			switch mediaType {
-			case "application/json", "application/proto":
-			default:
-				http.Error(w, "Content-Type must be application/json or application/proto", http.StatusUnsupportedMediaType)
-				return
-			}
+		if r.Header.Get(HeaderRequestedBy) == "" {
+			http.Error(w, fmt.Sprintf("%s header is required", HeaderRequestedBy), http.StatusBadRequest)
+			return
 		}
-
 		next.ServeHTTP(w, r)
 	})
 }
@@ -43,7 +37,7 @@ var Security = func(conf SecurityConfig) func(next http.Handler) http.Handler {
 		AllowedOrigins:   conf.CORS.AllowedOrigins,
 		AllowCredentials: true,
 		AllowedMethods:   lo.Uniq(slices.Concat([]string{http.MethodPost}, conf.CORS.AllowedMethods /*, connectcors.AllowedMethods()*/)),
-		AllowedHeaders:   lo.Uniq(slices.Concat([]string{HeaderContentType}, conf.CORS.AllowedHeaders, connectcors.AllowedHeaders())),
+		AllowedHeaders:   lo.Uniq(slices.Concat([]string{HeaderContentType, HeaderRequestedBy}, conf.CORS.AllowedHeaders, connectcors.AllowedHeaders())),
 		ExposedHeaders:   lo.Uniq(slices.Concat(conf.CORS.ExposedHeaders, connectcors.ExposedHeaders())),
 		MaxAge:           int(conf.CORS.MaxAge.Seconds()),
 		Debug:            conf.CORS.Debug,
