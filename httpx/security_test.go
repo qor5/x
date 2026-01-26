@@ -84,6 +84,19 @@ func TestSecurity(t *testing.T) {
 			}(),
 			expectedStatus: http.StatusOK,
 		},
+		{
+			name: "deny_simple_requests_with_skip_check",
+			config: SecurityConfig{
+				CORS: CORSConfig{
+					DenySimpleRequests: true,
+					SkipDenySimpleRequests: func(r *http.Request) bool {
+						return r.URL.Path == "/healthz"
+					},
+				},
+			},
+			request:        httptest.NewRequest(http.MethodGet, "/healthz", nil),
+			expectedStatus: http.StatusOK,
+		},
 	}
 
 	for _, tt := range tests {
@@ -153,6 +166,90 @@ func TestDenySimpleRequests(t *testing.T) {
 			middleware := DenySimpleRequests(handler)
 
 			req := httptest.NewRequest(http.MethodPost, "/test", nil)
+			if tt.headerValue != "" {
+				req.Header.Set("X-Requested-By", tt.headerValue)
+			}
+
+			w := httptest.NewRecorder()
+			middleware.ServeHTTP(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			assert.Equal(t, tt.expectedStatus, resp.StatusCode)
+		})
+	}
+}
+
+func TestDenySimpleRequestsFactory(t *testing.T) {
+	tests := []struct {
+		name           string
+		skipCheck      func(r *http.Request) bool
+		requestPath    string
+		headerValue    string
+		expectedStatus int
+	}{
+		{
+			name:           "nil_skipCheck_missing_header",
+			skipCheck:      nil,
+			requestPath:    "/api/test",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "nil_skipCheck_with_header",
+			skipCheck:      nil,
+			requestPath:    "/api/test",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "skipCheck_returns_true",
+			skipCheck: func(r *http.Request) bool {
+				return r.URL.Path == "/healthz"
+			},
+			requestPath:    "/healthz",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "skipCheck_returns_false_missing_header",
+			skipCheck: func(r *http.Request) bool {
+				return r.URL.Path == "/healthz"
+			},
+			requestPath:    "/api/test",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name: "skipCheck_returns_false_with_header",
+			skipCheck: func(r *http.Request) bool {
+				return r.URL.Path == "/healthz"
+			},
+			requestPath:    "/api/test",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "skipCheck_multiple_paths",
+			skipCheck: func(r *http.Request) bool {
+				return r.URL.Path == "/healthz" || r.URL.Path == "/metrics"
+			},
+			requestPath:    "/metrics",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			})
+
+			middleware := DenySimpleRequestsFactory(tt.skipCheck)(handler)
+
+			req := httptest.NewRequest(http.MethodPost, tt.requestPath, nil)
 			if tt.headerValue != "" {
 				req.Header.Set("X-Requested-By", tt.headerValue)
 			}
