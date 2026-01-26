@@ -18,18 +18,30 @@ var (
 	HeaderRequestedBy = http.CanonicalHeaderKey("X-Requested-By")
 )
 
-// DenySimpleRequests is a middleware that prevents CORS simple requests by requiring
-// the X-Requested-By header to be present. This provides CSRF protection when used
-// with CORS, as browsers will not automatically include custom headers in simple requests,
-// forcing a preflight OPTIONS request that can be validated by CORS policies.
-var DenySimpleRequests = func(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get(HeaderRequestedBy) == "" {
-			http.Error(w, fmt.Sprintf("%s header is required", HeaderRequestedBy), http.StatusBadRequest)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
+// DenySimpleRequests is the default middleware instance that denies all simple requests
+// without the X-Requested-By header. Use DenySimpleRequestsFactory for custom skip logic.
+var DenySimpleRequests = DenySimpleRequestsFactory(nil)
+
+// DenySimpleRequestsFactory creates a configurable middleware that prevents CORS simple requests.
+// The skipCheck function allows selective exemption of certain requests from the header requirement.
+// When skipCheck returns true, the request is allowed through without checking the X-Requested-By header.
+// If skipCheck is nil, all requests will be checked.
+// This provides CSRF protection when used with CORS, as browsers will not automatically include
+// custom headers in simple requests, forcing a preflight OPTIONS request.
+var DenySimpleRequestsFactory = func(skipCheck func(r *http.Request) bool) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if skipCheck != nil && skipCheck(r) {
+				next.ServeHTTP(w, r)
+				return
+			}
+			if r.Header.Get(HeaderRequestedBy) == "" {
+				http.Error(w, fmt.Sprintf("%s header is required", HeaderRequestedBy), http.StatusBadRequest)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 var Security = func(conf SecurityConfig) func(next http.Handler) http.Handler {
@@ -49,6 +61,7 @@ var Security = func(conf SecurityConfig) func(next http.Handler) http.Handler {
 	}
 	c := cors.New(corsOpts)
 	frameAncestors := buildFrameAncestors(conf.CORS.AllowedOrigins)
+	denySimpleRequests := DenySimpleRequestsFactory(conf.CORS.SkipDenySimpleRequests)
 	return func(next http.Handler) http.Handler {
 		var handler http.Handler
 		handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +81,7 @@ var Security = func(conf SecurityConfig) func(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		})
 		if conf.CORS.DenySimpleRequests {
-			handler = DenySimpleRequests(handler)
+			handler = denySimpleRequests(handler)
 		}
 		return c.Handler(handler)
 	}
