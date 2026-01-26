@@ -1,6 +1,7 @@
 package httpx
 
 import (
+	"net/http"
 	"time"
 )
 
@@ -29,6 +30,10 @@ type CORSConfig struct {
 	ExposedHeaders     []string      `confx:"exposedHeaders" usage:"CORS exposed headers"`
 	MaxAge             time.Duration `confx:"maxAge" usage:"CORS max age"`
 	DenySimpleRequests bool          `confx:"denySimpleRequests" usage:"CORS Deny simple requests"`
+	// SkipDenySimpleRequests allows selective exemption from X-Requested-By header requirement.
+	// When this function returns true for a request, the header check is skipped.
+	// Common use cases: health checks, webhooks, or specific API endpoints that need exemption.
+	SkipDenySimpleRequests func(r *http.Request) bool `confx:"-"`
 }
 
 type SecurityConfig struct {
