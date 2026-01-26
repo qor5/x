@@ -18,6 +18,10 @@ var (
 	HeaderRequestedBy = http.CanonicalHeaderKey("X-Requested-By")
 )
 
+// DenySimpleRequests is a middleware that prevents CORS simple requests by requiring
+// the X-Requested-By header to be present. This provides CSRF protection when used
+// with CORS, as browsers will not automatically include custom headers in simple requests,
+// forcing a preflight OPTIONS request that can be validated by CORS policies.
 var DenySimpleRequests = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get(HeaderRequestedBy) == "" {
