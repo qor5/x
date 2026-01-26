@@ -71,7 +71,7 @@ func TestSecurity(t *testing.T) {
 			},
 		},
 		{
-			name: "deny_simple_requests_with_invalid_content_type",
+			name: "deny_simple_requests_enabled",
 			config: SecurityConfig{
 				CORS: CORSConfig{
 					DenySimpleRequests: true,
@@ -79,102 +79,7 @@ func TestSecurity(t *testing.T) {
 			},
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPost, "/test", nil)
-				req.Header.Set("Content-Type", "text/plain")
-				return req
-			}(),
-			expectedStatus: http.StatusUnsupportedMediaType,
-		},
-		{
-			name: "deny_simple_requests_with_missing_content_type",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request:        httptest.NewRequest(http.MethodPost, "/test", nil),
-			expectedStatus: http.StatusBadRequest,
-		},
-		{
-			name: "deny_simple_requests_with_valid_json_content_type",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request: func() *http.Request {
-				req := httptest.NewRequest(http.MethodPost, "/test", nil)
-				req.Header.Set("Content-Type", "application/json")
-				return req
-			}(),
-			expectedStatus: http.StatusOK,
-		},
-		{
-			name: "deny_simple_requests_with_valid_proto_content_type",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request: func() *http.Request {
-				req := httptest.NewRequest(http.MethodPost, "/test", nil)
-				req.Header.Set("Content-Type", "application/proto")
-				return req
-			}(),
-			expectedStatus: http.StatusOK,
-		},
-		{
-			name: "multiple_content_type_headers",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request: func() *http.Request {
-				req := httptest.NewRequest(http.MethodPost, "/test", nil)
-				req.Header.Add("Content-Type", "application/json")
-				req.Header.Add("Content-Type", "text/plain")
-				return req
-			}(),
-			expectedStatus: http.StatusBadRequest,
-		},
-		{
-			name: "invalid_content_type_format",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request: func() *http.Request {
-				req := httptest.NewRequest(http.MethodPost, "/test", nil)
-				req.Header.Set("Content-Type", "invalid content type")
-				return req
-			}(),
-			expectedStatus: http.StatusBadRequest,
-		},
-		{
-			name: "deny_simple_requests_with_head_method",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request: func() *http.Request {
-				req := httptest.NewRequest(http.MethodHead, "/test", nil)
-				req.Header.Set("Content-Type", "text/plain")
-				return req
-			}(),
-			expectedStatus: http.StatusUnsupportedMediaType,
-		},
-		{
-			name: "deny_simple_requests_with_valid_head_content_type",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request: func() *http.Request {
-				req := httptest.NewRequest(http.MethodHead, "/test", nil)
-				req.Header.Set("Content-Type", "application/json")
+				req.Header.Set("X-Requested-By", "fetch")
 				return req
 			}(),
 			expectedStatus: http.StatusOK,
@@ -212,6 +117,53 @@ func TestSecurity(t *testing.T) {
 			for _, key := range tt.notExpectedHeaders {
 				assert.Empty(t, resp.Header.Get(key), "Header %s should not be set", key)
 			}
+		})
+	}
+}
+
+func TestDenySimpleRequests(t *testing.T) {
+	tests := []struct {
+		name           string
+		headerValue    string
+		expectedStatus int
+	}{
+		{
+			name:           "missing_header",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "with_fetch",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "with_custom_value",
+			headerValue:    "my-custom-app",
+			expectedStatus: http.StatusOK,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			})
+
+			middleware := DenySimpleRequests(handler)
+
+			req := httptest.NewRequest(http.MethodPost, "/test", nil)
+			if tt.headerValue != "" {
+				req.Header.Set("X-Requested-By", tt.headerValue)
+			}
+
+			w := httptest.NewRecorder()
+			middleware.ServeHTTP(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			assert.Equal(t, tt.expectedStatus, resp.StatusCode)
 		})
 	}
 }
