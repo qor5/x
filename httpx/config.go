@@ -33,7 +33,7 @@ type CORSConfig struct {
 	// SkipDenySimpleRequests allows selective exemption from X-Requested-By header requirement.
 	// When this function returns true for a request, the header check is skipped.
 	// Common use cases: health checks, webhooks, or specific API endpoints that need exemption.
-	SkipDenySimpleRequests func(r *http.Request) bool `confx:"-"`
+	SkipDenySimpleRequests func(r *http.Request) bool `confx:"-" json:"-"`
 }
 
 type SecurityConfig struct {
