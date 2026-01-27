@@ -187,14 +187,14 @@ func TestDenySimpleRequests(t *testing.T) {
 		{
 			name:           "post_text_plain_no_header",
 			method:         http.MethodPost,
-			contentType:    "text/plain",
+			contentType:    "text/plain; charset=utf-8",
 			headerValue:    "",
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "post_text_plain_with_header",
 			method:         http.MethodPost,
-			contentType:    "text/plain",
+			contentType:    "text/plain; charset=utf-8",
 			headerValue:    "fetch",
 			expectedStatus: http.StatusOK,
 		},
@@ -243,6 +243,13 @@ func TestDenySimpleRequests(t *testing.T) {
 		{
 			name:           "patch_no_header_allowed",
 			method:         http.MethodPatch,
+			contentType:    "",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "options_no_header_allowed",
+			method:         http.MethodOptions,
 			contentType:    "",
 			headerValue:    "",
 			expectedStatus: http.StatusOK,
