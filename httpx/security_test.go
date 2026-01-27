@@ -137,22 +137,114 @@ func TestSecurity(t *testing.T) {
 func TestDenySimpleRequests(t *testing.T) {
 	tests := []struct {
 		name           string
+		method         string
+		contentType    string
 		headerValue    string
 		expectedStatus int
 	}{
 		{
-			name:           "missing_header",
+			name:           "post_no_content_type_no_header",
+			method:         http.MethodPost,
+			contentType:    "",
 			headerValue:    "",
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
-			name:           "with_fetch",
+			name:           "post_no_content_type_with_header",
+			method:         http.MethodPost,
+			contentType:    "",
 			headerValue:    "fetch",
 			expectedStatus: http.StatusOK,
 		},
 		{
-			name:           "with_custom_value",
-			headerValue:    "my-custom-app",
+			name:           "post_simple_content_type_no_header",
+			method:         http.MethodPost,
+			contentType:    "application/x-www-form-urlencoded",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "post_simple_content_type_with_header",
+			method:         http.MethodPost,
+			contentType:    "application/x-www-form-urlencoded",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "post_multipart_no_header",
+			method:         http.MethodPost,
+			contentType:    "multipart/form-data",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "post_multipart_with_header",
+			method:         http.MethodPost,
+			contentType:    "multipart/form-data",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "post_text_plain_no_header",
+			method:         http.MethodPost,
+			contentType:    "text/plain",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "post_text_plain_with_header",
+			method:         http.MethodPost,
+			contentType:    "text/plain",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "post_json_no_header_allowed",
+			method:         http.MethodPost,
+			contentType:    "application/json",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "post_proto_no_header_allowed",
+			method:         http.MethodPost,
+			contentType:    "application/proto",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "get_no_header",
+			method:         http.MethodGet,
+			contentType:    "",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "get_with_header",
+			method:         http.MethodGet,
+			contentType:    "",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "put_no_header_allowed",
+			method:         http.MethodPut,
+			contentType:    "",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "delete_no_header_allowed",
+			method:         http.MethodDelete,
+			contentType:    "",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "patch_no_header_allowed",
+			method:         http.MethodPatch,
+			contentType:    "",
+			headerValue:    "",
 			expectedStatus: http.StatusOK,
 		},
 	}
@@ -165,7 +257,10 @@ func TestDenySimpleRequests(t *testing.T) {
 
 			middleware := DenySimpleRequests(handler)
 
-			req := httptest.NewRequest(http.MethodPost, "/test", nil)
+			req := httptest.NewRequest(tt.method, "/test", nil)
+			if tt.contentType != "" {
+				req.Header.Set("Content-Type", tt.contentType)
+			}
 			if tt.headerValue != "" {
 				req.Header.Set("X-Requested-By", tt.headerValue)
 			}

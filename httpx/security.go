@@ -18,16 +18,34 @@ var (
 	HeaderRequestedBy = http.CanonicalHeaderKey("X-Requested-By")
 )
 
-// DenySimpleRequests is the default middleware instance that denies all simple requests
+// SimpleRequestContentTypes are the only Content-Type values that qualify as CORS simple requests.
+// Per the Fetch Standard (https://fetch.spec.whatwg.org/#cors-safelisted-request-header),
+// only these three Content-Types are allowed in simple requests without triggering a preflight.
+var SimpleRequestContentTypes = []string{
+	"application/x-www-form-urlencoded",
+	"multipart/form-data",
+	"text/plain",
+}
+
+// DenySimpleRequests is the default middleware instance that denies CORS simple requests
 // without the X-Requested-By header. Use DenySimpleRequestsFactory for custom skip logic.
 var DenySimpleRequests = DenySimpleRequestsFactory(nil)
 
 // DenySimpleRequestsFactory creates a configurable middleware that prevents CORS simple requests.
-// The skipCheck function allows selective exemption of certain requests from the header requirement.
-// When skipCheck returns true, the request is allowed through without checking the X-Requested-By header.
+// This provides CSRF protection by requiring either:
+//   - The X-Requested-By header to be present, OR
+//   - A Content-Type that is NOT a simple request type (which triggers CORS preflight)
+//
+// Per the Fetch Standard, CORS simple requests are limited to:
+//   - Methods: GET, HEAD, POST
+//   - Content-Types: application/x-www-form-urlencoded, multipart/form-data, text/plain
+//
+// Requests with other Content-Types (e.g., application/json) automatically trigger a preflight
+// OPTIONS request, which can be validated by CORS policies, so they are allowed through.
+//
+// The skipCheck function allows selective exemption of certain requests from this check.
+// When skipCheck returns true, the request bypasses all validation.
 // If skipCheck is nil, all requests will be checked.
-// This provides CSRF protection when used with CORS, as browsers will not automatically include
-// custom headers in simple requests, forcing a preflight OPTIONS request.
 var DenySimpleRequestsFactory = func(skipCheck func(r *http.Request) bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -35,10 +53,25 @@ var DenySimpleRequestsFactory = func(skipCheck func(r *http.Request) bool) func(
 				next.ServeHTTP(w, r)
 				return
 			}
-			if r.Header.Get(HeaderRequestedBy) == "" {
-				http.Error(w, fmt.Sprintf("%s header is required", HeaderRequestedBy), http.StatusBadRequest)
+
+			if r.Header.Get(HeaderRequestedBy) != "" {
+				next.ServeHTTP(w, r)
 				return
 			}
+
+			// Check if this could be a CORS simple request (GET/HEAD/POST with simple Content-Type)
+			switch r.Method {
+			case http.MethodGet, http.MethodHead, http.MethodPost:
+				mediaType, _, _ := ParseContentType(r)
+				if mediaType == "" || slices.Contains(SimpleRequestContentTypes, mediaType) {
+					// Simple request without X-Requested-By header - deny it
+					http.Error(w, fmt.Sprintf("%s header is required", HeaderRequestedBy), http.StatusBadRequest)
+					return
+				}
+			}
+
+			// Non-simple request (other methods or non-simple Content-Type) - allow through
+			// These will trigger CORS preflight which provides the necessary protection
 			next.ServeHTTP(w, r)
 		})
 	}
