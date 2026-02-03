@@ -47,6 +47,11 @@ type MergeComponentHandler func(ctx context.Context, info *MergeComponentInfo) e
 // Return nil on success, or error to abort.
 type MergeExtensionsHandler func(ctx context.Context, info *MergeExtensionsInfo) error
 
+// PathNameModifier modifies path names during merge.
+// It receives the context, original path name, and path item.
+// Return empty string to keep the original name.
+type PathNameModifier func(ctx context.Context, name string, item *openapi3.PathItem) string
+
 // MergeSource represents an OpenAPI spec source to be merged.
 type MergeSource struct {
 	// Data is the raw YAML/JSON bytes of the OpenAPI spec.
@@ -56,6 +61,10 @@ type MergeSource struct {
 	// Useful when loading specs from embed.FS or other non-filesystem sources.
 	// If nil, a default loader will be used.
 	Loader *openapi3.Loader
+
+	// PathNameModifier modifies path names during merge.
+	// If nil, path names are kept unchanged.
+	PathNameModifier PathNameModifier
 
 	// PathHandler handles path merge decisions. If nil, all paths are merged (overwrite on conflict).
 	PathHandler MergePathHandler
@@ -98,11 +107,11 @@ func Merge(ctx context.Context, sources []*MergeSource) (*openapi3.T, error) {
 		if result == nil {
 			result = spec
 			ensureComponents(result)
-			if err := handleFirstSource(ctx, result, source.PathHandler, source.ComponentHandler); err != nil {
+			if err := handleFirstSource(ctx, result, source.PathNameModifier, source.PathHandler, source.ComponentHandler); err != nil {
 				return nil, errors.Wrapf(err, "failed to process source %d", i)
 			}
 		} else {
-			if err := mergeIntoSpec(ctx, result, spec, source.PathHandler, source.ComponentHandler, source.ExtensionsHandler); err != nil {
+			if err := mergeIntoSpec(ctx, result, spec, source.PathNameModifier, source.PathHandler, source.ComponentHandler, source.ExtensionsHandler); err != nil {
 				return nil, errors.Wrapf(err, "failed to merge source %d", i)
 			}
 		}
@@ -148,14 +157,29 @@ func ensureComponents(spec *openapi3.T) {
 	}
 }
 
-func handleFirstSource(ctx context.Context, spec *openapi3.T, pathHandler MergePathHandler, componentHandler MergeComponentHandler) error {
-	if pathHandler != nil && spec.Paths != nil {
+func handleFirstSource(ctx context.Context, spec *openapi3.T, pathNameModifier PathNameModifier, pathHandler MergePathHandler, componentHandler MergeComponentHandler) error {
+	if spec.Paths != nil {
 		for name, item := range spec.Paths.Map() {
-			err := pathHandler(ctx, &MergePathInfo{Name: name, Source: item, Target: nil})
-			if errors.Is(err, ErrMergeSkip) {
+			newName := name
+			if pathNameModifier != nil {
+				if modified := pathNameModifier(ctx, name, item); modified != "" {
+					newName = modified
+				}
+			}
+
+			if pathHandler != nil {
+				err := pathHandler(ctx, &MergePathInfo{Name: newName, Source: item, Target: nil})
+				if errors.Is(err, ErrMergeSkip) {
+					spec.Paths.Delete(name)
+					continue
+				} else if err != nil {
+					return errors.Wrapf(err, "path handler error for %s", newName)
+				}
+			}
+
+			if newName != name {
 				spec.Paths.Delete(name)
-			} else if err != nil {
-				return errors.Wrapf(err, "path handler error for %s", name)
+				spec.Paths.Set(newName, item)
 			}
 		}
 	}
@@ -169,22 +193,29 @@ func handleFirstSource(ctx context.Context, spec *openapi3.T, pathHandler MergeP
 	return nil
 }
 
-func mergeIntoSpec(ctx context.Context, target, source *openapi3.T, pathHandler MergePathHandler, componentHandler MergeComponentHandler, extensionsHandler MergeExtensionsHandler) error {
+func mergeIntoSpec(ctx context.Context, target, source *openapi3.T, pathNameModifier PathNameModifier, pathHandler MergePathHandler, componentHandler MergeComponentHandler, extensionsHandler MergeExtensionsHandler) error {
 	if source.Paths != nil {
 		if target.Paths == nil {
 			target.Paths = &openapi3.Paths{}
 		}
 		for name, item := range source.Paths.Map() {
-			existingItem := target.Paths.Find(name)
+			newName := name
+			if pathNameModifier != nil {
+				if modified := pathNameModifier(ctx, name, item); modified != "" {
+					newName = modified
+				}
+			}
+
+			existingItem := target.Paths.Find(newName)
 			if pathHandler != nil {
-				err := pathHandler(ctx, &MergePathInfo{Name: name, Source: item, Target: existingItem})
+				err := pathHandler(ctx, &MergePathInfo{Name: newName, Source: item, Target: existingItem})
 				if errors.Is(err, ErrMergeSkip) {
 					continue
 				} else if err != nil {
-					return errors.Wrapf(err, "path handler error for %s", name)
+					return errors.Wrapf(err, "path handler error for %s", newName)
 				}
 			}
-			target.Paths.Set(name, item)
+			target.Paths.Set(newName, item)
 		}
 	}
 
