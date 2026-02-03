@@ -1536,3 +1536,139 @@ x-shared: "overwritten"
 	require.Equal(t, "from B", spec.Extensions["x-custom-b"])
 	require.Equal(t, "overwritten", spec.Extensions["x-shared"])
 }
+
+func TestMergeOpenAPISpecs_PathNameModifier(t *testing.T) {
+	specA := []byte(`
+openapi: 3.0.4
+info:
+  title: Service A
+  version: 1.0.0
+paths:
+  /users:
+    get:
+      operationId: listUsers
+      summary: List users
+      responses:
+        "200":
+          description: Success
+  /users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getUser
+      summary: Get user
+      responses:
+        "200":
+          description: Success
+`)
+
+	specB := []byte(`
+openapi: 3.0.4
+info:
+  title: Service B
+  version: 1.0.0
+paths:
+  /items:
+    get:
+      operationId: listItems
+      summary: List items
+      responses:
+        "200":
+          description: Success
+`)
+
+	t.Run("first source path name modifier", func(t *testing.T) {
+		spec, err := Merge(context.Background(), []*MergeSource{
+			{
+				Data: specA,
+				PathNameModifier: func(ctx context.Context, name string, item *openapi3.PathItem) string {
+					return "/api/v1" + name
+				},
+			},
+		})
+		require.NoError(t, err)
+
+		require.Nil(t, spec.Paths.Find("/users"))
+		require.Nil(t, spec.Paths.Find("/users/{id}"))
+		require.NotNil(t, spec.Paths.Find("/api/v1/users"))
+		require.NotNil(t, spec.Paths.Find("/api/v1/users/{id}"))
+	})
+
+	t.Run("merge source path name modifier", func(t *testing.T) {
+		spec, err := Merge(context.Background(), []*MergeSource{
+			{Data: specA},
+			{
+				Data: specB,
+				PathNameModifier: func(ctx context.Context, name string, item *openapi3.PathItem) string {
+					return "/api/v2" + name
+				},
+			},
+		})
+		require.NoError(t, err)
+
+		require.NotNil(t, spec.Paths.Find("/users"))
+		require.NotNil(t, spec.Paths.Find("/users/{id}"))
+		require.Nil(t, spec.Paths.Find("/items"))
+		require.NotNil(t, spec.Paths.Find("/api/v2/items"))
+	})
+
+	t.Run("path name modifier with item access", func(t *testing.T) {
+		spec, err := Merge(context.Background(), []*MergeSource{
+			{
+				Data: specA,
+				PathNameModifier: func(ctx context.Context, name string, item *openapi3.PathItem) string {
+					if item.Get != nil && item.Get.OperationID == "listUsers" {
+						return "/api/admin" + name
+					}
+					return ""
+				},
+			},
+		})
+		require.NoError(t, err)
+
+		require.Nil(t, spec.Paths.Find("/users"))
+		require.NotNil(t, spec.Paths.Find("/api/admin/users"))
+		require.NotNil(t, spec.Paths.Find("/users/{id}"))
+	})
+
+	t.Run("path name modifier returns empty keeps original", func(t *testing.T) {
+		spec, err := Merge(context.Background(), []*MergeSource{
+			{
+				Data: specA,
+				PathNameModifier: func(ctx context.Context, name string, item *openapi3.PathItem) string {
+					return ""
+				},
+			},
+		})
+		require.NoError(t, err)
+
+		require.NotNil(t, spec.Paths.Find("/users"))
+		require.NotNil(t, spec.Paths.Find("/users/{id}"))
+	})
+
+	t.Run("path name modifier with path handler", func(t *testing.T) {
+		var handlerReceivedNames []string
+		spec, err := Merge(context.Background(), []*MergeSource{
+			{
+				Data: specA,
+				PathNameModifier: func(ctx context.Context, name string, item *openapi3.PathItem) string {
+					return "/modified" + name
+				},
+				PathHandler: func(ctx context.Context, info *MergePathInfo) error {
+					handlerReceivedNames = append(handlerReceivedNames, info.Name)
+					return nil
+				},
+			},
+		})
+		require.NoError(t, err)
+
+		require.Contains(t, handlerReceivedNames, "/modified/users")
+		require.Contains(t, handlerReceivedNames, "/modified/users/{id}")
+		require.NotNil(t, spec.Paths.Find("/modified/users"))
+		require.NotNil(t, spec.Paths.Find("/modified/users/{id}"))
+	})
+}
