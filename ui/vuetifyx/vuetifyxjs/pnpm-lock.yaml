@@ -44,7 +44,7 @@ importers:
         specifier: ^1.6.15
         version: 1.6.15
       lodash:
-        specifier: ^4.17.23
+        specifier: ^4.17.21
         version: 4.17.23
       resize-observer-polyfill:
         specifier: ^1.5.1
