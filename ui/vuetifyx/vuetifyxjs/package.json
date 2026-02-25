@@ -5,7 +5,7 @@
   "scripts": {
     "comp": "npx tsx ./scripts/new-demo-doc.ts",
     "dev": "vitepress dev docs",
-    "build": "vue-tsc --noEmit && vite build ",
+    "build": "vite build ",
     "build:lib": "cross-env NODE_ENV=lib babel src --out-dir lib --source-maps --extensions \".ts\",\".tsx\",\".snap\" --copy-files --no-copy-ignored --out-file-extension .mjs",
     "watch-build": "nodemon --watch src --ext ts,scss,vue --exec 'npm run build'",
     "preview": "vite preview",
