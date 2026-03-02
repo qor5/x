@@ -203,6 +203,373 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 ---
 
+## API 返回格式对比
+
+statusx 有**两条错误响应路径**（Connect 协议 和 VProto 协议），httperrors 只有一条纯 JSON 路径。
+
+### 场景 1：简单错误（无 i18n）
+
+**Go 代码：**
+
+```go
+// statusx
+statusx.New(codes.NotFound, "NOT_FOUND", "user not found")
+
+// httperrors
+httperrors.Error(http.StatusNotFound, "NOT_FOUND", "user not found")
+```
+
+**statusx — Connect 路径** (`x-ensure-connect-error: true`)：
+
+```
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+```
+
+```json
+{
+  "code": "not_found",
+  "message": "user not found",
+  "details": [
+    {
+      "type": "google.rpc.ErrorInfo",
+      "value": "CglOT1RfRk9VTkQ=",
+      "debug": { "reason": "NOT_FOUND", "domain": "", "metadata": {} }
+    }
+  ]
+}
+```
+
+> `code` 是 gRPC code 的小写字符串（`not_found`），`reason` 藏在 `details[].debug.reason` 里，`value` 是 base64 编码的 protobuf。
+
+**statusx — VProto 路径**（默认前端请求）：
+
+```
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+```
+
+```json
+{
+  "code": "NOT_FOUND",
+  "msg": "user not found",
+  "defaultViewMsg": "user not found",
+  "fieldViolations": []
+}
+```
+
+> VProto 使用 `msg` 而非 `message`，使用 `defaultViewMsg` 作为展示消息。无翻译时 `defaultViewMsg == msg`。
+
+**httperrors**：
+
+```
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+```
+
+```json
+{
+  "code": "NOT_FOUND",
+  "message": "user not found"
+}
+```
+
+> 无 `details`、无 protobuf、无冗余字段。`metadata`、`fieldViolations`、`localizedMessage` 为空时不出现。
+
+---
+
+### 场景 2：简单错误 + i18n（中文）
+
+**Go 代码（业务层相同，翻译由 middleware 自动完成）：**
+
+```go
+// 请求 Header: x-selected-language: zh 或 Accept-Language: zh
+
+// statusx
+statusx.New(codes.NotFound, "NOT_FOUND", "user not found")
+
+// httperrors
+httperrors.Error(http.StatusNotFound, "NOT_FOUND", "user not found")
+```
+
+**statusx — Connect 路径**：
+
+```json
+{
+  "code": "not_found",
+  "message": "user not found",
+  "details": [
+    {
+      "type": "google.rpc.ErrorInfo",
+      "value": "CglOT1RfRk9VTkQ=",
+      "debug": { "reason": "NOT_FOUND", "domain": "", "metadata": {} }
+    },
+    {
+      "type": "google.rpc.LocalizedMessage",
+      "value": "CgJ6aBLJiaa+vuWIsA==",
+      "debug": { "locale": "zh", "message": "未找到" }
+    }
+  ]
+}
+```
+
+> 翻译结果作为 `LocalizedMessage` detail 追加到 `details` 数组中，`message` **保持原始不变**。前端需要遍历 `details` 数组并找到 `type == "google.rpc.LocalizedMessage"` 的条目。
+
+**statusx — VProto 路径**：
+
+```json
+{
+  "code": "NOT_FOUND",
+  "msg": "user not found",
+  "defaultViewMsg": "未找到",
+  "fieldViolations": []
+}
+```
+
+> `msg` 保持原始英文，`defaultViewMsg` 为翻译后的中文。前端直接取 `defaultViewMsg` 展示。
+
+**httperrors**：
+
+```json
+{
+  "code": "NOT_FOUND",
+  "message": "user not found",
+  "localizedMessage": "未找到"
+}
+```
+
+> `message` 保持原始不变，翻译结果放在 `localizedMessage` 中。前端用 `localizedMessage || message` 展示。
+
+---
+
+### 场景 3：字段校验错误（无 i18n）
+
+**Go 代码：**
+
+```go
+// statusx
+fv1 := statusx.NewFieldViolation("email", "REQUIRED", "email is required")
+fv2 := statusx.NewFieldViolation("password", "TOO_SHORT", "password must be at least 8 characters")
+statusx.BadRequest(fv1, fv2)
+
+// httperrors
+fv1 := httperrors.NewFieldViolation("email", "REQUIRED", "email is required")
+fv2 := httperrors.NewFieldViolation("password", "TOO_SHORT", "password must be at least 8 characters")
+httperrors.ValidationError(fv1, fv2)
+```
+
+**statusx — Connect 路径**：
+
+```json
+{
+  "code": "invalid_argument",
+  "message": "invalid argument",
+  "details": [
+    {
+      "type": "google.rpc.ErrorInfo",
+      "value": "...",
+      "debug": { "reason": "INVALID_ARGUMENT", "domain": "", "metadata": {} }
+    },
+    {
+      "type": "google.rpc.BadRequest",
+      "value": "...(base64 protobuf)...",
+      "debug": {
+        "fieldViolations": [
+          {
+            "field": "email",
+            "description": "email is required",
+            "reason": "REQUIRED"
+          },
+          {
+            "field": "password",
+            "description": "password must be at least 8 characters",
+            "reason": "TOO_SHORT"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+> 字段违规信息藏在 `details[]` 中的 `BadRequest` detail 里，需要解析 protobuf 或读 `debug` 字段。
+
+**statusx — VProto 路径**：
+
+```json
+{
+  "code": "INVALID_ARGUMENT",
+  "msg": "invalid argument",
+  "defaultViewMsg": "invalid argument",
+  "fieldViolations": [
+    {
+      "field": "email",
+      "code": "REQUIRED",
+      "msg": "email is required",
+      "defaultViewMsg": "email is required"
+    },
+    {
+      "field": "password",
+      "code": "TOO_SHORT",
+      "msg": "password must be at least 8 characters",
+      "defaultViewMsg": "password must be at least 8 characters"
+    }
+  ]
+}
+```
+
+> VProto 路径结构比 Connect 路径更直观，但使用 `msg` / `defaultViewMsg` 命名。
+
+**httperrors**：
+
+```json
+{
+  "code": "INVALID_ARGUMENT",
+  "message": "invalid argument",
+  "fieldViolations": [
+    {
+      "field": "email",
+      "code": "REQUIRED",
+      "message": "email is required"
+    },
+    {
+      "field": "password",
+      "code": "TOO_SHORT",
+      "message": "password must be at least 8 characters"
+    }
+  ]
+}
+```
+
+> 结构与 VProto 类似但使用标准 `message` 命名。`localizedMessage` 为空时不出现。
+
+---
+
+### 场景 4：字段校验错误 + i18n（中文）
+
+**statusx — Connect 路径**：
+
+```json
+{
+  "code": "invalid_argument",
+  "message": "invalid argument",
+  "details": [
+    {
+      "type": "google.rpc.ErrorInfo",
+      "value": "...",
+      "debug": { "reason": "INVALID_ARGUMENT" }
+    },
+    {
+      "type": "google.rpc.LocalizedMessage",
+      "value": "...",
+      "debug": { "locale": "zh", "message": "参数无效" }
+    },
+    {
+      "type": "google.rpc.BadRequest",
+      "value": "...",
+      "debug": {
+        "fieldViolations": [
+          {
+            "field": "email",
+            "description": "email is required",
+            "reason": "REQUIRED",
+            "localizedMessage": { "locale": "zh", "message": "必填" }
+          },
+          {
+            "field": "password",
+            "description": "password must be at least 8 characters",
+            "reason": "TOO_SHORT",
+            "localizedMessage": { "locale": "zh", "message": "太短" }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+> Connect 路径的翻译信息分散在多个 detail 中，前端解析成本高。
+
+**statusx — VProto 路径**：
+
+```json
+{
+  "code": "INVALID_ARGUMENT",
+  "msg": "invalid argument",
+  "defaultViewMsg": "参数无效",
+  "fieldViolations": [
+    {
+      "field": "email",
+      "code": "REQUIRED",
+      "msg": "email is required",
+      "defaultViewMsg": "必填"
+    },
+    {
+      "field": "password",
+      "code": "TOO_SHORT",
+      "msg": "password must be at least 8 characters",
+      "defaultViewMsg": "太短"
+    }
+  ]
+}
+```
+
+> `msg` 保持原始，`defaultViewMsg` 为翻译后的文本。
+
+**httperrors**：
+
+```json
+{
+  "code": "INVALID_ARGUMENT",
+  "message": "invalid argument",
+  "localizedMessage": "参数无效",
+  "fieldViolations": [
+    {
+      "field": "email",
+      "code": "REQUIRED",
+      "message": "email is required",
+      "localizedMessage": "必填"
+    },
+    {
+      "field": "password",
+      "code": "TOO_SHORT",
+      "message": "password must be at least 8 characters",
+      "localizedMessage": "太短"
+    }
+  ]
+}
+```
+
+> `message` 保持原始，`localizedMessage` 为翻译后的文本。
+
+---
+
+### 字段命名映射对照
+
+| 语义         | statusx Connect 路径                     | statusx VProto 路径 | httperrors         |
+| ------------ | ---------------------------------------- | ------------------- | ------------------ |
+| 错误码       | `code`（gRPC 小写，如 `not_found`）      | `code`（大写）      | `code`（大写）     |
+| 原始消息     | `message`                                | `msg`               | `message`          |
+| 翻译消息     | `details[LocalizedMessage].message`      | `defaultViewMsg`    | `localizedMessage` |
+| Reason       | `details[ErrorInfo].debug.reason`        | `code`              | `code`             |
+| 字段路径     | `details[BadRequest]...field`            | `field`             | `field`            |
+| 字段错误码   | `details[BadRequest]...reason`           | `code`              | `code`             |
+| 字段原始描述 | `details[BadRequest]...description`      | `msg`               | `message`          |
+| 字段翻译     | `details[BadRequest]...localizedMessage` | `defaultViewMsg`    | `localizedMessage` |
+| 附加信息     | `details[ErrorInfo].debug.metadata`      | ❌ 不支持           | `metadata`         |
+
+### 前端解析复杂度对比
+
+| 操作                | statusx Connect 路径                                                    | statusx VProto 路径   | httperrors                              |
+| ------------------- | ----------------------------------------------------------------------- | --------------------- | --------------------------------------- |
+| 获取错误码          | `err.details.find(d => d.type === "google.rpc.ErrorInfo").debug.reason` | `err.code`            | `err.code`                              |
+| 获取展示消息        | 遍历 `details` 找 `LocalizedMessage`，fallback `message`                | `err.defaultViewMsg`  | `err.localizedMessage \|\| err.message` |
+| 获取字段违规        | 遍历 `details` 找 `BadRequest`，解析 `fieldViolations`                  | `err.fieldViolations` | `err.fieldViolations`                   |
+| 获取字段翻译        | `fv.localizedMessage.message`（嵌套在 details 内）                      | `fv.defaultViewMsg`   | `fv.localizedMessage \|\| fv.message`   |
+| 需要理解 protobuf？ | **是**（detail type、base64 value）                                     | 否                    | 否                                      |
+
+---
+
 ## 对比总结
 
 | 维度                    | statusx (旧)                             | httperrors (新)                                  |

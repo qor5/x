@@ -16,9 +16,10 @@ type Status struct {
 	reason     string
 	message    string
 
-	metadata        map[string]string
-	localized       *Localized
-	fieldViolations []*FieldViolation
+	metadata         map[string]string
+	localized        *Localized
+	localizedMessage *LocalizedMessage
+	fieldViolations  []*FieldViolation
 
 	cause error
 }
@@ -126,6 +127,13 @@ func (s *Status) Localized() *Localized {
 		return nil
 	}
 	return s.localized.Clone()
+}
+
+func (s *Status) GetLocalizedMessage() *LocalizedMessage {
+	if s == nil || s.localizedMessage == nil {
+		return nil
+	}
+	return s.localizedMessage.Clone()
 }
 
 func (s *Status) FieldViolations() []*FieldViolation {
@@ -259,13 +267,14 @@ func Clone(s *Status) *Status {
 		localized = s.localized.Clone()
 	}
 	return &Status{
-		httpStatus:      s.httpStatus,
-		reason:          s.reason,
-		message:         s.message,
-		metadata:        maps.Clone(s.metadata),
-		localized:       localized,
-		fieldViolations: cloneFieldViolations(s.fieldViolations),
-		cause:           s.cause,
+		httpStatus:       s.httpStatus,
+		reason:           s.reason,
+		message:          s.message,
+		metadata:         maps.Clone(s.metadata),
+		localized:        localized,
+		localizedMessage: s.localizedMessage.Clone(),
+		fieldViolations:  cloneFieldViolations(s.fieldViolations),
+		cause:            s.cause,
 	}
 }
 

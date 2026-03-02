@@ -81,7 +81,9 @@ func TestTranslateError(t *testing.T) {
 		require.NotNil(t, result)
 
 		st := Convert(result)
-		assert.Equal(t, "Not Found", st.Message())
+		assert.Equal(t, "user not found", st.Message()) // original preserved
+		require.NotNil(t, st.GetLocalizedMessage())
+		assert.Equal(t, "Not Found", st.GetLocalizedMessage().Message)
 	})
 
 	t.Run("translate to Chinese", func(t *testing.T) {
@@ -90,7 +92,10 @@ func TestTranslateError(t *testing.T) {
 		require.NotNil(t, result)
 
 		st := Convert(result)
-		assert.Equal(t, "未找到", st.Message())
+		assert.Equal(t, "user not found", st.Message()) // original preserved
+		require.NotNil(t, st.GetLocalizedMessage())
+		assert.Equal(t, "未找到", st.GetLocalizedMessage().Message)
+		assert.Equal(t, "zh", st.GetLocalizedMessage().Locale)
 	})
 
 	t.Run("translate with custom localized key", func(t *testing.T) {
@@ -99,7 +104,9 @@ func TestTranslateError(t *testing.T) {
 		result := TranslateError(err, ib, language.English)
 
 		st := Convert(result)
-		assert.Equal(t, "Not Found", st.Message())
+		assert.Equal(t, "bad request", st.Message()) // original preserved
+		require.NotNil(t, st.GetLocalizedMessage())
+		assert.Equal(t, "Not Found", st.GetLocalizedMessage().Message)
 	})
 
 	t.Run("translate field violations", func(t *testing.T) {
@@ -113,6 +120,7 @@ func TestTranslateError(t *testing.T) {
 		st := Convert(result)
 		fvs := st.FieldViolations()
 		require.Len(t, fvs, 1)
+		assert.Equal(t, "email is required", fvs[0].Description()) // original preserved
 		require.NotNil(t, fvs[0].GetLocalizedMessage())
 		assert.Equal(t, "必填", fvs[0].GetLocalizedMessage().Message)
 		assert.Equal(t, "zh", fvs[0].GetLocalizedMessage().Locale)
@@ -128,6 +136,7 @@ func TestTranslateError(t *testing.T) {
 		st := Convert(result)
 		fvs := st.FieldViolations()
 		require.Len(t, fvs, 1)
+		assert.Equal(t, "name is too short", fvs[0].Description()) // original preserved
 		require.NotNil(t, fvs[0].GetLocalizedMessage())
 		assert.Equal(t, "Required", fvs[0].GetLocalizedMessage().Message)
 	})
@@ -146,6 +155,22 @@ func TestTranslateError(t *testing.T) {
 		// Should preserve the existing translation
 		assert.Equal(t, "Obligatoire", fvs[0].GetLocalizedMessage().Message)
 		assert.Equal(t, "fr", fvs[0].GetLocalizedMessage().Locale)
+	})
+
+	t.Run("idempotent field violation translation", func(t *testing.T) {
+		fv := NewFieldViolation("email", "REQUIRED", "email is required")
+		err := New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid").
+			WithFieldViolations(fv).Err()
+
+		// First translation
+		result := TranslateError(err, ib, language.English)
+		// Second translation should not change anything
+		result2 := TranslateError(result, ib, language.English)
+		st := Convert(result2)
+		fvs := st.FieldViolations()
+		require.Len(t, fvs, 1)
+		require.NotNil(t, fvs[0].GetLocalizedMessage())
+		assert.Equal(t, "Required", fvs[0].GetLocalizedMessage().Message)
 	})
 
 	t.Run("unknown error", func(t *testing.T) {
@@ -168,7 +193,9 @@ func TestTranslateStatusErrorOnly(t *testing.T) {
 		require.NotNil(t, result)
 
 		st := Convert(result)
-		assert.Equal(t, "Not Found", st.Message())
+		assert.Equal(t, "not found", st.Message()) // original preserved
+		require.NotNil(t, st.GetLocalizedMessage())
+		assert.Equal(t, "Not Found", st.GetLocalizedMessage().Message)
 	})
 
 	t.Run("does not translate non-StatusError", func(t *testing.T) {
@@ -200,9 +227,12 @@ func TestTranslated(t *testing.T) {
 
 		translated := s.Translated(ib, language.Chinese)
 
-		assert.Equal(t, "格式无效", translated.Message())
+		assert.Equal(t, "bad format", translated.Message()) // original preserved
+		require.NotNil(t, translated.GetLocalizedMessage())
+		assert.Equal(t, "格式无效", translated.GetLocalizedMessage().Message)
 		fvs := translated.FieldViolations()
 		require.Len(t, fvs, 1)
+		assert.Equal(t, "required", fvs[0].Description()) // original preserved
 		require.NotNil(t, fvs[0].GetLocalizedMessage())
 		assert.Equal(t, "必填", fvs[0].GetLocalizedMessage().Message)
 	})
@@ -212,7 +242,8 @@ func TestTranslated(t *testing.T) {
 		translated1 := s.Translated(ib, language.English)
 		translated2 := translated1.Translated(ib, language.English)
 
-		// Second translation should not change anything (localized is nil after first translation)
+		// Second translation should not change anything (localizedMessage already set)
 		assert.Equal(t, translated1.Message(), translated2.Message())
+		assert.Equal(t, translated1.GetLocalizedMessage().Message, translated2.GetLocalizedMessage().Message)
 	})
 }

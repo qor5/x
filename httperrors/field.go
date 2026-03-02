@@ -69,8 +69,9 @@ func PrependField(field string, fvs ...*FieldViolation) FieldViolations {
 	return fvs
 }
 
-// FieldViolation represents a field-level validation violation with localization capability
+// FieldViolation represents a field-level validation violation with localization capability.
 //
+// Translation preserves the original description and stores the translated text in localizedMessage.
 // Priority order for localized messages:
 //  1. LocalizedMessage (highest priority - pre-translated, ready to use)
 //  2. Localized (lower priority - template that needs translation via middleware)

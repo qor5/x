@@ -37,11 +37,11 @@ func (c *HTTPErrorMiddlewareConfig) WithHTTPWriteErrorHook(hooks ...hook.Hook[HT
 // ErrorResponse is the standard JSON error response body.
 // Fields use camelCase for frontend compatibility.
 type ErrorResponse struct {
-	Code            string                       `json:"code"`
-	Message         string                       `json:"message"`
-	LocalizedMessage string                      `json:"localizedMessage,omitempty"`
-	Metadata        map[string]string            `json:"metadata,omitempty"`
-	FieldViolations []*ErrorResponseFieldViolation `json:"fieldViolations,omitempty"`
+	Code             string                         `json:"code"`
+	Message          string                         `json:"message"`
+	LocalizedMessage string                         `json:"localizedMessage,omitempty"`
+	Metadata         map[string]string              `json:"metadata,omitempty"`
+	FieldViolations  []*ErrorResponseFieldViolation `json:"fieldViolations,omitempty"`
 }
 
 // ErrorResponseFieldViolation represents a single field violation in the JSON error response.
@@ -129,6 +129,9 @@ func WriteJSONError(err error, w http.ResponseWriter) error {
 		Message:  st.Message(),
 		Metadata: st.Metadata(),
 	}
+	if st.localizedMessage != nil {
+		resp.LocalizedMessage = st.localizedMessage.Message
+	}
 
 	for _, fv := range st.fieldViolations {
 		efv := &ErrorResponseFieldViolation{
@@ -152,4 +155,57 @@ func WriteJSONError(err error, w http.ResponseWriter) error {
 
 	_, writeErr := w.Write(data)
 	return writeErr
+}
+
+// HandleError translates and writes a structured JSON error response for the given error.
+// This is intended for use inside individual handlers that want to explicitly handle errors
+// without relying on panic-based middleware.
+//
+// Usage:
+//
+//	func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
+//	    user, err := h.userService.GetUser(r.Context(), r.PathValue("id"))
+//	    if err != nil {
+//	        httperrors.HandleError(h.conf, w, r, err)
+//	        return
+//	    }
+//	    json.NewEncoder(w).Encode(user)
+//	}
+func HandleError(conf *HTTPErrorMiddlewareConfig, w http.ResponseWriter, r *http.Request, err error) {
+	if conf == nil || conf.I18N == nil {
+		panic("HTTPErrorMiddlewareConfig.I18N is required")
+	}
+
+	writeError := func(ctx context.Context, input *HTTPWriteErrorInput) (*HTTPWriteErrorOutput, error) {
+		lang := languageFromRequest(input.Conf.I18N, input.R)
+		translated := TranslateError(input.Err, input.Conf.I18N, lang)
+		werr := WriteJSONError(translated, input.W)
+		if werr != nil {
+			return &HTTPWriteErrorOutput{Written: false}, werr
+		}
+		return &HTTPWriteErrorOutput{Written: true}, nil
+	}
+	if conf.writeErrorHook != nil {
+		writeError = conf.writeErrorHook(writeError)
+	}
+
+	_, werr := writeError(r.Context(), &HTTPWriteErrorInput{
+		Conf: conf,
+		W:    w, R: r, Err: err,
+	})
+	if werr != nil {
+		slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err)
+	}
+}
+
+// WrapHandlerFunc wraps a single http.HandlerFunc with httperrors panic recovery and i18n translation.
+// This is useful when only some handlers in a mux use httperrors, and a global middleware is not appropriate.
+//
+// Usage:
+//
+//	mux.HandleFunc("/api/users/{id}", httperrors.WrapHandlerFunc(conf, h.GetUser))
+//	mux.HandleFunc("/legacy/other", legacyHandler) // not wrapped
+func WrapHandlerFunc(conf *HTTPErrorMiddlewareConfig, handler http.HandlerFunc) http.HandlerFunc {
+	wrapped := ErrorMiddleware(conf)(handler)
+	return wrapped.ServeHTTP
 }

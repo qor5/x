@@ -120,11 +120,12 @@ Content-Type: application/json
 ```json
 {
   "code": "NOT_FOUND",
-  "message": "未找到"
+  "message": "user not found",
+  "localizedMessage": "未找到"
 }
 ```
 
-> `message` 被翻译为对应语言（翻译后替换原始 message）。`code` 始终是原始 reason 常量，不翻译。
+> `message` 保持原始英文不变，翻译结果放在 `localizedMessage` 字段中。`code` 始终是原始 reason 常量，不翻译。
 
 ---
 
@@ -259,7 +260,8 @@ Content-Type: application/json
 ```json
 {
   "code": "INVALID_ARGUMENT",
-  "message": "参数无效",
+  "message": "invalid argument",
+  "localizedMessage": "参数无效",
   "fieldViolations": [
     {
       "field": "email",
@@ -277,9 +279,9 @@ Content-Type: application/json
 }
 ```
 
-> - 顶层 `message` 被翻译（替换原始 message）
-> - 每个 fieldViolation 的 `message` 保持原始英文描述不变
-> - 翻译结果放在 `localizedMessage` 字段中
+> - 顶层 `message` 保持原始英文不变，翻译结果放在 `localizedMessage` 中
+> - 每个 fieldViolation 的 `message` 保持原始英文描述不变，翻译结果放在 `localizedMessage` 中
+> - `code` 始终是原始 reason 常量，不翻译
 
 ---
 
@@ -615,8 +617,8 @@ Content-Type: application/json
 | 字段               | 类型     | 是否必有 | 说明                                               |
 | ------------------ | -------- | -------- | -------------------------------------------------- |
 | `code`             | `string` | **是**   | 错误原因常量（如 `NOT_FOUND`、`REQUIRED`），不翻译 |
-| `message`          | `string` | **是**   | 人类可读消息，会被 i18n 翻译替换                   |
-| `localizedMessage` | `string` | 否       | 顶层翻译消息（仅在翻译后出现）                     |
+| `message`          | `string` | **是**   | 原始人类可读消息，始终保持不变                     |
+| `localizedMessage` | `string` | 否       | 翻译后的消息，仅在翻译后出现                       |
 | `metadata`         | `object` | 否       | 键值对附加信息，空时省略                           |
 | `fieldViolations`  | `array`  | 否       | 字段级校验错误列表，空时省略                       |
 
@@ -656,6 +658,7 @@ async function handleResponse(resp: Response) {
 
     // 展示给用户的消息优先使用 localizedMessage（如果有），否则 fallback 到 message
     const displayMessage = err.localizedMessage || err.message;
+    showError(displayMessage);
 
     // 处理字段级错误
     if (err.fieldViolations) {

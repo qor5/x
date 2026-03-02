@@ -40,7 +40,7 @@ func (l *Localized) Clone() *Localized {
 	}
 }
 
-// LocalizedMessage represents a pre-translated message.
+// LocalizedMessage represents a pre-translated message with its locale.
 type LocalizedMessage struct {
 	Locale  string
 	Message string
@@ -59,10 +59,12 @@ func (lm *LocalizedMessage) Clone() *LocalizedMessage {
 // TranslateError translates error messages and field violations using the provided i18n instance and language.
 // Returns the original error if translation is not possible or if localized details already exist.
 //
-// Translation priority:
-//  1. If localizedMessage already exists -> skip translation (highest priority)
-//  2. If Localized template exists -> translate template (medium priority)
-//  3. Use error reason for translation -> fallback (lowest priority)
+// Translation behavior:
+//   - The original message is preserved in the `message` field.
+//   - The translated text is stored in the `localizedMessage` field.
+//   - If the Localized template is set, its key and args are used for translation.
+//   - Otherwise, the error reason is used as the i18n key fallback.
+//   - If already translated (localized is nil), translation is skipped.
 func TranslateError(err error, ib *i18nx.I18N, lang language.Tag) error {
 	if err == nil {
 		return nil
@@ -88,12 +90,8 @@ func TranslateStatusErrorOnly(err error, ib *i18nx.I18N, lang language.Tag) (err
 	return TranslateError(err, ib, lang), true
 }
 
-// Translated returns a new Status with translated messages and field violations.
-//
-// Translation priority:
-//  1. If localizedMessage already exists -> skip translation (highest priority)
-//  2. If Localized template exists -> translate template (medium priority)
-//  3. Use error reason for translation -> fallback (lowest priority)
+// Translated returns a new Status with translated messages stored in localizedMessage fields.
+// The original message is preserved unchanged.
 func (s *Status) Translated(ib *i18nx.I18N, lang language.Tag) *Status {
 	if s == nil {
 		return nil
@@ -105,13 +103,14 @@ func (s *Status) Translated(ib *i18nx.I18N, lang language.Tag) *Status {
 	return st
 }
 
-// translateMainMessage handles the translation of the main status message
+// translateMainMessage handles the translation of the main status message.
+// The original message is preserved; the translated text is stored in localizedMessage.
 func (s *Status) translateMainMessage(ib *i18nx.I18N, lang language.Tag) {
-	// Check if already translated (localizedMessage already set via translation)
-	// For Status, we track this by checking if localized has been consumed (nil).
-	// After translation, localized is cleared to indicate it's been processed.
+	if s.localizedMessage != nil {
+		return // Already translated
+	}
 	if s.localized == nil {
-		return // Already translated or no template
+		return // No template
 	}
 
 	localized := cmp.Or(s.localized, &Localized{})
@@ -125,22 +124,28 @@ func (s *Status) translateMainMessage(ib *i18nx.I18N, lang language.Tag) {
 	}
 
 	if text != "" {
-		s.message = text
+		s.localizedMessage = &LocalizedMessage{
+			Locale:  lang.String(),
+			Message: text,
+		}
 	}
 
 	s.localized = nil // Clear to indicate translation is done
 }
 
-// translateFieldViolations handles the translation of field violations
+// translateFieldViolations handles the translation of field violations.
+// The original description is preserved; the translated text is stored in localizedMessage.
 func (s *Status) translateFieldViolations(ib *i18nx.I18N, lang language.Tag) {
 	if len(s.fieldViolations) == 0 {
 		return
 	}
 
 	for _, fv := range s.fieldViolations {
-		// Check if LocalizedMessage already exists (highest priority)
 		if fv.localizedMessage != nil {
-			continue
+			continue // Already translated
+		}
+		if fv.localized == nil {
+			continue // No template
 		}
 
 		localized := cmp.Or(fv.localized, &Localized{})
