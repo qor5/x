@@ -27,7 +27,7 @@ func (s *UserService) GetUser(ctx context.Context, id string) (*User, error) {
         return nil, err
     }
     if user == nil {
-        return nil, httperrors.Error(http.StatusNotFound, "NOT_FOUND", "user not found")
+        return nil, httperrors.Error(http.StatusNotFound, httperrors.ReasonNotFound, "user not found")
     }
     return user, nil
 }
@@ -59,7 +59,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 // 业务层
 func (s *UserService) GetUser(ctx context.Context, id string) (*User, error) {
     // ...
-    return nil, httperrors.Error(http.StatusNotFound, "NOT_FOUND", "user not found")
+    return nil, httperrors.Error(http.StatusNotFound, httperrors.ReasonNotFound, "user not found")
 }
 
 // handler 层
@@ -137,7 +137,7 @@ Content-Type: application/json
 // 业务层
 func (s *ProjectService) Delete(ctx context.Context, id string) error {
     if !hasPermission(ctx, "project", "delete") {
-        return httperrors.New(http.StatusForbidden, "PERMISSION_DENIED", "permission denied").
+        return httperrors.New(http.StatusForbidden, httperrors.ReasonPermissionDenied, "permission denied").
             WithMetadata(map[string]string{
                 "resource": "project",
                 "action":   "delete",
@@ -352,7 +352,7 @@ func (req *CreateOrderRequest) Validate() error {
     var fvs httperrors.FieldViolations
     for i, item := range req.Items {
         if item.Quantity <= 0 {
-            fvs = append(fvs, httperrors.NewFieldViolationf(
+            fvs = append(fvs, httperrors.NewFieldViolation(
                 fmt.Sprintf("items[%d].quantity", i), "OUT_OF_RANGE",
                 "quantity must be positive",
             ))
@@ -422,7 +422,7 @@ Content-Type: application/json
 ```json
 {
   "code": "INTERNAL",
-  "message": "internal server error"
+  "message": "failed to create order"
 }
 ```
 
@@ -439,7 +439,7 @@ Content-Type: application/json
 func authMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         if !isAuthenticated(r) {
-            panic(httperrors.Error(http.StatusUnauthorized, "UNAUTHENTICATED", "authentication required"))
+            panic(httperrors.Error(http.StatusUnauthorized, httperrors.ReasonUnauthenticated, "authentication required"))
         }
         next.ServeHTTP(w, r)
     })
@@ -468,7 +468,7 @@ Content-Type: application/json
 // 业务层
 func (s *ResourceService) Get(ctx context.Context, id string) (*Resource, error) {
     if !hasAccess(ctx, id) {
-        return nil, httperrors.Error(http.StatusForbidden, "PERMISSION_DENIED", "you do not have access to this resource")
+        return nil, httperrors.Error(http.StatusForbidden, httperrors.ReasonPermissionDenied, "you do not have access to this resource")
     }
     // ...
     return resource, nil
@@ -502,7 +502,7 @@ Content-Type: application/json
 func (s *UserService) Register(ctx context.Context, email string) error {
     exists, _ := s.repo.ExistsByEmail(ctx, email)
     if exists {
-        return httperrors.New(http.StatusConflict, "ALREADY_EXISTS", "email already registered").
+        return httperrors.New(http.StatusConflict, httperrors.ReasonAlreadyExists, "email already registered").
             WithMetadata(map[string]string{"field": "email"}).Err()
     }
     // ...
@@ -538,7 +538,7 @@ Content-Type: application/json
 func rateLimitMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         if isRateLimited(r) {
-            panic(httperrors.New(http.StatusTooManyRequests, "RESOURCE_EXHAUSTED", "rate limit exceeded").
+            panic(httperrors.New(http.StatusTooManyRequests, httperrors.ReasonResourceExhausted, "rate limit exceeded").
                 WithMetadata(map[string]string{"retryAfter": "30"}).Err())
         }
         next.ServeHTTP(w, r)
