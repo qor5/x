@@ -21,6 +21,9 @@ REQUIRED,Required,必填
 TOO_SHORT,Too Short,太短
 INVALID_FORMAT,Invalid Format,格式无效
 custom.greeting,Hello %s,你好 %s
+TOO_SHORT_MIN,Must be at least %d characters,至少需要%d个字符
+OUT_OF_RANGE,Must be between %d and %d,必须在%d到%d之间
+custom.welcome,Welcome {{.Name}} to {{.App}},欢迎 {{.Name}} 使用 {{.App}}
 `
 	ib, err := i18nx.New(strings.NewReader(csv))
 	require.NoError(t, err)
@@ -180,6 +183,182 @@ func TestTranslateError(t *testing.T) {
 
 		st := Convert(result)
 		assert.Equal(t, http.StatusInternalServerError, st.StatusCode())
+	})
+}
+
+func TestTranslateError_LocalizedWithI18N(t *testing.T) {
+	ib := newTestI18N(t)
+
+	t.Run("status reason as i18n key - English", func(t *testing.T) {
+		// reason "NOT_FOUND" is automatically used as i18n key
+		err := Error(http.StatusNotFound, "NOT_FOUND", "user xyz not found")
+		result := TranslateError(err, ib, language.English)
+
+		st := Convert(result)
+		assert.Equal(t, http.StatusNotFound, st.StatusCode())
+		assert.Equal(t, "NOT_FOUND", st.Reason())
+		assert.Equal(t, "user xyz not found", st.Message()) // original preserved
+		require.NotNil(t, st.GetLocalizedMessage())
+		assert.Equal(t, "Not Found", st.GetLocalizedMessage().Message)
+		assert.Equal(t, "en", st.GetLocalizedMessage().Locale)
+	})
+
+	t.Run("status reason as i18n key - Chinese", func(t *testing.T) {
+		err := Error(http.StatusInternalServerError, "INTERNAL", "database connection failed")
+		result := TranslateError(err, ib, language.Chinese)
+
+		st := Convert(result)
+		assert.Equal(t, "database connection failed", st.Message()) // original preserved
+		require.NotNil(t, st.GetLocalizedMessage())
+		assert.Equal(t, "内部错误", st.GetLocalizedMessage().Message)
+		assert.Equal(t, "zh", st.GetLocalizedMessage().Locale)
+	})
+
+	t.Run("field violation reason as i18n key", func(t *testing.T) {
+		fvs := []*FieldViolation{
+			NewFieldViolation("email", "REQUIRED", "email is required"),
+			NewFieldViolation("password", "TOO_SHORT", "password is too short"),
+		}
+		err := ValidationError(fvs).Err()
+		result := TranslateError(err, ib, language.Chinese)
+
+		st := Convert(result)
+		violations := st.FieldViolations()
+		require.Len(t, violations, 2)
+
+		assert.Equal(t, "email is required", violations[0].Description())
+		require.NotNil(t, violations[0].GetLocalizedMessage())
+		assert.Equal(t, "必填", violations[0].GetLocalizedMessage().Message)
+
+		assert.Equal(t, "password is too short", violations[1].Description())
+		require.NotNil(t, violations[1].GetLocalizedMessage())
+		assert.Equal(t, "太短", violations[1].GetLocalizedMessage().Message)
+	})
+
+	t.Run("custom localized key overrides reason", func(t *testing.T) {
+		// reason is "BAD_REQUEST" but i18n key is overridden to "NOT_FOUND"
+		err := New(http.StatusBadRequest, "BAD_REQUEST", "something went wrong").
+			WithLocalized("NOT_FOUND").Err()
+		result := TranslateError(err, ib, language.Chinese)
+
+		st := Convert(result)
+		assert.Equal(t, "BAD_REQUEST", st.Reason())                  // reason unchanged
+		assert.Equal(t, "something went wrong", st.Message())         // original preserved
+		assert.Equal(t, "未找到", st.GetLocalizedMessage().Message) // translated by custom key
+	})
+}
+
+func TestTranslateError_TemplateVariables(t *testing.T) {
+	ib := newTestI18N(t)
+
+	t.Run("positional args - single", func(t *testing.T) {
+		// WithLocalizedArgs sets positional %d args
+		fv := NewFieldViolation("password", "TOO_SHORT_MIN", "must be at least 8 characters").
+			WithLocalizedArgs(8)
+		err := ValidationError(fv).Err()
+		result := TranslateError(err, ib, language.Chinese)
+
+		st := Convert(result)
+		violations := st.FieldViolations()
+		require.Len(t, violations, 1)
+		assert.Equal(t, "must be at least 8 characters", violations[0].Description())
+		require.NotNil(t, violations[0].GetLocalizedMessage())
+		assert.Equal(t, "至少需要8个字符", violations[0].GetLocalizedMessage().Message)
+	})
+
+	t.Run("positional args - multiple", func(t *testing.T) {
+		fv := NewFieldViolation("age", "OUT_OF_RANGE", "must be between 18 and 120").
+			WithLocalizedArgs(18, 120)
+		err := ValidationError(fv).Err()
+		result := TranslateError(err, ib, language.Chinese)
+
+		st := Convert(result)
+		violations := st.FieldViolations()
+		require.Len(t, violations, 1)
+		assert.Equal(t, "must be between 18 and 120", violations[0].Description())
+		require.NotNil(t, violations[0].GetLocalizedMessage())
+		assert.Equal(t, "必须在18到120之间", violations[0].GetLocalizedMessage().Message)
+	})
+
+	t.Run("positional args - English", func(t *testing.T) {
+		fv := NewFieldViolation("password", "TOO_SHORT_MIN", "must be at least 8 characters").
+			WithLocalizedArgs(8)
+		err := ValidationError(fv).Err()
+		result := TranslateError(err, ib, language.English)
+
+		st := Convert(result)
+		violations := st.FieldViolations()
+		require.Len(t, violations, 1)
+		require.NotNil(t, violations[0].GetLocalizedMessage())
+		assert.Equal(t, "Must be at least 8 characters", violations[0].GetLocalizedMessage().Message)
+	})
+
+	t.Run("named args with map", func(t *testing.T) {
+		// WithLocalized with a map triggers Go template rendering {{.Name}}
+		err := New(http.StatusBadRequest, "BAD_REQUEST", "invalid request").
+			WithLocalized("custom.welcome", map[string]any{
+				"Name": "Alice",
+				"App":  "PIM",
+			}).Err()
+		result := TranslateError(err, ib, language.Chinese)
+
+		st := Convert(result)
+		assert.Equal(t, "invalid request", st.Message())
+		require.NotNil(t, st.GetLocalizedMessage())
+		assert.Equal(t, "欢迎 Alice 使用 PIM", st.GetLocalizedMessage().Message)
+	})
+
+	t.Run("named args with map - English", func(t *testing.T) {
+		err := New(http.StatusBadRequest, "BAD_REQUEST", "invalid request").
+			WithLocalized("custom.welcome", map[string]any{
+				"Name": "Bob",
+				"App":  "Console",
+			}).Err()
+		result := TranslateError(err, ib, language.English)
+
+		st := Convert(result)
+		require.NotNil(t, st.GetLocalizedMessage())
+		assert.Equal(t, "Welcome Bob to Console", st.GetLocalizedMessage().Message)
+	})
+
+	t.Run("positional args on status level", func(t *testing.T) {
+		// Status-level translation with positional args
+		err := New(http.StatusBadRequest, "BAD_REQUEST", "greeting failed").
+			WithLocalized("custom.greeting", "World").Err()
+		result := TranslateError(err, ib, language.Chinese)
+
+		st := Convert(result)
+		assert.Equal(t, "greeting failed", st.Message())
+		require.NotNil(t, st.GetLocalizedMessage())
+		assert.Equal(t, "你好 World", st.GetLocalizedMessage().Message)
+	})
+
+	t.Run("mixed field violations with and without args", func(t *testing.T) {
+		fvs := []*FieldViolation{
+			NewFieldViolation("email", "REQUIRED", "email is required"),
+			NewFieldViolation("password", "TOO_SHORT_MIN", "must be at least 8 characters").
+				WithLocalizedArgs(8),
+			NewFieldViolation("age", "OUT_OF_RANGE", "must be between 18 and 120").
+				WithLocalizedArgs(18, 120),
+		}
+		err := ValidationError(fvs).Err()
+		result := TranslateError(err, ib, language.Chinese)
+
+		st := Convert(result)
+		violations := st.FieldViolations()
+		require.Len(t, violations, 3)
+
+		// No args - simple key lookup
+		require.NotNil(t, violations[0].GetLocalizedMessage())
+		assert.Equal(t, "必填", violations[0].GetLocalizedMessage().Message)
+
+		// Single positional arg
+		require.NotNil(t, violations[1].GetLocalizedMessage())
+		assert.Equal(t, "至少需要8个字符", violations[1].GetLocalizedMessage().Message)
+
+		// Multiple positional args
+		require.NotNil(t, violations[2].GetLocalizedMessage())
+		assert.Equal(t, "必须在18到120之间", violations[2].GetLocalizedMessage().Message)
 	})
 }
 
