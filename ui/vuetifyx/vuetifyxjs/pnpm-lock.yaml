@@ -38,8 +38,8 @@ importers:
         specifier: ^1.11.13
         version: 1.11.18
       dompurify:
-        specifier: ^3.2.6
-        version: 3.2.6
+        specifier: ^3.3.2
+        version: 3.3.2
       echarts:
         specifier: ^5.6.0
         version: 5.6.0
@@ -1854,8 +1854,9 @@ packages:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
 
-  dompurify@3.2.6:
-    resolution: {integrity: sha512-/2GogDQlohXPZe6D6NOgQvXLPSYBqIWMnZ8zzOhn09REE4eyAzb+Hed3jhoM9OkuaJ8P6ZGTTVWQKAi8ieIzfQ==}
+  dompurify@3.3.2:
+    resolution: {integrity: sha512-6obghkliLdmKa56xdbLOpUZ43pAR6xFy1uOrxBaIDjT+yaRuuybLjGS9eVBoSR/UPU5fq3OXClEHLJNGvbxKpQ==}
+    engines: {node: '>=20'}
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
@@ -4871,7 +4872,7 @@ snapshots:
 
   diff@4.0.2: {}
 
-  dompurify@3.2.6:
+  dompurify@3.3.2:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
