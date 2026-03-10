@@ -360,12 +360,49 @@ export const funnelChartPreset: ChartOptions = {
   ]
 }
 
+// Line chart preset configuration
+export const lineChartPreset: ChartOptions = {
+  ...lightAnimationConfig,
+  tooltip: {
+    trigger: 'axis',
+    formatter: (params: any) => {
+      if (!Array.isArray(params)) params = [params]
+      let result = params[0]?.axisValueLabel || params[0]?.name || ''
+      for (const param of params) {
+        const data = param.data
+        const isObj = typeof data === 'object' && data !== null
+        const value = isObj ? data.value : data
+        const orders = isObj ? data.orders : null
+        result += '<br/>' + param.marker + ' ' + param.seriesName + ': ' + value
+        if (orders != null) {
+          result += ' (' + orders + ' orders)'
+        }
+      }
+      return result
+    },
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderColor: '#eee',
+    borderWidth: 1,
+    textStyle: { color: '#333' },
+    shadowBlur: 5,
+    shadowColor: 'rgba(0, 0, 0, 0.1)'
+  },
+  grid: {
+    left: '3%',
+    right: '4%',
+    bottom: '3%',
+    containLabel: true
+  },
+  series: []
+}
+
 // Export all presets
 export const chartPresets = {
   barChart: barChartPreset,
   pieChart: pieChartPreset,
   funnelChart: funnelChartPreset,
-  lineInFunnel: presetsLineInFunnel
+  lineInFunnel: presetsLineInFunnel,
+  lineChart: lineChartPreset
 }
 
 // Export all animation presets

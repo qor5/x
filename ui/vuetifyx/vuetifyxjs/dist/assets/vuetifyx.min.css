@@ -73097,24 +73097,24 @@ a {
 }
 .funnel-cols:has(.funnel-col:nth-child(10)) .funnel-col .funnel-stat-value[data-v-ba5be0f8] {
   font-size: 0.9em;
-}.vx-chart-wrap[data-v-db5dec1d] {
+}.vx-chart-wrap[data-v-de708421] {
   width: 100%;
   height: 100%;
   position: relative;
   display: flex;
   flex-direction: column;
 }
-.vx-chart-wrap .vx-chart-title[data-v-db5dec1d] {
+.vx-chart-wrap .vx-chart-title[data-v-de708421] {
   font-size: 18px;
   font-weight: 510;
   color: rgb(33, 33, 33);
   margin: 16px 0 0 16px;
   text-align: left;
 }
-.vx-chart-wrap .vx-chart-container[data-v-db5dec1d] {
+.vx-chart-wrap .vx-chart-container[data-v-de708421] {
   flex: 1;
   width: 100%;
-  min-height: var(--v724a2771);
+  min-height: var(--v9af0490c);
 }.vx-tilted-images[data-v-5bbaa822] {
   width: 100%;
 }

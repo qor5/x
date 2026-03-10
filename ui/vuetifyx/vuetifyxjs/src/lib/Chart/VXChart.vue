@@ -55,7 +55,7 @@ import FunnelChart from './FunnelChart.vue'
 import { useVxChartMergeOptsCallback } from './useVxChartMergeOpts'
 
 // Define preset types
-type PresetType = 'barChart' | 'pieChart' | 'funnelChart' | ''
+type PresetType = 'barChart' | 'pieChart' | 'funnelChart' | 'lineChart' | ''
 
 // Define animation types
 type AnimationType =
@@ -93,7 +93,8 @@ const toggle = (index: number) => {
 const props = defineProps({
   presets: {
     type: String as () => PresetType,
-    validator: (value: string) => ['barChart', 'pieChart', 'funnelChart', ''].includes(value),
+    validator: (value: string) =>
+      ['barChart', 'pieChart', 'funnelChart', 'lineChart', ''].includes(value),
     default: ''
   },
   options: {
