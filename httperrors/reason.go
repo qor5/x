@@ -5,26 +5,23 @@ import "net/http"
 // Common reason constants for HTTP errors.
 // These replace the protobuf ErrorReason enum from statusx.
 const (
-	ReasonOK                = "OK"
-	ReasonCanceled          = "CANCELED"
-	ReasonUnknown           = "UNKNOWN"
-	ReasonBadRequest        = "BAD_REQUEST"
-	ReasonInvalidArgument   = "INVALID_ARGUMENT"
-	ReasonDeadlineExceeded  = "DEADLINE_EXCEEDED"
-	ReasonNotFound          = "NOT_FOUND"
-	ReasonAlreadyExists     = "ALREADY_EXISTS"
-	ReasonConflict          = "CONFLICT"
-	ReasonPermissionDenied  = "PERMISSION_DENIED"
-	ReasonResourceExhausted = "RESOURCE_EXHAUSTED"
+	ReasonOK                 = "OK"
+	ReasonCanceled           = "CANCELED"
+	ReasonUnknown            = "UNKNOWN"
+	ReasonInvalidArgument    = "INVALID_ARGUMENT"
+	ReasonDeadlineExceeded   = "DEADLINE_EXCEEDED"
+	ReasonNotFound           = "NOT_FOUND"
+	ReasonAlreadyExists      = "ALREADY_EXISTS"
+	ReasonPermissionDenied   = "PERMISSION_DENIED"
+	ReasonResourceExhausted  = "RESOURCE_EXHAUSTED"
 	ReasonFailedPrecondition = "FAILED_PRECONDITION"
-	ReasonAborted           = "ABORTED"
-	ReasonOutOfRange        = "OUT_OF_RANGE"
-	ReasonUnimplemented     = "UNIMPLEMENTED"
-	ReasonInternal          = "INTERNAL"
-	ReasonUnavailable       = "UNAVAILABLE"
-	ReasonDataLoss          = "DATA_LOSS"
-	ReasonUnauthenticated   = "UNAUTHENTICATED"
-	ReasonBadGateway        = "BAD_GATEWAY"
+	ReasonAborted            = "ABORTED"
+	ReasonOutOfRange         = "OUT_OF_RANGE"
+	ReasonUnimplemented      = "UNIMPLEMENTED"
+	ReasonInternal           = "INTERNAL"
+	ReasonUnavailable        = "UNAVAILABLE"
+	ReasonDataLoss           = "DATA_LOSS"
+	ReasonUnauthenticated    = "UNAUTHENTICATED"
 )
 
 // ReasonFromStatus returns a default reason string for a given HTTP status code.
@@ -33,7 +30,7 @@ func ReasonFromStatus(httpStatus int) string {
 	case http.StatusOK:
 		return ReasonOK
 	case http.StatusBadRequest:
-		return ReasonBadRequest
+		return ReasonInvalidArgument
 	case http.StatusUnauthorized:
 		return ReasonUnauthenticated
 	case http.StatusForbidden:
@@ -41,7 +38,7 @@ func ReasonFromStatus(httpStatus int) string {
 	case http.StatusNotFound:
 		return ReasonNotFound
 	case http.StatusConflict:
-		return ReasonConflict
+		return ReasonAlreadyExists
 	case http.StatusUnprocessableEntity:
 		return ReasonInvalidArgument
 	case http.StatusTooManyRequests:
@@ -51,7 +48,7 @@ func ReasonFromStatus(httpStatus int) string {
 	case http.StatusNotImplemented:
 		return ReasonUnimplemented
 	case http.StatusBadGateway:
-		return ReasonBadGateway
+		return ReasonUnavailable
 	case http.StatusServiceUnavailable:
 		return ReasonUnavailable
 	case http.StatusGatewayTimeout:

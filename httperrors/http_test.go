@@ -3,6 +3,7 @@ package httperrors
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -13,6 +14,34 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/language"
 )
+
+type marshalFailResponseWriter struct {
+	header      http.Header
+	wroteHeader bool
+	statusCode  int
+	wroteBody   bool
+	writeErr    error
+}
+
+func (w *marshalFailResponseWriter) Header() http.Header {
+	if w.header == nil {
+		w.header = make(http.Header)
+	}
+	return w.header
+}
+
+func (w *marshalFailResponseWriter) WriteHeader(statusCode int) {
+	w.wroteHeader = true
+	w.statusCode = statusCode
+}
+
+func (w *marshalFailResponseWriter) Write(p []byte) (int, error) {
+	w.wroteBody = true
+	if w.writeErr != nil {
+		return 0, w.writeErr
+	}
+	return len(p), nil
+}
 
 func newTestI18NForHTTP(t *testing.T) *i18nx.I18N {
 	t.Helper()
@@ -134,7 +163,7 @@ func TestErrorMiddleware_WithFieldViolations(t *testing.T) {
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fv := NewFieldViolation("email", "REQUIRED", "email is required")
-		panic(ValidationError(fv).Err())
+		panic(BadRequest(fv).Err())
 	})
 
 	middleware := NewErrorMiddleware(ib)
@@ -146,7 +175,7 @@ func TestErrorMiddleware_WithFieldViolations(t *testing.T) {
 
 	server.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	var resp ErrorResponse
 	err := json.Unmarshal(w.Body.Bytes(), &resp)
@@ -222,13 +251,13 @@ func TestWriteJSONError(t *testing.T) {
 	t.Run("with field violations", func(t *testing.T) {
 		fv1 := NewFieldViolation("email", "REQUIRED", "email is required")
 		fv2 := NewFieldViolation("name", "TOO_SHORT", "name is too short")
-		err := ValidationError(fv1, fv2).Err()
+		err := BadRequest(fv1, fv2).Err()
 
 		w := httptest.NewRecorder()
 		werr := WriteJSONError(err, w)
 		require.NoError(t, werr)
 
-		assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
 
 		var resp ErrorResponse
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
@@ -242,7 +271,7 @@ func TestWriteJSONError(t *testing.T) {
 	t.Run("with translated field violation", func(t *testing.T) {
 		ib := newTestI18NForHTTP(t)
 		fv := NewFieldViolation("email", "REQUIRED", "email is required")
-		err := New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid").
+		err := New(http.StatusBadRequest, ReasonInvalidArgument, "invalid").
 			WithFieldViolations(fv).Err()
 
 		// Translate to Chinese
@@ -259,6 +288,16 @@ func TestWriteJSONError(t *testing.T) {
 		assert.Equal(t, "必填", resp.FieldViolations[0].LocalizedMessage)
 	})
 
+	t.Run("write body failure returns error after committing original status", func(t *testing.T) {
+		w := &marshalFailResponseWriter{writeErr: errors.New("write failed")}
+
+		werr := WriteJSONError(Error(http.StatusBadRequest, "TEST", "test"), w)
+		require.Error(t, werr)
+		assert.True(t, w.wroteHeader)
+		assert.True(t, w.wroteBody)
+		assert.Equal(t, http.StatusBadRequest, w.statusCode)
+	})
+
 	t.Run("no redundant status code in body", func(t *testing.T) {
 		err := Error(http.StatusNotFound, "NOT_FOUND", "not found")
 		w := httptest.NewRecorder()
@@ -273,7 +312,7 @@ func TestWriteJSONError(t *testing.T) {
 
 	t.Run("camelCase field names", func(t *testing.T) {
 		fv := NewFieldViolation("email", "REQUIRED", "required")
-		err := New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid").
+		err := New(http.StatusBadRequest, ReasonInvalidArgument, "invalid").
 			WithMetadata(map[string]string{"k": "v"}).
 			WithFieldViolations(fv).Err()
 
@@ -383,6 +422,20 @@ func TestHandleError(t *testing.T) {
 		assert.Panics(t, func() {
 			HandleError(&HTTPErrorMiddlewareConfig{}, httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/", nil), Error(http.StatusBadRequest, "T", "t"))
 		})
+	})
+}
+
+func TestWriteError(t *testing.T) {
+	t.Run("returns write error", func(t *testing.T) {
+		ib := newTestI18NForHTTP(t)
+		conf := &HTTPErrorMiddlewareConfig{I18N: ib}
+
+		req := httptest.NewRequest(http.MethodGet, "/test", nil)
+		w := &marshalFailResponseWriter{writeErr: errors.New("write failed")}
+
+		werr := WriteError(conf, w, req, Error(http.StatusBadRequest, "TEST", "test"))
+		require.Error(t, werr)
+		assert.Equal(t, http.StatusBadRequest, w.statusCode)
 	})
 }
 

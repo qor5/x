@@ -114,7 +114,7 @@ func TestTranslateError(t *testing.T) {
 
 	t.Run("translate field violations", func(t *testing.T) {
 		fv := NewFieldViolation("email", "REQUIRED", "email is required")
-		err := New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid").
+		err := New(http.StatusBadRequest, ReasonInvalidArgument, "invalid").
 			WithFieldViolations(fv).Err()
 
 		result := TranslateError(err, ib, language.Chinese)
@@ -132,7 +132,7 @@ func TestTranslateError(t *testing.T) {
 	t.Run("field violation with custom localized key", func(t *testing.T) {
 		fv := NewFieldViolation("name", "TOO_SHORT", "name is too short").
 			WithLocalized("REQUIRED")
-		err := New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid").
+		err := New(http.StatusBadRequest, ReasonInvalidArgument, "invalid").
 			WithFieldViolations(fv).Err()
 
 		result := TranslateError(err, ib, language.English)
@@ -148,7 +148,7 @@ func TestTranslateError(t *testing.T) {
 		fv := NewFieldViolation("email", "REQUIRED", "email is required")
 		fv.localizedMessage = &LocalizedMessage{Locale: "fr", Message: "Obligatoire"}
 
-		err := New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid").
+		err := New(http.StatusBadRequest, ReasonInvalidArgument, "invalid").
 			WithFieldViolations(fv).Err()
 
 		result := TranslateError(err, ib, language.English)
@@ -162,7 +162,7 @@ func TestTranslateError(t *testing.T) {
 
 	t.Run("idempotent field violation translation", func(t *testing.T) {
 		fv := NewFieldViolation("email", "REQUIRED", "email is required")
-		err := New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid").
+		err := New(http.StatusBadRequest, ReasonInvalidArgument, "invalid").
 			WithFieldViolations(fv).Err()
 
 		// First translation
@@ -242,8 +242,8 @@ func TestTranslateError_LocalizedWithI18N(t *testing.T) {
 		result := TranslateError(err, ib, language.Chinese)
 
 		st := Convert(result)
-		assert.Equal(t, "BAD_REQUEST", st.Reason())                  // reason unchanged
-		assert.Equal(t, "something went wrong", st.Message())         // original preserved
+		assert.Equal(t, "BAD_REQUEST", st.Reason())              // reason unchanged
+		assert.Equal(t, "something went wrong", st.Message())    // original preserved
 		assert.Equal(t, "未找到", st.GetLocalizedMessage().Message) // translated by custom key
 	})
 }
@@ -401,7 +401,7 @@ func TestTranslated(t *testing.T) {
 
 	t.Run("translates main message and field violations", func(t *testing.T) {
 		fv := NewFieldViolation("email", "REQUIRED", "required")
-		s := New(http.StatusUnprocessableEntity, "INVALID_FORMAT", "bad format").
+		s := New(http.StatusBadRequest, "INVALID_FORMAT", "bad format").
 			WithFieldViolations(fv)
 
 		translated := s.Translated(ib, language.Chinese)

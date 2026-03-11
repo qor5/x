@@ -170,7 +170,7 @@ func TestWithFieldViolations(t *testing.T) {
 	fv1 := NewFieldViolation("email", "REQUIRED", "email is required")
 	fv2 := NewFieldViolation("name", "TOO_SHORT", "name is too short")
 
-	s := New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid argument").
+	s := New(http.StatusBadRequest, ReasonInvalidArgument, "invalid argument").
 		WithFieldViolations(fv1, fv2)
 
 	fvs := s.FieldViolations()
@@ -199,7 +199,7 @@ func TestWithFlattenFieldViolations(t *testing.T) {
 	fv1 := NewFieldViolation("email", "REQUIRED", "email is required")
 	fvs := FieldViolations{NewFieldViolation("name", "TOO_SHORT", "name is too short")}
 
-	s := New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid argument").
+	s := New(http.StatusBadRequest, ReasonInvalidArgument, "invalid argument").
 		WithFlattenFieldViolations(fv1, fvs)
 
 	result := s.FieldViolations()

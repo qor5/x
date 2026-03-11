@@ -10,6 +10,34 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestBadRequest(t *testing.T) {
+	t.Run("with violations", func(t *testing.T) {
+		fv1 := NewFieldViolation("email", "REQUIRED", "email is required")
+		fv2 := NewFieldViolation("name", "TOO_SHORT", "name is too short")
+
+		s := BadRequest(fv1, fv2)
+		assert.Equal(t, http.StatusBadRequest, s.StatusCode())
+		assert.Equal(t, ReasonInvalidArgument, s.Reason())
+		assert.Equal(t, "invalid argument", s.Message())
+
+		fvs := s.FieldViolations()
+		require.Len(t, fvs, 2)
+		assert.Equal(t, "email", fvs[0].Field())
+		assert.Equal(t, "name", fvs[1].Field())
+	})
+
+	t.Run("empty violations returns OK", func(t *testing.T) {
+		s := BadRequest()
+		assert.Equal(t, http.StatusOK, s.StatusCode())
+		assert.Equal(t, ReasonOK, s.Reason())
+	})
+
+	t.Run("nil input skipped", func(t *testing.T) {
+		s := BadRequest(nil)
+		assert.Equal(t, http.StatusOK, s.StatusCode())
+	})
+}
+
 func TestValidationError(t *testing.T) {
 	t.Run("with violations", func(t *testing.T) {
 		fv1 := NewFieldViolation("email", "REQUIRED", "email is required")
@@ -99,6 +127,8 @@ func TestPrependField(t *testing.T) {
 	require.Len(t, result, 2)
 	assert.Equal(t, "user.email", result[0].Field())
 	assert.Equal(t, "user.name", result[1].Field())
+	assert.Equal(t, "email", fv1.Field())
+	assert.Equal(t, "name", fv2.Field())
 }
 
 func TestFieldViolations_PrependField(t *testing.T) {
@@ -111,6 +141,8 @@ func TestFieldViolations_PrependField(t *testing.T) {
 	require.Len(t, result, 2)
 	assert.Equal(t, "address.street", result[0].Field())
 	assert.Equal(t, "address.city", result[1].Field())
+	assert.Equal(t, "street", fvs[0].Field())
+	assert.Equal(t, "city", fvs[1].Field())
 }
 
 func TestNewFieldViolation(t *testing.T) {
@@ -222,7 +254,7 @@ func TestToFieldViolations(t *testing.T) {
 
 	t.Run("with nested field violations", func(t *testing.T) {
 		fv := NewFieldViolation("email", "REQUIRED", "email is required")
-		err := New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid").
+		err := New(http.StatusBadRequest, ReasonInvalidArgument, "invalid").
 			WithFieldViolations(fv).Err()
 
 		result := ToFieldViolations(err, "user")
@@ -233,7 +265,7 @@ func TestToFieldViolations(t *testing.T) {
 
 	t.Run("nested violations without field prefix", func(t *testing.T) {
 		fv := NewFieldViolation("email", "REQUIRED", "required")
-		err := New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid").
+		err := New(http.StatusBadRequest, ReasonInvalidArgument, "invalid").
 			WithFieldViolations(fv).Err()
 
 		result := ToFieldViolations(err, "")

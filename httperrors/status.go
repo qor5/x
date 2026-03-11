@@ -6,7 +6,6 @@ import (
 	"io"
 	"maps"
 	"net/http"
-	"slices"
 
 	"github.com/pkg/errors"
 )
@@ -210,8 +209,8 @@ func (s *Status) WithLocalized(key string, args ...any) *Status {
 }
 
 // WithLocalizedArgs sets template arguments for i18n.
-// Preserves the existing localized key and adds/replaces the template arguments.
-// Since the key is always set (either at creation time or by WithLocalized), no fallback logic is needed.
+// This method relies on the constructor invariant that localized is initialized with the reason as the default key.
+// Use WithLocalized if you need to change the translation key before setting args.
 func (s *Status) WithLocalizedArgs(args ...any) *Status {
 	st := Clone(s)
 	st.localized = &Localized{
@@ -381,11 +380,4 @@ func WrapStatus(err error, httpStatus int, message string) *Status {
 // WrapStatusf wraps an error with automatically derived reason and formatted message.
 func WrapStatusf(err error, httpStatus int, format string, a ...any) *Status {
 	return Wrapf(err, httpStatus, ReasonFromStatus(httpStatus), format, a...)
-}
-
-func cloneFieldViolations(fvs []*FieldViolation) []*FieldViolation {
-	if fvs == nil {
-		return nil
-	}
-	return slices.Clone(fvs)
 }

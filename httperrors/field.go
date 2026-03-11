@@ -8,8 +8,21 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ValidationError creates a new Status with http.StatusUnprocessableEntity (422) and a flattened list of field violations.
-func ValidationError(inputs ...any) *Status {
+// BadRequest creates a new Status with http.StatusBadRequest (400) and a flattened list of field violations.
+func BadRequest(inputs ...any) *Status {
+	violations, err := FlattenFieldViolations(inputs...)
+	if err != nil {
+		panic(err)
+	}
+	if len(violations) == 0 {
+		return New(http.StatusOK, ReasonOK, "ok")
+	}
+	return New(http.StatusBadRequest, ReasonInvalidArgument, "invalid argument").WithFieldViolations(violations...)
+}
+
+// UnprocessableEntity creates a new Status with http.StatusUnprocessableEntity (422)
+// and a flattened list of field violations.
+func UnprocessableEntity(inputs ...any) *Status {
 	violations, err := FlattenFieldViolations(inputs...)
 	if err != nil {
 		panic(err)
@@ -18,6 +31,11 @@ func ValidationError(inputs ...any) *Status {
 		return New(http.StatusOK, ReasonOK, "ok")
 	}
 	return New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid argument").WithFieldViolations(violations...)
+}
+
+// Deprecated: use UnprocessableEntity instead.
+func ValidationError(inputs ...any) *Status {
+	return UnprocessableEntity(inputs...)
 }
 
 // FormatField formats a dotted field path by applying a formatting function to each segment
@@ -63,10 +81,25 @@ func FormatField(field string, formatFunc func(string) string) string {
 
 // PrependField prepends a field name to the field name of each field violation.
 func PrependField(field string, fvs ...*FieldViolation) FieldViolations {
-	for _, fv := range fvs {
+	result := cloneFieldViolations(fvs)
+	for _, fv := range result {
+		if fv == nil {
+			continue
+		}
 		fv.field = field + "." + fv.field
 	}
-	return fvs
+	return result
+}
+
+func cloneFieldViolations(fvs []*FieldViolation) []*FieldViolation {
+	if fvs == nil {
+		return nil
+	}
+	cloned := make([]*FieldViolation, 0, len(fvs))
+	for _, fv := range fvs {
+		cloned = append(cloned, fv.Clone())
+	}
+	return cloned
 }
 
 // FieldViolation represents a field-level validation violation with localization capability.
@@ -169,8 +202,8 @@ func (f *FieldViolation) WithLocalized(key string, args ...any) *FieldViolation 
 }
 
 // WithLocalizedArgs sets template arguments for i18n.
-// Preserves the existing localized key if present, or leaves it empty for the translator to use reason as fallback.
-// This is useful when you want to add template arguments without setting a specific i18n key.
+// This method relies on the constructor invariant that localized is initialized with the reason as the default key.
+// Use WithLocalized if you need to change the translation key before setting args.
 func (f *FieldViolation) WithLocalizedArgs(args ...any) *FieldViolation {
 	return f.WithLocalized(f.localized.Key(), args...)
 }

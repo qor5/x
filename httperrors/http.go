@@ -145,19 +145,20 @@ func WriteJSONError(err error, w http.ResponseWriter) error {
 		resp.FieldViolations = append(resp.FieldViolations, efv)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(st.StatusCode())
-
 	data, marshalErr := json.Marshal(resp)
 	if marshalErr != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		return marshalErr
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(st.StatusCode())
 
 	_, writeErr := w.Write(data)
 	return writeErr
 }
 
-// HandleError translates and writes a structured JSON error response for the given error.
+// WriteError translates and writes a structured JSON error response for the given error.
 // This is intended for use inside individual handlers that want to explicitly handle errors
 // without relying on panic-based middleware.
 //
@@ -166,12 +167,14 @@ func WriteJSONError(err error, w http.ResponseWriter) error {
 //	func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 //	    user, err := h.userService.GetUser(r.Context(), r.PathValue("id"))
 //	    if err != nil {
-//	        httperrors.HandleError(h.conf, w, r, err)
+//	        if herr := httperrors.WriteError(h.conf, w, r, err); herr != nil {
+//	            slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err)
+//	        }
 //	        return
 //	    }
 //	    json.NewEncoder(w).Encode(user)
 //	}
-func HandleError(conf *HTTPErrorMiddlewareConfig, w http.ResponseWriter, r *http.Request, err error) {
+func WriteError(conf *HTTPErrorMiddlewareConfig, w http.ResponseWriter, r *http.Request, err error) error {
 	if conf == nil || conf.I18N == nil {
 		panic("HTTPErrorMiddlewareConfig.I18N is required")
 	}
@@ -194,6 +197,16 @@ func HandleError(conf *HTTPErrorMiddlewareConfig, w http.ResponseWriter, r *http
 		W:    w, R: r, Err: err,
 	})
 	if werr != nil {
+		slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err)
+		return werr
+	}
+	return nil
+}
+
+// HandleError translates and writes a structured JSON error response for the given error.
+// It is kept for backward compatibility and intentionally does not return write errors.
+func HandleError(conf *HTTPErrorMiddlewareConfig, w http.ResponseWriter, r *http.Request, err error) {
+	if werr := WriteError(conf, w, r, err); werr != nil {
 		slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err)
 	}
 }
