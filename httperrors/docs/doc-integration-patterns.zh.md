@@ -1,22 +1,22 @@
-# httperrors Integration Patterns Guide
+# httperrors 接入模式指南
 
-This document explains how to integrate the `httperrors` package in different scenarios and outlines the recommended practices for each pattern.
-
----
-
-## Three Integration Patterns
-
-| Pattern                    | Functions                                | Suitable Scenario                                   | Error Propagation              |
-| -------------------------- | ---------------------------------------- | --------------------------------------------------- | ------------------------------ |
-| **Global middleware**      | `ErrorMiddleware` / `NewErrorMiddleware` | All handlers use httperrors                         | panic                          |
-| **Wrapped single handler** | `WrapHandlerFunc`                        | Only part of a mux uses httperrors                  | panic                          |
-| **Explicit handling**      | `WriteError` / `HandleError`             | The handler handles errors explicitly without panic | return error / direct handling |
+本文档说明在不同场景下如何接入 `httperrors` 包，以及各种模式的最佳实践。
 
 ---
 
-## 1. Global Middleware Pattern
+## 三种接入方式
 
-**Suitable scenario**: every handler in the service uses `httperrors` for error responses.
+| 方式 | 函数 | 适用场景 | 错误传播 |
+| --- | --- | --- | --- |
+| **全局中间件** | `ErrorMiddleware` / `NewErrorMiddleware` | 所有 handler 都使用 httperrors | panic |
+| **单 handler 包裹** | `WrapHandlerFunc` | mux 中部分 handler 使用 httperrors | panic |
+| **显式调用** | `WriteError` / `HandleError` | handler 内部自行处理错误，不依赖 panic | return error / direct handling |
+
+---
+
+## 1. 全局中间件模式
+
+**适用场景**: 整个服务的所有 handler 都使用 `httperrors` 返回错误。
 
 ```go
 package main
@@ -39,12 +39,13 @@ func main() {
     mux.HandleFunc("GET /api/users/{id}", userHandler.GetUser)
     mux.HandleFunc("POST /api/orders", orderHandler.Create)
 
+    // 全局中间件：所有 handler 的 panic(error) 都会被捕获并转为 JSON 响应
     handler := httperrors.NewErrorMiddleware(ib)(mux)
     http.ListenAndServe(":8080", handler)
 }
 ```
 
-**Service layer** (always returns `error`):
+**业务层**（始终 return error）:
 
 ```go
 func (s *UserService) GetUser(ctx context.Context, id string) (*User, error) {
@@ -59,7 +60,7 @@ func (s *UserService) GetUser(ctx context.Context, id string) (*User, error) {
 }
 ```
 
-**Handler layer** (panics to hand the error to middleware):
+**Handler 层**（panic 传播给中间件）:
 
 ```go
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
@@ -71,14 +72,14 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-**Pros**: concise and requires the least handler code  
-**Cons**: every handler must follow the `panic(error)` convention
+**优点**: 简洁，handler 代码最少  
+**缺点**: 所有 handler 必须遵循 `panic(error)` 约定
 
 ---
 
-## 2. Wrapped Single Handler Pattern
+## 2. 单 Handler 包裹模式
 
-**Suitable scenario**: a mux mixes multiple styles and only some handlers use `httperrors`.
+**适用场景**: 一个 mux 上混合了多种 handler，只有部分 handler 使用 `httperrors`。
 
 ```go
 func main() {
@@ -97,7 +98,7 @@ func main() {
 }
 ```
 
-The wrapped handlers still use panic internally:
+被包裹的 handler 内部仍使用 panic 模式：
 
 ```go
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
@@ -109,18 +110,17 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-**Pros**: flexible and can be adopted handler by handler  
-**Cons**: each registration needs an extra wrapper
+**优点**: 灵活，逐个 handler 选择是否接入  
+**缺点**: 每个 handler 注册时需要额外包裹一层
 
 ---
 
-## 3. Explicit Handling Pattern
+## 3. 显式调用模式
 
-**Suitable scenario**:
-
-- the handler prefers `return` over `panic`
-- extra logic is needed before or after writing the error response, such as logging or metrics
-- the integration environment cannot use panic-based handling
+**适用场景**:
+- handler 内部想用 `return` 而非 `panic` 处理错误
+- 需要在写错误响应前后做额外逻辑（如日志、metrics）
+- 与现有框架集成，无法使用 panic 模式
 
 ```go
 func main() {
@@ -135,7 +135,7 @@ func main() {
 }
 ```
 
-Use `WriteError` explicitly inside the handler:
+Handler 内部显式调用 `WriteError`：
 
 ```go
 type UserHandler struct {
@@ -155,7 +155,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-If only backward compatibility is needed, `HandleError` can still be used:
+如果你只需要兼容旧调用方式，也可以继续使用 `HandleError`：
 
 ```go
 func (h *UserHandler) GetUserLegacy(w http.ResponseWriter, r *http.Request) {
@@ -168,14 +168,14 @@ func (h *UserHandler) GetUserLegacy(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-**Pros**: does not rely on panic and is fully explicit, which is closer to standard Go style  
-**Cons**: every error branch must explicitly write the response and return
+**优点**: 不依赖 panic，完全显式控制，更符合 Go 惯例  
+**缺点**: 每个错误处理点都需要显式写出响应并 `return`
 
 ---
 
-## 4. Mixed Pattern (Recommended for Gradual Migration)
+## 4. 混合模式（推荐的渐进式迁移方案）
 
-**Suitable scenario**: a large project is migrating gradually from legacy error handling to `httperrors`.
+**适用场景**: 大型项目中逐步从旧错误处理迁移到 `httperrors`。
 
 ```go
 func main() {
@@ -198,9 +198,9 @@ func main() {
 
 ---
 
-## 5. Integration with Custom Hooks
+## 5. 带自定义 Hook 的接入
 
-All three patterns support custom hooks through `HTTPErrorMiddlewareConfig`, which can be used for logging, metrics, or response customization before and after error writing.
+所有三种方式都支持通过 `HTTPErrorMiddlewareConfig` 配置 hook，用于在错误写入前后做自定义逻辑（如日志、metrics、修改响应）。
 
 ```go
 conf := &httperrors.HTTPErrorMiddlewareConfig{I18N: ib}
@@ -225,43 +225,43 @@ httperrors.HandleError(conf, w, r, err)
 
 ---
 
-## Pattern Selection Decision Tree
+## 模式选择决策树
 
 ```
-Do all handlers on your mux use httperrors?
-├── Yes → Global middleware pattern (ErrorMiddleware)
-└── No → Only part of the handlers use httperrors
-         ├── Can those handlers use panic-based propagation?
-         │   ├── Yes → Wrapped single handler pattern (WrapHandlerFunc)
-         │   └── No → Explicit handling pattern (WriteError / HandleError)
-         └── Are you doing a gradual migration?
-             └── Yes → Mixed pattern (WrapHandlerFunc + WriteError/HandleError + legacy code)
+你的 mux 上所有 handler 都用 httperrors 吗？
+├── 是 → 全局中间件模式 (ErrorMiddleware)
+└── 否 → 部分 handler 用 httperrors
+         ├── handler 内部可以用 panic 模式吗？
+         │   ├── 是 → 单 handler 包裹模式 (WrapHandlerFunc)
+         │   └── 否 → 显式调用模式 (WriteError / HandleError)
+         └── 正在渐进式迁移？
+             └── 是 → 混合模式（WrapHandlerFunc + WriteError/HandleError + 旧代码共存）
 ```
 
 ---
 
-## API Reference
+## API 参考
 
 ### `ErrorMiddleware(conf) func(http.Handler) http.Handler`
 
-Global middleware that wraps an entire `http.Handler`. It catches `panic(error)` and writes a JSON error response.
+全局中间件，包裹整个 `http.Handler`。捕获 `panic(error)` 并写入 JSON 错误响应。
 
 ### `NewErrorMiddleware(ib) func(http.Handler) http.Handler`
 
-Convenience version of `ErrorMiddleware` using the default configuration.
+`ErrorMiddleware` 的便捷版本，使用默认配置。
 
 ### `WrapHandlerFunc(conf, handler) http.HandlerFunc`
 
-Wraps a single `http.HandlerFunc`. Its behavior matches `ErrorMiddleware` (panic capture + translation + JSON response).
+包裹单个 `http.HandlerFunc`，行为与 `ErrorMiddleware` 一致（panic 捕获 + 翻译 + JSON 响应）。
 
 ### `WriteError(conf, w, r, err) error`
 
-Explicitly used inside a handler to translate an error and write a JSON response. The caller can explicitly handle write failures.
+在 handler 内部显式调用，翻译错误并写入 JSON 响应。调用方可以显式处理写出失败。
 
 ### `HandleError(conf, w, r, err)`
 
-Backward-compatible wrapper. It internally calls `WriteError` and logs write failures without returning them.
+兼容入口。内部调用 `WriteError` 并记录写出失败日志，不返回错误。
 
 ### `WriteJSONError(err, w) error`
 
-The lowest-level writer. It only converts an error into JSON and writes it to the `ResponseWriter`. It **does not translate** the error.
+最底层的写入函数，仅将 error 转为 JSON 写入 `ResponseWriter`。**不做翻译**。适合已经手动翻译过的场景。

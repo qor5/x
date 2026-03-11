@@ -1,25 +1,25 @@
 # httperrors HTTP Response Examples
 
-This document explains the HTTP response format produced by the `httperrors` package in different scenarios and clearly separates what belongs in the **Response Header** from what belongs in the **Response Body**.
+本文档详细说明 `httperrors` 包在各种场景下的 HTTP 响应格式，明确区分 **Response Header** 和 **Response Body** 中的信息。
 
 ---
 
-## Design Principles
+## 设计原则
 
-- The HTTP status code appears **only in the Response Header** and is **not duplicated** in the body
-- The body uses **camelCase** field names
-- Empty fields are automatically omitted through `omitempty`
-- `Content-Type` is always `application/json`
+- HTTP status code **只在 Response Header** 中，Body 中**不重复**
+- Body 使用 **camelCase** 字段命名
+- 空值字段通过 `omitempty` **自动省略**，不会出现在 Body 中
+- `Content-Type` 固定为 `application/json`
 
 ---
 
-## Error Propagation Model
+## 错误传播模型
 
-In normal Go code, errors are propagated layer by layer using `return error`.
-Only at the final HTTP handler boundary is an error handed to `ErrorMiddleware` via `panic` so it can be converted into an HTTP response.
+在正常的 Go 程序中，错误通过 `return error` 在调用链中逐层传递。
+只有在 HTTP handler 的最终入口处，才通过 `panic` 将错误交给 `ErrorMiddleware` 捕获并写入 HTTP 响应。
 
 ```go
-// ===== Service layer: always return error =====
+// ===== 业务/服务层：始终 return error =====
 
 func (s *UserService) GetUser(ctx context.Context, id string) (*User, error) {
     user, err := s.repo.FindByID(ctx, id)
@@ -32,35 +32,37 @@ func (s *UserService) GetUser(ctx context.Context, id string) (*User, error) {
     return user, nil
 }
 
-// ===== HTTP handler layer: panic to hand the error to middleware =====
+// ===== HTTP handler 层：调用业务逻辑，panic 传播错误给 middleware =====
 
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
     user, err := h.userService.GetUser(r.Context(), r.PathValue("id"))
     if err != nil {
-        panic(err)
+        panic(err) // ErrorMiddleware 会捕获并写入 JSON 响应
     }
+    // 正常响应...
     json.NewEncoder(w).Encode(user)
 }
 ```
 
-> **Key point**: `panic` only appears at the handler boundary. It is the mechanism used to hand an `error` to middleware.
-> Business logic should still use `return error`, following standard Go conventions.
+> **关键点**: `panic` 只出现在 handler 的边界处，是将 `error` 交给 middleware 的手段。
+> 业务代码中一律使用 `return error`，与标准 Go 惯例一致。
 
-The code examples below are split into two parts where needed: the **service layer** (`return`) and the **handler layer** (`panic`).
+以下各场景的 Go 代码示例分为 **业务层**（return）和 **handler 层**（panic）两部分。
 
 ---
 
-## 1. Simple Error Without Extra Information
+## 1. 简单错误（无额外信息）
 
-**Scenario**: resource not found.
+**场景**: 资源未找到
 
 ```go
-// Service layer
+// 业务层
 func (s *UserService) GetUser(ctx context.Context, id string) (*User, error) {
+    // ...
     return nil, httperrors.Error(http.StatusNotFound, httperrors.ReasonNotFound, "user not found")
 }
 
-// Handler layer
+// handler 层
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
     user, err := h.userService.GetUser(r.Context(), r.PathValue("id"))
     if err != nil {
@@ -86,13 +88,13 @@ Content-Type: application/json
 }
 ```
 
-> `metadata`, `fieldViolations`, and `localizedMessage` are omitted when empty.
+> `metadata`、`fieldViolations`、`localizedMessage` 均为空，不出现在 Body 中。
 
 ---
 
-## 2. Simple Error with i18n Translation
+## 2. 简单错误 + i18n 翻译
 
-**Scenario**: same as above, but the caller requests Chinese.
+**场景**: 同上，但请求方指定了中文
 
 ### Request Header
 
@@ -100,7 +102,7 @@ Content-Type: application/json
 x-selected-language: zh
 ```
 
-or:
+或者:
 
 ```
 Accept-Language: zh
@@ -123,16 +125,16 @@ Content-Type: application/json
 }
 ```
 
-> `message` keeps the original English text. The translation is placed in `localizedMessage`. `code` is never translated.
+> `message` 保持原始英文不变，翻译结果放在 `localizedMessage` 字段中。`code` 始终是原始 reason 常量，不翻译。
 
 ---
 
-## 3. Error with Metadata
+## 3. 带 Metadata 的错误
 
-**Scenario**: permission denied with extra structured context.
+**场景**: 权限不足，附带额外上下文
 
 ```go
-// Service layer
+// 业务层
 func (s *ProjectService) Delete(ctx context.Context, id string) error {
     if !hasPermission(ctx, "project", "delete") {
         return httperrors.New(http.StatusForbidden, httperrors.ReasonPermissionDenied, "permission denied").
@@ -141,10 +143,11 @@ func (s *ProjectService) Delete(ctx context.Context, id string) error {
                 "action":   "delete",
             }).Err()
     }
+    // ...
     return nil
 }
 
-// Handler layer
+// handler 层
 func (h *ProjectHandler) Delete(w http.ResponseWriter, r *http.Request) {
     if err := h.projectService.Delete(r.Context(), r.PathValue("id")); err != nil {
         panic(err)
@@ -175,11 +178,12 @@ Content-Type: application/json
 
 ---
 
-## 4. Field Validation Error Without Translation
+## 4. 字段校验错误（无翻译）
 
-**Scenario**: a form submission contains multiple invalid fields.
+**场景**: 表单提交，多个字段不合法
 
 ```go
+// 业务层 / 校验逻辑
 func (req *CreateUserRequest) Validate() error {
     var fvs httperrors.FieldViolations
     if req.Email == "" {
@@ -188,7 +192,17 @@ func (req *CreateUserRequest) Validate() error {
     if len(req.Password) < 8 {
         fvs = append(fvs, httperrors.NewFieldViolation("password", "TOO_SHORT", "password must be at least 8 characters"))
     }
-    return httperrors.BadRequest(fvs...).Err()
+    return httperrors.BadRequest(fvs...).Err() // 无违规时返回 nil
+}
+
+// handler 层
+func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
+    var req CreateUserRequest
+    json.NewDecoder(r.Body).Decode(&req)
+    if err := req.Validate(); err != nil {
+        panic(err)
+    }
+    // ...
 }
 ```
 
@@ -220,11 +234,13 @@ Content-Type: application/json
 }
 ```
 
+> 每个 `fieldViolation` 中的 `localizedMessage` 为空时不出现。
+
 ---
 
-## 5. Field Validation Error with i18n Translation
+## 5. 字段校验错误 + i18n 翻译
 
-**Scenario**: same as above, but the caller requests Chinese.
+**场景**: 同上，请求方指定中文
 
 ### Request Header
 
@@ -235,7 +251,7 @@ x-selected-language: zh
 ### Response Header
 
 ```
-HTTP/1.1 400 Bad Request
+HTTP/1.1 422 Unprocessable Entity
 Content-Type: application/json
 ```
 
@@ -263,16 +279,18 @@ Content-Type: application/json
 }
 ```
 
-> The top-level `message` remains unchanged and the translated text goes to `localizedMessage`.
-> The same rule applies to each field violation.
+> - 顶层 `message` 保持原始英文不变，翻译结果放在 `localizedMessage` 中
+> - 每个 fieldViolation 的 `message` 保持原始英文描述不变，翻译结果放在 `localizedMessage` 中
+> - `code` 始终是原始 reason 常量，不翻译
 
 ---
 
-## 6. Nested Field Validation Error
+## 6. 嵌套字段校验错误
 
-**Scenario**: nested object validation using dot-separated field paths.
+**场景**: 嵌套对象校验，字段路径用 `.` 分隔
 
 ```go
+// 子对象校验
 func (a *Address) Validate() error {
     var fvs httperrors.FieldViolations
     if a.Street == "" {
@@ -284,6 +302,7 @@ func (a *Address) Validate() error {
     return httperrors.BadRequest(fvs...).Err()
 }
 
+// 父对象校验：用 ToFieldViolations 组合子对象的错误并 prepend 字段前缀
 func (req *CreateOrderRequest) Validate() error {
     var all httperrors.FieldViolations
     if err := req.Address.Validate(); err != nil {
@@ -321,13 +340,16 @@ Content-Type: application/json
 }
 ```
 
+> 每个 `fieldViolation` 中的 `localizedMessage` 为空时不出现。
+
 ---
 
-## 7. Array Element Validation Error
+## 7. 数组元素校验错误
 
-**Scenario**: one or more elements inside an array are invalid.
+**场景**: 数组中某个元素校验失败
 
 ```go
+// 业务层
 func (req *CreateOrderRequest) Validate() error {
     var fvs httperrors.FieldViolations
     for i, item := range req.Items {
@@ -367,16 +389,26 @@ Content-Type: application/json
 
 ---
 
-## 8. Internal Server Error
+## 8. 服务端内部错误
 
-**Scenario**: unexpected backend failure.
+**场景**: 未预期的异常
 
 ```go
+// 业务层：包装底层错误
 func (s *OrderService) Create(ctx context.Context, req *CreateOrderRequest) error {
     if err := s.repo.Insert(ctx, req); err != nil {
         return httperrors.WrapStatus(err, http.StatusInternalServerError, "failed to create order")
     }
     return nil
+}
+
+// handler 层
+func (h *OrderHandler) Create(w http.ResponseWriter, r *http.Request) {
+    // ...
+    if err := h.orderService.Create(r.Context(), &req); err != nil {
+        panic(err)
+    }
+    // ...
 }
 ```
 
@@ -396,13 +428,16 @@ Content-Type: application/json
 }
 ```
 
+> 内部错误的 cause（堆栈、原始错误信息）**不会暴露给前端**，只在服务端日志中可见。
+
 ---
 
-## 9. Authentication and Authorization Errors
+## 9. 认证/鉴权错误
 
-### 9a. Unauthenticated (401)
+### 9a. 未认证（401）
 
 ```go
+// 中间件 / 业务层
 func authMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         if !isAuthenticated(r) {
@@ -429,13 +464,15 @@ Content-Type: application/json
 }
 ```
 
-### 9b. Permission Denied (403)
+### 9b. 无权限（403）
 
 ```go
+// 业务层
 func (s *ResourceService) Get(ctx context.Context, id string) (*Resource, error) {
     if !hasAccess(ctx, id) {
         return nil, httperrors.Error(http.StatusForbidden, httperrors.ReasonPermissionDenied, "you do not have access to this resource")
     }
+    // ...
     return resource, nil
 }
 ```
@@ -458,17 +495,19 @@ Content-Type: application/json
 
 ---
 
-## 10. Conflict Error
+## 10. 冲突错误
 
-**Scenario**: optimistic locking or uniqueness conflict.
+**场景**: 乐观锁冲突、唯一约束冲突
 
 ```go
+// 业务层
 func (s *UserService) Register(ctx context.Context, email string) error {
     exists, _ := s.repo.ExistsByEmail(ctx, email)
     if exists {
         return httperrors.New(http.StatusConflict, httperrors.ReasonAlreadyExists, "email already registered").
             WithMetadata(map[string]string{"field": "email"}).Err()
     }
+    // ...
     return nil
 }
 ```
@@ -494,9 +533,10 @@ Content-Type: application/json
 
 ---
 
-## 11. Rate Limit Error
+## 11. 限流错误
 
 ```go
+// 中间件
 func rateLimitMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         if isRateLimited(r) {
@@ -529,16 +569,20 @@ Content-Type: application/json
 
 ---
 
-## 12. Timeout Error
+## 12. 超时错误
 
-**Scenario**: upstream service timeout.
+**场景**: 上游服务超时
 
 ```go
+// 业务层：context.DeadlineExceeded 会被 FromError 自动识别为 504
 func (s *PaymentService) Charge(ctx context.Context, req *ChargeRequest) error {
-    _, err := s.gateway.Charge(ctx, req)
+    resp, err := s.gateway.Charge(ctx, req)
     if err != nil {
+        // 如果 err 是 context.DeadlineExceeded，FromError 会自动转为 504 + DEADLINE_EXCEEDED
+        // 也可以显式包装：
         return httperrors.WrapStatus(err, http.StatusGatewayTimeout, "upstream service timed out")
     }
+    // ...
     return nil
 }
 ```
@@ -561,30 +605,75 @@ Content-Type: application/json
 
 ---
 
-## Field Overview
+## 字段总览
 
-### Information in the Response Header
+### Response Header 中的信息
 
-| Header | Meaning | Example |
-| --- | --- | --- |
-| HTTP Status Line | HTTP status code and standard phrase | `HTTP/1.1 400 Bad Request` |
-| Content-Type | Fixed value | `application/json` |
+| Header           | 说明                   | 示例                                |
+| ---------------- | ---------------------- | ----------------------------------- |
+| HTTP Status Line | HTTP 状态码 + 标准短语 | `HTTP/1.1 422 Unprocessable Entity` |
+| Content-Type     | 固定值                 | `application/json`                  |
 
-### Information in the Response Body
+### Response Body 中的信息
 
-| Field | Type | Required | Meaning |
-| --- | --- | --- | --- |
-| `code` | `string` | Yes | Error reason constant such as `NOT_FOUND` or `INVALID_ARGUMENT` |
-| `message` | `string` | Yes | Original human-readable message |
-| `localizedMessage` | `string` | No | Translated message |
-| `metadata` | `object` | No | Additional key-value data |
-| `fieldViolations` | `array` | No | Field-level validation failures |
+| 字段               | 类型     | 是否必有 | 说明                                               |
+| ------------------ | -------- | -------- | -------------------------------------------------- |
+| `code`             | `string` | **是**   | 错误原因常量（如 `NOT_FOUND`、`REQUIRED`），不翻译 |
+| `message`          | `string` | **是**   | 原始人类可读消息，始终保持不变                     |
+| `localizedMessage` | `string` | 否       | 翻译后的消息，仅在翻译后出现                       |
+| `metadata`         | `object` | 否       | 键值对附加信息，空时省略                           |
+| `fieldViolations`  | `array`  | 否       | 字段级校验错误列表，空时省略                       |
 
-### Elements inside `fieldViolations`
+### fieldViolations 数组元素
 
-| Field | Type | Required | Meaning |
-| --- | --- | --- | --- |
-| `field` | `string` | Yes | Field path, including nested `.` and array indices like `[n]` |
-| `code` | `string` | Yes | Field-level validation code |
-| `message` | `string` | Yes | Original field-level message |
-| `localizedMessage` | `string` | No | Translated field-level message |
+| 字段               | 类型     | 是否必有 | 说明                                     |
+| ------------------ | -------- | -------- | ---------------------------------------- |
+| `field`            | `string` | **是**   | 字段路径，支持 `.` 嵌套和 `[n]` 数组索引 |
+| `code`             | `string` | **是**   | 该字段的错误原因常量                     |
+| `message`          | `string` | **是**   | 原始描述，始终保持不翻译                 |
+| `localizedMessage` | `string` | 否       | 该字段的翻译消息，空时省略               |
+
+---
+
+## 前端处理建议
+
+```typescript
+interface ErrorResponse {
+  code: string;
+  message: string;
+  localizedMessage?: string;
+  metadata?: Record<string, string>;
+  fieldViolations?: FieldViolation[];
+}
+
+interface FieldViolation {
+  field: string;
+  code: string;
+  message: string;
+  localizedMessage?: string;
+}
+
+// 使用示例
+async function handleResponse(resp: Response) {
+  if (!resp.ok) {
+    const err: ErrorResponse = await resp.json();
+
+    // 展示给用户的消息优先使用 localizedMessage（如果有），否则 fallback 到 message
+    const displayMessage = err.localizedMessage || err.message;
+    showError(displayMessage);
+
+    // 处理字段级错误
+    if (err.fieldViolations) {
+      for (const fv of err.fieldViolations) {
+        const fieldMsg = fv.localizedMessage || fv.message;
+        setFieldError(fv.field, fieldMsg);
+      }
+    }
+
+    // 根据 code 做特定逻辑
+    if (err.code === "UNAUTHENTICATED") {
+      redirectToLogin();
+    }
+  }
+}
+```
