@@ -380,10 +380,10 @@ func TestHandleError(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		fv := NewFieldViolation("email", "REQUIRED", "email is required")
-		err := ValidationError(fv).Err()
+		err := BadRequest(fv).Err()
 		HandleError(conf, w, req, err)
 
-		assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
 
 		var resp ErrorResponse
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))

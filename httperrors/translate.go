@@ -57,7 +57,7 @@ func (lm *LocalizedMessage) Clone() *LocalizedMessage {
 }
 
 // TranslateError translates error messages and field violations using the provided i18n instance and language.
-// Returns the original error if translation is not possible or if localized details already exist.
+// It always returns an error derived from a status representation of the input error (typically a *StatusError);
 //
 // Translation behavior:
 //   - The original message is preserved in the `message` field.

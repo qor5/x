@@ -38,12 +38,12 @@ func TestBadRequest(t *testing.T) {
 	})
 }
 
-func TestValidationError(t *testing.T) {
+func TestUnprocessableEntity(t *testing.T) {
 	t.Run("with violations", func(t *testing.T) {
 		fv1 := NewFieldViolation("email", "REQUIRED", "email is required")
 		fv2 := NewFieldViolation("name", "TOO_SHORT", "name is too short")
 
-		s := ValidationError(fv1, fv2)
+		s := UnprocessableEntity(fv1, fv2)
 		assert.Equal(t, http.StatusUnprocessableEntity, s.StatusCode())
 		assert.Equal(t, ReasonInvalidArgument, s.Reason())
 		assert.Equal(t, "invalid argument", s.Message())
@@ -55,13 +55,13 @@ func TestValidationError(t *testing.T) {
 	})
 
 	t.Run("empty violations returns OK", func(t *testing.T) {
-		s := ValidationError()
+		s := UnprocessableEntity()
 		assert.Equal(t, http.StatusOK, s.StatusCode())
 		assert.Equal(t, ReasonOK, s.Reason())
 	})
 
 	t.Run("nil input skipped", func(t *testing.T) {
-		s := ValidationError(nil)
+		s := UnprocessableEntity(nil)
 		assert.Equal(t, http.StatusOK, s.StatusCode())
 	})
 }

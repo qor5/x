@@ -1,6 +1,7 @@
 package httperrors
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/samber/lo"
@@ -10,7 +11,7 @@ import (
 func AssertFieldViolations(t *testing.T, err error, fvs ...*FieldViolation) {
 	t.Helper()
 	st := Convert(err)
-	assert.Equal(t, 422, st.StatusCode(), "error status code mismatch")
+	assert.Equal(t, http.StatusBadRequest, st.StatusCode(), "error status code mismatch")
 	assert.Equal(t, "invalid argument", st.Message(), "error message mismatch")
 
 	actualFVs := st.FieldViolations()

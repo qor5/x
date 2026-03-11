@@ -219,7 +219,7 @@ func TestTranslateError_LocalizedWithI18N(t *testing.T) {
 			NewFieldViolation("email", "REQUIRED", "email is required"),
 			NewFieldViolation("password", "TOO_SHORT", "password is too short"),
 		}
-		err := ValidationError(fvs).Err()
+		err := BadRequest(fvs).Err()
 		result := TranslateError(err, ib, language.Chinese)
 
 		st := Convert(result)
@@ -255,7 +255,7 @@ func TestTranslateError_TemplateVariables(t *testing.T) {
 		// WithLocalizedArgs sets positional %d args
 		fv := NewFieldViolation("password", "TOO_SHORT_MIN", "must be at least 8 characters").
 			WithLocalizedArgs(8)
-		err := ValidationError(fv).Err()
+		err := BadRequest(fv).Err()
 		result := TranslateError(err, ib, language.Chinese)
 
 		st := Convert(result)
@@ -269,7 +269,7 @@ func TestTranslateError_TemplateVariables(t *testing.T) {
 	t.Run("positional args - multiple", func(t *testing.T) {
 		fv := NewFieldViolation("age", "OUT_OF_RANGE", "must be between 18 and 120").
 			WithLocalizedArgs(18, 120)
-		err := ValidationError(fv).Err()
+		err := BadRequest(fv).Err()
 		result := TranslateError(err, ib, language.Chinese)
 
 		st := Convert(result)
@@ -283,7 +283,7 @@ func TestTranslateError_TemplateVariables(t *testing.T) {
 	t.Run("positional args - English", func(t *testing.T) {
 		fv := NewFieldViolation("password", "TOO_SHORT_MIN", "must be at least 8 characters").
 			WithLocalizedArgs(8)
-		err := ValidationError(fv).Err()
+		err := BadRequest(fv).Err()
 		result := TranslateError(err, ib, language.English)
 
 		st := Convert(result)
@@ -341,7 +341,7 @@ func TestTranslateError_TemplateVariables(t *testing.T) {
 			NewFieldViolation("age", "OUT_OF_RANGE", "must be between 18 and 120").
 				WithLocalizedArgs(18, 120),
 		}
-		err := ValidationError(fvs).Err()
+		err := BadRequest(fvs).Err()
 		result := TranslateError(err, ib, language.Chinese)
 
 		st := Convert(result)
