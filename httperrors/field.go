@@ -20,24 +20,6 @@ func BadRequest(inputs ...any) *Status {
 	return New(http.StatusBadRequest, ReasonInvalidArgument, "invalid argument").WithFieldViolations(violations...)
 }
 
-// UnprocessableEntity creates a new Status with http.StatusUnprocessableEntity (422)
-// and a flattened list of field violations.
-func UnprocessableEntity(inputs ...any) *Status {
-	violations, err := FlattenFieldViolations(inputs...)
-	if err != nil {
-		panic(err)
-	}
-	if len(violations) == 0 {
-		return New(http.StatusOK, ReasonOK, "ok")
-	}
-	return New(http.StatusUnprocessableEntity, ReasonInvalidArgument, "invalid argument").WithFieldViolations(violations...)
-}
-
-// Deprecated: use UnprocessableEntity instead.
-func ValidationError(inputs ...any) *Status {
-	return UnprocessableEntity(inputs...)
-}
-
 // FormatField formats a dotted field path by applying a formatting function to each segment
 // while preserving array index notations (e.g., [0], [1]).
 //
