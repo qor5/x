@@ -129,8 +129,6 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 		w.Header().Set(httpx.HeaderContentType, contentType)
 	}
 
-	w.WriteHeader(statusCode)
-
 	var data []byte
 	var werr error
 	if isJSON {
@@ -139,8 +137,11 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 		data, werr = proto.Marshal(verr)
 	}
 	if werr != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		return Wrapf(werr, codes.Internal, ReasonFromCode(codes.Internal).String(), "failed to marshal error (isJSON:%t)", isJSON).Err()
 	}
+
+	w.WriteHeader(statusCode)
 
 	_, werr = w.Write(data)
 	if werr != nil {

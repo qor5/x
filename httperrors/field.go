@@ -1,26 +1,23 @@
-package statusx
+package httperrors
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/pkg/errors"
-	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
-	"google.golang.org/genproto/googleapis/rpc/errdetails"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/protobuf/proto"
 )
 
-// BadRequest creates a new Status with the InvalidArgument code and a flattened list of field violations.
+// BadRequest creates a new Status with http.StatusBadRequest (400) and a flattened list of field violations.
 func BadRequest(inputs ...any) *Status {
 	violations, err := FlattenFieldViolations(inputs...)
 	if err != nil {
 		panic(err)
 	}
 	if len(violations) == 0 {
-		return New(codes.OK, statusv1.ErrorReason_OK.String(), "ok")
+		return New(http.StatusOK, ReasonOK, "ok")
 	}
-	return New(codes.InvalidArgument, statusv1.ErrorReason_INVALID_ARGUMENT.String(), "invalid argument").WithFieldViolations(violations...)
+	return New(http.StatusBadRequest, ReasonInvalidArgument, "invalid argument").WithFieldViolations(violations...)
 }
 
 // FormatField formats a dotted field path by applying a formatting function to each segment
@@ -87,17 +84,18 @@ func cloneFieldViolations(fvs []*FieldViolation) []*FieldViolation {
 	return cloned
 }
 
-// FieldViolation represents a field-level validation violation with localization capability
+// FieldViolation represents a field-level validation violation with localization capability.
 //
+// Translation preserves the original description and stores the translated text in localizedMessage.
 // Priority order for localized messages:
 //  1. LocalizedMessage (highest priority - pre-translated, ready to use)
-//  2. Localized (lower priority - template that needs translation via interceptor)
+//  2. Localized (lower priority - template that needs translation via middleware)
 type FieldViolation struct {
 	field            string
 	reason           string
 	description      string
-	localized        *Localized                   // Localization template (requires translation via interceptor)
-	localizedMessage *errdetails.LocalizedMessage // Pre-translated message (ready to use)
+	localized        *Localized        // Localization template (requires translation via middleware)
+	localizedMessage *LocalizedMessage // Pre-translated message (ready to use)
 }
 
 type FieldViolations []*FieldViolation
@@ -130,39 +128,22 @@ func (f *FieldViolation) Description() string {
 	return f.description
 }
 
-// Localized returns the localization template if set.
+// GetLocalized returns the localization template if set.
 // Returns nil if no localization template is available.
-func (f *FieldViolation) Localized() *Localized {
-	if f.localized == nil {
+func (f *FieldViolation) GetLocalized() *Localized {
+	if f == nil || f.localized == nil {
 		return nil
 	}
-	// Return a copy to prevent external modification
-	return &Localized{
-		key:  f.localized.Key(),
-		args: f.localized.Args(),
-	}
+	return f.localized.Clone()
 }
 
-// LocalizedMessage returns the pre-translated message if available.
+// GetLocalizedMessage returns the pre-translated message if available.
 // Returns nil if no pre-translated message is set.
-func (f *FieldViolation) LocalizedMessage() *errdetails.LocalizedMessage {
-	if f.localizedMessage == nil {
+func (f *FieldViolation) GetLocalizedMessage() *LocalizedMessage {
+	if f == nil || f.localizedMessage == nil {
 		return nil
 	}
-	return proto.Clone(f.localizedMessage).(*errdetails.LocalizedMessage)
-}
-
-func (f *FieldViolation) Clone() *FieldViolation {
-	if f == nil {
-		return nil
-	}
-	return &FieldViolation{
-		field:            f.Field(),
-		reason:           f.Reason(),
-		description:      f.Description(),
-		localized:        f.Localized(),
-		localizedMessage: f.LocalizedMessage(),
-	}
+	return f.localizedMessage.Clone()
 }
 
 // NewFieldViolation creates a new field validation violation.
@@ -198,29 +179,28 @@ func (f *FieldViolation) WithLocalized(key string, args ...any) *FieldViolation 
 		reason:           f.Reason(),
 		description:      f.Description(),
 		localized:        &Localized{key: key, args: args},
-		localizedMessage: f.LocalizedMessage(),
+		localizedMessage: f.GetLocalizedMessage(),
 	}
 }
 
 // WithLocalizedArgs sets template arguments for i18n.
-// Preserves the existing localized key if present, or leaves it empty for the translator to use reason as fallback.
-// This is useful when you want to add template arguments without setting a specific i18n key.
+// This method relies on the constructor invariant that localized is initialized with the reason as the default key.
+// Use WithLocalized if you need to change the translation key before setting args.
 func (f *FieldViolation) WithLocalizedArgs(args ...any) *FieldViolation {
 	return f.WithLocalized(f.localized.Key(), args...)
 }
 
-// Proto converts FieldViolation to protobuf message
-func (f *FieldViolation) Proto() *statusv1.BadRequest_FieldViolation {
+// Clone creates a deep copy of this FieldViolation.
+func (f *FieldViolation) Clone() *FieldViolation {
 	if f == nil {
 		return nil
 	}
-
-	return &statusv1.BadRequest_FieldViolation{
-		Field:            f.Field(),
-		Reason:           f.Reason(),
-		Description:      f.Description(),
-		Localized:        f.Localized().Proto(),
-		LocalizedMessage: f.LocalizedMessage(),
+	return &FieldViolation{
+		field:            f.field,
+		reason:           f.reason,
+		description:      f.description,
+		localized:        f.localized.Clone(),
+		localizedMessage: f.localizedMessage.Clone(),
 	}
 }
 
@@ -240,71 +220,37 @@ func ToFieldViolations(err error, field string) FieldViolations {
 		s.message = "unknown error"
 	}
 
-	// Check for existing translated content in details
-	var localizedMessage *errdetails.LocalizedMessage
-	var badRequest *errdetails.BadRequest
-	for _, d := range s.details {
-		switch v := d.(type) {
-		case *errdetails.LocalizedMessage:
-			localizedMessage = proto.Clone(v).(*errdetails.LocalizedMessage)
-		case *errdetails.BadRequest:
-			badRequest = proto.Clone(v).(*errdetails.BadRequest)
-		}
-	}
-
 	// Main field error (skip if field is empty)
 	var result FieldViolations
 	if field != "" {
-		// Include main error as first field violation
-		var mainLocalized *Localized
-		if localizedMessage == nil {
-			// Only use s.localized if no existing translated message
-			mainLocalized = LocalizedFromProto(s.localized)
-		}
-
 		result = append(result, &FieldViolation{
-			field:            field,
-			reason:           s.Reason(),
-			description:      s.Message(),
-			localized:        mainLocalized,
-			localizedMessage: localizedMessage,
+			field:       field,
+			reason:      s.Reason(),
+			description: s.Message(),
+			localized:   s.Localized(),
 		})
 	}
 
-	// Process field violations - use existingBadRequest if present, otherwise s.badRequest
+	// Process field violations
 	var fieldPrefix string
 	if field != "" {
 		fieldPrefix = field + "."
 	}
-	if badRequest != nil {
-		// Use Google standard BadRequest from details
-		for _, fv := range badRequest.FieldViolations {
-			result = append(result, &FieldViolation{
-				field:            fieldPrefix + fv.Field,
-				reason:           fv.Reason,
-				description:      fv.Description,
-				localized:        nil,
-				localizedMessage: fv.LocalizedMessage,
-			})
-		}
-	} else if s.badRequest != nil {
-		// Use our custom badRequest
-		for _, fv := range s.badRequest.FieldViolations {
-			result = append(result, &FieldViolation{
-				field:            fieldPrefix + fv.Field,
-				reason:           fv.Reason,
-				description:      fv.Description,
-				localized:        LocalizedFromProto(fv.Localized),
-				localizedMessage: nil,
-			})
-		}
+	for _, fv := range s.fieldViolations {
+		result = append(result, &FieldViolation{
+			field:            fieldPrefix + fv.field,
+			reason:           fv.reason,
+			description:      fv.description,
+			localized:        fv.localized.Clone(),
+			localizedMessage: fv.localizedMessage.Clone(),
+		})
 	}
 
 	return result
 }
 
 // FlattenFieldViolations flattens various field violation types into a unified FieldViolations slice.
-// Supports *FieldViolation, []*FieldViolation, FieldViolations, and their protobuf equivalents.
+// Supports *FieldViolation, []*FieldViolation, FieldViolations.
 // Mixed types are allowed in a single call.
 //
 // Note: For error and *Status inputs, use ToFieldViolations(err, field) or status.ToFieldViolations(field)
@@ -325,26 +271,6 @@ func FlattenFieldViolations(inputs ...any) (FieldViolations, error) {
 			result = append(result, v...)
 		case FieldViolations:
 			result = append(result, v...)
-		case *errdetails.BadRequest_FieldViolation:
-			if v != nil {
-				result = append(result, &FieldViolation{
-					field:            v.Field,
-					reason:           v.Reason,
-					description:      v.Description,
-					localizedMessage: v.LocalizedMessage,
-				})
-			}
-		case []*errdetails.BadRequest_FieldViolation:
-			for _, pbFv := range v {
-				if pbFv != nil {
-					result = append(result, &FieldViolation{
-						field:            pbFv.Field,
-						reason:           pbFv.Reason,
-						description:      pbFv.Description,
-						localizedMessage: pbFv.LocalizedMessage,
-					})
-				}
-			}
 		default:
 			return nil, errors.Errorf("unsupported type for flatten field violations: %T", v)
 		}
