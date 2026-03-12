@@ -147,7 +147,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
     user, err := h.userService.GetUser(r.Context(), r.PathValue("id"))
     if err != nil {
         if werr := httperrors.WriteError(h.conf, w, r, err); werr != nil {
-            slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err)
+            slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err, "writeError", werr)
         }
         return
     }
@@ -217,8 +217,8 @@ conf = conf.WithHTTPWriteErrorHook(func(next httperrors.HTTPWriteErrorFunc) http
 
 handler := httperrors.ErrorMiddleware(conf)(mux)
 wrapped := httperrors.WrapHandlerFunc(conf, h.GetUser)
-if err := httperrors.WriteError(conf, w, r, err); err != nil {
-    slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err)
+if werr := httperrors.WriteError(conf, w, r, err); werr != nil {
+    slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err, "writeError", werr)
 }
 httperrors.HandleError(conf, w, r, err)
 ```

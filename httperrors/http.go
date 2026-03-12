@@ -90,7 +90,7 @@ func ErrorMiddleware(conf *HTTPErrorMiddlewareConfig) func(http.Handler) http.Ha
 							W:    w, R: r, Err: err,
 						})
 						if werr != nil {
-							slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err)
+							slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err, "writeError", werr)
 							return
 						}
 						written = output.Written
@@ -168,7 +168,7 @@ func WriteJSONError(err error, w http.ResponseWriter) error {
 //	    user, err := h.userService.GetUser(r.Context(), r.PathValue("id"))
 //	    if err != nil {
 //	        if herr := httperrors.WriteError(h.conf, w, r, err); herr != nil {
-//	            slog.ErrorContext(r.Context(), "Failed to write http response error", "error", herr, "originalError", err)
+//	            slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err, "writeError", herr)
 //	        }
 //	        return
 //	    }
@@ -206,7 +206,7 @@ func WriteError(conf *HTTPErrorMiddlewareConfig, w http.ResponseWriter, r *http.
 // It is kept for backward compatibility and intentionally does not return write errors.
 func HandleError(conf *HTTPErrorMiddlewareConfig, w http.ResponseWriter, r *http.Request, err error) {
 	if werr := WriteError(conf, w, r, err); werr != nil {
-		slog.ErrorContext(r.Context(), "Failed to write http response error", "error", werr, "originalError", err)
+		slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err, "writeError", werr)
 	}
 }
 

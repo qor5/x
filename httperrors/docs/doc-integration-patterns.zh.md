@@ -6,11 +6,11 @@
 
 ## 三种接入方式
 
-| 方式 | 函数 | 适用场景 | 错误传播 |
-| --- | --- | --- | --- |
-| **全局中间件** | `ErrorMiddleware` / `NewErrorMiddleware` | 所有 handler 都使用 httperrors | panic |
-| **单 handler 包裹** | `WrapHandlerFunc` | mux 中部分 handler 使用 httperrors | panic |
-| **显式调用** | `WriteError` / `HandleError` | handler 内部自行处理错误，不依赖 panic | return error / direct handling |
+| 方式                | 函数                                     | 适用场景                               | 错误传播                       |
+| ------------------- | ---------------------------------------- | -------------------------------------- | ------------------------------ |
+| **全局中间件**      | `ErrorMiddleware` / `NewErrorMiddleware` | 所有 handler 都使用 httperrors         | panic                          |
+| **单 handler 包裹** | `WrapHandlerFunc`                        | mux 中部分 handler 使用 httperrors     | panic                          |
+| **显式调用**        | `WriteError` / `HandleError`             | handler 内部自行处理错误，不依赖 panic | return error / direct handling |
 
 ---
 
@@ -118,6 +118,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 ## 3. 显式调用模式
 
 **适用场景**:
+
 - handler 内部想用 `return` 而非 `panic` 处理错误
 - 需要在写错误响应前后做额外逻辑（如日志、metrics）
 - 与现有框架集成，无法使用 panic 模式
@@ -147,7 +148,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
     user, err := h.userService.GetUser(r.Context(), r.PathValue("id"))
     if err != nil {
         if werr := httperrors.WriteError(h.conf, w, r, err); werr != nil {
-            slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err)
+            slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err, "writeError", werr)
         }
         return
     }
@@ -217,8 +218,8 @@ conf = conf.WithHTTPWriteErrorHook(func(next httperrors.HTTPWriteErrorFunc) http
 
 handler := httperrors.ErrorMiddleware(conf)(mux)
 wrapped := httperrors.WrapHandlerFunc(conf, h.GetUser)
-if err := httperrors.WriteError(conf, w, r, err); err != nil {
-    slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err)
+if werr := httperrors.WriteError(conf, w, r, err); werr != nil {
+    slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err, "writeError", err)
 }
 httperrors.HandleError(conf, w, r, err)
 ```
