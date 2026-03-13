@@ -471,3 +471,114 @@ func TestParseContentType(t *testing.T) {
 		})
 	}
 }
+
+// TestCORSOptionsWithOrigin verifies OPTIONS preflight request behavior
+// when Origin is empty or not in the allowlist.
+//
+// Key findings:
+// 1. OPTIONS preflight always returns 204 No Content (handled by rs/cors library)
+// 2. When Origin is empty or not in allowlist: NO Access-Control-Allow-* headers are returned
+// 3. When Origin is in allowlist: Access-Control-Allow-Origin, Methods, Credentials are returned
+// 4. The browser will block the actual request if preflight doesn't return proper CORS headers
+func TestCORSOptionsWithOrigin(t *testing.T) {
+	tests := []struct {
+		name                     string
+		allowedOrigins           []string
+		requestOrigin            string
+		expectedStatus           int
+		expectAccessControlAllow bool
+		expectedAllowOrigin      string
+	}{
+		{
+			name:                     "empty_origin_with_allowlist",
+			allowedOrigins:           []string{"https://example.com"},
+			requestOrigin:            "",
+			expectedStatus:           http.StatusNoContent, // 204 - preflight response
+			expectAccessControlAllow: false,
+			expectedAllowOrigin:      "",
+		},
+		{
+			name:                     "origin_in_allowlist",
+			allowedOrigins:           []string{"https://example.com"},
+			requestOrigin:            "https://example.com",
+			expectedStatus:           http.StatusNoContent, // 204 - preflight response
+			expectAccessControlAllow: true,
+			expectedAllowOrigin:      "https://example.com",
+		},
+		{
+			name:                     "origin_not_in_allowlist",
+			allowedOrigins:           []string{"https://example.com"},
+			requestOrigin:            "https://evil.com",
+			expectedStatus:           http.StatusNoContent, // 204 - preflight response
+			expectAccessControlAllow: false,
+			expectedAllowOrigin:      "",
+		},
+		{
+			name:                     "empty_allowlist_with_origin",
+			allowedOrigins:           []string{},
+			requestOrigin:            "https://example.com",
+			expectedStatus:           http.StatusNoContent, // 204 - preflight response
+			expectAccessControlAllow: false,
+			expectedAllowOrigin:      "",
+		},
+		{
+			name:                     "empty_allowlist_empty_origin",
+			allowedOrigins:           []string{},
+			requestOrigin:            "",
+			expectedStatus:           http.StatusNoContent, // 204 - preflight response
+			expectAccessControlAllow: false,
+			expectedAllowOrigin:      "",
+		},
+		{
+			name:                     "wildcard_origin_supported",
+			allowedOrigins:           []string{"*"},
+			requestOrigin:            "https://any.com",
+			expectedStatus:           http.StatusNoContent, // 204 - preflight response
+			expectAccessControlAllow: true,
+			expectedAllowOrigin:      "*", // wildcard returns "*" not the actual origin
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			})
+
+			config := SecurityConfig{
+				CORS: CORSConfig{
+					AllowedOrigins: tt.allowedOrigins,
+				},
+			}
+			middleware := Security(config)
+			secureHandler := middleware(handler)
+
+			req := httptest.NewRequest(http.MethodOptions, "/test", nil)
+			if tt.requestOrigin != "" {
+				req.Header.Set("Origin", tt.requestOrigin)
+			}
+			req.Header.Set("Access-Control-Request-Method", "POST")
+
+			w := httptest.NewRecorder()
+			secureHandler.ServeHTTP(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			assert.Equal(t, tt.expectedStatus, resp.StatusCode, "Status code should match")
+
+			allowOrigin := resp.Header.Get("Access-Control-Allow-Origin")
+			allowMethods := resp.Header.Get("Access-Control-Allow-Methods")
+			allowCredentials := resp.Header.Get("Access-Control-Allow-Credentials")
+			if tt.expectAccessControlAllow {
+				assert.Equal(t, tt.expectedAllowOrigin, allowOrigin, "Access-Control-Allow-Origin should match")
+				assert.NotEmpty(t, allowMethods, "Access-Control-Allow-Methods should be set")
+				assert.Equal(t, "true", allowCredentials, "Access-Control-Allow-Credentials should be true")
+			} else {
+				assert.Empty(t, allowOrigin, "Access-Control-Allow-Origin should be empty")
+				assert.Empty(t, allowMethods, "Access-Control-Allow-Methods should be empty")
+				assert.Empty(t, allowCredentials, "Access-Control-Allow-Credentials should be empty")
+			}
+		})
+	}
+}
