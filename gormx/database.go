@@ -169,6 +169,10 @@ func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm
 		return nil, nil, errors.Wrap(err, "failed to setup omit associations plugin")
 	}
 
+	if err := db.Use(SoftDeleteUpdatedAtPlugin); err != nil {
+		return nil, nil, errors.Wrap(err, "failed to setup soft delete updated at plugin")
+	}
+
 	if err := db.Use(NewTracingPlugin(&conf.Tracing)); err != nil {
 		return nil, nil, errors.Wrap(err, "failed to setup database tracing plugin")
 	}
