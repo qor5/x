@@ -78,16 +78,12 @@ func TestSoftDeleteUpdatedAtPlugin(t *testing.T) {
 		record := SoftDeleteUpdatedAtModel{Name: "soft-delete"}
 		require.NoError(t, db.WithContext(ctx).Create(&record).Error)
 
-		createdUpdatedAt := record.UpdatedAt
-		time.Sleep(20 * time.Millisecond)
-
 		require.NoError(t, db.WithContext(ctx).Delete(&record).Error)
 
 		var deletedRecord SoftDeleteUpdatedAtModel
 		require.NoError(t, db.WithContext(ctx).Unscoped().Where("id = ?", record.ID).First(&deletedRecord).Error)
 		require.False(t, deletedRecord.DeletedAt.Time.IsZero())
-		require.True(t, deletedRecord.UpdatedAt.After(createdUpdatedAt) || deletedRecord.UpdatedAt.Equal(deletedRecord.DeletedAt.Time))
-		require.WithinDuration(t, deletedRecord.DeletedAt.Time, deletedRecord.UpdatedAt, time.Second)
+		require.True(t, deletedRecord.UpdatedAt.Equal(deletedRecord.DeletedAt.Time))
 	})
 
 	t.Run("hard delete does not try to update UpdatedAt", func(t *testing.T) {
@@ -122,16 +118,12 @@ func TestSoftDeleteUpdatedAtPlugin(t *testing.T) {
 		record := SoftDeleteCustomFieldNameModel{ID: uuid.NewString(), Name: "custom-fields"}
 		require.NoError(t, db.WithContext(ctx).Create(&record).Error)
 
-		createdModifiedAt := record.ModifiedAt
-		time.Sleep(20 * time.Millisecond)
-
 		require.NoError(t, db.WithContext(ctx).Delete(&record).Error)
 
 		var deletedRecord SoftDeleteCustomFieldNameModel
 		require.NoError(t, db.WithContext(ctx).Unscoped().Where("id = ?", record.ID).First(&deletedRecord).Error)
 		require.False(t, deletedRecord.RemovedAt.Time.IsZero())
-		require.True(t, deletedRecord.ModifiedAt.After(createdModifiedAt))
-		require.WithinDuration(t, deletedRecord.RemovedAt.Time, deletedRecord.ModifiedAt, time.Second)
+		require.True(t, deletedRecord.ModifiedAt.Equal(deletedRecord.RemovedAt.Time))
 	})
 
 	t.Run("custom field names dry run SQL", func(t *testing.T) {
@@ -154,19 +146,13 @@ func TestSoftDeleteUpdatedAtPlugin(t *testing.T) {
 		record := SoftDeleteMultiAutoUpdateModel{ID: uuid.NewString(), Name: "multi-auto-update"}
 		require.NoError(t, db.WithContext(ctx).Create(&record).Error)
 
-		createdUpdatedAt := record.UpdatedAt
-		createdModifiedAt := record.ModifiedAt
-		time.Sleep(20 * time.Millisecond)
-
 		require.NoError(t, db.WithContext(ctx).Delete(&record).Error)
 
 		var deletedRecord SoftDeleteMultiAutoUpdateModel
 		require.NoError(t, db.WithContext(ctx).Unscoped().Where("id = ?", record.ID).First(&deletedRecord).Error)
 		require.False(t, deletedRecord.DeletedAt.Time.IsZero())
-		require.True(t, deletedRecord.UpdatedAt.After(createdUpdatedAt))
-		require.True(t, deletedRecord.ModifiedAt.After(createdModifiedAt))
-		require.WithinDuration(t, deletedRecord.DeletedAt.Time, deletedRecord.UpdatedAt, time.Second)
-		require.WithinDuration(t, deletedRecord.DeletedAt.Time, deletedRecord.ModifiedAt, time.Second)
+		require.True(t, deletedRecord.UpdatedAt.Equal(deletedRecord.DeletedAt.Time))
+		require.True(t, deletedRecord.ModifiedAt.Equal(deletedRecord.DeletedAt.Time))
 	})
 
 	t.Run("multiple AutoUpdateTime fields dry run SQL", func(t *testing.T) {
