@@ -77,8 +77,11 @@ func TestSoftDeleteUpdatedAtPlugin(t *testing.T) {
 
 		record := SoftDeleteUpdatedAtModel{Name: "soft-delete"}
 		require.NoError(t, db.WithContext(ctx).Create(&record).Error)
+		lastUpdatedAt := record.UpdatedAt
+		require.False(t, record.UpdatedAt.IsZero())
 
 		require.NoError(t, db.WithContext(ctx).Delete(&record).Error)
+		require.True(t, record.UpdatedAt.After(lastUpdatedAt))
 
 		var deletedRecord SoftDeleteUpdatedAtModel
 		require.NoError(t, db.WithContext(ctx).Unscoped().Where("id = ?", record.ID).First(&deletedRecord).Error)
@@ -91,8 +94,11 @@ func TestSoftDeleteUpdatedAtPlugin(t *testing.T) {
 
 		record := SoftDeleteUpdatedAtModel{Name: "hard-delete"}
 		require.NoError(t, db.WithContext(ctx).Create(&record).Error)
+		lastUpdatedAt := record.UpdatedAt
+		require.False(t, record.UpdatedAt.IsZero())
 
 		require.NoError(t, db.WithContext(ctx).Unscoped().Delete(&record).Error)
+		require.True(t, record.UpdatedAt.Equal(lastUpdatedAt))
 
 		var count int64
 		require.NoError(t, db.WithContext(ctx).Model(&SoftDeleteUpdatedAtModel{}).Unscoped().Where("id = ?", record.ID).Count(&count).Error)
@@ -117,13 +123,32 @@ func TestSoftDeleteUpdatedAtPlugin(t *testing.T) {
 
 		record := SoftDeleteCustomFieldNameModel{ID: uuid.NewString(), Name: "custom-fields"}
 		require.NoError(t, db.WithContext(ctx).Create(&record).Error)
+		lastModifiedAt := record.ModifiedAt
+		require.False(t, record.ModifiedAt.IsZero())
 
 		require.NoError(t, db.WithContext(ctx).Delete(&record).Error)
+		require.True(t, record.ModifiedAt.After(lastModifiedAt))
 
 		var deletedRecord SoftDeleteCustomFieldNameModel
 		require.NoError(t, db.WithContext(ctx).Unscoped().Where("id = ?", record.ID).First(&deletedRecord).Error)
 		require.False(t, deletedRecord.RemovedAt.Time.IsZero())
 		require.True(t, deletedRecord.ModifiedAt.Equal(deletedRecord.RemovedAt.Time))
+	})
+
+	t.Run("hard delete does not update custom field names", func(t *testing.T) {
+		require.NoError(t, suite.ResetDB(ctx, &SoftDeleteCustomFieldNameModel{}))
+
+		record := SoftDeleteCustomFieldNameModel{ID: uuid.NewString(), Name: "custom-hard-delete"}
+		require.NoError(t, db.WithContext(ctx).Create(&record).Error)
+		lastModifiedAt := record.ModifiedAt
+		require.False(t, record.ModifiedAt.IsZero())
+
+		require.NoError(t, db.WithContext(ctx).Unscoped().Delete(&record).Error)
+		require.True(t, record.ModifiedAt.Equal(lastModifiedAt))
+
+		var count int64
+		require.NoError(t, db.WithContext(ctx).Model(&SoftDeleteCustomFieldNameModel{}).Unscoped().Where("id = ?", record.ID).Count(&count).Error)
+		require.Equal(t, int64(0), count)
 	})
 
 	t.Run("custom field names dry run SQL", func(t *testing.T) {
@@ -145,8 +170,14 @@ func TestSoftDeleteUpdatedAtPlugin(t *testing.T) {
 
 		record := SoftDeleteMultiAutoUpdateModel{ID: uuid.NewString(), Name: "multi-auto-update"}
 		require.NoError(t, db.WithContext(ctx).Create(&record).Error)
+		lastUpdatedAt := record.UpdatedAt
+		lastModifiedAt := record.ModifiedAt
+		require.False(t, record.UpdatedAt.IsZero())
+		require.False(t, record.ModifiedAt.IsZero())
 
 		require.NoError(t, db.WithContext(ctx).Delete(&record).Error)
+		require.True(t, record.UpdatedAt.After(lastUpdatedAt))
+		require.True(t, record.ModifiedAt.After(lastModifiedAt))
 
 		var deletedRecord SoftDeleteMultiAutoUpdateModel
 		require.NoError(t, db.WithContext(ctx).Unscoped().Where("id = ?", record.ID).First(&deletedRecord).Error)
@@ -168,5 +199,24 @@ func TestSoftDeleteUpdatedAtPlugin(t *testing.T) {
 		require.True(t, strings.Contains(sql, "\"updated_at\""), sql)
 		require.True(t, strings.Contains(sql, "\"modified_at\""), sql)
 		require.True(t, strings.Contains(sql, "\"deleted_at\""), sql)
+	})
+
+	t.Run("hard delete does not update multiple AutoUpdateTime fields", func(t *testing.T) {
+		require.NoError(t, suite.ResetDB(ctx, &SoftDeleteMultiAutoUpdateModel{}))
+
+		record := SoftDeleteMultiAutoUpdateModel{ID: uuid.NewString(), Name: "multi-hard-delete"}
+		require.NoError(t, db.WithContext(ctx).Create(&record).Error)
+		lastUpdatedAt := record.UpdatedAt
+		lastModifiedAt := record.ModifiedAt
+		require.False(t, record.UpdatedAt.IsZero())
+		require.False(t, record.ModifiedAt.IsZero())
+
+		require.NoError(t, db.WithContext(ctx).Unscoped().Delete(&record).Error)
+		require.True(t, record.UpdatedAt.Equal(lastUpdatedAt))
+		require.True(t, record.ModifiedAt.Equal(lastModifiedAt))
+
+		var count int64
+		require.NoError(t, db.WithContext(ctx).Model(&SoftDeleteMultiAutoUpdateModel{}).Unscoped().Where("id = ?", record.ID).Count(&count).Error)
+		require.Equal(t, int64(0), count)
 	})
 }
