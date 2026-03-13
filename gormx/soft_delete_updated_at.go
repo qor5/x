@@ -34,6 +34,13 @@ type deleteClausesPatcher struct {
 	patched sync.Map
 }
 
+// patch mutates the cached schema's DeleteClauses to inject our custom clause.
+// This is concurrency-safe because this callback is registered via Before("gorm:delete"),
+// so it always runs before GORM's "gorm:delete" callback reads DeleteClauses within the
+// same goroutine. Cross-goroutine safety is ensured by the mutex+sync.Map double-check:
+// any goroutine that passes through patch either performs the write under the lock or
+// observes patched==true (meaning the write has already completed) before proceeding
+// to "gorm:delete".
 func (p *deleteClausesPatcher) patch(tx *gorm.DB) {
 	if tx.Statement == nil || tx.Statement.Schema == nil {
 		return

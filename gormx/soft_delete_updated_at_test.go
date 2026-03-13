@@ -169,4 +169,38 @@ func TestSoftDeleteUpdatedAtPlugin(t *testing.T) {
 		require.True(t, strings.Contains(sql, "\"modified_at\""), sql)
 		require.True(t, strings.Contains(sql, "\"deleted_at\""), sql)
 	})
+
+	t.Run("concurrent soft deletes", func(t *testing.T) {
+		require.NoError(t, suite.ResetDB(ctx, &SoftDeleteUpdatedAtModel{}))
+
+		const n = 20
+		records := make([]SoftDeleteUpdatedAtModel, n)
+		for i := range records {
+			records[i] = SoftDeleteUpdatedAtModel{Name: "concurrent"}
+			require.NoError(t, db.WithContext(ctx).Create(&records[i]).Error)
+		}
+
+		// Use a fresh DB+plugin so the schema hasn't been patched yet,
+		// maximizing the chance of concurrent patch attempts.
+		freshDB, err := gorm.Open(postgresx.Open(suite.DSN()))
+		require.NoError(t, err)
+		require.NoError(t, freshDB.Use(gormx.SoftDeleteUpdatedAtPlugin))
+
+		errs := make(chan error, n)
+		for i := range records {
+			go func(r SoftDeleteUpdatedAtModel) {
+				errs <- freshDB.WithContext(ctx).Delete(&r).Error
+			}(records[i])
+		}
+		for range records {
+			require.NoError(t, <-errs)
+		}
+
+		for _, r := range records {
+			var deletedRecord SoftDeleteUpdatedAtModel
+			require.NoError(t, db.WithContext(ctx).Unscoped().Where("id = ?", r.ID).First(&deletedRecord).Error)
+			require.False(t, deletedRecord.DeletedAt.Time.IsZero())
+			require.True(t, deletedRecord.UpdatedAt.Equal(deletedRecord.DeletedAt.Time))
+		}
+	})
 }
