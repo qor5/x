@@ -1,6 +1,6 @@
 module github.com/qor5/x/v3
 
-go 1.24.0
+go 1.25.8
 
 require (
 	connectrpc.com/connect v1.18.1
