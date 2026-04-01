@@ -27,6 +27,8 @@ func (g *withTracing) Enqueue(ctx context.Context, tx *sql.Tx, plans ...que.Plan
 	ctx, span := logtracing.StartSpan(ctx, spanName)
 	defer func() { logtracing.EndSpan(ctx, xerr) }()
 
+	span.AppendKVs("span.type", "queue")
+	span.AppendKVs("span.role", "producer")
 	span.AppendKVs("goque.plans.count", len(plans))
 	span.AppendKVs("goque.transaction.enabled", tx != nil)
 
@@ -75,6 +77,8 @@ func PerformWithTracing(notifier errornotifier.Notifier) func(next func(ctx cont
 			defer logtracing.RecordPanic(ctx)
 
 			spanKVs := map[string]any{
+				"span.type":        "queue",
+				"span.role":        "consumer",
 				"goque.job.id":     j.ID(),
 				"goque.queue.name": j.Plan().Queue,
 			}
