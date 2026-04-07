@@ -458,3 +458,26 @@ func Wrap(err error, c codes.Code, reason, message string) *Status {
 func Wrapf(err error, c codes.Code, reason, format string, a ...any) *Status {
 	return Wrap(err, c, reason, fmt.Sprintf(format, a...))
 }
+
+// AlwaysWrap is like Wrap but always applies the given code, reason, and message,
+// even if err is already a Status error. The original error is preserved as the cause.
+func AlwaysWrap(err error, c codes.Code, reason, message string) *Status {
+	if err == nil {
+		return New(codes.OK, statusv1.ErrorReason_OK.String(), "")
+	}
+	s, ok := FromError(err)
+	if ok {
+		s = Clone(s)
+	}
+	s.cause = errors.WithStack(err)
+	s.code = c
+	s.message = message
+	s.errorInfo.Reason = reason
+	// Immediately fix key to creation-time reason
+	s.localized = &statusv1.Localized{Key: s.Reason()}
+	return s
+}
+
+func AlwaysWrapf(err error, c codes.Code, reason, format string, a ...any) *Status {
+	return AlwaysWrap(err, c, reason, fmt.Sprintf(format, a...))
+}
