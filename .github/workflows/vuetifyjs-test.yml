@@ -49,4 +49,4 @@ jobs:
           git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
       - name: Build and Test
-        run: cd ./ui/vuetifyx/vuetifyxjs/ && pnpm install && pnpm run build && pnpm run test:unit
+        run: cd ./ui/vuetifyx/vuetifyxjs/ && pnpm install --frozen-lockfile && pnpm run build && pnpm run test:unit
