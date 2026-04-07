@@ -262,10 +262,11 @@ func TestWrap(t *testing.T) {
 	}
 
 	{
-		status, _ := status.New(codes.NotFound, "resource not found").WithDetails(&errdetails.ErrorInfo{
+		st, err := status.New(codes.NotFound, "resource not found").WithDetails(&errdetails.ErrorInfo{
 			Reason: "NOT_FOUND",
 		})
-		wrapped := Wrap(status.Err(), codes.Internal, statusv1.ErrorReason_INTERNAL.String(), "internal server error")
+		require.NoError(t, err)
+		wrapped := Wrap(st.Err(), codes.Internal, statusv1.ErrorReason_INTERNAL.String(), "internal server error")
 		assert.Equal(t, codes.NotFound, wrapped.Code())
 		assert.Equal(t, "NOT_FOUND", wrapped.Reason())
 		assert.Equal(t, "resource not found", wrapped.Message())
@@ -318,9 +319,10 @@ func TestAlwaysWrap(t *testing.T) {
 	})
 
 	t.Run("overrides existing gRPC status error", func(t *testing.T) {
-		st, _ := status.New(codes.NotFound, "resource not found").WithDetails(&errdetails.ErrorInfo{
+		st, err := status.New(codes.NotFound, "resource not found").WithDetails(&errdetails.ErrorInfo{
 			Reason: "NOT_FOUND",
 		})
+		require.NoError(t, err)
 		wrapped := AlwaysWrap(st.Err(), codes.Internal, "INTERNAL_ERROR", "internal server error")
 		require.NotNil(t, wrapped)
 
