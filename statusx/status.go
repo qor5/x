@@ -474,8 +474,11 @@ func AlwaysWrap(err error, c codes.Code, reason, message string) *Status {
 	if err == nil {
 		return New(codes.OK, statusv1.ErrorReason_OK.String(), "")
 	}
-	s, ok := FromError(err)
-	if ok {
+	s, _ := FromError(err)
+	// Only clone when err is a *StatusError, since FromError returns a shared
+	// pointer in that case. Other branches already create a fresh *Status.
+	var se *StatusError
+	if errors.As(err, &se) {
 		s = Clone(s)
 	}
 	s.cause = errors.WithStack(err)
