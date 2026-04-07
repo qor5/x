@@ -369,6 +369,21 @@ func TestAlwaysWrap(t *testing.T) {
 		require.NotNil(t, localized)
 		assert.Equal(t, "DATABASE_ERROR", localized.Key)
 	})
+
+	t.Run("non-nil error with OK code becomes unknown", func(t *testing.T) {
+		originalErr := errors.New("original error")
+		wrapped := AlwaysWrap(originalErr, codes.OK, statusv1.ErrorReason_OK.String(), "should become unknown")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, codes.Unknown, wrapped.Code())
+		assert.Equal(t, statusv1.ErrorReason_UNKNOWN.String(), wrapped.Reason())
+		assert.Equal(t, "should become unknown", wrapped.Message())
+		assert.True(t, errors.Is(wrapped.Err(), originalErr))
+
+		localized := wrapped.Localized()
+		require.NotNil(t, localized)
+		assert.Equal(t, statusv1.ErrorReason_UNKNOWN.String(), localized.Key)
+	})
 }
 
 func TestAlwaysWrapf(t *testing.T) {
