@@ -461,6 +461,11 @@ func Wrapf(err error, c codes.Code, reason, format string, a ...any) *Status {
 
 // AlwaysWrap is like Wrap but always applies the given code, reason, and message,
 // even if err is already a Status error. The original error is preserved as the cause.
+// If err is nil, it returns an OK status (consistent with Wrap).
+//
+// When wrapping an existing Status, structural details (field violations, metadata, etc.)
+// are preserved via Clone, but the localized key is reset to match the new reason.
+// Use WithLocalized/WithLocalizedArgs on the result if custom localization is needed.
 func AlwaysWrap(err error, c codes.Code, reason, message string) *Status {
 	if err == nil {
 		return New(codes.OK, statusv1.ErrorReason_OK.String(), "")
