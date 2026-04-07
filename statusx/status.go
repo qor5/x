@@ -459,9 +459,13 @@ func Wrapf(err error, c codes.Code, reason, format string, a ...any) *Status {
 	return Wrap(err, c, reason, fmt.Sprintf(format, a...))
 }
 
-// AlwaysWrap is like Wrap but always applies the given code, reason, and message,
-// even if err is already a Status error. The original error is preserved as the cause.
-// If err is nil, it returns an OK status (consistent with Wrap).
+// AlwaysWrap is like Wrap but always sets the underlying code, reason, and message
+// fields, even if err is already a Status error. The original error is preserved as
+// the cause. If err is nil, it returns an OK status (consistent with Wrap).
+//
+// Note: the computed Code()/Reason() follow the Status invariant that a non-nil cause
+// cannot be OK. If err is non-nil and c == codes.OK, Code() returns codes.Unknown and
+// Reason() returns "UNKNOWN", even though the stored fields are set as given.
 //
 // When wrapping an existing Status, structural details (field violations, metadata, etc.)
 // are preserved via Clone, but the localized key is reset to match the new reason.

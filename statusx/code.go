@@ -71,16 +71,18 @@ func WrapCodef(err error, code codes.Code, format string, a ...any) *Status {
 	return Wrapf(err, code, ReasonFromCode(code).String(), format, a...)
 }
 
-// AlwaysWrapCode is like WrapCode but always applies the given code and message,
+// AlwaysWrapCode is like WrapCode but always sets the given code and message,
 // even if err is already a Status error. The original error is preserved as the cause.
-// If err is nil, it returns an OK status (consistent with AlwaysWrap).
+// If err is nil, it returns an OK status. See AlwaysWrap for details on the
+// codes.OK + non-nil error edge case.
 func AlwaysWrapCode(err error, code codes.Code, message string) *Status {
 	return AlwaysWrap(err, code, ReasonFromCode(code).String(), message)
 }
 
-// AlwaysWrapCodef is like WrapCodef but always applies the given code and formatted message,
+// AlwaysWrapCodef is like WrapCodef but always sets the given code and formatted message,
 // even if err is already a Status error. The original error is preserved as the cause.
-// If err is nil, it returns an OK status (consistent with AlwaysWrap).
+// If err is nil, it returns an OK status. See AlwaysWrap for details on the
+// codes.OK + non-nil error edge case.
 func AlwaysWrapCodef(err error, code codes.Code, format string, a ...any) *Status {
 	return AlwaysWrapf(err, code, ReasonFromCode(code).String(), format, a...)
 }
