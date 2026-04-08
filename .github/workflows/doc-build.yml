@@ -26,7 +26,7 @@ jobs:
 
       - name: Install dep
         working-directory: ui/vuetifyx/vuetifyxjs
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: build doc
         working-directory: ui/vuetifyx/vuetifyxjs

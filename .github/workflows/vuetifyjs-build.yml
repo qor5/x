@@ -34,7 +34,7 @@ jobs:
       - name: Build project
         run: |
           cd ui/vuetifyx/vuetifyxjs
-          pnpm install
+          pnpm install --frozen-lockfile
           pnpm run build
 
       - name: Commit build artifacts
