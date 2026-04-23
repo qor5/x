@@ -1,8 +1,5 @@
 name: Build and Deploy Docs
-permissions:
-  contents: write
-  checks: write
-  pull-requests: read
+permissions: {}
 
 on:
   push:
@@ -12,6 +9,10 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      checks: write
+      pull-requests: read
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
