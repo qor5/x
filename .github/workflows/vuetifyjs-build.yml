@@ -1,8 +1,5 @@
 name: Build and Commit Artifacts
-permissions:
-  contents: write
-  checks: write
-  pull-requests: read
+permissions: {}
 
 on:
   pull_request:
@@ -11,6 +8,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      checks: write
+      pull-requests: read
 
     steps:
       - name: Checkout code

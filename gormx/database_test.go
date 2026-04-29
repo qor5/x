@@ -174,14 +174,10 @@ func TestNewIAMDialector(t *testing.T) {
 			},
 			errContains: "invalid port",
 		},
-		{
-			name: "missing user",
-			args: args{
-				dsn:    "postgres://:pass@hostname:5432/dbname",
-				region: "us-west-2",
-			},
-			errContains: "user is required",
-		},
+		// Note: pgx v5.9+ populates an empty user with the current OS user,
+		// matching libpq behavior. As a result there is no DSN that leaves
+		// conf.User empty, so the "user is required" branch in NewIAMDialector
+		// is defensive and not directly testable via ParseConfig inputs.
 		{
 			name: "password provided",
 			args: args{
