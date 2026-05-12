@@ -5,10 +5,11 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/netip"
 	"time"
 
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/go-connections/nat"
+	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/api/types/network"
 	"github.com/pkg/errors"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -92,10 +93,10 @@ func OpenContainer(ctx context.Context, conf *ContainerConfig) (_ *Container, xe
 	}
 	if conf.HostPort != "" {
 		req.HostConfigModifier = func(hostConfig *container.HostConfig) {
-			hostConfig.PortBindings = map[nat.Port][]nat.PortBinding{
-				"5432/tcp": {
+			hostConfig.PortBindings = network.PortMap{
+				network.MustParsePort("5432/tcp"): {
 					{
-						HostIP:   "0.0.0.0",
+						HostIP:   netip.MustParseAddr("0.0.0.0"),
 						HostPort: conf.HostPort,
 					},
 				},
