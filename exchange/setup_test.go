@@ -1,12 +1,14 @@
 package exchange_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/theplant/testenv"
+	"github.com/qor5/x/v3/gormx"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -49,19 +51,22 @@ type TestExchangeCompositePrimaryKeyModel struct {
 }
 
 func TestMain(m *testing.M) {
-	env, err := testenv.New().DBEnable(true).SetUp()
+	ctx := context.Background()
+	container, err := gormx.OpenContainer(ctx, nil)
 	if err != nil {
 		panic(err)
 	}
-	defer func() { _ = env.TearDown() }()
-	db = env.DB
+	defer func() { _ = container.Terminate(ctx) }()
+
+	db, err = gorm.Open(postgres.Open(container.DSN), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
 	db.Logger = db.Logger.LogMode(logger.Info)
 
 	migrateTables()
 
-	s := m.Run()
-	// dropTables()
-	os.Exit(s)
+	os.Exit(m.Run())
 }
 
 func migrateTables() {
