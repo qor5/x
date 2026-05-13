@@ -38,7 +38,7 @@ require (
 	github.com/pquerna/otp v1.4.0
 	github.com/qiniu/api.v7/v7 v7.8.2
 	github.com/qor5/confx v0.0.0-20250426065316-0d28db5b4d54
-	github.com/qor5/go-bus v0.0.0-20250731113321-2c127f29aaaa
+	github.com/qor5/go-bus v0.1.1-0.20260513042224-f44a29d2650c
 	github.com/qor5/go-que v1.1.0
 	github.com/qor5/web/v3 v3.0.12-0.20250610095130-935d3f95f63a
 	github.com/rs/cors v1.11.1
@@ -53,7 +53,7 @@ require (
 	github.com/theplant/htmlgo v1.0.3
 	github.com/theplant/inject v1.2.2
 	github.com/theplant/osenv v0.0.2
-	github.com/theplant/ratelimiter v1.0.1
+	github.com/theplant/ratelimiter v1.0.2-0.20260513051226-060e61f4e5d3
 	github.com/theplant/testingutils v0.0.2
 	github.com/theplant/validator v0.0.0-20210202101755-357a9daa8f5f
 	go.opentelemetry.io/otel/trace v1.43.0
@@ -109,7 +109,6 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/dlclark/regexp2 v1.11.2 // indirect
-	github.com/docker/docker v28.5.2+incompatible // indirect
 	github.com/docker/go-connections v0.6.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -188,7 +187,6 @@ require (
 	github.com/spf13/viper v1.19.0 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.6.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/testcontainers/testcontainers-go/modules/redis v0.42.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.16 // indirect
 	github.com/tklauser/numcpus v0.11.0 // indirect
 	github.com/uber/jaeger-client-go v2.29.1+incompatible // indirect

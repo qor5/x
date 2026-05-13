@@ -129,8 +129,6 @@ github.com/distribution/reference v0.6.0 h1:0IXCQ5g4/QMHHkarYzh5l+u8T3t73zM5Qvfr
 github.com/distribution/reference v0.6.0/go.mod h1:BbU0aIcezP1/5jX/8MP0YiH4SdvB5Y4f/wlDRiLyi3E=
 github.com/dlclark/regexp2 v1.11.2 h1:/u628IuisSTwri5/UKloiIsH8+qF2Pu7xEQX+yIKg68=
 github.com/dlclark/regexp2 v1.11.2/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
-github.com/docker/docker v28.5.2+incompatible h1:DBX0Y0zAjZbSrm1uzOkdr1onVghKaftjlSWt4AFexzM=
-github.com/docker/docker v28.5.2+incompatible/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
 github.com/docker/go-connections v0.6.0 h1:LlMG9azAe1TqfR7sO+NJttz1gy6KO7VJBh+pMmjSD94=
 github.com/docker/go-connections v0.6.0/go.mod h1:AahvXYshr6JgfUJGdDCs2b5EZG/vmaMAntpSFH5BFKE=
 github.com/docker/go-units v0.5.0 h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4=
@@ -383,8 +381,8 @@ github.com/qiniu/api.v7/v7 v7.8.2 h1:f08kI0MmsJNzK4sUS8bG3HDH67ktwd/ji23Gkiy2ra4
 github.com/qiniu/api.v7/v7 v7.8.2/go.mod h1:FPsIqxh1Ym3X01sANE5ZwXfLZSWoCUp5+jNI8cLo3l0=
 github.com/qor5/confx v0.0.0-20250426065316-0d28db5b4d54 h1:sO/saPkFgwfLaiCVTg+e9x6lAYBrqY91h1REu4NLMm0=
 github.com/qor5/confx v0.0.0-20250426065316-0d28db5b4d54/go.mod h1:03dPo1SHYn9sU57mH67Y1p9FIcglWaHr4i/xkeYmX4o=
-github.com/qor5/go-bus v0.0.0-20250731113321-2c127f29aaaa h1:occnZcByMdRE7LSualIogL17T6/5a9d7XhAkoYjzVBI=
-github.com/qor5/go-bus v0.0.0-20250731113321-2c127f29aaaa/go.mod h1:U7v/C7reFIQcF+GVh5ALCSWF52pnRno81c76mWYiTMs=
+github.com/qor5/go-bus v0.1.1-0.20260513042224-f44a29d2650c h1:smg7+S2uHp3/Dvva/ki4RcIltM+7+pyEFz1nSV95Xg4=
+github.com/qor5/go-bus v0.1.1-0.20260513042224-f44a29d2650c/go.mod h1:UV+kThN6+hyzktGwwrihgZCLDNZ9kI/1gscuFoNq804=
 github.com/qor5/go-que v1.1.0 h1:jv7BYovZTXRwpshzvaolZezVILlny++AjeMdV/MV/Tc=
 github.com/qor5/go-que v1.1.0/go.mod h1:TSB15i8+bfrNCNYk6qcldIfPB9ubKbfFT7FwxgKvh4Q=
 github.com/qor5/web/v3 v3.0.12-0.20250610095130-935d3f95f63a h1:msSdenwBRqoe4VX6Wltm6shmgnpT6G8AHq+D9PRUE0M=
@@ -451,10 +449,8 @@ github.com/theplant/inject v1.2.2 h1:TVJVOKBQpMWPPHrjuivr6/oXIPMEr90OzxpOSz2kP74
 github.com/theplant/inject v1.2.2/go.mod h1:VFF27CAA2RdajLKbwsXLtZfr927sdmntRWcGVrkDfmU=
 github.com/theplant/osenv v0.0.2 h1:SI2I/gLQQj5pQgpBQ8YKx/u4i7KE7yG2Gmr/ZORuxn8=
 github.com/theplant/osenv v0.0.2/go.mod h1:gUdlLzvmJb/dyBmXk+qEWiIhAN1tmVhYktzK1HHEz3c=
-github.com/theplant/ratelimiter v1.0.1 h1:JEtCbhdU8DHLb9gVLOosZwc/HIAsXqAt1mnq0hMUbt0=
-github.com/theplant/ratelimiter v1.0.1/go.mod h1:6W19Pzj2f+FbOtpsv8xYMWuEM8UCgOpFyxCctDyMBH4=
-github.com/theplant/testenv v0.2.1 h1:GL80bSN7GHs4tl98W1ufdd2YcQ0BkHncWSgsOZsNY6U=
-github.com/theplant/testenv v0.2.1/go.mod h1:/Eq/353mtHC7t1VzGpZ/dzGI/YQ5QN1kZMB0+5GqCn4=
+github.com/theplant/ratelimiter v1.0.2-0.20260513051226-060e61f4e5d3 h1:+S2Ssxy6M0GY2AJoA6rbGgnBuumMQy9sm3JvSwceRS4=
+github.com/theplant/ratelimiter v1.0.2-0.20260513051226-060e61f4e5d3/go.mod h1:nfD6Vg0xZyNrfcPZeApIjZweaK2pBiEUq1a57Qsn3Lo=
 github.com/theplant/testingutils v0.0.2 h1:ryFb7J8NPnyMA4mdgBEf5ha3QUqWA9WVulWGyUbH2u4=
 github.com/theplant/testingutils v0.0.2/go.mod h1:nh7wj3YTJehg0PBHnPXtvqIqdnBUn0Gqb79JHnblFuc=
 github.com/theplant/validator v0.0.0-20210202101755-357a9daa8f5f h1:VQbZHMv9xuUihaRESflntL8VIi/cI6nVaP6a+F78BkU=
