@@ -383,8 +383,8 @@ github.com/qiniu/api.v7/v7 v7.8.2 h1:f08kI0MmsJNzK4sUS8bG3HDH67ktwd/ji23Gkiy2ra4
 github.com/qiniu/api.v7/v7 v7.8.2/go.mod h1:FPsIqxh1Ym3X01sANE5ZwXfLZSWoCUp5+jNI8cLo3l0=
 github.com/qor5/confx v0.0.0-20250426065316-0d28db5b4d54 h1:sO/saPkFgwfLaiCVTg+e9x6lAYBrqY91h1REu4NLMm0=
 github.com/qor5/confx v0.0.0-20250426065316-0d28db5b4d54/go.mod h1:03dPo1SHYn9sU57mH67Y1p9FIcglWaHr4i/xkeYmX4o=
-github.com/qor5/go-bus v0.0.0-20250731113321-2c127f29aaaa h1:occnZcByMdRE7LSualIogL17T6/5a9d7XhAkoYjzVBI=
-github.com/qor5/go-bus v0.0.0-20250731113321-2c127f29aaaa/go.mod h1:U7v/C7reFIQcF+GVh5ALCSWF52pnRno81c76mWYiTMs=
+github.com/qor5/go-bus v0.1.1-0.20260513131612-93e3d0f42553 h1:ZKvMmd7USJXV/xwA3BJi0d9d7rn0DTPm49pnWIUjrTw=
+github.com/qor5/go-bus v0.1.1-0.20260513131612-93e3d0f42553/go.mod h1:EPgZ757/492ESIbC2nFZC8V4bf7ABk0DwfTePm4MVBk=
 github.com/qor5/go-que v1.1.0 h1:jv7BYovZTXRwpshzvaolZezVILlny++AjeMdV/MV/Tc=
 github.com/qor5/go-que v1.1.0/go.mod h1:TSB15i8+bfrNCNYk6qcldIfPB9ubKbfFT7FwxgKvh4Q=
 github.com/qor5/web/v3 v3.0.12-0.20250610095130-935d3f95f63a h1:msSdenwBRqoe4VX6Wltm6shmgnpT6G8AHq+D9PRUE0M=
