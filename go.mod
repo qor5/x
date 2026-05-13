@@ -41,6 +41,7 @@ require (
 	github.com/qor5/go-bus v0.0.0-20250731113321-2c127f29aaaa
 	github.com/qor5/go-que v1.1.0
 	github.com/qor5/web/v3 v3.0.12-0.20250610095130-935d3f95f63a
+	github.com/redis/go-redis/v9 v9.16.0
 	github.com/rs/cors v1.11.1
 	github.com/rs/xid v1.6.0
 	github.com/samber/lo v1.50.0
@@ -48,6 +49,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/sunfmin/reflectutils v1.0.6
 	github.com/testcontainers/testcontainers-go v0.42.0
+	github.com/testcontainers/testcontainers-go/modules/redis v0.42.0
 	github.com/theplant/appkit v0.0.0-20250528023215-3d0d299dc4c6
 	github.com/theplant/cachex v0.0.0-20251210183652-8e675368cbc5
 	github.com/theplant/htmlgo v1.0.3
@@ -154,6 +156,7 @@ require (
 	github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35 // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mdelapenya/tlscert v0.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.2.0 // indirect
@@ -176,7 +179,6 @@ require (
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
-	github.com/redis/go-redis/v9 v9.16.0 // indirect
 	github.com/sagikazarmark/locafero v0.6.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.3 // indirect
@@ -187,7 +189,6 @@ require (
 	github.com/spf13/viper v1.19.0 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.6.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/testcontainers/testcontainers-go/modules/redis v0.42.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.16 // indirect
 	github.com/tklauser/numcpus v0.11.0 // indirect
 	github.com/uber/jaeger-client-go v2.29.1+incompatible // indirect
