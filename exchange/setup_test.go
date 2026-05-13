@@ -52,13 +52,19 @@ type TestExchangeCompositePrimaryKeyModel struct {
 
 func TestMain(m *testing.M) {
 	ctx := context.Background()
-	container, err := gormx.OpenContainer(ctx, nil)
-	if err != nil {
-		panic(err)
-	}
-	defer func() { _ = container.Terminate(ctx) }()
 
-	db, err = gorm.Open(postgres.Open(container.DSN), &gorm.Config{})
+	testSuite := gormx.MustStartTestSuite(ctx)
+	defer func() {
+		if err := testSuite.Stop(context.Background()); err != nil {
+			fmt.Printf("Error during teardown: %v\n", err)
+		}
+	}()
+
+	// Open a plain connection without OmitAssociationsPlugin, which MustStartTestSuite installs
+	// via SetupDatabase. Exchange's importer relies on GORM creating nested associations for new
+	// records during CreateInBatches, so the plugin must not be active on this connection.
+	var err error
+	db, err = gorm.Open(postgres.Open(testSuite.DSN()), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
