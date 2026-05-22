@@ -161,42 +161,14 @@ const propsForTimeSelect = computed(() => {
   //   display: none;
   // }
 
+  // Vuetify 3.8+ docked variant lays out month and year on opposite sides via flex; the old overrides absolute-positioned non-existent classes and forced __month full-width, breaking the layout.
   &:deep(.v-date-picker-controls) {
-    display: block;
-    position: relative;
-    padding-inline-start: 15px;
-    padding-inline-end: 15px;
     padding-bottom: 20px;
 
-    .v-date-picker-controls__month-btn {
-      position: absolute;
-      left: 50%;
-      margin-left: -10px;
-      transform: translateX(-50%);
-      top: 2px;
-      .v-btn__content {
-        color: rgb(var(--v-theme-on-surface));
-      }
-    }
-
-    .v-date-picker-controls__mode-btn {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      margin-left: 65.5px;
-      top: 2px;
-    }
-
-    .v-date-picker-controls__month {
-      display: flex;
-      width: 100%;
-
+    .v-date-picker-controls__month,
+    .v-date-picker-controls__year {
       .v-btn {
         --v-btn-height: 20px;
-      }
-
-      & > :nth-child(2) {
-        margin-left: auto;
       }
     }
   }
