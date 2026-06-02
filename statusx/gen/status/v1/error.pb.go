@@ -41,28 +41,31 @@ const (
 	ErrorReason_UNAVAILABLE         ErrorReason = 14
 	ErrorReason_DATA_LOSS           ErrorReason = 15
 	ErrorReason_UNAUTHENTICATED     ErrorReason = 16
+	// It's not a standard gRPC code, but we'll still put it here to handle other error codes in x.
+	ErrorReason_RATE_LIMITED ErrorReason = 100
 )
 
 // Enum value maps for ErrorReason.
 var (
 	ErrorReason_name = map[int32]string{
-		0:  "OK",
-		1:  "CANCELED",
-		2:  "UNKNOWN",
-		3:  "INVALID_ARGUMENT",
-		4:  "DEADLINE_EXCEEDED",
-		5:  "NOT_FOUND",
-		6:  "ALREADY_EXISTS",
-		7:  "PERMISSION_DENIED",
-		8:  "RESOURCE_EXHAUSTED",
-		9:  "FAILED_PRECONDITION",
-		10: "ABORTED",
-		11: "OUT_OF_RANGE",
-		12: "UNIMPLEMENTED",
-		13: "INTERNAL",
-		14: "UNAVAILABLE",
-		15: "DATA_LOSS",
-		16: "UNAUTHENTICATED",
+		0:   "OK",
+		1:   "CANCELED",
+		2:   "UNKNOWN",
+		3:   "INVALID_ARGUMENT",
+		4:   "DEADLINE_EXCEEDED",
+		5:   "NOT_FOUND",
+		6:   "ALREADY_EXISTS",
+		7:   "PERMISSION_DENIED",
+		8:   "RESOURCE_EXHAUSTED",
+		9:   "FAILED_PRECONDITION",
+		10:  "ABORTED",
+		11:  "OUT_OF_RANGE",
+		12:  "UNIMPLEMENTED",
+		13:  "INTERNAL",
+		14:  "UNAVAILABLE",
+		15:  "DATA_LOSS",
+		16:  "UNAUTHENTICATED",
+		100: "RATE_LIMITED",
 	}
 	ErrorReason_value = map[string]int32{
 		"OK":                  0,
@@ -82,6 +85,7 @@ var (
 		"UNAVAILABLE":         14,
 		"DATA_LOSS":           15,
 		"UNAUTHENTICATED":     16,
+		"RATE_LIMITED":        100,
 	}
 )
 
@@ -116,7 +120,7 @@ var File_status_v1_error_proto protoreflect.FileDescriptor
 
 const file_status_v1_error_proto_rawDesc = "" +
 	"\n" +
-	"\x15status/v1/error.proto\x12\tstatus.v1*\xbd\x02\n" +
+	"\x15status/v1/error.proto\x12\tstatus.v1*\xcf\x02\n" +
 	"\vErrorReason\x12\x06\n" +
 	"\x02OK\x10\x00\x12\f\n" +
 	"\bCANCELED\x10\x01\x12\v\n" +
@@ -135,7 +139,8 @@ const file_status_v1_error_proto_rawDesc = "" +
 	"\bINTERNAL\x10\r\x12\x0f\n" +
 	"\vUNAVAILABLE\x10\x0e\x12\r\n" +
 	"\tDATA_LOSS\x10\x0f\x12\x13\n" +
-	"\x0fUNAUTHENTICATED\x10\x10B\x95\x01\n" +
+	"\x0fUNAUTHENTICATED\x10\x10\x12\x10\n" +
+	"\fRATE_LIMITED\x10dB\x95\x01\n" +
 	"\rcom.status.v1B\n" +
 	"ErrorProtoP\x01Z3github.com/qor5/x/v3/statusx/gen/status/v1;statusv1\xa2\x02\x03SXX\xaa\x02\tStatus.V1\xca\x02\tStatus\\V1\xe2\x02\x15Status\\V1\\GPBMetadata\xea\x02\n" +
 	"Status::V1b\x06proto3"
