@@ -41,3 +41,16 @@ func TestReasonFromCode(t *testing.T) {
 		})
 	}
 }
+
+func TestRateLimitedReason(t *testing.T) {
+	// RATE_LIMITED is a domain-specific reason, not aligned to a gRPC code.
+	// It lives at 100, leaving 17-99 reserved for future gRPC-code-aligned reasons.
+	assert.Equal(t, statusv1.ErrorReason(100), statusv1.ErrorReason_RATE_LIMITED)
+	assert.Equal(t, "RATE_LIMITED", statusv1.ErrorReason_RATE_LIMITED.String())
+
+	// It must not collide with any reason derived from a standard gRPC code.
+	for c := codes.OK; c <= codes.Unauthenticated; c++ {
+		assert.NotEqual(t, statusv1.ErrorReason_RATE_LIMITED, ReasonFromCode(c),
+			"RATE_LIMITED must not collide with the reason for code %s", c)
+	}
+}
