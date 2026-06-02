@@ -20,4 +20,7 @@ enum ErrorReason {
   UNAVAILABLE = 14;
   DATA_LOSS = 15;
   UNAUTHENTICATED = 16;
+
+  // It's not a standard gRPC code, but we'll still put it here to handle other error codes in x.
+  RATE_LIMITED = 100;
 }
