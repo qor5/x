@@ -57,5 +57,6 @@ func SetupDefaultLogger(conf *Config) (*slog.Logger, error) {
 	}
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
+	slog.SetLogLoggerLevel(level)
 	return logger, nil
 }
