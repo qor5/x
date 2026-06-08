@@ -38,7 +38,7 @@ require (
 	github.com/pquerna/otp v1.4.0
 	github.com/qiniu/api.v7/v7 v7.8.2
 	github.com/qor5/confx v0.0.0-20250426065316-0d28db5b4d54
-	github.com/qor5/go-bus v0.1.0
+	github.com/qor5/go-bus v0.1.2
 	github.com/qor5/go-que v1.1.0
 	github.com/qor5/web/v3 v3.0.12-0.20250610095130-935d3f95f63a
 	github.com/rs/cors v1.11.1
@@ -57,9 +57,9 @@ require (
 	github.com/theplant/testingutils v0.0.2
 	github.com/theplant/validator v0.0.0-20210202101755-357a9daa8f5f
 	go.opentelemetry.io/otel/trace v1.43.0
-	golang.org/x/crypto v0.49.0
-	golang.org/x/net v0.52.0
-	golang.org/x/text v0.35.0
+	golang.org/x/crypto v0.52.0
+	golang.org/x/net v0.55.0
+	golang.org/x/text v0.37.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260401024825-9d38bb4040a9
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
@@ -205,7 +205,7 @@ require (
 	golang.org/x/exp v0.0.0-20241204233417-43b7b7cde48d // indirect
 	golang.org/x/oauth2 v0.35.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260401024825-9d38bb4040a9 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
