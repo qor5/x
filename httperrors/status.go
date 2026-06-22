@@ -381,3 +381,53 @@ func WrapStatus(err error, httpStatus int, message string) *Status {
 func WrapStatusf(err error, httpStatus int, format string, a ...any) *Status {
 	return Wrapf(err, httpStatus, ReasonFromStatus(httpStatus), format, a...)
 }
+
+// AlwaysWrap is like Wrap but always sets the underlying httpStatus, reason, and message
+// fields, even if err is already a Status error. The original error is preserved as
+// the cause. If err is nil, it returns an OK status (consistent with Wrap).
+//
+// Note: the computed StatusCode()/Reason() follow the Status invariant that a non-error
+// cause cannot be OK. If err is non-nil and httpStatus is 2xx, StatusCode() returns 500
+// and Reason() returns "UNKNOWN", even though the stored fields are set as given.
+//
+// When wrapping an existing Status, structural details (field violations, metadata, etc.)
+// are preserved via Clone, but the localized key is reset to match the new reason.
+// Use WithLocalized/WithLocalizedArgs on the result if custom localization is needed.
+func AlwaysWrap(err error, httpStatus int, reason, message string) *Status {
+	if err == nil {
+		return New(http.StatusOK, ReasonOK, "")
+	}
+	s, _ := FromError(err)
+	// Only clone when err is a *StatusError, since FromError returns a shared
+	// pointer in that case. Other branches already create a fresh *Status.
+	var se *StatusError
+	if errors.As(err, &se) {
+		s = Clone(s)
+	}
+	s.cause = errors.WithStack(err)
+	s.httpStatus = httpStatus
+	s.message = message
+	s.reason = reason
+	s.localized = &Localized{key: s.Reason()}
+	return s
+}
+
+func AlwaysWrapf(err error, httpStatus int, reason, format string, a ...any) *Status {
+	return AlwaysWrap(err, httpStatus, reason, fmt.Sprintf(format, a...))
+}
+
+// AlwaysWrapStatus is like WrapStatus but always sets the given status code and message,
+// even if err is already a Status error. The original error is preserved as the cause.
+// If err is nil, it returns an OK status. See AlwaysWrap for details on the
+// 2xx status + non-nil error edge case.
+func AlwaysWrapStatus(err error, httpStatus int, message string) *Status {
+	return AlwaysWrap(err, httpStatus, ReasonFromStatus(httpStatus), message)
+}
+
+// AlwaysWrapStatusf is like WrapStatusf but always sets the given status code and
+// formatted message, even if err is already a Status error. The original error is
+// preserved as the cause. If err is nil, it returns an OK status. See AlwaysWrap
+// for details on the 2xx status + non-nil error edge case.
+func AlwaysWrapStatusf(err error, httpStatus int, format string, a ...any) *Status {
+	return AlwaysWrapf(err, httpStatus, ReasonFromStatus(httpStatus), format, a...)
+}
