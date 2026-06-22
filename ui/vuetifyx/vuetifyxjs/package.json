@@ -71,7 +71,8 @@
       "@vitepress-code-preview/container": "patches/@vitepress-code-preview__container.patch"
     },
     "overrides": {
-      "esbuild": "0.25.0"
+      "esbuild": "0.25.0",
+      "markdown-it@<=14.2.0": "14.2.0"
     }
   },
   "engines": {
