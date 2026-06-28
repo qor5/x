@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
-    "@tiptap/core": "^2.27.2",
+    "@tiptap/core": "^3.27.0",
     "@tiptap/vue-3": "^2.27.2",
     "@vitejs/plugin-vue-jsx": "^5.1.5",
     "@vueuse/core": "^11.3.0",
@@ -71,7 +71,9 @@
       "@vitepress-code-preview/container": "patches/@vitepress-code-preview__container.patch"
     },
     "overrides": {
-      "esbuild": "0.25.0"
+      "esbuild": "0.25.0",
+      "linkify-it@<=5.0.1": "5.0.1",
+      "@tiptap/extension-link@<=3.27.0": "3.27.0"
     }
   },
   "engines": {
