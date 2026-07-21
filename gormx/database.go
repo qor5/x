@@ -28,7 +28,7 @@ import (
 	_ "embed"
 )
 
-var DefaultCreateBatchSize = 100
+var DefaultCreateBatchSize = 512
 
 type AuthMethod string
 
