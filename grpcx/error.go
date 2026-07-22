@@ -51,6 +51,7 @@ func DefaultErrorUnaryServerInterceptor(notifier errornotifier.Notifier) grpc.Un
 		if span != nil {
 			span.AppendKVs(
 				"err.reason", st.Reason(),
+				"err.details", st.Details(),
 			)
 		}
 
@@ -60,8 +61,9 @@ func DefaultErrorUnaryServerInterceptor(notifier errornotifier.Notifier) grpc.Un
 				"full_method":    info.FullMethod,
 				"err.stacktrace": fmt.Sprintf("%+v", err),
 				"err.reason":     st.Reason(),
+				"err.details":    st.Details(),
 			})
-			slog.ErrorContext(ctx, fmt.Sprintf("grpc err in %s: %+v", info.FullMethod, err), "full_method", info.FullMethod, "err.reason", st.Reason())
+			slog.ErrorContext(ctx, fmt.Sprintf("grpc err in %s: %+v", info.FullMethod, err), "full_method", info.FullMethod, "err.reason", st.Reason(), "err.details", st.Details())
 		}
 
 		return err
