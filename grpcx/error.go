@@ -46,12 +46,14 @@ func ErrorUnaryServerInterceptor(errHandler func(ctx context.Context, req any, i
 func DefaultErrorUnaryServerInterceptor(notifier errornotifier.Notifier) grpc.UnaryServerInterceptor {
 	return ErrorUnaryServerInterceptor(func(ctx context.Context, req any, info *grpc.UnaryServerInfo, err error) error {
 		st := statusx.Convert(err)
+		reason := st.Reason()
+		details := st.Details()
 
 		span := logtracing.SpanFromContext(ctx)
 		if span != nil {
 			span.AppendKVs(
-				"err.reason", st.Reason(),
-				"err.details", st.Details(),
+				"err.reason", reason,
+				"err.details", details,
 			)
 		}
 
@@ -60,10 +62,10 @@ func DefaultErrorUnaryServerInterceptor(notifier errornotifier.Notifier) grpc.Un
 			notifier.Notify(err, nil, map[string]any{
 				"full_method":    info.FullMethod,
 				"err.stacktrace": fmt.Sprintf("%+v", err),
-				"err.reason":     st.Reason(),
-				"err.details":    st.Details(),
+				"err.reason":     reason,
+				"err.details":    details,
 			})
-			slog.ErrorContext(ctx, fmt.Sprintf("grpc err in %s: %+v", info.FullMethod, err), "full_method", info.FullMethod, "err.reason", st.Reason(), "err.details", st.Details())
+			slog.ErrorContext(ctx, fmt.Sprintf("grpc err in %s: %+v", info.FullMethod, err), "full_method", info.FullMethod, "err.reason", reason, "err.details", details)
 		}
 
 		return err
