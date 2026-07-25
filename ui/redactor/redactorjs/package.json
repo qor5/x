@@ -21,11 +21,11 @@
   "pnpm": {
     "overrides": {
       "esbuild": "0.25.0",
-      "@vue/shared": "3.5.40",
-      "@vue/server-renderer": "3.5.40",
       "@vue/compiler-core": "3.5.40",
       "@vue/compiler-dom": "3.5.40",
-      "@vue/compiler-ssr": "3.5.40"
+      "@vue/compiler-ssr": "3.5.40",
+      "@vue/shared": "3.5.40",
+      "@vue/server-renderer": "3.5.40"
     }
   }
 }
