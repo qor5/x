@@ -18,6 +18,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetches the entire history for a correct commit
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -50,9 +51,14 @@ jobs:
           # Check if there are any changes
           if ! git diff --cached --quiet; then
             git commit -m 'Add build artifacts'
-            git push origin HEAD:${{ github.head_ref }}
+            # Authenticate the push explicitly: checkout no longer persists the
+            # token in .git/config, and HEAD_REF goes through the environment so
+            # a crafted branch name cannot inject shell.
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${REPOSITORY}.git" "HEAD:${HEAD_REF}"
           else
             echo "No changes detected; skipping commit."
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_REF: ${{ github.head_ref }}
+          REPOSITORY: ${{ github.repository }}
