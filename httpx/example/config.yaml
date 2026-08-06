@@ -7,9 +7,15 @@ http:
   idleTimeout: "120s"
   # 0 = 不限。没有它，单个超大 body 会被整体读进内存。
   maxRequestBodySize: 0
-  # 0 = 不限。只防 fd 耗尽，**不是并发闸门**：HTTP/2 一条连接可承载多个 stream。
-  # 并发上限应由上游（网关 circuit breaker）或 in-flight middleware 控制。
+  # 0 = 不限。数的是 **TCP 连接**不是请求：HTTP/1.1 下两者接近，HTTP/2 下一条
+  # 连接多路复用许多请求，完全脱钩。它只防 fd 耗尽。
   maxConnections: 0
+  # 0 = 用 Go 默认值 250。**per-connection**，不是全局。
+  # 与 maxConnections 相乘才是在途请求的硬上限：maxConnections × maxConcurrentStreams。
+  # 单独设它约束不了任何东西——客户端多开几条连接就绕过去了。
+  # 网关已经限并发时（Envoy 的 maxParallelRequests），调小它没有额外保护，反而
+  # 损失多路复用；保持 0 即可，除非你需要这个上限在算术上可知。
+  maxConcurrentStreams: 0
   tls:
     enabled: false
     certBase64: ""

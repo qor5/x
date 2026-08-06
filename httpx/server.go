@@ -119,6 +119,14 @@ func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
 	protocols.SetUnencryptedHTTP2(true)
 	srv.Protocols = protocols
 
+	// 注意：Go 1.25 的 http.Server.HTTP2 字段注释仍写着 "This field does not yet
+	// have any effect"，但那句已经过时——h2_bundle.go 的 configFromServer 会经
+	// fillNetHTTPServerConfig 消费它。实测（1.25.6，读服务端 SETTINGS 帧）设 42
+	// 即通告 42，不设则为 250。Go 1.26 已删掉那句注释。
+	if conf.MaxConcurrentStreams > 0 {
+		srv.HTTP2 = &http.HTTP2Config{MaxConcurrentStreams: conf.MaxConcurrentStreams}
+	}
+
 	if conf.TLS.Enabled {
 		cert, err := loadTLSCertificate(conf.TLS.CertBase64, conf.TLS.KeyBase64)
 		if err != nil {
