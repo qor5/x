@@ -5,16 +5,22 @@ http:
   readHeaderTimeout: "4s"
   writeTimeout: "20s"
   idleTimeout: "120s"
-  # 0 = 不限。没有它，单个超大 body 会被整体读进内存。
+  # 0 = unlimited. Without it a single oversized body is read wholly into memory.
+  # Left at 0 by default on purpose: a sane cap depends entirely on the service
+  # (an upload endpoint may legitimately need hundreds of MiB), so the library
+  # cannot pick one for you. Set it per service, and prefer capping at the
+  # gateway too (Envoy requestBuffer / nginx proxy-body-size).
   maxRequestBodySize: 0
-  # 0 = 不限。数的是 **TCP 连接**不是请求：HTTP/1.1 下两者接近，HTTP/2 下一条
-  # 连接多路复用许多请求，完全脱钩。它只防 fd 耗尽。
+  # 0 = unlimited. Counts TCP CONNECTIONS, not requests: under HTTP/1.1 the two
+  # roughly coincide, under HTTP/2 one connection multiplexes many requests and
+  # they fully decouple. Guards fd exhaustion only.
   maxConnections: 0
-  # 0 = 用 Go 默认值 250。**per-connection**，不是全局。
-  # 与 maxConnections 相乘才是在途请求的硬上限：maxConnections × maxConcurrentStreams。
-  # 单独设它约束不了任何东西——客户端多开几条连接就绕过去了。
-  # 网关已经限并发时（Envoy 的 maxParallelRequests），调小它没有额外保护，反而
-  # 损失多路复用；保持 0 即可，除非你需要这个上限在算术上可知。
+  # 0 = Go's default (250). PER CONNECTION, not global.
+  # Multiply by maxConnections for the in-flight ceiling. On its own it bounds
+  # nothing — a client just opens more connections. Behind a gateway that already
+  # caps concurrency (Envoy's maxParallelRequests), lowering it buys no extra
+  # protection and costs multiplexing; leave it at 0 unless you need the ceiling
+  # to be arithmetically knowable.
   maxConcurrentStreams: 0
   tls:
     enabled: false

@@ -1,6 +1,7 @@
 package httpx_test
 
 import (
+	"bufio"
 	"context"
 	"crypto/tls"
 	"io"
@@ -161,4 +162,66 @@ func TestNewServer_MaxRequestBodySize(t *testing.T) {
 		defer func() { _ = resp.Body.Close() }()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 	})
+}
+
+// Migrating off h2c.NewHandler drops HTTP/1.1 Upgrade-based h2c (the stdlib
+// only speaks prior-knowledge). The contract we must keep is that such a
+// request still gets served — a protocol downgrade, never an error.
+//
+// Old behaviour: 101 Switching Protocols. New: 200 OK over HTTP/1.1.
+func TestNewServer_H2CUpgradeFallsBackToHTTP1(t *testing.T) {
+	addr := serve(t, &httpx.ServerConfig{Address: ":0"},
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_, _ = io.WriteString(w, r.Proto)
+		}))
+
+	conn, err := net.Dial("tcp", addr)
+	require.NoError(t, err)
+	defer func() { _ = conn.Close() }()
+	require.NoError(t, conn.SetDeadline(time.Now().Add(5*time.Second)))
+
+	_, err = io.WriteString(conn, "GET / HTTP/1.1\r\nHost: x\r\n"+
+		"Connection: Upgrade, HTTP2-Settings\r\nUpgrade: h2c\r\n"+
+		"HTTP2-Settings: AAMAAABkAARAAAAAAAIAAAAA\r\n\r\n")
+	require.NoError(t, err)
+
+	status, err := bufio.NewReader(conn).ReadString('\n')
+	require.NoError(t, err)
+	require.Contains(t, status, "200 OK",
+		"an Upgrade: h2c request must still be served, just without upgrading")
+	require.NotContains(t, status, "101")
+}
+
+// The old code forwarded IdleTimeout explicitly (&http2.Server{IdleTimeout: …}).
+// The stdlib path has to inherit it from http.Server, or h2c connections would
+// silently start living forever.
+func TestNewServer_IdleTimeoutAppliesToH2C(t *testing.T) {
+	const idle = 500 * time.Millisecond
+
+	addr := serve(t, &httpx.ServerConfig{Address: ":0", IdleTimeout: idle},
+		http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+
+	conn, err := net.Dial("tcp", addr)
+	require.NoError(t, err)
+	defer func() { _ = conn.Close() }()
+	require.NoError(t, conn.SetDeadline(time.Now().Add(5*time.Second)))
+
+	_, err = io.WriteString(conn, http2.ClientPreface)
+	require.NoError(t, err)
+	fr := http2.NewFramer(conn, conn)
+	require.NoError(t, fr.WriteSettings())
+
+	// An idle h2c connection must be shut down; the server signals that with
+	// GOAWAY (and then closes), so any read eventually stops succeeding.
+	deadline := time.Now().Add(4 * time.Second)
+	for time.Now().Before(deadline) {
+		f, err := fr.ReadFrame()
+		if err != nil {
+			return // connection closed — IdleTimeout did its job
+		}
+		if _, ok := f.(*http2.GoAwayFrame); ok {
+			return
+		}
+	}
+	t.Fatal("idle h2c connection was never closed — IdleTimeout is not reaching HTTP/2")
 }
