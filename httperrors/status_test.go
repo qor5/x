@@ -443,6 +443,156 @@ func TestWrapStatusf(t *testing.T) {
 	assert.Equal(t, "failed to query users", s.Message())
 }
 
+func TestAlwaysWrap(t *testing.T) {
+	t.Run("plain error", func(t *testing.T) {
+		originalErr := errors.New("original error")
+		wrapped := AlwaysWrap(originalErr, http.StatusInternalServerError, ReasonInternal, "internal server error")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, http.StatusInternalServerError, wrapped.StatusCode())
+		assert.Equal(t, ReasonInternal, wrapped.Reason())
+		assert.Equal(t, "internal server error", wrapped.Message())
+		assert.True(t, errors.Is(wrapped.Err(), originalErr))
+	})
+
+	t.Run("nil error", func(t *testing.T) {
+		wrapped := AlwaysWrap(nil, http.StatusInternalServerError, ReasonInternal, "internal server error")
+		require.NotNil(t, wrapped)
+		assert.Equal(t, http.StatusOK, wrapped.StatusCode())
+		assert.Equal(t, ReasonOK, wrapped.Reason())
+		assert.Equal(t, "", wrapped.Message())
+	})
+
+	t.Run("overrides existing StatusError", func(t *testing.T) {
+		original := New(http.StatusNotFound, "NOT_FOUND", "resource not found")
+		wrapped := AlwaysWrap(original.Err(), http.StatusInternalServerError, ReasonInternal, "internal server error")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, http.StatusInternalServerError, wrapped.StatusCode())
+		assert.Equal(t, ReasonInternal, wrapped.Reason())
+		assert.Equal(t, "internal server error", wrapped.Message())
+	})
+
+	t.Run("preserves details from existing StatusError", func(t *testing.T) {
+		original := New(http.StatusBadRequest, ReasonInvalidArgument, "validation failed").
+			WithFieldViolations(
+				NewFieldViolation("email", "field.email.invalid", "Email is invalid"),
+			).
+			WithMetadata(map[string]string{"key": "value"})
+
+		wrapped := AlwaysWrap(original.Err(), http.StatusInternalServerError, ReasonInternal, "internal server error")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, http.StatusInternalServerError, wrapped.StatusCode())
+		assert.Equal(t, ReasonInternal, wrapped.Reason())
+		assert.Equal(t, "internal server error", wrapped.Message())
+		assert.Len(t, wrapped.FieldViolations(), 1)
+		assert.Equal(t, "email", wrapped.FieldViolations()[0].Field())
+	})
+
+	t.Run("does not mutate original StatusError", func(t *testing.T) {
+		original := New(http.StatusNotFound, "NOT_FOUND", "resource not found").
+			WithMetadata(map[string]string{"key": "value"})
+
+		_ = AlwaysWrap(original.Err(), http.StatusInternalServerError, ReasonInternal, "internal server error")
+
+		assert.Equal(t, http.StatusNotFound, original.StatusCode())
+		assert.Equal(t, "NOT_FOUND", original.Reason())
+		assert.Equal(t, "resource not found", original.Message())
+	})
+
+	t.Run("localized key matches new reason", func(t *testing.T) {
+		original := New(http.StatusNotFound, "NOT_FOUND", "resource not found")
+		wrapped := AlwaysWrap(original.Err(), http.StatusInternalServerError, "DATABASE_ERROR", "database failed")
+		require.NotNil(t, wrapped)
+
+		localized := wrapped.Localized()
+		require.NotNil(t, localized)
+		assert.Equal(t, "DATABASE_ERROR", localized.Key())
+	})
+
+	t.Run("non-nil error with 2xx status becomes 500", func(t *testing.T) {
+		originalErr := errors.New("original error")
+		wrapped := AlwaysWrap(originalErr, http.StatusOK, ReasonOK, "should become unknown")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, http.StatusInternalServerError, wrapped.StatusCode())
+		assert.Equal(t, ReasonUnknown, wrapped.Reason())
+		assert.Equal(t, "should become unknown", wrapped.Message())
+		assert.True(t, errors.Is(wrapped.Err(), originalErr))
+
+		localized := wrapped.Localized()
+		require.NotNil(t, localized)
+		assert.Equal(t, ReasonUnknown, localized.Key())
+	})
+}
+
+func TestAlwaysWrapf(t *testing.T) {
+	t.Run("plain error with format", func(t *testing.T) {
+		originalErr := errors.New("original error")
+		wrapped := AlwaysWrapf(originalErr, http.StatusInternalServerError, ReasonInternal, "error for %s: %d", "user", 42)
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, http.StatusInternalServerError, wrapped.StatusCode())
+		assert.Equal(t, ReasonInternal, wrapped.Reason())
+		assert.Equal(t, "error for user: 42", wrapped.Message())
+	})
+
+	t.Run("overrides existing StatusError with format", func(t *testing.T) {
+		original := New(http.StatusNotFound, "NOT_FOUND", "resource not found")
+		wrapped := AlwaysWrapf(original.Err(), http.StatusInternalServerError, ReasonInternal, "error for %s", "user")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, http.StatusInternalServerError, wrapped.StatusCode())
+		assert.Equal(t, ReasonInternal, wrapped.Reason())
+		assert.Equal(t, "error for user", wrapped.Message())
+	})
+}
+
+func TestAlwaysWrapStatus(t *testing.T) {
+	t.Run("plain error", func(t *testing.T) {
+		originalErr := errors.New("original error")
+		wrapped := AlwaysWrapStatus(originalErr, http.StatusInternalServerError, "internal server error")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, http.StatusInternalServerError, wrapped.StatusCode())
+		assert.Equal(t, ReasonInternal, wrapped.Reason())
+		assert.Equal(t, "internal server error", wrapped.Message())
+	})
+
+	t.Run("overrides existing StatusError", func(t *testing.T) {
+		original := New(http.StatusNotFound, "NOT_FOUND", "resource not found")
+		wrapped := AlwaysWrapStatus(original.Err(), http.StatusInternalServerError, "internal server error")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, http.StatusInternalServerError, wrapped.StatusCode())
+		assert.Equal(t, ReasonInternal, wrapped.Reason())
+		assert.Equal(t, "internal server error", wrapped.Message())
+	})
+}
+
+func TestAlwaysWrapStatusf(t *testing.T) {
+	t.Run("plain error with format", func(t *testing.T) {
+		originalErr := errors.New("original error")
+		wrapped := AlwaysWrapStatusf(originalErr, http.StatusInternalServerError, "error for %s", "user")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, http.StatusInternalServerError, wrapped.StatusCode())
+		assert.Equal(t, ReasonInternal, wrapped.Reason())
+		assert.Equal(t, "error for user", wrapped.Message())
+	})
+
+	t.Run("overrides existing StatusError", func(t *testing.T) {
+		original := New(http.StatusNotFound, "NOT_FOUND", "resource not found")
+		wrapped := AlwaysWrapStatusf(original.Err(), http.StatusInternalServerError, "error for %s", "user")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, http.StatusInternalServerError, wrapped.StatusCode())
+		assert.Equal(t, ReasonInternal, wrapped.Reason())
+		assert.Equal(t, "error for user", wrapped.Message())
+	})
+}
+
 func TestString(t *testing.T) {
 	s := New(http.StatusNotFound, "NOT_FOUND", "user not found")
 	str := s.String()
