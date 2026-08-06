@@ -6,14 +6,39 @@ import (
 )
 
 type ServerConfig struct {
-	Address           string         `confx:"address" usage:"HTTP server address" validate:"required"`
-	PathPrefix        string         `confx:"pathPrefix" usage:"Path prefix for all handlers. Will be normalized to start with '/' and not end with '/' (except for root path '/'). Root path '/' is treated as no prefix. Example: 'api/v1' or '/api/v1/' both become '/api/v1'"`
-	ReadTimeout       time.Duration  `confx:"readTimeout" usage:"maximum duration before timing out read of the request"`
-	ReadHeaderTimeout time.Duration  `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers" validate:"ltefield=ReadTimeout"`
-	WriteTimeout      time.Duration  `confx:"writeTimeout" usage:"maximum duration before timing out write of the response"`
-	IdleTimeout       time.Duration  `confx:"idleTimeout" usage:"maximum amount of time to wait for the next request when keep-alives are enabled"`
-	TLS               TLSConfig      `confx:"tls"`
-	Security          SecurityConfig `confx:",squash"`
+	Address           string        `confx:"address" usage:"HTTP server address" validate:"required"`
+	PathPrefix        string        `confx:"pathPrefix" usage:"Path prefix for all handlers. Will be normalized to start with '/' and not end with '/' (except for root path '/'). Root path '/' is treated as no prefix. Example: 'api/v1' or '/api/v1/' both become '/api/v1'"`
+	ReadTimeout       time.Duration `confx:"readTimeout" usage:"maximum duration before timing out read of the request"`
+	ReadHeaderTimeout time.Duration `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers" validate:"ltefield=ReadTimeout"`
+	WriteTimeout      time.Duration `confx:"writeTimeout" usage:"maximum duration before timing out write of the response"`
+	IdleTimeout       time.Duration `confx:"idleTimeout" usage:"maximum amount of time to wait for the next request when keep-alives are enabled"`
+	// MaxRequestBodySize caps the request body via http.MaxBytesHandler. 0 means unlimited.
+	// Without it a single oversized body can be read entirely into memory.
+	MaxRequestBodySize int64 `confx:"maxRequestBodySize" usage:"maximum request body size in bytes, 0 for unlimited" validate:"gte=0"`
+	// MaxConcurrentStreams caps HTTP/2 streams per connection. 0 uses Go's default (250).
+	//
+	// This is PER CONNECTION, not global. Together with MaxConnections it gives a hard
+	// upper bound on in-flight requests: MaxConnections × MaxConcurrentStreams. On its own
+	// it bounds nothing — a client can just open more connections.
+	//
+	// Behind a gateway that already caps concurrency (Envoy's maxParallelRequests), lowering
+	// this buys no extra protection and costs multiplexing: the same request volume just
+	// queues at the gateway or opens more connections. Leave it at 0 unless you need the
+	// bound to be arithmetically knowable.
+	MaxConcurrentStreams int `confx:"maxConcurrentStreams" usage:"max HTTP/2 streams per connection (per-connection, not global; multiply by maxConnections for the in-flight ceiling), 0 for Go default (250)" validate:"gte=0"`
+	// MaxConnections caps concurrent TCP connections via netutil.LimitListener. 0 means unlimited.
+	//
+	// It counts CONNECTIONS, not requests. Under HTTP/1.1 a connection carries one request
+	// at a time so the two roughly coincide, but under HTTP/2 a single connection multiplexes
+	// many concurrent streams — so this is NOT a concurrency limit. It only guards against
+	// file-descriptor exhaustion. To bound concurrent requests, use the gateway's circuit
+	// breaker (e.g. Envoy's maxParallelRequests) or an in-flight middleware.
+	//
+	// Past the limit Accept blocks (connections queue in the kernel backlog) rather than
+	// being rejected.
+	MaxConnections int            `confx:"maxConnections" usage:"max concurrent TCP connections (connections, NOT requests: HTTP/2 multiplexes many requests per connection; guards fd exhaustion only), 0 for unlimited" validate:"gte=0"`
+	TLS            TLSConfig      `confx:"tls"`
+	Security       SecurityConfig `confx:",squash"`
 }
 
 type TLSConfig struct {
