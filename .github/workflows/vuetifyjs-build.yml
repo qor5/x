@@ -28,11 +28,6 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm@10.16.1
 
-      - name: Configure git for private repository access
-        run: |
-          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
-          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
-
       - name: Build project
         run: |
           cd ui/vuetifyx/vuetifyxjs
@@ -42,6 +37,12 @@ jobs:
       - name: Commit build artifacts
         if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
+          # Checkout no longer persists the token, so authenticate through gh's
+          # credential helper: it records only a helper directive
+          # (`!gh auth git-credential`) in ~/.gitconfig and resolves GH_TOKEN
+          # from this environment when git asks, so no token is written to disk.
+          gh auth setup-git --hostname github.com
+
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
@@ -51,14 +52,12 @@ jobs:
           # Check if there are any changes
           if ! git diff --cached --quiet; then
             git commit -m 'Add build artifacts'
-            # Authenticate the push explicitly: checkout no longer persists the
-            # token in .git/config, and HEAD_REF goes through the environment so
-            # a crafted branch name cannot inject shell.
-            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${REPOSITORY}.git" "HEAD:${HEAD_REF}"
+            # HEAD_REF goes through the environment so a crafted branch name
+            # cannot inject shell.
+            git push origin "HEAD:${HEAD_REF}"
           else
             echo "No changes detected; skipping commit."
           fi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_REF: ${{ github.head_ref }}
-          REPOSITORY: ${{ github.repository }}

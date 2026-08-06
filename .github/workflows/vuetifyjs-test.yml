@@ -45,10 +45,5 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm@10.16.1
 
-      - name: Configure git for private repository access
-        run: |
-          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
-          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
-
       - name: Build and Test
         run: cd ./ui/vuetifyx/vuetifyxjs/ && pnpm install --frozen-lockfile && pnpm run build && pnpm run test:unit
