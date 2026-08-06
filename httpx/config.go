@@ -15,11 +15,17 @@ type ServerConfig struct {
 	// MaxRequestBodySize caps the request body via http.MaxBytesHandler. 0 means unlimited.
 	// Without it a single oversized body can be read entirely into memory.
 	MaxRequestBodySize int64 `confx:"maxRequestBodySize" usage:"maximum request body size in bytes, 0 for unlimited"`
-	// MaxConnections caps concurrent connections via netutil.LimitListener. 0 means unlimited.
-	// This guards against fd exhaustion, NOT against request concurrency: one HTTP/2
-	// connection carries many streams. Cap concurrency upstream (gateway circuit breaker)
-	// or with an in-flight middleware instead. Accept blocks past the limit rather than rejecting.
-	MaxConnections int            `confx:"maxConnections" usage:"maximum number of concurrent connections, 0 for unlimited"`
+	// MaxConnections caps concurrent TCP connections via netutil.LimitListener. 0 means unlimited.
+	//
+	// It counts CONNECTIONS, not requests. Under HTTP/1.1 a connection carries one request
+	// at a time so the two roughly coincide, but under HTTP/2 a single connection multiplexes
+	// many concurrent streams — so this is NOT a concurrency limit. It only guards against
+	// file-descriptor exhaustion. To bound concurrent requests, use the gateway's circuit
+	// breaker (e.g. Envoy's maxParallelRequests) or an in-flight middleware.
+	//
+	// Past the limit Accept blocks (connections queue in the kernel backlog) rather than
+	// being rejected.
+	MaxConnections int            `confx:"maxConnections" usage:"max concurrent TCP connections (connections, NOT requests: HTTP/2 multiplexes many requests per connection; guards fd exhaustion only), 0 for unlimited"`
 	TLS            TLSConfig      `confx:"tls"`
 	Security       SecurityConfig `confx:",squash"`
 }
