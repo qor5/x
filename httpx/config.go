@@ -6,14 +6,22 @@ import (
 )
 
 type ServerConfig struct {
-	Address           string         `confx:"address" usage:"HTTP server address" validate:"required"`
-	PathPrefix        string         `confx:"pathPrefix" usage:"Path prefix for all handlers. Will be normalized to start with '/' and not end with '/' (except for root path '/'). Root path '/' is treated as no prefix. Example: 'api/v1' or '/api/v1/' both become '/api/v1'"`
-	ReadTimeout       time.Duration  `confx:"readTimeout" usage:"maximum duration before timing out read of the request"`
-	ReadHeaderTimeout time.Duration  `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers" validate:"ltefield=ReadTimeout"`
-	WriteTimeout      time.Duration  `confx:"writeTimeout" usage:"maximum duration before timing out write of the response"`
-	IdleTimeout       time.Duration  `confx:"idleTimeout" usage:"maximum amount of time to wait for the next request when keep-alives are enabled"`
-	TLS               TLSConfig      `confx:"tls"`
-	Security          SecurityConfig `confx:",squash"`
+	Address           string        `confx:"address" usage:"HTTP server address" validate:"required"`
+	PathPrefix        string        `confx:"pathPrefix" usage:"Path prefix for all handlers. Will be normalized to start with '/' and not end with '/' (except for root path '/'). Root path '/' is treated as no prefix. Example: 'api/v1' or '/api/v1/' both become '/api/v1'"`
+	ReadTimeout       time.Duration `confx:"readTimeout" usage:"maximum duration before timing out read of the request"`
+	ReadHeaderTimeout time.Duration `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers" validate:"ltefield=ReadTimeout"`
+	WriteTimeout      time.Duration `confx:"writeTimeout" usage:"maximum duration before timing out write of the response"`
+	IdleTimeout       time.Duration `confx:"idleTimeout" usage:"maximum amount of time to wait for the next request when keep-alives are enabled"`
+	// MaxRequestBodySize caps the request body via http.MaxBytesHandler. 0 means unlimited.
+	// Without it a single oversized body can be read entirely into memory.
+	MaxRequestBodySize int64 `confx:"maxRequestBodySize" usage:"maximum request body size in bytes, 0 for unlimited"`
+	// MaxConnections caps concurrent connections via netutil.LimitListener. 0 means unlimited.
+	// This guards against fd exhaustion, NOT against request concurrency: one HTTP/2
+	// connection carries many streams. Cap concurrency upstream (gateway circuit breaker)
+	// or with an in-flight middleware instead. Accept blocks past the limit rather than rejecting.
+	MaxConnections int            `confx:"maxConnections" usage:"maximum number of concurrent connections, 0 for unlimited"`
+	TLS            TLSConfig      `confx:"tls"`
+	Security       SecurityConfig `confx:",squash"`
 }
 
 type TLSConfig struct {

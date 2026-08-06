@@ -5,6 +5,11 @@ http:
   readHeaderTimeout: "4s"
   writeTimeout: "20s"
   idleTimeout: "120s"
+  # 0 = 不限。没有它，单个超大 body 会被整体读进内存。
+  maxRequestBodySize: 0
+  # 0 = 不限。只防 fd 耗尽，**不是并发闸门**：HTTP/2 一条连接可承载多个 stream。
+  # 并发上限应由上游（网关 circuit breaker）或 in-flight middleware 控制。
+  maxConnections: 0
   tls:
     enabled: false
     certBase64: ""

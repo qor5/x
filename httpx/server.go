@@ -12,14 +12,23 @@ import (
 	"github.com/pkg/errors"
 	"github.com/qor5/x/v3/netx"
 	"github.com/theplant/inject/lifecycle"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
+	"golang.org/x/net/netutil"
 )
 
 type Listener net.Listener
 
 func SetupListener(lc *lifecycle.Lifecycle, conf *ServerConfig) (Listener, error) {
-	return netx.SetupListenerFactory("http-listener", conf.Address)(lc)
+	listener, err := netx.SetupListenerFactory("http-listener", conf.Address)(lc)
+	if err != nil {
+		return nil, err
+	}
+	// 连接数上限只防 fd 耗尽，不是并发闸门：HTTP/2 一条连接可承载多个 stream，
+	// 真正的并发上限应由上游（网关的 circuit breaker）或 in-flight middleware 控制。
+	// 超出限制时 Accept 阻塞（连接停在内核 accept queue），不是拒绝。
+	if conf.MaxConnections > 0 {
+		listener = netutil.LimitListener(listener, conf.MaxConnections)
+	}
+	return listener, nil
 }
 
 func SetupServerFactory(name string, handler http.Handler) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *ServerConfig, listener Listener) (*http.Server, error) {
@@ -80,6 +89,11 @@ func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
 		handler = http.StripPrefix(pathPrefix, handler)
 	}
 
+	// 包在最外层，让 body 上限先于路由与业务 handler 生效。
+	if conf.MaxRequestBodySize > 0 {
+		handler = http.MaxBytesHandler(handler, conf.MaxRequestBodySize)
+	}
+
 	srv := &http.Server{
 		ReadTimeout:       conf.ReadTimeout,
 		ReadHeaderTimeout: conf.ReadHeaderTimeout,
@@ -87,6 +101,24 @@ func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
 		IdleTimeout:       conf.IdleTimeout,
 		Handler:           handler,
 	}
+
+	// HTTP/2 在两种模式下都启用：TLS 经 ALPN 协商，明文经 h2c。
+	//
+	// 这取代了此前 `else` 分支里的 h2c.NewHandler —— 它已被 x/net 标记
+	// Deprecated（"Set the http.Server Protocols field to use unencrypted
+	// HTTP/2 instead"），且为支持 HTTP/1.1 Upgrade 模式会把 h2c 连接的**首个
+	// 请求整体读入内存**（其文档要求用 MaxBytesHandler 包裹，此前并没有）。
+	// 标准库实现只 Peek 24 字节比对 PRI 前导，仅支持 prior-knowledge 模式，
+	// 没有这个内存放大面。
+	//
+	// 行为差异：依赖 `Upgrade: h2c` 头升级的客户端将静默退回 HTTP/1.1（不报错）。
+	// Envoy / gRPC 客户端用的都是 prior-knowledge，不受影响。
+	protocols := new(http.Protocols)
+	protocols.SetHTTP1(true)
+	protocols.SetHTTP2(true)
+	protocols.SetUnencryptedHTTP2(true)
+	srv.Protocols = protocols
+
 	if conf.TLS.Enabled {
 		cert, err := loadTLSCertificate(conf.TLS.CertBase64, conf.TLS.KeyBase64)
 		if err != nil {
@@ -95,10 +127,6 @@ func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
 		srv.TLSConfig = &tls.Config{
 			Certificates: []tls.Certificate{cert},
 		}
-	} else {
-		srv.Handler = h2c.NewHandler(srv.Handler, &http2.Server{
-			IdleTimeout: srv.IdleTimeout,
-		})
 	}
 	return srv, nil
 }
