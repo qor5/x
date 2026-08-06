@@ -14,7 +14,7 @@ type ServerConfig struct {
 	IdleTimeout       time.Duration `confx:"idleTimeout" usage:"maximum amount of time to wait for the next request when keep-alives are enabled"`
 	// MaxRequestBodySize caps the request body via http.MaxBytesHandler. 0 means unlimited.
 	// Without it a single oversized body can be read entirely into memory.
-	MaxRequestBodySize int64 `confx:"maxRequestBodySize" usage:"maximum request body size in bytes, 0 for unlimited"`
+	MaxRequestBodySize int64 `confx:"maxRequestBodySize" usage:"maximum request body size in bytes, 0 for unlimited" validate:"gte=0"`
 	// MaxConcurrentStreams caps HTTP/2 streams per connection. 0 uses Go's default (250).
 	//
 	// This is PER CONNECTION, not global. Together with MaxConnections it gives a hard
@@ -25,7 +25,7 @@ type ServerConfig struct {
 	// this buys no extra protection and costs multiplexing: the same request volume just
 	// queues at the gateway or opens more connections. Leave it at 0 unless you need the
 	// bound to be arithmetically knowable.
-	MaxConcurrentStreams int `confx:"maxConcurrentStreams" usage:"max HTTP/2 streams per connection (per-connection, not global; multiply by maxConnections for the in-flight ceiling), 0 for Go default (250)"`
+	MaxConcurrentStreams int `confx:"maxConcurrentStreams" usage:"max HTTP/2 streams per connection (per-connection, not global; multiply by maxConnections for the in-flight ceiling), 0 for Go default (250)" validate:"gte=0"`
 	// MaxConnections caps concurrent TCP connections via netutil.LimitListener. 0 means unlimited.
 	//
 	// It counts CONNECTIONS, not requests. Under HTTP/1.1 a connection carries one request
@@ -36,7 +36,7 @@ type ServerConfig struct {
 	//
 	// Past the limit Accept blocks (connections queue in the kernel backlog) rather than
 	// being rejected.
-	MaxConnections int            `confx:"maxConnections" usage:"max concurrent TCP connections (connections, NOT requests: HTTP/2 multiplexes many requests per connection; guards fd exhaustion only), 0 for unlimited"`
+	MaxConnections int            `confx:"maxConnections" usage:"max concurrent TCP connections (connections, NOT requests: HTTP/2 multiplexes many requests per connection; guards fd exhaustion only), 0 for unlimited" validate:"gte=0"`
 	TLS            TLSConfig      `confx:"tls"`
 	Security       SecurityConfig `confx:",squash"`
 }

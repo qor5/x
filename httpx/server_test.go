@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/theplant/inject/lifecycle"
 	"golang.org/x/net/http2"
 
 	"github.com/qor5/x/v3/httpx"
@@ -224,4 +225,62 @@ func TestNewServer_IdleTimeoutAppliesToH2C(t *testing.T) {
 		}
 	}
 	t.Fatal("idle h2c connection was never closed — IdleTimeout is not reaching HTTP/2")
+}
+
+// MaxConnections caps concurrent TCP connections. It takes effect in
+// SetupListener (netutil.LimitListener), not in NewServer, so this test goes
+// through the real wiring rather than the bare net.Listen used elsewhere.
+//
+// LimitListener enforces the cap by not Accept-ing past it — connections sit
+// in the kernel backlog rather than being refused — so the observable effect
+// is that a second connection gets no response while the first is held open.
+func TestNewServer_MaxConnections(t *testing.T) {
+	conf := &httpx.ServerConfig{Address: "127.0.0.1:0", MaxConnections: 1}
+
+	lc := lifecycle.New()
+	listener, err := httpx.SetupListener(lc, conf)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = listener.Close() })
+
+	srv, err := httpx.NewServer(conf, http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			_, _ = io.WriteString(w, "ok")
+		}))
+	require.NoError(t, err)
+	go func() { _ = srv.Serve(listener) }()
+	t.Cleanup(func() { _ = srv.Close() })
+
+	addr := listener.Addr().String()
+
+	// First connection: served normally, then held open via keep-alive so it
+	// keeps occupying the single slot.
+	held, err := net.Dial("tcp", addr)
+	require.NoError(t, err)
+	defer func() { _ = held.Close() }()
+	require.NoError(t, held.SetDeadline(time.Now().Add(5*time.Second)))
+	_, err = io.WriteString(held, "GET / HTTP/1.1\r\nHost: x\r\n\r\n")
+	require.NoError(t, err)
+	status, err := bufio.NewReader(held).ReadString('\n')
+	require.NoError(t, err)
+	require.Contains(t, status, "200 OK", "the first connection must be served")
+
+	// Second connection: the TCP handshake still completes (kernel backlog),
+	// but the server never Accepts it, so no response arrives.
+	blocked, err := net.Dial("tcp", addr)
+	require.NoError(t, err)
+	defer func() { _ = blocked.Close() }()
+	require.NoError(t, blocked.SetDeadline(time.Now().Add(700*time.Millisecond)))
+	_, err = io.WriteString(blocked, "GET / HTTP/1.1\r\nHost: x\r\n\r\n")
+	require.NoError(t, err)
+	_, err = bufio.NewReader(blocked).ReadString('\n')
+	require.Error(t, err, "a second connection must not be served while the cap is taken")
+
+	// Releasing the slot lets the queued connection through — the cap blocks,
+	// it does not permanently reject. (It is the already-queued one that gets
+	// Accept-ed next, so re-use `blocked` rather than dialling afresh.)
+	require.NoError(t, held.Close())
+	require.NoError(t, blocked.SetDeadline(time.Now().Add(5*time.Second)))
+	status, err = bufio.NewReader(blocked).ReadString('\n')
+	require.NoError(t, err)
+	require.Contains(t, status, "200 OK", "the slot must be reusable once freed")
 }
