@@ -37,7 +37,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.4.0
 	github.com/qiniu/api.v7/v7 v7.8.2
-	github.com/qor5/confx v0.0.0-20250426065316-0d28db5b4d54
+	github.com/qor5/confx v0.0.0-20260809190714-853d25a54d11
 	github.com/qor5/go-bus v0.1.2
 	github.com/qor5/go-que v1.1.0
 	github.com/qor5/kx v0.0.0-20260713082723-dc32af6f8fd6
@@ -45,7 +45,7 @@ require (
 	github.com/rs/cors v1.11.1
 	github.com/rs/xid v1.6.0
 	github.com/samber/lo v1.52.0
-	github.com/spf13/cast v1.7.1
+	github.com/spf13/cast v1.9.2
 	github.com/stretchr/testify v1.11.1
 	github.com/sunfmin/reflectutils v1.0.6
 	github.com/testcontainers/testcontainers-go v0.42.0
@@ -118,8 +118,8 @@ require (
 	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.37.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/fsnotify/fsnotify v1.8.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
+	github.com/fsnotify/fsnotify v1.9.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-kit/kit v0.12.1-0.20220826005032-a7ba4fa4e289 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
@@ -131,8 +131,9 @@ require (
 	github.com/go-playground/form/v4 v4.2.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.25.0 // indirect
+	github.com/go-playground/validator/v10 v10.26.0 // indirect
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
+	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/gookit/color v1.3.6 // indirect
 	github.com/gorilla/context v1.1.2 // indirect
@@ -172,12 +173,12 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/ory/pagination v0.0.1 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
-	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
+	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/redis/go-redis/v9 v9.16.0 // indirect
-	github.com/sagikazarmark/locafero v0.6.0 // indirect
+	github.com/sagikazarmark/locafero v0.9.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.3 // indirect
@@ -185,7 +186,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
-	github.com/spf13/viper v1.19.0 // indirect
+	github.com/spf13/viper v1.20.1 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.6.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/testcontainers/testcontainers-go/modules/redis v0.42.0 // indirect

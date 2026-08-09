@@ -71,16 +71,6 @@ func SetupServerFactory(name string, handler http.Handler) func(ctx context.Cont
 }
 
 func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
-	// Cannot be a `ltefield` struct tag: ReadTimeout == 0 means no read deadline
-	// at all, not "zero seconds", so it is not an upper bound. That meaning is
-	// defined by net/http, which the tag layer cannot see — tagged, a config
-	// that sets only a header timeout would fail validation.
-	if conf.ReadTimeout > 0 && conf.ReadHeaderTimeout > conf.ReadTimeout {
-		return nil, errors.Errorf(
-			"readHeaderTimeout (%s) must not exceed readTimeout (%s)",
-			conf.ReadHeaderTimeout, conf.ReadTimeout)
-	}
-
 	// Normalize PathPrefix to ensure predictable behavior:
 	// - Always starts with "/" (add if missing)
 	// - Never ends with "/" unless it's the root path "/"

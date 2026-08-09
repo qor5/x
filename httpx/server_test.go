@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/qor5/confx"
 	"github.com/stretchr/testify/require"
 	"github.com/theplant/inject/lifecycle"
 	"golang.org/x/net/http2"
@@ -286,30 +287,31 @@ func TestNewServer_MaxConnections(t *testing.T) {
 }
 
 // ReadTimeout == 0 means no read deadline, so it is not an upper bound for
-// ReadHeaderTimeout. This used to be a `ltefield=ReadTimeout` struct tag, which
-// rejected a config that set only a header timeout — a reasonable minimal
-// hardening — and stopped the service from starting.
+// ReadHeaderTimeout. A plain `ltefield=ReadTimeout` rejected a config that set
+// only a header timeout — a reasonable minimal hardening — and stopped the
+// service from starting. The stop_if in front of it is what fixes that.
 func TestReadHeaderTimeoutAgainstReadTimeout(t *testing.T) {
-	for _, c := range []struct {
-		name         string
-		header, read time.Duration
-		wantErr      bool
-	}{
-		{"read deadline set, header within it", 5 * time.Second, 10 * time.Second, false},
-		{"read deadline set, header beyond it", 15 * time.Second, 10 * time.Second, true},
-		{"no read deadline, header only", 10 * time.Second, 0, false},
-	} {
-		t.Run(c.name, func(t *testing.T) {
-			_, err := httpx.NewServer(&httpx.ServerConfig{
-				Address:           ":0",
-				ReadHeaderTimeout: c.header,
-				ReadTimeout:       c.read,
-			}, http.NotFoundHandler())
-			if c.wantErr {
-				require.ErrorContains(t, err, "must not exceed readTimeout")
-				return
-			}
-			require.NoError(t, err)
-		})
+	suite := confx.NewValidationSuite(t)
+	cfg := func(header, read time.Duration) *httpx.ServerConfig {
+		return &httpx.ServerConfig{Address: ":0", ReadHeaderTimeout: header, ReadTimeout: read}
 	}
+	suite.RunTests([]confx.ExpectedValidation{
+		{
+			Name:           "read deadline set, header within it",
+			Config:         cfg(5*time.Second, 10*time.Second),
+			ExpectedErrors: nil,
+		},
+		{
+			Name:   "read deadline set, header beyond it",
+			Config: cfg(15*time.Second, 10*time.Second),
+			ExpectedErrors: []confx.ExpectedValidationError{
+				{Path: "ReadHeaderTimeout", Tag: "ltefield"},
+			},
+		},
+		{
+			Name:           "no read deadline, header only",
+			Config:         cfg(10*time.Second, 0),
+			ExpectedErrors: nil,
+		},
+	})
 }

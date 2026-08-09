@@ -9,11 +9,10 @@ type ServerConfig struct {
 	Address     string        `confx:"address" usage:"HTTP server address" validate:"required"`
 	PathPrefix  string        `confx:"pathPrefix" usage:"Path prefix for all handlers. Will be normalized to start with '/' and not end with '/' (except for root path '/'). Root path '/' is treated as no prefix. Example: 'api/v1' or '/api/v1/' both become '/api/v1'"`
 	ReadTimeout time.Duration `confx:"readTimeout" usage:"maximum duration before timing out read of the request"`
-	// No `ltefield=ReadTimeout`: ReadTimeout == 0 means no read deadline at all,
-	// so it is not an upper bound. Tagged, a config that sets only a header
-	// timeout — a reasonable minimal hardening — fails validation and the
-	// service will not start. Checked in NewServer() instead.
-	ReadHeaderTimeout time.Duration `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers"`
+	// stop_if guards the ltefield: ReadTimeout == 0 means no read deadline at
+	// all, so it is not an upper bound, and a plain `ltefield` would reject a
+	// config that sets only a header timeout.
+	ReadHeaderTimeout time.Duration `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers" validate:"stop_if=ReadTimeout 0,ltefield=ReadTimeout"`
 	WriteTimeout      time.Duration `confx:"writeTimeout" usage:"maximum duration before timing out write of the response"`
 	IdleTimeout       time.Duration `confx:"idleTimeout" usage:"maximum amount of time to wait for the next request when keep-alives are enabled"`
 	// MaxRequestBodySize caps the request body via http.MaxBytesHandler. 0 means unlimited.

@@ -79,11 +79,11 @@ func TestConfig(t *testing.T) {
 			},
 		},
 		{
-			// Neither pairing is a validation error any more: on both, 0 on the
-			// right-hand side means "no limit", which `ltefield` cannot express.
-			// Open() enforces them, and only when a real limit is configured —
-			// see TestMaxIdleConnsAgainstCap / TestConnMaxIdleTimeAgainstLifetime.
-			Name: "valid config - pairings are enforced in Open(), not here",
+			// Both pairings still validate here, but each ltefield is guarded by
+			// a stop_if: 0 on the right-hand side means "no limit", so it is not
+			// an upper bound and the comparison must not run. Below, both limits
+			// ARE set, so both comparisons apply and both are violated.
+			Name: "invalid config - idle above a real cap, idleTime beyond a real lifetime",
 			Config: &gormx.DatabaseConfig{
 				DSN:             "postgres://user:pass@localhost:5432/db",
 				Debug:           true,
@@ -94,7 +94,10 @@ func TestConfig(t *testing.T) {
 				ConnMaxLifetime: 10 * time.Minute,
 				AuthMethod:      gormx.AuthMethodPassword,
 			},
-			ExpectedErrors: nil,
+			ExpectedErrors: []confx.ExpectedValidationError{
+				{Path: "MaxIdleConns", Tag: "ltefield"},
+				{Path: "ConnMaxIdleTime", Tag: "ltefield"},
+			},
 		},
 		{
 			// The new default. Before this change maxOpenConns defaulted to 200
@@ -135,7 +138,7 @@ func TestConfig(t *testing.T) {
 				DSN:             "", // empty dsn
 				Debug:           true,
 				Tracing:         gormx.TracingConfig{},
-				MaxIdleConns:    11, // no longer a validation error — enforced in Open()
+				MaxIdleConns:    11, // above MaxOpenConns, and MaxOpenConns is a real cap
 				MaxOpenConns:    10,
 				ConnMaxIdleTime: 30 * time.Minute, // maxIdleTime > maxLifetime
 				ConnMaxLifetime: 10 * time.Minute,
@@ -144,6 +147,8 @@ func TestConfig(t *testing.T) {
 			ExpectedErrors: []confx.ExpectedValidationError{
 				{Path: "DSN", Tag: "required"},
 				{Path: "AuthMethod", Tag: "oneof"},
+				{Path: "MaxIdleConns", Tag: "ltefield"},
+				{Path: "ConnMaxIdleTime", Tag: "ltefield"},
 			},
 		},
 	})
@@ -361,74 +366,4 @@ func TestAuthMethodIAM(t *testing.T) {
 		require.Error(t, err)
 		t.Logf("Expected error with invalid credentials: %v", err)
 	})
-}
-
-// The idle/open pairing moved out of struct validation and into Open(), because
-// MaxOpenConns == 0 means unlimited and `ltefield` cannot express that. Open()
-// must therefore reject the pairing only when a real cap is configured.
-func TestMaxIdleConnsAgainstCap(t *testing.T) {
-	base := func() *gormx.DatabaseConfig {
-		return &gormx.DatabaseConfig{
-			DSN:             "postgres://user:pass@127.0.0.1:1/db",
-			ConnMaxIdleTime: 10 * time.Minute,
-			ConnMaxLifetime: 30 * time.Minute,
-			AuthMethod:      gormx.AuthMethodPassword,
-		}
-	}
-	for _, c := range []struct {
-		name       string
-		idle, open int
-		wantErr    bool
-	}{
-		{"cap set, idle above it", 11, 10, true},
-		{"cap set, idle within it", 10, 10, false},
-		{"unlimited, warm idle pool", 20, 0, false},
-	} {
-		t.Run(c.name, func(t *testing.T) {
-			conf := base()
-			conf.MaxIdleConns, conf.MaxOpenConns = c.idle, c.open
-			_, _, err := gormx.Open(context.Background(), conf)
-			if c.wantErr {
-				require.ErrorContains(t, err, "must not exceed maxOpenConns")
-				return
-			}
-			// Anything else fails on the unreachable DSN, never on the pairing.
-			if err != nil {
-				require.NotContains(t, err.Error(), "must not exceed maxOpenConns")
-			}
-		})
-	}
-}
-
-// Same shape as the pool pairing: ConnMaxLifetime == 0 means connections are
-// never recycled, so it is not an upper bound for ConnMaxIdleTime.
-func TestConnMaxIdleTimeAgainstLifetime(t *testing.T) {
-	base := func() *gormx.DatabaseConfig {
-		return &gormx.DatabaseConfig{
-			DSN:        "postgres://user:pass@127.0.0.1:1/db",
-			AuthMethod: gormx.AuthMethodPassword,
-		}
-	}
-	for _, c := range []struct {
-		name           string
-		idleTime, life time.Duration
-		wantErr        bool
-	}{
-		{"lifetime set, idleTime within it", 10 * time.Minute, 30 * time.Minute, false},
-		{"lifetime set, idleTime beyond it", 30 * time.Minute, 10 * time.Minute, true},
-		{"never recycled, idleTime only", 10 * time.Minute, 0, false},
-	} {
-		t.Run(c.name, func(t *testing.T) {
-			conf := base()
-			conf.ConnMaxIdleTime, conf.ConnMaxLifetime = c.idleTime, c.life
-			_, _, err := gormx.Open(context.Background(), conf)
-			if c.wantErr {
-				require.ErrorContains(t, err, "must not exceed connMaxLifetime")
-				return
-			}
-			if err != nil {
-				require.NotContains(t, err.Error(), "must not exceed connMaxLifetime")
-			}
-		})
-	}
 }
