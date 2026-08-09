@@ -33,12 +33,19 @@ type ServerConfig struct {
 	//
 	// It counts CONNECTIONS, not requests. Under HTTP/1.1 a connection carries one request
 	// at a time so the two roughly coincide, but under HTTP/2 a single connection multiplexes
-	// many concurrent streams — so this is NOT a concurrency limit. It only guards against
-	// file-descriptor exhaustion. To bound concurrent requests, use the gateway's circuit
-	// breaker (e.g. Envoy's maxParallelRequests) or an in-flight middleware.
+	// many concurrent streams — so this is NOT a concurrency limit.
 	//
-	// Past the limit Accept blocks (connections queue in the kernel backlog) rather than
-	// being rejected.
+	// Leaving it at 0 is usually right. Past the limit netutil.LimitListener stops calling
+	// Accept, so connections sit in the kernel backlog and the client waits until its own
+	// timeout — an invisible queue, with nothing logged and nothing rejected. And the number
+	// is hard to justify from either side it supposedly protects: low enough to bound
+	// per-connection memory is orders of magnitude below the process fd ceiling, so it
+	// guards neither in practice.
+	//
+	// What bounds resource use is the request timeouts above: an overloaded server gets
+	// slower, requests time out and release what they hold, and it recovers on its own.
+	// Set this only when you specifically need a hard connection ceiling and have a number
+	// you can defend.
 	MaxConnections int            `confx:"maxConnections" usage:"max concurrent TCP connections (connections, NOT requests: HTTP/2 multiplexes many requests per connection; guards fd exhaustion only), 0 for unlimited" validate:"gte=0"`
 	TLS            TLSConfig      `confx:"tls"`
 	Security       SecurityConfig `confx:",squash"`
