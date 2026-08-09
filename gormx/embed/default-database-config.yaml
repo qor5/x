@@ -5,8 +5,11 @@ database:
     excludeQuery: false
     excludeQueryVars: false
     maxQueryLength: 0 # Maximum query length for tracing, 0 uses default (4096)
+  # Idle connections kept warm; not a limit on anything.
   maxIdleConns: 20
-  maxOpenConns: 200
+  # 0 = unlimited, and that is the recommendation. A pool cap does not bound
+  # resource use — request timeouts do. See DatabaseConfig.MaxOpenConns.
+  maxOpenConns: 0
   connMaxLifetime: "30m"
   connMaxIdleTime: "10m"
   authMethod: "password" # password, iam

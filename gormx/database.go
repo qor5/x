@@ -43,11 +43,31 @@ type IAMDialectorConfig struct {
 }
 
 type DatabaseConfig struct {
-	DSN             string             `confx:"dsn" usage:"Database connection string" validate:"required"`
-	Debug           bool               `confx:"debug" usage:"Enable debug mode"`
-	Tracing         TracingConfig      `confx:"tracing" usage:"Tracing configuration"`
-	MaxIdleConns    int                `confx:"maxIdleConns" usage:"Maximum number of idle connections" validate:"ltefield=MaxOpenConns"`
-	MaxOpenConns    int                `confx:"maxOpenConns" usage:"Maximum number of open connections"`
+	DSN     string        `confx:"dsn" usage:"Database connection string" validate:"required"`
+	Debug   bool          `confx:"debug" usage:"Enable debug mode"`
+	Tracing TracingConfig `confx:"tracing" usage:"Tracing configuration"`
+	// MaxIdleConns is how many idle connections the pool keeps warm, so a
+	// steady request rate does not pay reconnect cost on every query. It is
+	// not a limit on anything.
+	//
+	// No `ltefield=MaxOpenConns` here: MaxOpenConns == 0 means UNLIMITED, so
+	// comparing against it as an upper bound is wrong — the pairing is checked
+	// in Open() instead, and only when a real cap is configured.
+	MaxIdleConns int `confx:"maxIdleConns" usage:"Number of idle connections kept warm (not a limit)"`
+	// MaxOpenConns caps concurrent connections. 0 (the default) means
+	// unlimited, and that is the recommended setting.
+	//
+	// A pool cap is not what bounds resource use — request timeouts are, and
+	// they only work if the timeout context reaches the DB layer. A cap just
+	// moves the queue into database/sql, where nothing observes it: no log
+	// carries DBStats.WaitCount, so the symptom is latency with no error. It
+	// also hides load from the things that should react — requests block on
+	// the pool rather than on the database, so the DB looks idle and CPU stays
+	// below the autoscaler's threshold. An overloaded database gets slower but
+	// does not fall over, and recovers once the surge passes; when capacity is
+	// genuinely the problem the answer is a larger instance, which a cap would
+	// then force every consumer to re-tune.
+	MaxOpenConns    int                `confx:"maxOpenConns" usage:"Maximum concurrent connections; 0 = unlimited (recommended)"`
 	ConnMaxLifetime time.Duration      `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`
 	ConnMaxIdleTime time.Duration      `confx:"connMaxIdleTime" usage:"Maximum idle time for connections" validate:"ltefield=ConnMaxLifetime"`
 	AuthMethod      AuthMethod         `confx:"authMethod" usage:"Authentication method: 'password' or 'iam'" validate:"required,oneof=password iam"`
@@ -104,6 +124,16 @@ func (c *dbCloserWrapper) Close() error {
 }
 
 func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm.DB, io.Closer, error) {
+	// Checked before dialing: a configuration mistake should surface as itself,
+	// not behind a connection error. Only meaningful when a cap is actually
+	// configured — with MaxOpenConns == 0 (unlimited) there is no upper bound
+	// for MaxIdleConns to exceed, which is why this cannot be a `ltefield` tag.
+	if conf.MaxOpenConns > 0 && conf.MaxIdleConns > conf.MaxOpenConns {
+		return nil, nil, errors.Errorf(
+			"maxIdleConns (%d) must not exceed maxOpenConns (%d)",
+			conf.MaxIdleConns, conf.MaxOpenConns)
+	}
+
 	var (
 		dialector gorm.Dialector
 		err       error
