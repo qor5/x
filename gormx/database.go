@@ -67,9 +67,11 @@ type DatabaseConfig struct {
 	// does not fall over, and recovers once the surge passes; when capacity is
 	// genuinely the problem the answer is a larger instance, which a cap would
 	// then force every consumer to re-tune.
-	MaxOpenConns    int                `confx:"maxOpenConns" usage:"Maximum concurrent connections; 0 = unlimited (recommended)"`
-	ConnMaxLifetime time.Duration      `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`
-	ConnMaxIdleTime time.Duration      `confx:"connMaxIdleTime" usage:"Maximum idle time for connections" validate:"ltefield=ConnMaxLifetime"`
+	MaxOpenConns    int           `confx:"maxOpenConns" usage:"Maximum concurrent connections; 0 = unlimited (recommended)"`
+	ConnMaxLifetime time.Duration `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`
+	// Same shape as MaxIdleConns above: ConnMaxLifetime == 0 means connections
+	// are never recycled, so it is not an upper bound either. Checked in Open().
+	ConnMaxIdleTime time.Duration      `confx:"connMaxIdleTime" usage:"Maximum idle time for connections"`
 	AuthMethod      AuthMethod         `confx:"authMethod" usage:"Authentication method: 'password' or 'iam'" validate:"required,oneof=password iam"`
 	IAM             IAMDialectorConfig `confx:"iam" validate:"skip_nested_unless=AuthMethod iam" usage:"IAM configuration"`
 }
@@ -125,13 +127,22 @@ func (c *dbCloserWrapper) Close() error {
 
 func Open(ctx context.Context, conf *DatabaseConfig, opts ...gorm.Option) (*gorm.DB, io.Closer, error) {
 	// Checked before dialing: a configuration mistake should surface as itself,
-	// not behind a connection error. Only meaningful when a cap is actually
-	// configured — with MaxOpenConns == 0 (unlimited) there is no upper bound
-	// for MaxIdleConns to exceed, which is why this cannot be a `ltefield` tag.
+	// not behind a connection error.
+	//
+	// These two pairings cannot be `ltefield` struct tags. In both, 0 on the
+	// right-hand side means "no limit", not "zero" — that meaning is defined by
+	// the `if conf.X > 0` guards further down, and the tag layer cannot see it.
+	// Tagged, a perfectly good config like (maxIdleConns 20, maxOpenConns 0)
+	// fails validation and the service will not start.
 	if conf.MaxOpenConns > 0 && conf.MaxIdleConns > conf.MaxOpenConns {
 		return nil, nil, errors.Errorf(
 			"maxIdleConns (%d) must not exceed maxOpenConns (%d)",
 			conf.MaxIdleConns, conf.MaxOpenConns)
+	}
+	if conf.ConnMaxLifetime > 0 && conf.ConnMaxIdleTime > conf.ConnMaxLifetime {
+		return nil, nil, errors.Errorf(
+			"connMaxIdleTime (%s) must not exceed connMaxLifetime (%s)",
+			conf.ConnMaxIdleTime, conf.ConnMaxLifetime)
 	}
 
 	var (

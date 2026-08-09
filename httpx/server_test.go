@@ -284,3 +284,32 @@ func TestNewServer_MaxConnections(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, status, "200 OK", "the slot must be reusable once freed")
 }
+
+// ReadTimeout == 0 means no read deadline, so it is not an upper bound for
+// ReadHeaderTimeout. This used to be a `ltefield=ReadTimeout` struct tag, which
+// rejected a config that set only a header timeout — a reasonable minimal
+// hardening — and stopped the service from starting.
+func TestReadHeaderTimeoutAgainstReadTimeout(t *testing.T) {
+	for _, c := range []struct {
+		name         string
+		header, read time.Duration
+		wantErr      bool
+	}{
+		{"read deadline set, header within it", 5 * time.Second, 10 * time.Second, false},
+		{"read deadline set, header beyond it", 15 * time.Second, 10 * time.Second, true},
+		{"no read deadline, header only", 10 * time.Second, 0, false},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			_, err := httpx.NewServer(&httpx.ServerConfig{
+				Address:           ":0",
+				ReadHeaderTimeout: c.header,
+				ReadTimeout:       c.read,
+			}, http.NotFoundHandler())
+			if c.wantErr {
+				require.ErrorContains(t, err, "must not exceed readTimeout")
+				return
+			}
+			require.NoError(t, err)
+		})
+	}
+}

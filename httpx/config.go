@@ -6,10 +6,14 @@ import (
 )
 
 type ServerConfig struct {
-	Address           string        `confx:"address" usage:"HTTP server address" validate:"required"`
-	PathPrefix        string        `confx:"pathPrefix" usage:"Path prefix for all handlers. Will be normalized to start with '/' and not end with '/' (except for root path '/'). Root path '/' is treated as no prefix. Example: 'api/v1' or '/api/v1/' both become '/api/v1'"`
-	ReadTimeout       time.Duration `confx:"readTimeout" usage:"maximum duration before timing out read of the request"`
-	ReadHeaderTimeout time.Duration `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers" validate:"ltefield=ReadTimeout"`
+	Address     string        `confx:"address" usage:"HTTP server address" validate:"required"`
+	PathPrefix  string        `confx:"pathPrefix" usage:"Path prefix for all handlers. Will be normalized to start with '/' and not end with '/' (except for root path '/'). Root path '/' is treated as no prefix. Example: 'api/v1' or '/api/v1/' both become '/api/v1'"`
+	ReadTimeout time.Duration `confx:"readTimeout" usage:"maximum duration before timing out read of the request"`
+	// No `ltefield=ReadTimeout`: ReadTimeout == 0 means no read deadline at all,
+	// so it is not an upper bound. Tagged, a config that sets only a header
+	// timeout — a reasonable minimal hardening — fails validation and the
+	// service will not start. Checked in NewServer() instead.
+	ReadHeaderTimeout time.Duration `confx:"readHeaderTimeout" usage:"maximum duration before timing out read of the request headers"`
 	WriteTimeout      time.Duration `confx:"writeTimeout" usage:"maximum duration before timing out write of the response"`
 	IdleTimeout       time.Duration `confx:"idleTimeout" usage:"maximum amount of time to wait for the next request when keep-alives are enabled"`
 	// MaxRequestBodySize caps the request body via http.MaxBytesHandler. 0 means unlimited.
@@ -21,10 +25,9 @@ type ServerConfig struct {
 	// upper bound on in-flight requests: MaxConnections × MaxConcurrentStreams. On its own
 	// it bounds nothing — a client can just open more connections.
 	//
-	// Behind a gateway that already caps concurrency (Envoy's maxParallelRequests), lowering
-	// this buys no extra protection and costs multiplexing: the same request volume just
-	// queues at the gateway or opens more connections. Leave it at 0 unless you need the
-	// bound to be arithmetically knowable.
+	// Lowering it buys little: the same request volume just opens more connections.
+	// Leave it at 0 unless you specifically need the in-flight bound to be
+	// arithmetically knowable.
 	MaxConcurrentStreams int `confx:"maxConcurrentStreams" usage:"max HTTP/2 streams per connection (per-connection, not global; multiply by maxConnections for the in-flight ceiling), 0 for Go default (250)" validate:"gte=0"`
 	// MaxConnections caps concurrent TCP connections via netutil.LimitListener. 0 means unlimited.
 	//
