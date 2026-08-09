@@ -46,28 +46,19 @@ type DatabaseConfig struct {
 	DSN     string        `confx:"dsn" usage:"Database connection string" validate:"required"`
 	Debug   bool          `confx:"debug" usage:"Enable debug mode"`
 	Tracing TracingConfig `confx:"tracing" usage:"Tracing configuration"`
-	// MaxIdleConns is how many idle connections the pool keeps warm, so a
-	// steady request rate does not pay reconnect cost on every query. It is
-	// not a limit on anything.
+	// MaxIdleConns is the number of idle connections database/sql keeps in the
+	// pool; connections beyond it are closed when returned. It does not cap how
+	// many connections may be open.
 	//
-	// No `ltefield=MaxOpenConns` here: MaxOpenConns == 0 means UNLIMITED, so
-	// comparing against it as an upper bound is wrong — the pairing is checked
-	// in Open() instead, and only when a real cap is configured.
-	MaxIdleConns int `confx:"maxIdleConns" usage:"Number of idle connections kept warm (not a limit)"`
+	// No `ltefield=MaxOpenConns` tag: MaxOpenConns == 0 means unlimited, so it
+	// is not an upper bound to compare against. Open() checks the pairing
+	// instead, and only when MaxOpenConns > 0.
+	MaxIdleConns int `confx:"maxIdleConns" usage:"Number of idle connections kept in the pool"`
 	// MaxOpenConns caps concurrent connections. 0 (the default) means
-	// unlimited, and that is the recommended setting.
-	//
-	// A pool cap is not what bounds resource use — request timeouts are, and
-	// they only work if the timeout context reaches the DB layer. A cap just
-	// moves the queue into database/sql, where nothing observes it: no log
-	// carries DBStats.WaitCount, so the symptom is latency with no error. It
-	// also hides load from the things that should react — requests block on
-	// the pool rather than on the database, so the DB looks idle and CPU stays
-	// below the autoscaler's threshold. An overloaded database gets slower but
-	// does not fall over, and recovers once the surge passes; when capacity is
-	// genuinely the problem the answer is a larger instance, which a cap would
-	// then force every consumer to re-tune.
-	MaxOpenConns    int           `confx:"maxOpenConns" usage:"Maximum concurrent connections; 0 = unlimited (recommended)"`
+	// unlimited, matching database/sql's own default: past the cap, callers
+	// block inside sql.DB waiting for a connection to be returned, and the wait
+	// is only visible through DBStats.WaitCount.
+	MaxOpenConns    int           `confx:"maxOpenConns" usage:"Maximum concurrent connections; 0 = unlimited"`
 	ConnMaxLifetime time.Duration `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`
 	// Same shape as MaxIdleConns above: ConnMaxLifetime == 0 means connections
 	// are never recycled, so it is not an upper bound either. Checked in Open().

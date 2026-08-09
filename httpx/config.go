@@ -35,17 +35,9 @@ type ServerConfig struct {
 	// at a time so the two roughly coincide, but under HTTP/2 a single connection multiplexes
 	// many concurrent streams — so this is NOT a concurrency limit.
 	//
-	// Leaving it at 0 is usually right. Past the limit netutil.LimitListener stops calling
-	// Accept, so connections sit in the kernel backlog and the client waits until its own
-	// timeout — an invisible queue, with nothing logged and nothing rejected. And the number
-	// is hard to justify from either side it supposedly protects: low enough to bound
-	// per-connection memory is orders of magnitude below the process fd ceiling, so it
-	// guards neither in practice.
-	//
-	// What bounds resource use is the request timeouts above: an overloaded server gets
-	// slower, requests time out and release what they hold, and it recovers on its own.
-	// Set this only when you specifically need a hard connection ceiling and have a number
-	// you can defend.
+	// Past the limit netutil.LimitListener stops calling Accept, so further connections
+	// wait in the kernel backlog until the client gives up: nothing is logged and nothing
+	// is rejected.
 	MaxConnections int            `confx:"maxConnections" usage:"max concurrent TCP connections (connections, NOT requests: HTTP/2 multiplexes many requests per connection; guards fd exhaustion only), 0 for unlimited" validate:"gte=0"`
 	TLS            TLSConfig      `confx:"tls"`
 	Security       SecurityConfig `confx:",squash"`
