@@ -12,14 +12,25 @@ import (
 	"github.com/pkg/errors"
 	"github.com/qor5/x/v3/netx"
 	"github.com/theplant/inject/lifecycle"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
+	"golang.org/x/net/netutil"
 )
 
 type Listener net.Listener
 
 func SetupListener(lc *lifecycle.Lifecycle, conf *ServerConfig) (Listener, error) {
-	return netx.SetupListenerFactory("http-listener", conf.Address)(lc)
+	listener, err := netx.SetupListenerFactory("http-listener", conf.Address)(lc)
+	if err != nil {
+		return nil, err
+	}
+	// A connection cap guards against fd exhaustion; it is NOT a concurrency
+	// limit, since one HTTP/2 connection carries many streams. Bound concurrency
+	// upstream (the gateway's circuit breaker) or with an in-flight middleware.
+	// Past the limit Accept blocks — connections queue in the kernel backlog
+	// rather than being rejected.
+	if conf.MaxConnections > 0 {
+		listener = netutil.LimitListener(listener, conf.MaxConnections)
+	}
+	return listener, nil
 }
 
 func SetupServerFactory(name string, handler http.Handler) func(ctx context.Context, lc *lifecycle.Lifecycle, conf *ServerConfig, listener Listener) (*http.Server, error) {
@@ -80,6 +91,12 @@ func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
 		handler = http.StripPrefix(pathPrefix, handler)
 	}
 
+	// Outermost, so the body cap applies before routing and before any
+	// business handler gets to read.
+	if conf.MaxRequestBodySize > 0 {
+		handler = http.MaxBytesHandler(handler, conf.MaxRequestBodySize)
+	}
+
 	srv := &http.Server{
 		ReadTimeout:       conf.ReadTimeout,
 		ReadHeaderTimeout: conf.ReadHeaderTimeout,
@@ -87,6 +104,45 @@ func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
 		IdleTimeout:       conf.IdleTimeout,
 		Handler:           handler,
 	}
+
+	// HTTP/2 on both paths: negotiated via ALPN under TLS, h2c in cleartext.
+	//
+	// This replaces the h2c.NewHandler that used to live in the `else` branch.
+	// x/net marks it Deprecated ("Set the http.Server Protocols field to use
+	// unencrypted HTTP/2 instead"), and to support HTTP/1.1 Upgrade it reads
+	// the FIRST request on an h2c connection entirely into memory (its own doc
+	// asks callers to wrap it in MaxBytesHandler; we never did). The stdlib
+	// implementation only peeks 24 bytes for the PRI preface — prior-knowledge
+	// mode only — so that memory amplification does not exist here.
+	//
+	// Behaviour change: a client relying on the `Upgrade: h2c` header no longer
+	// upgrades. It falls back to HTTP/1.1 silently — the request is still served
+	// normally (verified: 200 OK rather than 101 Switching Protocols), so this
+	// is a downgrade in protocol, not a failure. Envoy (with appProtocol h2c)
+	// and gRPC clients both use prior-knowledge and are unaffected.
+	//
+	// Also verified unchanged: http.Server.IdleTimeout still governs h2c
+	// connections. The old code forwarded it explicitly via
+	// &http2.Server{IdleTimeout: ...}; the stdlib path inherits it, and both
+	// close an idle connection at the same moment.
+	protocols := new(http.Protocols)
+	protocols.SetHTTP1(true)
+	protocols.SetHTTP2(true)
+	protocols.SetUnencryptedHTTP2(true)
+	srv.Protocols = protocols
+
+	// Heads-up for anyone auditing this: through Go 1.25 the doc comment on
+	// http.Server.HTTP2 still reads "This field does not yet have any effect"
+	// (go.dev/issue/67813). That comment is wrong, and has been since the field
+	// landed — h2_bundle.go's configFromServer has always fed it through
+	// fillNetHTTPConfig. Measured by reading the server's SETTINGS frame,
+	// MaxConcurrentStreams: 42 is advertised as 42 on go1.24.1, 1.24.11, 1.25.1,
+	// 1.25.6, 1.25.12 and 1.26.3 alike (250 when unset). Go 1.26 finally dropped
+	// the stale comment. server_test.go pins this so it cannot silently regress.
+	if conf.MaxConcurrentStreams > 0 {
+		srv.HTTP2 = &http.HTTP2Config{MaxConcurrentStreams: conf.MaxConcurrentStreams}
+	}
+
 	if conf.TLS.Enabled {
 		cert, err := loadTLSCertificate(conf.TLS.CertBase64, conf.TLS.KeyBase64)
 		if err != nil {
@@ -95,10 +151,6 @@ func NewServer(conf *ServerConfig, handler http.Handler) (*http.Server, error) {
 		srv.TLSConfig = &tls.Config{
 			Certificates: []tls.Certificate{cert},
 		}
-	} else {
-		srv.Handler = h2c.NewHandler(srv.Handler, &http2.Server{
-			IdleTimeout: srv.IdleTimeout,
-		})
 	}
 	return srv, nil
 }

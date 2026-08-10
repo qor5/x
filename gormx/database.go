@@ -43,13 +43,26 @@ type IAMDialectorConfig struct {
 }
 
 type DatabaseConfig struct {
-	DSN             string             `confx:"dsn" usage:"Database connection string" validate:"required"`
-	Debug           bool               `confx:"debug" usage:"Enable debug mode"`
-	Tracing         TracingConfig      `confx:"tracing" usage:"Tracing configuration"`
-	MaxIdleConns    int                `confx:"maxIdleConns" usage:"Maximum number of idle connections" validate:"ltefield=MaxOpenConns"`
-	MaxOpenConns    int                `confx:"maxOpenConns" usage:"Maximum number of open connections"`
-	ConnMaxLifetime time.Duration      `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`
-	ConnMaxIdleTime time.Duration      `confx:"connMaxIdleTime" usage:"Maximum idle time for connections" validate:"ltefield=ConnMaxLifetime"`
+	DSN     string        `confx:"dsn" usage:"Database connection string" validate:"required"`
+	Debug   bool          `confx:"debug" usage:"Enable debug mode"`
+	Tracing TracingConfig `confx:"tracing" usage:"Tracing configuration"`
+	// MaxIdleConns is the number of idle connections database/sql keeps in the
+	// pool; connections beyond it are closed when returned. It does not cap how
+	// many connections may be open.
+	//
+	// stop_if guards the ltefield: MaxOpenConns == 0 means unlimited, so it is
+	// not an upper bound to compare against, and a plain `ltefield` would
+	// reject the (20, 0) pairing.
+	MaxIdleConns int `confx:"maxIdleConns" usage:"Number of idle connections kept in the pool" validate:"stop_if=MaxOpenConns 0,ltefield=MaxOpenConns"`
+	// MaxOpenConns caps concurrent connections. 0 (the default) means
+	// unlimited, matching database/sql's own default: past the cap, callers
+	// block inside sql.DB waiting for a connection to be returned, and the wait
+	// is only visible through DBStats.WaitCount.
+	MaxOpenConns    int           `confx:"maxOpenConns" usage:"Maximum concurrent connections; 0 = unlimited"`
+	ConnMaxLifetime time.Duration `confx:"connMaxLifetime" usage:"Maximum connection lifetime"`
+	// Same shape as MaxIdleConns above: ConnMaxLifetime == 0 means connections
+	// are never recycled, so it is not an upper bound either.
+	ConnMaxIdleTime time.Duration      `confx:"connMaxIdleTime" usage:"Maximum idle time for connections" validate:"stop_if=ConnMaxLifetime 0,ltefield=ConnMaxLifetime"`
 	AuthMethod      AuthMethod         `confx:"authMethod" usage:"Authentication method: 'password' or 'iam'" validate:"required,oneof=password iam"`
 	IAM             IAMDialectorConfig `confx:"iam" validate:"skip_nested_unless=AuthMethod iam" usage:"IAM configuration"`
 }

@@ -79,7 +79,11 @@ func TestConfig(t *testing.T) {
 			},
 		},
 		{
-			Name: "invalid config - connection constraints",
+			// Both pairings still validate here, but each ltefield is guarded by
+			// a stop_if: 0 on the right-hand side means "no limit", so it is not
+			// an upper bound and the comparison must not run. Below, both limits
+			// ARE set, so both comparisons apply and both are violated.
+			Name: "invalid config - idle above a real cap, idleTime beyond a real lifetime",
 			Config: &gormx.DatabaseConfig{
 				DSN:             "postgres://user:pass@localhost:5432/db",
 				Debug:           true,
@@ -94,6 +98,23 @@ func TestConfig(t *testing.T) {
 				{Path: "MaxIdleConns", Tag: "ltefield"},
 				{Path: "ConnMaxIdleTime", Tag: "ltefield"},
 			},
+		},
+		{
+			// The new default. Before this change maxOpenConns defaulted to 200
+			// and MaxIdleConns carried `ltefield=MaxOpenConns`, so flipping the
+			// default to 0 would have made 20 <= 0 fail and every consumer would
+			// have failed to start.
+			Name: "valid config - unlimited maxOpenConns with warm idle pool",
+			Config: &gormx.DatabaseConfig{
+				DSN:             "postgres://user:pass@localhost:5432/db",
+				Tracing:         gormx.TracingConfig{},
+				MaxIdleConns:    20,
+				MaxOpenConns:    0,
+				ConnMaxIdleTime: 10 * time.Minute,
+				ConnMaxLifetime: 30 * time.Minute,
+				AuthMethod:      gormx.AuthMethodPassword,
+			},
+			ExpectedErrors: nil,
 		},
 		{
 			Name: "invalid config - auth method",
@@ -117,7 +138,7 @@ func TestConfig(t *testing.T) {
 				DSN:             "", // empty dsn
 				Debug:           true,
 				Tracing:         gormx.TracingConfig{},
-				MaxIdleConns:    11, // maxIdleConns > maxOpenConns
+				MaxIdleConns:    11, // above MaxOpenConns, and MaxOpenConns is a real cap
 				MaxOpenConns:    10,
 				ConnMaxIdleTime: 30 * time.Minute, // maxIdleTime > maxLifetime
 				ConnMaxLifetime: 10 * time.Minute,
