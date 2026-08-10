@@ -19,7 +19,7 @@ import (
 	"github.com/qor5/x/v3/httpx"
 )
 
-// serve 起一个监听在随机端口上的 server，返回其地址。
+// serve starts a server on a random port and returns its address.
 func serve(t *testing.T, conf *httpx.ServerConfig, handler http.Handler) string {
 	t.Helper()
 
@@ -35,8 +35,9 @@ func serve(t *testing.T, conf *httpx.ServerConfig, handler http.Handler) string 
 	return ln.Addr().String()
 }
 
-// h2cClient 用 prior-knowledge 模式（直接发 HTTP/2 前导）连明文端口，
-// 这正是 Envoy / gRPC 客户端在 appProtocol=h2c 下的行为。
+// h2cClient talks to a cleartext port in prior-knowledge mode (it sends the
+// HTTP/2 preface straight away), which is exactly what Envoy and gRPC clients
+// do when appProtocol is h2c.
 func h2cClient() *http.Client {
 	return &http.Client{
 		Transport: &http2.Transport{
@@ -48,8 +49,9 @@ func h2cClient() *http.Client {
 	}
 }
 
-// 迁移到 http.Server.Protocols 之后，明文 HTTP/2 必须仍然可用——
-// 这是替换掉已废弃的 h2c.NewHandler 时最需要守住的行为。
+// Cleartext HTTP/2 must keep working after the move to http.Server.Protocols.
+// This is the behaviour most at risk when replacing the deprecated
+// h2c.NewHandler, so it is asserted directly.
 func TestNewServer_H2C(t *testing.T) {
 	addr := serve(t, &httpx.ServerConfig{Address: ":0"},
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +67,7 @@ func TestNewServer_H2C(t *testing.T) {
 	require.Equal(t, "HTTP/2.0", string(body))
 }
 
-// 同一个 server 必须同时还能服务 HTTP/1.1。
+// The same server must still serve HTTP/1.1.
 func TestNewServer_HTTP1StillWorks(t *testing.T) {
 	addr := serve(t, &httpx.ServerConfig{Address: ":0"},
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -81,9 +83,10 @@ func TestNewServer_HTTP1StillWorks(t *testing.T) {
 	require.Equal(t, "HTTP/1.1", string(body))
 }
 
-// 读服务端在 SETTINGS 帧里通告的 MAX_CONCURRENT_STREAMS。
-// 这是唯一能证明 http.Server.HTTP2 真的生效的方式——Go 1.25 的字段注释还写着
-// "does not yet have any effect"，那句已经过时，但只能实测来确认。
+// Reads MAX_CONCURRENT_STREAMS as the server advertises it in the SETTINGS
+// frame. This is the only way to prove http.Server.HTTP2 is honoured: the
+// field's doc comment in Go 1.25 still says "does not yet have any effect",
+// which is stale, but nothing short of measuring it says so.
 func advertisedMaxStreams(t *testing.T, addr string) uint32 {
 	t.Helper()
 
