@@ -32,7 +32,7 @@
     "vue-router": "^4.6.4",
     "vuedraggable": "^4.1.0",
     "vuetify": "^3.12.5",
-    "vuetify-pro-tiptap": "github:qor5/vuetify-pro-tiptap#25239003de910f0a703af4964546193e930416d4"
+    "vuetify-pro-tiptap": "github:qor5/vuetify-pro-tiptap"
   },
   "devDependencies": {
     "@babel/types": "^7.29.0",
