@@ -1,6 +1,6 @@
 module github.com/qor5/x/v3
 
-go 1.25.8
+go 1.26.0
 
 require (
 	connectrpc.com/connect v1.18.1
@@ -58,7 +58,7 @@ require (
 	github.com/theplant/testingutils v0.0.2
 	github.com/theplant/validator v0.0.0-20210202101755-357a9daa8f5f
 	go.opentelemetry.io/otel/trace v1.44.0
-	golang.org/x/crypto v0.55.0
+	golang.org/x/crypto v0.56.0
 	golang.org/x/net v0.58.0
 	golang.org/x/sync v0.22.0
 	golang.org/x/text v0.41.0
