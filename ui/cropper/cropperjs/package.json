@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "cropperjs": "^1.6.2",
-    "vue": "^3.5.40"
+    "vue": "^3.5.42"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
@@ -30,11 +30,11 @@
       "esbuild": "0.25.0",
       "brace-expansion": "2.0.2",
       "minimatch": "9.0.9",
-      "@vue/shared": "3.5.40",
-      "@vue/server-renderer": "3.5.40",
-      "@vue/compiler-core": "3.5.40",
-      "@vue/compiler-dom": "3.5.40",
-      "@vue/compiler-ssr": "3.5.40"
+      "@vue/compiler-core": "3.5.42",
+      "@vue/compiler-dom": "3.5.42",
+      "@vue/compiler-ssr": "3.5.42",
+      "@vue/server-renderer": "3.5.42",
+      "@vue/shared": "3.5.42"
     }
   }
 }
