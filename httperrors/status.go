@@ -386,7 +386,7 @@ func WrapStatusf(err error, httpStatus int, format string, a ...any) *Status {
 // fields, even if err is already a Status error. The original error is preserved as
 // the cause. If err is nil, it returns an OK status (consistent with Wrap).
 //
-// Note: the computed StatusCode()/Reason() follow the Status invariant that a non-error
+// Note: the computed StatusCode()/Reason() follow the Status invariant that a non-nil
 // cause cannot be OK. If err is non-nil and httpStatus is 2xx, StatusCode() returns 500
 // and Reason() returns "UNKNOWN", even though the stored fields are set as given.
 //
