@@ -41,7 +41,7 @@ require (
 	github.com/qor5/go-bus v0.1.2
 	github.com/qor5/go-que v1.1.0
 	github.com/qor5/kx v0.0.0-20260713082723-dc32af6f8fd6
-	github.com/qor5/web/v3 v3.0.12-0.20250610095130-935d3f95f63a
+	github.com/qor5/web/v3 v3.2.0
 	github.com/rs/cors v1.11.1
 	github.com/rs/xid v1.6.0
 	github.com/samber/lo v1.52.0
