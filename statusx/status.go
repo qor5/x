@@ -458,3 +458,38 @@ func Wrap(err error, c codes.Code, reason, message string) *Status {
 func Wrapf(err error, c codes.Code, reason, format string, a ...any) *Status {
 	return Wrap(err, c, reason, fmt.Sprintf(format, a...))
 }
+
+// AlwaysWrap is like Wrap but always sets the underlying code, reason, and message
+// fields, even if err is already a Status error. The original error is preserved as
+// the cause. If err is nil, it returns an OK status (consistent with Wrap).
+//
+// Note: the computed Code()/Reason() follow the Status invariant that a non-nil cause
+// cannot be OK. If err is non-nil and c == codes.OK, Code() returns codes.Unknown and
+// Reason() returns "UNKNOWN", even though the stored fields are set as given.
+//
+// When wrapping an existing Status, structural details (field violations, metadata, etc.)
+// are preserved via Clone, but the localized key is reset to match the new reason.
+// Use WithLocalized/WithLocalizedArgs on the result if custom localization is needed.
+func AlwaysWrap(err error, c codes.Code, reason, message string) *Status {
+	if err == nil {
+		return New(codes.OK, statusv1.ErrorReason_OK.String(), "")
+	}
+	s, _ := FromError(err)
+	// Only clone when err is a *StatusError, since FromError returns a shared
+	// pointer in that case. Other branches already create a fresh *Status.
+	var se *StatusError
+	if errors.As(err, &se) {
+		s = Clone(s)
+	}
+	s.cause = errors.WithStack(err)
+	s.code = c
+	s.message = message
+	s.errorInfo.Reason = reason
+	// Immediately fix key to creation-time reason
+	s.localized = &statusv1.Localized{Key: s.Reason()}
+	return s
+}
+
+func AlwaysWrapf(err error, c codes.Code, reason, format string, a ...any) *Status {
+	return AlwaysWrap(err, c, reason, fmt.Sprintf(format, a...))
+}
