@@ -24,7 +24,9 @@ func (b *VRowBuilder) Dense(v bool) (r *VRowBuilder) {
 }
 
 func (b *VRowBuilder) NoGutters(v bool) (r *VRowBuilder) {
-	b.tag.Attr(":no-gutters", fmt.Sprint(v))
+	if v {
+		b.tag.Attr(":no-gutters", fmt.Sprint(v))
+	}
 	return b
 }
 
