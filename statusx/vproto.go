@@ -5,6 +5,7 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"connectrpc.com/connect"
@@ -24,6 +25,16 @@ const HeaderEnsureConnectError = "x-ensure-connect-error"
 
 var AllowHeaders = []string{
 	http.CanonicalHeaderKey(HeaderEnsureConnectError),
+}
+
+// HeaderStatusMetadata carries the error's metadata (from statusx.WithMetadata)
+// on the HTTP response. Since vproto.ValidationError has no metadata field, the
+// metadata is exposed out-of-band: a JSON-encoded map[string]string, URL-escaped,
+// set on this header. It is only present when the error actually carries metadata.
+const HeaderStatusMetadata = "x-status-metadata"
+
+var ExposedHeaders = []string{
+	http.CanonicalHeaderKey(HeaderStatusMetadata),
 }
 
 func EnsureConnectError(ctx context.Context) bool {
@@ -117,6 +128,12 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 		}
 	}
 
+	// vproto.ValidationError has no metadata field, so expose the error's
+	// metadata (from statusx.WithMetadata) out-of-band on a response header.
+	if md := errorInfo.GetMetadata(); len(md) > 0 {
+		w.Header().Set(HeaderStatusMetadata, url.QueryEscape(jsonx.MustMarshalX[string](md)))
+	}
+
 	isJSON := isMimeTypeJSON(w.Header().Get(httpx.HeaderContentType))
 	if w.Header().Get(httpx.HeaderContentType) == "" {
 		isJSON = shouldReturnJSON(r)
@@ -129,8 +146,6 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 		w.Header().Set(httpx.HeaderContentType, contentType)
 	}
 
-	w.WriteHeader(statusCode)
-
 	var data []byte
 	var werr error
 	if isJSON {
@@ -139,8 +154,11 @@ func WriteVProtoHTTPError(err error, w http.ResponseWriter, r *http.Request) (xe
 		data, werr = proto.Marshal(verr)
 	}
 	if werr != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		return Wrapf(werr, codes.Internal, ReasonFromCode(codes.Internal).String(), "failed to marshal error (isJSON:%t)", isJSON).Err()
 	}
+
+	w.WriteHeader(statusCode)
 
 	_, werr = w.Write(data)
 	if werr != nil {

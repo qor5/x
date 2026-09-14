@@ -22,6 +22,7 @@ import (
 	"github.com/qor5/x/v3/gormx"
 	"github.com/qor5/x/v3/healthz/testdata/gen"
 	"github.com/qor5/x/v3/normalize"
+	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
 )
 
 // Test gRPC service implementation using healthz testdata
@@ -310,7 +311,8 @@ func TestUnaryServerInterceptor_ErrorMetadata(t *testing.T) {
 		require.NotEmpty(t, errorInfo.Metadata, "ErrorInfo should contain metadata")
 
 		// Verify the custom reason is set correctly
-		assert.Equal(t, "RATE_LIMITED", errorInfo.Reason, "Error reason should be RATE_LIMITED")
+		assert.Equal(t, statusv1.ErrorReason_RATE_LIMITED.String(), errorInfo.Reason, "Error reason should be RATE_LIMITED")
+		assert.Equal(t, "RATE_LIMITED", errorInfo.Reason, "Error reason wire value should remain RATE_LIMITED")
 
 		// Verify metadata contains required fields
 		metadata := errorInfo.Metadata

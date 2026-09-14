@@ -113,6 +113,32 @@ func TestFormatField(t *testing.T) {
 	}
 }
 
+func TestPrependField(t *testing.T) {
+	fv1 := NewFieldViolation("email", "REQUIRED", "Email is required")
+	fv2 := NewFieldViolation("name", "TOO_SHORT", "Name is too short")
+
+	result := PrependField("user", fv1, fv2)
+	require.Len(t, result, 2)
+	assert.Equal(t, "user.email", result[0].Field())
+	assert.Equal(t, "user.name", result[1].Field())
+	assert.Equal(t, "email", fv1.Field())
+	assert.Equal(t, "name", fv2.Field())
+}
+
+func TestFieldViolations_PrependField(t *testing.T) {
+	fvs := FieldViolations{
+		NewFieldViolation("street", "REQUIRED", "Street is required"),
+		NewFieldViolation("city", "REQUIRED", "City is required"),
+	}
+
+	result := fvs.PrependField("address")
+	require.Len(t, result, 2)
+	assert.Equal(t, "address.street", result[0].Field())
+	assert.Equal(t, "address.city", result[1].Field())
+	assert.Equal(t, "street", fvs[0].Field())
+	assert.Equal(t, "city", fvs[1].Field())
+}
+
 func TestFlattenFieldViolations(t *testing.T) {
 	t.Run("flatten mixed single and slice", func(t *testing.T) {
 		// ✅ mixed types in a single call

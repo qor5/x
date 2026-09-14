@@ -66,10 +66,25 @@ func FormatField(field string, formatFunc func(string) string) string {
 
 // PrependField prepends a field name to the field name of each field violation.
 func PrependField(field string, fvs ...*FieldViolation) FieldViolations {
-	for _, fv := range fvs {
+	result := cloneFieldViolations(fvs)
+	for _, fv := range result {
+		if fv == nil {
+			continue
+		}
 		fv.field = field + "." + fv.field
 	}
-	return fvs
+	return result
+}
+
+func cloneFieldViolations(fvs []*FieldViolation) []*FieldViolation {
+	if fvs == nil {
+		return nil
+	}
+	cloned := make([]*FieldViolation, 0, len(fvs))
+	for _, fv := range fvs {
+		cloned = append(cloned, fv.Clone())
+	}
+	return cloned
 }
 
 // FieldViolation represents a field-level validation violation with localization capability
@@ -135,6 +150,19 @@ func (f *FieldViolation) LocalizedMessage() *errdetails.LocalizedMessage {
 		return nil
 	}
 	return proto.Clone(f.localizedMessage).(*errdetails.LocalizedMessage)
+}
+
+func (f *FieldViolation) Clone() *FieldViolation {
+	if f == nil {
+		return nil
+	}
+	return &FieldViolation{
+		field:            f.Field(),
+		reason:           f.Reason(),
+		description:      f.Description(),
+		localized:        f.Localized(),
+		localizedMessage: f.LocalizedMessage(),
+	}
 }
 
 // NewFieldViolation creates a new field validation violation.

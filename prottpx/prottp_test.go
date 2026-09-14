@@ -5,13 +5,16 @@ import (
 	"context"
 	"errors"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"connectrpc.com/connect"
+	"github.com/qor5/x/v3/netx"
 	"github.com/qor5/x/v3/normalize"
 	testdatav1 "github.com/qor5/x/v3/prottpx/gen/testdata/v1"
 	"github.com/qor5/x/v3/statusx"
@@ -1095,4 +1098,174 @@ func TestHandler_WithDefaultContentType(t *testing.T) {
 			NewHandler(WithDefaultContentType("text/plain"))
 		})
 	})
+}
+
+// slowEchoServer is a server that waits for a signal before responding,
+// used to test client cancellation propagation.
+type slowEchoServer struct {
+	testdatav1.UnimplementedEchoServiceServer
+	ctxCanceled chan struct{}
+	startedCh   chan struct{}
+}
+
+func (s *slowEchoServer) Echo(ctx context.Context, req *testdatav1.EchoRequest) (*testdatav1.EchoResponse, error) {
+	close(s.startedCh)
+
+	select {
+	case <-ctx.Done():
+		close(s.ctxCanceled)
+		return nil, ctx.Err()
+	case <-time.After(10 * time.Second):
+		return &testdatav1.EchoResponse{Message: "Echo: " + req.Message}, nil
+	}
+}
+
+func TestHandler_ClientCancellation(t *testing.T) {
+	slowServer := &slowEchoServer{
+		ctxCanceled: make(chan struct{}),
+		startedCh:   make(chan struct{}),
+	}
+
+	hdr := NewHandler()
+	testdatav1.RegisterEchoServiceServer(hdr, slowServer)
+
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+
+	server := &http.Server{Handler: hdr}
+	go func() {
+		_ = server.Serve(listener)
+	}()
+	defer server.Shutdown(context.Background())
+
+	serverAddr := "http://" + netx.ConnectableString(listener.Addr())
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	req := &testdatav1.EchoRequest{Message: "test"}
+	body, err := JSONMarshalOptions.Marshal(req)
+	require.NoError(t, err)
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost,
+		serverAddr+"/testdata.v1.EchoService/Echo", bytes.NewReader(body))
+	require.NoError(t, err)
+	httpReq.Header.Set(HeaderContentType, JSONContentType)
+
+	client := &http.Client{}
+
+	errCh := make(chan error, 1)
+	go func() {
+		resp, err := client.Do(httpReq)
+		if resp != nil {
+			resp.Body.Close()
+		}
+		errCh <- err
+	}()
+
+	<-slowServer.startedCh
+
+	cancel()
+
+	select {
+	case <-slowServer.ctxCanceled:
+		t.Log("Server context was canceled as expected")
+	case <-time.After(2 * time.Second):
+		t.Fatal("Server context was NOT canceled within timeout - client cancellation did NOT propagate to server")
+	}
+
+	select {
+	case err := <-errCh:
+		assert.True(t, errors.Is(err, context.Canceled) || strings.Contains(err.Error(), "context canceled"),
+			"expected context canceled error, got: %v", err)
+	case <-time.After(2 * time.Second):
+		t.Fatal("HTTP request did not complete within timeout")
+	}
+}
+
+// timeoutEchoServer captures the context error when canceled due to timeout.
+type timeoutEchoServer struct {
+	testdatav1.UnimplementedEchoServiceServer
+	ctxErr    chan error
+	startedCh chan struct{}
+}
+
+func (s *timeoutEchoServer) Echo(ctx context.Context, req *testdatav1.EchoRequest) (*testdatav1.EchoResponse, error) {
+	close(s.startedCh)
+
+	select {
+	case <-ctx.Done():
+		s.ctxErr <- ctx.Err()
+		return nil, ctx.Err()
+	case <-time.After(10 * time.Second):
+		return &testdatav1.EchoResponse{Message: "Echo: " + req.Message}, nil
+	}
+}
+
+func TestHandler_ClientTimeout(t *testing.T) {
+	timeoutServer := &timeoutEchoServer{
+		ctxErr:    make(chan error, 1),
+		startedCh: make(chan struct{}),
+	}
+
+	hdr := NewHandler()
+	testdatav1.RegisterEchoServiceServer(hdr, timeoutServer)
+
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+
+	server := &http.Server{Handler: hdr}
+	go func() {
+		_ = server.Serve(listener)
+	}()
+	defer server.Shutdown(context.Background())
+
+	serverAddr := "http://" + netx.ConnectableString(listener.Addr())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+
+	req := &testdatav1.EchoRequest{Message: "test"}
+	body, err := JSONMarshalOptions.Marshal(req)
+	require.NoError(t, err)
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost,
+		serverAddr+"/testdata.v1.EchoService/Echo", bytes.NewReader(body))
+	require.NoError(t, err)
+	httpReq.Header.Set(HeaderContentType, JSONContentType)
+
+	client := &http.Client{}
+
+	errCh := make(chan error, 1)
+	go func() {
+		resp, err := client.Do(httpReq)
+		if resp != nil {
+			resp.Body.Close()
+		}
+		errCh <- err
+	}()
+
+	<-timeoutServer.startedCh
+
+	select {
+	case serverErr := <-timeoutServer.ctxErr:
+		t.Logf("Server received context error: %v", serverErr)
+		assert.ErrorIs(t, serverErr, context.Canceled)
+		if errors.Is(serverErr, context.DeadlineExceeded) {
+			t.Log("Server correctly detected DeadlineExceeded (timeout)")
+		} else if errors.Is(serverErr, context.Canceled) {
+			t.Log("Server received Canceled instead of DeadlineExceeded")
+		} else {
+			t.Logf("Server received unexpected error type: %T", serverErr)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("Server context was NOT canceled within timeout")
+	}
+
+	select {
+	case err := <-errCh:
+		t.Logf("Client received error: %v", err)
+		assert.ErrorIs(t, err, context.DeadlineExceeded)
+	case <-time.After(2 * time.Second):
+		t.Fatal("HTTP request did not complete within timeout")
+	}
 }

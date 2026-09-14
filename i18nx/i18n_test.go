@@ -287,6 +287,82 @@ test,测试,Test,テスト,Test`))
 	}
 }
 
+// TestI18N_RegionalTagPromotion verifies that when CSV headers use regional tags
+// (e.g. ja-JP, zh-CN), base language codes (ja, zh) also resolve translations.
+// This is critical because browsers often send "Accept-Language: ja" without region.
+func TestI18N_RegionalTagPromotion(t *testing.T) {
+	in, err := New(strings.NewReader(`
+key,en-US,zh-CN,ja-JP
+HELLO,Hello,你好,こんにちは
+GREET,"Hello, {{.Name}}!","你好，{{.Name}}！","こんにちは、{{.Name}}！"`))
+	require.NoError(t, err)
+
+	t.Run("base tag ja resolves ja-JP message", func(t *testing.T) {
+		tag := in.MatchStrings("ja")
+		out := in.Sprintf(tag, "HELLO")
+		assert.Equal(t, "こんにちは", out)
+	})
+
+	t.Run("base tag zh resolves zh-CN message", func(t *testing.T) {
+		tag := in.MatchStrings("zh")
+		out := in.Sprintf(tag, "HELLO")
+		assert.Equal(t, "你好", out)
+	})
+
+	t.Run("regional tag ja-JP still works", func(t *testing.T) {
+		tag := in.MatchStrings("ja-JP")
+		out := in.Sprintf(tag, "HELLO")
+		assert.Equal(t, "こんにちは", out)
+	})
+
+	t.Run("regional tag zh-CN still works", func(t *testing.T) {
+		tag := in.MatchStrings("zh-CN")
+		out := in.Sprintf(tag, "HELLO")
+		assert.Equal(t, "你好", out)
+	})
+
+	t.Run("en-US fallback for en", func(t *testing.T) {
+		tag := in.MatchStrings("en")
+		out := in.Sprintf(tag, "HELLO")
+		assert.Equal(t, "Hello", out)
+	})
+
+	t.Run("template with base tag ja", func(t *testing.T) {
+		tag := in.MatchStrings("ja")
+		out := in.Sprintf(tag, "GREET", map[string]any{"Name": "太郎"})
+		assert.Equal(t, "こんにちは、太郎！", out)
+	})
+
+	t.Run("unsupported locale falls back to en-US", func(t *testing.T) {
+		tag := in.MatchStrings("fr")
+		out := in.Sprintf(tag, "HELLO")
+		assert.Equal(t, "Hello", out)
+	})
+}
+
+// TestI18N_RegionalTagPromotion_ExplicitBaseNotOverwritten verifies that
+// an explicit base-language entry in CSV is NOT overwritten by a regional tag.
+func TestI18N_RegionalTagPromotion_ExplicitBaseNotOverwritten(t *testing.T) {
+	// CSV has both "ja" (base) and "ja-JP" (regional) with different values.
+	// The explicit "ja" entry should take precedence.
+	in, err := New(strings.NewReader(`
+key,en,ja,ja-JP
+HELLO,Hello,ベースJA,リージョナルJA-JP`))
+	require.NoError(t, err)
+
+	t.Run("base tag ja uses explicit ja entry", func(t *testing.T) {
+		tag := in.MatchStrings("ja")
+		out := in.Sprintf(tag, "HELLO")
+		assert.Equal(t, "ベースJA", out)
+	})
+
+	t.Run("regional tag ja-JP uses ja-JP entry", func(t *testing.T) {
+		tag := in.MatchStrings("ja-JP")
+		out := in.Sprintf(tag, "HELLO")
+		assert.Equal(t, "リージョナルJA-JP", out)
+	})
+}
+
 func TestI18N_Template(t *testing.T) {
 	// Override with simple English-only templates
 	csv := `key,en

@@ -1,8 +1,5 @@
 name: Build and Deploy Docs
-permissions:
-  contents: write
-  checks: write
-  pull-requests: read
+permissions: {}
 
 on:
   push:
@@ -12,9 +9,15 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      checks: write
+      pull-requests: read
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: set Node.js environment
         uses: actions/setup-node@v3
@@ -26,7 +29,7 @@ jobs:
 
       - name: Install dep
         working-directory: ui/vuetifyx/vuetifyxjs
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: build doc
         working-directory: ui/vuetifyx/vuetifyxjs

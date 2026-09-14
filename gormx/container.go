@@ -5,10 +5,11 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/netip"
 	"time"
 
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/go-connections/nat"
+	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/api/types/network"
 	"github.com/pkg/errors"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -33,12 +34,19 @@ func SetupContainer(ctx context.Context, lc *lifecycle.Lifecycle, conf *Containe
 //
 // HostPort binds the container's 5432/tcp to a specific host port when set.
 // Leave it empty to let Docker allocate a random available port.
+//
+// Args carries extra postgres server arguments for settings that cannot be
+// changed after the postmaster has started — max_connections is the one that
+// bites in practice. They are appended after the built-in "-c fsync=off", so a
+// caller can also override that default by repeating the flag: postgres takes
+// the last occurrence.
 type ContainerConfig struct {
-	Image        string `confx:"image" usage:"PostgreSQL image to use"`
-	Username     string `confx:"username" usage:"PostgreSQL username"`
-	Password     string `confx:"password" usage:"PostgreSQL password"`
-	DatabaseName string `confx:"databaseName" usage:"PostgreSQL database name"`
-	HostPort     string `confx:"hostPort" usage:"PostgreSQL host port"`
+	Image        string   `confx:"image" usage:"PostgreSQL image to use"`
+	Username     string   `confx:"username" usage:"PostgreSQL username"`
+	Password     string   `confx:"password" usage:"PostgreSQL password"`
+	DatabaseName string   `confx:"databaseName" usage:"PostgreSQL database name"`
+	HostPort     string   `confx:"hostPort" usage:"PostgreSQL host port"`
+	Args         []string `confx:"args" usage:"Extra postgres server arguments, e.g. [\"-c\", \"max_connections=300\"]"`
 }
 
 // DefaultContainerConfig is the default configuration for starting a PostgreSQL test container.
@@ -87,15 +95,15 @@ func OpenContainer(ctx context.Context, conf *ContainerConfig) (_ *Container, xe
 			"POSTGRES_PASSWORD": conf.Password,
 			"POSTGRES_DB":       conf.DatabaseName,
 		},
-		Cmd:        []string{"postgres", "-c", "fsync=off"},
+		Cmd:        append([]string{"postgres", "-c", "fsync=off"}, conf.Args...),
 		WaitingFor: wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
 	}
 	if conf.HostPort != "" {
 		req.HostConfigModifier = func(hostConfig *container.HostConfig) {
-			hostConfig.PortBindings = map[nat.Port][]nat.PortBinding{
-				"5432/tcp": {
+			hostConfig.PortBindings = network.PortMap{
+				network.MustParsePort("5432/tcp"): {
 					{
-						HostIP:   "0.0.0.0",
+						HostIP:   netip.MustParseAddr("0.0.0.0"),
 						HostPort: conf.HostPort,
 					},
 				},

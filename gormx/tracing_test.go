@@ -17,6 +17,41 @@ type TracingTestModel struct {
 	Name string
 }
 
+func TestTracingWithCanceledContext(t *testing.T) {
+	ctx := context.Background()
+	db := suite.DB()
+
+	err := suite.ResetDB(ctx, &TracingTestModel{})
+	require.NoError(t, err)
+
+	err = db.WithContext(ctx).Create(&TracingTestModel{Name: "test"}).Error
+	require.NoError(t, err)
+
+	var logCount atomic.Int32
+	countingLogger := kitlog.Logger{Logger: gklog.LoggerFunc(func(keyvals ...any) error {
+		logCount.Add(1)
+		return nil
+	})}
+
+	canceledCtx, cancel := context.WithCancel(ctx)
+	cancel()
+
+	canceledCtx = kitlog.Context(canceledCtx, countingLogger)
+
+	logCount.Store(0)
+	var result TracingTestModel
+	err = db.WithContext(canceledCtx).First(&result).Error
+
+	t.Logf("Query error: %v", err)
+	t.Logf("Log count after query with canceled context: %d", logCount.Load())
+
+	if logCount.Load() > 0 {
+		t.Log("Tracing IS recorded even with canceled context")
+	} else {
+		t.Log("Tracing is NOT recorded when context is canceled")
+	}
+}
+
 func TestWithoutTracing(t *testing.T) {
 	ctx := context.Background()
 	db := suite.DB()

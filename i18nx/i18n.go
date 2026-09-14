@@ -56,6 +56,18 @@ func New(overrides ...io.Reader) (*I18N, error) {
 	overrides = append([]io.Reader{strings.NewReader(defaultCatalogCSV)}, overrides...)
 
 	cl := catalog.NewBuilder(catalog.Fallback(FallbackTag))
+
+	// Track which (base-tag, key) pairs have explicit entries so we don't
+	// overwrite them when promoting regional tags below.
+	type baseKey struct {
+		tag language.Tag
+		key string
+	}
+	explicitBase := make(map[baseKey]bool)
+
+	// Collect all messages for a second pass (base-language promotion).
+	var allMsgs []*csvMessage
+
 	for _, override := range overrides {
 		msgs, err := parseCSV(override)
 		if err != nil {
@@ -65,7 +77,33 @@ func New(overrides ...io.Reader) (*I18N, error) {
 			if err := cl.SetString(msg.tag, msg.key, msg.value); err != nil {
 				return nil, errors.Wrapf(err, "failed to set message %q for language %q", msg.key, msg.tag)
 			}
+			// If this tag IS a base language (no region), record it.
+			base, _ := msg.tag.Base()
+			baseTag := language.Make(base.String())
+			if msg.tag == baseTag {
+				explicitBase[baseKey{tag: baseTag, key: msg.key}] = true
+			}
 		}
+		allMsgs = append(allMsgs, msgs...)
+	}
+
+	// Promote regional tags to their base language (e.g. ja-JP → ja) so that
+	// browsers sending "Accept-Language: ja" find a translation. Skip if an
+	// explicit base-language entry already exists for that key.
+	for _, msg := range allMsgs {
+		base, _ := msg.tag.Base()
+		baseTag := language.Make(base.String())
+		if baseTag == msg.tag {
+			continue // already a base tag
+		}
+		bk := baseKey{tag: baseTag, key: msg.key}
+		if explicitBase[bk] {
+			continue // explicit base entry takes precedence
+		}
+		if err := cl.SetString(baseTag, msg.key, msg.value); err != nil {
+			return nil, errors.Wrapf(err, "failed to set base-language message %q for language %q", msg.key, baseTag)
+		}
+		explicitBase[bk] = true // mark so later regional tags for the same base don't overwrite
 	}
 
 	languages := cl.Languages()

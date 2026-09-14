@@ -1,12 +1,14 @@
 package exchange_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/theplant/testenv"
+	"github.com/qor5/x/v3/gormx"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -49,19 +51,28 @@ type TestExchangeCompositePrimaryKeyModel struct {
 }
 
 func TestMain(m *testing.M) {
-	env, err := testenv.New().DBEnable(true).SetUp()
+	ctx := context.Background()
+
+	testSuite := gormx.MustStartTestSuite(ctx)
+	defer func() {
+		if err := testSuite.Stop(context.Background()); err != nil {
+			fmt.Printf("Error during teardown: %v\n", err)
+		}
+	}()
+
+	// Open a plain connection without OmitAssociationsPlugin, which MustStartTestSuite installs
+	// via SetupDatabase. Exchange's importer relies on GORM creating nested associations for new
+	// records during CreateInBatches, so the plugin must not be active on this connection.
+	var err error
+	db, err = gorm.Open(postgres.Open(testSuite.DSN()), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
-	defer func() { _ = env.TearDown() }()
-	db = env.DB
 	db.Logger = db.Logger.LogMode(logger.Info)
 
 	migrateTables()
 
-	s := m.Run()
-	// dropTables()
-	os.Exit(s)
+	os.Exit(m.Run())
 }
 
 func migrateTables() {

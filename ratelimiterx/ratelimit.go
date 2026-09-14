@@ -12,8 +12,6 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-var ErrorReasonRateLimited = "RATE_LIMITED"
-
 type Evaluator func(ctx context.Context, callMeta *normalize.CallMeta) ([]*ratelimiter.ReserveRequest, error)
 
 type Metadata struct {
@@ -51,7 +49,7 @@ func allow(ctx context.Context, limiter ratelimiter.RateLimiter, evaluator Evalu
 			if err := jsonx.Copy(&md, &meta); err != nil {
 				return statusx.Wrap(err, codes.Internal, statusv1.ErrorReason_INTERNAL.String(), "failed to copy metadata").Err()
 			}
-			return statusx.New(codes.ResourceExhausted, ErrorReasonRateLimited, "ratelimit exceeded").
+			return statusx.New(codes.ResourceExhausted, statusv1.ErrorReason_RATE_LIMITED.String(), "ratelimit exceeded").
 				WithMetadata(md).
 				Err()
 		}

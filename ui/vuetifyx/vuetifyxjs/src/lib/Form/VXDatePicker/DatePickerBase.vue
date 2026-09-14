@@ -49,6 +49,22 @@ const dateOfPicker = ref()
 const dateStr = computed(() => dayjs(dateOfPicker.value).format('YYYY-MM-DD'))
 const useTimeSelect = computed(() => props.type === 'datetimepicker')
 
+// Vuetify's v-date-picker emits update:year and update:month synchronously,
+// back-to-back, when arrow navigation crosses a year boundary (e.g. Jan -> Dec).
+// dateStr only reflects the previous emit's modelValue once Vue's reactivity
+// flushes, which hasn't happened yet by the time the second event fires - so
+// deriving each patch from dateStr independently loses whichever field the
+// other handler just changed. Track year/month in local refs instead, updated
+// synchronously, so both patches always compose from the latest state.
+const displayedYear = ref<number>()
+const displayedMonth = ref<number>()
+
+function syncDisplayedYearMonth(date: string) {
+  const [year, month] = date.split('-').map(Number)
+  displayedYear.value = year
+  displayedMonth.value = month
+}
+
 watch(
   () => props.modelValue,
   (value) => {
@@ -60,6 +76,7 @@ watch(
         dateOfPicker.value = date
       }
     }
+    syncDisplayedYearMonth(dateStr.value)
   },
   { immediate: true }
 )
@@ -75,20 +92,20 @@ function onYearOrMonthChange(value: number | unknown | Date, type: 'year' | 'mon
   let emitValueImmediate = false
 
   if (type === 'year') {
-    newDate = dateStr.value
-      .split('-')
-      .map((item: string, index: number) => (index === 0 ? value : item))
-      .join('-')
+    displayedYear.value = value as number
+    const day = dateStr.value.split('-')[2]
+    newDate = `${displayedYear.value}-${String(displayedMonth.value).padStart(2, '0')}-${day}`
 
     emitValueImmediate = !!props.modelValue
   } else if (type === 'month') {
-    newDate = dateStr.value
-      .split('-')
-      .map((item: string, index: number) => (index === 1 ? (value as number) + 1 : item))
-      .join('-')
+    displayedMonth.value = (value as number) + 1
+    const day = dateStr.value.split('-')[2]
+    newDate = `${displayedYear.value}-${String(displayedMonth.value).padStart(2, '0')}-${day}`
+
     emitValueImmediate = !!props.modelValue
   } else {
     newDate = dayjs(value as number).format('YYYY-MM-DD')
+    syncDisplayedYearMonth(newDate)
     emitValueImmediate = true
   }
 
@@ -161,42 +178,14 @@ const propsForTimeSelect = computed(() => {
   //   display: none;
   // }
 
+  // Vuetify 3.8+ docked variant lays out month and year on opposite sides via flex; the old overrides absolute-positioned non-existent classes and forced __month full-width, breaking the layout.
   &:deep(.v-date-picker-controls) {
-    display: block;
-    position: relative;
-    padding-inline-start: 15px;
-    padding-inline-end: 15px;
     padding-bottom: 20px;
 
-    .v-date-picker-controls__month-btn {
-      position: absolute;
-      left: 50%;
-      margin-left: -10px;
-      transform: translateX(-50%);
-      top: 2px;
-      .v-btn__content {
-        color: rgb(var(--v-theme-on-surface));
-      }
-    }
-
-    .v-date-picker-controls__mode-btn {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      margin-left: 65.5px;
-      top: 2px;
-    }
-
-    .v-date-picker-controls__month {
-      display: flex;
-      width: 100%;
-
+    .v-date-picker-controls__month,
+    .v-date-picker-controls__year {
       .v-btn {
         --v-btn-height: 20px;
-      }
-
-      & > :nth-child(2) {
-        margin-left: auto;
       }
     }
   }

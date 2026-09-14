@@ -61,7 +61,7 @@ func HTTPErrorWriter(conf *HTTPErrorWriterConfig) func(http.Handler) http.Handle
 							W:    w, R: r, Err: err,
 						})
 						if werr != nil {
-							slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err) // This should not happen generally
+							slog.ErrorContext(r.Context(), "Failed to write http response error", "error", err, "writeError", werr) // This should not happen generally
 							return
 						}
 						written = output.Written

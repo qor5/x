@@ -71,7 +71,7 @@ func TestSecurity(t *testing.T) {
 			},
 		},
 		{
-			name: "deny_simple_requests_with_invalid_content_type",
+			name: "deny_simple_requests_enabled",
 			config: SecurityConfig{
 				CORS: CORSConfig{
 					DenySimpleRequests: true,
@@ -79,104 +79,22 @@ func TestSecurity(t *testing.T) {
 			},
 			request: func() *http.Request {
 				req := httptest.NewRequest(http.MethodPost, "/test", nil)
-				req.Header.Set("Content-Type", "text/plain")
-				return req
-			}(),
-			expectedStatus: http.StatusUnsupportedMediaType,
-		},
-		{
-			name: "deny_simple_requests_with_missing_content_type",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request:        httptest.NewRequest(http.MethodPost, "/test", nil),
-			expectedStatus: http.StatusBadRequest,
-		},
-		{
-			name: "deny_simple_requests_with_valid_json_content_type",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request: func() *http.Request {
-				req := httptest.NewRequest(http.MethodPost, "/test", nil)
-				req.Header.Set("Content-Type", "application/json")
+				req.Header.Set("X-Requested-By", "fetch")
 				return req
 			}(),
 			expectedStatus: http.StatusOK,
 		},
 		{
-			name: "deny_simple_requests_with_valid_proto_content_type",
+			name: "deny_simple_requests_with_skip_check",
 			config: SecurityConfig{
 				CORS: CORSConfig{
 					DenySimpleRequests: true,
+					SkipDenySimpleRequests: func(r *http.Request) bool {
+						return r.URL.Path == "/healthz"
+					},
 				},
 			},
-			request: func() *http.Request {
-				req := httptest.NewRequest(http.MethodPost, "/test", nil)
-				req.Header.Set("Content-Type", "application/proto")
-				return req
-			}(),
-			expectedStatus: http.StatusOK,
-		},
-		{
-			name: "multiple_content_type_headers",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request: func() *http.Request {
-				req := httptest.NewRequest(http.MethodPost, "/test", nil)
-				req.Header.Add("Content-Type", "application/json")
-				req.Header.Add("Content-Type", "text/plain")
-				return req
-			}(),
-			expectedStatus: http.StatusBadRequest,
-		},
-		{
-			name: "invalid_content_type_format",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request: func() *http.Request {
-				req := httptest.NewRequest(http.MethodPost, "/test", nil)
-				req.Header.Set("Content-Type", "invalid content type")
-				return req
-			}(),
-			expectedStatus: http.StatusBadRequest,
-		},
-		{
-			name: "deny_simple_requests_with_head_method",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request: func() *http.Request {
-				req := httptest.NewRequest(http.MethodHead, "/test", nil)
-				req.Header.Set("Content-Type", "text/plain")
-				return req
-			}(),
-			expectedStatus: http.StatusUnsupportedMediaType,
-		},
-		{
-			name: "deny_simple_requests_with_valid_head_content_type",
-			config: SecurityConfig{
-				CORS: CORSConfig{
-					DenySimpleRequests: true,
-				},
-			},
-			request: func() *http.Request {
-				req := httptest.NewRequest(http.MethodHead, "/test", nil)
-				req.Header.Set("Content-Type", "application/json")
-				return req
-			}(),
+			request:        httptest.NewRequest(http.MethodGet, "/healthz", nil),
 			expectedStatus: http.StatusOK,
 		},
 	}
@@ -212,6 +130,239 @@ func TestSecurity(t *testing.T) {
 			for _, key := range tt.notExpectedHeaders {
 				assert.Empty(t, resp.Header.Get(key), "Header %s should not be set", key)
 			}
+		})
+	}
+}
+
+func TestDenySimpleRequests(t *testing.T) {
+	tests := []struct {
+		name           string
+		method         string
+		contentType    string
+		headerValue    string
+		expectedStatus int
+	}{
+		{
+			name:           "post_no_content_type_no_header",
+			method:         http.MethodPost,
+			contentType:    "",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "post_no_content_type_with_header",
+			method:         http.MethodPost,
+			contentType:    "",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "post_simple_content_type_no_header",
+			method:         http.MethodPost,
+			contentType:    "application/x-www-form-urlencoded",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "post_simple_content_type_with_header",
+			method:         http.MethodPost,
+			contentType:    "application/x-www-form-urlencoded",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "post_multipart_no_header",
+			method:         http.MethodPost,
+			contentType:    "multipart/form-data",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "post_multipart_with_header",
+			method:         http.MethodPost,
+			contentType:    "multipart/form-data",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "post_text_plain_no_header",
+			method:         http.MethodPost,
+			contentType:    "text/plain; charset=utf-8",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "post_text_plain_with_header",
+			method:         http.MethodPost,
+			contentType:    "text/plain; charset=utf-8",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "post_json_no_header_allowed",
+			method:         http.MethodPost,
+			contentType:    "application/json",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "post_proto_no_header_allowed",
+			method:         http.MethodPost,
+			contentType:    "application/proto",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "get_no_header",
+			method:         http.MethodGet,
+			contentType:    "",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "get_with_header",
+			method:         http.MethodGet,
+			contentType:    "",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "put_no_header_allowed",
+			method:         http.MethodPut,
+			contentType:    "",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "delete_no_header_allowed",
+			method:         http.MethodDelete,
+			contentType:    "",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "patch_no_header_allowed",
+			method:         http.MethodPatch,
+			contentType:    "",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "options_no_header_allowed",
+			method:         http.MethodOptions,
+			contentType:    "",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			})
+
+			middleware := DenySimpleRequests(handler)
+
+			req := httptest.NewRequest(tt.method, "/test", nil)
+			if tt.contentType != "" {
+				req.Header.Set("Content-Type", tt.contentType)
+			}
+			if tt.headerValue != "" {
+				req.Header.Set("X-Requested-By", tt.headerValue)
+			}
+
+			w := httptest.NewRecorder()
+			middleware.ServeHTTP(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			assert.Equal(t, tt.expectedStatus, resp.StatusCode)
+		})
+	}
+}
+
+func TestDenySimpleRequestsFactory(t *testing.T) {
+	tests := []struct {
+		name           string
+		skipCheck      func(r *http.Request) bool
+		requestPath    string
+		headerValue    string
+		expectedStatus int
+	}{
+		{
+			name:           "nil_skipCheck_missing_header",
+			skipCheck:      nil,
+			requestPath:    "/api/test",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "nil_skipCheck_with_header",
+			skipCheck:      nil,
+			requestPath:    "/api/test",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "skipCheck_returns_true",
+			skipCheck: func(r *http.Request) bool {
+				return r.URL.Path == "/healthz"
+			},
+			requestPath:    "/healthz",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "skipCheck_returns_false_missing_header",
+			skipCheck: func(r *http.Request) bool {
+				return r.URL.Path == "/healthz"
+			},
+			requestPath:    "/api/test",
+			headerValue:    "",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name: "skipCheck_returns_false_with_header",
+			skipCheck: func(r *http.Request) bool {
+				return r.URL.Path == "/healthz"
+			},
+			requestPath:    "/api/test",
+			headerValue:    "fetch",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "skipCheck_multiple_paths",
+			skipCheck: func(r *http.Request) bool {
+				return r.URL.Path == "/healthz" || r.URL.Path == "/metrics"
+			},
+			requestPath:    "/metrics",
+			headerValue:    "",
+			expectedStatus: http.StatusOK,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			})
+
+			middleware := DenySimpleRequestsFactory(tt.skipCheck)(handler)
+
+			req := httptest.NewRequest(http.MethodPost, tt.requestPath, nil)
+			if tt.headerValue != "" {
+				req.Header.Set("X-Requested-By", tt.headerValue)
+			}
+
+			w := httptest.NewRecorder()
+			middleware.ServeHTTP(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			assert.Equal(t, tt.expectedStatus, resp.StatusCode)
 		})
 	}
 }
@@ -316,6 +467,117 @@ func TestParseContentType(t *testing.T) {
 				if tt.expectedParams != nil {
 					assert.Equal(t, tt.expectedParams, params)
 				}
+			}
+		})
+	}
+}
+
+// TestCORSOptionsWithOrigin verifies OPTIONS preflight request behavior
+// when Origin is empty or not in the allowlist.
+//
+// Key findings:
+// 1. OPTIONS preflight always returns 204 No Content (handled by rs/cors library)
+// 2. When Origin is empty or not in allowlist: NO Access-Control-Allow-* headers are returned
+// 3. When Origin is in allowlist: Access-Control-Allow-Origin, Methods, Credentials are returned
+// 4. The browser will block the actual request if preflight doesn't return proper CORS headers
+func TestCORSOptionsWithOrigin(t *testing.T) {
+	tests := []struct {
+		name                     string
+		allowedOrigins           []string
+		requestOrigin            string
+		expectedStatus           int
+		expectAccessControlAllow bool
+		expectedAllowOrigin      string
+	}{
+		{
+			name:                     "empty_origin_with_allowlist",
+			allowedOrigins:           []string{"https://example.com"},
+			requestOrigin:            "",
+			expectedStatus:           http.StatusNoContent, // 204 - preflight response
+			expectAccessControlAllow: false,
+			expectedAllowOrigin:      "",
+		},
+		{
+			name:                     "origin_in_allowlist",
+			allowedOrigins:           []string{"https://example.com"},
+			requestOrigin:            "https://example.com",
+			expectedStatus:           http.StatusNoContent, // 204 - preflight response
+			expectAccessControlAllow: true,
+			expectedAllowOrigin:      "https://example.com",
+		},
+		{
+			name:                     "origin_not_in_allowlist",
+			allowedOrigins:           []string{"https://example.com"},
+			requestOrigin:            "https://evil.com",
+			expectedStatus:           http.StatusNoContent, // 204 - preflight response
+			expectAccessControlAllow: false,
+			expectedAllowOrigin:      "",
+		},
+		{
+			name:                     "empty_allowlist_with_origin",
+			allowedOrigins:           []string{},
+			requestOrigin:            "https://example.com",
+			expectedStatus:           http.StatusNoContent, // 204 - preflight response
+			expectAccessControlAllow: false,
+			expectedAllowOrigin:      "",
+		},
+		{
+			name:                     "empty_allowlist_empty_origin",
+			allowedOrigins:           []string{},
+			requestOrigin:            "",
+			expectedStatus:           http.StatusNoContent, // 204 - preflight response
+			expectAccessControlAllow: false,
+			expectedAllowOrigin:      "",
+		},
+		{
+			name:                     "wildcard_origin_supported",
+			allowedOrigins:           []string{"*"},
+			requestOrigin:            "https://any.com",
+			expectedStatus:           http.StatusNoContent, // 204 - preflight response
+			expectAccessControlAllow: true,
+			expectedAllowOrigin:      "*", // wildcard returns "*" not the actual origin
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			})
+
+			config := SecurityConfig{
+				CORS: CORSConfig{
+					AllowedOrigins: tt.allowedOrigins,
+				},
+			}
+			middleware := Security(config)
+			secureHandler := middleware(handler)
+
+			req := httptest.NewRequest(http.MethodOptions, "/test", nil)
+			if tt.requestOrigin != "" {
+				req.Header.Set("Origin", tt.requestOrigin)
+			}
+			req.Header.Set("Access-Control-Request-Method", "POST")
+
+			w := httptest.NewRecorder()
+			secureHandler.ServeHTTP(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+
+			assert.Equal(t, tt.expectedStatus, resp.StatusCode, "Status code should match")
+
+			allowOrigin := resp.Header.Get("Access-Control-Allow-Origin")
+			allowMethods := resp.Header.Get("Access-Control-Allow-Methods")
+			allowCredentials := resp.Header.Get("Access-Control-Allow-Credentials")
+			if tt.expectAccessControlAllow {
+				assert.Equal(t, tt.expectedAllowOrigin, allowOrigin, "Access-Control-Allow-Origin should match")
+				assert.NotEmpty(t, allowMethods, "Access-Control-Allow-Methods should be set")
+				assert.Equal(t, "true", allowCredentials, "Access-Control-Allow-Credentials should be true")
+			} else {
+				assert.Empty(t, allowOrigin, "Access-Control-Allow-Origin should be empty")
+				assert.Empty(t, allowMethods, "Access-Control-Allow-Methods should be empty")
+				assert.Empty(t, allowCredentials, "Access-Control-Allow-Credentials should be empty")
 			}
 		})
 	}
