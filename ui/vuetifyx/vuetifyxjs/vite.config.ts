@@ -13,6 +13,11 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // Since vite 7.3, minification strips third-party license banners by default.
+  // This directory's dist is go:embed-ed and redistributed with qor5/x, and MIT
+  // and friends require the copyright notice to survive redistribution — so keep
+  // them explicitly rather than relying on a default that has already changed once.
+  esbuild: { legalComments: 'inline' },
   build: {
     cssCodeSplit:false,
     /**
