@@ -16,8 +16,8 @@
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
-    "@tiptap/core": "^3.31.0",
-    "@tiptap/vue-3": "^3.31.0",
+    "@tiptap/core": "^3.31.4",
+    "@tiptap/vue-3": "^3.31.4",
     "@vitejs/plugin-vue-jsx": "^5.1.5",
     "@vueuse/core": "^11.3.0",
     "date-fns": "^3.6.0",
