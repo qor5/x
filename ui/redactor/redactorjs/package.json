@@ -14,9 +14,9 @@
     "vue": "^3.5.42"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.3",
+    "@vitejs/plugin-vue": "^5.2.4",
     "vite": "^6.4.3",
-    "vite-plugin-vue-devtools": "^7.7.2"
+    "vite-plugin-vue-devtools": "^7.7.6"
   },
   "pnpm": {
     "overrides": {
