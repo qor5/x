@@ -262,10 +262,11 @@ func TestWrap(t *testing.T) {
 	}
 
 	{
-		status, _ := status.New(codes.NotFound, "resource not found").WithDetails(&errdetails.ErrorInfo{
+		st, err := status.New(codes.NotFound, "resource not found").WithDetails(&errdetails.ErrorInfo{
 			Reason: "NOT_FOUND",
 		})
-		wrapped := Wrap(status.Err(), codes.Internal, statusv1.ErrorReason_INTERNAL.String(), "internal server error")
+		require.NoError(t, err)
+		wrapped := Wrap(st.Err(), codes.Internal, statusv1.ErrorReason_INTERNAL.String(), "internal server error")
 		assert.Equal(t, codes.NotFound, wrapped.Code())
 		assert.Equal(t, "NOT_FOUND", wrapped.Reason())
 		assert.Equal(t, "resource not found", wrapped.Message())
@@ -284,6 +285,170 @@ func TestWrap(t *testing.T) {
 		require.NotNil(t, localized, "localized should not be nil")
 		assert.Equal(t, "DATABASE_CONNECTION_ERROR", localized.Key,
 			"localized key should match the reason for consistent i18n translation")
+	})
+}
+
+func TestAlwaysWrap(t *testing.T) {
+	t.Run("plain error", func(t *testing.T) {
+		originalErr := errors.New("original error")
+		wrapped := AlwaysWrap(originalErr, codes.Internal, "INTERNAL_ERROR", "internal server error")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, codes.Internal, wrapped.Code())
+		assert.Equal(t, "INTERNAL_ERROR", wrapped.Reason())
+		assert.Equal(t, "internal server error", wrapped.Message())
+		assert.True(t, errors.Is(wrapped.Err(), originalErr))
+	})
+
+	t.Run("nil error", func(t *testing.T) {
+		wrapped := AlwaysWrap(nil, codes.Internal, "INTERNAL_ERROR", "internal server error")
+		require.NotNil(t, wrapped)
+		assert.Equal(t, codes.OK, wrapped.Code())
+		assert.Equal(t, statusv1.ErrorReason_OK.String(), wrapped.Reason())
+		assert.Equal(t, "", wrapped.Message())
+	})
+
+	t.Run("overrides existing StatusError", func(t *testing.T) {
+		original := New(codes.NotFound, "NOT_FOUND", "resource not found")
+		wrapped := AlwaysWrap(original.Err(), codes.Internal, "INTERNAL_ERROR", "internal server error")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, codes.Internal, wrapped.Code())
+		assert.Equal(t, "INTERNAL_ERROR", wrapped.Reason())
+		assert.Equal(t, "internal server error", wrapped.Message())
+	})
+
+	t.Run("overrides existing gRPC status error", func(t *testing.T) {
+		st, err := status.New(codes.NotFound, "resource not found").WithDetails(&errdetails.ErrorInfo{
+			Reason: "NOT_FOUND",
+		})
+		require.NoError(t, err)
+		wrapped := AlwaysWrap(st.Err(), codes.Internal, "INTERNAL_ERROR", "internal server error")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, codes.Internal, wrapped.Code())
+		assert.Equal(t, "INTERNAL_ERROR", wrapped.Reason())
+		assert.Equal(t, "internal server error", wrapped.Message())
+	})
+
+	t.Run("preserves details from existing StatusError", func(t *testing.T) {
+		original := New(codes.InvalidArgument, "VALIDATION_FAILED", "validation failed").
+			WithFieldViolations(
+				NewFieldViolation("email", "field.email.invalid", "Email is invalid"),
+			).
+			WithMetadata(map[string]string{"key": "value"})
+
+		wrapped := AlwaysWrap(original.Err(), codes.Internal, "INTERNAL_ERROR", "internal server error")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, codes.Internal, wrapped.Code())
+		assert.Equal(t, "INTERNAL_ERROR", wrapped.Reason())
+		assert.Equal(t, "internal server error", wrapped.Message())
+		assert.NotNil(t, wrapped.badRequest)
+		assert.Len(t, wrapped.badRequest.FieldViolations, 1)
+		assert.Equal(t, "email", wrapped.badRequest.FieldViolations[0].Field)
+	})
+
+	t.Run("does not mutate original StatusError", func(t *testing.T) {
+		original := New(codes.NotFound, "NOT_FOUND", "resource not found").
+			WithMetadata(map[string]string{"key": "value"})
+
+		_ = AlwaysWrap(original.Err(), codes.Internal, "INTERNAL_ERROR", "internal server error")
+
+		assert.Equal(t, codes.NotFound, original.Code())
+		assert.Equal(t, "NOT_FOUND", original.Reason())
+		assert.Equal(t, "resource not found", original.Message())
+	})
+
+	t.Run("localized key matches new reason", func(t *testing.T) {
+		original := New(codes.NotFound, "NOT_FOUND", "resource not found")
+		wrapped := AlwaysWrap(original.Err(), codes.Internal, "DATABASE_ERROR", "database failed")
+		require.NotNil(t, wrapped)
+
+		localized := wrapped.Localized()
+		require.NotNil(t, localized)
+		assert.Equal(t, "DATABASE_ERROR", localized.Key)
+	})
+
+	t.Run("non-nil error with OK code becomes unknown", func(t *testing.T) {
+		originalErr := errors.New("original error")
+		wrapped := AlwaysWrap(originalErr, codes.OK, statusv1.ErrorReason_OK.String(), "should become unknown")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, codes.Unknown, wrapped.Code())
+		assert.Equal(t, statusv1.ErrorReason_UNKNOWN.String(), wrapped.Reason())
+		assert.Equal(t, "should become unknown", wrapped.Message())
+		assert.True(t, errors.Is(wrapped.Err(), originalErr))
+
+		localized := wrapped.Localized()
+		require.NotNil(t, localized)
+		assert.Equal(t, statusv1.ErrorReason_UNKNOWN.String(), localized.Key)
+	})
+}
+
+func TestAlwaysWrapf(t *testing.T) {
+	t.Run("plain error with format", func(t *testing.T) {
+		originalErr := errors.New("original error")
+		wrapped := AlwaysWrapf(originalErr, codes.Internal, "INTERNAL_ERROR", "error for %s: %d", "user", 42)
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, codes.Internal, wrapped.Code())
+		assert.Equal(t, "INTERNAL_ERROR", wrapped.Reason())
+		assert.Equal(t, "error for user: 42", wrapped.Message())
+	})
+
+	t.Run("overrides existing StatusError with format", func(t *testing.T) {
+		original := New(codes.NotFound, "NOT_FOUND", "resource not found")
+		wrapped := AlwaysWrapf(original.Err(), codes.Internal, "INTERNAL_ERROR", "error for %s", "user")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, codes.Internal, wrapped.Code())
+		assert.Equal(t, "INTERNAL_ERROR", wrapped.Reason())
+		assert.Equal(t, "error for user", wrapped.Message())
+	})
+}
+
+func TestAlwaysWrapCode(t *testing.T) {
+	t.Run("plain error", func(t *testing.T) {
+		originalErr := errors.New("original error")
+		wrapped := AlwaysWrapCode(originalErr, codes.Internal, "internal server error")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, codes.Internal, wrapped.Code())
+		assert.Equal(t, statusv1.ErrorReason_INTERNAL.String(), wrapped.Reason())
+		assert.Equal(t, "internal server error", wrapped.Message())
+	})
+
+	t.Run("overrides existing StatusError", func(t *testing.T) {
+		original := New(codes.NotFound, "NOT_FOUND", "resource not found")
+		wrapped := AlwaysWrapCode(original.Err(), codes.Internal, "internal server error")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, codes.Internal, wrapped.Code())
+		assert.Equal(t, statusv1.ErrorReason_INTERNAL.String(), wrapped.Reason())
+		assert.Equal(t, "internal server error", wrapped.Message())
+	})
+}
+
+func TestAlwaysWrapCodef(t *testing.T) {
+	t.Run("plain error with format", func(t *testing.T) {
+		originalErr := errors.New("original error")
+		wrapped := AlwaysWrapCodef(originalErr, codes.Internal, "error for %s", "user")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, codes.Internal, wrapped.Code())
+		assert.Equal(t, statusv1.ErrorReason_INTERNAL.String(), wrapped.Reason())
+		assert.Equal(t, "error for user", wrapped.Message())
+	})
+
+	t.Run("overrides existing StatusError", func(t *testing.T) {
+		original := New(codes.NotFound, "NOT_FOUND", "resource not found")
+		wrapped := AlwaysWrapCodef(original.Err(), codes.Internal, "error for %s", "user")
+		require.NotNil(t, wrapped)
+
+		assert.Equal(t, codes.Internal, wrapped.Code())
+		assert.Equal(t, statusv1.ErrorReason_INTERNAL.String(), wrapped.Reason())
+		assert.Equal(t, "error for user", wrapped.Message())
 	})
 }
 
