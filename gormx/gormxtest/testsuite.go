@@ -1,9 +1,9 @@
-package gormx
+package gormxtest
 
 import (
 	"context"
-	_ "embed"
 
+	"github.com/qor5/x/v3/gormx"
 	"github.com/theplant/inject"
 	"github.com/theplant/inject/lifecycle"
 	"gorm.io/gorm"
@@ -89,12 +89,12 @@ func StartTestSuite(ctx context.Context, opts ...TestSuiteOption) (*TestSuite, e
 		lifecycle.SetupSignal,
 		func() *ContainerConfig { return options.containerConfig },
 		SetupContainer,
-		func(c *Container) *DatabaseConfig {
-			conf := DefaultDatabaseConfig()
+		func(c *Container) *gormx.DatabaseConfig {
+			conf := gormx.DefaultDatabaseConfig()
 			conf.DSN = c.DSN
 			return conf
 		},
-		SetupDatabase,
+		gormx.SetupDatabase,
 		options.providers,
 	)
 	if err != nil {

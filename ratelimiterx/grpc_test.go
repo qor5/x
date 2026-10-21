@@ -19,7 +19,7 @@ import (
 	"google.golang.org/grpc/test/bufconn"
 	"gorm.io/gorm"
 
-	"github.com/qor5/x/v3/gormx"
+	"github.com/qor5/x/v3/gormx/gormxtest"
 	"github.com/qor5/x/v3/healthz/testdata/gen"
 	"github.com/qor5/x/v3/normalize"
 	statusv1 "github.com/qor5/x/v3/statusx/gen/status/v1"
@@ -38,7 +38,7 @@ var db *gorm.DB
 
 func TestMain(m *testing.M) {
 	ctx := context.Background()
-	suite := gormx.MustStartTestSuite(ctx)
+	suite := gormxtest.MustStartTestSuite(ctx)
 	defer func() { _ = suite.Stop(ctx) }()
 
 	db = suite.DB()
