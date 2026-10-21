@@ -1,10 +1,10 @@
-package gormx_test
+package gormxtest_test
 
 import (
 	"context"
 	"testing"
 
-	"github.com/qor5/x/v3/gormx"
+	"github.com/qor5/x/v3/gormx/gormxtest"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
@@ -30,7 +30,7 @@ func migrateWidgets(_ context.Context, db *gorm.DB, dsn string) error {
 
 // Declared at package scope, exactly as a consumer would: nothing starts until
 // the first Fork.
-var widgetPool = gormx.NewTemplatePool(nil, migrateWidgets)
+var widgetPool = gormxtest.NewTemplatePool(nil, migrateWidgets)
 
 func TestTemplatePool(t *testing.T) {
 	t.Cleanup(func() { require.NoError(t, widgetPool.Close(context.Background())) })
@@ -87,10 +87,10 @@ func TestTemplatePool(t *testing.T) {
 // The pool raises max_connections because handing out many databases at once is
 // its whole purpose, but a caller who names the setting must still win.
 func TestTemplatePool_CallerArgsWin(t *testing.T) {
-	conf := gormx.DefaultContainerConfig()
+	conf := gormxtest.DefaultContainerConfig()
 	conf.Args = []string{"-c", "max_connections=137"}
 
-	pool := gormx.NewTemplatePool(conf, migrateWidgets)
+	pool := gormxtest.NewTemplatePool(conf, migrateWidgets)
 	t.Cleanup(func() { require.NoError(t, pool.Close(context.Background())) })
 
 	var maxConnections string
@@ -100,6 +100,6 @@ func TestTemplatePool_CallerArgsWin(t *testing.T) {
 
 func TestNewTemplatePool_RequiresMigrator(t *testing.T) {
 	require.PanicsWithValue(t, "gormx: NewTemplatePool requires a TemplateMigrator", func() {
-		gormx.NewTemplatePool(nil, nil)
+		gormxtest.NewTemplatePool(nil, nil)
 	})
 }

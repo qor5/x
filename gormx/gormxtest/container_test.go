@@ -1,10 +1,10 @@
-package gormx_test
+package gormxtest_test
 
 import (
 	"context"
 	"testing"
 
-	"github.com/qor5/x/v3/gormx"
+	"github.com/qor5/x/v3/gormx/gormxtest"
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -16,10 +16,10 @@ import (
 func TestOpenContainer_Args(t *testing.T) {
 	ctx := context.Background()
 
-	conf := gormx.DefaultContainerConfig()
+	conf := gormxtest.DefaultContainerConfig()
 	conf.Args = []string{"-c", "max_connections=123"}
 
-	container, err := gormx.OpenContainer(ctx, conf)
+	container, err := gormxtest.OpenContainer(ctx, conf)
 	require.NoError(t, err)
 	t.Cleanup(func() {
 		_ = container.Terminate(context.WithoutCancel(ctx))

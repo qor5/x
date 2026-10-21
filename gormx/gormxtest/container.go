@@ -1,4 +1,4 @@
-package gormx
+package gormxtest
 
 import (
 	"cmp"

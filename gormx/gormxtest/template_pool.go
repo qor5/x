@@ -1,4 +1,4 @@
-package gormx
+package gormxtest
 
 import (
 	"cmp"
@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
+	"github.com/qor5/x/v3/gormx"
 	"gorm.io/gorm"
 )
 
@@ -72,7 +73,7 @@ type TemplateMigrator func(ctx context.Context, db *gorm.DB, dsn string) error
 //
 // Declare one per test binary and let it start itself:
 //
-//	var pool = gormx.NewTemplatePool(nil, migrate)
+//	var pool = gormxtest.NewTemplatePool(nil, migrate)
 //
 //	func TestSomething(t *testing.T) {
 //		db := pool.Fork(t)
@@ -236,14 +237,14 @@ func (p *TemplatePool) start() {
 	}
 }
 
-// open dials one of the container's databases with the package's own defaults,
-// so a fork behaves like any other gormx-managed connection (tracing, plugins)
+// open dials one of the container's databases with gormx's own defaults, so a
+// fork behaves like any other gormx-managed connection (tracing, plugins)
 // rather than a bare gorm.Open.
 func (p *TemplatePool) open(ctx context.Context, dsn string, opts ...gorm.Option) (*gorm.DB, io.Closer, error) {
-	conf := DefaultDatabaseConfig()
+	conf := gormx.DefaultDatabaseConfig()
 	conf.DSN = dsn
 	conf.MaxIdleConns = forkMaxIdleConns
-	return Open(ctx, conf, opts...)
+	return gormx.Open(ctx, conf, opts...)
 }
 
 func (p *TemplatePool) dsn(database string) string {

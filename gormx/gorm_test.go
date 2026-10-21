@@ -4,14 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/qor5/x/v3/gormx"
+	"github.com/qor5/x/v3/gormx/gormxtest"
 )
 
-var suite *gormx.TestSuite
+var suite *gormxtest.TestSuite
 
 func TestMain(m *testing.M) {
 	ctx := context.Background()
-	suite = gormx.MustStartTestSuite(ctx)
+	suite = gormxtest.MustStartTestSuite(ctx)
 	defer func() { _ = suite.Stop(ctx) }()
 	m.Run()
 }
