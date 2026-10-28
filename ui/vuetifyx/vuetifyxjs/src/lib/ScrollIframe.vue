@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import { diffAndUpdate } from './utils/diffAndUpdate'
 
 const emit = defineEmits(['load'])
 const iframe = ref()
@@ -21,52 +22,6 @@ const props = defineProps({
   updateDifferent: { type: Boolean, default: false }
 })
 const virtualHeight = props.virtualElementHeight
-
-const diffAndUpdate = (oldNode: Node, newNode: Node, deep: number = 0) => {
-  if (deep > 0) {
-    if (oldNode.nodeType !== newNode.nodeType || oldNode.nodeName !== newNode.nodeName) {
-      const parent = oldNode.parentNode
-      if (parent) {
-        parent.replaceChild(newNode.cloneNode(true), oldNode)
-      }
-      return
-    }
-
-    if (oldNode.nodeType === Node.TEXT_NODE) {
-      if (oldNode.nodeValue !== newNode.nodeValue) {
-        oldNode.nodeValue = newNode.nodeValue
-      }
-      return
-    }
-    const oldElement = oldNode as Element
-    const newElement = newNode as Element
-    const oldAttrs = oldElement.attributes
-    const newAttrs = newElement.attributes
-    Array.from(oldAttrs).forEach((attr) => {
-      if (!newElement.hasAttribute(attr.name)) {
-        oldElement.removeAttribute(attr.name)
-      }
-    })
-    Array.from(newAttrs).forEach((attr) => {
-      if (oldElement.getAttribute(attr.name) !== attr.value) {
-        oldElement.setAttribute(attr.name, attr.value)
-      }
-    })
-  }
-
-  const oldChildren = Array.from(oldNode.childNodes)
-  const newChildren = Array.from(newNode.childNodes)
-  const maxLength = Math.max(oldChildren.length, newChildren.length)
-  for (let i = 0; i < maxLength; i++) {
-    if (!oldChildren[i] && newChildren[i]) {
-      oldNode.appendChild(newChildren[i].cloneNode(true))
-    } else if (oldChildren[i] && !newChildren[i]) {
-      oldChildren[i].remove()
-    } else if (oldChildren[i] && newChildren[i]) {
-      diffAndUpdate(oldChildren[i], newChildren[i], deep + 1)
-    }
-  }
-}
 
 const resizeObserver = new ResizeObserver((entries) => {
   for (let entry of entries) {
@@ -338,7 +293,29 @@ const updateBody = (
     '*'
   )
   const bodyEle = iframeDoc().querySelector('body')
-  bodyEle.innerHTML = data.body
+  // KGM-3886: replacing the whole body via innerHTML destroys and rebuilds every
+  // container node. The rebuilt content's height collapses momentarily (the edited
+  // container — e.g. a Video — has not laid out yet), so the iframe scroll is reset
+  // to the top and then smooth-scrolled back to the edited container, producing a
+  // visible (intermittent, layout-timing dependent) "jump to top then slide back"
+  // glitch.
+  //
+  // When updateDifferent is enabled and this is an in-place field update
+  // (isUpdate === true, set only by the container field-save path), patch the DOM in
+  // place instead. A field edit never changes the number or order of containers, so
+  // the index-based diff aligns perfectly and only the edited container's changed
+  // attributes/text are touched. Untouched nodes keep their identity and laid-out
+  // height, so the scroll position never moves — no jump, regardless of timing.
+  //
+  // The diff is index-based and key-less, so it must NOT be used when the structure
+  // changes (add / move / delete container). Those paths emit isUpdate === false and
+  // keep the wholesale innerHTML replacement (they intentionally scroll to the
+  // target container anyway).
+  if (props.updateDifferent && data.isUpdate) {
+    diffAndUpdate(bodyEle, temp)
+  } else {
+    bodyEle.innerHTML = data.body
+  }
   setTimeout(() => {
     setIframeDisplay()
     scrollToCurrentContainer(data.containerDataID, data.isUpdate)
