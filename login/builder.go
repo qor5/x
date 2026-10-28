@@ -74,6 +74,9 @@ type Builder struct {
 	authCookieName        string
 	authSecureCookieName  string
 	continueUrlCookieName string
+	// paths of static files that can be accessed without login.
+	// an entry ending with "/" matches as a prefix, otherwise it must match exactly.
+	publicPathPrefixes []string
 	// seconds
 	sessionMaxAge        int
 	cookieConfig         CookieConfig
@@ -186,7 +189,8 @@ func New() *Builder {
 		totpConfig: TOTPConfig{
 			Issuer: "QOR5",
 		},
-		oauthIdentifiers: make(map[string]OAuthIdentifier),
+		oauthIdentifiers:   make(map[string]OAuthIdentifier),
+		publicPathPrefixes: []string{assetsPathPrefix},
 	}
 
 	i18nB := i18n.New()
@@ -207,6 +211,14 @@ func New() *Builder {
 
 func (b *Builder) Secret(v string) (r *Builder) {
 	b.secret = v
+	return b
+}
+
+// PublicPathPrefixes appends paths whose static files (.js, .css, .png, ...) can be accessed without login.
+// An entry ending with "/" matches as a prefix, otherwise it must match the request path exactly.
+// Only declare paths that serve static files, never paths of dynamic handlers.
+func (b *Builder) PublicPathPrefixes(vs ...string) (r *Builder) {
+	b.publicPathPrefixes = append(b.publicPathPrefixes, vs...)
 	return b
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -43,6 +44,28 @@ func MockCurrentUser(user any) func(next http.Handler) http.Handler {
 
 var ErrShouldNotExtend = errors.New("should not extend session")
 
+// isPublicStaticPath reports whether p is a static file under the declared public paths,
+// which can be accessed without login.
+// The file extension alone does not tell whether a path is served by a static file handler.
+func (b *Builder) isPublicStaticPath(p string, staticFileRe *regexp.Regexp) bool {
+	if path.Clean(p) != p || !staticFileRe.MatchString(strings.ToLower(p)) {
+		return false
+	}
+	for _, v := range b.publicPathPrefixes {
+		if v == "" {
+			continue
+		}
+		if strings.HasSuffix(v, "/") {
+			if strings.HasPrefix(p, v) {
+				return true
+			}
+		} else if p == v {
+			return true
+		}
+	}
+	return false
+}
+
 func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) http.Handler {
 	mustLogin := true
 	autoRedirectToHomePage := true
@@ -72,7 +95,7 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if staticFileRe.MatchString(strings.ToLower(r.URL.Path)) {
+			if b.isPublicStaticPath(r.URL.Path, staticFileRe) {
 				next.ServeHTTP(w, r)
 				return
 			}
