@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/qor5/go-que"
@@ -81,6 +82,9 @@ func PerformWithTracing(notifier errornotifier.Notifier) func(next func(ctx cont
 				"span.role":        "consumer",
 				"goque.job.id":     j.ID(),
 				"goque.queue.name": j.Plan().Queue,
+				// How long past its scheduled RunAt the job waited before a
+				// worker picked it up; rises when the queue is backlogged.
+				"goque.job.latency_ms": time.Since(j.Plan().RunAt).Milliseconds(),
 			}
 
 			payload, err := jsonx.Marshal(j.Plan())

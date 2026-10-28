@@ -73,7 +73,7 @@ const clear = (e: any) => {
 </script>
 
 <template>
-  <v-menu :close-on-content-click="false" class="rounded-lg" v-model="menu">
+  <v-menu :close-on-content-click="false" scrim="transparent" class="rounded-lg" v-model="menu">
     <template v-slot:activator="{ props: menuProps }">
       <filter-button
         :op="modelValue"

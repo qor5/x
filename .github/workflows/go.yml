@@ -27,6 +27,8 @@ jobs:
           timezoneLinux: 'Asia/Shanghai'
 
       - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
 
       - name: Set up Go
         uses: actions/setup-go@v2
