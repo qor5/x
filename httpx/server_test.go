@@ -1,0 +1,320 @@
+package httpx_test
+
+import (
+	"bufio"
+	"context"
+	"crypto/tls"
+	"io"
+	"net"
+	"net/http"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/qor5/confx"
+	"github.com/stretchr/testify/require"
+	"github.com/theplant/inject/lifecycle"
+	"golang.org/x/net/http2"
+
+	"github.com/qor5/x/v3/httpx"
+)
+
+// serve starts a server on a random port and returns its address.
+func serve(t *testing.T, conf *httpx.ServerConfig, handler http.Handler) string {
+	t.Helper()
+
+	srv, err := httpx.NewServer(conf, handler)
+	require.NoError(t, err)
+
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+
+	go func() { _ = srv.Serve(ln) }()
+	t.Cleanup(func() { _ = srv.Close() })
+
+	return ln.Addr().String()
+}
+
+// h2cClient talks to a cleartext port in prior-knowledge mode (it sends the
+// HTTP/2 preface straight away), which is exactly what Envoy and gRPC clients
+// do when appProtocol is h2c.
+func h2cClient() *http.Client {
+	return &http.Client{
+		Transport: &http2.Transport{
+			AllowHTTP: true,
+			DialTLSContext: func(ctx context.Context, network, addr string, _ *tls.Config) (net.Conn, error) {
+				return (&net.Dialer{}).DialContext(ctx, network, addr)
+			},
+		},
+	}
+}
+
+// Cleartext HTTP/2 must keep working after the move to http.Server.Protocols.
+// This is the behaviour most at risk when replacing the deprecated
+// h2c.NewHandler, so it is asserted directly.
+func TestNewServer_H2C(t *testing.T) {
+	addr := serve(t, &httpx.ServerConfig{Address: ":0"},
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_, _ = io.WriteString(w, r.Proto)
+		}))
+
+	resp, err := h2cClient().Get("http://" + addr)
+	require.NoError(t, err)
+	defer func() { _ = resp.Body.Close() }()
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.Equal(t, "HTTP/2.0", string(body))
+}
+
+// The same server must still serve HTTP/1.1.
+func TestNewServer_HTTP1StillWorks(t *testing.T) {
+	addr := serve(t, &httpx.ServerConfig{Address: ":0"},
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_, _ = io.WriteString(w, r.Proto)
+		}))
+
+	resp, err := http.Get("http://" + addr)
+	require.NoError(t, err)
+	defer func() { _ = resp.Body.Close() }()
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.Equal(t, "HTTP/1.1", string(body))
+}
+
+// Reads MAX_CONCURRENT_STREAMS as the server advertises it in the SETTINGS
+// frame. This is the only way to prove http.Server.HTTP2 is honoured: the
+// field's doc comment in Go 1.25 still says "does not yet have any effect",
+// which is stale, but nothing short of measuring it says so.
+func advertisedMaxStreams(t *testing.T, addr string) uint32 {
+	t.Helper()
+
+	conn, err := net.Dial("tcp", addr)
+	require.NoError(t, err)
+	defer func() { _ = conn.Close() }()
+	require.NoError(t, conn.SetDeadline(time.Now().Add(5*time.Second)))
+
+	_, err = io.WriteString(conn, http2.ClientPreface)
+	require.NoError(t, err)
+
+	fr := http2.NewFramer(conn, conn)
+	require.NoError(t, fr.WriteSettings())
+
+	for range 5 {
+		f, err := fr.ReadFrame()
+		require.NoError(t, err)
+		sf, ok := f.(*http2.SettingsFrame)
+		if !ok {
+			continue
+		}
+		if v, ok := sf.Value(http2.SettingMaxConcurrentStreams); ok {
+			return v
+		}
+	}
+	t.Fatal("server never advertised MAX_CONCURRENT_STREAMS")
+	return 0
+}
+
+func TestNewServer_MaxConcurrentStreams(t *testing.T) {
+	noop := http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})
+
+	t.Run("configured value is advertised", func(t *testing.T) {
+		addr := serve(t, &httpx.ServerConfig{Address: ":0", MaxConcurrentStreams: 42}, noop)
+		require.Equal(t, uint32(42), advertisedMaxStreams(t, addr))
+	})
+
+	t.Run("zero falls back to the Go default", func(t *testing.T) {
+		addr := serve(t, &httpx.ServerConfig{Address: ":0"}, noop)
+		require.Equal(t, uint32(250), advertisedMaxStreams(t, addr))
+	})
+}
+
+func TestNewServer_MaxRequestBodySize(t *testing.T) {
+	const limit = 16
+
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, err := io.ReadAll(r.Body); err != nil {
+			w.WriteHeader(http.StatusRequestEntityTooLarge)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	})
+
+	t.Run("under the limit passes", func(t *testing.T) {
+		addr := serve(t, &httpx.ServerConfig{Address: ":0", MaxRequestBodySize: limit}, handler)
+
+		resp, err := http.Post("http://"+addr, "text/plain", strings.NewReader("short"))
+		require.NoError(t, err)
+		defer func() { _ = resp.Body.Close() }()
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("over the limit is rejected", func(t *testing.T) {
+		addr := serve(t, &httpx.ServerConfig{Address: ":0", MaxRequestBodySize: limit}, handler)
+
+		resp, err := http.Post("http://"+addr, "text/plain", strings.NewReader(strings.Repeat("x", limit*4)))
+		require.NoError(t, err)
+		defer func() { _ = resp.Body.Close() }()
+		require.Equal(t, http.StatusRequestEntityTooLarge, resp.StatusCode)
+	})
+
+	t.Run("zero means unlimited", func(t *testing.T) {
+		addr := serve(t, &httpx.ServerConfig{Address: ":0"}, handler)
+
+		resp, err := http.Post("http://"+addr, "text/plain", strings.NewReader(strings.Repeat("x", limit*4)))
+		require.NoError(t, err)
+		defer func() { _ = resp.Body.Close() }()
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+	})
+}
+
+// Migrating off h2c.NewHandler drops HTTP/1.1 Upgrade-based h2c (the stdlib
+// only speaks prior-knowledge). The contract we must keep is that such a
+// request still gets served — a protocol downgrade, never an error.
+//
+// Old behaviour: 101 Switching Protocols. New: 200 OK over HTTP/1.1.
+func TestNewServer_H2CUpgradeFallsBackToHTTP1(t *testing.T) {
+	addr := serve(t, &httpx.ServerConfig{Address: ":0"},
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_, _ = io.WriteString(w, r.Proto)
+		}))
+
+	conn, err := net.Dial("tcp", addr)
+	require.NoError(t, err)
+	defer func() { _ = conn.Close() }()
+	require.NoError(t, conn.SetDeadline(time.Now().Add(5*time.Second)))
+
+	_, err = io.WriteString(conn, "GET / HTTP/1.1\r\nHost: x\r\n"+
+		"Connection: Upgrade, HTTP2-Settings\r\nUpgrade: h2c\r\n"+
+		"HTTP2-Settings: AAMAAABkAARAAAAAAAIAAAAA\r\n\r\n")
+	require.NoError(t, err)
+
+	status, err := bufio.NewReader(conn).ReadString('\n')
+	require.NoError(t, err)
+	require.Contains(t, status, "200 OK",
+		"an Upgrade: h2c request must still be served, just without upgrading")
+	require.NotContains(t, status, "101")
+}
+
+// The old code forwarded IdleTimeout explicitly (&http2.Server{IdleTimeout: …}).
+// The stdlib path has to inherit it from http.Server, or h2c connections would
+// silently start living forever.
+func TestNewServer_IdleTimeoutAppliesToH2C(t *testing.T) {
+	const idle = 500 * time.Millisecond
+
+	addr := serve(t, &httpx.ServerConfig{Address: ":0", IdleTimeout: idle},
+		http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+
+	conn, err := net.Dial("tcp", addr)
+	require.NoError(t, err)
+	defer func() { _ = conn.Close() }()
+	require.NoError(t, conn.SetDeadline(time.Now().Add(5*time.Second)))
+
+	_, err = io.WriteString(conn, http2.ClientPreface)
+	require.NoError(t, err)
+	fr := http2.NewFramer(conn, conn)
+	require.NoError(t, fr.WriteSettings())
+
+	// An idle h2c connection must be shut down; the server signals that with
+	// GOAWAY (and then closes), so any read eventually stops succeeding.
+	deadline := time.Now().Add(4 * time.Second)
+	for time.Now().Before(deadline) {
+		f, err := fr.ReadFrame()
+		if err != nil {
+			return // connection closed — IdleTimeout did its job
+		}
+		if _, ok := f.(*http2.GoAwayFrame); ok {
+			return
+		}
+	}
+	t.Fatal("idle h2c connection was never closed — IdleTimeout is not reaching HTTP/2")
+}
+
+// MaxConnections caps concurrent TCP connections. It takes effect in
+// SetupListener (netutil.LimitListener), not in NewServer, so this test goes
+// through the real wiring rather than the bare net.Listen used elsewhere.
+//
+// LimitListener enforces the cap by not Accept-ing past it — connections sit
+// in the kernel backlog rather than being refused — so the observable effect
+// is that a second connection gets no response while the first is held open.
+func TestNewServer_MaxConnections(t *testing.T) {
+	conf := &httpx.ServerConfig{Address: "127.0.0.1:0", MaxConnections: 1}
+
+	lc := lifecycle.New()
+	listener, err := httpx.SetupListener(lc, conf)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = listener.Close() })
+
+	srv, err := httpx.NewServer(conf, http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			_, _ = io.WriteString(w, "ok")
+		}))
+	require.NoError(t, err)
+	go func() { _ = srv.Serve(listener) }()
+	t.Cleanup(func() { _ = srv.Close() })
+
+	addr := listener.Addr().String()
+
+	// First connection: served normally, then held open via keep-alive so it
+	// keeps occupying the single slot.
+	held, err := net.Dial("tcp", addr)
+	require.NoError(t, err)
+	defer func() { _ = held.Close() }()
+	require.NoError(t, held.SetDeadline(time.Now().Add(5*time.Second)))
+	_, err = io.WriteString(held, "GET / HTTP/1.1\r\nHost: x\r\n\r\n")
+	require.NoError(t, err)
+	status, err := bufio.NewReader(held).ReadString('\n')
+	require.NoError(t, err)
+	require.Contains(t, status, "200 OK", "the first connection must be served")
+
+	// Second connection: the TCP handshake still completes (kernel backlog),
+	// but the server never Accepts it, so no response arrives.
+	blocked, err := net.Dial("tcp", addr)
+	require.NoError(t, err)
+	defer func() { _ = blocked.Close() }()
+	require.NoError(t, blocked.SetDeadline(time.Now().Add(700*time.Millisecond)))
+	_, err = io.WriteString(blocked, "GET / HTTP/1.1\r\nHost: x\r\n\r\n")
+	require.NoError(t, err)
+	_, err = bufio.NewReader(blocked).ReadString('\n')
+	require.Error(t, err, "a second connection must not be served while the cap is taken")
+
+	// Releasing the slot lets the queued connection through — the cap blocks,
+	// it does not permanently reject. (It is the already-queued one that gets
+	// Accept-ed next, so re-use `blocked` rather than dialling afresh.)
+	require.NoError(t, held.Close())
+	require.NoError(t, blocked.SetDeadline(time.Now().Add(5*time.Second)))
+	status, err = bufio.NewReader(blocked).ReadString('\n')
+	require.NoError(t, err)
+	require.Contains(t, status, "200 OK", "the slot must be reusable once freed")
+}
+
+// ReadTimeout == 0 means no read deadline, so it is not an upper bound for
+// ReadHeaderTimeout. A plain `ltefield=ReadTimeout` rejected a config that set
+// only a header timeout — a reasonable minimal hardening — and stopped the
+// service from starting. The stop_if in front of it is what fixes that.
+func TestReadHeaderTimeoutAgainstReadTimeout(t *testing.T) {
+	suite := confx.NewValidationSuite(t)
+	cfg := func(header, read time.Duration) *httpx.ServerConfig {
+		return &httpx.ServerConfig{Address: ":0", ReadHeaderTimeout: header, ReadTimeout: read}
+	}
+	suite.RunTests([]confx.ExpectedValidation{
+		{
+			Name:           "read deadline set, header within it",
+			Config:         cfg(5*time.Second, 10*time.Second),
+			ExpectedErrors: nil,
+		},
+		{
+			Name:   "read deadline set, header beyond it",
+			Config: cfg(15*time.Second, 10*time.Second),
+			ExpectedErrors: []confx.ExpectedValidationError{
+				{Path: "ReadHeaderTimeout", Tag: "ltefield"},
+			},
+		},
+		{
+			Name:           "no read deadline, header only",
+			Config:         cfg(10*time.Second, 0),
+			ExpectedErrors: nil,
+		},
+	})
+}

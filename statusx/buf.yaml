@@ -1,0 +1,22 @@
+# For details on buf.yaml configuration, visit https://buf.build/docs/configuration/v2/buf-yaml
+version: v2
+modules:
+  - path: proto
+  - path: testdata/proto
+
+deps:
+  - buf.build/envoyproxy/protoc-gen-validate
+  - buf.build/googleapis/googleapis
+
+lint:
+  use:
+    - STANDARD
+  ignore_only:
+    ENUM_VALUE_PREFIX:
+      - proto/status/v1/error.proto
+    ENUM_ZERO_VALUE_SUFFIX:
+      - proto/status/v1/error.proto
+
+breaking:
+  use:
+    - FILE

@@ -1,0 +1,46 @@
+openapi: 3.0.4
+info:
+  title: Test API with $ref
+  version: 1.0.0
+  x-iam-service:
+    code: iam
+    name: Test IAM
+    description: Test service for $ref validation
+
+servers:
+  - url: /api/v1
+
+security:
+  - sessionCookieAuth: []
+
+x-iam-permissions:
+  - code: "iam:access"
+    name: "Access IAM"
+    type: system
+    description: "System access"
+  - code: "iam:user:read"
+    name: "Read Users"
+    type: feature
+    description: "Read user data"
+
+paths:
+  # Reference individual paths from media_library.yaml
+  # Note: OpenAPI doesn't support bulk imports - you must reference each path individually
+  # The ~1 is URL encoding for / in JSON Pointer syntax
+  /media:
+    $ref: "./media_library.yaml#/paths/~1media"
+
+  /media/{id}:
+    $ref: "./media_library.yaml#/paths/~1media~1{id}"
+
+components:
+  schemas:
+    # Reference schemas from media_library.yaml
+    MediaItem:
+      $ref: "./media_library.yaml#/components/schemas/MediaItem"
+
+  securitySchemes:
+    sessionCookieAuth:
+      type: apiKey
+      in: cookie
+      name: session

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package status.v1;
+
+import "google/protobuf/any.proto";
+import "google/rpc/error_details.proto";
+
+// Localized contains i18n information
+message Localized {
+  string key = 1; // Localization key
+  repeated google.protobuf.Any args = 2; // Template arguments
+}
+
+// BadRequest contains field-level validation violations
+message BadRequest {
+  message FieldViolation {
+    string field = 1; // Field name (e.g., "email", "user.email", "profile.age")
+    string description = 2; // Error description for BadRequest_FieldViolation
+    string reason = 3; // Error reason code (UPPER_SNAKE_CASE format)
+    Localized localized = 4; // Field-specific localization template (lower priority)
+    google.rpc.LocalizedMessage localized_message = 5; // Pre-translated message (higher priority)
+  }
+  repeated FieldViolation field_violations = 1; // Field-level violations
+}

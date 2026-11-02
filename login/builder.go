@@ -75,6 +75,9 @@ type Builder struct {
 	authCookieName        string
 	authSecureCookieName  string
 	continueUrlCookieName string
+	// paths of static files that can be accessed without login.
+	// an entry ending with "/" matches as a prefix, otherwise it must match exactly.
+	publicPathPrefixes []string
 	// seconds
 	sessionMaxAge        int
 	cookieConfig         CookieConfig
@@ -187,7 +190,8 @@ func New() *Builder {
 		totpConfig: TOTPConfig{
 			Issuer: "QOR5",
 		},
-		oauthIdentifiers: make(map[string]OAuthIdentifier),
+		oauthIdentifiers:   make(map[string]OAuthIdentifier),
+		publicPathPrefixes: []string{assetsPathPrefix},
 	}
 
 	i18nB := i18n.New()
@@ -208,6 +212,14 @@ func New() *Builder {
 
 func (b *Builder) Secret(v string) (r *Builder) {
 	b.secret = v
+	return b
+}
+
+// PublicPathPrefixes appends paths whose static files (.js, .css, .png, ...) can be accessed without login.
+// An entry ending with "/" matches as a prefix, otherwise it must match the request path exactly.
+// Only declare paths that serve static files, never paths of dynamic handlers.
+func (b *Builder) PublicPathPrefixes(vs ...string) (r *Builder) {
+	b.publicPathPrefixes = append(b.publicPathPrefixes, vs...)
 	return b
 }
 
@@ -1131,7 +1143,7 @@ func (b *Builder) consumeTOTPCode(r *http.Request, up UserPasser, passcode strin
 		return ErrWrongTOTPCode
 	}
 	lastCode, usedAt := up.GetLastUsedTOTPCode()
-	if usedAt != nil && time.Now().Sub(*usedAt) > 90*time.Second {
+	if usedAt != nil && time.Since(*usedAt) > 90*time.Second {
 		lastCode = ""
 	}
 	if passcode == lastCode {
@@ -1219,7 +1231,7 @@ func (b *Builder) sendResetPasswordLink(w http.ResponseWriter, r *http.Request) 
 
 	_, createdAt, _ := u.(UserPasser).GetResetPasswordToken()
 	if createdAt != nil {
-		v := 60 - int(time.Now().Sub(*createdAt).Seconds())
+		v := 60 - int(time.Since(*createdAt).Seconds())
 		if v > 0 {
 			setSecondsToRedoFlash(w, v)
 			b.setWrongForgetPasswordInputFlash(w, WrongForgetPasswordInputFlash{
@@ -1484,7 +1496,8 @@ func (b *Builder) doFormChangePassword(w http.ResponseWriter, r *http.Request) {
 
 	err := b.ChangePassword(r, oldPassword, password, confirmPassword, otp)
 	if err != nil {
-		if ne, ok := err.(*NoticeError); ok {
+		var ne *NoticeError
+		if errors.As(err, &ne) {
 			setNoticeFlash(w, ne)
 		} else {
 			var fc FailCode

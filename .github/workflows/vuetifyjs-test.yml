@@ -26,21 +26,24 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [22.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: szenius/set-timezone@v1.0
+      - uses: szenius/set-timezone@dd47655c84241eec2ffa0a855959c16c0920c3c4 # v1.0
         with:
           timezoneLinux: 'Asia/Shanghai'
 
       - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: Install pnpm
-        run: npm install -g pnpm@9.15.5
+        run: npm install -g pnpm@10.16.1
+
       - name: Build and Test
-        run: cd ./ui/vuetifyx/vuetifyxjs/ && pnpm install && pnpm run build && pnpm run test:unit
+        run: cd ./ui/vuetifyx/vuetifyxjs/ && pnpm install --frozen-lockfile && pnpm run build && pnpm run test:unit

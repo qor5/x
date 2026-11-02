@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package jsonx.testdata;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+message Identity {
+  // Unique identifier
+  string id = 1;
+
+  // Timestamp when the identity was created
+  google.protobuf.Timestamp created_at = 2;
+
+  // Timestamp when the identity was last updated
+  google.protobuf.Timestamp updated_at = 3;
+
+  // Identity status (e.g., ACTIVE means the identity is active)
+  string status = 4;
+
+  // Public metadata accessible to all users
+  google.protobuf.Struct metadata_public = 5;
+
+  // User's email address
+  string email = 6;
+
+  // User's given name
+  string given_name = 7;
+
+  // User's family name
+  string family_name = 8;
+
+  // User's birthday
+  optional google.protobuf.Timestamp birthday = 9;
+
+  // Whether the user has consented to terms and conditions (data consent)
+  bool data_consent = 10;
+
+  // Number of sessions created by the identity
+  uint32 total_sessions_created = 101;
+}
+
+message UpdateIdentityInput {
+  // Public metadata for the identity.
+  google.protobuf.Struct metadata_public = 1;
+
+  // Given name of the identity.
+  optional string given_name = 2;
+
+  // Family name of the identity.
+  optional string family_name = 3;
+
+  // Birthday of the identity.
+  optional google.protobuf.Timestamp birthday = 4;
+
+  // Whether the user has consented to terms and conditions (data consent)
+  optional bool data_consent = 5;
+}
+
+message EmailCreation {
+  // Email address for the new identity.
+  string email = 1;
+
+  // Password for the new identity.
+  string password = 2;
+
+  // Input data for creating the identity.
+  UpdateIdentityInput input = 3;
+}
+
+message CreateIdentityRequest {
+  oneof creation {
+    // Input data for creating an identity with email and password.
+    EmailCreation email_creation = 1;
+  }
+}
+
+message EmailRecovery {
+  // Email address for identity recovery.
+  string email = 1;
+
+  // New password to set
+  string new_password = 2;
+}
+
+message RecoverIdentityRequest {
+  // Recovery method for the identity.
+  oneof recovery {
+    EmailRecovery email_recovery = 1;
+  }
+}

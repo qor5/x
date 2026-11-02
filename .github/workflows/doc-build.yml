@@ -1,8 +1,5 @@
 name: Build and Deploy Docs
-permissions:
-  contents: write
-  checks: write
-  pull-requests: read
+permissions: {}
 
 on:
   push:
@@ -12,28 +9,34 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      checks: write
+      pull-requests: read
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: set Node.js environment
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: '22.x'
 
       - name: Install pnpm
-        run: npm install -g pnpm@9.15.5
+        run: npm install -g pnpm@10.16.1
 
       - name: Install dep
         working-directory: ui/vuetifyx/vuetifyxjs
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: build doc
         working-directory: ui/vuetifyx/vuetifyxjs
         run: pnpm run docs:build
 
       - name: push to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847 # v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ui/vuetifyx/vuetifyxjs/docs/.vitepress/dist

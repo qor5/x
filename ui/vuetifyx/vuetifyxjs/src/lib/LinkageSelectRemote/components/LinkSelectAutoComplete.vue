@@ -180,12 +180,11 @@ const searchData = (val: any) => {
       <template v-slot:append-item v-if="remoteUrl">
         <div class="text-center">
           <v-pagination
-            size="20"
             v-if="props.isPaging"
             v-model="pagination.page"
             rounded="circle"
             :length="pages"
-            total-visible="5"
+            total-visible="3"
             @update:modelValue="loadRemoteItems()"
           ></v-pagination>
           <div v-else>

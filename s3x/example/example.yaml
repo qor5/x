@@ -1,0 +1,4 @@
+s3:
+  bucket: ""
+  region: ""
+  endpoint: ""

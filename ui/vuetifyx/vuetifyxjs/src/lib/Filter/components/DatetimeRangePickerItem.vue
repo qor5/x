@@ -14,12 +14,7 @@ const datePickerVisible = ref(false)
 
 const emit = defineEmits(['update:modelValue'])
 const options = props.modelValue.dateOptions
-const option = ref()
-if (options) {
-  if (options.length >= 1) {
-    option.value = options[0]
-  }
-}
+const placeholder = Array.isArray(options) ? options.map((o: any) => o.label) : []
 const value = ref([props.modelValue.valueFrom, props.modelValue.valueTo])
 
 const updateModelValue = (val: any) => {
@@ -38,7 +33,7 @@ const updateModelValue = (val: any) => {
       @update:model-value="updateModelValue"
       v-model="value"
       type="datetimepicker"
-      v-bind="option"
+      :placeholder="placeholder"
     ></range-picker>
   </div>
 </template>

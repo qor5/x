@@ -414,7 +414,7 @@ func TestBatch(t *testing.T) {
 		// 100,Orange13,2021-01-01,80,180,8,6.5,IPS,FALSE,TRUE,yyds,eyyds,3000px,6000px,TRUE,FALSE
 		code := fmt.Sprintf("%d", i+100)
 		csvContentB.WriteString(code)
-		csvContentB.WriteString(fmt.Sprintf(",Orange"))
+		csvContentB.WriteString(",Orange")
 		csvContentB.WriteString(code)
 		csvContentB.WriteString(",2021-01-01,80,180,8,6.5,IPS,FALSE,TRUE,yyds,eyyds,3000px,6000px,TRUE,FALSE\n")
 	}
@@ -452,7 +452,7 @@ func TestBatch(t *testing.T) {
 		// 100,Orange13,2021-01-01,80,180,8,6.5,IPS,FALSE,TRUE,yyds,eyyds,3000px,6000px,TRUE,FALSE
 		code := fmt.Sprintf("%d", i+100)
 		csvContentB.WriteString(code)
-		csvContentB.WriteString(fmt.Sprintf(",Orange"))
+		csvContentB.WriteString(",Orange")
 		csvContentB.WriteString(code)
 		csvContentB.WriteString(",2021-02-01,90,190,9,7.5,IPS+,FALSE,FALSE,,,,,FALSE,FALSE\n")
 	}
@@ -460,7 +460,7 @@ func TestBatch(t *testing.T) {
 		// 100,Orange13,2021-01-01,80,180,8,6.5,IPS,FALSE,TRUE,yyds,eyyds,3000px,6000px,TRUE,FALSE
 		code := fmt.Sprintf("%d", i+100)
 		csvContentB.WriteString(code)
-		csvContentB.WriteString(fmt.Sprintf(",Orangee"))
+		csvContentB.WriteString(",Orangee")
 		csvContentB.WriteString(code)
 		csvContentB.WriteString(",2021-02-01,90,190,9,7.5,IPS+,TRUE,FALSE,yyds2,eyyds2,4000px,7000px,FALSE,TRUE\n")
 	}
