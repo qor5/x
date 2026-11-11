@@ -30,7 +30,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/manifoldco/promptui v0.9.0
 	github.com/markbates/goth v1.80.0
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/mattn/go-sqlite3 v1.14.52
 	github.com/moby/moby/api v1.54.1
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
 	github.com/ory/ladon v1.3.0
@@ -212,4 +212,16 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20260526163538-3dc84a4a5aaa // indirect
 	gorm.io/datatypes v1.2.7 // indirect
 	gorm.io/driver/mysql v1.6.0 // indirect
+)
+
+// v2.0.x of go-sqlite3 were tagged by accident (in 2020, bundling SQLite
+// 3.31.1) and are retracted, yet a requirement on one, from
+// github.com/qor5/go-bus and github.com/qor5/kx (which depend on this module
+// in turn), still selects it over v1.14.x. Excluded here, the version this go.mod requires is
+// v1.14.x, and so is the one every module depending on this one gets.
+exclude (
+	github.com/mattn/go-sqlite3 v2.0.0+incompatible
+	github.com/mattn/go-sqlite3 v2.0.1+incompatible
+	github.com/mattn/go-sqlite3 v2.0.2+incompatible
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 )
