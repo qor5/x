@@ -21,14 +21,14 @@
     "npm-run-all2": "^6.2.6",
     "prettier": "^3.5.3",
     "typescript": "~5.4.5",
-    "vite": "6.4.3",
+    "vite": "6.4.5",
     "vite-plugin-vue-devtools": "^7.7.6",
     "vue-tsc": "^2.2.10"
   },
   "pnpm": {
     "overrides": {
       "esbuild": "0.25.0",
-      "brace-expansion": "2.1.2",
+      "brace-expansion": "2.1.7",
       "minimatch": "9.0.9",
       "@vue/compiler-core": "3.5.42",
       "@vue/compiler-dom": "3.5.42",
@@ -42,7 +42,7 @@
       "picomatch": "4.0.4",
       "nanoid@<3.3.18": "3.3.18",
       "nanoid@>=4 <5.1.11": "5.1.11",
-      "shell-quote": "1.9.0"
+      "shell-quote": "1.11.0"
     }
   },
   "packageManager": "pnpm@10.16.1"
