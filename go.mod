@@ -1,6 +1,6 @@
 module github.com/qor5/x/v3
 
-go 1.26.10
+go 1.26.11
 
 require (
 	connectrpc.com/connect v1.18.1
@@ -155,7 +155,7 @@ require (
 	github.com/jjeffery/errors v1.0.3 // indirect
 	github.com/jjeffery/kv v0.8.1 // indirect
 	github.com/jonboulle/clockwork v0.3.0 // indirect
-	github.com/klauspost/compress v1.18.7 // indirect
+	github.com/klauspost/compress v1.20.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35 // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
