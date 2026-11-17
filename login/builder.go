@@ -827,9 +827,7 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 	if user == nil {
 		user = &claims
 	} else {
-		// The avatar is no longer carried in the session JWT; expose it on the
-		// user object for the rest of this login request (e.g. afterLoginHook).
-		user.(OAuthUser).SetAvatar(ouser.AvatarURL)
+		user.(OAuthUser).SetAvatar(claims.AvatarURL)
 	}
 
 	if b.afterLoginHook != nil {
@@ -855,19 +853,21 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 
 // newOAuthSessionClaims builds the session claims for an OAuth login.
 // When a user model is configured, the user record is the source of truth and
-// the claims only carry identifiers, so no profile PII (email, name, avatar)
-// ends up in the client-side session JWT. Without a user model the claims are
-// used as the user object itself, so the profile fields are kept.
+// the claims only carry identifiers plus the avatar URL (a public profile image
+// URL, which is not persisted and is restored onto the user on each request),
+// so no email or name ends up in the client-side session JWT. Without a user
+// model the claims are used as the user object itself, so the profile fields
+// are kept.
 func (b *Builder) newOAuthSessionClaims(ouser goth.User, userID string) UserClaims {
 	claims := UserClaims{
 		Provider:         ouser.Provider,
 		UserID:           userID,
+		AvatarURL:        ouser.AvatarURL,
 		RegisteredClaims: b.genBaseSessionClaim(userID),
 	}
 	if b.userModel == nil {
 		claims.Email = ouser.Email
 		claims.Name = ouser.Name
-		claims.AvatarURL = ouser.AvatarURL
 	}
 	return claims
 }

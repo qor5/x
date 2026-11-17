@@ -28,11 +28,11 @@ type UserClaims struct {
 	jwt.RegisteredClaims
 }
 
-// stripProfile removes profile PII so that only identifiers remain.
+// stripProfile removes profile PII so that only identifiers and the avatar
+// URL (a public profile image URL) remain.
 func (c *UserClaims) stripProfile() {
 	c.Email = ""
 	c.Name = ""
-	c.AvatarURL = ""
 	c.Location = ""
 	c.IDToken = ""
 }

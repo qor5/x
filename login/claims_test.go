@@ -21,14 +21,17 @@ func TestOAuthSessionClaims(t *testing.T) {
 		AvatarURL: "https://example.com/a.png",
 	}
 
-	t.Run("with user model, PII is not carried in the session JWT", func(t *testing.T) {
+	t.Run("with user model, email/name are not carried in the session JWT", func(t *testing.T) {
 		b := New().Secret("test-secret").UserModel(&testOAuthUser{})
 		c := b.newOAuthSessionClaims(ouser, "42")
 		if c.Provider != "google" || c.UserID != "42" || c.Subject != "42" {
 			t.Fatalf("unexpected identity claims: %+v", c)
 		}
-		if c.Email != "" || c.Name != "" || c.AvatarURL != "" || c.Location != "" || c.IDToken != "" {
+		if c.Email != "" || c.Name != "" || c.Location != "" || c.IDToken != "" {
 			t.Fatalf("PII leaked into session claims: %+v", c)
+		}
+		if c.AvatarURL != ouser.AvatarURL {
+			t.Fatalf("avatar URL must be kept: %+v", c)
 		}
 	})
 
@@ -44,7 +47,7 @@ func TestOAuthSessionClaims(t *testing.T) {
 func TestUserClaimsStripProfile(t *testing.T) {
 	c := UserClaims{Provider: "google", UserID: "1", Email: "e", Name: "n", AvatarURL: "a", Location: "l", IDToken: "t", PassUpdatedAt: "p", TOTPValidated: true}
 	c.stripProfile()
-	want := UserClaims{Provider: "google", UserID: "1", PassUpdatedAt: "p", TOTPValidated: true}
+	want := UserClaims{Provider: "google", UserID: "1", AvatarURL: "a", PassUpdatedAt: "p", TOTPValidated: true}
 	if !reflect.DeepEqual(c, want) {
 		t.Fatalf("got %+v, want %+v", c, want)
 	}

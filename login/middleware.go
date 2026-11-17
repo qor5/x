@@ -129,9 +129,9 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 				var err error
 				user, err = b.findUserByID(claims.UserID)
 				if err == nil {
-					// OAuth profile data (e.g. avatar) is intentionally not carried
-					// in the session JWT when a user model is configured. Drop it from
-					// tokens issued by older versions so it is not re-signed on extend.
+					// Email/name are intentionally not carried in the session JWT
+					// when a user model is configured. Drop them from tokens issued
+					// by older versions so they are not re-signed on extend.
 					claims.stripProfile()
 					if claims.Provider == "" {
 						if user.(UserPasser).GetPasswordUpdatedAt() != claims.PassUpdatedAt {
@@ -140,6 +140,8 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 						if user.(UserPasser).GetLocked() {
 							err = ErrUserLocked
 						}
+					} else {
+						user.(OAuthUser).SetAvatar(claims.AvatarURL)
 					}
 				}
 				if err != nil {
