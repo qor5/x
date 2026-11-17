@@ -65,17 +65,21 @@ func continueCookie(w *httptest.ResponseRecorder, name string) *http.Cookie {
 func TestSetContinueURL(t *testing.T) {
 	b := New().Secret("test-secret")
 	for _, c := range []struct {
-		name    string
-		target  string
-		referer string
-		expect  string // "" means cookie must not be set
+		name      string
+		target    string
+		referer   string
+		expectSet bool
+		expect    string
 	}{
-		{name: "plain request uri", target: "/admin/orders?page=2", expect: "/admin/orders?page=2"},
-		{name: "execute event uses same-host referer", target: "/admin/orders?__execute_event__=x", referer: "http://example.com/admin/orders?page=3", expect: "/admin/orders?page=3"},
-		{name: "execute event with referer from another host is reduced to a path", target: "/admin/orders?__execute_event__=x", referer: "https://proxy.internal/admin/orders?page=4", expect: "/admin/orders?page=4"},
-		{name: "execute event with javascript referer", target: "/admin/orders?__execute_event__=x", referer: "javascript:alert(1)", expect: ""},
-		{name: "execute event with protocol relative referer", target: "/admin/orders?__execute_event__=x", referer: "//evil.com/phish", expect: ""},
-		{name: "login page ignored", target: b.loginPageURL, expect: ""},
+		{name: "plain request uri", target: "/admin/orders?page=2", expectSet: true, expect: "/admin/orders?page=2"},
+		{name: "execute event uses referer path", target: "/admin/orders?__execute_event__=x", referer: "http://example.com/admin/orders?page=3", expectSet: true, expect: "/admin/orders?page=3"},
+		{name: "execute event with referer from another host is reduced to a path", target: "/admin/orders?__execute_event__=x", referer: "https://proxy.internal/admin/orders?page=4", expectSet: true, expect: "/admin/orders?page=4"},
+		// unsafe values overwrite any stale continue URL with ""
+		{name: "execute event with javascript referer", target: "/admin/orders?__execute_event__=x", referer: "javascript:alert(1)", expectSet: true, expect: ""},
+		{name: "execute event with protocol relative referer", target: "/admin/orders?__execute_event__=x", referer: "//evil.com/phish", expectSet: true, expect: ""},
+		{name: "execute event without referer", target: "/admin/orders?__execute_event__=x", expectSet: true, expect: ""},
+		{name: "login page ignored", target: b.loginPageURL, expectSet: false},
+		{name: "login page referer ignored", target: "/admin/orders?__execute_event__=x", referer: "http://example.com" + b.loginPageURL, expectSet: false},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			r := httptest.NewRequest(http.MethodGet, c.target, nil) // Host: example.com
@@ -85,7 +89,7 @@ func TestSetContinueURL(t *testing.T) {
 			w := httptest.NewRecorder()
 			b.setContinueURL(w, r)
 			ck := continueCookie(w, b.continueUrlCookieName)
-			if c.expect == "" {
+			if !c.expectSet {
 				if ck != nil {
 					t.Fatalf("expected no continue cookie, got %q", ck.Value)
 				}

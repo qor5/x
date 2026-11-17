@@ -1113,12 +1113,11 @@ func (b *Builder) cleanAuthCookies(w http.ResponseWriter) {
 }
 
 func (b *Builder) setContinueURL(w http.ResponseWriter, r *http.Request) {
-	continueURL := sanitizeContinueURL(r.RequestURI, false)
-	if strings.Contains(r.RequestURI, "?__execute_event__=") {
-		continueURL = sanitizeContinueURL(r.Referer(), true)
-	}
-	if continueURL == "" {
-		return
+	rawURL := r.RequestURI
+	continueURL := sanitizeContinueURL(rawURL, false)
+	if strings.Contains(rawURL, "?__execute_event__=") {
+		rawURL = r.Referer()
+		continueURL = sanitizeContinueURL(rawURL, true)
 	}
 	ignore := false
 	{
@@ -1131,7 +1130,7 @@ func (b *Builder) setContinueURL(w http.ResponseWriter, r *http.Request) {
 			b.totpValidatePageURL:          {},
 			b.LogoutURL:                    {},
 		}
-		u, err := url.Parse(continueURL)
+		u, err := url.Parse(rawURL)
 		if err != nil {
 			ignore = true
 		} else {
@@ -1143,6 +1142,8 @@ func (b *Builder) setContinueURL(w http.ResponseWriter, r *http.Request) {
 	if ignore {
 		return
 	}
+	// An unsafe value is stored as "" (rather than skipped) so that a stale
+	// continue URL from an earlier request does not survive.
 	http.SetCookie(w, &http.Cookie{
 		Name:     b.continueUrlCookieName,
 		Value:    continueURL,
