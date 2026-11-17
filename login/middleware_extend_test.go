@@ -27,6 +27,10 @@ func TestMiddlewareExtendLegacyOAuthToken(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// each connection to :memory: is a separate database
+	if sqlDB, err := db.DB(); err == nil {
+		sqlDB.SetMaxOpenConns(1)
+	}
 	if err := db.AutoMigrate(&extendTestUser{}); err != nil {
 		t.Fatal(err)
 	}
