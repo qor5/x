@@ -879,7 +879,7 @@ func (b *Builder) authUserPass(account string, password string) (user interface{
 		if err == gorm.ErrRecordNotFound {
 			// spend the same time as a real password check to avoid
 			// leaking account existence through response timing
-			compareDummyPassword(password)
+			runDummyPasswordCompare(password)
 			return nil, ErrUserNotFound
 		}
 		return nil, err
@@ -887,8 +887,14 @@ func (b *Builder) authUserPass(account string, password string) (user interface{
 
 	u := user.(UserPasser)
 	if u.GetLocked() {
-		compareDummyPassword(password)
+		runDummyPasswordCompare(password)
 		return user, ErrUserLocked
+	}
+
+	if !hasUsablePasswordHash(user) {
+		// bcrypt fails fast on an empty/invalid hash (e.g. OAuth-only
+		// accounts); equalize the timing with a real comparison
+		runDummyPasswordCompare(password)
 	}
 
 	if !u.IsPasswordCorrect(password) {
