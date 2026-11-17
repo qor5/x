@@ -940,8 +940,7 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 		}
 		setFailCodeFlash(w, code)
 		b.setWrongLoginInputFlash(w, WrongLoginInputFlash{
-			Account:  account,
-			Password: password,
+			Account: account,
 		})
 		return
 	}
@@ -1337,10 +1336,6 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	if confirmPassword != password {
 		setFailCodeFlash(w, FailCodePasswordNotMatch)
-		b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
-			Password:        password,
-			ConfirmPassword: confirmPassword,
-		})
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
@@ -1370,10 +1365,6 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 	if b.beforeSetPasswordHook != nil {
 		if herr := b.wrapHook(b.beforeSetPasswordHook)(r, u, password); herr != nil {
 			setNoticeOrPanic(w, herr)
-			b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
-				Password:        password,
-				ConfirmPassword: confirmPassword,
-			})
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
 		}
@@ -1381,10 +1372,6 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	if u.(UserPasser).GetIsTOTPSetup() {
 		if !doTOTP {
-			b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
-				Password:        password,
-				ConfirmPassword: confirmPassword,
-			})
 			failRedirectURL = MustSetQuery(failRedirectURL, "totp", "1")
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
@@ -1402,9 +1389,7 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 			}
 			setFailCodeFlash(w, fc)
 			b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
-				Password:        password,
-				ConfirmPassword: confirmPassword,
-				TOTP:            passcode,
+				TOTP: passcode,
 			})
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
@@ -1524,10 +1509,7 @@ func (b *Builder) doFormChangePassword(w http.ResponseWriter, r *http.Request) {
 		}
 
 		b.setWrongChangePasswordInputFlash(w, WrongChangePasswordInputFlash{
-			OldPassword:     oldPassword,
-			NewPassword:     password,
-			ConfirmPassword: confirmPassword,
-			TOTP:            otp,
+			TOTP: otp,
 		})
 		http.Redirect(w, r, redirectURL, http.StatusFound)
 		return
