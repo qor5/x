@@ -87,6 +87,7 @@ type Builder struct {
 	recaptchaConfig      RecaptchaConfig
 	autoExtendSession    bool
 	maxRetryCount        int
+	unifiedLoginFailure  bool
 	noForgetPasswordLink bool
 	i18nBuilder          *i18n.Builder
 
@@ -581,6 +582,15 @@ func (b *Builder) AutoExtendSession(v bool) (r *Builder) {
 	return b
 }
 
+// UnifiedLoginFailure makes username/password login report the same failure
+// (FailCodeIncorrectAccountNameOrPassword) for an unknown account, a wrong
+// password and a locked account, so the response does not reveal whether an
+// account exists or is locked. Default false.
+func (b *Builder) UnifiedLoginFailure(v bool) (r *Builder) {
+	b.unifiedLoginFailure = v
+	return b
+}
+
 // default 5
 // MaxRetryCount <= 0 means no max retry count limit
 func (b *Builder) MaxRetryCount(v int) (r *Builder) {
@@ -867,6 +877,9 @@ func (b *Builder) authUserPass(account string, password string) (user interface{
 	user, err = b.userModel.(UserPasser).FindUser(b.db, b.newUserObject(), account)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
+			// spend the same time as a real password check to avoid
+			// leaking account existence through response timing
+			compareDummyPassword(password)
 			return nil, ErrUserNotFound
 		}
 		return nil, err
@@ -874,6 +887,7 @@ func (b *Builder) authUserPass(account string, password string) (user interface{
 
 	u := user.(UserPasser)
 	if u.GetLocked() {
+		compareDummyPassword(password)
 		return user, ErrUserLocked
 	}
 
@@ -899,6 +913,21 @@ func (b *Builder) authUserPass(account string, password string) (user interface{
 		}
 	}
 	return user, nil
+}
+
+// userPassLoginFailCode maps an authUserPass error to the fail code shown to
+// the user. ok is false for unexpected errors.
+func (b *Builder) userPassLoginFailCode(err error) (code FailCode, ok bool) {
+	switch err {
+	case ErrWrongPassword, ErrUserNotFound:
+		return FailCodeIncorrectAccountNameOrPassword, true
+	case ErrUserLocked, ErrUserGetLocked:
+		if b.unifiedLoginFailure {
+			return FailCodeIncorrectAccountNameOrPassword, true
+		}
+		return FailCodeUserLocked, true
+	}
+	return 0, false
 }
 
 func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
@@ -945,13 +974,8 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		var code FailCode
-		switch err {
-		case ErrWrongPassword, ErrUserNotFound:
-			code = FailCodeIncorrectAccountNameOrPassword
-		case ErrUserLocked, ErrUserGetLocked:
-			code = FailCodeUserLocked
-		default:
+		code, ok := b.userPassLoginFailCode(err)
+		if !ok {
 			panic(err)
 		}
 		setFailCodeFlash(w, code)
