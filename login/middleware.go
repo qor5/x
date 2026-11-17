@@ -198,7 +198,15 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 
 			if b.autoExtendSession && time.Since(claims.IssuedAt.Time).Seconds() > float64(b.sessionMaxAge)/10 {
 				if b.afterExtendSessionHook != nil {
-					oldSessionToken := b.mustGetSessionToken(*claims)
+					// Use the token exactly as the client sent it: claims may have been
+					// modified above (e.g. stripProfile on legacy tokens), and
+					// downstream may look the session up by the old token.
+					var oldSessionToken string
+					if tc, err := r.Cookie(b.authCookieName); err == nil {
+						oldSessionToken = tc.Value
+					} else {
+						oldSessionToken = b.mustGetSessionToken(*claims)
+					}
 
 					newClaims := clone.Clone(claims).(*UserClaims)
 					newClaims.RegisteredClaims = b.genBaseSessionClaim(claims.UserID)
