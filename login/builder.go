@@ -1703,6 +1703,9 @@ func (b *Builder) MountAPI(mux *http.ServeMux) {
 
 	mux.HandleFunc(b.LogoutURL, b.logout)
 	if b.userPassEnabled {
+		// generate the dummy hash up front so the first failed login does not
+		// pay the extra bcrypt cost (which would be a timing signal itself)
+		dummyPasswordHash()
 		mux.HandleFunc(b.passwordLoginURL, b.userpassLogin)
 		mux.HandleFunc(b.resetPasswordURL, b.doResetPassword)
 		mux.HandleFunc(b.changePasswordURL, b.doFormChangePassword)
