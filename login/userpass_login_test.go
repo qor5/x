@@ -2,11 +2,18 @@ package login
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func TestUserPassLoginFailCode(t *testing.T) {
@@ -143,6 +150,68 @@ func TestAuthUserPassTimingEqualization(t *testing.T) {
 			}
 			if calls != c.expectDummy {
 				t.Fatalf("dummy comparisons = %d, want %d", calls, c.expectDummy)
+			}
+		})
+	}
+}
+
+type lockTestUser struct {
+	ID        uint `gorm:"primarykey"`
+	DeletedAt gorm.DeletedAt
+	UserPass
+}
+
+// When the account gets locked by this attempt and afterUserLockedHook returns
+// an error, unified mode must still emit the same fail code and input flash as
+// any other failure; the default mode keeps its previous behavior.
+func TestUserPassLoginGetLockedFlashes(t *testing.T) {
+	for _, unified := range []bool{true, false} {
+		t.Run(fmt.Sprintf("unified=%v", unified), func(t *testing.T) {
+			db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{Logger: logger.Discard})
+			if err != nil {
+				t.Fatal(err)
+			}
+			// each connection to :memory: is a separate database
+			if sqlDB, err := db.DB(); err == nil {
+				sqlDB.SetMaxOpenConns(1)
+			}
+			if err := db.AutoMigrate(&lockTestUser{}); err != nil {
+				t.Fatal(err)
+			}
+			u := &lockTestUser{UserPass: UserPass{Account: "alice", Password: "right"}}
+			u.EncryptPassword()
+			if err := db.Create(u).Error; err != nil {
+				t.Fatal(err)
+			}
+
+			b := New().Secret("test-secret").DB(db).UserModel(&lockTestUser{}).
+				MaxRetryCount(1).
+				UnifiedLoginFailure(unified).
+				AfterUserLocked(func(r *http.Request, user interface{}, extraVals ...interface{}) error {
+					return &NoticeError{Level: NoticeLevel_Error, Message: "locked"}
+				})
+
+			form := url.Values{"account": {"alice"}, "password": {"wrong"}}
+			r := httptest.NewRequest(http.MethodPost, "/auth/userpass/login", strings.NewReader(form.Encode()))
+			r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			w := httptest.NewRecorder()
+			b.userpassLogin(w, r)
+
+			cookies := map[string]string{}
+			for _, c := range w.Result().Cookies() {
+				cookies[c.Name] = c.Value
+			}
+			fc, hasFC := cookies[failCodeFlashCookieName]
+			_, hasInput := cookies[wrongLoginInputFlashCookieName]
+			if unified {
+				if fc != fmt.Sprint(FailCodeIncorrectAccountNameOrPassword) || !hasInput {
+					t.Fatalf("unified mode: expected unified fail code and input flash, got %v", cookies)
+				}
+			} else if hasFC || hasInput {
+				t.Fatalf("default mode: expected previous behavior (notice only), got %v", cookies)
+			}
+			if _, ok := cookies[noticeFlashCookieName]; !ok {
+				t.Fatalf("expected hook notice flash, got %v", cookies)
 			}
 		})
 	}

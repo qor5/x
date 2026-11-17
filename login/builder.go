@@ -973,21 +973,31 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	user, err = b.authUserPass(account, password)
 	if err != nil {
+		code, ok := b.userPassLoginFailCode(err)
+		if !ok {
+			panic(err)
+		}
+		setFailureFlashes := func() {
+			setFailCodeFlash(w, code)
+			b.setWrongLoginInputFlash(w, WrongLoginInputFlash{
+				Account: account,
+			})
+		}
+		// In unified mode, set the failure flashes before afterUserLockedHook so
+		// the response carries the same fail code and input flash even if the
+		// hook returns an error.
+		if b.unifiedLoginFailure {
+			setFailureFlashes()
+		}
 		if err == ErrUserGetLocked && b.afterUserLockedHook != nil {
 			if herr := b.wrapHook(b.afterUserLockedHook)(r, user); herr != nil {
 				setNoticeOrPanic(w, herr)
 				return
 			}
 		}
-
-		code, ok := b.userPassLoginFailCode(err)
-		if !ok {
-			panic(err)
+		if !b.unifiedLoginFailure {
+			setFailureFlashes()
 		}
-		setFailCodeFlash(w, code)
-		b.setWrongLoginInputFlash(w, WrongLoginInputFlash{
-			Account: account,
-		})
 		return
 	}
 
