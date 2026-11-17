@@ -28,6 +28,15 @@ type UserClaims struct {
 	jwt.RegisteredClaims
 }
 
+// stripProfile removes profile PII so that only identifiers remain.
+func (c *UserClaims) stripProfile() {
+	c.Email = ""
+	c.Name = ""
+	c.AvatarURL = ""
+	c.Location = ""
+	c.IDToken = ""
+}
+
 func mustSignClaims(claims jwt.Claims, secret string) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signed, err := token.SignedString([]byte(secret))
