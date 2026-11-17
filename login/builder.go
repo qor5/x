@@ -1068,9 +1068,12 @@ func (b *Builder) cleanAuthCookies(w http.ResponseWriter) {
 }
 
 func (b *Builder) setContinueURL(w http.ResponseWriter, r *http.Request) {
-	continueURL := r.RequestURI
-	if strings.Contains(continueURL, "?__execute_event__=") {
-		continueURL = r.Referer()
+	continueURL := sanitizeContinueURL(r.RequestURI, "")
+	if strings.Contains(r.RequestURI, "?__execute_event__=") {
+		continueURL = sanitizeContinueURL(r.Referer(), r.Host)
+	}
+	if continueURL == "" {
+		return
 	}
 	ignore := false
 	{
@@ -1120,7 +1123,9 @@ func (b *Builder) getContinueURL(w http.ResponseWriter, r *http.Request) string 
 		HttpOnly: true,
 	})
 
-	return c.Value
+	// The value is re-validated here in case it was planted by other means
+	// (e.g. a sibling subdomain) or set by an older version without validation.
+	return sanitizeContinueURL(c.Value, r.Host)
 }
 
 func (b *Builder) setSecureCookiesByClaims(w http.ResponseWriter, user interface{}, claims UserClaims) (err error) {
