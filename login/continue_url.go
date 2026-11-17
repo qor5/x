@@ -13,10 +13,12 @@ import (
 // references ("//host"), backslashes in the path (which browsers treat as
 // "/"), control characters, userinfo and non-http(s) schemes are rejected.
 //
-// If allowHost is non-empty, an absolute http(s) URL whose host equals
-// allowHost (case-insensitive, port included) is accepted and reduced to its
-// path + query + fragment. Absolute URLs are always rejected otherwise.
-func sanitizeContinueURL(raw string, allowHost string) string {
+// If allowAbsolute is true, an absolute http(s) URL (any host, e.g. a Referer)
+// is accepted and reduced to its path + query + fragment. The host is
+// deliberately not compared with the request host: the result is always a
+// relative path on the current origin, and comparing would break behind
+// proxies that rewrite Host. Absolute URLs are rejected otherwise.
+func sanitizeContinueURL(raw string, allowAbsolute bool) string {
 	if raw == "" {
 		return ""
 	}
@@ -38,7 +40,7 @@ func sanitizeContinueURL(raw string, allowHost string) string {
 		return ""
 	}
 	if u.Scheme != "" || u.Host != "" {
-		if allowHost == "" || !strings.EqualFold(u.Host, allowHost) {
+		if !allowAbsolute || u.Host == "" {
 			return ""
 		}
 		if s := strings.ToLower(u.Scheme); s != "http" && s != "https" {
