@@ -80,7 +80,7 @@ func defaultLoginPage(vh *ViewHelper) web.PageFunc {
 					),
 					Div(
 						Label(msgr.PasswordLabel).Class(DefaultViewCommon.LabelClass).For("password"),
-						DefaultViewCommon.PasswordInputWithRevealFunction("password", msgr.PasswordPlaceholder, "password", wIn.Password),
+						DefaultViewCommon.PasswordInputWithRevealFunction("password", msgr.PasswordPlaceholder, "password", ""),
 					).Class("mt-6"),
 					If(isRecaptchaEnabled,
 						Div(
@@ -305,12 +305,12 @@ func defaultResetPasswordPage(vh *ViewHelper) web.PageFunc {
 					Input("token").Type("hidden").Value(token),
 					Div(
 						Label(msgr.ResetPasswordLabel).Class(DefaultViewCommon.LabelClass).For("password"),
-						DefaultViewCommon.PasswordInputWithRevealFunction("password", msgr.ResetPasswordPlaceholder, "password", wIn.Password),
+						DefaultViewCommon.PasswordInputWithRevealFunction("password", msgr.ResetPasswordPlaceholder, "password", ""),
 						DefaultViewCommon.PasswordStrengthMeter("password"),
 					),
 					Div(
 						Label(msgr.ResetPasswordConfirmLabel).Class(DefaultViewCommon.LabelClass).For("confirm_password"),
-						DefaultViewCommon.PasswordInputWithRevealFunction("confirm_password", msgr.ResetPasswordConfirmPlaceholder, "confirm_password", wIn.ConfirmPassword),
+						DefaultViewCommon.PasswordInputWithRevealFunction("confirm_password", msgr.ResetPasswordConfirmPlaceholder, "confirm_password", ""),
 					).Class("mt-6"),
 					If(doTOTP,
 						Div(
@@ -347,16 +347,16 @@ func defaultChangePasswordPage(vh *ViewHelper) web.PageFunc {
 				Form(
 					Div(
 						Label(msgr.ChangePasswordOldLabel).Class(DefaultViewCommon.LabelClass).For("old_password"),
-						DefaultViewCommon.PasswordInputWithRevealFunction("old_password", msgr.ChangePasswordOldPlaceholder, "old_password", wIn.OldPassword),
+						DefaultViewCommon.PasswordInputWithRevealFunction("old_password", msgr.ChangePasswordOldPlaceholder, "old_password", ""),
 					),
 					Div(
 						Label(msgr.ChangePasswordNewLabel).Class(DefaultViewCommon.LabelClass).For("password"),
-						DefaultViewCommon.PasswordInputWithRevealFunction("password", msgr.ChangePasswordNewPlaceholder, "password", wIn.NewPassword),
+						DefaultViewCommon.PasswordInputWithRevealFunction("password", msgr.ChangePasswordNewPlaceholder, "password", ""),
 						DefaultViewCommon.PasswordStrengthMeter("password"),
 					).Class("mt-6"),
 					Div(
 						Label(msgr.ChangePasswordNewConfirmLabel).Class(DefaultViewCommon.LabelClass).For("confirm_password"),
-						DefaultViewCommon.PasswordInputWithRevealFunction("confirm_password", msgr.ChangePasswordNewConfirmPlaceholder, "confirm_password", wIn.ConfirmPassword),
+						DefaultViewCommon.PasswordInputWithRevealFunction("confirm_password", msgr.ChangePasswordNewConfirmPlaceholder, "confirm_password", ""),
 					).Class("mt-6"),
 					If(vh.TOTPEnabled(),
 						Div(

@@ -87,6 +87,7 @@ type Builder struct {
 	recaptchaConfig      RecaptchaConfig
 	autoExtendSession    bool
 	maxRetryCount        int
+	unifiedLoginFailure  bool
 	noForgetPasswordLink bool
 	i18nBuilder          *i18n.Builder
 
@@ -581,6 +582,15 @@ func (b *Builder) AutoExtendSession(v bool) (r *Builder) {
 	return b
 }
 
+// UnifiedLoginFailure makes username/password login report the same failure
+// (FailCodeIncorrectAccountNameOrPassword) for an unknown account, a wrong
+// password and a locked account, so the response does not reveal whether an
+// account exists or is locked. Default false.
+func (b *Builder) UnifiedLoginFailure(v bool) (r *Builder) {
+	b.unifiedLoginFailure = v
+	return b
+}
+
 // default 5
 // MaxRetryCount <= 0 means no max retry count limit
 func (b *Builder) MaxRetryCount(v int) (r *Builder) {
@@ -813,16 +823,11 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 		userID = objectID(user)
 	}
 
-	claims := UserClaims{
-		Provider:         ouser.Provider,
-		Email:            ouser.Email,
-		Name:             ouser.Name,
-		UserID:           userID,
-		AvatarURL:        ouser.AvatarURL,
-		RegisteredClaims: b.genBaseSessionClaim(userID),
-	}
+	claims := b.newOAuthSessionClaims(ouser, userID)
 	if user == nil {
 		user = &claims
+	} else {
+		user.(OAuthUser).SetAvatar(claims.AvatarURL)
 	}
 
 	if b.afterLoginHook != nil {
@@ -846,11 +851,35 @@ func (b *Builder) completeUserAuthCallbackComplete(w http.ResponseWriter, r *htt
 	return
 }
 
+// newOAuthSessionClaims builds the session claims for an OAuth login.
+// When a user model is configured, the user record is the source of truth and
+// the claims only carry identifiers plus the avatar URL (a public profile image
+// URL, which is not persisted and is restored onto the user on each request),
+// so no email or name ends up in the client-side session JWT. Without a user
+// model the claims are used as the user object itself, so the profile fields
+// are kept.
+func (b *Builder) newOAuthSessionClaims(ouser goth.User, userID string) UserClaims {
+	claims := UserClaims{
+		Provider:         ouser.Provider,
+		UserID:           userID,
+		AvatarURL:        ouser.AvatarURL,
+		RegisteredClaims: b.genBaseSessionClaim(userID),
+	}
+	if b.userModel == nil {
+		claims.Email = ouser.Email
+		claims.Name = ouser.Name
+	}
+	return claims
+}
+
 // return user if account exists even if there is an error returned
 func (b *Builder) authUserPass(account string, password string) (user interface{}, err error) {
 	user, err = b.userModel.(UserPasser).FindUser(b.db, b.newUserObject(), account)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
+			// spend the same time as a real password check to avoid
+			// leaking account existence through response timing
+			runDummyPasswordCompare(password)
 			return nil, ErrUserNotFound
 		}
 		return nil, err
@@ -858,7 +887,14 @@ func (b *Builder) authUserPass(account string, password string) (user interface{
 
 	u := user.(UserPasser)
 	if u.GetLocked() {
+		runDummyPasswordCompare(password)
 		return user, ErrUserLocked
+	}
+
+	if !hasUsablePasswordHash(user) {
+		// bcrypt fails fast on an empty/invalid hash (e.g. OAuth-only
+		// accounts); equalize the timing with a real comparison
+		runDummyPasswordCompare(password)
 	}
 
 	if !u.IsPasswordCorrect(password) {
@@ -883,6 +919,21 @@ func (b *Builder) authUserPass(account string, password string) (user interface{
 		}
 	}
 	return user, nil
+}
+
+// userPassLoginFailCode maps an authUserPass error to the fail code shown to
+// the user. ok is false for unexpected errors.
+func (b *Builder) userPassLoginFailCode(err error) (code FailCode, ok bool) {
+	switch err {
+	case ErrWrongPassword, ErrUserNotFound:
+		return FailCodeIncorrectAccountNameOrPassword, true
+	case ErrUserLocked, ErrUserGetLocked:
+		if b.unifiedLoginFailure {
+			return FailCodeIncorrectAccountNameOrPassword, true
+		}
+		return FailCodeUserLocked, true
+	}
+	return 0, false
 }
 
 func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
@@ -922,27 +973,31 @@ func (b *Builder) userpassLogin(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	user, err = b.authUserPass(account, password)
 	if err != nil {
+		code, ok := b.userPassLoginFailCode(err)
+		if !ok {
+			panic(err)
+		}
+		setFailureFlashes := func() {
+			setFailCodeFlash(w, code)
+			b.setWrongLoginInputFlash(w, WrongLoginInputFlash{
+				Account: account,
+			})
+		}
+		// In unified mode, set the failure flashes before afterUserLockedHook so
+		// the response carries the same fail code and input flash even if the
+		// hook returns an error.
+		if b.unifiedLoginFailure {
+			setFailureFlashes()
+		}
 		if err == ErrUserGetLocked && b.afterUserLockedHook != nil {
 			if herr := b.wrapHook(b.afterUserLockedHook)(r, user); herr != nil {
 				setNoticeOrPanic(w, herr)
 				return
 			}
 		}
-
-		var code FailCode
-		switch err {
-		case ErrWrongPassword, ErrUserNotFound:
-			code = FailCodeIncorrectAccountNameOrPassword
-		case ErrUserLocked, ErrUserGetLocked:
-			code = FailCodeUserLocked
-		default:
-			panic(err)
+		if !b.unifiedLoginFailure {
+			setFailureFlashes()
 		}
-		setFailCodeFlash(w, code)
-		b.setWrongLoginInputFlash(w, WrongLoginInputFlash{
-			Account:  account,
-			Password: password,
-		})
 		return
 	}
 
@@ -1068,9 +1123,11 @@ func (b *Builder) cleanAuthCookies(w http.ResponseWriter) {
 }
 
 func (b *Builder) setContinueURL(w http.ResponseWriter, r *http.Request) {
-	continueURL := r.RequestURI
-	if strings.Contains(continueURL, "?__execute_event__=") {
-		continueURL = r.Referer()
+	rawURL := r.RequestURI
+	continueURL := sanitizeContinueURL(rawURL, false)
+	if strings.Contains(rawURL, "?__execute_event__=") {
+		rawURL = r.Referer()
+		continueURL = sanitizeContinueURL(rawURL, true)
 	}
 	ignore := false
 	{
@@ -1083,7 +1140,7 @@ func (b *Builder) setContinueURL(w http.ResponseWriter, r *http.Request) {
 			b.totpValidatePageURL:          {},
 			b.LogoutURL:                    {},
 		}
-		u, err := url.Parse(continueURL)
+		u, err := url.Parse(rawURL)
 		if err != nil {
 			ignore = true
 		} else {
@@ -1095,6 +1152,8 @@ func (b *Builder) setContinueURL(w http.ResponseWriter, r *http.Request) {
 	if ignore {
 		return
 	}
+	// An unsafe value is stored as "" (rather than skipped) so that a stale
+	// continue URL from an earlier request does not survive.
 	http.SetCookie(w, &http.Cookie{
 		Name:     b.continueUrlCookieName,
 		Value:    continueURL,
@@ -1120,7 +1179,9 @@ func (b *Builder) getContinueURL(w http.ResponseWriter, r *http.Request) string 
 		HttpOnly: true,
 	})
 
-	return c.Value
+	// The value is re-validated here in case it was planted by other means
+	// (e.g. a sibling subdomain) or set by an older version without validation.
+	return sanitizeContinueURL(c.Value, true)
 }
 
 func (b *Builder) setSecureCookiesByClaims(w http.ResponseWriter, user interface{}, claims UserClaims) (err error) {
@@ -1332,10 +1393,6 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	if confirmPassword != password {
 		setFailCodeFlash(w, FailCodePasswordNotMatch)
-		b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
-			Password:        password,
-			ConfirmPassword: confirmPassword,
-		})
 		http.Redirect(w, r, failRedirectURL, http.StatusFound)
 		return
 	}
@@ -1365,10 +1422,6 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 	if b.beforeSetPasswordHook != nil {
 		if herr := b.wrapHook(b.beforeSetPasswordHook)(r, u, password); herr != nil {
 			setNoticeOrPanic(w, herr)
-			b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
-				Password:        password,
-				ConfirmPassword: confirmPassword,
-			})
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
 		}
@@ -1376,10 +1429,6 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	if u.(UserPasser).GetIsTOTPSetup() {
 		if !doTOTP {
-			b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
-				Password:        password,
-				ConfirmPassword: confirmPassword,
-			})
 			failRedirectURL = MustSetQuery(failRedirectURL, "totp", "1")
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
@@ -1397,9 +1446,7 @@ func (b *Builder) doResetPassword(w http.ResponseWriter, r *http.Request) {
 			}
 			setFailCodeFlash(w, fc)
 			b.setWrongResetPasswordInputFlash(w, WrongResetPasswordInputFlash{
-				Password:        password,
-				ConfirmPassword: confirmPassword,
-				TOTP:            passcode,
+				TOTP: passcode,
 			})
 			http.Redirect(w, r, failRedirectURL, http.StatusFound)
 			return
@@ -1519,10 +1566,7 @@ func (b *Builder) doFormChangePassword(w http.ResponseWriter, r *http.Request) {
 		}
 
 		b.setWrongChangePasswordInputFlash(w, WrongChangePasswordInputFlash{
-			OldPassword:     oldPassword,
-			NewPassword:     password,
-			ConfirmPassword: confirmPassword,
-			TOTP:            otp,
+			TOTP: otp,
 		})
 		http.Redirect(w, r, redirectURL, http.StatusFound)
 		return
@@ -1659,6 +1703,9 @@ func (b *Builder) MountAPI(mux *http.ServeMux) {
 
 	mux.HandleFunc(b.LogoutURL, b.logout)
 	if b.userPassEnabled {
+		// generate the dummy hash up front so the first failed login does not
+		// pay the extra bcrypt cost (which would be a timing signal itself)
+		dummyPasswordHash()
 		mux.HandleFunc(b.passwordLoginURL, b.userpassLogin)
 		mux.HandleFunc(b.resetPasswordURL, b.doResetPassword)
 		mux.HandleFunc(b.changePasswordURL, b.doFormChangePassword)

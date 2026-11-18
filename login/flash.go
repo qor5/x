@@ -131,9 +131,12 @@ func setNoticeOrPanic(w http.ResponseWriter, err error) {
 
 const wrongLoginInputFlashCookieName = "qor5_wli_flash"
 
+// WrongLoginInputFlash is stored in a client-side cookie to refill the login
+// form after a failed attempt. It must never carry the password.
 type WrongLoginInputFlash struct {
-	Account  string
-	Password string
+	Account string
+	// Deprecated: never populated; passwords are no longer stored in flash cookies.
+	Password string `json:"-"`
 }
 
 func (b *Builder) setWrongLoginInputFlash(w http.ResponseWriter, f WrongLoginInputFlash) {
@@ -167,9 +170,13 @@ func (b *Builder) setWrongForgetPasswordInputFlash(w http.ResponseWriter, f Wron
 
 const wrongResetPasswordInputFlashCookieName = "qor5_wrpi_flash"
 
+// WrongResetPasswordInputFlash is stored in a client-side cookie to refill the
+// reset password form after a failed attempt. It must never carry passwords.
 type WrongResetPasswordInputFlash struct {
-	Password        string
-	ConfirmPassword string
+	// Deprecated: never populated; passwords are no longer stored in flash cookies.
+	Password string `json:"-"`
+	// Deprecated: never populated; passwords are no longer stored in flash cookies.
+	ConfirmPassword string `json:"-"`
 	TOTP            string
 }
 
@@ -186,10 +193,15 @@ func (b *Builder) setWrongResetPasswordInputFlash(w http.ResponseWriter, f Wrong
 
 const wrongChangePasswordInputFlashCookieName = "qor5_wcpi_flash"
 
+// WrongChangePasswordInputFlash is stored in a client-side cookie to refill the
+// change password form after a failed attempt. It must never carry passwords.
 type WrongChangePasswordInputFlash struct {
-	OldPassword     string
-	NewPassword     string
-	ConfirmPassword string
+	// Deprecated: never populated; passwords are no longer stored in flash cookies.
+	OldPassword string `json:"-"`
+	// Deprecated: never populated; passwords are no longer stored in flash cookies.
+	NewPassword string `json:"-"`
+	// Deprecated: never populated; passwords are no longer stored in flash cookies.
+	ConfirmPassword string `json:"-"`
 	TOTP            string
 }
 

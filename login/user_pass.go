@@ -105,6 +105,11 @@ func (up *UserPass) EncryptPassword() {
 	up.PassUpdatedAt = fmt.Sprint(time.Now().UnixNano())
 }
 
+// GetEncryptedPassword returns the stored password hash.
+func (up *UserPass) GetEncryptedPassword() string {
+	return up.Password
+}
+
 func (up *UserPass) IsPasswordCorrect(password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(up.Password), []byte(password)) == nil
 }

@@ -129,6 +129,10 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 				var err error
 				user, err = b.findUserByID(claims.UserID)
 				if err == nil {
+					// Email/name are intentionally not carried in the session JWT
+					// when a user model is configured. Drop them from tokens issued
+					// by older versions so they are not re-signed on extend.
+					claims.stripProfile()
 					if claims.Provider == "" {
 						if user.(UserPasser).GetPasswordUpdatedAt() != claims.PassUpdatedAt {
 							err = ErrPasswordChanged
@@ -194,7 +198,15 @@ func (b *Builder) Middleware(cfgs ...MiddlewareConfig) func(next http.Handler) h
 
 			if b.autoExtendSession && time.Since(claims.IssuedAt.Time).Seconds() > float64(b.sessionMaxAge)/10 {
 				if b.afterExtendSessionHook != nil {
-					oldSessionToken := b.mustGetSessionToken(*claims)
+					// Use the token exactly as the client sent it: claims may have been
+					// modified above (e.g. stripProfile on legacy tokens), and
+					// downstream may look the session up by the old token.
+					var oldSessionToken string
+					if tc, err := r.Cookie(b.authCookieName); err == nil {
+						oldSessionToken = tc.Value
+					} else {
+						oldSessionToken = b.mustGetSessionToken(*claims)
+					}
 
 					newClaims := clone.Clone(claims).(*UserClaims)
 					newClaims.RegisteredClaims = b.genBaseSessionClaim(claims.UserID)
