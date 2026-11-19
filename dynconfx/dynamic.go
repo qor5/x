@@ -194,7 +194,8 @@ func (c *ConfigProvider[T]) UpdateWithTx(ctx context.Context, tx *gorm.DB, updat
 	}
 	// tx has not committed and may still roll back, so what it wrote must not
 	// be cached. Dropping the cache instead still leaves a gap: a Get between
-	// here and the commit caches the old value until the TTL expires. Document
+	// here and the commit caches the old value until the TTL expires, and the
+	// next Get has no stale value to fall back on if the store fails. Document
 	// and Collection read the rows on every Get and have neither problem.
 	c.cacheSet = false
 	return nil
@@ -346,7 +347,7 @@ func isNotFoundError(err error) bool {
 	if err == nil {
 		return false
 	}
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, ErrNotFound) {
 		return true
 	}
 	// Check for common not found error patterns

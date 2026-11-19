@@ -28,7 +28,7 @@ invalidating.
 ```go
 m, _ := dynconfx.NewDecryptCachingManager(kxManager, 0)
 
-doc := dynconfx.NewDocument(db, m, "oidc", nil, dynconfx.WithDocumentDefault(defaults))
+doc := dynconfx.NewDocument(db, m, "oidc", map[string]string{"config": "oidc"}, dynconfx.WithDocumentDefault(defaults))
 err := doc.WithDB(tx).Update(ctx, func(c Config) (Config, error) { c.Enable = true; return c, nil })
 
 providers, _ := dynconfx.NewCollection[ProviderConfig](db, m, dynconfx.CollectionSchema{

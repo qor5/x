@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
+	clone "github.com/huandu/go-clone/generic"
 	"github.com/pkg/errors"
 	"github.com/qor5/kx"
 	"gorm.io/gorm"
@@ -45,6 +46,11 @@ func WithDocumentDefault[T any](value T) DocumentOption[T] {
 
 // NewDocument returns the Document stored in db under key. T must be
 // registered with kxManager's registry, naming its sensitive fields.
+//
+// Documents share the configs table, so give each an encryptionContext that
+// names its key (e.g. {"config": key}): otherwise a ciphertext copied from one
+// row onto another decrypts there. Rows written by EncryptedConfigStore under
+// another context must keep that context.
 func NewDocument[T any](db *gorm.DB, kxManager *kx.Manager, key string, encryptionContext map[string]string, opts ...DocumentOption[T]) *Document[T] {
 	d := &Document[T]{db: db, kxManager: kxManager, key: key, encryptionContext: encryptionContext}
 	for _, opt := range opts {
@@ -63,8 +69,8 @@ func (d *Document[T]) WithDB(db *gorm.DB) *Document[T] {
 	return &clone
 }
 
-// Get returns the stored configuration: the default when no row is stored
-// and one was given, ErrNotFound otherwise.
+// Get returns the stored configuration: a copy of the default when no row is
+// stored and one was given, ErrNotFound otherwise.
 func (d *Document[T]) Get(ctx context.Context) (T, error) {
 	return d.read(ctx, d.db, false)
 }
@@ -75,11 +81,17 @@ func (d *Document[T]) Get(ctx context.Context) (T, error) {
 // same Document therefore run one after the other, the second seeing the
 // first's result. When mutate returns an error nothing is written.
 //
-// The lock needs a row: the very first two Updates, racing before any row
-// exists, both start from the default and the later write wins.
+// When no row exists yet, Update first inserts one holding the default, so
+// that two Updates racing to create it also run one after the other.
 func (d *Document[T]) Update(ctx context.Context, mutate func(T) (T, error)) error {
 	return d.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		current, err := d.read(ctx, tx, true)
+		if errors.Is(err, ErrNotFound) {
+			if err := d.insertDefault(ctx, tx); err != nil {
+				return err
+			}
+			current, err = d.read(ctx, tx, true)
+		}
 		if err != nil {
 			return err
 		}
@@ -96,9 +108,8 @@ func (d *Document[T]) Save(ctx context.Context, value T) error {
 	return d.write(ctx, d.db, value)
 }
 
-// read loads the row, locking it when lock is set. A missing row is the
-// default, or ErrNotFound without lock; with lock, the zero value, since an
-// Update creates the row.
+// read loads the row, locking it when lock is set. A missing row is a copy
+// of the default when Get has one, ErrNotFound otherwise.
 func (d *Document[T]) read(ctx context.Context, db *gorm.DB, lock bool) (T, error) {
 	var zero T
 	query := db.WithContext(ctx).Where("key = ?", d.key)
@@ -108,11 +119,8 @@ func (d *Document[T]) read(ctx context.Context, db *gorm.DB, lock bool) (T, erro
 	var record ConfigRecord
 	err := query.Take(&record).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		if d.defaultValue != nil {
-			return *d.defaultValue, nil
-		}
-		if lock {
-			return zero, nil
+		if d.defaultValue != nil && !lock {
+			return clone.Clone(*d.defaultValue), nil
 		}
 		return zero, errors.Wrapf(ErrNotFound, "config %q", d.key)
 	}
@@ -134,16 +142,39 @@ func (d *Document[T]) read(ctx context.Context, db *gorm.DB, lock bool) (T, erro
 	return value, nil
 }
 
-func (d *Document[T]) write(ctx context.Context, db *gorm.DB, value T) error {
+// insertDefault inserts the row holding the default (or the zero value)
+// unless one exists. A concurrent insert of the same key waits on the unique
+// key until the other transaction ends, so only one of them creates the row.
+func (d *Document[T]) insertDefault(ctx context.Context, db *gorm.DB) error {
+	var value T
+	if d.defaultValue != nil {
+		value = clone.Clone(*d.defaultValue)
+	}
+	record, err := d.record(ctx, value)
+	if err != nil {
+		return err
+	}
+	err = db.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).Create(&record).Error
+	return errors.Wrapf(err, "failed to create config %q", d.key)
+}
+
+func (d *Document[T]) record(ctx context.Context, value T) (ConfigRecord, error) {
 	encrypted, ciphertext, err := kx.EncryptStruct(ctx, d.kxManager, value, d.encryptionContext)
 	if err != nil {
-		return errors.Wrapf(err, "failed to encrypt config %q", d.key)
+		return ConfigRecord{}, errors.Wrapf(err, "failed to encrypt config %q", d.key)
 	}
 	data, err := json.Marshal(encrypted)
 	if err != nil {
-		return errors.Wrapf(err, "failed to marshal config %q", d.key)
+		return ConfigRecord{}, errors.Wrapf(err, "failed to marshal config %q", d.key)
 	}
-	record := ConfigRecord{Key: d.key, Data: data, Ciphertext: ciphertext, UpdatedAt: time.Now()}
+	return ConfigRecord{Key: d.key, Data: data, Ciphertext: ciphertext, UpdatedAt: time.Now()}, nil
+}
+
+func (d *Document[T]) write(ctx context.Context, db *gorm.DB, value T) error {
+	record, err := d.record(ctx, value)
+	if err != nil {
+		return err
+	}
 	err = db.WithContext(ctx).
 		Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "key"}},

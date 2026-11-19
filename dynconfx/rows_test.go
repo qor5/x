@@ -9,6 +9,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/qor5/kx"
@@ -67,9 +68,10 @@ func (f *fakeCipher) Decrypt(_ context.Context, ciphertext []byte, encryptionCon
 }
 
 type settings struct {
-	Name    string `json:"name"`
-	Secret  string `json:"secret"`
-	Counter int    `json:"counter"`
+	Name    string            `json:"name"`
+	Secret  string            `json:"secret"`
+	Counter int               `json:"counter"`
+	Tags    map[string]string `json:"tags,omitempty"`
 }
 
 func newManagers(t *testing.T) (*fakeCipher, *kx.Manager) {
@@ -282,6 +284,66 @@ func TestDocument_UpdateWithoutDefaultStartsFromZero(t *testing.T) {
 	assert.Equal(t, settings{Counter: 1}, got)
 }
 
+// Two Updates racing to create the row both land: the second waits for the
+// first's insert instead of starting from the default too.
+func TestDocument_ConcurrentFirstUpdatesAllLand(t *testing.T) {
+	ctx := context.Background()
+	db := resetConfigs(t)
+	_, m := newManagers(t)
+	doc := dynconfx.NewDocument(db, m, "fresh", nil, dynconfx.WithDocumentDefault(settings{Name: "default"}))
+
+	const writers = 8
+	start := make(chan struct{})
+	var wg sync.WaitGroup
+	for range writers {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-start
+			assert.NoError(t, doc.Update(ctx, func(s settings) (settings, error) {
+				// Hold the transaction open so that, without the insert's
+				// lock, the other writers read the missing row meanwhile.
+				time.Sleep(50 * time.Millisecond)
+				s.Counter++
+				return s, nil
+			}))
+		}()
+	}
+	close(start)
+	wg.Wait()
+
+	got, err := doc.Get(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, settings{Name: "default", Counter: writers}, got)
+}
+
+// Neither Get nor a rolled back Update can change the default through a map
+// they were handed.
+func TestDocument_DefaultIsNotShared(t *testing.T) {
+	ctx := context.Background()
+	db := resetConfigs(t)
+	_, m := newManagers(t)
+	doc := dynconfx.NewDocument(db, m, "app", nil, dynconfx.WithDocumentDefault(settings{Tags: map[string]string{"a": "1"}}))
+
+	got, err := doc.Get(ctx)
+	require.NoError(t, err)
+	got.Tags["from-get"] = "x"
+
+	errRollback := errors.New("roll back")
+	err = db.Transaction(func(tx *gorm.DB) error {
+		require.NoError(t, doc.WithDB(tx).Update(ctx, func(s settings) (settings, error) {
+			s.Tags["from-update"] = "x"
+			return s, nil
+		}))
+		return errRollback
+	})
+	require.ErrorIs(t, err, errRollback)
+
+	got, err = doc.Get(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"a": "1"}, got.Tags)
+}
+
 func TestDocument_UpdateErrorWritesNothing(t *testing.T) {
 	ctx := context.Background()
 	db := resetConfigs(t)
@@ -409,7 +471,7 @@ func TestCollection_PutGetEachRowEncryptedOnItsOwn(t *testing.T) {
 // Get, and List, which decrypts nothing, still lists them all.
 func TestCollection_BadEntryAffectsOnlyItself(t *testing.T) {
 	ctx := context.Background()
-	db := resetTenants(t, "good", "bad")
+	db := resetTenants(t, "good", "bad", "draft")
 	cipher, m := newManagers(t)
 	c := newTenantCollection(t, db, m)
 	require.NoError(t, c.Put(ctx, "good", settings{Name: "G", Secret: "g"}))
@@ -426,7 +488,7 @@ func TestCollection_BadEntryAffectsOnlyItself(t *testing.T) {
 	entries, err := c.List(ctx)
 	require.NoError(t, err)
 	assert.Equal(t, before, cipher.decrypts.Load(), "List decrypts nothing")
-	require.Len(t, entries, 2)
+	require.Len(t, entries, 2, "a row without an entry is not listed")
 	for _, e := range entries {
 		assert.Empty(t, e.Value.Secret)
 	}
@@ -478,6 +540,7 @@ func TestCollection_Update(t *testing.T) {
 	})
 
 	t.Run("concurrent updates of one entry all land", func(t *testing.T) {
+		require.NoError(t, c.Put(ctx, "t", settings{Secret: "first"}))
 		const writers, each = 4, 10
 		var wg sync.WaitGroup
 		for range writers {
@@ -538,9 +601,45 @@ func TestCollection_WithDBWritesInTheTransaction(t *testing.T) {
 }
 
 func TestStatic(t *testing.T) {
-	got, err := dynconfx.Static(settings{Name: "fixed"}).Get(context.Background())
+	src := dynconfx.Static(settings{Name: "fixed", Tags: map[string]string{"a": "1"}})
+	got, err := src.Get(context.Background())
 	require.NoError(t, err)
-	assert.Equal(t, settings{Name: "fixed"}, got)
+	got.Tags["changed"] = "x"
+	got, err = src.Get(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, settings{Name: "fixed", Tags: map[string]string{"a": "1"}}, got, "each Get returns its own copy")
+}
+
+func TestCollection_CustomEncryptionContextAndOrder(t *testing.T) {
+	ctx := context.Background()
+	db := resetTenants(t, "a", "b")
+	_, m := newManagers(t)
+	var contexts []map[string]string
+	c, err := dynconfx.NewCollection[settings](db, m, dynconfx.CollectionSchema{
+		Table:            "tenants",
+		KeyColumn:        "code",
+		DataColumn:       "config",
+		CiphertextColumn: "ciphertext",
+		OrderBy:          "code DESC",
+		EncryptionContext: func(key string) map[string]string {
+			ec := map[string]string{"tenant": key}
+			contexts = append(contexts, ec)
+			return ec
+		},
+	})
+	require.NoError(t, err)
+	require.NoError(t, c.Put(ctx, "a", settings{Secret: "s"}))
+	require.NoError(t, c.Put(ctx, "b", settings{Secret: "s"}))
+
+	assert.Contains(t, contexts, map[string]string{"tenant": "a"}, "Put encrypts under the schema's context")
+	got, err := c.Get(ctx, "a")
+	require.NoError(t, err)
+	assert.Equal(t, "s", got.Secret)
+
+	entries, err := c.List(ctx)
+	require.NoError(t, err)
+	require.Len(t, entries, 2)
+	assert.Equal(t, []string{"b", "a"}, []string{entries[0].Key, entries[1].Key}, "List follows OrderBy")
 }
 
 // UpdateWithTx must not leave a rolled back value in the cache.

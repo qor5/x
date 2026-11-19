@@ -31,7 +31,9 @@ const DefaultDecryptCacheSize = 1024
 // invalidated, and a rolled back write leaves nothing behind.
 //
 // Failures are not remembered: a ciphertext that does not decrypt is tried
-// again on the next read. size bounds the entries kept, least recently used
+// again on the next read. Successes are remembered without a time limit: a
+// process keeps a plaintext it has decrypted after the KMS key is disabled or
+// its grant revoked, until the entry is evicted or the process restarts. size bounds the entries kept, least recently used
 // first out; zero means DefaultDecryptCacheSize.
 func NewDecryptCachingManager(m *kx.Manager, size int) (*kx.Manager, error) {
 	if size < 0 {
@@ -75,7 +77,7 @@ func (d *decryptCachingDecrypter) Decrypt(ctx context.Context, ciphertext []byte
 		return nil, err
 	}
 	d.cache.add(key, plaintext)
-	return bytes.Clone(plaintext), nil
+	return plaintext, nil
 }
 
 // plaintextCacheKey hashes the ciphertext and the encryption context, each

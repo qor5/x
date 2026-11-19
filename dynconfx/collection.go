@@ -16,7 +16,8 @@ import (
 //
 // The rows belong to the application: a Collection reads and writes only
 // these two columns of rows that already exist, and never inserts or deletes
-// one. A row whose DataColumn is NULL has no entry yet.
+// one. A row whose DataColumn is NULL has no entry yet. KeyColumn must be
+// unique within Scope. Collection is written for PostgreSQL.
 type CollectionSchema struct {
 	Table            string
 	KeyColumn        string
@@ -33,7 +34,8 @@ type CollectionSchema struct {
 
 	// EncryptionContext returns the encryption context of the entry under
 	// key. It must name the key, so that a ciphertext copied onto another row
-	// does not decrypt there. Defaults to {"dynconfx:key": key}.
+	// does not decrypt there. Defaults to the table, the ciphertext column and
+	// the key.
 	EncryptionContext func(key string) map[string]string
 }
 
@@ -74,8 +76,9 @@ func NewCollection[T any](db *gorm.DB, kxManager *kx.Manager, schema CollectionS
 		schema.OrderBy = schema.KeyColumn
 	}
 	if schema.EncryptionContext == nil {
+		table, column := schema.Table, schema.CiphertextColumn
 		schema.EncryptionContext = func(key string) map[string]string {
-			return map[string]string{"dynconfx:key": key}
+			return map[string]string{"dynconfx:table": table, "dynconfx:column": column, "dynconfx:key": key}
 		}
 	}
 	return &Collection[T]{db: db, kxManager: kxManager, schema: schema}, nil
@@ -110,17 +113,14 @@ func (c *Collection[T]) selectRow() string {
 // Get returns the entry under key, sensitive fields decrypted, or ErrNotFound
 // when there is no such row or it has no entry.
 func (c *Collection[T]) Get(ctx context.Context, key string) (T, error) {
-	return c.get(ctx, c.db, key, false)
+	return c.get(ctx, c.db, key)
 }
 
-func (c *Collection[T]) get(ctx context.Context, db *gorm.DB, key string, lock bool) (T, error) {
+func (c *Collection[T]) get(ctx context.Context, db *gorm.DB, key string) (T, error) {
 	var zero T
-	query := c.rows(ctx, db).Select(c.selectRow()).Where(c.schema.KeyColumn+" = ?", key)
-	if lock {
-		query = query.Clauses(clause.Locking{Strength: "UPDATE"})
-	}
 	var rows []collectionRow
-	if err := query.Limit(1).Find(&rows).Error; err != nil {
+	if err := c.rows(ctx, db).Select(c.selectRow()).Where(c.schema.KeyColumn+" = ?", key).
+		Limit(1).Find(&rows).Error; err != nil {
 		return zero, errors.Wrapf(err, "failed to load entry %q of %s", key, c.schema.Table)
 	}
 	if len(rows) == 0 || rows[0].Data == nil {
@@ -192,7 +192,7 @@ func (c *Collection[T]) Update(ctx context.Context, key string, mutate func(valu
 		if len(exists) == 0 {
 			return errors.Wrapf(ErrNotFound, "entry %q of %s", key, c.schema.Table)
 		}
-		current, err := c.get(ctx, tx, key, false)
+		current, err := c.get(ctx, tx, key)
 		if err != nil && !errors.Is(err, ErrNotFound) {
 			return err
 		}
