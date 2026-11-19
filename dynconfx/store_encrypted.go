@@ -13,6 +13,10 @@ import (
 )
 
 // EncryptedConfigStore implements ConfigStore with encryption support using kx library.
+//
+// Deprecated: Use Document. EncryptedConfigStore.Update takes no row lock, so two
+// concurrent Updates both read the same config and the later one discards the
+// earlier one's change; Document.Update locks the row.
 // It stores configs in a database with sensitive fields encrypted.
 type EncryptedConfigStore[T any] struct {
 	db                *gorm.DB
