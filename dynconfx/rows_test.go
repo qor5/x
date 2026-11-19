@@ -672,6 +672,46 @@ func TestCollection_DefaultContextNamesTheTable(t *testing.T) {
 	require.ErrorContains(t, err, "encryption context mismatch")
 }
 
+// reservedNames names its columns with SQL keywords, which only work when
+// quoted as identifiers.
+type reservedNames struct {
+	User   string  `gorm:"column:user;primaryKey"`
+	Order  []byte  `gorm:"column:order;type:jsonb"`
+	Select *string `gorm:"column:select"`
+}
+
+// Collection quotes the schema's column names instead of pasting them into
+// the SQL.
+func TestCollection_QuotesColumnNames(t *testing.T) {
+	ctx := context.Background()
+	db := suite.DB()
+	require.NoError(t, db.AutoMigrate(&reservedNames{}))
+	require.NoError(t, db.Exec(`DELETE FROM reserved_names`).Error)
+	require.NoError(t, db.Create(&reservedNames{User: "b"}).Error)
+	require.NoError(t, db.Create(&reservedNames{User: "a"}).Error)
+	_, m := newManagers(t)
+	c, err := dynconfx.NewCollection[settings](db, m, dynconfx.CollectionSchema{
+		Table: "reserved_names", KeyColumn: "user", DataColumn: "order", CiphertextColumn: "select",
+	})
+	require.NoError(t, err)
+
+	require.NoError(t, c.Put(ctx, "a", settings{Name: "A", Secret: "s"}))
+	require.NoError(t, c.Update(ctx, "b", func(s settings, err error) (settings, error) {
+		s.Name = "B"
+		return s, nil
+	}))
+	got, err := c.Get(ctx, "a")
+	require.NoError(t, err)
+	assert.Equal(t, settings{Name: "A", Secret: "s"}, got)
+	entries, err := c.List(ctx)
+	require.NoError(t, err)
+	require.Len(t, entries, 2)
+	assert.Equal(t, []string{"a", "b"}, []string{entries[0].Key, entries[1].Key}, "ordered by the key by default")
+	require.NoError(t, c.Clear(ctx, "a"))
+	_, err = c.Get(ctx, "a")
+	require.ErrorIs(t, err, dynconfx.ErrNotFound)
+}
+
 type notFoundStore struct{ dynconfx.ConfigStore[settings] }
 
 func (notFoundStore) Load(context.Context) (settings, error) {

@@ -30,6 +30,8 @@ type CollectionSchema struct {
 	Scope func(*gorm.DB) *gorm.DB
 
 	// OrderBy orders List, e.g. "created_at, code". Defaults to KeyColumn.
+	// Unlike the column names above, which are quoted as identifiers, it is
+	// SQL taken as is, so it must come from the application's code.
 	OrderBy string
 
 	// EncryptionContext returns the encryption context of the entry under
@@ -72,9 +74,6 @@ func NewCollection[T any](db *gorm.DB, kxManager *kx.Manager, schema CollectionS
 			return nil, errors.Errorf("CollectionSchema.%s is required", name)
 		}
 	}
-	if schema.OrderBy == "" {
-		schema.OrderBy = schema.KeyColumn
-	}
 	if schema.EncryptionContext == nil {
 		table, column := schema.Table, schema.CiphertextColumn
 		schema.EncryptionContext = func(key string) map[string]string {
@@ -106,8 +105,18 @@ func (c *Collection[T]) rows(ctx context.Context, db *gorm.DB) *gorm.DB {
 	return query
 }
 
-func (c *Collection[T]) selectRow() string {
-	return c.schema.KeyColumn + " AS dynconfx_key, " + c.schema.DataColumn + " AS dynconfx_data, " + c.schema.CiphertextColumn + " AS dynconfx_ciphertext"
+// selectRows selects the schema's columns under the names collectionRow
+// reads, quoted as identifiers.
+func (c *Collection[T]) selectRows(query *gorm.DB) *gorm.DB {
+	return query.Select("? AS dynconfx_key, ? AS dynconfx_data, ? AS dynconfx_ciphertext",
+		clause.Column{Name: c.schema.KeyColumn},
+		clause.Column{Name: c.schema.DataColumn},
+		clause.Column{Name: c.schema.CiphertextColumn})
+}
+
+// keyIs matches the row under key.
+func (c *Collection[T]) keyIs(key string) clause.Eq {
+	return clause.Eq{Column: clause.Column{Name: c.schema.KeyColumn}, Value: key}
 }
 
 // Get returns the entry under key, sensitive fields decrypted, or ErrNotFound
@@ -119,7 +128,7 @@ func (c *Collection[T]) Get(ctx context.Context, key string) (T, error) {
 func (c *Collection[T]) get(ctx context.Context, db *gorm.DB, key string) (T, error) {
 	var zero T
 	var rows []collectionRow
-	if err := c.rows(ctx, db).Select(c.selectRow()).Where(c.schema.KeyColumn+" = ?", key).
+	if err := c.selectRows(c.rows(ctx, db)).Where(c.keyIs(key)).
 		Limit(1).Find(&rows).Error; err != nil {
 		return zero, errors.Wrapf(err, "failed to load entry %q of %s", key, c.schema.Table)
 	}
@@ -134,11 +143,14 @@ func (c *Collection[T]) get(ctx context.Context, db *gorm.DB, key string) (T, er
 // ciphertext cannot be read. Get an entry to read its sensitive fields.
 func (c *Collection[T]) List(ctx context.Context) ([]Entry[T], error) {
 	var rows []collectionRow
-	if err := c.rows(ctx, c.db).
-		Select(c.selectRow()).
-		Where(c.schema.DataColumn + " IS NOT NULL").
-		Order(c.schema.OrderBy).
-		Find(&rows).Error; err != nil {
+	query := c.selectRows(c.rows(ctx, c.db)).
+		Where(clause.Neq{Column: clause.Column{Name: c.schema.DataColumn}, Value: nil})
+	if c.schema.OrderBy != "" {
+		query = query.Order(c.schema.OrderBy)
+	} else {
+		query = query.Order(clause.OrderByColumn{Column: clause.Column{Name: c.schema.KeyColumn}})
+	}
+	if err := query.Find(&rows).Error; err != nil {
 		return nil, errors.Wrapf(err, "failed to list the entries of %s", c.schema.Table)
 	}
 	entries := make([]Entry[T], 0, len(rows))
@@ -183,7 +195,7 @@ func (c *Collection[T]) Update(ctx context.Context, key string, mutate func(valu
 	return c.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var exists []string
 		if err := c.rows(ctx, tx).
-			Where(c.schema.KeyColumn+" = ?", key).
+			Where(c.keyIs(key)).
 			Clauses(clause.Locking{Strength: "UPDATE"}).
 			Limit(1).
 			Pluck(c.schema.KeyColumn, &exists).Error; err != nil {
@@ -229,7 +241,7 @@ func (c *Collection[T]) put(ctx context.Context, db *gorm.DB, key string, value 
 }
 
 func (c *Collection[T]) write(ctx context.Context, db *gorm.DB, key string, columns map[string]any) error {
-	result := c.rows(ctx, db).Where(c.schema.KeyColumn+" = ?", key).Updates(columns)
+	result := c.rows(ctx, db).Where(c.keyIs(key)).Updates(columns)
 	if result.Error != nil {
 		return errors.Wrapf(result.Error, "failed to store entry %q of %s", key, c.schema.Table)
 	}
