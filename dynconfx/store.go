@@ -5,6 +5,8 @@ import (
 )
 
 // ConfigStore defines the interface for config persistence.
+//
+// Deprecated: Use Document or Collection.
 // Implementations can store configs in databases, files, or other backends.
 type ConfigStore[T any] interface {
 	// Load loads config from storage.

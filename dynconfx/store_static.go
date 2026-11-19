@@ -30,6 +30,8 @@ type StaticStore[T any] struct {
 }
 
 // NewStaticStore creates a new StaticStore with the given config value.
+//
+// Deprecated: Use Static.
 func NewStaticStore[T any](config T) *StaticStore[T] {
 	return &StaticStore[T]{
 		config: config,
