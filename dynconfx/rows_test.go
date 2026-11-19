@@ -74,6 +74,11 @@ type settings struct {
 
 func newManagers(t *testing.T) (*fakeCipher, *kx.Manager) {
 	t.Helper()
+	return newManagersWithCacheSize(t, 0)
+}
+
+func newManagersWithCacheSize(t *testing.T, size int) (*fakeCipher, *kx.Manager) {
+	t.Helper()
 	registry, err := kx.NewRegistry()
 	require.NoError(t, err)
 	require.NoError(t, registry.RegisterStruct(settings{}, kx.WithRegularField("Secret", false)))
@@ -82,7 +87,7 @@ func newManagers(t *testing.T) (*fakeCipher, *kx.Manager) {
 	cipher := &fakeCipher{}
 	plain, err := kx.NewManager(cipher, hashFactory, registry)
 	require.NoError(t, err)
-	cached, err := dynconfx.NewDecryptCachingManager(plain, 0)
+	cached, err := dynconfx.NewDecryptCachingManager(plain, size)
 	require.NoError(t, err)
 	return cipher, cached
 }
@@ -261,6 +266,65 @@ func TestDecryptCache(t *testing.T) {
 	})
 }
 
+func TestDocument_UpdateWithoutDefaultStartsFromZero(t *testing.T) {
+	ctx := context.Background()
+	db := resetConfigs(t)
+	_, m := newManagers(t)
+	doc := dynconfx.NewDocument[settings](db, m, "app", nil)
+
+	require.NoError(t, doc.Update(ctx, func(s settings) (settings, error) {
+		require.Equal(t, settings{}, s)
+		s.Counter = 1
+		return s, nil
+	}))
+	got, err := doc.Get(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, settings{Counter: 1}, got)
+}
+
+func TestDocument_UpdateErrorWritesNothing(t *testing.T) {
+	ctx := context.Background()
+	db := resetConfigs(t)
+	_, m := newManagers(t)
+	doc := dynconfx.NewDocument[settings](db, m, "app", nil)
+	require.NoError(t, doc.Save(ctx, settings{Name: "kept"}))
+
+	errMutate := errors.New("refuse")
+	err := doc.Update(ctx, func(s settings) (settings, error) {
+		s.Name = "changed"
+		return s, errMutate
+	})
+	require.ErrorIs(t, err, errMutate)
+	got, err := doc.Get(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, "kept", got.Name)
+}
+
+func TestDecryptCache_EvictsLeastRecentlyUsed(t *testing.T) {
+	ctx := context.Background()
+	db := resetConfigs(t)
+	cipher, m := newManagersWithCacheSize(t, 2)
+	docs := map[string]*dynconfx.Document[settings]{}
+	for _, key := range []string{"a", "b", "c"} {
+		docs[key] = dynconfx.NewDocument[settings](db, m, key, nil)
+		require.NoError(t, docs[key].Save(ctx, settings{Secret: key}))
+	}
+	decryptsFor := func(key string) int32 {
+		before := cipher.decrypts.Load()
+		got, err := docs[key].Get(ctx)
+		require.NoError(t, err)
+		require.Equal(t, key, got.Secret)
+		return cipher.decrypts.Load() - before
+	}
+
+	assert.Equal(t, int32(1), decryptsFor("a"))
+	assert.Equal(t, int32(1), decryptsFor("b"))
+	assert.Equal(t, int32(0), decryptsFor("a"), "a is now the most recently used")
+	assert.Equal(t, int32(1), decryptsFor("c"), "c evicts b, the least recently used")
+	assert.Equal(t, int32(0), decryptsFor("a"))
+	assert.Equal(t, int32(1), decryptsFor("b"), "b was evicted")
+}
+
 func TestNewDecryptCachingManager_RejectsNegativeSize(t *testing.T) {
 	_, m := newManagers(t)
 	_, err := dynconfx.NewDecryptCachingManager(m, -1)
@@ -434,6 +498,49 @@ func TestCollection_Update(t *testing.T) {
 		assert.Equal(t, writers*each, got.Counter)
 		assert.Equal(t, "first", got.Secret)
 	})
+}
+
+func TestCollection_UpdateErrorWritesNothing(t *testing.T) {
+	ctx := context.Background()
+	db := resetTenants(t, "t")
+	_, m := newManagers(t)
+	c := newTenantCollection(t, db, m)
+	require.NoError(t, c.Put(ctx, "t", settings{Name: "kept"}))
+
+	errMutate := errors.New("refuse")
+	err := c.Update(ctx, "t", func(s settings, err error) (settings, error) {
+		s.Name = "changed"
+		return s, errMutate
+	})
+	require.ErrorIs(t, err, errMutate)
+	got, err := c.Get(ctx, "t")
+	require.NoError(t, err)
+	assert.Equal(t, "kept", got.Name)
+}
+
+func TestCollection_WithDBWritesInTheTransaction(t *testing.T) {
+	ctx := context.Background()
+	db := resetTenants(t, "t")
+	_, m := newManagers(t)
+	c := newTenantCollection(t, db, m)
+
+	errRollback := errors.New("roll back")
+	err := db.Transaction(func(tx *gorm.DB) error {
+		require.NoError(t, c.WithDB(tx).Put(ctx, "t", settings{Secret: "inside"}))
+		got, err := c.WithDB(tx).Get(ctx, "t")
+		require.NoError(t, err)
+		require.Equal(t, "inside", got.Secret, "the transaction sees its own write")
+		return errRollback
+	})
+	require.ErrorIs(t, err, errRollback)
+	_, err = c.Get(ctx, "t")
+	require.ErrorIs(t, err, dynconfx.ErrNotFound, "the rolled back write left nothing")
+}
+
+func TestStatic(t *testing.T) {
+	got, err := dynconfx.Static(settings{Name: "fixed"}).Get(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, settings{Name: "fixed"}, got)
 }
 
 // UpdateWithTx must not leave a rolled back value in the cache.
