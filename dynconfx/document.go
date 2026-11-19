@@ -82,7 +82,9 @@ func (d *Document[T]) Get(ctx context.Context) (T, error) {
 // first's result. When mutate returns an error nothing is written.
 //
 // When no row exists yet, Update first inserts one holding the default, so
-// that two Updates racing to create it also run one after the other.
+// that two Updates racing to create it also run one after the other. This
+// relies on READ COMMITTED, PostgreSQL's default; under REPEATABLE READ or
+// SERIALIZABLE the later of two racing first Updates fails instead.
 func (d *Document[T]) Update(ctx context.Context, mutate func(T) (T, error)) error {
 	return d.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		current, err := d.read(ctx, tx, true)

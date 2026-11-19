@@ -642,6 +642,51 @@ func TestCollection_CustomEncryptionContextAndOrder(t *testing.T) {
 	assert.Equal(t, []string{"b", "a"}, []string{entries[0].Key, entries[1].Key}, "List follows OrderBy")
 }
 
+type otherTenant struct {
+	Code       string `gorm:"primaryKey"`
+	Config     []byte `gorm:"type:jsonb"`
+	Ciphertext *string
+}
+
+// The default encryption context names the table, so an entry's ciphertext
+// copied to the same key in another table does not decrypt there.
+func TestCollection_DefaultContextNamesTheTable(t *testing.T) {
+	ctx := context.Background()
+	db := resetTenants(t, "same")
+	require.NoError(t, db.AutoMigrate(&otherTenant{}))
+	require.NoError(t, db.Exec(`DELETE FROM other_tenants`).Error)
+	require.NoError(t, db.Create(&otherTenant{Code: "same"}).Error)
+	_, m := newManagers(t)
+	tenants := newTenantCollection(t, db, m)
+	others, err := dynconfx.NewCollection[settings](db, m, dynconfx.CollectionSchema{
+		Table: "other_tenants", KeyColumn: "code", DataColumn: "config", CiphertextColumn: "ciphertext",
+	})
+	require.NoError(t, err)
+	require.NoError(t, tenants.Put(ctx, "same", settings{Secret: "s"}))
+
+	var row tenant
+	require.NoError(t, db.Take(&row, "code = ?", "same").Error)
+	require.NoError(t, db.Model(&otherTenant{}).Where("code = ?", "same").
+		Updates(map[string]any{"config": row.Config, "ciphertext": *row.Ciphertext}).Error)
+	_, err = others.Get(ctx, "same")
+	require.ErrorContains(t, err, "encryption context mismatch")
+}
+
+type notFoundStore struct{ dynconfx.ConfigStore[settings] }
+
+func (notFoundStore) Load(context.Context) (settings, error) {
+	return settings{}, errors.Wrap(dynconfx.ErrNotFound, "adapter")
+}
+
+// A ConfigProvider over a store that reports ErrNotFound, such as an adapter
+// around a Document, returns its default.
+func TestConfigProvider_DefaultOnErrNotFound(t *testing.T) {
+	provider := dynconfx.NewConfigProvider[settings](notFoundStore{}, dynconfx.WithDefault(settings{Name: "default"}))
+	got, err := provider.Get(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, "default", got.Name)
+}
+
 // UpdateWithTx must not leave a rolled back value in the cache.
 func TestConfigProvider_UpdateWithTxRollbackNotCached(t *testing.T) {
 	ctx := context.Background()
