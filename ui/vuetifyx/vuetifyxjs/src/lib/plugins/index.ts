@@ -44,6 +44,10 @@ import LinkageSelectRemote from '@/lib/LinkageSelectRemote/index.vue'
 import VXSegmentForm from '@/lib/Form/VXSegmentForm/index.vue'
 import VXModelProxy from '@/lib/VXModelProxy.vue'
 import VXChart from '@/lib/Chart/VXChart.vue'
+import VXTimeline from '@/lib/Timeline/VXTimeline.vue'
+import VXTiltedImages from '@/lib/TiltedImages/VXTiltedImages.vue'
+import VXImageGallery from '@/lib/VXImageGallery.vue'
+import VXVideo from '@/lib/VXVideo.vue'
 
 declare const window: any
 
@@ -85,6 +89,10 @@ const vuetifyx = {
     app.component('vx-segment-form', VXSegmentForm)
     app.component('vx-iframe-emitter', VXIframeEmitter)
     app.component('vx-model-proxy', VXModelProxy)
+    app.component('vx-timeline', VXTimeline)
+    app.component('vx-tilted-images', VXTiltedImages)
+    app.component('vx-image-gallery', VXImageGallery)
+    app.component('vx-video', VXVideo)
   }
 }
 
