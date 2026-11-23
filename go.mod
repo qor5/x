@@ -24,7 +24,7 @@ require (
 	github.com/huandu/go-clone v1.7.3
 	github.com/huandu/go-clone/generic v1.7.3
 	github.com/iancoleman/strcase v0.3.0
-	github.com/jackc/pgx/v5 v5.9.2
+	github.com/jackc/pgx/v5 v5.12.0
 	github.com/jinzhu/configor v1.2.2
 	github.com/jinzhu/inflection v1.0.0
 	github.com/lib/pq v1.10.9
@@ -38,8 +38,8 @@ require (
 	github.com/pquerna/otp v1.4.0
 	github.com/qiniu/api.v7/v7 v7.8.2
 	github.com/qor5/confx v0.0.0-20260810031108-8d9c78bbd3fb
-	github.com/qor5/go-bus v0.1.2
-	github.com/qor5/go-que v1.1.0
+	github.com/qor5/go-bus v0.2.0
+	github.com/qor5/go-que v1.2.0
 	github.com/qor5/kx v0.0.0-20260713082723-dc32af6f8fd6
 	github.com/qor5/web/v3 v3.2.1
 	github.com/rs/cors v1.11.1
@@ -149,7 +149,7 @@ require (
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/jackc/puddle/v2 v2.2.3 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jjeffery/errors v1.0.3 // indirect
 	github.com/jjeffery/kv v0.8.1 // indirect
