@@ -8,6 +8,8 @@ import (
 )
 
 // ConfigAPI provides HTTP handlers for config management operations.
+//
+// Deprecated: ConfigAPI is built on ConfigProvider and will be removed with it.
 type ConfigAPI[T any] struct {
 	dynamicConfig *ConfigProvider[T]
 	store         ConfigStore[T]

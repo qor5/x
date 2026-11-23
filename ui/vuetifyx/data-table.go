@@ -145,6 +145,12 @@ func (b *DataTableBuilder) ClearSelectionLabel(v string) (r *DataTableBuilder) {
 	return b
 }
 
+// selectionColumnStyle pins the checkbox column to a fixed width. `width` alone
+// is only a preferred size: the checkbox has no intrinsic min-content width, so
+// once the table overflows its container the column collapses to its padding
+// and the checkbox is painted over the next column. `min-width` prevents that.
+const selectionColumnStyle = "width: 48px; min-width: 48px;"
+
 type primarySlugger interface {
 	PrimarySlug() string
 }
@@ -199,7 +205,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 		}
 
 		if b.onSelectionChanged != "" {
-			tds = append(tds, h.Td().Class("pr-0").Children(
+			tds = append(tds, h.Td().Class("pr-0").Style(selectionColumnStyle).Children(
 				v.VCheckbox().
 					Density(v.DensityCompact).
 					Class("mt-0").
@@ -314,7 +320,7 @@ func (b *DataTableBuilder) MarshalHTML(c context.Context) (r []byte, err error) 
 							}`,
 						),
 				),
-			).Style("width: 48px;").Class("pr-0"))
+			).Style(selectionColumnStyle).Class("pr-0"))
 		}
 
 		for _, f := range b.columns {

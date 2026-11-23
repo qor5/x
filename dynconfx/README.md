@@ -1,5 +1,44 @@
 # Dynamic Configuration Design
 
+## Document, Collection and Source (current API)
+
+`ConfigProvider` and the `ConfigStore` implementations are deprecated; the
+rest of this file describes them. New code uses:
+
+- **`Source[T]`** — `Get(ctx) (T, error)`. Services that only read their
+  configuration depend on this. `Static(value)` wraps a value from the
+  deployment's files.
+- **`Document[T]`** — one row of the `configs` table, sensitive fields
+  encrypted together. `Update` locks the row, so concurrent read-modify-writes
+  all land.
+- **`Collection[T]`** — one entry per row of an application's own table
+  (`CollectionSchema` names the table and columns), each entry encrypted on
+  its own with an encryption context naming its key. `Get` reads and decrypts
+  one row, so a bad entry affects only itself; `List` decrypts nothing; `Put`,
+  `Update` (row locked) and `Clear` write one row and never insert.
+
+Neither keeps a cache of the configuration: every read goes to the database,
+so a write is visible on every replica the moment it commits, a transaction
+sees its own writes, and a rollback leaves nothing behind. What is expensive
+is the KMS call, so wrap the kx manager with `NewDecryptCachingManager`: it
+remembers plaintexts keyed by ciphertext and encryption context, and a
+changed configuration has a new ciphertext, so nothing ever needs
+invalidating.
+
+```go
+m, _ := dynconfx.NewDecryptCachingManager(kxManager, 0)
+
+doc := dynconfx.NewDocument(db, m, "oidc", map[string]string{"config": "oidc"}, dynconfx.WithDocumentDefault(defaults))
+err := doc.WithDB(tx).Update(ctx, func(c Config) (Config, error) { c.Enable = true; return c, nil })
+
+providers, _ := dynconfx.NewCollection[ProviderConfig](db, m, dynconfx.CollectionSchema{
+	Table: "identity_providers", KeyColumn: "code",
+	DataColumn: "protocol_config", CiphertextColumn: "protocol_config_ciphertext",
+	Scope: func(db *gorm.DB) *gorm.DB { return db.Where("protocol = ? AND deleted_at IS NULL", "SAML") },
+})
+pc, err := providers.Get(ctx, "acme")
+```
+
 ## Background
 
 Based on the discussion:

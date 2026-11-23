@@ -13,6 +13,13 @@ import (
 
 // ConfigProvider manages configuration with automatic caching and TTL support.
 // It provides thread-safe access to configuration values that can be reloaded at runtime.
+//
+// Deprecated: Use Document, Collection or Static. A ConfigProvider caches the
+// whole configuration in each process for its TTL, so another replica serves
+// an old value for up to that long after a write, and every Get waits while
+// an Update holds the lock through its database and KMS calls. Document and
+// Collection read the rows on every Get and cache only decrypted plaintexts
+// (NewDecryptCachingManager).
 type ConfigProvider[T any] struct {
 	store        ConfigStore[T]
 	cache        T
@@ -160,6 +167,8 @@ type TxUpdater[T any] interface {
 // UpdateWithTx applies a partial update to the config using the given transaction.
 // The underlying store must implement TxUpdater interface (e.g., EncryptedConfigStore).
 // This allows the config update to participate in an external transaction.
+// It drops the cache rather than caching the update, which tx may still roll
+// back; the next Get loads from the store.
 //
 // Example:
 //
@@ -180,7 +189,16 @@ func (c *ConfigProvider[T]) UpdateWithTx(ctx context.Context, tx *gorm.DB, updat
 		return errors.New("underlying store does not support transactions")
 	}
 
-	return c.updateWithStore(ctx, txStore.WithTx(tx), updateFunc)
+	if err := txStore.WithTx(tx).Update(ctx, updateFunc); err != nil {
+		return err
+	}
+	// tx has not committed and may still roll back, so what it wrote must not
+	// be cached. Dropping the cache instead still leaves a gap: a Get between
+	// here and the commit caches the old value until the TTL expires, and the
+	// next Get has no stale value to fall back on if the store fails. Document
+	// and Collection read the rows on every Get and have neither problem.
+	c.cacheSet = false
+	return nil
 }
 
 // updateWithStore is the common implementation for Update and UpdateWithTx.
@@ -329,7 +347,7 @@ func isNotFoundError(err error) bool {
 	if err == nil {
 		return false
 	}
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, ErrNotFound) {
 		return true
 	}
 	// Check for common not found error patterns
