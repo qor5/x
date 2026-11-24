@@ -58,12 +58,12 @@ func (b *VXReadonlyFieldBuilder) MarshalHTML(ctx context.Context) ([]byte, error
 				HideDetails(true).
 				Class("my-0 py-0 text-black-lighten-9")
 		} else {
-			vComp = h.Text(fmt.Sprint(b.value))
+			vComp = SafeText(fmt.Sprint(b.value))
 		}
 	}
 
 	return h.Div(
-		h.Label(b.label).Class("v-label theme--light text-caption"),
+		h.Label(b.label).Attr("v-pre", true).Class("v-label theme--light text-caption"),
 		h.Div(vComp).Class("pt-1"),
 	).Class("mb-4").MarshalHTML(ctx)
 }
