@@ -97,9 +97,12 @@ func setNoticeFlash(w http.ResponseWriter, ne *NoticeError) {
 	if ne == nil {
 		return
 	}
+	// The message is base64 encoded because a cookie value is ASCII only:
+	// http.SetCookie drops every other byte, which left a message in
+	// Japanese, for example, with nothing but its digits.
 	http.SetCookie(w, &http.Cookie{
 		Name:     noticeFlashCookieName,
-		Value:    fmt.Sprintf("%d#%s", ne.Level, ne.Message),
+		Value:    fmt.Sprintf("%d#%s", ne.Level, base64.StdEncoding.EncodeToString([]byte(ne.Message))),
 		Path:     "/",
 		HttpOnly: true,
 	})

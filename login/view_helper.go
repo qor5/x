@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/qor5/x/v3/i18n"
 )
@@ -145,6 +146,11 @@ func (vh *ViewHelper) GetNoticeFlash(w http.ResponseWriter, r *http.Request) *No
 		}
 		level = NoticeLevel(n)
 		message = vs[1]
+		// A cookie that is not base64 was set before messages were encoded
+		// and is shown as it is.
+		if raw, err := base64.StdEncoding.DecodeString(vs[1]); err == nil && utf8.Valid(raw) {
+			message = string(raw)
+		}
 	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     noticeFlashCookieName,

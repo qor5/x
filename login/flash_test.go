@@ -91,3 +91,39 @@ func TestLegacyInputFlashCookieDoesNotRefillPassword(t *testing.T) {
 		t.Fatalf("unexpected refill: %+v", got)
 	}
 }
+
+// A cookie value is ASCII only, so a notice has to survive the round trip
+// through one whatever language it is written in.
+func TestNoticeFlashKeepsNonASCIIMessages(t *testing.T) {
+	vh := New().Secret("test-secret").ViewHelper()
+
+	for _, msg := range []string{
+		"Password must contain at least one letter, one number and one symbol",
+		"パスワードには英字・数字・記号をそれぞれ1文字以上含めてください",
+		`quotes ", semicolons ; and # signs`,
+	} {
+		w := httptest.NewRecorder()
+		setNoticeFlash(w, &NoticeError{Level: NoticeLevel_Error, Message: msg})
+
+		r := httptest.NewRequest(http.MethodGet, "/auth/reset-password", nil)
+		for _, c := range w.Result().Cookies() {
+			r.AddCookie(c)
+		}
+		got := vh.GetNoticeFlash(httptest.NewRecorder(), r)
+		if got == nil || got.Level != NoticeLevel_Error || got.Message != msg {
+			t.Errorf("notice %q came back as %+v", msg, got)
+		}
+	}
+}
+
+// A notice set before messages were encoded is still shown.
+func TestNoticeFlashReadsUnencodedCookie(t *testing.T) {
+	vh := New().Secret("test-secret").ViewHelper()
+
+	r := httptest.NewRequest(http.MethodGet, "/auth/login", nil)
+	r.AddCookie(&http.Cookie{Name: noticeFlashCookieName, Value: "2#User locked. Try again later."})
+	got := vh.GetNoticeFlash(httptest.NewRecorder(), r)
+	if got == nil || got.Message != "User locked. Try again later." {
+		t.Errorf("unexpected notice: %+v", got)
+	}
+}
